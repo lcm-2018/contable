@@ -91,7 +91,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Tope Mínimo</th>
                                         <th>Tope Máximo</th>
                                         <th>Existencia</th>
-                                        <th>Vr. Promedio</th>
+                                        <th>Vr. Promedio temp</th>
                                         <th>Es Clínico</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
