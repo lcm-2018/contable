@@ -1,0 +1,495 @@
+* {
+    margin:0;
+    padding:0;
+    font-family: sans-serif;
+}
+
+.algleft{
+    float:left; 
+}
+
+.algbottom{
+    vertical-align: bottom;
+}
+
+.subry{
+    text-decoration: underline;   
+}
+
+.border-0{
+    border:0 !important;
+}
+
+.border-1{
+    border:1px solid #000 !important;
+}
+
+.border-t{
+    border-top:1px solid #000 !important;
+}
+
+.border-b{
+    border-bottom:1px solid #000 !important;
+}
+
+table {
+    page-break-inside:auto;
+    border-collapse:collapse;
+    border-spacing:0;
+    margin:0 1px 2px 1px;
+}
+
+table.br tr{
+    page-break-inside:avoid;
+    page-break-after:auto;
+}
+
+thead {
+    display:table-header-group;
+}
+
+tfoot{
+    display:table-footer-group;
+}
+
+th.rotate,td.rotate {
+    height: 50px;
+}
+
+th.rotate,td.rotate > div {
+    transform:        
+        translate(0, 10px)
+        rotate(-90deg);
+    width: 30px;
+}
+
+th.rotate,td.rotate > div.w50ph {
+    transform:        
+        translate(0, 5px)
+        rotate(-90deg);
+    width: 40px;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    background: transparent;
+    width: 100%;
+    border: none;
+    border-top: solid 1px #000;
+}
+
+.lncen{
+    margin:auto;     
+}
+
+strong{
+    font-weight: bold;
+}
+
+.tspan{
+    margin:0 20px 0 0;
+}
+
+.tb-border-1250{
+    border-spacing:0;
+    width:1250px;
+}
+
+.tb-border {    
+    border-spacing:0;
+}
+
+.tb-border tr td,.tb-border tr th,.tb-border-1250 tr th,.tb-border-1250 tr td{
+    padding:2px 0;
+    border: 1px solid #000;
+}
+
+.tb-border-0  {    
+    border-spacing:0;
+    width: 850px;
+}
+
+.tb-border-0 tr td{
+    border: 0 !important;
+    padding:2px 0;
+}
+
+.tb-border-1  {    
+    border-spacing:0;
+    width: 850px;
+    border: 1px solid #000;
+}
+
+.tb-border-1 tr td{
+    padding:2px 2px;
+    border-collapse: collapse;
+}
+
+.tb-border-1-4{
+    border-spacing:0;
+    width: 850px;
+    border: 1px solid #000;
+}
+
+.tb-border-1-4 tr td{
+    padding:6px 0;
+    border-collapse: collapse;
+}
+
+.tb-border-2  {
+    width: 850px;
+}
+
+.tb-border-2 tr td,.tb-border-2 tr th{
+    padding:1px 1px;
+    border: 1px solid #000 !important; 
+}
+
+.tb-border-2-1  {
+    width: 850px;
+}
+
+.tb-border-2-1 tr td,.tb-border-2-1 tr th{
+    padding:1px 1px;
+    border: 1px solid #000; 
+}
+
+.etiqueta{
+    vertical-align:central;
+    font-weight:bold;
+}
+
+.valores{
+    vertical-align:central;
+    font-size:11px;
+}
+
+.valoresq{
+    vertical-align:central;    
+    font-family:sans-serif;
+    font-size:9px;
+}
+
+.t_letra20{
+    font-size:20px;
+}
+
+.t_letra17{
+    font-size:17px;
+}
+
+.t_letra15{
+    font-size:15px;
+}
+
+.t_letra13{
+    font-size:13px;
+}
+
+.t_letra11{
+    font-size:11px !important;
+}
+
+.t_letra12{
+    font-size:12px !important;
+}
+
+.t_letra10{
+    font-size:10px;
+}
+
+.t_letra8{
+    font-size:8px;
+}
+
+.izq{
+    text-align: left;
+}
+
+.der{
+    text-align: right;
+}
+
+.just{
+    text-align: justify !important;
+}
+
+
+.top{
+    vertical-align: top;    
+}
+
+.cen{
+    text-align: center !important;
+}
+
+.cazul{
+    background: #d1e0eb; 
+}
+
+.w850p { 
+    width: 850px;    
+    margin-left: 0;
+}
+
+.w200p { 
+    width: 200px;
+    height: 2px;
+}
+
+.space-2b{
+    margin:0 0 1px 0;
+}
+
+.dmimg{
+    width:180px;
+    height:50px; 
+}
+
+.byellow{
+    background-color: #FFFF00;
+}
+
+.bgreen{
+    background-color: #B5E518;
+}
+
+.bblue{
+    background-color: #66ccff;
+}
+
+.bred{
+    background-color: #FF0000;
+}
+
+.bgrey{
+    background-color: #414848;
+}
+
+.bpurple{
+    background-color:#e72feb;
+}
+
+.cred{
+    color:#FF0000;
+}
+
+.cgreenc{
+    color:#72a66a;
+}
+
+.cbluec{
+    color:#6633ff;
+}
+
+.cpurple{
+    color:#e72feb;
+}
+
+.w10p{
+    width:10px;   
+}
+
+.w30p{
+    width:30px;   
+}
+
+.w50p{
+    width:50px;
+}
+
+.w60p{
+    width:60px;
+}
+
+.w100p{
+    width:100px;
+}
+
+.w150p{
+    width:150px;   
+}
+
+.w520p{
+    width:520px;    
+}
+
+.h36p{
+    height: 36px;
+}
+.h70p{height: 70px;}
+.h100p{height: 100px;}
+.h140p{height: 140px;}
+.w120p{width:120px;}
+.w40p{width:40px;}
+.w1100p{width:1100px;}
+
+footer {page-break-after: always;}
+
+.page_break{
+    page-break-after: always;
+}
+
+.page_break_avoid{
+    page-break-inside: avoid;
+}
+
+table.tb_odontograma{
+    border-collapse:collapse;
+    border-spacing:0;
+}
+
+table.tb_odontograma tr td{
+    border:1px solid #CCC;
+    text-align: center;
+    font-size:10px;
+}
+
+table.tb_odontograma svg{
+    height:44px;
+    width:44px;
+}
+
+table.tb_odontograma .bordeseplf{
+    border-left:2px solid #000 !important;
+}
+
+table.tb_odontograma .bordeseptp{
+    border-top:2px solid #000 !important;
+}
+
+.img-1{
+    max-width:30%;
+}
+
+.border-1-3{
+    border: 1px solid #000;
+    padding: 4px 5px;
+}
+
+.bg-titulos {
+    background-color: #E1E5E5 !important;
+}
+
+.bg-subtitulos {
+    background-color: #F2FFE6 !important;
+}
+
+.bg-div {
+    background-color: #AED6F1 !important;
+}
+
+.bg-alert {
+    background-color: #FFFF00 !important;
+}
+
+.text-titulos{
+    vertical-align:central;
+    font-size:11px;
+}
+
+.text-contenido{
+    vertical-align:central;
+    font-size:12px;
+}
+
+.h25p{
+    height: 25px;
+}
+
+.table-bordered tr,.table-bordered td {
+    border-spacing:0;
+    border: 1px solid #dee2e6;    
+}
+
+.h-divider{
+    margin-top:5px;
+    margin-bottom:5px;
+    height:1px;
+    width:850px;
+    border-top:1px solid gray;
+}
+
+.text-justify {
+  text-align: justify !important;
+}
+
+.cell{
+    max-width:100%;
+    white-space:nowrap;
+}
+
+.img_firma{
+    width:250px;
+    height:50px
+}
+
+.img_huella{
+    width:110px;
+    height:110px;
+}
+
+.tb-border-100  {    
+    border-spacing:0;
+    width: 100%;
+}
+
+.tb-border-100 tr td{
+    border: 0 !important;
+    padding:2px 0;
+}
+.tb-border-4  {
+    width: 1100px;
+}
+.tb-border-4 tr td{
+    padding:1px 1px;
+    border: 1px solid #000 !important; 
+}
+.tb-border-4-1  {
+    width: 1100px;
+    border: 1px solid #000 !important; 
+}
+.tb-border-4 tr td{
+    padding:1px 1px;
+    
+}
+#tb_escalacyd tr td{
+    border-collapse:collapse;        
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 11px;
+    text-align: center;
+    padding:1px;
+    border:1px solid #000;
+    width:5px !important;
+    height: 5px !important;    
+}
+
+.pie-pagina {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+}
+
+p{
+    margin-top:8px;
+}
+
+.p18{
+    line-height: 18px;
+}
+
+.p20{
+    line-height: 20px;
+}
+
+.tablagen{
+  display: table;
+}
+
+.fila{
+  display: table-row;
+}
+.col{
+  display: table-cell;
+}
