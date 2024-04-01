@@ -1,7 +1,7 @@
 <?php
 $bd_driver = "mysql";
 $bd_servidor = "localhost";
-$bd_base = "farmacia"; //"bd_contablersc";
+$bd_base = "bd_cronhis"; //"bd_contablersc";
 $bd_base_f = "farmacia"; //"bd_farmacia";
 $api =  "localhost/api/";
 $charset = "charset=utf8";
