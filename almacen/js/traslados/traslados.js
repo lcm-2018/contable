@@ -103,6 +103,7 @@
 
     //Buascar registros de traslados
     $('#btn_buscar_filtro').on("click", function() {
+        $('.is-invalid').removeClass('is-invalid');
         reloadtable('tb_traslados');
     });
 
@@ -358,6 +359,45 @@
         }).always(function() {}).fail(function() {
             alert('Ocurrió un error');
         });
+    });
+
+    $('#btnImprimeTraslados').on('click', function () {
+        reloadtable('tb_traslados');
+        let id_sedori = $('#sl_sedori_filtro').val();
+        let id_bodori = $('#sl_bodori_filtro').val(); 
+        let id_tra = $('#txt_idtra_filtro').val();
+        let num_tra = $('#txt_numtra_filtro').val();  
+        let fec_ini = $('#txt_fecini_filtro').val();
+        let fec_fin = $('#txt_fecfin_filtro').val();
+        let id_tercero = $('#sl_tercero_filtro').val();
+        let id_seddes = $('#sl_seddes_filtro').val(); 
+        let id_boddes = $('#sl_boddes_filtro').val();
+        let estado = $('#sl_estado_filtro').val();
+        $('.is-invalid').removeClass('is-invalid');
+        let verifica = verifica_vacio($('#txt_fecini_filtro')); 
+            verifica += verifica_vacio($('#txt_fecfin_filtro'));    
+        if (verifica == 2||verifica==1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe escribir un rango de fechas');
+        }
+        else{      
+            $.post("imp_traslados.php", { id_sedori:id_sedori,
+                                         id_bodori:id_bodori,
+                                         id_tra:id_tra,
+                                         num_tra:num_tra,
+                                         fec_ini: fec_ini,
+                                         fec_fin:fec_fin,
+                                         id_tercero:id_tercero,
+                                         id_seddes:id_seddes,
+                                         id_boddes:id_boddes,
+                                         estado:estado}, function (he) {
+                $('#divTamModalForms').removeClass('modal-xl');
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').addClass('modal-lg');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            }); 
+        }           
     });
 
 })(jQuery);

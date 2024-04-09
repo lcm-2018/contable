@@ -51,6 +51,7 @@ include '../../../permisos.php';
                                     <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
                                         <span class="fas fa-search fa-lg" aria-hidden="true"></span>
                                     </a>
+                                    <button id="btnImprimeSubgrupos" class="btn btn-outline-success btn-sm" title="Imprimir Subgrupos"><i class="fas fa-print"></i></button>
                                 </div>
                             </div>
 

@@ -95,6 +95,7 @@
     });
 
     $('#btn_buscar_filtro').on("click", function() {
+        $('.is-invalid').removeClass('is-invalid');
         reloadtable('tb_egresos');
     });
 
@@ -348,6 +349,45 @@
         }).always(function() {}).fail(function() {
             alert('Ocurrió un error');
         });
+    });
+
+    $('#btnImprimeEgresos').on('click', function () {
+        reloadtable('tb_egresos');
+        let id_sede = $('#sl_sede_filtro').val();
+        let id_bodega = $('#sl_bodega_filtro').val(); 
+        let id_egr = $('#txt_idegr_filtro').val();
+        let num_egr = $('#txt_numegr_filtro').val();  
+        let fec_ini = $('#txt_fecini_filtro').val();
+        let fec_fin = $('#txt_fecfin_filtro').val();
+        let id_tercero = $('#sl_tercero_filtro').val();
+        let id_depende = $('#sl_dependencia_filtro').val(); 
+        let id_tipegr = $('#sl_tipegr_filtro').val();
+        let estado = $('#sl_estado_filtro').val();
+        $('.is-invalid').removeClass('is-invalid');
+        let verifica = verifica_vacio($('#txt_fecini_filtro')); 
+            verifica += verifica_vacio($('#txt_fecfin_filtro'));    
+        if (verifica == 2||verifica==1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe escribir un rango de fechas');
+        }
+        else{      
+            $.post("imp_egresos.php", { id_sede:id_sede,
+                                         id_bodega:id_bodega,
+                                         id_egr:id_egr,
+                                         num_egr:num_egr,
+                                         fec_ini: fec_ini,
+                                         fec_fin:fec_fin,
+                                         id_tercero:id_tercero,
+                                         id_depende:id_depende,
+                                         id_tipegr:id_tipegr,
+                                         estado:estado}, function (he) {
+                $('#divTamModalForms').removeClass('modal-xl');
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').addClass('modal-lg');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            }); 
+        }           
     });
 
 })(jQuery);

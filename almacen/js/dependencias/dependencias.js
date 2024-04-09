@@ -58,8 +58,8 @@
     });
 
     //Buascar registros
-    $('#btn_buscar_filtro').on("click", function() {
-        reloadtable('tb_dependencias');
+    $('#btn_buscar_filtro').on("click", function() {       
+        reloadtable('tb_dependencias'); 
     });
 
     $('.filtro').keypress(function(e) {
@@ -140,36 +140,15 @@
     });
 
     $('#btnImprimeDependecias').on('click', function () {
-        let mes = 2;      
-        $.post("imp_dependencias.php", { mes: mes }, function (he) {
-            $('#divTamModalForms').removeClass('modal-xl');
-            $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').addClass('modal-lg');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
-        });
+        reloadtable('tb_dependencias');
+        let nombre = $('#txt_nombre_filtro').val();      
+            $.post("imp_dependencias.php", { nombre: nombre }, function (he) {
+                $('#divTamModalForms').removeClass('modal-xl');
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').addClass('modal-lg');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            });    
     });
-
-    $('#divModalForms').on('click', '#btnImprimir', function () {
-        function imprSelec() {
-            var div = $('#areaImprimir').html();
-            var ventimp = window.open(' ', '');
-            ventimp.document.write('<!DOCTYPE html><html><head><title>Imprimir</title></head><body>');
-            ventimp.document.write('<div>' + div + '</div>');
-            ventimp.document.write('</body></html>');
-            ventimp.print();
-            ventimp.close();
-        }
-        $('#divModalForms .collapse').addClass('show');
-        imprSelec();
-    });
-
-    $('#divModalForms').on('click', '#btnExcelEntrada', function () {
-        let xls = ($('#areaImprimir').html());
-        var encoded = window.btoa(xls);
-        $('<form action="reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
-    });
-
-
-
+    
 })(jQuery);

@@ -52,7 +52,7 @@ include '../../../permisos.php';
                                         <span class="fas fa-search fa-lg" aria-hidden="true"></span>
                                        
                                     </a>
-                                    <button id="btnImprimeDependecias" class="btn btn-outline-success btn-sm" title="Imprimir Kardex"><i class="fas fa-print"></i></button>
+                                    <button id="btnImprimeDependecias" class="btn btn-outline-success btn-sm" title="Imprimir Dependencias"><i class="fas fa-print"></i></button>
                                 </div>
                                 
                             </div>

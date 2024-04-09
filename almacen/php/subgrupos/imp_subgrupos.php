@@ -6,10 +6,11 @@ if (!isset($_SESSION['user'])) {
 }
 
 include '../../../conexion.php';
+include '../common/funciones_generales.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$user =$_SESSION['user'];
+$user = $_SESSION['user'];
 
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 try {
@@ -20,13 +21,16 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 
-$where = "WHERE tb_dependencias.id_dependencia<>0";
+$where = "WHERE far_subgrupos.id_subgrupo<>0";
 if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND tb_dependencias.nom_dependencia LIKE '" . $_POST['nombre'] . "%'";
+    $where .= " AND far_subgrupos.nom_subgrupo LIKE '" . $_POST['nombre'] . "%'";
 }
 
 try {
-    $sql = "SELECT id_dependencia,nom_dependencia FROM tb_dependencias $where ORDER BY id_dependencia DESC";
+    $sql = "SELECT far_subgrupos.id_subgrupo,far_subgrupos.cod_subgrupo,far_subgrupos.nom_subgrupo,far_grupos.nom_grupo,
+                IF(far_subgrupos.estado=1,'ACTIVO','INACTIVO') AS estado
+            FROM far_subgrupos
+            INNER JOIN far_grupos ON (far_grupos.id_grupo=far_subgrupos.id_grupo) $where ORDER BY far_subgrupos.id_subgrupo DESC";
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
 } catch (PDOException $e) {
@@ -59,59 +63,65 @@ try {
     <table style="width:100% !important; border-collapse: collapse;">
         <thead style="background-color: white !important;font-size:80%">
             <tr style="padding: bottom 3px; color:black">
-                <td colspan="10">
+                <td colspan="5">
                     <table style="width:100% !important;">
                         <tr>
-                            <td rowspan="3" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
-                            <td colspan="3" style="text-align:center">
+                            <td rowspan="5" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+                            <td colspan="5" style="text-align:center">
                                 <header><b><?php echo $empresa['nombre']; ?> </b></header>
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="3" style="text-align:center">
-                                 NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?>
+                            <td colspan="5" style="text-align:center">
+                                NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?>
                             </td>
                         </tr>
-                        <tr>                            
-                            <td colspan="2" style="text-align:right">
+                        <tr>
+                            <td colspan="5" style="text-align:right">
                                 Fec. Imp.: <?php echo date('Y/m/d'); ?>
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="text-align:center">
-                              <b>DEPENDENCIAS</b>  
+                            <td colspan="5" style="text-align:center">
+                                <b>SUBGRUPOS ARTICULOS</b>
                             </td>
                         </tr>
                     </table>
                 </td>
             </tr>
             <tr style="background-color: #CED3D3; text-align:center">
-                <th>ID</th>
-                <th>Nombre</th>                
+            <th>Id</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Grupo</th>
+            <th>Estado</th>
             </tr>
         </thead>
         <tbody style="font-size: 60%;">
-            <?php           
-            $tabla = '';                                      
-                    foreach ($objs as $obj) {                              
-                        $tabla .=  '<tr class="resaltar" style="text-align:center"> 
-                        <td>' .$obj['id_dependencia'] .'</td>
-                        <td>' . mb_strtoupper($obj['nom_dependencia']). '</td>                               
+            <?php
+            $tabla = '';
+            foreach ($objs as $obj) {
+            $tabla .=  '<tr class="resaltar" style="text-align:center"> 
+                        <td>' . $obj['id_subgrupo'] . '</td>
+                        <td>' . $obj['cod_subgrupo'] . '</td>
+                        <td>' . $obj['nom_subgrupo'] . '</td>
+                        <td>' . $obj['nom_grupo'] . '</td>
+                        <td>' . $obj['estado'] . '</td>                                                         
                     </tr>';
-                    }            
+            }
             echo $tabla;
             ?>
             <tr>
-                <td colspan="2" style="height: 30px;" ></td>
+                <td colspan="5" style="height: 30px;"></td>
             </tr>
             <tr>
-                <td colspan="2">
+                <td colspan="5">
                     <table style="width: 100%;">
                         <tr>
-                            <td colspan="2" style="text-align:left">
-                            Usuario: <?php echo mb_strtoupper($user); ?>
-                            </td>                           
-                        </tr>                     
+                            <td colspan="5" style="text-align:left">
+                                Usuario: <?php echo mb_strtoupper($user); ?>
+                            </td>
+                        </tr>
                     </table>
                 </td>
             </tr>
