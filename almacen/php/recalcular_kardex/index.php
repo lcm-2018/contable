@@ -57,7 +57,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 </div>
                                 <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_subgrupo_filtro">
-                                        <?php subgrupo_articulo($cmd,'--Subgrupo--') ?>
+                                        <?php subgrupo_articulo($cmd, '--Subgrupo--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
@@ -69,7 +69,12 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
                                         <span class="fas fa-search fa-lg" aria-hidden="true"></span>
                                     </a>
-                                </div>                                
+                                </div>
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_buscar_filtro2" class="btn btn-outline-success btn-sm" title="Filtrar">
+                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                </div>
                             </div>
 
                             <!--Lista de registros en la tabla-->
@@ -80,24 +85,26 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 echo '<input type="hidden" id="peReg" value="0">';
                             }
                             ?>
-                            <table id="tb_articulos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
-                                <thead>
-                                    <tr class="text-center centro-vertical">
-                                        <th></th>
-                                        <th>Id</th>
-                                        <th>Código</th>
-                                        <th>Nombre</th>
-                                        <th>Subgrupo</th>
-                                        <th>Tope Mínimo</th>
-                                        <th>Tope Máximo</th>
-                                        <th>Existencia</th>
-                                        <th>Vr. Promedio</th>
-                                        <th>Es Clínico</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                            <form id="frm_articulos">
+                                <table id="tb_articulos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                                    <thead>
+                                        <tr class="text-center centro-vertical">
+                                            <th></th>
+                                            <th>Id</th>
+                                            <th>Código</th>
+                                            <th>Nombre</th>
+                                            <th>Subgrupo</th>
+                                            <th>Tope Mínimo</th>
+                                            <th>Tope Máximo</th>
+                                            <th>Existencia</th>
+                                            <th>Vr. Promedio</th>
+                                            <th>Es Clínico</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </form>
                         </div>
                     </div>
                 </div>

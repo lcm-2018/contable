@@ -78,7 +78,7 @@ if (!empty($objs)) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
         $data[] = [
-            "select" => '<input type="checkbox" checked>',
+            "select" => '<input type="checkbox" name="art[]" value="' . $id . '">',
             "id_med" => $id,
             "cod_medicamento" => $obj['cod_medicamento'],
             "nom_medicamento" => mb_strtoupper($obj['nom_medicamento']),

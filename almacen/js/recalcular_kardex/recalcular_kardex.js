@@ -70,7 +70,33 @@
 
     //Buascar registros de Articulos
     $('#btn_buscar_filtro').on("click", function() {
-        reloadtable('tb_articulos');
+        //reloadtable('tb_articulos');
+
+
+
+    });
+
+    $('#btn_buscar_filtro2').on("click", function() {
+        //reloadtable('tb_articulos');
+        var data = $('#frm_articulos').serialize();
+        $.ajax({
+            type: 'POST',
+            url: 'procesar.php',
+            dataType: 'json',
+            data: data
+        }).done(function(r) {
+            if (r.mensaje == 'ok') {
+
+                $('#divModalDone').modal('show');
+                $('#divMsgDone').html("Proceso realizado con éxito");
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function() {}).fail(function() {
+            alert('Ocurrió un error');
+        });
+
     });
 
     $('.filtro').keypress(function(e) {
