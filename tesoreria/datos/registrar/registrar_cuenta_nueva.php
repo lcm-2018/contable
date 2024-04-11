@@ -15,7 +15,7 @@ if (isset($_POST)) {
     if (!empty($_POST['id_cuenta'])) {
         $cuentas = $_POST['id_pgcp'];
     }
-    $query = $cmd->prepare("SELECT id_pgcp,nombre, cuenta FROM seg_ctb_pgcp WHERE id_pgcp=?");
+    $query = $cmd->prepare("SELECT id_pgcp,nombre, cuenta FROM ctb_pgcp WHERE id_pgcp=?");
     $query->bindParam(1, $cuentas, PDO::PARAM_INT);
     $query->execute();
     $cuentacont = $query->fetch();

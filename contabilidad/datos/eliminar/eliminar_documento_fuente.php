@@ -7,24 +7,14 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 $response['value'] = 'error';
 // consulto si el id de la cuenta fue utilizado en seg_fin_chequera_cont
 try {
-    // consulto la cuenta con el id recibido en la tabla ctb_pgcp
-    $query = "SELECT `id_ctb_libaux` FROM `ctb_libaux` WHERE `id_cuenta` = ?";
-    $query = $pdo->prepare($query);
+    $query = $pdo->prepare("DELETE FROM `ctb_fuente` WHERE `id_doc_fuente` = ? ");
     $query->bindParam(1, $id);
     $query->execute();
-    // consulto cuantos registros genera la sentencia
     if ($query->rowCount() > 0) {
-        $response['msg'] = 'Cuenta contiene registros asociados';
+        $response['value'] = 'ok';
+        $response['msg'] = 'Cuenta eliminada correctamente';
     } else {
-        $query = $pdo->prepare("DELETE FROM ctb_pgcp WHERE id_pgcp = ? ");
-        $query->bindParam(1, $id);
-        $query->execute();
-        if ($query->rowCount() > 0) {
-            $response['value'] = 'ok';
-            $response['msg'] = 'Cuenta eliminada correctamente';
-        } else {
-            $response['msg'] = $query->errorInfo()[2];
-        }
+        $response['msg'] = $query->errorInfo()[2];
     }
     $cmd = null;
 } catch (PDOException $e) {

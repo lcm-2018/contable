@@ -267,7 +267,7 @@ $nom_mes = isset($meses[$nomina['mes']]) ? 'MES DE ' . mb_strtoupper($meses[$nom
 $id_pto = $pto['id_pto'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha = $date->format('Y-m-d');
-$objeto = "PAGO NOMINA PATRONAL " . $cual . " N° " . $nomina['id_nomina'] . ' ' . $nom_mes . "VIGENCIA " . $nomina['vigencia'];
+$objeto = "PAGO NOMINA PATRONAL " . $cual . " N° " . $nomina['id_nomina'] . ' ' . $nom_mes . " VIGENCIA " . $nomina['vigencia'];
 $iduser = $_SESSION['id_user'];
 $fecha2 = $date->format('Y-m-d H:i:s');
 //CDP

@@ -126,15 +126,15 @@ $enletras = numeroLetras($total);
 try {
     $sql = "SELECT
     `ctb_libaux`.`cuenta` as cuenta
-    , `seg_ctb_pgcp`.`nombre`
+    , `ctb_pgcp`.`nombre`
     , `ctb_libaux`.`debito` as debito
     , `ctb_libaux`.`credito` as credito
     , `ctb_libaux`.`id_tercero`
 
     FROM
     `ctb_libaux`
-    INNER JOIN `seg_ctb_pgcp` 
-        ON (`ctb_libaux`.`cuenta` = `seg_ctb_pgcp`.`cuenta`)
+    INNER JOIN `ctb_pgcp` 
+        ON (`ctb_libaux`.`cuenta` = `ctb_pgcp`.`cuenta`)
     WHERE (`ctb_libaux`.`id_ctb_doc` =$dto)
     ORDER BY `ctb_libaux`.`cuenta` DESC;";
     $res = $cmd->query($sql);
@@ -329,7 +329,7 @@ $id_forma = 0;
                 try {
                     $sql = "SELECT
                             `seg_ctb_factura`.`id_ctb_doc`
-                            , `seg_ctb_tipodoc`.`tipo` as tipo
+                            , `ctb_tipo_doc`.`tipo` as tipo
                             , `seg_ctb_factura`.`num_doc`
                             , `seg_ctb_factura`.`fecha_fact`
                             , `seg_ctb_factura`.`fecha_ven`
@@ -338,8 +338,8 @@ $id_forma = 0;
                             , `seg_ctb_factura`.`valor_base`
                             FROM
                             `seg_ctb_factura`
-                            INNER JOIN `seg_ctb_tipodoc` 
-                                ON (`seg_ctb_factura`.`tipo_doc` = `seg_ctb_tipodoc`.`id_ctb_tipodoc`)
+                            INNER JOIN `ctb_tipo_doc` 
+                                ON (`seg_ctb_factura`.`tipo_doc` = `ctb_tipo_doc`.`id_ctb_tipodoc`)
                             WHERE (`seg_ctb_factura`.`id_ctb_doc` ={$doc['id_ctb_cop']});";
                     $res = $cmd->query($sql);
                     $factura = $res->fetch();
@@ -353,7 +353,7 @@ $id_forma = 0;
                     $sql = "SELECT
                          SUM(`valor_retencion`) AS descuentos
                         FROM
-                        `seg_ctb_causa_retencion`
+                        `ctb_causa_retencion`
                         WHERE (`id_ctb_doc` ={$doc['id_ctb_cop']});";
                     $rs = $cmd->query($sql);
                     $retenciones = $rs->fetch();

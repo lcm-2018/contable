@@ -16,21 +16,21 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-    `seg_ctb_causa_costos`.`id`
-    ,`seg_ctb_causa_costos`.`id_ctb_doc`
-    , `seg_ctb_causa_costos`.`valor`
+    `ctb_causa_costos`.`id`
+    ,`ctb_causa_costos`.`id_ctb_doc`
+    , `ctb_causa_costos`.`valor`
     , `tb_sedes`.`nom_sede`
     , `tb_municipios`.`nom_municipio`
     , `tb_centros_costo`.`descripcion`
     FROM
-    `seg_ctb_causa_costos`
+    `ctb_causa_costos`
     INNER JOIN `tb_sedes` 
-        ON (`seg_ctb_causa_costos`.`id_sede` = `tb_sedes`.`id_sede`)
+        ON (`ctb_causa_costos`.`id_sede` = `tb_sedes`.`id_sede`)
     INNER JOIN `tb_municipios` 
         ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`)
     INNER JOIN `tb_centros_costo` 
-        ON (`tb_centros_costo`.`id_centro` = `seg_ctb_causa_costos`.`id_cc`)
-    WHERE (`seg_ctb_causa_costos`.`id_ctb_doc` =$id_doc);";
+        ON (`tb_centros_costo`.`id_centro` = `ctb_causa_costos`.`id_cc`)
+    WHERE (`ctb_causa_costos`.`id_ctb_doc` =$id_doc);";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll();
 

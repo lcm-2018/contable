@@ -7,7 +7,7 @@ $_post = json_decode(file_get_contents('php://input'), true);
 // Buscamos si hay registros posteriores a la fecha recibida
 
 // consultar valor valor_aprobado en pto_cargue
-$sql = "SELECT tipo_dato FROM seg_ctb_pgcp WHERE cuenta = '$_post[cuenta]'";
+$sql = "SELECT tipo_dato FROM ctb_pgcp WHERE cuenta = '$_post[cuenta]'";
 $rs = $cx->query($sql);
 $datos = $rs->fetch_assoc();
 $tipo = $datos['tipo_dato'];

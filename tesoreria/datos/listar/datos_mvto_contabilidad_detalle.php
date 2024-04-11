@@ -27,7 +27,7 @@ if (!empty($listappto)) {
         try {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-            $sql = "SELECT nombre FROM seg_ctb_pgcp WHERE cuenta='$lp[cuenta]'";
+            $sql = "SELECT nombre FROM ctb_pgcp WHERE cuenta='$lp[cuenta]'";
             $rs = $cmd->query($sql);
             $datos = $rs->fetch();
             $cmd = null;

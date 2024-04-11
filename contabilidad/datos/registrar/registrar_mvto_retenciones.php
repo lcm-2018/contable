@@ -32,7 +32,7 @@ if (isset($_POST)) {
 
     try {
         if (empty($_POST['id'])) {
-            $query = $cmd->prepare("INSERT INTO seg_ctb_causa_retencion (id_ctb_doc,id_retencion, valor_base, tarifa,valor_retencion,id_terceroapi) VALUES (?, ?, ?, ?, ?, ?)");
+            $query = $cmd->prepare("INSERT INTO ctb_causa_retencion (id_ctb_doc,id_retencion, valor_base, tarifa,valor_retencion,id_terceroapi) VALUES (?, ?, ?, ?, ?, ?)");
             $query->bindParam(1, $id_doc, PDO::PARAM_INT);
             $query->bindParam(2, $id_rete, PDO::PARAM_INT);
             $query->bindParam(3, $base, PDO::PARAM_STR);
@@ -44,22 +44,22 @@ if (isset($_POST)) {
                 $id = $cmd->lastInsertId();
                 // consultar y cargar el cuerpo de la tabla
                 $sql = "SELECT
-                `seg_ctb_causa_retencion`.`id_causa_retencion`
-                , `seg_ctb_causa_retencion`.`id_ctb_doc`
+                `ctb_causa_retencion`.`id_causa_retencion`
+                , `ctb_causa_retencion`.`id_ctb_doc`
                 , `seg_ctb_retencion_tipo`.`tipo`
                 , `seg_ctb_retenciones`.`nombre_retencion`
-                , `seg_ctb_causa_retencion`.`valor_base`
-                , `seg_ctb_causa_retencion`.`tarifa`
-                , `seg_ctb_causa_retencion`.`valor_retencion`
-                ,`seg_ctb_causa_retencion`.`id_terceroapi`
+                , `ctb_causa_retencion`.`valor_base`
+                , `ctb_causa_retencion`.`tarifa`
+                , `ctb_causa_retencion`.`valor_retencion`
+                ,`ctb_causa_retencion`.`id_terceroapi`
 
             FROM
-                `seg_ctb_causa_retencion`
+                `ctb_causa_retencion`
                 INNER JOIN `seg_ctb_retenciones` 
-                    ON (`seg_ctb_causa_retencion`.`id_retencion` = `seg_ctb_retenciones`.`id_retencion`)
+                    ON (`ctb_causa_retencion`.`id_retencion` = `seg_ctb_retenciones`.`id_retencion`)
                 INNER JOIN `seg_ctb_retencion_tipo` 
                     ON (`seg_ctb_retencion_tipo`.`id_retencion_tipo` = `seg_ctb_retenciones`.`id_retencion_tipo`)
-            WHERE (`seg_ctb_causa_retencion`.`id_ctb_doc` = $id_doc);";
+            WHERE (`ctb_causa_retencion`.`id_ctb_doc` = $id_doc);";
                 $rs = $cmd->query($sql);
                 $rubros = $rs->fetchAll();
 

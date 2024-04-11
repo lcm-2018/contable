@@ -84,7 +84,7 @@ try {
                                     REGISTRO DE MOVIMIENTOS CONTABLES
                                 </div>
                                 <?php
-                                if (PermisosUsuario($permisos, 5501, 2)  || $id_rol == 1) {
+                                if ((PermisosUsuario($permisos, 5501, 2)  || $id_rol == 1) && !($tipo_doc == '5' || $tipo_doc == '3')) {
                                     echo '<input type="hidden" id="peReg" value="1">';
                                 } else {
                                     echo '<input type="hidden" id="peReg" value="0">';

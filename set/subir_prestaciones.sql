@@ -1,86 +1,218 @@
-INSERT INTO `nom_nominas` (`id_nomina`, `descripcion`,`mes`,`vigencia`,`tipo`,`estado`,`planilla`,`fec_reg`) VALUES
-(1,"LIQUIDACIÓN PRESTACIONES SOCIALES", "01", 2023, "PS",5,5,"2023-01-31 11:02:00");
-INSERT INTO `nom_liq_bsp`(`id_empleado`,`val_bsp`,`id_user_reg`,`mes`,`anio`,`fec_reg`,`id_nomina`)VALUES
-("5","500000","1","01","2023","2023-01-31 11:02:00","1"),
-("6","500000","1","01","2023","2023-01-31 11:02:00","1"),
-("16","460000","1","01","2023","2023-01-31 11:02:00","1"),
-("19","500000","1","01","2023","2023-01-31 11:02:00","1"),
-("20","979999","1","01","2023","2023-01-31 11:02:00","1"),
-("27","1000000","1","01","2023","2023-01-31 11:02:00","1");
-INSERT INTO `nom_liq_prima`(`id_empleado`,`cant_dias`,`val_liq_ps`,`periodo`,`fec_reg`,`id_nomina`, `corte`)VALUES
-(5,360,282714,1,"2023-01-31 11:02:00",1,"2023-01-31"),
-(6,360,307878,1,"2023-01-31 11:02:00",1,"2023-01-31"),
-(16,360,0,1,"2023-01-31 11:02:00",1,"2023-01-31"),
-(19,360,118956,1,"2023-01-31 11:02:00",1,"2022-10-10"),
-(20,360,969969,1,"2023-01-31 11:02:00",1,"2023-03-14"),
-(27,360,108142,1,"2023-01-31 11:02:00",1,"2022-10-10");
-INSERT INTO `nom_liq_prima_nav`(`id_empleado`,`cant_dias`,`val_liq_pv`,`periodo`,`anio`,`fec_reg`,`id_nomina`,`corte`)VALUES
-(2,360,1073436,2,2022,"2022-12-31 14:57:01",NULL,"2022-12-31"),
-(3,360,1013801,2,2022,"2022-12-31 14:57:01",NULL,"2022-12-31"),
-(7,360,2766288,2,2022,"2022-12-06 11:52:37",NULL,"2022-12-06"),
-(8,360,360794,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(9,360,4820655,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(11,360,4798122,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(12,360,1086847,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(13,360,3834385,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(14,360,5698321,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(15,360,2875462,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(17,360,1910317,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(18,360,4746236,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(22,360,2766119,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(23,360,454248,2,2023,"2023-03-15 00:00:00",NULL,"2023-03-15"),
-(24,360,1057932,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(25,360,2483061,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(26,360,1046045,2,2022,"2022-12-31 11:52:37",NULL,"2022-12-31"),
-(28,360,1456162,2,2022,"2022-12-31 14:57:01",NULL,"2022-12-31"),
-(31,360,48896,2,2023,"2023-02-13 08:56:56",NULL,"2023-02-13"),
-(32,360,14493,2,2023,"2023-01-31 10:04:36",NULL,"2023-01-31");
-
-INSERT INTO `nom_vacaciones`(`id_vac`,`id_empleado`,`anticipo`,`fec_inicial`,`fec_inicio`,`fec_fin`,`dias_inactivo`,`dias_habiles`,`dias_liquidar`,`estado`,`fec_reg`)VALUES
-(17,29,2,"2022-01-27","2022-01-27","2022-02-18,22",15,360,2,"2022-01-27"),
-(18,9,2,"2022-08-02","2022-08-02","2022-08-24,22",15,360,2,"2022-08-02"),
-(19,14,2,"2023-01-17","2023-01-17","2023-02-08,22",15,360,2,"2023-01-17"),
-(20,25,2,"2023-01-31","2023-01-31","2023-02-22,22",15,360,2,"2023-01-31"),
-(21,32,2,"2023-01-31","2023-01-31","2023-02-22,22",15,360,2,"2023-01-31"),
-(22,31,2,"2023-02-13","2023-02-13","2023-03-07,22",15,360,2,"2023-02-13"),
-(23,15,2,"2023-02-16","2023-02-16","2023-03-10,22",15,360,2,"2023-02-16"),
-(24,22,2,"2023-02-16","2023-02-16","2023-03-10,22",15,360,2,"2023-02-16"),
-(25,11,2,"2023-02-23","2023-02-23","2023-03-17,22",15,360,2,"2023-02-23"),
-(26,7,2,"2023-03-15","2023-03-15","2023-04-06,22",15,360,2,"2023-03-15"),
-(27,23,2,"2023-03-15","2023-03-15","2023-04-06,22",15,360,2,"2023-03-15"),
-(28,13,2,"2023-05-10","2023-05-10","2023-06-01,22",15,360,2,"2023-05-10");
-INSERT INTO `nom_liq_vac`(`id_vac`,`dias_liqs`,`val_liq`,`val_prima_vac`,`val_bon_recrea`,`anio_vac`,`fec_reg`, `mes_vac`)VALUES
-(17,503321,503321,65740,2022,"2022-01-27","01"),
-(18,4570197,4570197,285285,2022,"2022-08-02","08"),
-(19,3443241,2718348,341204,2023,"2023-01-17","01"),
-(20,1572605,1241531,154761,2023,"2023-01-31","01"),
-(21,555664,555664,71188,2023,"2023-01-31","01"),
-(22,590485,590485,71979,2023,"2023-02-13","02"),
-(23,2031747,1385282,172668,2023,"2023-02-16","02"),
-(24,1751876,1383060,172668,2023,"2023-02-16","02"),
-(25,3204029,2288592,285285,2023,"2023-02-23","02"),
-(26,2401155,1385282,172668,2023,"2023-03-15","03"),
-(27,1777492,1777492,229920,2023,"2023-03-15","03"),
-(28,2588932,1849237,229920,2023,"2023-05-10","05");
-
-INSERT INTO `nom_liq_cesantias`(`id_empleado`,`cant_dias`,`val_cesantias`,`val_icesantias`,`porcentaje_interes`,`anio`,`fec_reg`,`id_nomina`, `corte`)VALUES
-(5,360,1394058,167287,12,2023,"2023-01-31 11:02:00",1,"2023-01-31"),
-(6,360,1345342,161441,12,2023,"2023-01-31 11:02:00",1,"2023-01-31"),
-(16,360,0,0,12,2023,"2023-01-31 11:02:00",1,"2023-01-31"),
-(19,360,1044122,125295,12,2023,"2023-01-31 11:02:00",1,"2022-10-10"),
-(20,360,609401,73128,12,2023,"2023-01-31 11:02:00",1,"2023-03-14"),
-(27,360,1022342,122681,12,2023,"2023-01-31 11:02:00",1,"2022-10-10");
-INSERT INTO `nom_liq_salario` (`id_empleado`,`forma_pago`,`metodo_pago`,`val_liq`,`anio`,`fec_reg`,`id_nomina`)VALUES
-(5,1,47,3527561,2023,"2023-01-31 11:02:00",1),
-(6,1,47,3543348,2023,"2023-01-31 11:02:00",1),
-(16,1,47,460000,2023,"2023-01-31 11:02:00",1),
-(19,1,47,3759768,2023,"2023-01-31 11:02:00",1),
-(20,1,47,6172142,2023,"2023-01-31 11:02:00",1),
-(27,1,47,5386439,2023,"2023-01-31 11:02:00",1);
-INSERT INTO `nom_liq_dlab_auxt`(`id_empleado`, `val_liq_dias`, `val_liq_auxt`, `aux_alim`, `g_representa`, `horas_ext`, `id_nomina`)VALUES
-(5,0,0,0,0,0,1),
-(6,0,0,0,0,0,1),
-(16,0,0,0,0,0,1),
-(19,0,0,0,0,0,1),
-(20,0,0,0,0,0,1),
-(27,0,0,0,0,0,1);
+DELETE FROM tes_referencia;
+ALTER TABLE tes_referencia AUTO_INCREMENT = 1;
+DELETE FROM seg_terceros;
+ALTER TABLE seg_terceros AUTO_INCREMENT = 1;
+DELETE FROM ctb_doc;
+ALTER TABLE ctb_doc AUTO_INCREMENT = 1;
+DELETE FROM ctb_factura;
+ALTER TABLE ctb_factura AUTO_INCREMENT = 1;
+DELETE FROM ctb_pgcp;
+ALTER TABLE ctb_pgcp AUTO_INCREMENT = 1;
+DELETE FROM ctb_libaux;
+ALTER TABLE ctb_libaux AUTO_INCREMENT = 1;
+DELETE FROM ctt_modalidad;
+ALTER TABLE ctt_modalidad AUTO_INCREMENT = 1;
+DELETE FROM tb_tipo_contratacion;
+ALTER TABLE tb_tipo_contratacion AUTO_INCREMENT = 1;
+DELETE FROM tb_tipo_bien_servicio;
+ALTER TABLE tb_tipo_bien_servicio AUTO_INCREMENT = 1;
+DELETE FROM pto_presupuestos;
+ALTER TABLE pto_presupuestos AUTO_INCREMENT = 1;
+DELETE FROM pto_cdp;
+ALTER TABLE pto_cdp AUTO_INCREMENT = 1;
+DELETE FROM ctt_adquisiciones;
+ALTER TABLE ctt_adquisiciones AUTO_INCREMENT = 1;
+DELETE FROM ctt_bien_servicio;
+ALTER TABLE ctt_bien_servicio AUTO_INCREMENT = 1;
+DELETE FROM ctt_adquisicion_detalles;
+ALTER TABLE ctt_adquisicion_detalles AUTO_INCREMENT = 1;
+DELETE FROM ctt_clasificacion_bn_sv;
+ALTER TABLE ctt_clasificacion_bn_sv AUTO_INCREMENT = 1;
+DELETE FROM ctt_contratos;
+ALTER TABLE ctt_contratos AUTO_INCREMENT = 1;
+DELETE FROM ctt_destino_contrato;
+ALTER TABLE ctt_destino_contrato AUTO_INCREMENT = 1;
+DELETE FROM ctt_escala_honorarios;
+ALTER TABLE ctt_escala_honorarios AUTO_INCREMENT = 1;
+DELETE FROM ctt_estudios_previos;
+ALTER TABLE ctt_estudios_previos AUTO_INCREMENT = 1;
+DELETE FROM ctt_garantias_compra;
+ALTER TABLE ctt_garantias_compra AUTO_INCREMENT = 1;
+DELETE FROM ctt_novedad_adicion_prorroga;
+ALTER TABLE ctt_novedad_adicion_prorroga AUTO_INCREMENT = 1;
+DELETE FROM ctt_novedad_cesion;
+ALTER TABLE ctt_novedad_cesion AUTO_INCREMENT = 1;
+DELETE FROM ctt_novedad_liquidacion;
+ALTER TABLE ctt_novedad_liquidacion AUTO_INCREMENT = 1;
+DELETE FROM ctt_novedad_suspension;
+ALTER TABLE ctt_novedad_suspension AUTO_INCREMENT = 1;
+DELETE FROM ctt_novedad_reinicio;
+ALTER TABLE ctt_novedad_reinicio AUTO_INCREMENT = 1;
+DELETE FROM ctt_novedad_terminacion;
+ALTER TABLE ctt_novedad_terminacion AUTO_INCREMENT = 1;
+DELETE FROM fin_maestro_doc;
+ALTER TABLE fin_maestro_doc AUTO_INCREMENT = 1;
+DELETE FROM fin_respon_doc;
+ALTER TABLE fin_respon_doc AUTO_INCREMENT = 1;
+DELETE FROM nom_afp;
+ALTER TABLE nom_afp AUTO_INCREMENT = 1;
+DELETE FROM nom_arl;
+ALTER TABLE nom_arl AUTO_INCREMENT = 1;
+DELETE FROM nom_cargo_empleado;
+ALTER TABLE nom_cargo_empleado AUTO_INCREMENT = 1;
+DELETE FROM nom_causacion;
+ALTER TABLE nom_causacion AUTO_INCREMENT = 1;
+DELETE FROM nom_incremento_salario;
+ALTER TABLE nom_incremento_salario AUTO_INCREMENT = 1;
+DELETE FROM nom_retroactivos;
+ALTER TABLE nom_retroactivos AUTO_INCREMENT = 1;
+DELETE FROM nom_nominas;
+ALTER TABLE nom_nominas AUTO_INCREMENT = 1;
+DELETE FROM nom_cdp_empleados;
+ALTER TABLE nom_cdp_empleados AUTO_INCREMENT = 1;
+DELETE FROM nom_conceptos_liquidacion;
+ALTER TABLE nom_conceptos_liquidacion AUTO_INCREMENT = 1;
+DELETE FROM nom_conceptosxvigencia;
+ALTER TABLE nom_conceptosxvigencia AUTO_INCREMENT = 1;
+DELETE FROM nom_consecutivo_viaticos;
+ALTER TABLE nom_consecutivo_viaticos AUTO_INCREMENT = 1;
+DELETE FROM nom_empleado;
+ALTER TABLE nom_empleado AUTO_INCREMENT = 1;
+DELETE FROM nom_contratos_empleados;
+ALTER TABLE nom_contratos_empleados AUTO_INCREMENT = 1;
+DELETE FROM nom_sindicatos;
+ALTER TABLE nom_sindicatos AUTO_INCREMENT = 1;
+DELETE FROM nom_cuota_sindical;
+ALTER TABLE nom_cuota_sindical AUTO_INCREMENT = 1;
+DELETE FROM nom_juzgados;
+ALTER TABLE nom_juzgados AUTO_INCREMENT = 1;
+DELETE FROM nom_embargos;
+ALTER TABLE nom_embargos AUTO_INCREMENT = 1;
+DELETE FROM nom_empleados_retirados;
+ALTER TABLE nom_empleados_retirados AUTO_INCREMENT = 1;
+DELETE FROM nom_epss;
+ALTER TABLE nom_epss AUTO_INCREMENT = 1;
+DELETE FROM nom_fondo_censan;
+ALTER TABLE nom_fondo_censan AUTO_INCREMENT = 1;
+DELETE FROM nom_horas_ex_trab;
+ALTER TABLE nom_horas_ex_trab AUTO_INCREMENT = 1;
+DELETE FROM nom_incapacidad;
+ALTER TABLE nom_incapacidad AUTO_INCREMENT = 1;
+DELETE FROM nom_indemniza_vac;
+ALTER TABLE nom_indemniza_vac AUTO_INCREMENT = 1;
+DELETE FROM nom_libranzas;
+ALTER TABLE nom_libranzas AUTO_INCREMENT = 1;
+DELETE FROM nom_licencia_luto;
+ALTER TABLE nom_licencia_luto AUTO_INCREMENT = 1;
+DELETE FROM nom_licenciasmp;
+ALTER TABLE nom_licenciasmp AUTO_INCREMENT = 1;
+DELETE FROM nom_licenciasnr;
+ALTER TABLE nom_licenciasnr AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_bsp;
+ALTER TABLE nom_liq_bsp AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_cesantias;
+ALTER TABLE nom_liq_cesantias AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_compesatorio;
+ALTER TABLE nom_liq_compesatorio AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_dias_lab;
+ALTER TABLE nom_liq_dias_lab AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_dlab_auxt;
+ALTER TABLE nom_liq_dlab_auxt AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_embargo;
+ALTER TABLE nom_liq_embargo AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_empleado;
+ALTER TABLE nom_liq_empleado AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_horex;
+ALTER TABLE nom_liq_horex AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_incap;
+ALTER TABLE nom_liq_incap AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_indemniza_vac;
+ALTER TABLE nom_liq_indemniza_vac AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_libranza;
+ALTER TABLE nom_liq_libranza AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_licluto;
+ALTER TABLE nom_liq_licluto AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_licmp;
+ALTER TABLE nom_liq_licmp AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_licnr;
+ALTER TABLE nom_liq_licnr AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_parafiscales;
+ALTER TABLE nom_liq_parafiscales AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_prestaciones_sociales;
+ALTER TABLE nom_liq_prestaciones_sociales AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_prima;
+ALTER TABLE nom_liq_prima AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_prima_nav;
+ALTER TABLE nom_liq_prima_nav AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_salario;
+ALTER TABLE nom_liq_salario AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_segsocial_empdo;
+ALTER TABLE nom_liq_segsocial_empdo AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_sindicato_aportes;
+ALTER TABLE nom_liq_sindicato_aportes AUTO_INCREMENT = 1;
+DELETE FROM nom_vacaciones;
+ALTER TABLE nom_vacaciones AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_vac;
+ALTER TABLE nom_liq_vac AUTO_INCREMENT = 1;
+DELETE FROM nom_nomina_pto_ctb_tes;
+ALTER TABLE nom_nomina_pto_ctb_tes AUTO_INCREMENT = 1;
+DELETE FROM nom_novedades_afp;
+ALTER TABLE nom_novedades_afp AUTO_INCREMENT = 1;
+DELETE FROM nom_novedades_arl;
+ALTER TABLE nom_novedades_arl AUTO_INCREMENT = 1;
+DELETE FROM nom_novedades_eps;
+ALTER TABLE nom_novedades_eps AUTO_INCREMENT = 1;
+DELETE FROM nom_novedades_fc;
+ALTER TABLE nom_novedades_fc AUTO_INCREMENT = 1;
+DELETE FROM nom_otros_descuentos;
+ALTER TABLE nom_otros_descuentos AUTO_INCREMENT = 1;
+DELETE FROM nom_pago_dependiente;
+ALTER TABLE nom_pago_dependiente AUTO_INCREMENT = 1;
+DELETE FROM nom_rango_viaticos;
+ALTER TABLE nom_rango_viaticos AUTO_INCREMENT = 1;
+DELETE FROM pto_cargue;
+ALTER TABLE pto_cargue AUTO_INCREMENT = 1;
+DELETE FROM nom_rel_rubro;
+ALTER TABLE nom_rel_rubro AUTO_INCREMENT = 1;
+DELETE FROM nom_resolucion_viaticos;
+ALTER TABLE nom_resolucion_viaticos AUTO_INCREMENT = 1;
+DELETE FROM nom_resoluciones;
+ALTER TABLE nom_resoluciones AUTO_INCREMENT = 1;
+DELETE FROM nom_retencion_fte;
+ALTER TABLE nom_retencion_fte AUTO_INCREMENT = 1;
+DELETE FROM nom_salarios_basico;
+ALTER TABLE nom_salarios_basico AUTO_INCREMENT = 1;
+DELETE FROM nom_soporte_ne;
+ALTER TABLE nom_soporte_ne AUTO_INCREMENT = 1;
+DELETE FROM nom_viaticos;
+ALTER TABLE nom_viaticos AUTO_INCREMENT = 1;
+DELETE FROM pto_cdp_detalle;
+ALTER TABLE pto_cdp_detalle AUTO_INCREMENT = 1;
+DELETE FROM pto_crp;
+ALTER TABLE pto_crp AUTO_INCREMENT = 1;
+DELETE FROM pto_crp_detalle;
+ALTER TABLE pto_crp_detalle AUTO_INCREMENT = 1;
+DELETE FROM pto_cop_detalle;
+ALTER TABLE pto_cop_detalle AUTO_INCREMENT = 1;
+DELETE FROM pto_homologa_gastos;
+ALTER TABLE pto_homologa_gastos AUTO_INCREMENT = 1;
+DELETE FROM pto_homologa_ingresos;
+ALTER TABLE pto_homologa_ingresos AUTO_INCREMENT = 1;
+DELETE FROM pto_mod;
+ALTER TABLE pto_mod AUTO_INCREMENT = 1;
+DELETE FROM pto_mod_detalle;
+ALTER TABLE pto_mod_detalle AUTO_INCREMENT = 1;
+DELETE FROM seg_garantias_compra;
+ALTER TABLE seg_garantias_compra AUTO_INCREMENT = 1;
+DELETE FROM seg_permisos_modulos;
+ALTER TABLE seg_permisos_modulos AUTO_INCREMENT = 1;
+DELETE FROM seg_soporte_fno;
+ALTER TABLE seg_soporte_fno AUTO_INCREMENT = 1;
+DELETE FROM tb_rel_tercero;
+ALTER TABLE tb_rel_tercero AUTO_INCREMENT = 1;
+DELETE FROM tes_tipo_cuenta;
+ALTER TABLE tes_tipo_cuenta AUTO_INCREMENT = 1;
+DELETE FROM tes_cuentas;
+ALTER TABLE tes_cuentas AUTO_INCREMENT = 1;
+DELETE FROM nom_liq_contrato_emp;
+ALTER TABLE nom_liq_contrato_emp AUTO_INCREMENT = 1;

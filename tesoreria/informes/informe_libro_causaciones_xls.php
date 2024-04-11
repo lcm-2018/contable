@@ -183,7 +183,7 @@ FROM
                 SUM(`valor_retencion`) as retenido
                 , `id_ctb_doc`
                 FROM
-                `seg_ctb_causa_retencion`
+                `ctb_causa_retencion`
                 WHERE (`id_ctb_doc` =$id_ctb_doc);";
                 $res = $cmd->query($sql);
                 $reten = $res->fetch();

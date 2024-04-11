@@ -6,16 +6,16 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-    SUM(`seg_ctb_causa_costos`.`valor`) as base
+    SUM(`ctb_causa_costos`.`valor`) as base
     , `seg_terceros`.`id_tercero_api`
     FROM
     `tb_sedes`
     INNER JOIN `seg_terceros` 
         ON (`tb_sedes`.`id_tercero` = `seg_terceros`.`id_tercero`)
-    INNER JOIN `seg_ctb_causa_costos` 
-        ON (`seg_ctb_causa_costos`.`id_sede` = `tb_sedes`.`id_sede`)
-    WHERE (`seg_ctb_causa_costos`.`id_ctb_doc` ={$_post['id_doc']})
-    GROUP BY `seg_ctb_causa_costos`.`id_sede`;";
+    INNER JOIN `ctb_causa_costos` 
+        ON (`ctb_causa_costos`.`id_sede` = `tb_sedes`.`id_sede`)
+    WHERE (`ctb_causa_costos`.`id_ctb_doc` ={$_post['id_doc']})
+    GROUP BY `ctb_causa_costos`.`id_sede`;";
     $rs = $cmd->query($sql);
     $retenciones = $rs->fetchAll();
     // buscar valor_total,valor_base,valor_iva de la tabla seg_ctb_factura cuando id_Ctb_doc = $_post['id_doc']

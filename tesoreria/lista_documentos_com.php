@@ -10,15 +10,12 @@ include '../permisos.php';
 <!DOCTYPE html>
 <html lang="es">
 <?php include '../head.php';
-if (!isset($_POST['tipo_doc'])) $tipo_doc = '';
-else $tipo_doc = $_POST['tipo_doc'];
-if (!isset($_GET['var'])) $tipo = $_POST['var'];
-else $tipo = $_GET['var'];
-// Consulta tipo de documento
+$tipo_doc = isset($_POST['id_tipo_doc']) ? $_POST['id_tipo_doc'] : '0';
+$tipo = isset($_POST['var']) ? $_POST['var'] : '';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT cod,nombre FROM ctb_fuente WHERE tesor=$tipo";
+    $sql = "SELECT `id_doc_fuente`, `cod`, `nombre` FROM `ctb_fuente` WHERE `tesor` = $tipo";
     $sql3 = $sql;
     $rs = $cmd->query($sql);
     $docsFuente = $rs->fetchAll();
@@ -69,9 +66,7 @@ try {
 }
 ?>
 
-<body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] === '1') {
-                                echo 'sb-sidenav-toggled';
-                            } ?>">
+<body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ? 'sb-sidenav-toggled' : '' ?>">
 
     <?php include '../navsuperior.php' ?>
     <div id="layoutSidenav">
@@ -86,8 +81,13 @@ try {
                                     <i class="fas fa-users fa-lg" style="color:#1D80F7"></i>
                                     REGISTRO DE MOVIMIENTOS DE TESORERIA
                                 </div>
-                                <input type="hidden" id="peReg" value="<?php echo $permisos['registrar']; ?>">
-
+                                <?php
+                                if (((PermisosUsuario($permisos, 5601, 2) && $tipo == 1) || (PermisosUsuario($permisos, 5602, 2) && $tipo == 2) || PermisosUsuario($permisos, 5603, 2) && $tipo == 3) || $id_rol == 1) {
+                                    echo '<input type="hidden" id="peReg" value="1">';
+                                } else {
+                                    echo '<input type="hidden" id="peReg" value="0">';
+                                }
+                                ?>
                             </div>
                         </div>
                         <div class="card-body" id="divCuerpoPag">
@@ -98,13 +98,13 @@ try {
                                             <div class="input-group-prepend px-1">
                                                 <form action="<?php echo $_SERVER["PHP_SELF"] ?>" method="POST">
                                                     <select class="custom-select " id="id_ctb_tipo" name="id_ctb_tipo" onchange="cambiaListadoTesoreria(value,'<?php echo $tipo; ?>')">
-                                                        <option value="">-- Seleccionar --</option>
+                                                        <option value="0">-- Seleccionar --</option>
                                                         <?php
-                                                        foreach ($docsFuente as $mov) {
-                                                            if ($mov['cod'] == $tipo_doc) {
-                                                                echo '<option value="' . $mov['cod'] . '" selected>' . $mov['nombre'] .  '</option>';
+                                                        foreach ($docsFuente as $df) {
+                                                            if ($df['id_doc_fuente'] == $tipo_doc) {
+                                                                echo '<option value="' . $df['id_doc_fuente'] . '" selected>' . $df['nombre'] .  '</option>';
                                                             } else {
-                                                                echo '<option value="' . $mov['cod'] . '">' . $mov['nombre'] . '</option>';
+                                                                echo '<option value="' . $df['id_doc_fuente'] . '">' . $df['nombre'] . '</option>';
                                                             }
                                                         }
                                                         ?>
@@ -112,7 +112,7 @@ try {
                                                     <input type="hidden" name="var_tip" id="var_tip" value="<?php echo $tipo; ?>">
                                                 </form>
                                                 <?php
-                                                if ($tipo_doc == 'CEVA') {
+                                                if ($tipo_doc == '4') {
                                                     echo '<div class="input-group-prepend px-1">
                                                         <button type="button" class="btn btn-primary" onclick ="CargaObligaPago(2)">
                                                           Ver Listado <span class="badge badge-light"><?php echo $tipo_doc; ?></span>
@@ -122,20 +122,18 @@ try {
                                                         <button type="button" class="btn btn-outline-secondary" onclick ="cargaListaReferenciaPago(2)">
                                                           Referencias <span class="badge badge-light"><?php echo $tipo_doc; ?></span>
                                                         </button>
-                                                     </div>';
+                                                     </div>
+                                                     <div class="input-group-prepend px-1">
+                                                     <input type="hidden" id="total" value="' . $total . '">
+                                                         <button type="button" class="btn btn-outline-success" onclick ="CegresoNomina()">
+                                                           Nómina <span class="badge badge-light" id="totalCausa">' . $total . '</span>
+                                                         </button>
+                                                      </div>';
                                                 }
-                                                if ($tipo_doc == 'CTCB') {
+                                                if ($tipo_doc == '11') {
                                                     echo '<div class="input-group-prepend px-1">
                                                         <button type="button" class="btn btn-secondary" onclick ="CargaArqueoCaja(2)">
                                                           Ver Listado <span class="badge badge-light"><?php echo $tipo_doc; ?></span>
-                                                        </button>
-                                                     </div>';
-                                                }
-                                                if ($tipo_doc == 'CEVA') {
-                                                    echo '<div class="input-group-prepend px-1">
-                                                    <input type="hidden" id="total" value="' . $total . '">
-                                                        <button type="button" class="btn btn-outline-success" onclick ="CegresoNomina()">
-                                                          Nómina <span class="badge badge-light" id="totalCausa">' . $total . '</span>
                                                         </button>
                                                      </div>';
                                                 }
@@ -146,31 +144,33 @@ try {
                                     </div>
                                 </div>
                                 <br>
-                                <table id="tableMvtoTesoreriaPagos" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 8%;">Numero</th>
-                                            <th style="width: 8%;">Fecha</th>
-                                            <th style="width: 8%;">CC/Nit</th>
-                                            <th style="width: 40%;">Tercero</th>
-                                            <th style="width: 12%;">Valor</th>
-                                            <th style="width: 12%;">Acciones</th>
+                                <?php if ($tipo_doc != '0') { ?>
+                                    <table id="tableMvtoTesoreriaPagos" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 8%;">Numero</th>
+                                                <th style="width: 8%;">Fecha</th>
+                                                <th style="width: 8%;">CC/Nit</th>
+                                                <th style="width: 40%;">Tercero</th>
+                                                <th style="width: 12%;">Valor</th>
+                                                <th style="width: 12%;">Acciones</th>
 
-                                        </tr>
-                                    </thead>
-                                    <tbody id="modificartableMvtoTesoreriaPagos">
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th>Numero</th>
-                                            <th>Fecha</th>
-                                            <th>CC/Nit</th>
-                                            <th>Tercero</th>
-                                            <th>Valor</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="modificartableMvtoTesoreriaPagos">
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Numero</th>
+                                                <th>Fecha</th>
+                                                <th>CC/Nit</th>
+                                                <th>Tercero</th>
+                                                <th>Valor</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                <?php } ?>
                             </div>
                             <div class="text-center pt-4">
                             </div>

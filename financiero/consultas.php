@@ -169,3 +169,24 @@ function saldoCdp($cdp, $rubro, $cx)
     }
     return $saldo;
 }
+
+function Nivel($numero)
+{
+    // Mapeo de los valores de entrada a los valores de salida deseados
+    $mapeo = [
+        1 => 1,
+        2 => 2,
+        4 => 3,
+        6 => 4,
+        8 => 5,
+        10 => 6,
+        12 => 7,
+    ];
+
+    $cantidad = intval(floor(log10(abs($numero))) + 1);
+
+    if ($numero == 0) {
+        return 'error';
+    }
+    return array_key_exists($cantidad, $mapeo) ? $mapeo[$cantidad] : 'error';
+}

@@ -13,7 +13,8 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `ctb_doc`.`id_ctb_doc`
+                `pto_crp`.`id_manu` AS `id_crp`
+                , `ctb_doc`.`id_ctb_doc`
                 , `ctb_doc`.`id_manu`
                 , `ctb_doc`.`id_tipo_doc` AS `tipo`
                 , `ctb_doc`.`fecha`
@@ -24,9 +25,16 @@ try {
                 , `ctb_fuente`.`nombre`
             FROM
                 `ctb_doc`
-                INNER JOIN `ctb_fuente` 
+                LEFT JOIN `ctb_fuente` 
                     ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
-            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia)";
+                LEFT JOIN `pto_cop_detalle` 
+                    ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN `pto_crp_detalle` 
+                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                LEFT JOIN `pto_crp` 
+                    ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia)
+            GROUP BY `ctb_doc`.`id_ctb_doc`";
     $rs = $cmd->query($sql);
     $listappto = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -34,7 +42,7 @@ try {
 }
 // consultar la fecha de cierre del periodo del módulo de presupuesto 
 try {
-    $sql = "SELECT fecha_cierre FROM tb_fin_periodos WHERE id_modulo=3";
+    $sql = "SELECT fecha_cierre FROM tb_fin_periodos WHERE id_modulo = 3";
     $rs = $cmd->query($sql);
     $fecha_cierre = $rs->fetch();
     $fecha_cierre = !empty($fecha_cierre) ? $fecha_cierre['fecha_cierre'] : date("Y-m-d");
@@ -92,6 +100,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $result = curl_exec($ch);
 curl_close($ch);
 $terceros = json_decode($result, true);
+$data = [];
 if (!empty($listappto)) {
     foreach ($listappto as $lp) {
         $valor_debito = 0;
@@ -110,13 +119,6 @@ if (!empty($listappto)) {
         } else {
             $tercero = '';
         }
-        // consultar la suma de debito y credito en la tabla ctb_libaux para el documento
-        /*
-        $sql = "SELECT sum(debito) as debito, sum(credito) as credito FROM ctb_libaux WHERE id_ctb_doc=$id_ctb GROUP BY id_ctb_doc";
-        $rs3 = $cmd->query($sql);
-        $suma = $rs3->fetch();
-        $dif = $suma['debito'] - $suma['credito'];
-        */
         // consultar la diferencia en array diferencias
         $key = array_search($id_ctb, array_column($diferencias, 'id_ctb_doc'));
         if ($key  !== false) {
@@ -132,20 +134,7 @@ if (!empty($listappto)) {
             $valor_total = number_format($valor_debito, 2, ',', '.');
         }
         // Consulto el numero de registro presupuestal asociado al documento
-        /*
-       $sql = "SELECT
-        `pto_documento`.`id_manu`
-        , `pto_documento_detalles`.`id_ctb_doc`
-        FROM
-        `pto_documento_detalles`
-        INNER JOIN `pto_documento` 
-            ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-        WHERE (`pto_documento_detalles`.`id_ctb_doc` =$id_ctb )
-        GROUP BY `pto_documento_detalles`.`id_ctb_doc`;";
-        $rs4 = $cmd->query($sql);
-        $docment = $rs4->fetch();
-        */
-        $id_manu_rp = 0; // $docment['id_manu'];
+        $id_manu_rp = $lp['id_crp'] != '' ? $lp['id_crp'] : '-';
 
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
         // Sumar el valor del crp de la tabla id_pto_mtvo asociado al CDP
@@ -161,9 +150,10 @@ if (!empty($listappto)) {
         } else {
             $anular = '<a value="' . $id_ctb . '" class="dropdown-item sombra " href="#" onclick="anularDocumentoCont(' . $id_ctb . ');">Anulación</a>';
         }
+        $base = base64_encode($id_ctb . '|' . $id_ctb_doc);
         if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
-            $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" onclick="cargarListaDetalle(' . $id_ctb . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Editar_' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
-            $detalles = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
+            $editar = '<a value="' . $id_ctb . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas  fa-pencil-alt fa-lg"></span></a>';
+            $detalles = '<a text ="' . $base . '" onclick="cargarListaDetalle(this)" class="btn btn-outline-warning btn-sm btn-circle shadow-gb"  title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
             $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoDoc(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
             $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
             ...
@@ -197,7 +187,7 @@ if (!empty($listappto)) {
             $borrar = null;
         }
 
-        if ($estado == 1) {
+        if ($estado == 2) {
             $editar = null;
             $borrar = null;
         }
@@ -230,11 +220,9 @@ if (!empty($listappto)) {
             'fecha' => $fecha,
             'tercero' => $tercero,
             'valor' =>  '<div class="text-right">' . $valor_total . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $borrar . $imprimir  . $enviar . $acciones .  $dato . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir  . $enviar . $acciones .  $dato . '</div>',
         ];
     }
-} else {
-    $data = ['entro' => $sql];
 }
 $cmd = null;
 $datos = ['data' => $data];

@@ -82,7 +82,7 @@ if (isset($_POST['id_doc'])) {
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
-    // Consulto el valor de causacion de costo asociado al registro en la tabla seg_ctb_causa_costos
+    // Consulto el valor de causacion de costo asociado al registro en la tabla ctb_causa_costos
     try {
         $sql = "SELECT id_ctb_pag FROM seg_tes_detalle_pago WHERE id_ctb_doc=$id_doc";
         $rs = $cmd->query($sql);

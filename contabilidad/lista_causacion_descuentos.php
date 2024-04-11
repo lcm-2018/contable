@@ -19,21 +19,21 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-    `seg_ctb_causa_retencion`.`id_causa_retencion`
-    , `seg_ctb_causa_retencion`.`id_ctb_doc`
+    `ctb_causa_retencion`.`id_causa_retencion`
+    , `ctb_causa_retencion`.`id_ctb_doc`
     , `seg_ctb_retencion_tipo`.`tipo`
     , `seg_ctb_retenciones`.`nombre_retencion`
-    , `seg_ctb_causa_retencion`.`valor_base`
-    , `seg_ctb_causa_retencion`.`tarifa`
-    , `seg_ctb_causa_retencion`.`valor_retencion`
-    ,`seg_ctb_causa_retencion`.`id_terceroapi`
+    , `ctb_causa_retencion`.`valor_base`
+    , `ctb_causa_retencion`.`tarifa`
+    , `ctb_causa_retencion`.`valor_retencion`
+    ,`ctb_causa_retencion`.`id_terceroapi`
 FROM
-    `seg_ctb_causa_retencion`
+    `ctb_causa_retencion`
     INNER JOIN `seg_ctb_retenciones` 
-        ON (`seg_ctb_causa_retencion`.`id_retencion` = `seg_ctb_retenciones`.`id_retencion`)
+        ON (`ctb_causa_retencion`.`id_retencion` = `seg_ctb_retenciones`.`id_retencion`)
     INNER JOIN `seg_ctb_retencion_tipo` 
         ON (`seg_ctb_retencion_tipo`.`id_retencion_tipo` = `seg_ctb_retenciones`.`id_retencion_tipo`)
-WHERE (`seg_ctb_causa_retencion`.`id_ctb_doc` =$id_doc);";
+WHERE (`ctb_causa_retencion`.`id_ctb_doc` =$id_doc);";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll();
 } catch (PDOException $e) {

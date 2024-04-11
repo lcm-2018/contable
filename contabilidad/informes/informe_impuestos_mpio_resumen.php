@@ -60,19 +60,19 @@ try {
     , `seg_ctb_retencion_tipo`.`tipo`
     , `seg_ctb_retenciones`.`nombre_retencion`
     , `seg_ctb_retenciones`.`id_retencion`
-    , SUM(`seg_ctb_causa_retencion`.`valor_base`) AS base
-    , SUM(`seg_ctb_causa_retencion`.`valor_retencion`) AS retencion
+    , SUM(`ctb_causa_retencion`.`valor_base`) AS base
+    , SUM(`ctb_causa_retencion`.`valor_retencion`) AS retencion
 FROM
     `seg_ctb_retenciones`
     INNER JOIN `seg_ctb_retencion_tipo` 
         ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
-    INNER JOIN `seg_ctb_causa_retencion` 
-        ON (`seg_ctb_retenciones`.`id_retencion` = `seg_ctb_causa_retencion`.`id_retencion`)
+    INNER JOIN `ctb_causa_retencion` 
+        ON (`seg_ctb_retenciones`.`id_retencion` = `ctb_causa_retencion`.`id_retencion`)
     INNER JOIN `ctb_doc` 
-        ON (`seg_ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+        ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
 WHERE (`seg_ctb_retencion_tipo`.`id_retencion_tipo` =3
     AND `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte'
-    AND `seg_ctb_causa_retencion`.`id_terceroapi` ={$tercero['id_tercero_api']})
+    AND `ctb_causa_retencion`.`id_terceroapi` ={$tercero['id_tercero_api']})
 GROUP BY `seg_ctb_retenciones`.`nombre_retencion`;
             ";
     $res = $cmd->query($sql);
@@ -87,19 +87,19 @@ try {
     , `seg_ctb_retencion_tipo`.`tipo`
     , `seg_ctb_retenciones`.`nombre_retencion`
     , `seg_ctb_retenciones`.`id_retencion`
-    , SUM(`seg_ctb_causa_retencion`.`valor_base`) AS base
-    , SUM(`seg_ctb_causa_retencion`.`valor_retencion`) AS retencion
+    , SUM(`ctb_causa_retencion`.`valor_base`) AS base
+    , SUM(`ctb_causa_retencion`.`valor_retencion`) AS retencion
 FROM
     `seg_ctb_retenciones`
     INNER JOIN `seg_ctb_retencion_tipo` 
         ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
-    INNER JOIN `seg_ctb_causa_retencion` 
-        ON (`seg_ctb_retenciones`.`id_retencion` = `seg_ctb_causa_retencion`.`id_retencion`)
+    INNER JOIN `ctb_causa_retencion` 
+        ON (`seg_ctb_retenciones`.`id_retencion` = `ctb_causa_retencion`.`id_retencion`)
     INNER JOIN `ctb_doc` 
-        ON (`seg_ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+        ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
 WHERE (`seg_ctb_retencion_tipo`.`id_retencion_tipo` =4
     AND `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte'
-    AND `seg_ctb_causa_retencion`.`id_terceroapi` ={$tercero['id_tercero_api']})
+    AND `ctb_causa_retencion`.`id_terceroapi` ={$tercero['id_tercero_api']})
 GROUP BY `seg_ctb_retenciones`.`nombre_retencion`;
             ";
     $res = $cmd->query($sql);

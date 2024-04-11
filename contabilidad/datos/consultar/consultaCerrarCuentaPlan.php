@@ -3,37 +3,22 @@
 include '../../../conexion.php';
 $data = file_get_contents("php://input");
 // Realizo conexion con la base de datos
+$response['value'] = 'error';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-} catch (Exception $e) {
-    die("No se pudo conectar: " . $e->getMessage());
-}
-// Incio la transaccion
-try {
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $cmd->beginTransaction();
-
-    $sql = "SELECT id_pgcp from seg_tes_cuentas WHERE id_tes_cuenta=$data";
-    $rs = $cmd->query($sql);
-    $cuenta = $rs->fetch();
-
-    if ($cuenta != null) {
-        // update ctb_libaux set estado='C' where id_ctb_doc=$data;
-        $query = $cmd->prepare("UPDATE seg_tes_cuentas SET estado=1 WHERE id_tes_cuenta=?");
-        $query->bindParam(1, $data, PDO::PARAM_INT);
-        $query->execute();
-    }
-
-    // Actualizo el campo estado de la tabla pto_documento_detalles
-    $query = $cmd->prepare("UPDATE seg_ctb_pgcp SET estado=1 WHERE id_pgcp=?");
+    $query = $cmd->prepare("UPDATE `ctb_pgcp` SET `estado` = 0 WHERE `id_pgcp`= ?");
     $query->bindParam(1, $data, PDO::PARAM_INT);
     $query->execute();
-    $response[] = array("value" => "ok", "sql" => $data);
-    $cmd->commit();
+    if ($query->rowCount() > 0) {
+        $response['value'] = 'ok';
+        $response['msg'] = 'Cuenta cerrada correctamente';
+    } else {
+        $response['msg'] = $query->errorInfo()[2];
+    }
+    $cmd = null;
 } catch (Exception $e) {
-    $cmd->rollBack();
-    $response[] = array("value" => $sql);
+    $response['msg'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+
 echo json_encode($response);
-$cmd = null;
