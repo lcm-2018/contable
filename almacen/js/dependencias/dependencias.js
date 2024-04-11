@@ -9,15 +9,14 @@
 
     $(document).ready(function() {
         //Tabla de Registros
-        $('#tb_subgrupos').DataTable({
+        $('#tb_dependencias').DataTable({
             dom: setdom,
             buttons: [{
                 action: function(e, dt, node, config) {
-                    $.post("frm_reg_subgrupos.php", function(he) {
-                        //$('#divTamModalForms').removeClass('modal-xl');
-                        //$('#divTamModalForms').removeClass('modal-sm');
-                        //$('#divTamModalForms').removeClass('modal-lg');
-                        $('#divTamModalForms').addClass('modal-lg');
+                    $.post("frm_reg_dependencias.php", function(he) {
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').removeClass('modal-lg');
+                        $('#divTamModalForms').addClass('modal-sm');
                         $('#divModalForms').modal('show');
                         $("#divForms").html(he);
                     });
@@ -27,8 +26,9 @@
             processing: true,
             serverSide: true,
             searching: false,
+           
             ajax: {
-                url: 'listar_subgrupos.php',
+                url: 'listar_dependencias.php',
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
@@ -36,16 +36,13 @@
                 }
             },
             columns: [
-                { 'data': 'id_subgrupo' }, //Index=0
-                { 'data': 'cod_subgrupo' },
-                { 'data': 'nom_subgrupo' },
-                { 'data': 'nom_grupo' },
-                { 'data': 'estado' },
+                { 'data': 'id_dependencia' }, //Index=0              
+                { 'data': 'nom_dependencia' },          
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: 2 },
-                { orderable: false, targets: 5 }
+                { class: 'text-wrap', targets: 1 },
+                { orderable: false, targets: 2 }
             ],
             order: [
                 [0, "desc"]
@@ -57,25 +54,25 @@
         });
 
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
-        $('#tb_subgrupos').wrap('<div class="overflow"/>');
+        $('#tb_dependencias').wrap('<div class="overflow"/>');
     });
 
     //Buascar registros
     $('#btn_buscar_filtro').on("click", function() {       
-        reloadtable('tb_subgrupos');        
+        reloadtable('tb_dependencias'); 
     });
 
     $('.filtro').keypress(function(e) {
         if (e.keyCode == 13) {
-            reloadtable('tb_subgrupos');
+            reloadtable('tb_dependencias');
         }
     });
 
     //Editar un registro    
-    $('#tb_subgrupos').on('click', '.btn_editar', function() {
+    $('#tb_dependencias').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');
-        $.post("frm_reg_subgrupos.php", { id: id }, function(he) {
-            $('#divTamModalForms').addClass('modal-lg');
+        $.post("frm_reg_dependencias.php", { id: id }, function(he) {
+            $('#divTamModalForms').addClass('modal-sm');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
@@ -84,25 +81,23 @@
     //Guardar registro 
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
-        var error = verifica_vacio($('#txt_cod_subgrupo'));
-        error += verifica_vacio($('#txt_nom_subgrupo'));
-        error += verifica_vacio($('#sl_grp_subgrupo'));
+        var error = verifica_vacio($('#txt_nom_dependencia'));     
 
         if (error >= 1) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Los datos resaltados son obligatorios');
         } else {
-            var data = $('#frm_reg_subgrupos').serialize();
+            var data = $('#frm_reg_dependencias').serialize();
             $.ajax({
                 type: 'POST',
-                url: 'editar_subgrupos.php',
+                url: 'editar_dependencias.php',
                 dataType: 'json',
                 data: data + "&oper=add"
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
-                    let pag = ($('#id_subgrupo').val() == -1) ? 0 : $('#tb_subgrupos').DataTable().page.info().page;
-                    reloadtable('tb_subgrupos', pag);
-                    $('#id_subgrupo').val(r.id);
+                    let pag = ($('#id_dependencia').val() == -1) ? 0 : $('#tb_dependencias').DataTable().page.info().page;
+                    reloadtable('tb_dependencias', pag);
+                    $('#id_dependencia').val(r.id);
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");
                 } else {
@@ -115,24 +110,24 @@
         }
     });
 
-    //Borrarr un registro 
-    $('#tb_subgrupos').on('click', '.btn_eliminar', function() {
+    //Borrar un registro 
+    $('#tb_dependencias').on('click', '.btn_eliminar', function() {
         let id = $(this).attr('value');
-        confirmar_del('subgrupos', id);
+        confirmar_del('dependencias', id);
     });
 
-    $('#divModalConfDel').on("click", "#subgrupos", function() {
+    $('#divModalConfDel').on("click", "#dependencias", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
-            url: 'editar_subgrupos.php',
+            url: 'editar_dependencias.php',
             dataType: 'json',
             data: { id: id, oper: 'del' }
         }).done(function(r) {
             $('#divModalConfDel').modal('hide');
             if (r.mensaje == 'ok') {
-                let pag = $('#tb_subgrupos').DataTable().page.info().page;
-                reloadtable('tb_subgrupos', pag);
+                let pag = $('#tb_dependencias').DataTable().page.info().page;
+                reloadtable('tb_dependencias', pag);
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
             } else {
@@ -144,16 +139,16 @@
         });
     });
 
-    $('#btnImprimeSubgrupos').on('click', function () {
-        reloadtable('tb_subgrupos');
-        let nombre = $('#txt_nombre_filtro').val();        
-            $.post("imp_subgrupos.php", { nombre: nombre }, function (he) {
+    $('#btnImprimeDependecias').on('click', function () {
+        reloadtable('tb_dependencias');
+        let nombre = $('#txt_nombre_filtro').val();      
+            $.post("imp_dependencias.php", { nombre: nombre }, function (he) {
                 $('#divTamModalForms').removeClass('modal-xl');
                 $('#divTamModalForms').removeClass('modal-sm');
                 $('#divTamModalForms').addClass('modal-lg');
                 $('#divModalForms').modal('show');
                 $("#divForms").html(he);
-            });            
+            });    
     });
-
+    
 })(jQuery);

@@ -148,4 +148,28 @@ $(function() {
         }
     });
 
+<<<<<<< HEAD
 });
+=======
+    $('#divModalForms').on('click', '#btnImprimir', function () {
+        function imprSelec() {
+            var div = $('#areaImprimir').html();
+            var ventimp = window.open(' ', '');
+            ventimp.document.write('<!DOCTYPE html><html><head><title>Imprimir</title></head><body>');
+            ventimp.document.write('<div>' + div + '</div>');
+            ventimp.document.write('</body></html>');
+            ventimp.print();
+            ventimp.close();
+        }
+        $('#divModalForms .collapse').addClass('show');
+        imprSelec();
+    });
+
+    $('#divModalForms').on('click', '#btnExcelEntrada', function () {
+        let xls = ($('#areaImprimir').html());
+        var encoded = window.btoa(xls);
+        $('<form action="../common/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
+    });
+
+})(jQuery);
+>>>>>>> 7943234f85f0c5ec24a578f56c1cdfcb26c9fcbf

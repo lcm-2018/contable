@@ -68,8 +68,8 @@
     });
 
     //Buascar registros de Articulos
-    $('#btn_buscar_filtro').on("click", function() {
-        reloadtable('tb_articulos');
+    $('#btn_buscar_filtro').on("click", function() {         
+        reloadtable('tb_articulos');        
     });
 
     $('.filtro').keypress(function(e) {
@@ -396,6 +396,25 @@
         }).always(function() {}).fail(function() {
             alert('Ocurrió un error');
         });
+    });
+
+    $('#btnImprimeArticulos').on('click', function () {        
+        reloadtable('tb_articulos');         
+        let codigo = $('#txt_codigo_filtro').val(),
+            nombre = $('#txt_nombre_filtro').val(), 
+            subgrupo = $('#sl_subgrupo_filtro').val(),
+            estado = $('#sl_estado_filtro').val(); 
+            $.post("imp_articulos.php", {codigo:codigo, 
+                                         nombre: nombre,
+                                         subgrupo:subgrupo,
+                                         estado:estado }, function (he) {
+                $('#divTamModalForms').removeClass('modal-xl');
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').addClass('modal-lg');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            });           
+        
     });
 
 })(jQuery);
