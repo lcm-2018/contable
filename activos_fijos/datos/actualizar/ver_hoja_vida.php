@@ -95,13 +95,13 @@ try {
             SUBSTRING_INDEX(
             SUBSTRING_INDEX(
             (SELECT
-                `seg_entrada_activo_fijo`.`identificador`
+                `acf_entrada`.`identificador`
             FROM
                 `seg_num_serial`
                 INNER JOIN `seg_entra_detalle_activos_fijos` 
                     ON (`seg_num_serial`.`id_activo_fijo` = `seg_entra_detalle_activos_fijos`.`id_acfijo`)
-                INNER JOIN `seg_entrada_activo_fijo` 
-                    ON (`seg_entra_detalle_activos_fijos`.`id_entra_acfijo_do` = `seg_entrada_activo_fijo`.`id_entra_af`)
+                INNER JOIN `acf_entrada` 
+                    ON (`seg_entra_detalle_activos_fijos`.`id_entra_acfijo_do` = `acf_entrada`.`id_entra_af`)
             WHERE `seg_num_serial`.`id_serial` = '$id_serie' LIMIT 1) ,'|',3),'|',-1) AS `id_adquisicion`)";
     $rs = $cmd->query($sql);
     $fecadq = $rs->fetch();

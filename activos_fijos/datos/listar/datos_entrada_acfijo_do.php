@@ -4,8 +4,8 @@ if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
-include '../../../conexion.php';
-include '../../../permisos.php';
+include_once '../../../conexion.php';
+include_once '../../../permisos.php';
 function pesos($valor)
 {
     return '$' . number_format($valor, 2, ",", ".");
@@ -16,19 +16,19 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_entrada_activo_fijo`.`id_entra_af`
-                , `seg_entrada_activo_fijo`.`id_tercero_api`
-                , `seg_entrada_activo_fijo`.`id_tipo_entrada`
-                , `seg_tipo_entrada`.`descripcion`
-                , `seg_entrada_activo_fijo`.`acta_remision`
-                , `seg_entrada_activo_fijo`.`fec_acta_remision`
-                , `seg_entrada_activo_fijo`.`observacion`
-                , `seg_entrada_activo_fijo`.`estado`
+                `acf_entrada`.`id_entra_af`
+                , `acf_entrada`.`id_tercero_api`
+                , `acf_entrada`.`id_tipo_entrada`
+                , `acf_tipo_entrada`.`descripcion`
+                , `acf_entrada`.`acta_remision`
+                , `acf_entrada`.`fec_acta_remision`
+                , `acf_entrada`.`observacion`
+                , `acf_entrada`.`estado`
             FROM
-                `seg_entrada_activo_fijo`
-                INNER JOIN `seg_tipo_entrada` 
-                    ON (`seg_entrada_activo_fijo`.`id_tipo_entrada` = `seg_tipo_entrada`.`id_entrada`)
-            WHERE `seg_entrada_activo_fijo`.`vigencia` = '$vigencia' AND `seg_entrada_activo_fijo`.`id_tipo_entrada` = '$tipo'";
+                `acf_entrada`
+                INNER JOIN `acf_tipo_entrada` 
+                    ON (`acf_entrada`.`id_tipo_entrada` = `acf_tipo_entrada`.`id_entrada`)
+            WHERE `acf_entrada`.`vigencia` = '$vigencia' AND `acf_entrada`.`id_tipo_entrada` = '$tipo'";
     $rs = $cmd->query($sql);
     $lEntAF = $rs->fetchAll();
     $cmd = null;
@@ -60,10 +60,10 @@ if (!empty($lEntAF)) {
         }
         $detalles = $editar = $borrar = null;
         if ($laf['estado'] == 1) {
-            if ((intval($permisos['editar'])) == 1) {
+            if (PermisosUsuario($permisos, 5701, 3) || $id_rol == 1) {
                 $editar = '<a value="' . $id_eaf . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Actualizar o modificar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
             }
-            if ((intval($permisos['borrar'])) == 1) {
+            if (PermisosUsuario($permisos, 5701, 4) || $id_rol == 1) {
                 $borrar = '<a value="' . $id_eaf . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
             }
         }
@@ -81,7 +81,7 @@ if (!empty($lEntAF)) {
                 $coloricon = 'info';
                 break;
         }
-        if ((intval($permisos['listar'])) == 1) {
+        if (PermisosUsuario($permisos, 5701, 1) || $id_rol == 1) {
             $detalles = '<a value="' . $id_eaf . '" class="btn btn-outline-' . $coloricon . ' btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
         }
         $data[] = [

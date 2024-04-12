@@ -17,7 +17,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "UPDATE `seg_entrada_activo_fijo`  SET `id_tercero_api` = ?, `acta_remision` = ?, `fec_acta_remision` = ?, `observacion` = ? WHERE  `id_entra_af` = ?";
+    $sql = "UPDATE `acf_entrada`  SET `id_tercero_api` = ?, `acta_remision` = ?, `fec_acta_remision` = ?, `observacion` = ? WHERE  `id_entra_af` = ?";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);
     $sql->bindParam(2, $numActaRem, PDO::PARAM_STR);
@@ -31,7 +31,7 @@ try {
         if ($sql->rowCount() > 0) {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-            $sql = "UPDATE `seg_entrada_activo_fijo` SET  `id_user_act` = ? ,`fec_act` = ?  WHERE `id_entra_af` = ?";
+            $sql = "UPDATE `acf_entrada` SET  `id_user_act` = ? ,`fec_act` = ?  WHERE `id_entra_af` = ?";
             $sql = $cmd->prepare($sql);
             $sql->bindParam(1, $iduser, PDO::PARAM_INT);
             $sql->bindValue(2, $date->format('Y-m-d H:i:s'));

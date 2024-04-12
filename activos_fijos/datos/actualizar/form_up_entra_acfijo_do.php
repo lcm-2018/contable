@@ -10,18 +10,18 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_entrada_activo_fijo`.`id_entra_af`
-                , `seg_entrada_activo_fijo`.`id_tercero_api`
-                , `seg_entrada_activo_fijo`.`id_tipo_entrada`
-                , `seg_tipo_entrada`.`descripcion`
-                , `seg_entrada_activo_fijo`.`acta_remision`
-                , `seg_entrada_activo_fijo`.`fec_acta_remision`
-                , `seg_entrada_activo_fijo`.`observacion`
-                , `seg_entrada_activo_fijo`.`estado`
+                `acf_entrada`.`id_entra_af`
+                , `acf_entrada`.`id_tercero_api`
+                , `acf_entrada`.`id_tipo_entrada`
+                , `acf_tipo_entrada`.`descripcion`
+                , `acf_entrada`.`acta_remision`
+                , `acf_entrada`.`fec_acta_remision`
+                , `acf_entrada`.`observacion`
+                , `acf_entrada`.`estado`
             FROM
-                `seg_entrada_activo_fijo`
-                INNER JOIN `seg_tipo_entrada` 
-                    ON (`seg_entrada_activo_fijo`.`id_tipo_entrada` = `seg_tipo_entrada`.`id_entrada`)
+                `acf_entrada`
+                INNER JOIN `acf_tipo_entrada` 
+                    ON (`acf_entrada`.`id_tipo_entrada` = `acf_tipo_entrada`.`id_entrada`)
             WHERE `id_entra_af` = '$id_eaf'";
     $rs = $cmd->query($sql);
     $ent_acfij = $rs->fetch();

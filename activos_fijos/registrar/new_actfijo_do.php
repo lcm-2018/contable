@@ -17,7 +17,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "INSERT INTO `seg_entrada_activo_fijo` (`id_tercero_api`, `id_tipo_entrada`, `acta_remision`, `fec_acta_remision`, `observacion`, `vigencia`, `id_user_reg`, `fec_reg`)
+    $sql = "INSERT INTO `acf_entrada` (`id_tercero_api`, `id_tipo_entrada`, `acta_remision`, `fec_acta_remision`, `observacion`, `vigencia`, `id_user_reg`, `fec_reg`)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);

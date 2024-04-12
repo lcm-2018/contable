@@ -135,7 +135,7 @@ if ($recibido > 0) {
     $estado  = 2;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "UPDATE `seg_entrada_activo_fijo` SET `estado` = ? , `id_user_act` = ? ,`fec_act` = ?  WHERE `id_entra_af` = ?";
+    $sql = "UPDATE `acf_entrada` SET `estado` = ? , `id_user_act` = ? ,`fec_act` = ?  WHERE `id_entra_af` = ?";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $estado, PDO::PARAM_INT);
     $sql->bindParam(2, $iduser, PDO::PARAM_INT);

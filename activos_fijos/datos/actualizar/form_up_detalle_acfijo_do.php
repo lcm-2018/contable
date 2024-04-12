@@ -22,13 +22,13 @@ try {
                 , `seg_entra_detalle_activos_fijos`.`cantidad`
                 , `seg_entra_detalle_activos_fijos`.`id_tipo_activo`
                 , `seg_entra_detalle_activos_fijos`.`descripcion`
-                , `seg_entrada_activo_fijo`.`id_tipo_entrada`
+                , `acf_entrada`.`id_tipo_entrada`
             FROM
                 `seg_entra_detalle_activos_fijos`
                 INNER JOIN `ctt_bien_servicio` 
                     ON (`seg_entra_detalle_activos_fijos`.`id_prod` = `ctt_bien_servicio`.`id_b_s`)
-                INNER JOIN `seg_entrada_activo_fijo` 
-                    ON (`seg_entra_detalle_activos_fijos`.`id_entra_acfijo_do` = `seg_entrada_activo_fijo`.`id_entra_af`)
+                INNER JOIN `acf_entrada` 
+                    ON (`seg_entra_detalle_activos_fijos`.`id_entra_acfijo_do` = `acf_entrada`.`id_entra_af`)
             WHERE `seg_entra_detalle_activos_fijos`.`id_acfijo` = '$id_detalle'";
     $rs = $cmd->query($sql);
     $detalle_af = $rs->fetch();
