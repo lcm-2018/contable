@@ -351,43 +351,35 @@
         });
     });
 
-    $('#btnImprimeEgresos').on('click', function () {
+    //Imprimir registros
+    $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_egresos');
-        let id_sede = $('#sl_sede_filtro').val();
-        let id_bodega = $('#sl_bodega_filtro').val(); 
-        let id_egr = $('#txt_idegr_filtro').val();
-        let num_egr = $('#txt_numegr_filtro').val();  
-        let fec_ini = $('#txt_fecini_filtro').val();
-        let fec_fin = $('#txt_fecfin_filtro').val();
-        let id_tercero = $('#sl_tercero_filtro').val();
-        let id_depende = $('#sl_dependencia_filtro').val(); 
-        let id_tipegr = $('#sl_tipegr_filtro').val();
-        let estado = $('#sl_estado_filtro').val();
         $('.is-invalid').removeClass('is-invalid');
-        let verifica = verifica_vacio($('#txt_fecini_filtro')); 
-            verifica += verifica_vacio($('#txt_fecfin_filtro'));    
-        if (verifica == 2||verifica==1) {
+        var verifica = verifica_vacio($('#txt_fecini_filtro'));
+        verifica += verifica_vacio($('#txt_fecfin_filtro'));
+        if (verifica >= 1) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe escribir un rango de fechas');
-        }
-        else{      
-            $.post("imp_egresos.php", { id_sede:id_sede,
-                                         id_bodega:id_bodega,
-                                         id_egr:id_egr,
-                                         num_egr:num_egr,
-                                         fec_ini: fec_ini,
-                                         fec_fin:fec_fin,
-                                         id_tercero:id_tercero,
-                                         id_depende:id_depende,
-                                         id_tipegr:id_tipegr,
-                                         estado:estado}, function (he) {
-                $('#divTamModalForms').removeClass('modal-xl');
+        } else {
+            $.post("imp_egresos.php", {
+                id_sede: $('#sl_sede_filtro').val(),
+                id_bodega: $('#sl_bodega_filtro').val(),
+                id_egr: $('#txt_idegr_filtro').val(),
+                num_egr: $('#txt_numegr_filtro').val(),
+                fec_ini: $('#txt_fecini_filtro').val(),
+                fec_fin: $('#txt_fecfin_filtro').val(),
+                id_tercero: $('#sl_tercero_filtro').val(),
+                id_depende: $('#sl_dependencia_filtro').val(),
+                id_tipegr: $('#sl_tipegr_filtro').val(),
+                estado: $('#sl_estado_filtro').val()
+            }, function(he) {
                 $('#divTamModalForms').removeClass('modal-sm');
-                $('#divTamModalForms').addClass('modal-lg');
+                $('#divTamModalForms').removeClass('modal-lg');
+                $('#divTamModalForms').addClass('modal-xl');
                 $('#divModalForms').modal('show');
                 $("#divForms").html(he);
-            }); 
-        }           
+            });
+        }
     });
 
 })(jQuery);

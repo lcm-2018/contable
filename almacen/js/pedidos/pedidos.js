@@ -101,9 +101,9 @@
     });
 
     //Buscar registros de Pedido
-    $('#btn_buscar_filtro').on("click", function() {    
-        $('.is-invalid').removeClass('is-invalid');  
-        reloadtable('tb_pedidos');          
+    $('#btn_buscar_filtro').on("click", function() {
+        $('.is-invalid').removeClass('is-invalid');
+        reloadtable('tb_pedidos');
     });
 
     $('.filtro').keypress(function(e) {
@@ -363,41 +363,35 @@
             alert('Ocurrió un error');
         });
     });
-    
-    $('#btnImprimePedidos').on('click', function () {
+
+    //Imprimir registros
+    $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_pedidos');
-        let id_sedsol = $('#sl_sedsol_filtro').val();
-        let id_bodsol = $('#sl_bodsol_filtro').val();
-        let id_pedido = $('#txt_id_pedido_filtro').val(); 
-        let num_pedido = $('#txt_num_pedido_filtro').val();
-        let fec_ini = $('#txt_fecini_filtro').val();  
-        let fec_fin = $('#txt_fecfin_filtro').val(); 
-        let id_sedpro = $('#sl_sedpro_filtro').val();
-        let id_bodpro = $('#sl_bodpro_filtro').val();
-        let estado = $('#sl_estado_filtro').val();
         $('.is-invalid').removeClass('is-invalid');
-        let verifica = verifica_vacio($('#txt_fecini_filtro')); 
-            verifica += verifica_vacio($('#txt_fecfin_filtro'));    
-        if (verifica == 2||verifica==1) {
+        var verifica = verifica_vacio($('#txt_fecini_filtro'));
+        verifica += verifica_vacio($('#txt_fecfin_filtro'));
+        if (verifica >= 1) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe escribir un rango de fechas');
-        }
-        else{      
-            $.post("imp_pedidos.php", {id_sedsol:id_sedsol,
-                                       id_bodsol:id_bodsol,
-                                       id_pedido:id_pedido,
-                                       num_pedido:num_pedido,
-                                       fec_ini: fec_ini,
-                                       fec_fin:fec_fin,
-                                       id_sedpro:id_sedpro,
-                                       id_bodpro:id_bodpro,
-                                       estado:estado}, function (he) {
-                $('#divTamModalForms').removeClass('modal-xl');
-                $('#divTamModalForms').addClass('modal-lg');
+        } else {
+            $.post("imp_pedidos.php", {
+                id_sedsol: $('#sl_sedsol_filtro').val(),
+                id_bodsol: $('#sl_bodsol_filtro').val(),
+                id_pedido: $('#txt_id_pedido_filtro').val(),
+                num_pedido: $('#txt_num_pedido_filtro').val(),
+                fec_ini: $('#txt_fecini_filtro').val(),
+                fec_fin: $('#txt_fecfin_filtro').val(),
+                id_sedpro: $('#sl_sedpro_filtro').val(),
+                id_bodpro: $('#sl_bodpro_filtro').val(),
+                estado: $('#sl_estado_filtro').val()
+            }, function(he) {
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').removeClass('modal-lg');
+                $('#divTamModalForms').addClass('modal-xl');
                 $('#divModalForms').modal('show');
                 $("#divForms").html(he);
-            }); 
-        }           
+            });
+        }
     });
 
 })(jQuery);

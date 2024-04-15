@@ -10,19 +10,8 @@ include '../common/funciones_generales.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$user = $_SESSION['user'];
-
-// consulto el nombre de la empresa de la tabla tb_datos_ips
-try {
-    $sql = "SELECT razon_social_ips as nombre ,nit_ips as nit,dv as dig_ver FROM tb_datos_ips";
-    $res = $cmd->query($sql);
-    $empresa = $res->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
 
 $where = "WHERE far_orden_egreso.id_egreso<>0";
-
 if (isset($_POST['id_sede']) && $_POST['id_sede']) {
     $where .= " AND far_orden_egreso.id_sede='" . $_POST['id_sede'] . "'";
 }
@@ -82,100 +71,65 @@ try {
                 font-family: Arial, sans-serif;
             }
         }
-
         .resaltar:nth-child(even) {
             background-color: #F8F9F9;
         }
-
         .resaltar:nth-child(odd) {
             background-color: #ffffff;
         }
     </style>
+
+    <?php include('../common/reporte_header.php'); ?>
+
+    <table style="width:100%; font-size:80%">
+        <tr style="text-align:center">
+            <th>REPORTE DE ORDENES DE EGRESO ENTRE: <?php echo $_POST['fec_ini'].' y '. $_POST['fec_fin'] ?></th>
+        </tr>     
+    </table>
+
     <table style="width:100% !important; border-collapse: collapse;">
-        <thead style="background-color: white !important;font-size:80%">
-            <tr style="padding: bottom 3px; color:black">
-                <td colspan="12">
-                    <table style="width:100% !important;">
-                        <tr>
-                            <td rowspan="5" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
-                            <td colspan="12" style="text-align:center">
-                                <header><b><?php echo $empresa['nombre']; ?> </b></header>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="12" style="text-align:center">
-                                NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="12" style="text-align:right">
-                                Fec. Imp.: <?php echo date('Y/m/d'); ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="12" style="text-align:center">
-                                <b>EGRESOS</b>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr style="background-color: #CED3D3; text-align:center">
-            <th>Id</th>
-            <th>No. Egreso</th>
-            <th>Fecha Egreso</th>
-            <th>Hora Egreso</th>
-            <th>Detalle</th>
-            <th>Tercero</th>
-            <th>Dependencia</th>
-            <th>Tipo Egreso</th>
-            <th>Vr. Total</th>
-            <th>Sede</th>
-            <th>Bodega</th>
-            <th>Estado</th>
+        <thead style="background-color: white !important;font-size:80%">            
+            <tr style="background-color: #CED3D3; text-align:center; border:#A9A9A9 1px solid">
+                <th>Id</th>
+                <th>No. Egreso</th>
+                <th>Fecha Egreso</th>
+                <th>Hora Egreso</th>
+                <th>Detalle</th>
+                <th>Tercero</th>
+                <th>Dependencia</th>
+                <th>Tipo Egreso</th>
+                <th>Vr. Total</th>
+                <th>Sede</th>
+                <th>Bodega</th>
+                <th>Estado</th>
+            </tr>    
         </thead>
         <tbody style="font-size: 60%;">
             <?php
             $tabla = '';
             foreach ($objs as $obj) {
-            $tabla .=  '<tr class="resaltar" style="text-align:center"> 
+                $tabla .=  '<tr class="resaltar" style="text-align:center"> 
                         <td>' . $obj['id_egreso'] . '</td>  
                         <td>' . $obj['num_egreso'] . '</td>
                         <td>' . $obj['fec_egreso'] . '</td>
                         <td>' . $obj['hor_egreso'] . '</td>                  
-                        <td>' . $obj['detalle'] . '</td>                      
-                        <td>' . mb_strtoupper($obj['nom_tercero']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_dependencia']) . '</td> 
+                        <td style="text-align:left">' . $obj['detalle'] . '</td>                      
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_dependencia']) . '</td> 
                         <td>' . mb_strtoupper($obj['nom_tipo_egreso']) . '</td>   
                         <td>' . formato_valor($obj['val_total']). '</td>                             
                         <td>' . mb_strtoupper($obj['nom_sede']) . '</td>   
                         <td>' . mb_strtoupper($obj['nom_bodega']) . '</td>   
-                        <td>' . $obj['nom_estado']. '</td>                                                                                     
-                    </tr>';
+                        <td>' . $obj['nom_estado']. '</td></tr>';
             }
             echo $tabla;
-            ?>
-            <tr>
-                <td colspan="2" style="height: 30px;"></td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <table style="width: 100%;">
-                        <tr>
-                            <td colspan="2" style="text-align:left">
-                                Usuario: <?php echo mb_strtoupper($user); ?>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
+            ?>            
         </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="n">
-                    <div class="footer">
-                        <div class="page-number"></div>
-                    </div>
+        <tfoot style="background-color:white !important; font-size:60%"> 
+            <tr style="background-color:#CED3D3;">
+                <td colspan="12" style="text-align:left">
+                    No. de Registros: <?php echo count($objs); ?>&nbsp;&nbsp;-&nbsp;&nbsp;
+                    Usuario: <?php echo mb_strtoupper($_SESSION['user']); ?>     
                 </td>
             </tr>
         </tfoot>

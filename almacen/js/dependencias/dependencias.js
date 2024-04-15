@@ -26,7 +26,7 @@
             processing: true,
             serverSide: true,
             searching: false,
-           
+
             ajax: {
                 url: 'listar_dependencias.php',
                 type: 'POST',
@@ -37,7 +37,7 @@
             },
             columns: [
                 { 'data': 'id_dependencia' }, //Index=0              
-                { 'data': 'nom_dependencia' },          
+                { 'data': 'nom_dependencia' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
@@ -58,8 +58,8 @@
     });
 
     //Buascar registros
-    $('#btn_buscar_filtro').on("click", function() {       
-        reloadtable('tb_dependencias'); 
+    $('#btn_buscar_filtro').on("click", function() {
+        reloadtable('tb_dependencias');
     });
 
     $('.filtro').keypress(function(e) {
@@ -81,7 +81,7 @@
     //Guardar registro 
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
-        var error = verifica_vacio($('#txt_nom_dependencia'));     
+        var error = verifica_vacio($('#txt_nom_dependencia'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
@@ -139,16 +139,18 @@
         });
     });
 
-    $('#btnImprimeDependecias').on('click', function () {
+    //Imprimir registros
+    $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_dependencias');
-        let nombre = $('#txt_nombre_filtro').val();      
-            $.post("imp_dependencias.php", { nombre: nombre }, function (he) {
-                $('#divTamModalForms').removeClass('modal-xl');
-                $('#divTamModalForms').removeClass('modal-sm');
-                $('#divTamModalForms').addClass('modal-lg');
-                $('#divModalForms').modal('show');
-                $("#divForms").html(he);
-            });    
+        $.post("imp_dependencias.php", {
+            nombre: $('#txt_nombre_filtro').val()
+        }, function(he) {
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').addClass('modal-xl');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
     });
-    
+
 })(jQuery);

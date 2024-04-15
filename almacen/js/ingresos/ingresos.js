@@ -371,39 +371,33 @@
         });
     });
 
-    $('#btnImprimeIngresos').on('click', function () {
+    //Imprimir registros
+    $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_ingresos');
-        let id_ing = $('#txt_iding_filtro').val();
-        let num_ing = $('#txt_numing_filtro').val(); 
-        let num_fac = $('#txt_numfac_filtro').val();
-        let fec_ini = $('#txt_fecini_filtro').val();  
-        let fec_fin = $('#txt_fecfin_filtro').val(); 
-        let id_tercero = $('#sl_tercero_filtro').val();
-        let id_tiping = $('#sl_tiping_filtro').val();
-        let estado = $('#sl_estado_filtro').val();  
         $('.is-invalid').removeClass('is-invalid');
-        let verifica = verifica_vacio($('#txt_fecini_filtro')); 
-            verifica += verifica_vacio($('#txt_fecfin_filtro'));    
-        if (verifica == 2||verifica==1) {
+        var verifica = verifica_vacio($('#txt_fecini_filtro'));
+        verifica += verifica_vacio($('#txt_fecfin_filtro'));
+        if (verifica >= 1) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe escribir un rango de fechas');
-        }
-        else{      
-            $.post("imp_ingresos.php", { id_ing:id_ing,
-                                         num_ing:num_ing,
-                                         num_fac:num_fac,
-                                         fec_ini: fec_ini,
-                                         fec_fin:fec_fin,
-                                         id_tercero:id_tercero,
-                                         id_tiping:id_tiping,
-                                         estado:estado}, function (he) {
-                $('#divTamModalForms').removeClass('modal-xl');
+        } else {
+            $.post("imp_ingresos.php", {
+                id_ing: $('#txt_iding_filtro').val(),
+                num_ing: $('#txt_numing_filtro').val(),
+                num_fac: $('#txt_numfac_filtro').val(),
+                fec_ini: $('#txt_fecini_filtro').val(),
+                fec_fin: $('#txt_fecfin_filtro').val(),
+                id_tercero: $('#sl_tercero_filtro').val(),
+                id_tiping: $('#sl_tiping_filtro').val(),
+                estado: $('#sl_estado_filtro').val()
+            }, function(he) {
                 $('#divTamModalForms').removeClass('modal-sm');
-                $('#divTamModalForms').addClass('modal-lg');
+                $('#divTamModalForms').removeClass('modal-lg');
+                $('#divTamModalForms').addClass('modal-xl');
                 $('#divModalForms').modal('show');
                 $("#divForms").html(he);
-            }); 
-        }           
+            });
+        }
     });
 
 })(jQuery);

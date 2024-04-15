@@ -30,7 +30,7 @@ try {
             $top_max = $_POST['txt_topmax_art'];
             $id_unimed = $_POST['id_txt_unimed_art'] ? $_POST['id_txt_unimed_art'] : 0;
             $es_clinic = $_POST['rdo_escli_art'];
-            $id_medins = $_POST['sl_medins_art'] ? $_POST['sl_medins_art'] : NULL;
+            $id_medins = $_POST['sl_medins_art'] ? $_POST['sl_medins_art'] : 'NULL';
             $estado = $_POST['sl_estado'];
 
             if ($id == -1) {

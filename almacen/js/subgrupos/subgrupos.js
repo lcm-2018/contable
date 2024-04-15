@@ -61,8 +61,8 @@
     });
 
     //Buascar registros
-    $('#btn_buscar_filtro').on("click", function() {       
-        reloadtable('tb_subgrupos');        
+    $('#btn_buscar_filtro').on("click", function() {
+        reloadtable('tb_subgrupos');
     });
 
     $('.filtro').keypress(function(e) {
@@ -144,16 +144,18 @@
         });
     });
 
-    $('#btnImprimeSubgrupos').on('click', function () {
+    //Imprimir registros
+    $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_subgrupos');
-        let nombre = $('#txt_nombre_filtro').val();        
-            $.post("imp_subgrupos.php", { nombre: nombre }, function (he) {
-                $('#divTamModalForms').removeClass('modal-xl');
-                $('#divTamModalForms').removeClass('modal-sm');
-                $('#divTamModalForms').addClass('modal-lg');
-                $('#divModalForms').modal('show');
-                $("#divForms").html(he);
-            });            
+        $.post("imp_subgrupos.php", {
+            nombre: $('#txt_nombre_filtro').val()
+        }, function(he) {
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').addClass('modal-xl');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
     });
 
 })(jQuery);
