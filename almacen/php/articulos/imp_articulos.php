@@ -10,19 +10,8 @@ include '../common/funciones_generales.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$user = $_SESSION['user'];
-
-// consulto el nombre de la empresa de la tabla tb_datos_ips
-try {
-    $sql = "SELECT razon_social_ips as nombre ,nit_ips as nit,dv as dig_ver FROM tb_datos_ips";
-    $res = $cmd->query($sql);
-    $empresa = $res->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
 
 $where = "WHERE far_medicamentos.id_med<>0";
-
 if (isset($_POST['codigo']) && $_POST['codigo']) {
     $where .= " AND far_medicamentos.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";
 }
@@ -64,11 +53,9 @@ try {
                 font-family: Arial, sans-serif;
             }
         }
-
         .resaltar:nth-child(even) {
             background-color: #F8F9F9;
         }
-
         .resaltar:nth-child(odd) {
             background-color: #ffffff;
         }
