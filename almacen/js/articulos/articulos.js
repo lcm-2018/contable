@@ -398,4 +398,22 @@
         });
     });
 
+    //Imprimir registros
+    $('#btn_imprime_filtro').on('click', function() {
+        reloadtable('tb_articulos');
+        $.post("imp_articulos.php", {
+            codigo: $('#txt_codigo_filtro').val(),
+            nombre: $('#txt_nombre_filtro').val(),
+            subgrupo: $('#sl_subgrupo_filtro').val(),
+            estado: $('#sl_estado_filtro').val()
+        }, function(he) {
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').addClass('modal-xl');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+
+    });
+
 })(jQuery);

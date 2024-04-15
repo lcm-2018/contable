@@ -103,6 +103,7 @@
 
     //Buascar registros de traslados
     $('#btn_buscar_filtro').on("click", function() {
+        $('.is-invalid').removeClass('is-invalid');
         reloadtable('tb_traslados');
     });
 
@@ -358,6 +359,37 @@
         }).always(function() {}).fail(function() {
             alert('Ocurrió un error');
         });
+    });
+
+    //Imprimir registros
+    $('#btn_imprime_filtro').on('click', function() {
+        reloadtable('tb_traslados');
+        $('.is-invalid').removeClass('is-invalid');
+        var verifica = verifica_vacio($('#txt_fecini_filtro'));
+        verifica += verifica_vacio($('#txt_fecfin_filtro'));
+        if (verifica >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe escribir un rango de fechas');
+        } else {
+            $.post("imp_traslados.php", {
+                id_sedori: $('#sl_sedori_filtro').val(),
+                id_bodori: $('#sl_bodori_filtro').val(),
+                id_tra: $('#txt_idtra_filtro').val(),
+                num_tra: $('#txt_numtra_filtro').val(),
+                fec_ini: $('#txt_fecini_filtro').val(),
+                fec_fin: $('#txt_fecfin_filtro').val(),
+                id_tercero: $('#sl_tercero_filtro').val(),
+                id_seddes: $('#sl_seddes_filtro').val(),
+                id_boddes: $('#sl_boddes_filtro').val(),
+                estado: $('#sl_estado_filtro').val()
+            }, function(he) {
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').removeClass('modal-lg');
+                $('#divTamModalForms').addClass('modal-xl');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            });
+        }
     });
 
 })(jQuery);

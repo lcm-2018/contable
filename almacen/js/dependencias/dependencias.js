@@ -26,7 +26,7 @@
             processing: true,
             serverSide: true,
             searching: false,
-           
+
             ajax: {
                 url: 'listar_dependencias.php',
                 type: 'POST',
@@ -37,7 +37,7 @@
             },
             columns: [
                 { 'data': 'id_dependencia' }, //Index=0              
-                { 'data': 'nom_dependencia' },          
+                { 'data': 'nom_dependencia' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
@@ -81,7 +81,7 @@
     //Guardar registro 
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
-        var error = verifica_vacio($('#txt_nom_dependencia'));     
+        var error = verifica_vacio($('#txt_nom_dependencia'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
@@ -139,37 +139,18 @@
         });
     });
 
-    $('#btnImprimeDependecias').on('click', function () {
-        let mes = 2;      
-        $.post("imp_dependencias.php", { mes: mes }, function (he) {
-            $('#divTamModalForms').removeClass('modal-xl');
+    //Imprimir registros
+    $('#btn_imprime_filtro').on('click', function() {
+        reloadtable('tb_dependencias');
+        $.post("imp_dependencias.php", {
+            nombre: $('#txt_nombre_filtro').val()
+        }, function(he) {
             $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').addClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
     });
-
-    $('#divModalForms').on('click', '#btnImprimir', function () {
-        function imprSelec() {
-            var div = $('#areaImprimir').html();
-            var ventimp = window.open(' ', '');
-            ventimp.document.write('<!DOCTYPE html><html><head><title>Imprimir</title></head><body>');
-            ventimp.document.write('<div>' + div + '</div>');
-            ventimp.document.write('</body></html>');
-            ventimp.print();
-            ventimp.close();
-        }
-        $('#divModalForms .collapse').addClass('show');
-        imprSelec();
-    });
-
-    $('#divModalForms').on('click', '#btnExcelEntrada', function () {
-        let xls = ($('#areaImprimir').html());
-        var encoded = window.btoa(xls);
-        $('<form action="reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
-    });
-
-
 
 })(jQuery);

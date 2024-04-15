@@ -425,4 +425,24 @@
         });
     });
 
+    
+    $('#btnImprimeKardex').on('click', function () {        
+        reloadtable('tb_articulos');         
+        let codigo = $('#txt_codigo_filtro').val(),
+            nombre = $('#txt_nombre_filtro').val(), 
+            subgrupo = $('#sl_subgrupo_filtro').val(),
+            estado = $('#sl_estado_filtro').val(); 
+            $.post("imp_kardex.php", {codigo:codigo, 
+                                         nombre: nombre,
+                                         subgrupo:subgrupo,
+                                         estado:estado }, function (he) {
+                $('#divTamModalForms').removeClass('modal-xl');
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').addClass('modal-lg');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            });           
+        
+    });
+
 })(jQuery);
