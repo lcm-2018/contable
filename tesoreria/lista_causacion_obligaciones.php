@@ -6,18 +6,15 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../permisos.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
 // Consulta tipo de presupuesto
 $vigencia = $_SESSION['vigencia'];
+$id_vigencia = $_SESSION['id_vigencia'];
 $id_cop_add = $_POST['id_cop_add'] ?? 0;
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT id_pto_presupuestos FROM pto_presupuestos WHERE id_pto_tipo = 2 AND vigencia = '$_SESSION[vigencia]'";
+    $sql = "SELECT `id_pto` FROM `pto_presupuestos` WHERE (`id_vigencia` = $id_vigencia AND `id_tipo` = 2)";
     $rs = $cmd->query($sql);
     $listappto = $rs->fetch();
 } catch (PDOException $e) {
@@ -25,44 +22,68 @@ try {
 }
 try {
     $sql = "SELECT
-        ctb_doc.id_ctb_doc
-        , ctb_doc.id_manu as causacion 
-        , ctb_doc.id_tercero
-        , ctb_doc.fecha
-        , pto_documento.id_manu as registro
-        ,  contratacion.num_contrato
-        , SUM(pto_documento_detalles.valor)  AS valor 
-        , IFNULL(pagado.pagos,0) AS val_pagado
-    FROM	
-        ctb_doc
-        INNER JOIN pto_documento_detalles ON (ctb_doc.id_ctb_doc = pto_documento_detalles.id_ctb_doc)
-        INNER JOIN pto_documento ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-        LEFT JOIN (
-        SELECT 
-            SUM(pto_documento_detalles.valor) AS pagos 
-            ,pto_documento_detalles.id_ctb_cop
-        FROM pto_documento_detalles 
-        INNER JOIN ctb_doc ON (ctb_doc.id_ctb_doc = pto_documento_detalles.id_ctb_cop)
-        WHERE pto_documento_detalles.tipo_mov ='PAG' AND pto_documento_detalles.estado <5
-        GROUP BY ctb_doc.id_ctb_doc
-        ) AS pagado ON (ctb_doc.id_ctb_doc = pagado.id_ctb_cop)
-        LEFT JOIN (
-            SELECT DISTINCT
-            ctt_contratos.num_contrato
-            ,pto_documento_detalles.id_ctb_doc
-        FROM
-        pto_documento_detalles
-        INNER JOIN ctt_adquisiciones ON (pto_documento_detalles.id_auto_dep = ctt_adquisiciones.id_cdp)
-        INNER JOIN ctt_contratos ON (ctt_contratos.id_compra = ctt_adquisiciones.id_adquisicion)
-        ) AS contratacion ON (ctb_doc.id_ctb_doc = contratacion.id_ctb_doc)
-    WHERE pto_documento_detalles.tipo_mov ='COP' AND ctb_doc.estado =1 AND ctb_doc.vigencia =$vigencia
-    GROUP BY ctb_doc.id_ctb_doc;";
+                ctb_doc.id_ctb_doc
+                , ctb_doc.id_manu as causacion 
+                , ctb_doc.id_tercero
+                , ctb_doc.fecha
+                , pto_documento.id_manu as registro
+                ,  contratacion.num_contrato
+                , SUM(pto_documento_detalles.valor)  AS valor 
+                , IFNULL(pagado.pagos,0) AS val_pagado
+            FROM	
+                ctb_doc
+                INNER JOIN pto_documento_detalles 
+                    ON (ctb_doc.id_ctb_doc = pto_documento_detalles.id_ctb_doc)
+                INNER JOIN pto_documento 
+                    ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                LEFT JOIN (
+                        SELECT 
+                            SUM(pto_documento_detalles.valor) AS pagos 
+                            ,pto_documento_detalles.id_ctb_cop
+                        FROM pto_documento_detalles 
+                        INNER JOIN ctb_doc ON (ctb_doc.id_ctb_doc = pto_documento_detalles.id_ctb_cop)
+                        WHERE pto_documento_detalles.tipo_mov ='PAG' AND pto_documento_detalles.estado <5
+                        GROUP BY ctb_doc.id_ctb_doc
+                        ) AS pagado 
+                    ON (ctb_doc.id_ctb_doc = pagado.id_ctb_cop)
+                LEFT JOIN (
+                        SELECT DISTINCT
+                            ctt_contratos.num_contrato
+                            ,pto_documento_detalles.id_ctb_doc
+                        FROM
+                            pto_documento_detalles
+                        INNER JOIN ctt_adquisiciones 
+                            ON (pto_documento_detalles.id_auto_dep = ctt_adquisiciones.id_cdp)
+                        INNER JOIN ctt_contratos 
+                            ON (ctt_contratos.id_compra = ctt_adquisiciones.id_adquisicion)
+                        ) AS contratacion 
+                    ON (ctb_doc.id_ctb_doc = contratacion.id_ctb_doc)
+            WHERE pto_documento_detalles.tipo_mov ='COP' AND ctb_doc.estado =1 AND ctb_doc.vigencia =$vigencia
+            GROUP BY ctb_doc.id_ctb_doc;";
     $sql2 = $sql;
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$id_t = [];
+foreach ($listado as $rp) {
+    if ($rp['id_tercero'] !== null) {
+        $id_t[] = $rp['id_tercero'];
+    }
+}
+$payload = json_encode($id_t);
+//API URL
+$url = $api . 'terceros/datos/res/lista/terceros';
+$ch = curl_init($url);
+//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$result = curl_exec($ch);
+curl_close($ch);
+$terceros = json_decode($result, true);
 ?>
 <script>
     $('#tableObligacionesPago').DataTable({
@@ -112,34 +133,11 @@ try {
                         <th style="width: 10%;">Cc / Nit</th>
                         <th style="width: 20%;">Terceros</th>
                         <th style="width: 15%;">Valor</th>
-
                         <th style="width: 5%;">Acciones</th>
-
                     </tr>
                 </thead>
                 <tbody>
                     <?php
-
-                    $id_t = [];
-                    foreach ($listado as $rp) {
-                        if ($rp['id_tercero'] !== null) {
-                            $id_t[] = $rp['id_tercero'];
-                        }
-                    }
-                    $payload = json_encode($id_t);
-                    //API URL
-                    $url = $api . 'terceros/datos/res/lista/terceros';
-                    $ch = curl_init($url);
-                    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    $result = curl_exec($ch);
-                    curl_close($ch);
-                    $terceros = json_decode($result, true);
-
-
                     foreach ($listado as $ce) {
 
                         $id_doc = $ce['id_ctb_doc'];

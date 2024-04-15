@@ -2240,6 +2240,27 @@ const eliminarDocFuente = (comp) => {
 		}
 	});
 };
+function EstadoDocFuente(id, estado) {
+	fetch("datos/consultar/consultaEstadoDocFuente.php", {
+		method: "POST",
+		body: JSON.stringify({ id: id, estado: estado }),
+	})
+		.then((response) => response.json())
+		.then((response) => {
+			if (response.value == "ok") {
+				$('#tableDocumentosFuente').DataTable().ajax.reload();
+				mje(response.msg, "Proceso realizado con éxito...");
+			} else {
+				mjeError("Error: " + response.msg, "Verificar");
+			}
+		});
+}
+function abrirFuente(id) {
+	EstadoDocFuente(id, 1);
+}
+function cerrarFuente(id) {
+	EstadoDocFuente(id, 0);
+}
 // ================================== ANULACION DE DOCUMENTOS =================================================
 // Abre formulario para datos de anulación
 const anularDocumentoCont = (id) => {

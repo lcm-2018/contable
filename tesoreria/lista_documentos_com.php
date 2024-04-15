@@ -82,7 +82,7 @@ try {
                                     REGISTRO DE MOVIMIENTOS DE TESORERIA
                                 </div>
                                 <?php
-                                if (((PermisosUsuario($permisos, 5601, 2) && $tipo == 1) || (PermisosUsuario($permisos, 5602, 2) && $tipo == 2) || PermisosUsuario($permisos, 5603, 2) && $tipo == 3) || $id_rol == 1) {
+                                if (((PermisosUsuario($permisos, 5601, 2) && $tipo == 1) || (PermisosUsuario($permisos, 5602, 2) && $tipo == 2) || PermisosUsuario($permisos, 5603, 2) && $tipo == 3) || (PermisosUsuario($permisos, 5604, 2) && $tipo == 4)|| $id_rol == 1) {
                                     echo '<input type="hidden" id="peReg" value="1">';
                                 } else {
                                     echo '<input type="hidden" id="peReg" value="0">';

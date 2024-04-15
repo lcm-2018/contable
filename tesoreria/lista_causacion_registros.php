@@ -103,10 +103,10 @@ try {
                     <?php
                     if (isset($nominas)) {
                         foreach ($nominas as $nm) {
-                            $ids = base64_encode($nm['cdp'] . '|' . $nm['crp'] . '|' . $nm['cnom']);
+                            $ids = $nm['cdp'] . '|' . $nm['crp'] . '|' . $nm['cnom'];
                             $id_nomina = $nm['id_nomina'];
                             $pl = $nm['tipo'] == 'PL' ? 'PATRONALES' : '';
-                            $causar = '<button value="' . $id_nomina . '|' . $nm['tipo'] . '|' . $ids . '" onclick="CausaCENomina(this)" class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-plus-square fa-lg"></span></button>';
+                            $causar = '<button text="' . base64_encode($id_nomina . '|' . $nm['tipo'] . '|' . $ids) . '" onclick="CausaCENomina(this)" class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-plus-square fa-lg"></span></button>';
                     ?>
                             <tr>
                                 <td class="text-center"><?php echo $id_nomina ?></td>
