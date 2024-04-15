@@ -63,8 +63,14 @@ try {
 
     <?php include('../common/reporte_header.php'); ?>
 
+    <table style="width:100%; font-size:80%">
+        <tr style="text-align:center">
+            <th>REPORTE DE ARTICULOS</th>
+        </tr>     
+    </table> 
+
     <table style="width:100% !important; border-collapse:collapse;">
-        <thead style="background-color:white !important; font-size:80%">            
+        <thead style="background-color:white !important; font-size:80%">                
             <tr style="background-color:#CED3D3; text-align:center; border:#A9A9A9 1px solid">
                 <th>ID</th>
                 <th>Código</th>

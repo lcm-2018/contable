@@ -73,6 +73,12 @@ try {
     </style>
 
     <?php include('../common/reporte_header.php'); ?>
+    
+    <table style="width:100%; font-size:80%">
+        <tr style="text-align:center">
+            <th>REPORTE DE ORDENES DE INGRESO ENTRE: <?php echo $_POST['fec_ini'].' y '. $_POST['fec_fin'] ?></th>
+        </tr>     
+    </table>
 
     <table style="width:100% !important; border-collapse: collapse;">
         <thead style="background-color: white !important;font-size:80%">            

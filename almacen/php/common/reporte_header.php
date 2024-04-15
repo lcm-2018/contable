@@ -17,19 +17,19 @@ $telhd = $obj['telefono_ips'];
 ?>
 <table style="width:100% !important;">
     <tr>
-        <td colspan="3" style="text-align:right; font-size:11px">
+        <td colspan="3" style="text-align:right; font-size:50%">
             Generado por: <strong>CRONHIS</strong>. Fecha Impresión:<?php echo date('Y-m-d h:i:s A') ?>
         </td>
     </tr>    
     <tr>
-        <td style="width:18%">
+        <th style="width:15%">
             <label><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label>
-        </td>        
-        <td style="text-align:center">
+        </th>        
+        <th style="text-align:center">
             <div><?php echo $razhd; ?></div>
             <div>NIT: <?php echo $nithd; ?></div>
             <div><?php echo $dirhd; ?> TELÉFONO <?php echo $telhd; ?></div>
-        </td>
-        <td style="width:18%"></td>
+        </th>
+        <th style="width:15%"></th>
     </tr>
 </table>

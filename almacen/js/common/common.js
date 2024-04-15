@@ -148,7 +148,6 @@ $(function() {
         }
     });
 
-<<<<<<< HEAD
     //Boton de Imprimir de formulario Impresión
     $('#divModalForms').on('click', '#btnImprimir', function() {
         function imprSelec() {
@@ -172,6 +171,3 @@ $(function() {
     });
 
 })(jQuery);
-=======
-});
->>>>>>> 74d4aea4efcd049c42df9c2dcc55426aafa9fad2
