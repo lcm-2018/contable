@@ -11,7 +11,7 @@ function pesos($valor)
 
 include '../conexion.php';
 include '../permisos.php';
-$key = array_search('8', array_column($perm_modulos, 'id_modulo'));
+$key = array_search('57', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
     exit();
@@ -21,7 +21,7 @@ $tipo = isset($_POST['tipo']) ? $_POST['tipo'] : '0';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_entrada`, `descripcion` FROM  `seg_tipo_entrada`";
+    $sql = "SELECT `id_entrada`, `descripcion` FROM  `acf_tipo_entrada`";
     $rs = $cmd->query($sql);
     $tentradas = $rs->fetchAll();
     $cmd = null;
@@ -68,9 +68,11 @@ try {
                                     </select>
                                 </div>
                             </div>
-                            <input type="hidden" id="peReg" value="<?php echo $permisos['registrar'] ?>">
-                            <input type="hidden" id="tipo_entra_acfijo" value="<?php echo $tipo ?>">
-                            <?php
+                            <?php if (PermisosUsuario($permisos, 5701, 2) || $id_rol == 1) {
+                                echo '<input type="hidden" id="peReg" value="1">';
+                            } else {
+                                echo '<input type="hidden" id="peReg" value="0">';
+                            }
                             switch ($tipo) {
                                 case '1':
                             ?>

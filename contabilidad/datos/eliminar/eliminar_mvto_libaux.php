@@ -5,7 +5,7 @@ include '../../../conexion.php';
 try {
     $pdo = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $query = $pdo->prepare("DELETE FROM ctb_libaux WHERE id_ctb_libaux = ?");
+    $query = $pdo->prepare("DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = ?");
     $query->bindParam(1, $id);
     $query->execute();
     $response[] = array("value" => 'ok', "id" => $id);

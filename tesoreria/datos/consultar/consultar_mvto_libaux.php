@@ -7,14 +7,14 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sq2 = "SELECT
         `ctb_libaux`.`id_ctb_libaux`
-        , `seg_ctb_pgcp`.`cuenta`
-        , `seg_ctb_pgcp`.`nombre`
+        , `ctb_pgcp`.`cuenta`
+        , `ctb_pgcp`.`nombre`
         , `ctb_libaux`.`debito`
         , `ctb_libaux`.`credito`
         FROM
         `ctb_libaux`
-        INNER JOIN `seg_ctb_pgcp` 
-            ON (`ctb_libaux`.`cuenta` = `seg_ctb_pgcp`.`cuenta`)
+        INNER JOIN `ctb_pgcp` 
+            ON (`ctb_libaux`.`cuenta` = `ctb_pgcp`.`cuenta`)
         WHERE (`ctb_libaux`.`id_ctb_libaux` =$id);";
     $rs = $pdo->query($sq2);
     $resultado = $rs->fetch();

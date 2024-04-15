@@ -32,8 +32,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <i class="fas fa-users fa-lg" style="color:#1D80F7"></i>
                                     LISTA DE CUENTAS CONTABLES
                                 </div>
-                                <input type="hidden" id="peReg" value="<?php echo $permisos['registrar']; ?>">
-
+                                <?php
+                                if (PermisosUsuario($permisos, 5505, 2) || $id_rol == 1) {
+                                    echo '<input type="hidden" id="peReg" value="1">';
+                                } else {
+                                    echo '<input type="hidden" id="peReg" value="0">';
+                                }
+                                ?>
                             </div>
                         </div>
                         <div class="card-body" id="divCuerpoPag">

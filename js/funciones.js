@@ -541,6 +541,12 @@ if (esta === -1) {
     $('#formatoExcelPto').on('click', function () {
         DownoadFile('cargue_pto.xlsx')
     });
+    $('.tesoreria').on('click', function () {
+        let id = $(this).attr('text');
+        $('<form action="' + window.urlin + '/tesoreria/lista_documentos_com.php" method="post">' +
+            '<input type="hidden" name="var" value="' + id + '" />' +
+            '</form>').appendTo('body').submit();
+    });
 })(jQuery);
 
 function elegirmes(id) {

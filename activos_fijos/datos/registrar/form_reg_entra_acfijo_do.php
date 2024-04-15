@@ -9,7 +9,7 @@ $tipo = isset($_POST['tip_eaf']) ? $_POST['tip_eaf'] : exit('Acción no permitid
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `descripcion` FROM  `seg_tipo_entrada` WHERE `id_entrada` = $tipo";
+    $sql = "SELECT `descripcion` FROM  `acf_tipo_entrada` WHERE `id_entrada` = $tipo";
     $rs = $cmd->query($sql);
     $tentradas = $rs->fetch();
     $cmd = null;

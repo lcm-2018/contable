@@ -10,7 +10,7 @@ $id_sal = isset($_POST['id']) ?  $_POST['id'] : exit('Acción no permitida');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "DELETE FROM `seg_entrada_activo_fijo`  WHERE `id_entra_af`  = ?";
+    $sql = "DELETE FROM `acf_entrada`  WHERE `id_entra_af`  = ?";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_sal, PDO::PARAM_INT);
     $sql->execute();

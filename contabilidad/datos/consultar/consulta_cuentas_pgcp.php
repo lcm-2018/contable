@@ -5,10 +5,10 @@ include '../../../financiero/consultas.php';
 $_post = json_decode(file_get_contents('php://input'), true);
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-// Consultar si la cuenta existe en la tabla seg_ctb_pgcp
+// Consultar si la cuenta existe en la tabla ctb_pgcp
 $response = [];
 try {
-    $sql = "SELECT id_pgcp,cuenta,nombre,tipo_dato,estado FROM seg_ctb_pgcp WHERE cuenta = '{$_post['codigo']}';";
+    $sql = "SELECT id_pgcp,cuenta,nombre,tipo_dato,estado FROM ctb_pgcp WHERE cuenta = '{$_post['codigo']}';";
     $rs = $cmd->query($sql);
     $cuentas = $rs->fetch();
     // Verificar si la consulta trajo datos

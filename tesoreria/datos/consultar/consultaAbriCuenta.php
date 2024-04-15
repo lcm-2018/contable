@@ -23,7 +23,7 @@ try {
     $query->bindParam(1, $data, PDO::PARAM_INT);
     $query->execute();
     // Actualizo el campo estado de la tabla pto_documento_detalles
-    $query = $cmd->prepare("UPDATE seg_ctb_pgcp SET estado=0 WHERE id_pgcp=?");
+    $query = $cmd->prepare("UPDATE ctb_pgcp SET estado=0 WHERE id_pgcp=?");
     $query->bindParam(1, $id_pgcp, PDO::PARAM_INT);
     $query->execute();
     $response[] = array("value" => "ok");

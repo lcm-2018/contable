@@ -184,13 +184,13 @@ FROM
                 $banco = $cuenta['banco'];
                 // consulto valor retenido a cada documento
                 $sql = "SELECT
-                                SUM(`seg_ctb_causa_retencion`.`valor_retencion`) as retenido
+                                SUM(`ctb_causa_retencion`.`valor_retencion`) as retenido
                         FROM
-                            `seg_ctb_causa_retencion`
+                            `ctb_causa_retencion`
                             INNER JOIN `ctb_doc` 
-                                ON (`seg_ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                        WHERE (`seg_ctb_causa_retencion`.`id_ctb_doc` ={$rp['id_ctb_doc']})
-                        GROUP BY `seg_ctb_causa_retencion`.`id_ctb_doc`;";
+                                ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_causa_retencion`.`id_ctb_doc` ={$rp['id_ctb_doc']})
+                        GROUP BY `ctb_causa_retencion`.`id_ctb_doc`;";
                 $res = $cmd->query($sql);
                 $reten = $res->fetch();
                 $retenido = $reten['retenido'];

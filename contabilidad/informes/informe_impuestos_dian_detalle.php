@@ -57,14 +57,14 @@ try {
 try {
     $sql = "SELECT DISTINCT
             `seg_ctb_retencion_tipo`.`id_retencion_tipo`
-            , `seg_ctb_causa_retencion`.`id_retencion`
+            , `ctb_causa_retencion`.`id_retencion`
             , `seg_ctb_retenciones`.`nombre_retencion`
         FROM
-            `seg_ctb_causa_retencion`
+            `ctb_causa_retencion`
             INNER JOIN `ctb_doc` 
-                ON (`seg_ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
             INNER JOIN `seg_ctb_retenciones` 
-                ON (`seg_ctb_retenciones`.`id_retencion` = `seg_ctb_causa_retencion`.`id_retencion`)
+                ON (`seg_ctb_retenciones`.`id_retencion` = `ctb_causa_retencion`.`id_retencion`)
             INNER JOIN `seg_ctb_retencion_tipo` 
                 ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
         WHERE (`seg_ctb_retencion_tipo`.`id_retencion_tipo` =1 
@@ -79,14 +79,14 @@ try {
 try {
     $sql = "SELECT DISTINCT
     `seg_ctb_retencion_tipo`.`id_retencion_tipo`
-    , `seg_ctb_causa_retencion`.`id_retencion`
+    , `ctb_causa_retencion`.`id_retencion`
     , `seg_ctb_retenciones`.`nombre_retencion`
 FROM
-    `seg_ctb_causa_retencion`
+    `ctb_causa_retencion`
     INNER JOIN `ctb_doc` 
-        ON (`seg_ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+        ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
     INNER JOIN `seg_ctb_retenciones` 
-        ON (`seg_ctb_retenciones`.`id_retencion` = `seg_ctb_causa_retencion`.`id_retencion`)
+        ON (`seg_ctb_retenciones`.`id_retencion` = `ctb_causa_retencion`.`id_retencion`)
     INNER JOIN `seg_ctb_retencion_tipo` 
         ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
 WHERE (`seg_ctb_retencion_tipo`.`id_retencion_tipo` =2 AND  `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte');
@@ -207,20 +207,20 @@ $ccnit = $dat_ter[0]['cc_nit'];
             $sql = "SELECT
                 `ctb_doc`.`id_manu`
                 , `ctb_doc`.`id_tercero`
-                , `seg_ctb_causa_retencion`.`valor_base`
-                , `seg_ctb_causa_retencion`.`valor_retencion`
+                , `ctb_causa_retencion`.`valor_base`
+                , `ctb_causa_retencion`.`valor_retencion`
                 , `ctb_doc`.`fecha`
                 , `seg_ctb_retencion_tipo`.`id_retencion_tipo`
                 , `ctb_doc`.`id_ctb_doc`
             FROM
-                `seg_ctb_causa_retencion`
+                `ctb_causa_retencion`
                 INNER JOIN `ctb_doc` 
-                    ON (`seg_ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                 INNER JOIN `seg_ctb_retenciones` 
-                    ON (`seg_ctb_retenciones`.`id_retencion` = `seg_ctb_causa_retencion`.`id_retencion`)
+                    ON (`seg_ctb_retenciones`.`id_retencion` = `ctb_causa_retencion`.`id_retencion`)
                 INNER JOIN `seg_ctb_retencion_tipo` 
                     ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
-            WHERE (`seg_ctb_causa_retencion`.`id_retencion` ={$tp['id_retencion']}
+            WHERE (`ctb_causa_retencion`.`id_retencion` ={$tp['id_retencion']}
                 
                 AND `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte');";
             $res = $cmd->query($sql);
@@ -284,20 +284,20 @@ $ccnit = $dat_ter[0]['cc_nit'];
             $sql = "SELECT
                 `ctb_doc`.`id_manu`
                 , `ctb_doc`.`id_tercero`
-                , `seg_ctb_causa_retencion`.`valor_base`
-                , `seg_ctb_causa_retencion`.`valor_retencion`
+                , `ctb_causa_retencion`.`valor_base`
+                , `ctb_causa_retencion`.`valor_retencion`
                 , `ctb_doc`.`fecha`
                 , `seg_ctb_retencion_tipo`.`id_retencion_tipo`
                 , `ctb_doc`.`id_ctb_doc`
             FROM
-                `seg_ctb_causa_retencion`
+                `ctb_causa_retencion`
                 INNER JOIN `ctb_doc` 
-                    ON (`seg_ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                 INNER JOIN `seg_ctb_retenciones` 
-                    ON (`seg_ctb_retenciones`.`id_retencion` = `seg_ctb_causa_retencion`.`id_retencion`)
+                    ON (`seg_ctb_retenciones`.`id_retencion` = `ctb_causa_retencion`.`id_retencion`)
                 INNER JOIN `seg_ctb_retencion_tipo` 
                     ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
-            WHERE (`seg_ctb_causa_retencion`.`id_retencion` ={$tp['id_retencion']}
+            WHERE (`ctb_causa_retencion`.`id_retencion` ={$tp['id_retencion']}
                
                 AND `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte');";
             $res = $cmd->query($sql);

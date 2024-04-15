@@ -49,14 +49,14 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
     $sql = "SELECT DISTINCT
                 `ctb_libaux`.`cuenta`
-                , `seg_ctb_pgcp`.`nombre`
+                , `ctb_pgcp`.`nombre`
                 , SUBSTRING(`ctb_libaux`.`cuenta`,1,$long_ini) AS cta
             FROM
                 `ctb_libaux`
                 INNER JOIN `ctb_doc` 
                     ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                LEFT JOIN `seg_ctb_pgcp` 
-                    ON (`ctb_libaux`.`cuenta` = `seg_ctb_pgcp`.`cuenta`)
+                LEFT JOIN `ctb_pgcp` 
+                    ON (`ctb_libaux`.`cuenta` = `ctb_pgcp`.`cuenta`)
             WHERE (SUBSTRING(`ctb_libaux`.`cuenta`,1,$long_ini) BETWEEN $cuenta_ini AND $cuenta_fin);";
     $res = $cmd->query($sql);
     $cuentas = $res->fetchAll();

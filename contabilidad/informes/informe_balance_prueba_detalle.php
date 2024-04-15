@@ -39,7 +39,7 @@ $fecha = $_post['fecha'];
 // Sumo valores de copagos de facturas activas sin anulación
 try {
     $sql = "SELECT * FROM (
-        SELECT seg_ctb_pgcp.cuenta
+        SELECT ctb_pgcp.cuenta
         ,nombre,tipo_dato
         ,SUM(debitoi) AS debitoi
         ,SUM(creditoi) AS creditoi
@@ -82,11 +82,11 @@ try {
         FROM vista_ctb_libaux    
         WHERE vista_ctb_libaux.tipo NOT IN ('REC','RAD') AND vista_ctb_libaux.fecha  BETWEEN '$fecha_inicial' AND '$fecha_corte'
         ) AS balance
-        INNER JOIN seg_ctb_pgcp ON (SUBSTRING(balance.cuenta,1,1)=seg_ctb_pgcp.cuenta)
+        INNER JOIN ctb_pgcp ON (SUBSTRING(balance.cuenta,1,1)=ctb_pgcp.cuenta)
         GROUP BY cuenta
         
         UNION ALL
-        SELECT seg_ctb_pgcp.cuenta
+        SELECT ctb_pgcp.cuenta
         ,nombre,tipo_dato
         ,SUM(debitoi) AS debitoi
         ,SUM(creditoi) AS creditoi
@@ -129,11 +129,11 @@ try {
         FROM vista_ctb_libaux    
         WHERE vista_ctb_libaux.tipo NOT IN ('REC','RAD') AND vista_ctb_libaux.fecha  BETWEEN '$fecha_inicial' AND '$fecha_corte'
         ) AS balance
-        INNER JOIN seg_ctb_pgcp ON (SUBSTRING(balance.cuenta,1,2)=seg_ctb_pgcp.cuenta)
+        INNER JOIN ctb_pgcp ON (SUBSTRING(balance.cuenta,1,2)=ctb_pgcp.cuenta)
         GROUP BY cuenta
         
         UNION ALL
-        SELECT seg_ctb_pgcp.cuenta
+        SELECT ctb_pgcp.cuenta
         ,nombre,tipo_dato
         ,SUM(debitoi) AS debitoi
         ,SUM(creditoi) AS creditoi
@@ -176,11 +176,11 @@ try {
         FROM vista_ctb_libaux    
         WHERE vista_ctb_libaux.tipo NOT IN ('REC','RAD') AND vista_ctb_libaux.fecha  BETWEEN '$fecha_inicial' AND '$fecha_corte'
         ) AS balance
-        INNER JOIN seg_ctb_pgcp ON (SUBSTRING(balance.cuenta,1,4)=seg_ctb_pgcp.cuenta)
+        INNER JOIN ctb_pgcp ON (SUBSTRING(balance.cuenta,1,4)=ctb_pgcp.cuenta)
         GROUP BY cuenta
         
         UNION ALL
-        SELECT seg_ctb_pgcp.cuenta
+        SELECT ctb_pgcp.cuenta
         ,nombre,tipo_dato
         ,SUM(debitoi) AS debitoi
         ,SUM(creditoi) AS creditoi
@@ -223,11 +223,11 @@ try {
         FROM vista_ctb_libaux    
         WHERE vista_ctb_libaux.tipo NOT IN ('REC','RAD') AND vista_ctb_libaux.fecha  BETWEEN '$fecha_inicial' AND '$fecha_corte'
         ) AS balance
-        INNER JOIN seg_ctb_pgcp ON (SUBSTRING(balance.cuenta,1,6)=seg_ctb_pgcp.cuenta)
+        INNER JOIN ctb_pgcp ON (SUBSTRING(balance.cuenta,1,6)=ctb_pgcp.cuenta)
         GROUP BY cuenta
         
         UNION ALL
-        SELECT seg_ctb_pgcp.cuenta
+        SELECT ctb_pgcp.cuenta
         ,nombre,tipo_dato
         ,SUM(debitoi) AS debitoi
         ,SUM(creditoi) AS creditoi
@@ -270,12 +270,12 @@ try {
         FROM vista_ctb_libaux    
         WHERE vista_ctb_libaux.tipo NOT IN ('REC','RAD') AND vista_ctb_libaux.fecha  BETWEEN '$fecha_inicial' AND '$fecha_corte'
         ) AS balance
-        INNER JOIN seg_ctb_pgcp ON (SUBSTRING(balance.cuenta,1,8)=LPAD(seg_ctb_pgcp.cuenta,8,'x'))
-        WHERE tipo_dato = 'D' AND LENGTH(seg_ctb_pgcp.cuenta) = 8
+        INNER JOIN ctb_pgcp ON (SUBSTRING(balance.cuenta,1,8)=LPAD(ctb_pgcp.cuenta,8,'x'))
+        WHERE tipo_dato = 'D' AND LENGTH(ctb_pgcp.cuenta) = 8
         GROUP BY cuenta
         
         UNION ALL
-        SELECT seg_ctb_pgcp.cuenta
+        SELECT ctb_pgcp.cuenta
         ,nombre,tipo_dato
         ,SUM(debitoi) AS debitoi
         ,SUM(creditoi) AS creditoi
@@ -318,11 +318,11 @@ try {
         FROM vista_ctb_libaux    
         WHERE vista_ctb_libaux.tipo NOT IN ('REC','RAD') AND vista_ctb_libaux.fecha  BETWEEN '$fecha_inicial' AND '$fecha_corte'
         ) AS balance
-        INNER JOIN seg_ctb_pgcp ON (SUBSTRING(balance.cuenta,1,10)=LPAD(seg_ctb_pgcp.cuenta,10,'x'))
-        WHERE tipo_dato = 'D' AND LENGTH(seg_ctb_pgcp.cuenta) = 10
+        INNER JOIN ctb_pgcp ON (SUBSTRING(balance.cuenta,1,10)=LPAD(ctb_pgcp.cuenta,10,'x'))
+        WHERE tipo_dato = 'D' AND LENGTH(ctb_pgcp.cuenta) = 10
         GROUP BY cuenta        
         UNION ALL
-        SELECT seg_ctb_pgcp.cuenta
+        SELECT ctb_pgcp.cuenta
         ,nombre,tipo_dato
         ,SUM(debitoi) AS debitoi
         ,SUM(creditoi) AS creditoi
@@ -365,11 +365,11 @@ try {
         FROM vista_ctb_libaux    
         WHERE vista_ctb_libaux.tipo NOT IN ('REC','RAD') AND vista_ctb_libaux.fecha  BETWEEN '$fecha_inicial' AND '$fecha_corte'
         ) AS balance
-        INNER JOIN seg_ctb_pgcp ON (SUBSTRING(balance.cuenta,1,12)=LPAD(seg_ctb_pgcp.cuenta,12,'x'))
-        WHERE tipo_dato = 'D' AND LENGTH(seg_ctb_pgcp.cuenta) = 12
+        INNER JOIN ctb_pgcp ON (SUBSTRING(balance.cuenta,1,12)=LPAD(ctb_pgcp.cuenta,12,'x'))
+        WHERE tipo_dato = 'D' AND LENGTH(ctb_pgcp.cuenta) = 12
         GROUP BY cuenta
         UNION ALL
-        SELECT seg_ctb_pgcp.cuenta
+        SELECT ctb_pgcp.cuenta
         ,nombre,tipo_dato
         ,SUM(debitoi) AS debitoi
         ,SUM(creditoi) AS creditoi
@@ -412,8 +412,8 @@ try {
         FROM vista_ctb_libaux    
         WHERE vista_ctb_libaux.tipo NOT IN ('REC','RAD') AND vista_ctb_libaux.fecha  BETWEEN '$fecha_inicial' AND '$fecha_corte'
         ) AS balance
-        INNER JOIN seg_ctb_pgcp ON (SUBSTRING(balance.cuenta,1,9)=LPAD(seg_ctb_pgcp.cuenta,9,'x'))
-        WHERE tipo_dato = 'D' AND LENGTH(seg_ctb_pgcp.cuenta) = 9
+        INNER JOIN ctb_pgcp ON (SUBSTRING(balance.cuenta,1,9)=LPAD(ctb_pgcp.cuenta,9,'x'))
+        WHERE tipo_dato = 'D' AND LENGTH(ctb_pgcp.cuenta) = 9
         GROUP BY cuenta        
         ) AS t
         ORDER BY cuenta";

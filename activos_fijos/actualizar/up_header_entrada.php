@@ -24,7 +24,7 @@ if ($id_entrda == 0) {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "INSERT INTO `seg_entrada_activo_fijo`
+        $sql = "INSERT INTO `acf_entrada`
                     (`id_tercero_api`, `id_tipo_entrada`, `factura`, `acta_remision`, `fec_acta_remision`, `observacion`, `identificador`, `vigencia`, `id_user_reg`, `fec_reg`)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
@@ -55,7 +55,7 @@ if ($id_entrda == 0) {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "UPDATE `seg_entrada_activo_fijo` SET  `factura` = ?, `acta_remision` = ?, `fec_acta_remision` = ?, `observacion` = ? WHERE `id_entra_af` = ?";
+        $sql = "UPDATE `acf_entrada` SET  `factura` = ?, `acta_remision` = ?, `fec_acta_remision` = ?, `observacion` = ? WHERE `id_entra_af` = ?";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $factura, PDO::PARAM_STR);
         $sql->bindParam(2, $acta_remision, PDO::PARAM_STR);
@@ -64,7 +64,7 @@ if ($id_entrda == 0) {
         $sql->bindParam(5, $id_entrda, PDO::PARAM_INT);
         if ($sql->execute()) {
             if ($sql->rowCount() > 0) {
-                $sql = "UPDATE `seg_entrada_activo_fijo` SET  `id_user_act` = ?, `fec_act` = ? WHERE `id_entra_af` = ?";
+                $sql = "UPDATE `acf_entrada` SET  `id_user_act` = ?, `fec_act` = ? WHERE `id_entra_af` = ?";
                 $sql = $cmd->prepare($sql);
                 $sql->bindParam(1, $iduser, PDO::PARAM_INT);
                 $sql->bindValue(2, $date->format('Y-m-d H:i:s'));

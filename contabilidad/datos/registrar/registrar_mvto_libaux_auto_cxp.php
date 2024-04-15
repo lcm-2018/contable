@@ -53,12 +53,12 @@ if (isset($_POST)) {
     $id_tipo_bn_sv = $result['id_tipo_bn_sv'];
 
     // Consulto en la tabla de costos cuantos registros tiene asociados
-    $sq2 = "SELECT id_sede,id_cc,valor FROM seg_ctb_causa_costos WHERE id_ctb_doc = $id_doc";
+    $sq2 = "SELECT id_sede,id_cc,valor FROM ctb_causa_costos WHERE id_ctb_doc = $id_doc";
     $rs = $cmd->query($sq2);
     $datoscostos = $rs->fetchAll();
 
-    // Consulto las retenciones causadas en seg_ctb_causa_retencion
-    $sq2 = "SELECT id_retencion,valor_retencion,id_terceroapi FROM seg_ctb_causa_retencion WHERE id_ctb_doc = $id_doc";
+    // Consulto las retenciones causadas en ctb_causa_retencion
+    $sq2 = "SELECT id_retencion,valor_retencion,id_terceroapi FROM ctb_causa_retencion WHERE id_ctb_doc = $id_doc";
     $rs = $cmd->query($sq2);
     $datosretencion = $rs->fetchAll();
 

@@ -30,13 +30,13 @@ try {
                 , `seg_entra_detalle_activos_fijos`.`cantidad`
                 , `seg_entra_detalle_activos_fijos`.`id_tipo_activo`
                 , `seg_tipo_activo`.`descripcion` AS `tipo_activo`
-                , `seg_entrada_activo_fijo`.`estado`
+                , `acf_entrada`.`estado`
             FROM
                 `seg_entra_detalle_activos_fijos`
                 INNER JOIN `ctt_bien_servicio` 
                     ON (`seg_entra_detalle_activos_fijos`.`id_prod` = `ctt_bien_servicio`.`id_b_s`)
-                INNER JOIN `seg_entrada_activo_fijo` 
-                    ON (`seg_entra_detalle_activos_fijos`.`id_entra_acfijo_do` = `seg_entrada_activo_fijo`.`id_entra_af`)
+                INNER JOIN `acf_entrada` 
+                    ON (`seg_entra_detalle_activos_fijos`.`id_entra_acfijo_do` = `acf_entrada`.`id_entra_af`)
                 INNER JOIN `seg_tipo_activo` 
                     ON (`seg_entra_detalle_activos_fijos`.`id_tipo_activo` = `seg_tipo_activo`.`id_tipo_act`)
             WHERE `seg_entra_detalle_activos_fijos`.`id_entra_acfijo_do` = '$id_acfi'";

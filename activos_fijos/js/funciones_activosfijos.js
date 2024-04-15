@@ -187,7 +187,7 @@
             }],
         });
         $('#tableEntradasActivoFijos').wrap('<div class="overflow" />');
-        let tip_eaf = $('#tipo_entra_acfijo').val();
+        let tip_eaf = $('#slctipoEntradaAF').val();
         $('#tableEntradasActFijosDona').DataTable({
             dom: setdom,
             buttons: [{

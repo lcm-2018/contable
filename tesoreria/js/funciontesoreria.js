@@ -395,15 +395,10 @@ let terminarDetalleTes = function (dato, tipo) {
 };
 // Recargar a la tabla de documento contable  por acciones en el select
 function cambiaListadoTesoreria(dato, tipo) {
-  $(
-    '<form action="lista_documentos_com.php" method="post"><input type="hidden" name="tipo_doc" value="' +
-    dato +
-    '" /> <input type="hidden" name="var" value="' +
-    tipo +
-    '" /></form>'
-  )
-    .appendTo("body")
-    .submit();
+  $('<form action="lista_documentos_com.php" method="post">' +
+    '<input type="hidden" name="id_tipo_doc" value="' + dato + '" />' +
+    '<input type="hidden" name="var" value="' + tipo + '" />' +
+    '</form>').appendTo("body").submit();
 }
 let buscarConsecutivoTeso = function (doc) {
   let fecha = $("#fecha").val();

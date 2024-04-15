@@ -66,10 +66,10 @@ try {
             ) AS  causacion ON (pto_documento_detalles.id_ctb_cop =causacion.id_ctb_cop)
             LEFT JOIN(
                 SELECT 
-                    SUM(seg_ctb_causa_retencion.valor_retencion) AS descuento
-                    ,seg_ctb_causa_retencion.id_ctb_doc
-                FROM seg_ctb_causa_retencion
-                GROUP BY seg_ctb_causa_retencion.id_ctb_doc
+                    SUM(ctb_causa_retencion.valor_retencion) AS descuento
+                    ,ctb_causa_retencion.id_ctb_doc
+                FROM ctb_causa_retencion
+                GROUP BY ctb_causa_retencion.id_ctb_doc
             ) AS descuentos ON (pto_documento_detalles.id_ctb_cop=descuentos.id_ctb_doc)
             WHERE (ctb_doc.id_plano =$id);
 ";

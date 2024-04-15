@@ -13,7 +13,7 @@ try {
     $sql = "SELECT 
                 `id_entra_af`, `id_tercero_api`, `id_tipo_entrada`, `factura`, `acta_remision`, `fec_acta_remision`, `observacion`, `identificador`, `estado`, `vigencia`
             FROM
-                `seg_entrada_activo_fijo`
+                `acf_entrada`
             WHERE `identificador` = '$id_c' limit 1";
     $rs = $cmd->query($sql);
     $esta = $rs->fetch();

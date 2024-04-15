@@ -1,17 +1,38 @@
 <?php
-
-include '../../../conexion.php';
-$conexion = new mysqli($bd_servidor, $bd_usuario, $bd_clave, $bd_base);
-
-if (isset($_POST['search'])) {
-    $search = mysqli_real_escape_string($conexion, $_POST['search']);
-    $presupuesto = mysqli_real_escape_string($conexion, $_POST['valor']);
-    $sql = "SELECT cuenta,nombre,tipo_dato FROM seg_ctb_pgcp WHERE cuenta LIKE '$search%' AND estado =0";
-    $res = $conexion->query($sql);
-    while ($row = $res->fetch_assoc()) {
-        $response[] = array("value" => $row['cuenta'], "label" => $row['cuenta'] . " - " . $row['nombre'], "tipo" => $row['tipo_dato']);
-    }
-    echo json_encode($response);
+session_start();
+if (!isset($_SESSION['user'])) {
+    echo '<script>window.location.replace("../../index.php");</script>';
+    exit();
 }
+include '../../../conexion.php';
+$search = isset($_POST['search']) ?  $_POST['search'] : '';
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT `id_pgcp`, `cuenta`,`nombre`,`tipo_dato` 
+            FROM `ctb_pgcp` 
+            WHERE (`cuenta` LIKE '$search%' OR `nombre` LIKE '$search%') AND `estado` = 1";
+    $rs = $cmd->query($sql);
+    $cuentas = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+if (empty($cuentas)) {
+    $response[] = [
+        'id' => '0',
+        'label' => 'No hay coincidencias...',
+        'tipo_dato' => '0',
+    ];
+} else {
+    foreach ($cuentas as $c) {
+        $response[] = [
+            'id' => $c['id_pgcp'],
+            'label' => $c['cuenta'] . ' - ' . $c['nombre'],
+            'tipo_dato' => $c['tipo_dato'],
+        ];
+    }
+}
+echo json_encode($response);
 
 exit;

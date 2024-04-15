@@ -57,7 +57,7 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 // Consulto los documentos que estan relacionados con el pago
-// Consultar el valor a de los descuentos realizados a la cuenta de seg_ctb_causa_retencion
+// Consultar el valor a de los descuentos realizados a la cuenta de ctb_causa_retencion
 try {
     $sql = "SELECT
     `id_ctb_cop`
@@ -70,11 +70,11 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-// Consultar el valor a de los descuentos realizados a la cuenta de seg_ctb_causa_retencion de acuerdo a los documentos relacionados
+// Consultar el valor a de los descuentos realizados a la cuenta de ctb_causa_retencion de acuerdo a los documentos relacionados
 // recorro los documentos relacionados
 foreach ($des_documentos as $des) {
     try {
-        $sql = "SELECT SUM(`valor_retencion`) AS `valor` FROM `seg_ctb_causa_retencion` WHERE `id_ctb_doc` = {$des['id_ctb_cop']}";
+        $sql = "SELECT SUM(`valor_retencion`) AS `valor` FROM `ctb_causa_retencion` WHERE `id_ctb_doc` = {$des['id_ctb_cop']}";
         $rs = $cmd->query($sql);
         $descuentos = $rs->fetch();
         $valor_descuento = $valor_descuento + $descuentos['valor'];
