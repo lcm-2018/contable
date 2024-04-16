@@ -22,7 +22,7 @@ try {
                 , `ctb_doc`.`id_tercero`
                 , `ctb_doc`.`estado`
                 , `nom_nominas`.`id_nomina`
-                , `nom_nominas`.`tipo`
+                , `nom_nomina_pto_ctb_tes`.`tipo`
                 , `ctb_doc`.`id_tipo_doc`
                 , `ctb_doc`.`id_vigencia`
             FROM

@@ -585,7 +585,6 @@ foreach ($sueldoBasico as $sb) {
     $keypf = array_search($id_empleado, array_column($parafiscales, 'id_empleado'));
     $keyss = array_search($id_empleado, array_column($segSocial, 'id_empleado'));
     try {
-        $tipo_mov = 'PAG';
         $liberado = 0;
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

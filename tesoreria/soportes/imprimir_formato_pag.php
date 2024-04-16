@@ -5,12 +5,8 @@ if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../../head.php';
 $vigencia = $_SESSION['vigencia'];
-$dto = $_POST['id'];
+$id_doc = $_POST['id'];
 $num_doc = '';
 function pesos($valor)
 {
@@ -21,60 +17,60 @@ include '../../financiero/consultas.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
-    $sql = "SELECT 
-                detalle
-                ,fecha
-                ,id_manu
-                ,id_tercero
-                ,ctb_doc.fec_reg
-                ,tipo_doc 
-                ,CONCAT(seg_usuarios_sistema.nombre1,' ', seg_usuarios_sistema.nombre2,' ',seg_usuarios_sistema.apellido1,' ',seg_usuarios_sistema.apellido2)as usuario
-            FROM ctb_doc 
-            INNER JOIN seg_usuarios_sistema ON (ctb_doc.id_user_reg = seg_usuarios_sistema.id_usuario)
-            WHERE id_ctb_doc =$dto";
+    $sql = "SELECT
+                `ctb_doc`.`id_ctb_doc`
+                , `ctb_doc`.`id_tipo_doc`
+                , `ctb_doc`.`id_manu`
+                , `ctb_doc`.`fecha`
+                , `ctb_doc`.`detalle`
+                , `ctb_doc`.`id_tercero`
+                , `ctb_doc`.`estado`
+                , `ctb_fuente`.`cod`
+                , `ctb_fuente`.`nombre`
+                , `ctb_doc`.`id_tercero`
+                , `ctb_doc`.`fecha_reg`
+                , CONCAT_WS(' ', `seg_usuarios_sistema`.`nombre1`
+                , `seg_usuarios_sistema`.`nombre2`
+                , `seg_usuarios_sistema`.`apellido1`
+                , `seg_usuarios_sistema`.`apellido2`) AS `usuario`
+            FROM
+                `ctb_doc`
+                INNER JOIN `seg_usuarios_sistema` 
+                    ON (`ctb_doc`.`id_user_reg` = `seg_usuarios_sistema`.`id_usuario`)
+                INNER JOIN `ctb_fuente` 
+                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
     $res = $cmd->query($sql);
-    $cdp = $res->fetch();
+    $documento = $res->fetch();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-try {
-    $sql = "SELECT nombre FROM ctb_fuente WHERE cod ='$cdp[tipo_doc]'";
-    $res = $cmd->query($sql);
-    $tipo_doc = $res->fetch();
-    $nom_doc = $tipo_doc['nombre'];
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-
-$ccnit = $cdp['id_tercero'];
-if ($ccnit == null) {
+$nom_doc = $documento['nombre'];
+$ccnit = $documento['id_tercero'];
+if ($ccnit == '') {
     $tercero = 'NOMINA EMPLEADOS';
-    $num_doc = '';
 } else {
 
     // Consulta terceros en la api ********************************************* API
-    $url = $api . 'terceros/datos/res/datos/id/' . $ccnit;
+    $ids[] = $ccnit;
+    $payload = json_encode($ids);
+    //API URL
+    $url = $api . 'terceros/datos/res/lista/terceros';
     $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res_api = curl_exec($ch);
+    $result = curl_exec($ch);
     curl_close($ch);
-    $dat_ter = json_decode($res_api, true);
-    $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
-    // fin api terceros ******************************************************** 
-    try {
-        $sql = "SELECT no_doc FROM seg_terceros WHERE id_tercero_api =$ccnit";
-        $res = $cmd->query($sql);
-        $nit = $res->fetch();
-        $num_doc = $nit['no_doc'];
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-    }
+    $terceros = json_decode($result, true);
+    $tercero = isset($terceros[0]) ? ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']) : '---';
+    $num_doc = isset($terceros[0]) ? $terceros[0]['cc_nit'] : '--';
 }
 // Valor total del registro
 try {
-    $sql = "SELECT sum(debito) as valor FROM ctb_libaux WHERE id_ctb_doc =$dto";
+    $sql = "SELECT `id_ctb_doc` , SUM(`debito`) AS `valor` FROM `ctb_libaux` WHERE (`id_ctb_doc` = $id_doc)";
     $res = $cmd->query($sql);
     $datos = $res->fetch();
     $total = $datos['valor'];
@@ -83,10 +79,21 @@ try {
 }
 // consultar el id del crrp para saber si es un pago presupuestal
 try {
-    $sql = "SELECT id_crp  FROM ctb_libaux WHERE id_ctb_doc =$dto limit 1";
+    $sql = "SELECT
+                `ctb_doc`.`id_ctb_doc`
+                , `pto_crp_detalle`.`id_pto_crp`
+            FROM
+                `pto_pag_detalle`
+                INNER JOIN `pto_cop_detalle` 
+                    ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                INNER JOIN `ctb_doc` 
+                    ON (`pto_pag_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                INNER JOIN `pto_crp_detalle` 
+                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc) LIMIT 1 ";
     $res = $cmd->query($sql);
     $datos_crpp = $res->fetch();
-    $id_crpp = $datos_crpp['id_crp'];
+    $id_crpp = !empty($datos_crpp) ? $datos_crpp['id_pto_crp'] : 0;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -94,19 +101,24 @@ try {
 if ($id_crpp > 0) {
     try {
         $sql = "SELECT
-    `pto_documento`.`id_manu`
-    , `pto_documento_detalles`.`rubro`
-    , `pto_cargue`.`nom_rubro`
-    , `pto_documento_detalles`.`valor`
-    , `pto_documento_detalles`.`id_ctb_cop`
-FROM
-    `pto_documento_detalles`
-    INNER JOIN `pto_cargue` 
-        ON (`pto_documento_detalles`.`rubro` = `pto_cargue`.`cod_pptal`)
-    INNER JOIN `pto_documento` 
-        ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-WHERE (`pto_documento_detalles`.`id_ctb_doc` =$dto
-    AND `pto_cargue`.`vigencia` =$vigencia);";
+                    `ctb_doc`.`id_ctb_doc`
+                    , `pto_cop_detalle`.`valor`
+                    , `pto_cargue`.`nom_rubro`
+                    , `pto_cargue`.`cod_pptal` AS `rubro`
+                    , `ctb_doc`.`id_manu`
+                FROM
+                    `pto_pag_detalle`
+                    INNER JOIN `pto_cop_detalle` 
+                        ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                    INNER JOIN `ctb_doc` 
+                        ON (`pto_pag_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    INNER JOIN `pto_crp_detalle` 
+                        ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                    INNER JOIN `pto_cdp_detalle` 
+                        ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                    INNER JOIN `pto_cargue` 
+                        ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
         $res = $cmd->query($sql);
         $rubros = $res->fetchAll();
     } catch (PDOException $e) {
@@ -114,9 +126,12 @@ WHERE (`pto_documento_detalles`.`id_ctb_doc` =$dto
     }
     // Consulto el numero de documentos asociados al pago 
     try {
-        $sql = "SELECT `id_ctb_cop` FROM `pto_documento_detalles` WHERE (`id_ctb_doc` =$dto) GROUP BY `id_ctb_cop`;";
+        /*
+        $sql = "SELECT `id_ctb_cop` FROM `pto_documento_detalles` WHERE (`id_ctb_doc` =$id_doc) GROUP BY `id_ctb_cop`;";
         $rs = $cmd->query($sql);
         $documentos = $rs->fetchAll();
+        */
+        $documentos = [];
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -125,51 +140,54 @@ $enletras = numeroLetras($total);
 // Movimiento contable
 try {
     $sql = "SELECT
-    `ctb_libaux`.`cuenta` as cuenta
-    , `ctb_pgcp`.`nombre`
-    , `ctb_libaux`.`debito` as debito
-    , `ctb_libaux`.`credito` as credito
-    , `ctb_libaux`.`id_tercero`
+                `ctb_libaux`.`id_cuenta`
+                , `ctb_pgcp`.`cuenta`
+                , `ctb_pgcp`.`nombre`
+                , `ctb_libaux`.`debito`
+                , `ctb_libaux`.`credito`
+                , `ctb_libaux`.`id_tercero_api` AS `id_tercero`
 
-    FROM
-    `ctb_libaux`
-    INNER JOIN `ctb_pgcp` 
-        ON (`ctb_libaux`.`cuenta` = `ctb_pgcp`.`cuenta`)
-    WHERE (`ctb_libaux`.`id_ctb_doc` =$dto)
-    ORDER BY `ctb_libaux`.`cuenta` DESC;";
+            FROM
+                `ctb_libaux`
+                INNER JOIN `ctb_pgcp` 
+                    ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+            WHERE (`ctb_libaux`.`id_ctb_doc` = $id_doc)
+            ORDER BY `ctb_pgcp`.`cuenta` DESC";
     $res = $cmd->query($sql);
-    $movimiento = $res->fetchAll();
+    $movimiento = $res->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 
 // Consulta para mostrar la forma de pago
 try {
+    /*
     $sql = "SELECT
-    `seg_tes_detalle_pago`.`id_detalle_pago`
-    ,`tb_bancos`.`nom_banco`
-    , `seg_tes_cuentas`.`nombre`
-    , `seg_tes_forma_pago`.`forma_pago`
-    , `seg_tes_detalle_pago`.`documento`
-    , `seg_tes_detalle_pago`.`valor`
-    , `seg_tes_detalle_pago`.`id_forma_pago`
-    FROM
-    `seg_tes_detalle_pago`
-    INNER JOIN `seg_tes_forma_pago` 
-        ON (`seg_tes_detalle_pago`.`id_forma_pago` = `seg_tes_forma_pago`.`id_forma_pago`)
-    INNER JOIN `seg_tes_cuentas` 
-        ON (`seg_tes_detalle_pago`.`id_tes_cuenta` = `seg_tes_cuentas`.`id_tes_cuenta`)
-    INNER JOIN `tb_bancos` 
-        ON (`seg_tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
-    WHERE (`seg_tes_detalle_pago`.`id_ctb_doc` =$dto);";
+                `seg_tes_detalle_pago`.`id_detalle_pago`
+                ,`tb_bancos`.`nom_banco`
+                , `seg_tes_cuentas`.`nombre`
+                , `seg_tes_forma_pago`.`forma_pago`
+                , `seg_tes_detalle_pago`.`documento`
+                , `seg_tes_detalle_pago`.`valor`
+                , `seg_tes_detalle_pago`.`id_forma_pago`
+            FROM
+                `seg_tes_detalle_pago`
+                INNER JOIN `seg_tes_forma_pago` 
+                    ON (`seg_tes_detalle_pago`.`id_forma_pago` = `seg_tes_forma_pago`.`id_forma_pago`)
+                INNER JOIN `seg_tes_cuentas` 
+                    ON (`seg_tes_detalle_pago`.`id_tes_cuenta` = `seg_tes_cuentas`.`id_tes_cuenta`)
+                INNER JOIN `tb_bancos` 
+                    ON (`seg_tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
+            WHERE (`seg_tes_detalle_pago`.`id_ctb_doc` = $id_doc);";
     $rs = $cmd->query($sql);
-    $formapago = $rs->fetchAll();
+    $formapago = $rs->fetchAll();*/
+    $formapago = [];
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 try {
-    $sql = "SELECT `nombre`, `nit`, `dig_ver` FROM `tb_datos_ips`;";
+    $sql = "SELECT `razon_social_ips` AS `nombre`, `nit_ips` AS `nit`, `dv` AS `dig_ver` FROM `tb_datos_ips`;";
     $res = $cmd->query($sql);
     $empresa = $res->fetch();
 } catch (PDOException $e) {
@@ -177,7 +195,7 @@ try {
 }
 // si tipo de documento es CICP es un recibo de caja
 
-if ($cdp['tipo_doc'] == 'CICP') {
+if ($documento['id_tipo_doc'] == 'CICP') {
     try {
         $sql = "SELECT
                     `seg_tes_causa_arqueo`.`id_causa_arqueo`
@@ -191,18 +209,19 @@ if ($cdp['tipo_doc'] == 'CICP') {
                     `seg_tes_facturador`
                     INNER JOIN `seg_tes_causa_arqueo` 
                         ON (`seg_tes_facturador`.`cc` = `seg_tes_causa_arqueo`.`id_tercero`)
-                WHERE (`seg_tes_causa_arqueo`.`id_ctb_doc` =$dto);";
+                WHERE (`seg_tes_causa_arqueo`.`id_ctb_doc` =$id_doc);";
         $res = $cmd->query($sql);
         $facturadores = $res->fetchAll();
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
 }
-$fecha = date('Y-m-d', strtotime($cdp['fecha']));
-$hora = date('H:i:s', strtotime($cdp['fec_reg']));
+$fecha = date('Y-m-d', strtotime($documento['fecha']));
+$hora = date('H:i:s', strtotime($documento['fecha_reg']));
 // fechas para factua
 // Consulto responsable del documento
 try {
+    /*
     $sql = "SELECT
     `fin_respon_doc`.`nombre`
     , `fin_respon_doc`.`cargo`
@@ -214,17 +233,34 @@ try {
     WHERE (`fin_respon_doc`.`id_maestro_doc` =5
     AND `fin_respon_doc`.`estado` =1);";
     $res = $cmd->query($sql);
-    $responsable = $res->fetch();
-    $nom_respon = mb_strtoupper($responsable['nombre'], 'UTF-8');
-    $cargo_respon = $responsable['cargo'];
-    $descrip_respon = $responsable['descripcion'];
+    $responsable = $res->fetch();*/
+    $nom_respon = mb_strtoupper('XXXXXXXXXXXX', 'UTF-8');
+    $cargo_respon = 'XXXXX';
+    $descrip_respon = 'XXXXX';
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $id_forma = 0;
+$id_t = [];
+foreach ($movimiento as $mv) {
+    $id_t[] = $mv['id_tercero'];
+}
+$payload = json_encode($id_t);
+//API URL
+$url = $api . 'terceros/datos/res/lista/terceros';
+$ch = curl_init($url);
+//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$result = curl_exec($ch);
+curl_close($ch);
+$terceros = json_decode($result, true);
+$terceros = isset($terceros[0]) ? $terceros : [];
 ?>
 <div class="text-right pt-3">
-    <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $dto; ?>);"> Imprimir</a>
+    <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>
 <div class="contenedor bg-light" id="areaImprimir">
@@ -246,7 +282,7 @@ $id_forma = 0;
 
         <div class="row px-2" style="text-align: center">
             <div class="col-12">
-                <div class="col lead"><label><strong> <?php echo $nom_doc . ' No: ' . $cdp['id_manu']; ?></strong></label></div>
+                <div class="col lead"><label><strong> <?php echo $nom_doc . ' No: ' . $documento['id_manu']; ?></strong></label></div>
             </div>
         </div>
 
@@ -272,7 +308,7 @@ $id_forma = 0;
             </tr>
             <tr>
                 <td class='text-left'>OBJETO:</td>
-                <td class='text-left'><?php echo $cdp['detalle']; ?></td>
+                <td class='text-left'><?php echo $documento['detalle']; ?></td>
             </tr>
             <tr>
                 <td class='text-left'>VALOR:</td>
@@ -409,7 +445,7 @@ $id_forma = 0;
             ?>
         <?php }
         ?>
-        <?php if ($cdp['tipo_doc'] == 'CICP') { ?>
+        <?php if ($documento['id_tipo_doc'] == 'CICP') { ?>
             <div class="row">
                 <div class="col-12">
                     <div style="text-align: left">
@@ -490,27 +526,10 @@ $id_forma = 0;
                 <?php
                 $tot_deb = 0;
                 $tot_cre = 0;
-
-                $id_t = [];
-                foreach ($movimiento as $rp) {
-                    $id_t[] = $rp['id_tercero'];
-                }
-                $payload = json_encode($id_t);
-                //API URL
-                $url = $api . 'terceros/datos/res/lista/terceros';
-                $ch = curl_init($url);
-                //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                $result = curl_exec($ch);
-                curl_close($ch);
-                $terceros = json_decode($result, true);
                 foreach ($movimiento as $mv) {
                     // Consulta terceros en la api ********************************************* API
                     $key = array_search($mv['id_tercero'], array_column($terceros, 'id_tercero'));
-                    $ccnit = $terceros[$key]['cc_nit'];
+                    $ccnit = $key !== false ? $terceros[$key]['cc_nit'] : '--';
                     // fin api tercer
 
                     echo "<tr style='border: 1px solid black'>
@@ -607,7 +626,7 @@ $id_forma = 0;
             <tr>
                 <td class='text-left' style="width:33%">
                     <strong>Elaboró:</strong>
-                    <div><?php echo $cdp['usuario']; ?></div>
+                    <div><?php echo $documento['usuario']; ?></div>
                 </td>
                 <td style="text-align:center" style="width:33%">
                 </td>
