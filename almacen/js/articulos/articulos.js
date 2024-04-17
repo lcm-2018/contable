@@ -138,6 +138,9 @@
                     let pag = ($('#id_articulo').val() == -1) ? 0 : $('#tb_articulos').DataTable().page.info().page;
                     reloadtable('tb_articulos', pag);
                     $('#id_articulo').val(r.id);
+
+                    $('#btn_imprimir').prop('disabled', false);
+
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");
                 } else {
@@ -398,7 +401,7 @@
         });
     });
 
-    //Imprimir registros
+    //Imprimir listado de registros
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_articulos');
         $.post("imp_articulos.php", {
@@ -407,13 +410,25 @@
             subgrupo: $('#sl_subgrupo_filtro').val(),
             estado: $('#sl_estado_filtro').val()
         }, function(he) {
-            $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-lg');
-            $('#divTamModalForms').addClass('modal-xl');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
         });
+    });
 
+    //Imprimit un Articulo
+    $('#divForms').on("click", "#btn_imprimir", function() {
+        $.post("imp_articulo.php", {
+            id: $('#id_articulo').val()
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
     });
 
 })(jQuery);

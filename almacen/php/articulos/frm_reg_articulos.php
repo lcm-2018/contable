@@ -30,6 +30,8 @@ if (empty($obj)) {
     $obj['estado'] = 1;
     $obj['es_clinico'] = 0;
 }
+$imprimir = $id != -1 ? '' : 'disabled="disabled"';
+
 ?>
 
 <div class="px-0">
@@ -153,6 +155,7 @@ if (empty($obj)) {
     </div>
     <div class="text-center pt-3">    
         <button type="button" class="btn btn-primary btn-sm" id="btn_guardar">Guardar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir" <?php echo $imprimir ?>>Imprimir</button>
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>

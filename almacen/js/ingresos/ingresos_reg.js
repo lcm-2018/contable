@@ -29,6 +29,7 @@
                 { 'data': 'cod_medicamento' },
                 { 'data': 'nom_medicamento' },
                 { 'data': 'lote' },
+                { 'data': 'fec_vencimiento' },
                 { 'data': 'nom_presentacion' },
                 { 'data': 'cantidad' },
                 { 'data': 'valor_sin_iva' },
@@ -39,8 +40,8 @@
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [2, 4, 10] },
-                { orderable: false, targets: 11 }
+                { class: 'text-wrap', targets: [2, 5, 11] },
+                { orderable: false, targets: 12 }
             ],
             order: [
                 [0, "desc"]

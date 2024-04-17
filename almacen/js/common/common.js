@@ -149,7 +149,7 @@ $(function() {
     });
 
     //Boton de Imprimir de formulario Impresión
-    $('#divModalForms').on('click', '#btnImprimir', function() {
+    $('#divModalImp').on('click', '#btnImprimir', function() {
         function imprSelec() {
             var div = $('#areaImprimir').html();
             var ventimp = window.open(' ', '');
@@ -164,7 +164,7 @@ $(function() {
     });
 
     //Boton de Excel de formulario Impresión
-    $('#divModalForms').on('click', '#btnExcelEntrada', function() {
+    $('#divModalImp').on('click', '#btnExcelEntrada', function() {
         let xls = ($('#areaImprimir').html());
         var encoded = window.btoa(xls);
         $('<form action="../common/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();

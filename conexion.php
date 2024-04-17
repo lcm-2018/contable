@@ -8,3 +8,5 @@ $charset = "charset=utf8";
 $bd_usuario = "root";
 $bd_clave = "12345"; //"Csnr2022a*";
 $_SESSION['urlin'] = "/contable";
+
+$ruta_firmas='/proyecto/hc/img/firmas/';

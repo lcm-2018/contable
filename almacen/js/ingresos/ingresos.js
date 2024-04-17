@@ -139,6 +139,7 @@
                     $('#id_ingreso').val(r.id);
 
                     $('#btn_cerrar').prop('disabled', false);
+                    $('#btn_imprimir').prop('disabled', false);
 
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");
@@ -269,7 +270,6 @@
         });
     });
 
-
     // Autocompletar Presentacion de Lote
     $('#divFormsReg').on("input", "#txt_pre_lot", function() {
         $(this).autocomplete({
@@ -371,7 +371,7 @@
         });
     });
 
-    //Imprimir registros
+    //Imprimir listado de registros
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_ingresos');
         $('.is-invalid').removeClass('is-invalid');
@@ -391,13 +391,26 @@
                 id_tiping: $('#sl_tiping_filtro').val(),
                 estado: $('#sl_estado_filtro').val()
             }, function(he) {
-                $('#divTamModalForms').removeClass('modal-sm');
-                $('#divTamModalForms').removeClass('modal-lg');
-                $('#divTamModalForms').addClass('modal-xl');
-                $('#divModalForms').modal('show');
-                $("#divForms").html(he);
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
             });
         }
+    });
+
+    //Imprimit una Orden de Ingreso
+    $('#divForms').on("click", "#btn_imprimir", function() {
+        $.post("imp_ingreso.php", {
+            id: $('#id_ingreso').val()
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
     });
 
 })(jQuery);

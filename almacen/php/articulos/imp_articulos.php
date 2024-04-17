@@ -33,8 +33,8 @@ try {
             IF(far_medicamentos.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_medicamentos
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo) $where ORDER BY far_medicamentos.id_med DESC ";
-    $res = $cmd->query($sql);
-    $objs = $res->fetchAll();
+    $rs = $cmd->query($sql);
+    $objs = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -63,15 +63,15 @@ try {
 
     <?php include('../common/reporte_header.php'); ?>
 
-    <table style="width:100%; font-size:80%">
+    <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
             <th>REPORTE DE ARTICULOS</th>
         </tr>     
     </table> 
 
-    <table style="width:100% !important; border-collapse:collapse;">
-        <thead style="background-color:white !important; font-size:80%">                
-            <tr style="background-color:#CED3D3; text-align:center; border:#A9A9A9 1px solid">
+    <table style="width:100% !important">
+        <thead style="font-size:60%">                
+            <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>ID</th>
                 <th>Código</th>
                 <th>Nombre</th>
@@ -103,11 +103,10 @@ try {
             echo $tabla;
             ?>            
         </tbody>
-        <tfoot style="background-color:white !important; font-size:60%"> 
-            <tr style="background-color:#CED3D3;">
+        <tfoot style="font-size:60%"> 
+            <tr style="background-color:#CED3D3; color:#000000">
                 <td colspan="10" style="text-align:left">
-                    No. de Registros: <?php echo count($objs); ?>&nbsp;&nbsp;-&nbsp;&nbsp;
-                    Usuario: <?php echo mb_strtoupper($_SESSION['user']); ?>     
+                    No. de Registros: <?php echo count($objs); ?>  
                 </td>
             </tr>
         </tfoot>

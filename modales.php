@@ -106,3 +106,14 @@
     </div>
 </div>
 <!-- Modal -->
+<!-- Modal -->
+<div class="modal fade" id="divModalImp" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div id="divTamModalImp" class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center" id="divImp">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
