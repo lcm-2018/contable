@@ -278,6 +278,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT MAX(`id_manu`) AS `id_manu` FROM `ctb_doc` WHERE `id_vigencia` = $id_vigencia AND `id_tipo_doc` = $cnom";
     $rs = $cmd->query($sql);
+    $consecutivo = $rs->fetch();
     $id_manu = !empty($consecutivo) ? $consecutivo['id_manu'] + 1 : 1;
     $cmd = null;
 } catch (PDOException $e) {

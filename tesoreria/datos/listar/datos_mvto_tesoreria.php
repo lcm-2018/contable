@@ -4,11 +4,12 @@ if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
-include '../../../conexion.php';
-include '../../../permisos.php';
+include_once '../../../conexion.php';
+include_once '../../../permisos.php';
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
 $vigencia = $_SESSION['vigencia'];
+$id_vigencia = $_SESSION['id_vigencia'];
 $dato = null;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -21,16 +22,16 @@ try {
                 , `ctb_doc`.`id_tercero`
                 , `ctb_doc`.`estado`
                 , `nom_nominas`.`id_nomina`
-                , `nom_nominas`.`tipo`
-                , `ctb_doc`.`tipo_doc`
-                , `ctb_doc`.`vigencia`
+                , `nom_nomina_pto_ctb_tes`.`tipo`
+                , `ctb_doc`.`id_tipo_doc`
+                , `ctb_doc`.`id_vigencia`
             FROM
                 `ctb_doc`
+                LEFT JOIN `nom_nomina_pto_ctb_tes` 
+                    ON (`ctb_doc`.`id_ctb_doc` = `nom_nomina_pto_ctb_tes`.`ceva`)
                 LEFT JOIN `nom_nominas` 
-                    ON (`ctb_doc`.`id_nomina` = `nom_nominas`.`id_nomina`)
-            WHERE (`ctb_doc`.`fecha` > '2022-12-31'
-                AND `ctb_doc`.`tipo_doc` = '$id_ctb_doc'
-                AND `ctb_doc`.`vigencia` = '$vigencia')";
+                    ON (`nom_nomina_pto_ctb_tes`.`id_nomina` = `nom_nominas`.`id_nomina`)
+            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia)";
     $rs = $cmd->query($sql);
     $listappto = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -119,52 +120,42 @@ if (!empty($listappto)) {
         } else {
             $anular = '<a value="' . $id_ctb . '" class="dropdown-item sombra " href="#" onclick="anularDocumentoTes(' . $id_ctb . ');">Anulación</a>';
         }
-        if ((intval($permisos['editar'])) === 1) {
+        if ((PermisosUsuario($permisos, 5601, 3) || $id_rol == 1)) {
             $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" onclick="cargarListaDetallePagoEdit(' . $id_ctb . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Editar_' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
             $detalles = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
             $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoTes(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
             // Acciones teniendo en cuenta el tipo de rol
             //si es lider de proceso puede abrir o cerrar documentos
-
-            if ($rol['id_rol'] == 4 || $rol['id_rol'] == 1) {
-                if ($estado == 0) {
-                    $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
-                } else {
-                    $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoTes(' . $id_ctb . ')" href="#">Abrir documento</a>';
-                }
-                $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-                ...
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-               ' . $cerrar . '
-                ' . $anular . '
-                <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Duplicar</a>
-                <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Parametrizar</a>
-                </div>';
-            } else {
-                $cerrar = null;
-            }
-            if ($estado == 0) {
-                $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
-            }
         } else {
             $editar = null;
             $detalles = null;
             $acciones = null;
         }
-
-        if ((intval($permisos['borrar'])) === 1) {
+        if ((PermisosUsuario($permisos, 5601, 4) || $id_rol == 1)) {
             $borrar = '<a value="' . $id_ctb . '" onclick="eliminarRegistroTec(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+            if ($estado == 1) {
+                $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
+            } else {
+                $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoTes(' . $id_ctb . ')" href="#">Abrir documento</a>';
+            }
+            $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+            ...
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+           ' . $cerrar . '
+            ' . $anular . '
+            <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Duplicar</a>
+            <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Parametrizar</a>
+            </div>';
         } else {
             $borrar = null;
         }
 
-        if ($estado == 1) {
+        if ($estado >= 2) {
             $editar = null;
             $borrar = null;
         }
-
-        if ($estado == 5) {
+        if ($estado == 0) {
             $editar = null;
             $borrar = null;
             $imprimir = null;

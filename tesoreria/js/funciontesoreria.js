@@ -228,7 +228,7 @@ function CegresoNomina() {
 function CausaCENomina(boton) {
   var cant = document.getElementById("total");
   var valor = Number(cant.value);
-  var data = boton.value;
+  var data = atob(boton.getAttribute("text"));
   data = data.split("|");
   var tipo = data[1];
   var ruta = "";
@@ -259,8 +259,7 @@ function CausaCENomina(boton) {
             cant.value = valor - 1;
             document.getElementById("totalCausa").innerHTML = valor - 1;
             boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
-            let tabla = "tableMvtoTesoreriaPagos";
-            reloadtable(tabla);
+            $('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
             $("#divModalForms").modal("hide");
             mje("Registro exitoso");
           } else {

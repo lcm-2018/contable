@@ -626,7 +626,7 @@ $rol = $_SESSION['rol'];
                 }
                 $key = array_search('56', array_column($perm_modulos, 'id_modulo'));
                 if (false !== $key) {
-                    if (PermisosUsuario($permisos, 5601, 0) || PermisosUsuario($permisos, 5602, 0) || PermisosUsuario($permisos, 5603, 0)  || PermisosUsuario($permisos, 5604, 0) || PermisosUsuario($permisos, 5605, 0) || PermisosUsuario($permisos, 5606, 0)  || $id_rol == 1) {
+                    if (PermisosUsuario($permisos, 5601, 0) || PermisosUsuario($permisos, 5602, 0) || PermisosUsuario($permisos, 5603, 0)  || PermisosUsuario($permisos, 5604, 0) || PermisosUsuario($permisos, 5605, 0) || PermisosUsuario($permisos, 5606, 0) || PermisosUsuario($permisos, 5607, 0) || PermisosUsuario($permisos, 5608, 0) || $id_rol == 1) {
                     ?>
                         <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapseTeso" aria-expanded="false" aria-controls="collapsePages2">
                             <div class="form-row">
@@ -677,6 +677,18 @@ $rol = $_SESSION['rol'];
                                 <?php }
                                 if (PermisosUsuario($permisos, 5604, 0) || $id_rol == 1) {
                                 ?>
+                                    <a class="nav-link sombra  tesoreria" text="4" href="javascript:void(0)">
+                                        <div class="div-icono">
+                                            <i class="fas fa-cash-register fa-sm" style="color: #229954;"></i>
+                                        </div>
+                                        <div>
+                                            Caja menor
+                                        </div>
+                                    </a>
+                                <?php
+                                }
+                                if (PermisosUsuario($permisos, 5605, 0) || $id_rol == 1) {
+                                ?>
                                     <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/tesoreria/lista_informes_tesoreria.php">
                                         <div class="div-icono">
                                             <i class="far fa-file fa-sm" style="color: #FF5733;"></i>
@@ -686,7 +698,7 @@ $rol = $_SESSION['rol'];
                                         </div>
                                     </a>
                                 <?php }
-                                if (PermisosUsuario($permisos, 5605, 0) || PermisosUsuario($permisos, 5606, 0) || $id_rol == 1) {
+                                if (PermisosUsuario($permisos, 5606, 0) || PermisosUsuario($permisos, 5607, 0) || PermisosUsuario($permisos, 5608, 0) || $id_rol == 1) {
                                 ?>
                                     <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
                                         <div class="div-icono">
@@ -700,25 +712,38 @@ $rol = $_SESSION['rol'];
                                     <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-parent="#sidenavAccordionPages">
                                         <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
                                             <?php
-                                            if (PermisosUsuario($permisos, 5605, 0) || $id_rol == 1) {
+                                            if (PermisosUsuario($permisos, 5606, 0) || $id_rol == 1) {
                                             ?>
                                                 <a class="nav-link sombra" href="#">
                                                     <div class="div-icono">
-                                                        <i class="fas fa-gavel fa-sm" style="color: #B2BABB;"></i>
+                                                        <i class="fas fa-handshake fa-sm" style="color: #9A9B9B;"></i>
                                                     </div>
                                                     <div>
                                                         Conciliaciones
                                                     </div>
                                                 </a>
-                                            <?php }
-                                            if (PermisosUsuario($permisos, 5606, 0) || $id_rol == 1) {
+                                            <?php
+                                            }
+                                            if (PermisosUsuario($permisos, 5607, 0) || $id_rol == 1) {
                                             ?>
-                                                <a class="nav-link sombra" href="#">
+                                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/tesoreria/lista_cuentas_banco.php">
                                                     <div class="div-icono">
-                                                        <i class="fas fa-certificate fa-sm" style="color: #2980B9;"></i>
+                                                        <i class="fas fa-stream fa-sm" style="color: #1ABC9C;"></i>
                                                     </div>
                                                     <div>
-                                                        Certificados
+                                                        Cuentas
+                                                    </div>
+                                                </a>
+                                            <?php
+                                            }
+                                            if (PermisosUsuario($permisos, 5608, 0) || $id_rol == 1) {
+                                            ?>
+                                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/tesoreria/lista_chequeras_gen.php">
+                                                    <div class="div-icono">
+                                                        <i class="fas fa-wallet fa-sm" style="color: #E74C3C;"></i>
+                                                    </div>
+                                                    <div>
+                                                        Chequeras
                                                     </div>
                                                 </a>
                                             <?php

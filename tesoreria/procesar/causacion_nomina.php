@@ -6,13 +6,13 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../conexion.php';
 $vigencia = $_SESSION['vigencia'];
+$id_vigencia = $_SESSION['id_vigencia'];
 $data = explode(',', file_get_contents("php://input"));
-$idNomina = $data[0];
+$id_nomina = $data[0];
 $tipo_nomina = $data[1];
-$ids = explode('|', base64_decode($data[2]));
-$id_doc = $ids[0];
-$id_doc_crp = $ids[1];
-$id_doc_nom = $ids[2];
+$id_doc = $data[2];
+$id_doc_crp = $data[3];
+$id_ctb_doc = $data[4];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -30,7 +30,7 @@ try {
                 `nom_liq_dlab_auxt`
                 INNER JOIN `nom_empleado` 
                     ON (`nom_liq_dlab_auxt`.`id_empleado` = `nom_empleado`.`id_empleado`)
-            WHERE (`nom_liq_dlab_auxt`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_dlab_auxt`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $sueldoBasico = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -56,7 +56,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_nomina`, `tipo`, `descripcion`, `mes` FROM `nom_nominas` WHERE (`id_nomina` = $idNomina)";
+    $sql = "SELECT `id_nomina`, `tipo`, `descripcion`, `mes` FROM `nom_nominas` WHERE (`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $infonomina = $rs->fetch(PDO::FETCH_ASSOC);
     $tipo_nomina = $infonomina['tipo'];
@@ -80,7 +80,7 @@ try {
                     ON (`nom_horas_ex_trab`.`id_empleado` = `nom_empleado`.`id_empleado`)
                 INNER JOIN `nom_liq_horex` 
                     ON (`nom_liq_horex`.`id_he_lab` = `nom_horas_ex_trab`.`id_he_trab`)
-            WHERE (`nom_liq_horex`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_horex`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $horas = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -116,7 +116,7 @@ try {
                     ON (`nom_liq_segsocial_empdo`.`id_arl` = `nom_arl`.`id_arl`)
                 INNER JOIN `nom_epss` 
                     ON (`nom_liq_segsocial_empdo`.`id_eps` = `nom_epss`.`id_eps`)
-            WHERE (`nom_liq_segsocial_empdo`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_segsocial_empdo`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $segSocial = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -136,7 +136,7 @@ try {
                 `nom_liq_parafiscales`
                 INNER JOIN `nom_empleado` 
                     ON (`nom_liq_parafiscales`.`id_empleado` = `nom_empleado`.`id_empleado`)
-            WHERE (`nom_liq_parafiscales`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_parafiscales`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $parafiscales = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -156,7 +156,7 @@ try {
                     ON (`nom_embargos`.`id_empleado` = `nom_empleado`.`id_empleado`)
                 INNER JOIN `nom_liq_embargo` 
                     ON (`nom_liq_embargo`.`id_embargo` = `nom_embargos`.`id_embargo`)
-            WHERE (`nom_liq_embargo`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_embargo`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $embargos = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -178,7 +178,7 @@ try {
                     ON (`nom_libranzas`.`id_empleado` = `nom_empleado`.`id_empleado`)
                 INNER JOIN `nom_liq_libranza` 
                     ON (`nom_liq_libranza`.`id_libranza` = `nom_libranzas`.`id_libranza`)
-            WHERE (`nom_liq_libranza`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_libranza`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $libranzas = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -198,7 +198,7 @@ try {
                     ON (`nom_cuota_sindical`.`id_empleado` = `nom_empleado`.`id_empleado`)
                 INNER JOIN `nom_liq_sindicato_aportes` 
                     ON (`nom_liq_sindicato_aportes`.`id_cuota_sindical` = `nom_cuota_sindical`.`id_cuota_sindical`)
-            WHERE (`nom_liq_sindicato_aportes`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_sindicato_aportes`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $sindicato = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -208,7 +208,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_empleado` , `val_liq` FROM `nom_liq_salario` WHERE (`id_nomina` = $idNomina)";
+    $sql = "SELECT `id_empleado` , `val_liq` FROM `nom_liq_salario` WHERE (`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $salario = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -226,7 +226,7 @@ try {
                 `nom_liq_indemniza_vac`
                 INNER JOIN `nom_indemniza_vac` 
                     ON (`nom_liq_indemniza_vac`.`id_indemnizacion` = `nom_indemniza_vac`.`id_indemniza`)
-            WHERE (`nom_liq_indemniza_vac`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_indemniza_vac`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $indemnizacion = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -242,12 +242,12 @@ try {
                 , `nom_tipo_rubro`.`nombre`
                 , `nom_rel_rubro`.`r_admin`
                 , `nom_rel_rubro`.`r_operativo`
-                , `nom_rel_rubro`.`vigencia`
+                , `nom_rel_rubro`.`id_vigencia`
             FROM
                 `nom_rel_rubro`
                 INNER JOIN `nom_tipo_rubro` 
                     ON (`nom_rel_rubro`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE (`nom_rel_rubro`.`vigencia` = '$vigencia')";
+            WHERE (`nom_rel_rubro`.`id_vigencia` = $id_vigencia)";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -320,7 +320,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_empleado` , `val_ret` FROM `nom_retencion_fte` WHERE (`id_nomina` = $idNomina)";
+    $sql = "SELECT `id_empleado` , `val_ret` FROM `nom_retencion_fte` WHERE (`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $rfte = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -330,7 +330,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tes_cuenta`, `cta_contable` FROM `seg_tes_cuentas` WHERE (`id_tes_cuenta` = 21)";
+    $sql = "SELECT `id_cuenta` AS `cta_contable` FROM `tes_cuentas` WHERE (`estado` = 1)";
     $rs = $cmd->query($sql);
     $banco = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -346,7 +346,7 @@ try {
                 `nom_liq_vac`
                 INNER JOIN `nom_vacaciones` 
                     ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
-            WHERE (`nom_liq_vac`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_vac`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $vacaciones = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -360,7 +360,7 @@ try {
                 `id_empleado`, `val_bsp`
             FROM
                 `nom_liq_bsp`
-            WHERE (`id_nomina` = $idNomina)";
+            WHERE (`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $bsp = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -384,7 +384,7 @@ try {
                 `nom_liq_incap`
                 INNER JOIN `nom_incapacidad` 
                     ON (`nom_liq_incap`.`id_incapacidad` = `nom_incapacidad`.`id_incapacidad`)
-            WHERE (`nom_liq_incap`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_incap`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $incapacidades = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -402,7 +402,7 @@ try {
                 `nom_liq_prima_nav`
                 INNER JOIN `nom_empleado` 
                     ON (`nom_liq_prima_nav`.`id_empleado` = `nom_empleado`.`id_empleado`)
-            WHERE (`nom_liq_prima_nav`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_prima_nav`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $prima_nav = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -420,7 +420,7 @@ try {
                 `nom_liq_prima`
                 LEFT JOIN `nom_empleado` 
                     ON (`nom_liq_prima`.`id_empleado` = `nom_empleado`.`id_empleado`)
-            WHERE (`nom_liq_prima`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_prima`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $prima_sv = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -439,7 +439,7 @@ try {
                 `nom_liq_cesantias`
                 INNER JOIN `nom_empleado` 
                     ON (`nom_liq_cesantias`.`id_empleado` = `nom_empleado`.`id_empleado`)
-            WHERE (`nom_liq_cesantias`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_cesantias`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $cesantias = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -457,10 +457,10 @@ try {
                 `nom_liq_compesatorio`
                 INNER JOIN `nom_empleado` 
                     ON (`nom_liq_compesatorio`.`id_empleado` = `nom_empleado`.`id_empleado`)
-            WHERE (`nom_liq_compesatorio`.`id_nomina` = $idNomina)";
+            WHERE (`nom_liq_compesatorio`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $compensatorios = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $sql = "SELECT COUNT(`id_empleado`) FROM `nom_liq_salario`  WHERE `id_nomina` = $idNomina";
+    $sql = "SELECT COUNT(`id_empleado`) FROM `nom_liq_salario`  WHERE `id_nomina` = $id_nomina";
     $cantidad_empleados = $cmd->query($sql)->fetchColumn();
     $cmd = null;
 } catch (PDOException $e) {
@@ -485,47 +485,81 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha = $date->format('Y-m-d');
 if ($tipo_nomina == 'N') {
     $objeto = 'LIQUIDACIÓN MENSUAL EMPLEADOS, ' . mb_strtoupper($meses[$mes]) . ' DE ' . $vigencia;
-    $id_nom_ce = $idNomina;
+    $id_nom_ce = $id_nomina;
 } else {
-    $objeto = $descripcion . ' DE EMPLEADOS, NÓMINA No. ' . $idNomina . ' VIGENCIA ' . $vigencia;
+    $objeto = $descripcion . ' DE EMPLEADOS, NÓMINA No. ' . $id_nomina . ' VIGENCIA ' . $vigencia;
     $id_nom_ce = NULL;
 }
 $sede = 1;
 $iduser = $_SESSION['id_user'];
 $fecha2 = $date->format('Y-m-d H:i:s');
 $contador = 0;
+$tipo_doc = '4';
+
 //CEVA
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT MAX(`id_manu`) as `id_manu` FROM `ctb_doc` WHERE (`vigencia`= '$vigencia' AND `tipo_doc` ='CEVA')";
+    $sql = "SELECT MAX(`id_manu`) AS `id_manu` FROM `ctb_doc` WHERE `id_vigencia` = $id_vigencia AND `id_tipo_doc` = $tipo_doc";
     $rs = $cmd->query($sql);
-    $id_m = $rs->fetch(PDO::FETCH_ASSOC);
+    $id_manu = !empty($consecutivo) ? $consecutivo['id_manu'] + 1 : 1;
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$id_manu = $id_m['id_manu'] + 1;
-$tipo_doc = 'CEVA';
-$id_tercero = 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `no_doc` = " . $_SESSION['nit_emp'];
+    $rs = $cmd->query($sql);
+    $tercero = $rs->fetch();
+    $id_ter_api = !empty($tercero) ? $tercero['id_tercero_api'] : 0;
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `pto_cop_detalle`.`id_pto_cop_det`
+                , `pto_cdp_detalle`.`id_rubro`
+                , `pto_cop_detalle`.`id_tercero_api`
+            FROM
+                `pto_cop_detalle`
+                INNER JOIN `pto_crp_detalle` 
+                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                INNER JOIN `pto_cdp_detalle` 
+                    ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+            WHERE (`pto_cop_detalle`.`id_ctb_doc` = $id_ctb_doc)";
+    $rs = $cmd->query($sql);
+    $ids_detalle = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $estado = 2;
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $query = $cmd->prepare("INSERT INTO `ctb_doc` (`vigencia`, `tipo_doc`, `id_manu`,`id_tercero`, `fecha`, `detalle`, `id_user_reg`, `fec_reg`, `id_nomina`)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $query->bindParam(1, $vigencia, PDO::PARAM_INT);
+    $query = "INSERT INTO `ctb_doc` 
+                (`id_vigencia`, `id_tipo_doc`, `id_manu`,`id_tercero`, `fecha`, `detalle`, `id_user_reg`, `fecha_reg`, `estado`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = $cmd->prepare($query);
+    $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
     $query->bindParam(2, $tipo_doc, PDO::PARAM_STR);
     $query->bindParam(3, $id_manu, PDO::PARAM_INT);
-    $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
+    $query->bindParam(4, $id_ter_api, PDO::PARAM_INT);
     $query->bindParam(5, $fecha, PDO::PARAM_STR);
     $query->bindParam(6, $objeto, PDO::PARAM_STR);
     $query->bindParam(7, $iduser, PDO::PARAM_INT);
     $query->bindParam(8, $fecha2);
-    $query->bindParam(9, $id_nom_ce, PDO::PARAM_INT);
+    $query->bindParam(9, $estado, PDO::PARAM_INT);
     $query->execute();
-    $id_doc_ceva = $cmd->lastInsertId();
+    $id_ctb_doc_nom = $cmd->lastInsertId();
     if (!($cmd->lastInsertId() > 0)) {
         echo $query->errorInfo()[2];
+        exit();
     }
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -551,22 +585,18 @@ foreach ($sueldoBasico as $sb) {
     $keypf = array_search($id_empleado, array_column($parafiscales, 'id_empleado'));
     $keyss = array_search($id_empleado, array_column($segSocial, 'id_empleado'));
     try {
-        $tipo_mov = 'PAG';
-        $estado = 0;
+        $liberado = 0;
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-        $query = "INSERT INTO `pto_documento_detalles` (`id_pto_doc`, `tipo_mov`, `id_tercero_api`, `rubro`, `valor`,`estado`,`id_auto_dep`,`id_ctb_doc`,`id_ctb_cop`) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO `pto_pag_detalle`
+                    (`id_ctb_doc`,`id_pto_cop_det`,`valor`,`valor_liberado`,`id_tercero_api`)
+                VALUES (?, ?, ?, ?, ?)";
         $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_doc_crp, PDO::PARAM_INT);
-        $query->bindParam(2, $tipo_mov, PDO::PARAM_STR);
-        $query->bindParam(3, $id_tercero, PDO::PARAM_INT);
-        $query->bindParam(4, $rubro, PDO::PARAM_STR);
-        $query->bindParam(5, $valorCdp, PDO::PARAM_STR);
-        $query->bindParam(6, $estado, PDO::PARAM_INT);
-        $query->bindParam(7, $id_doc, PDO::PARAM_INT);
-        $query->bindParam(8, $id_doc_ceva, PDO::PARAM_INT);
-        $query->bindParam(9, $id_doc_nom, PDO::PARAM_INT);
+        $query->bindParam(1, $id_ctb_doc_nom, PDO::PARAM_INT);
+        $query->bindParam(2, $id_det, PDO::PARAM_INT);
+        $query->bindParam(3, $valor, PDO::PARAM_STR);
+        $query->bindParam(4, $liberado, PDO::PARAM_STR);
+        $query->bindParam(5, $id_tercero, PDO::PARAM_INT);
         foreach ($rubros as $rb) {
             $tipo = $rb['id_tipo'];
             if ($tipoCargo == '1') {
@@ -574,33 +604,40 @@ foreach ($sueldoBasico as $sb) {
             } else {
                 $rubro = $rb['r_operativo'];
             }
-            $valorCdp = 0;
+            $valor = 0;
+            $id_det = NULL;
+            foreach ($ids_detalle as $detalle) {
+                if ($detalle['id_rubro'] == $rubro && $detalle['id_tercero_api'] == $id_tercero) {
+                    $id_det = $detalle['id_pto_cop_det'];
+                    break;
+                }
+            }
             switch ($tipo) {
                 case 1:
-                    $valorCdp = $basico;
+                    $valor = $basico;
                     break;
                 case 2:
-                    $valorCdp = $extras;
+                    $valor = $extras;
                     break;
                 case 3:
-                    $valorCdp = $repre;
+                    $valor = $repre;
                     break;
                 case 4:
                     $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
-                    $valorCdp = $key !== false ? $vacaciones[$key]['val_bon_recrea'] : 0;
+                    $valor = $key !== false ? $vacaciones[$key]['val_bon_recrea'] : 0;
                     break;
                 case 5:
                     $key = array_search($id_empleado, array_column($bsp, 'id_empleado'));
-                    $valorCdp = $key !== false ? $bsp[$key]['val_bsp'] : 0;
+                    $valor = $key !== false ? $bsp[$key]['val_bsp'] : 0;
                     break;
                 case 6:
-                    $valorCdp = $auxtras;
+                    $valor = $auxtras;
                     break;
                 case 7:
-                    $valorCdp = $auxalim;
+                    $valor = $auxalim;
                     break;
                 case 8:
-                    $valorCdp = 0;
+                    $valor = 0;
                     $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
                     if ($key !== false) {
                         $filtro = [];
@@ -609,43 +646,43 @@ foreach ($sueldoBasico as $sb) {
                         });
                         foreach ($filtro as $f) {
                             if ($f['id_tipo'] == 1) {
-                                $valorCdp += $f['pago_eps'];
+                                $valor += $f['pago_eps'];
                             } else {
-                                $valorCdp += $f['pago_arl'];
+                                $valor += $f['pago_arl'];
                             }
                         }
                     }
                     break;
                 case 9:
                     $key = array_search($id_empleado, array_column($indemnizacion, 'id_empleado'));
-                    $valorCdp = $key !== false ? $indemnizacion[$key]['val_liq'] : 0;
+                    $valor = $key !== false ? $indemnizacion[$key]['val_liq'] : 0;
                     break;
                 case 17:
                     $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
-                    $valorCdp = $key !== false ? $vacaciones[$key]['val_liq'] : 0;
+                    $valor = $key !== false ? $vacaciones[$key]['val_liq'] : 0;
                     break;
                 case 18:
                     $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
-                    $valorCdp = $key !== false ? $cesantias[$key]['val_cesantias'] : 0;
+                    $valor = $key !== false ? $cesantias[$key]['val_cesantias'] : 0;
                     break;
                 case 19:
                     $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
-                    $valorCdp = $key !== false ? $cesantias[$key]['val_icesantias'] : 0;
+                    $valor = $key !== false ? $cesantias[$key]['val_icesantias'] : 0;
                     break;
                 case 20:
                     $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
-                    $valorCdp = $key !== false ? $vacaciones[$key]['val_prima_vac'] : 0;
+                    $valor = $key !== false ? $vacaciones[$key]['val_prima_vac'] : 0;
                     break;
                 case 21:
                     $key = array_search($id_empleado, array_column($prima_nav, 'id_empleado'));
-                    $valorCdp = $key !== false ? $prima_nav[$key]['val_liq_pv'] : 0;
+                    $valor = $key !== false ? $prima_nav[$key]['val_liq_pv'] : 0;
                     break;
                 case 22:
                     $key = array_search($id_empleado, array_column($prima_sv, 'id_empleado'));
-                    $valorCdp = $key !== false ? $prima_sv[$key]['val_liq_ps'] : 0;
+                    $valor = $key !== false ? $prima_sv[$key]['val_liq_ps'] : 0;
                     break;
                 case 32:
-                    $valorCdp = 0;
+                    $valor = 0;
                     $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
                     if ($key !== false) {
                         $filtro = [];
@@ -653,15 +690,15 @@ foreach ($sueldoBasico as $sb) {
                             return $incapacidades["id_empleado"] == $id_empleado;
                         });
                         foreach ($filtro as $f) {
-                            $valorCdp += $f['pago_empresa'];
+                            $valor += $f['pago_empresa'];
                         }
                     }
                     break;
                 default:
-                    $valorCdp = 0;
+                    $valor = 0;
                     break;
             }
-            if ($valorCdp > 0 && $rubro != '') {
+            if ($valor > 0 && $rubro != '') {
                 $query->execute();
                 if (!($cmd->lastInsertId() > 0)) {
                     echo $query->errorInfo()[2];
@@ -673,29 +710,19 @@ foreach ($sueldoBasico as $sb) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
     try {
-        $id_cc = 0;
-        $id_rte = 0;
-        $id_fac = 0;
-        $id_tipo_bn_sv = 0;
+        $neto = 0;
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-        $query = "INSERT INTO `ctb_libaux` (`id_ctb_doc`,`id_tercero`,`cuenta`,`debito`,`credito`,`id_sede`,`id_cc`,`id_crp`,`id_rte`,`id_fac`,`id_tipo_ad`,`id_user_reg`,`fec_reg`) 
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        $query = "INSERT INTO `ctb_libaux` (`id_ctb_doc`,`id_tercero_api`,`id_cuenta`,`debito`,`credito`,`id_user_reg`,`fecha_reg`) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
         $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_doc_ceva, PDO::PARAM_INT);
-        $query->bindParam(2, $id_tercero, PDO::PARAM_INT);
+        $query->bindParam(1, $id_ctb_doc_nom, PDO::PARAM_INT);
+        $query->bindParam(2, $id_ter_api, PDO::PARAM_INT);
         $query->bindParam(3, $cuenta, PDO::PARAM_STR);
         $query->bindParam(4, $valor, PDO::PARAM_STR);
         $query->bindParam(5, $credito, PDO::PARAM_STR);
-        $query->bindParam(6, $id_sede, PDO::PARAM_INT);
-        $query->bindParam(7, $id_cc, PDO::PARAM_INT);
-        $query->bindParam(8, $id_doc_crp, PDO::PARAM_INT);
-        $query->bindParam(9, $id_rte, PDO::PARAM_INT);
-        $query->bindParam(10, $id_fac, PDO::PARAM_INT);
-        $query->bindParam(11, $id_tipo_bn_sv, PDO::PARAM_INT);
-        $query->bindParam(12, $iduser, PDO::PARAM_INT);
-        $query->bindParam(13, $fecha2);
-        $neto = 0;
+        $query->bindParam(6, $iduser, PDO::PARAM_INT);
+        $query->bindParam(7, $fecha2);
         foreach ($cPasivo as $cp) {
             $credito = 0;
             $tipo = $cp['id_tipo'];
@@ -863,7 +890,7 @@ try {
     $sql = "UPDATE `nom_nominas` SET `estado` = ? WHERE `id_nomina` = ?";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $estado, PDO::PARAM_INT);
-    $sql->bindParam(2, $idNomina, PDO::PARAM_INT);
+    $sql->bindParam(2, $id_nomina, PDO::PARAM_INT);
     $sql->execute();
     $cmd = null;
 } catch (PDOException $e) {
@@ -874,8 +901,8 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $query = "UPDATE `nom_nomina_pto_ctb_tes` SET `ceva` = ? WHERE `id_nomina` = ? AND `crp`  = ?";
     $query = $cmd->prepare($query);
-    $query->bindParam(1, $id_doc_ceva, PDO::PARAM_INT);
-    $query->bindParam(2, $idNomina, PDO::PARAM_INT);
+    $query->bindParam(1, $id_ctb_doc_nom, PDO::PARAM_INT);
+    $query->bindParam(2, $id_nomina, PDO::PARAM_INT);
     $query->bindParam(3, $id_doc_crp, PDO::PARAM_INT);
     $query->execute();
     if (!($cmd->lastInsertId() > 0)) {

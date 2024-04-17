@@ -6,13 +6,14 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../conexion.php';
 $vigencia = $_SESSION['vigencia'];
+$id_vigencia = $_SESSION['id_vigencia'];
 $data = explode(',', file_get_contents("php://input"));
 $id_nomina = $data[0];
 $tipo_nomina = $data[1];
-$ids = explode('|', base64_decode($data[2]));
-$id_doc = $ids[0];
-$id_doc_crp = $ids[1];
-$id_doc_nom = $ids[2];
+$id_doc = $data[2];
+$id_doc_crp = $data[3];
+$id_ctb_doc = $data[4];
+
 $id_api_sena = 1245;
 $id_api_icbf = 1247;
 $id_api_comfam = 1246;
@@ -150,12 +151,12 @@ try {
                 , `nom_tipo_rubro`.`nombre`
                 , `nom_rel_rubro`.`r_admin`
                 , `nom_rel_rubro`.`r_operativo`
-                , `nom_rel_rubro`.`vigencia`
+                , `nom_rel_rubro`.`id_vigencia`
             FROM
                 `nom_rel_rubro`
                 INNER JOIN `nom_tipo_rubro` 
                     ON (`nom_rel_rubro`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE (`nom_rel_rubro`.`vigencia` = '$vigencia')";
+            WHERE (`nom_rel_rubro`.`id_vigencia` = $id_vigencia)";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -232,7 +233,7 @@ $cuentas['pasivo'] = $cPasivo;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tes_cuenta`, `cta_contable` FROM `seg_tes_cuentas` WHERE (`id_tes_cuenta` = 1)";
+    $sql = "SELECT `id_cuenta` AS `cta_contable` FROM `tes_cuentas` WHERE (`estado` = 1)";
     $rs = $cmd->query($sql);
     $banco = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -262,79 +263,114 @@ if ($nomina['tipo'] == 'N') {
 $nom_mes = isset($meses[$nomina['mes']]) ? 'MES DE ' . mb_strtoupper($meses[$nomina['mes']]) : '';
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha = $date->format('Y-m-d');
-$objeto = "PAGO NOMINA PATRONAL " . $cual . " N° " . $nomina['id_nomina'] . ' ' . $nom_mes . "VIGENCIA " . $nomina['vigencia'];
+$objeto = "PAGO NOMINA PATRONAL " . $cual . " N° " . $nomina['id_nomina'] . ' ' . $nom_mes . " VIGENCIA " . $nomina['vigencia'];
 $sede = 1;
 $iduser = $_SESSION['id_user'];
 $fecha2 = $date->format('Y-m-d H:i:s');
 $contador = 0;
 $id_tercero = 0;
+$tipo_doc = 4;
 //CEVA
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT MAX(`id_manu`) as `id_manu` FROM `ctb_doc` WHERE (`vigencia`= '$vigencia' AND `tipo_doc` ='CEVA')";
+    $sql = "SELECT MAX(`id_manu`) AS `id_manu` FROM `ctb_doc` WHERE `id_vigencia` = $id_vigencia AND `id_tipo_doc` = $tipo_doc";
     $rs = $cmd->query($sql);
-    $id_m = $rs->fetch(PDO::FETCH_ASSOC);
+    $consecutivo = $rs->fetch();
+    $id_manu = !empty($consecutivo) ? $consecutivo['id_manu'] + 1 : 1;
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$id_manu = $id_m['id_manu'] + 1;
-$tipo_doc = 'CEVA';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `no_doc` = " . $_SESSION['nit_emp'];
+    $rs = $cmd->query($sql);
+    $tercero = $rs->fetch();
+    $id_ter_api = !empty($tercero) ? $tercero['id_tercero_api'] : 0;
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `pto_cop_detalle`.`id_pto_cop_det`
+                , `pto_cdp_detalle`.`id_rubro`
+                , `pto_cop_detalle`.`id_tercero_api`
+            FROM
+                `pto_cop_detalle`
+                INNER JOIN `pto_crp_detalle` 
+                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                INNER JOIN `pto_cdp_detalle` 
+                    ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+            WHERE (`pto_cop_detalle`.`id_ctb_doc` = $id_ctb_doc)";
+    $rs = $cmd->query($sql);
+    $ids_detalle = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $estado = 2;
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $query = $cmd->prepare("INSERT INTO `ctb_doc` (`vigencia`, `tipo_doc`, `id_manu`,`id_tercero`, `fecha`, `detalle`, `id_user_reg`, `fec_reg`)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $query->bindParam(1, $vigencia, PDO::PARAM_INT);
+    $query = "INSERT INTO `ctb_doc` 
+                (`id_vigencia`, `id_tipo_doc`, `id_manu`,`id_tercero`, `fecha`, `detalle`, `id_user_reg`, `fecha_reg`, `estado`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = $cmd->prepare($query);
+    $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
     $query->bindParam(2, $tipo_doc, PDO::PARAM_STR);
     $query->bindParam(3, $id_manu, PDO::PARAM_INT);
-    $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
+    $query->bindParam(4, $id_ter_api, PDO::PARAM_INT);
     $query->bindParam(5, $fecha, PDO::PARAM_STR);
     $query->bindParam(6, $objeto, PDO::PARAM_STR);
     $query->bindParam(7, $iduser, PDO::PARAM_INT);
     $query->bindParam(8, $fecha2);
+    $query->bindParam(9, $estado, PDO::PARAM_INT);
     $query->execute();
-    $id_doc_ceva = $cmd->lastInsertId();
+    $id_ctb_doc_nom = $cmd->lastInsertId();
     if (!($cmd->lastInsertId() > 0)) {
         echo $query->errorInfo()[2];
+        exit();
     }
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 try {
-    $tipo_mov = 'PAG';
-    $estado = 0;
+    $liberado = 0;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $query = "INSERT INTO `pto_documento_detalles` (`id_pto_doc`, `tipo_mov`, `id_tercero_api`, `rubro`, `valor`,`estado`,`id_auto_dep`,`id_ctb_doc`,`id_ctb_cop`) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO `pto_pag_detalle`
+                    (`id_ctb_doc`,`id_pto_cop_det`,`valor`,`valor_liberado`,`id_tercero_api`)
+                VALUES (?, ?, ?, ?, ?)";
     $query = $cmd->prepare($query);
-    $query->bindParam(1, $id_doc_crp, PDO::PARAM_INT);
-    $query->bindParam(2, $tipo_mov, PDO::PARAM_STR);
-    $query->bindParam(3, $id_tercero, PDO::PARAM_INT);
-    $query->bindParam(4, $rubro, PDO::PARAM_STR);
-    $query->bindParam(5, $valorCdp, PDO::PARAM_STR);
-    $query->bindParam(6, $estado, PDO::PARAM_INT);
-    $query->bindParam(7, $id_doc, PDO::PARAM_INT);
-    $query->bindParam(8, $id_doc_ceva, PDO::PARAM_INT);
-    $query->bindParam(9, $id_doc_nom, PDO::PARAM_INT);
+    $query->bindParam(1, $id_ctb_doc_nom, PDO::PARAM_INT);
+    $query->bindParam(2, $id_det, PDO::PARAM_INT);
+    $query->bindParam(3, $valor, PDO::PARAM_STR);
+    $query->bindParam(4, $liberado, PDO::PARAM_STR);
+    $query->bindParam(5, $id_tercero, PDO::PARAM_INT);
     foreach ($rubros as $rb) {
         $tipo = $rb['id_tipo'];
+        $valor = 0;
         switch ($tipo) {
             case 11:
-                $valorCdp = $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
+                $valor = $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
                 $rubro = $rb['r_admin'];
                 $id_tercero = $id_api_comfam;
-                if ($valorCdp > 0) {
+                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
                         echo $query->errorInfo()[2];
                     }
                 }
                 $rubro = $rb['r_operativo'];
-                $valorCdp = $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
-                if ($valorCdp > 0) {
+                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                $valor = $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
+                if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
                         echo $query->errorInfo()[2];
@@ -347,8 +383,9 @@ try {
                     $epss = $administrativo['eps'];
                     foreach ($epss as $key => $value) {
                         $id_tercero = $idsTercer['eps'][$key];
-                        $valorCdp = $value;
-                        if ($valorCdp > 0) {
+                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                        $valor = $value;
+                        if ($valor > 0) {
                             $query->execute();
                             if (!($cmd->lastInsertId() > 0)) {
                                 echo $query->errorInfo()[2];
@@ -361,8 +398,9 @@ try {
                     $epss = $operativo['eps'];
                     foreach ($epss as $key => $value) {
                         $id_tercero = $idsTercer['eps'][$key];
-                        $valorCdp = $value;
-                        if ($valorCdp > 0) {
+                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                        $valor = $value;
+                        if ($valor > 0) {
                             $query->execute();
                             if (!($cmd->lastInsertId() > 0)) {
                                 echo $query->errorInfo()[2];
@@ -377,8 +415,9 @@ try {
                     $arls = $administrativo['arl'];
                     foreach ($arls as $key => $value) {
                         $id_tercero = $idsTercer['arl'][$key];
-                        $valorCdp = $value;
-                        if ($valorCdp > 0) {
+                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                        $valor = $value;
+                        if ($valor > 0) {
                             $query->execute();
                             if (!($cmd->lastInsertId() > 0)) {
                                 echo $query->errorInfo()[2];
@@ -391,8 +430,9 @@ try {
                     $arls = $operativo['arl'];
                     foreach ($arls as $key => $value) {
                         $id_tercero = $idsTercer['arl'][$key];
-                        $valorCdp = $value;
-                        if ($valorCdp > 0) {
+                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                        $valor = $value;
+                        if ($valor > 0) {
                             $query->execute();
                             if (!($cmd->lastInsertId() > 0)) {
                                 echo $query->errorInfo()[2];
@@ -407,8 +447,9 @@ try {
                     $afps = $administrativo['afp'];
                     foreach ($afps as $key => $value) {
                         $id_tercero = $idsTercer['afp'][$key];
-                        $valorCdp = $value;
-                        if ($valorCdp > 0) {
+                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                        $valor = $value;
+                        if ($valor > 0) {
                             $query->execute();
                             if (!($cmd->lastInsertId() > 0)) {
                                 echo $query->errorInfo()[2];
@@ -421,8 +462,9 @@ try {
                     $afps = $operativo['afp'];
                     foreach ($afps as $key => $value) {
                         $id_tercero = $idsTercer['afp'][$key];
-                        $valorCdp = $value;
-                        if ($valorCdp > 0) {
+                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                        $valor = $value;
+                        if ($valor > 0) {
                             $query->execute();
                             if (!($cmd->lastInsertId() > 0)) {
                                 echo $query->errorInfo()[2];
@@ -432,18 +474,20 @@ try {
                 }
                 break;
             case 15:
-                $valorCdp = $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
+                $valor = $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
                 $rubro = $rb['r_admin'];
                 $id_tercero = $id_api_icbf;
-                if ($valorCdp > 0) {
+                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
                         echo $query->errorInfo()[2];
                     }
                 }
                 $rubro = $rb['r_operativo'];
-                $valorCdp = $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
-                if ($valorCdp > 0) {
+                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                $valor = $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
+                if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
                         echo $query->errorInfo()[2];
@@ -451,18 +495,20 @@ try {
                 }
                 break;
             case 16:
-                $valorCdp = $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
+                $valor = $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
                 $rubro = $rb['r_admin'];
                 $id_tercero = $id_api_sena;
-                if ($valorCdp > 0) {
+                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
                         echo $query->errorInfo()[2];
                     }
                 }
                 $rubro = $rb['r_operativo'];
-                $valorCdp = $operativo['sena'] > 0 ? $operativo['sena'] : 0;
-                if ($valorCdp > 0) {
+                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                $valor = $operativo['sena'] > 0 ? $operativo['sena'] : 0;
+                if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
                         echo $query->errorInfo()[2];
@@ -470,7 +516,7 @@ try {
                 }
                 break;
             default:
-                $valorCdp = 0;
+                $valor = 0;
                 break;
         }
     }
@@ -479,28 +525,18 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 try {
-    $id_cc = 0;
-    $id_rte = 0;
-    $id_fac = 0;
-    $id_tipo_bn_sv = 0;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $query = "INSERT INTO `ctb_libaux` (`id_ctb_doc`,`id_tercero`,`cuenta`,`debito`,`credito`,`id_sede`,`id_cc`,`id_crp`,`id_rte`,`id_fac`,`id_tipo_ad`,`id_user_reg`,`fec_reg`) 
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    $query = "INSERT INTO `ctb_libaux` (`id_ctb_doc`,`id_tercero_api`,`id_cuenta`,`debito`,`credito`,`id_user_reg`,`fecha_reg`) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
     $query = $cmd->prepare($query);
-    $query->bindParam(1, $id_doc_ceva, PDO::PARAM_INT);
+    $query->bindParam(1, $id_ctb_doc_nom, PDO::PARAM_INT);
     $query->bindParam(2, $id_tercero, PDO::PARAM_INT);
     $query->bindParam(3, $cuenta, PDO::PARAM_STR);
     $query->bindParam(4, $valor, PDO::PARAM_STR);
     $query->bindParam(5, $credito, PDO::PARAM_STR);
-    $query->bindParam(6, $id_sede, PDO::PARAM_INT);
-    $query->bindParam(7, $id_cc, PDO::PARAM_INT);
-    $query->bindParam(8, $id_doc_crp, PDO::PARAM_INT);
-    $query->bindParam(9, $id_rte, PDO::PARAM_INT);
-    $query->bindParam(10, $id_fac, PDO::PARAM_INT);
-    $query->bindParam(11, $id_tipo_bn_sv, PDO::PARAM_INT);
-    $query->bindParam(12, $iduser, PDO::PARAM_INT);
-    $query->bindParam(13, $fecha2);
+    $query->bindParam(6, $iduser, PDO::PARAM_INT);
+    $query->bindParam(7, $fecha2);
     foreach ($cuentas['pasivo'] as $cp) {
         $credito = 0;
         $tipo = $cp['id_tipo'];
@@ -660,61 +696,53 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT MAX(`id_manu`) as `id_manu` FROM `ctb_doc` WHERE (`vigencia`= '$vigencia' AND `tipo_doc` ='CEVA')";
+    $sql = "SELECT MAX(`id_manu`) AS `id_manu` FROM `ctb_doc` WHERE `id_vigencia` = $id_vigencia AND `id_tipo_doc` = $tipo_doc";
     $rs = $cmd->query($sql);
-    $id_m = $rs->fetch(PDO::FETCH_ASSOC);
+    $consecutivo = $rs->fetch();
+    $id_manu = !empty($consecutivo) ? $consecutivo['id_manu'] + 1 : 1;
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$id_manu = $id_m['id_manu'] + 1;
-$tipo_doc = 'CEVA';
-$id_tercero = 0;
 try {
+    $estado = 2;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $query = $cmd->prepare("INSERT INTO `ctb_doc` (`vigencia`, `tipo_doc`, `id_manu`,`id_tercero`, `fecha`, `detalle`, `id_user_reg`, `fec_reg`)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $query->bindParam(1, $vigencia, PDO::PARAM_INT);
+    $query = "INSERT INTO `ctb_doc` 
+                (`id_vigencia`, `id_tipo_doc`, `id_manu`,`id_tercero`, `fecha`, `detalle`, `id_user_reg`, `fecha_reg`, `estado`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = $cmd->prepare($query);
+    $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
     $query->bindParam(2, $tipo_doc, PDO::PARAM_STR);
     $query->bindParam(3, $id_manu, PDO::PARAM_INT);
-    $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
+    $query->bindParam(4, $id_ter_api, PDO::PARAM_INT);
     $query->bindParam(5, $fecha, PDO::PARAM_STR);
     $query->bindParam(6, $objeto, PDO::PARAM_STR);
     $query->bindParam(7, $iduser, PDO::PARAM_INT);
     $query->bindParam(8, $fecha2);
+    $query->bindParam(9, $estado, PDO::PARAM_INT);
     $query->execute();
-    $id_doc_ceva = $cmd->lastInsertId();
+    $id_ctb_doc_nom = $cmd->lastInsertId();
     if (!($cmd->lastInsertId() > 0)) {
         echo $query->errorInfo()[2];
+        exit();
     }
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 try {
-    $id_cc = 0;
-    $id_rte = 0;
-    $id_fac = 0;
-    $id_tipo_bn_sv = 0;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $query = "INSERT INTO `ctb_libaux` (`id_ctb_doc`,`id_tercero`,`cuenta`,`debito`,`credito`,`id_sede`,`id_cc`,`id_crp`,`id_rte`,`id_fac`,`id_tipo_ad`,`id_user_reg`,`fec_reg`) 
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    $query = "INSERT INTO `ctb_libaux` (`id_ctb_doc`,`id_tercero_api`,`id_cuenta`,`debito`,`credito`,`id_user_reg`,`fecha_reg`) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
     $query = $cmd->prepare($query);
-    $query->bindParam(1, $id_doc_ceva, PDO::PARAM_INT);
+    $query->bindParam(1, $id_ctb_doc_nom, PDO::PARAM_INT);
     $query->bindParam(2, $id_tercero, PDO::PARAM_INT);
     $query->bindParam(3, $cuenta, PDO::PARAM_STR);
     $query->bindParam(4, $valor, PDO::PARAM_STR);
     $query->bindParam(5, $credito, PDO::PARAM_STR);
-    $query->bindParam(6, $id_sede, PDO::PARAM_INT);
-    $query->bindParam(7, $id_cc, PDO::PARAM_INT);
-    $query->bindParam(8, $id_doc_crp, PDO::PARAM_INT);
-    $query->bindParam(9, $id_rte, PDO::PARAM_INT);
-    $query->bindParam(10, $id_fac, PDO::PARAM_INT);
-    $query->bindParam(11, $id_tipo_bn_sv, PDO::PARAM_INT);
-    $query->bindParam(12, $iduser, PDO::PARAM_INT);
-    $query->bindParam(13, $fecha2);
-    $neto = 0;
+    $query->bindParam(6, $iduser, PDO::PARAM_INT);
+    $query->bindParam(7, $fecha2);
     foreach ($cuentas['pasivo'] as $cp) {
         $credito = 0;
         $tipo = $cp['id_tipo'];
@@ -806,7 +834,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $query = "UPDATE `nom_nomina_pto_ctb_tes` SET `ceva` = ? WHERE `id_nomina` = ? AND `crp`  = ?";
     $query = $cmd->prepare($query);
-    $query->bindParam(1, $id_doc_ceva, PDO::PARAM_INT);
+    $query->bindParam(1, $id_ctb_doc_nom, PDO::PARAM_INT);
     $query->bindParam(2, $id_nomina, PDO::PARAM_INT);
     $query->bindParam(3, $id_doc_crp, PDO::PARAM_INT);
     $query->execute();
@@ -818,3 +846,15 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 echo 'ok';
+
+function IdDetalle($ids_detalle, $rubro, $id_ter_api)
+{
+    $id_det = NULL;
+    foreach ($ids_detalle as $detalle) {
+        if ($detalle['id_rubro'] == $rubro && $detalle['id_tercero_api'] == $id_ter_api) {
+            $id_det = $detalle['id_pto_cop_det'];
+            break;
+        }
+    }
+    return $id_det;
+}
