@@ -169,5 +169,4 @@ $(function() {
         var encoded = window.btoa(xls);
         $('<form action="../common/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
     });
-
 })(jQuery);

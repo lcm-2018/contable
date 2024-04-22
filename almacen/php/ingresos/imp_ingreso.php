@@ -17,12 +17,14 @@ try {
     $sql = "SELECT far_orden_ingreso.id_ingreso,far_orden_ingreso.num_ingreso,far_orden_ingreso.fec_ingreso,
             far_orden_ingreso.hor_ingreso,far_orden_ingreso.num_factura,far_orden_ingreso.fec_factura,
             far_orden_ingreso.detalle,far_orden_ingreso.val_total,
-            far_bodegas.nombre AS nom_bodega,tb_terceros.nom_tercero,far_orden_ingreso_tipo.nom_tipo_ingreso,
-            CASE far_orden_ingreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS estado,
+            tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
+            tb_terceros.nom_tercero,far_orden_ingreso_tipo.nom_tipo_ingreso,
+            CASE far_orden_ingreso.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
             CASE far_orden_ingreso.estado WHEN 0 THEN far_orden_ingreso.fec_anulacion WHEN 1 THEN far_orden_ingreso.fec_creacion WHEN 2 THEN far_orden_ingreso.fec_cierre END AS fec_estado,
             CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
             usr.descripcion AS usr_perfil,usr.nom_firma
         FROM far_orden_ingreso 
+        INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_orden_ingreso.id_sede)
         INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_ingreso.id_bodega)
         INNER JOIN tb_terceros ON (tb_terceros.id_tercero=far_orden_ingreso.id_provedor)
         INNER JOIN far_orden_ingreso_tipo ON (far_orden_ingreso_tipo.id_tipo_ingreso=far_orden_ingreso.id_tipo_ingreso)
@@ -77,7 +79,7 @@ try {
         </tr>
     </table>
 
-    <table style="width:100%; font-size:60%; border:#A9A9A9 1px solid;">
+    <table style="width:100%; font-size:60%; text-align:left; border:#A9A9A9 1px solid;">
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td>Id. Ingreso</td>
             <td>No. Ingreso</td>
@@ -95,18 +97,20 @@ try {
             <td><?php echo $obj_e['fec_estado']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
+            <td>Sede</td>
             <td>Bodega</td>
             <td>Tipo de Ingreso</td>
             <td>No. Factura</td>
             <td>Fecha Factura</td>
-            <td colspan="2">Proveedor</td>
+            <td>Proveedor</td>
         </tr>
         <tr>
+            <td><?php echo $obj_e['nom_sede']; ?></td>
             <td><?php echo $obj_e['nom_bodega']; ?></td>
             <td><?php echo $obj_e['nom_tipo_ingreso']; ?></td>
             <td><?php echo $obj_e['num_factura']; ?></td>
             <td><?php echo $obj_e['fec_factura']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_tercero']; ?></td>
+            <td><?php echo $obj_e['nom_tercero']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td colspan="6">Detalle</td>

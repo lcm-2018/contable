@@ -104,5 +104,3 @@ function bitacora($accion, $opcion, $detalle, $id_usuario, $login) {
     $log= "Fecha: $fecha, Id Usuario-Login: $usuario, Accion: $accion, Opcion: $opcion, Registro: $detalle,IP:$ip\r\n";
     file_put_contents("$dir/$archivo.log", $log, FILE_APPEND | LOCK_EX);
 }
-
-?>

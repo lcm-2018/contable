@@ -39,7 +39,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <div class="row">
                                 <div class="col-md-11">
                                     <i class="fas fa-list-ul fa-lg" style="color:#1D80F7"></i>
-                                    ARTICULOS
+                                    RECALCULAR KARDEX DE LOTES DE ARTICULOS
                                 </div>
                             </div>
                         </div>
@@ -49,63 +49,114 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
                             <!--Opciones de filtros -->
                             <div class="form-row">
-                                <div class="form-group col-md-1">
-                                    <input type="text" class="filtro form-control form-control-sm" id="txt_codigo_filtro" placeholder="Codigo">
+                                <div class="form-group col-md-4">
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <select class="filtro form-control form-control-sm" id="sl_sede_fil">
+                                                <?php sedes_usuario($cmd, '--Sede--') ?>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <select class="filtro form-control form-control-sm" id="sl_bodega_fil">
+                                            </select>
+                                        </div>    
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-4">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion1" value="O">
+                                                <label class="form-check-label small" for="rdo_opcion1">Datos Articulo</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_codigo_fil" placeholder="Codigo" disabled="disabled">
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_fil" placeholder="Nombre" disabled="disabled">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">    
+                                        <div class="form-group col-md-8">
+                                            <label class="form-control-sm">Fecha Inicial de proceso Recalcular Kardex</label>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <input type="date" class="filtro form-control form-control-sm" id="txt_fecha_fil" name="txt_fecha_fil" placeholder="Fecha Inicial" disabled="disabled">
+                                        </div>
+                                    </div>   
                                 </div>
-                                <div class="form-group col-md-2">
-                                    <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_subgrupo_filtro">
-                                        <?php subgrupo_articulo($cmd, '--Subgrupo--') ?>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-1">
-                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
-                                        <?php estados_registros('--Estado--') ?>
-                                    </select>
-                                </div>
+                                <div class="form-group col-md-4">                                    
+                                    <div class="form-row">
+                                        <div class="form-group col-md-5">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion2" value="I">
+                                                <label class="form-check-label small" for="rdo_opcion2">Id. Orden Ingreso</label>
+                                            </div>
+                                        </div>    
+                                        <div class="form-group col-md-4">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_id_ing_fil" placeholder="Id. Ingreso" disabled="disabled">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-5">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion3" value="E">
+                                                <label class="form-check-label small" for="rdo_opcion3">Id. Orden Egreso</label>
+                                            </div>
+                                        </div>    
+                                        <div class="form-group col-md-4">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_id_egr_fil" placeholder="Id. Egreso" disabled="disabled">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-5">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion4" value="T">
+                                                <label class="form-check-label small" for="rdo_opcion4">Id. Orden Traslado</label>
+                                            </div>
+                                        </div>    
+                                        <div class="form-group col-md-4">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_id_tra_fil" placeholder="Id. Traslado" disabled="disabled">
+                                        </div>
+                                    </div>                              
+                                </div> 
                                 <div class="form-group col-md-1">
                                     <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
                                         <span class="fas fa-search fa-lg" aria-hidden="true"></span>
                                     </a>
-<<<<<<< HEAD
                                 </div>
-                                <div class="form-group col-md-1">
-                                    <a type="button" id="btn_buscar_filtro2" class="btn btn-outline-success btn-sm" title="Filtrar">
-                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                    <div class="form-group col-md-1">    
+                                    <a type="button" id="btn_recalcular_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
+                                        <span class="fas fa-cog fa-lg" aria-hidden="true"></span>
+                                        <label class="form-check-label small">Recalcular Lotes</label>
                                     </a>
-                                </div>
-=======
-                                    <button id="btnImprimeKardex" class="btn btn-outline-success btn-sm" title="Imprimir Kardex"><i class="fas fa-print"></i></button>
-                                </div>                                
->>>>>>> 7943234f85f0c5ec24a578f56c1cdfcb26c9fcbf
+                                </div>   
                             </div>
-
+                           
                             <!--Lista de registros en la tabla-->
-                            <?php
-                            if (PermisosUsuario($permisos, 5002, 2) || $id_rol == 1) {
-                                echo '<input type="hidden" id="peReg" value="1">';
-                            } else {
-                                echo '<input type="hidden" id="peReg" value="0">';
-                            }
-                            ?>
-                            <form id="frm_articulos">
-                                <table id="tb_articulos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <form id="frm_lotes">
+                                <table id="tb_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                     <thead>
                                         <tr class="text-center centro-vertical">
-                                            <th></th>
-                                            <th>Id</th>
+                                            <th rowspan="2">
+                                                <label for="chk_sel_fil">Sel.</label>
+                                                <input type="checkbox" id="chk_sel_fil">
+                                            </th>
+                                            <th colspan="3">Articulo</th>
+                                            <th colspan="5">Lote</th>
+                                            <th colspan="3">Existencia Total</th>
+                                        </tr>
+                                        <tr class="text-center centro-vertical">
+                                            <th>Id.</th>
                                             <th>Código</th>
-                                            <th>Nombre</th>
-                                            <th>Subgrupo</th>
-                                            <th>Tope Mínimo</th>
-                                            <th>Tope Máximo</th>
+                                            <th>Descripción</th>
+                                            <th>Sede</th>
+                                            <th>Bodega</th>
+                                            <th>Id.</th>
+                                            <th>Lote</th>
+                                            <th>Existencia</th>
+                                            <th>Código Articulo</th>
                                             <th>Existencia</th>
                                             <th>Vr. Promedio</th>
-                                            <th>Es Clínico</th>
-                                            <th>Estado</th>
-                                            <th>Acciones</th>
                                         </tr>
                                     </thead>
                                 </table>

@@ -14,31 +14,34 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 
 try {
-    $sql = "SELECT far_pedido.id_pedido,far_pedido.num_pedido,far_pedido.fec_pedido,far_pedido.hor_pedido,far_pedido.detalle,far_pedido.val_total,
-            ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
-            sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
-            CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
-            CASE far_pedido.estado WHEN 0 THEN far_pedido.fec_anulacion WHEN 1 THEN far_pedido.fec_creacion WHEN 2 THEN far_pedido.fec_cierre END AS fec_estado,
+    $sql = "SELECT far_traslado.id_traslado,far_traslado.num_traslado,far_traslado.fec_traslado,
+            far_traslado.hor_traslado,far_traslado.detalle,far_traslado.val_total,       
+            tb_so.nom_sede AS nom_sede_origen,tb_bo.nombre AS nom_bodega_origen,
+            tb_sd.nom_sede AS nom_sede_destino,tb_bd.nombre AS nom_bodega_destino,
+            CASE far_traslado.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
+            CASE far_traslado.estado WHEN 0 THEN far_traslado.fec_anulacion WHEN 1 THEN far_traslado.fec_creacion WHEN 2 THEN far_traslado.fec_cierre END AS fec_estado,
             CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
             usr.descripcion AS usr_perfil,usr.nom_firma
-        FROM far_pedido             
-        INNER JOIN tb_sedes AS ss ON (ss.id_sede = far_pedido.id_sede_destino)
-        INNER JOIN far_bodegas AS bs ON (bs.id_bodega = far_pedido.id_bodega_destino)           
-        INNER JOIN tb_sedes AS sp ON (sp.id_sede = far_pedido.id_sede_origen)
-        INNER JOIN far_bodegas AS bp ON (bp.id_bodega = far_pedido.id_bodega_origen)
-        LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_pedido.id_usr_cierre)
-        WHERE id_pedido=" . $id . " LIMIT 1";
+        FROM far_traslado       
+        INNER JOIN tb_sedes AS tb_so ON (tb_so.id_sede=far_traslado.id_sede_origen)
+        INNER JOIN far_bodegas AS tb_bo ON (tb_bo.id_bodega=far_traslado.id_bodega_origen)
+        INNER JOIN tb_sedes AS tb_sd ON (tb_sd.id_sede=far_traslado.id_sede_destino)
+        INNER JOIN far_bodegas AS tb_bd ON (tb_bd.id_bodega=far_traslado.id_bodega_destino)
+        LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_traslado.id_usr_cierre)
+        WHERE id_traslado=" . $id . " LIMIT 1";
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
-
-    $sql = "SELECT far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-            far_pedido_detalle.cantidad,far_pedido_detalle.valor,
-            (far_pedido_detalle.cantidad*far_pedido_detalle.valor) AS val_total
-        FROM far_pedido_detalle
-        INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_pedido_detalle.id_medicamento)
-        WHERE far_pedido_detalle.id_pedido=" . $id . " ORDER BY far_pedido_detalle.id_ped_detalle";
+    
+    $sql = "SELECT far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,far_medicamento_lote.lote,
+            far_medicamento_lote.fec_vencimiento,far_traslado_detalle.cantidad,far_traslado_detalle.valor,
+            (far_traslado_detalle.cantidad*far_traslado_detalle.valor) AS val_total
+        FROM far_traslado_detalle
+        INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_traslado_detalle.id_lote_origen)
+        INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_medicamento_lote.id_med)
+        WHERE far_traslado_detalle.id_traslado=" . $id . " ORDER BY far_traslado_detalle.id_tra_detalle";    
     $rs = $cmd->query($sql);
     $obj_ds = $rs->fetchAll();
+
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -71,36 +74,36 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>ORDEN DE PEDIDO</th>
+            <th>ORDEN DE TRASLADO</th>
         </tr>
     </table>
 
     <table style="width:100%; font-size:60%; text-align:left; border:#A9A9A9 1px solid;">
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td>Id. Pedido</td>
-            <td>No. Pedido</td>
-            <td>Fecha Pedido</td>
-            <td>Hora Pedido</td>
+            <td>Id. Traslado</td>
+            <td>No. Traslado</td>
+            <td>Fecha Traslado</td>
+            <td>Hora Traslado</td>
             <td>Estado</td>
             <td>Fecha Estado</td>
         </tr>
         <tr>
-            <td><?php echo $obj_e['id_pedido']; ?></td>
-            <td><?php echo $obj_e['num_pedido']; ?></td>
-            <td><?php echo $obj_e['fec_pedido']; ?></td>
-            <td><?php echo $obj_e['hor_pedido']; ?></td>
+            <td><?php echo $obj_e['id_traslado']; ?></td>
+            <td><?php echo $obj_e['num_traslado']; ?></td>
+            <td><?php echo $obj_e['fec_traslado']; ?></td>
+            <td><?php echo $obj_e['hor_traslado']; ?></td>
             <td><?php echo $obj_e['estado']; ?></td>
             <td><?php echo $obj_e['fec_estado']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="3">Sede y Bodega DE donde se solicita</td>
-            <td colspan="3">Sede y Bodega Proveedora A donde se solicita</td>
+            <td colspan="3">Sede y Bodega Origen</td>
+            <td colspan="3">Sede y Bodega Destino</td>
         </tr>
         <tr>
-            <td colspan="2"><?php echo $obj_e['nom_sede_solicita']; ?></td>
-            <td><?php echo $obj_e['nom_bodega_solicita']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_sede_provee']; ?></td>
-            <td><?php echo $obj_e['nom_bodega_provee']; ?></td>
+            <td colspan="2"><?php echo $obj_e['nom_sede_origen']; ?></td>
+            <td><?php echo $obj_e['nom_bodega_origen']; ?></td>
+            <td colspan="2"><?php echo $obj_e['nom_sede_destino']; ?></td>
+            <td><?php echo $obj_e['nom_bodega_destino']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td colspan="6">Detalle</td>
@@ -115,8 +118,10 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>Código</th>
                 <th>Descripción</th>
+                <th>Lote</th>
+                <th>Fecha Vencimiento</th>
                 <th>Cantidad</th>
-                <th>Valor Promedio</th>
+                <th>Valor Unitario</th>
                 <th>Valor Total</th>
             </tr>
         </thead>
@@ -127,8 +132,10 @@ try {
                 $tabla .=  '<tr class="resaltar"> 
                         <td>' . $obj['cod_medicamento'] . '</td>
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_medicamento']) . '</td>   
+                        <td>' . $obj['lote'] . '</td>
+                        <td>' . $obj['fec_vencimiento'] . '</td>
                         <td>' . $obj['cantidad'] . '</td>
-                        <td>' . formato_valor($obj['valor']) . '</td>   
+                        <td>' . formato_valor($obj['valor']) . '</td> 
                         <td>' . formato_valor($obj['val_total']) . '</td></tr>';
             }
             echo $tabla;
@@ -136,7 +143,7 @@ try {
         </tbody>
         <tfoot style="font-size:60%">
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="3"></td>
+                <td colspan="5"></td>
                 <td>TOTAL:</td>
                 <td><?php echo formato_valor($obj_e['val_total']); ?> </td>
             </tr>

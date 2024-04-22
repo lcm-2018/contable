@@ -50,7 +50,7 @@ try {
                 far_presentacion_lote.nom_presentacion,
 	            far_orden_ingreso_detalle.cantidad,far_orden_ingreso_detalle.valor_sin_iva,
 	            far_orden_ingreso_detalle.iva,far_orden_ingreso_detalle.valor,
-	            far_orden_ingreso_detalle.valor*far_orden_ingreso_detalle.cantidad AS val_total,
+	            (far_orden_ingreso_detalle.valor*far_orden_ingreso_detalle.cantidad) AS val_total,
 	            far_orden_ingreso_detalle.observacion
             FROM far_orden_ingreso_detalle
             INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_ingreso_detalle.id_lote)

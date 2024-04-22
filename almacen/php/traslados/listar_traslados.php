@@ -67,9 +67,10 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_traslado.id_traslado,far_traslado.num_traslado,far_traslado.fec_traslado,far_traslado.hor_traslado,
-                far_traslado.detalle,far_traslado.val_total,
+                far_traslado.detalle,
                 tb_so.nom_sede AS nom_sede_origen,tb_bo.nombre AS nom_bodega_origen,
                 tb_sd.nom_sede AS nom_sede_destino,tb_bd.nombre AS nom_bodega_destino,
+                far_traslado.val_total,
                 CASE far_traslado.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
             FROM far_traslado
             INNER JOIN tb_sedes AS tb_so ON (tb_so.id_sede=far_traslado.id_sede_origen)

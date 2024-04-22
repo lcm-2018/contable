@@ -77,7 +77,7 @@ try {
         </tr>
     </table>
 
-    <table style="width:100%; font-size:60%; border:#A9A9A9 1px solid;">
+    <table style="width:100%; font-size:60%; text-align:left; border:#A9A9A9 1px solid;">
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td>Código</td>
             <td colspan="3">Descripción</td>
