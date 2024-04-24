@@ -1,6 +1,6 @@
 <?php
 $bd_driver = "mysql";
-$bd_servidor = "localhost:4040";
+$bd_servidor = "localhost";
 $bd_base = "bd_cronhis_af";
 $api =  "localhost/api_terceros/";
 $charset = "charset=utf8";

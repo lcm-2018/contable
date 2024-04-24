@@ -29,13 +29,13 @@ try {
     $obj_e = $rs->fetch();
 
     $sql = "SELECT far_medicamento_lote.lote,
-                far_medicamento_lote.fec_vencimiento,far_presentacion_lote.nom_presentacion,far_medicamento_lote.existencia,
-                ROUND(far_medicamento_lote.existencia/far_presentacion_lote.cantidad,1) AS existencia_umpl,                
+                far_medicamento_lote.fec_vencimiento,far_presentacion_comercial.nom_presentacion,far_medicamento_lote.existencia,
+                ROUND(far_medicamento_lote.existencia/IFNULL(far_presentacion_comercial.cantidad,1),1) AS existencia_umpl,                
                 far_medicamento_cum.cum,far_bodegas.nombre AS nom_bodega,
                 IF(far_medicamento_lote.id_bodega=$bodega_pri,'SI','') as lote_pri,
                 IF(far_medicamento_lote.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_medicamento_lote
-            INNER JOIN far_presentacion_lote ON (far_presentacion_lote.id_presentacion=far_medicamento_lote.id_presentacion)
+            INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
             INNER JOIN far_medicamento_cum ON (far_medicamento_cum.id_cum=far_medicamento_lote.id_cum)
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_medicamento_lote.id_bodega)
             WHERE far_medicamento_lote.id_med=" . $id . " ORDER BY far_medicamento_lote.id_lote";

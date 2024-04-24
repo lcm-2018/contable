@@ -34,14 +34,14 @@ try {
             $hor_egr = $_POST['txt_hor_egr'];
             $id_tipegr = $_POST['sl_tip_egr'];
             $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;
-            $id_depende = $_POST['sl_dependencia'] ? $_POST['sl_dependencia'] : 0;
+            $id_cencosto = $_POST['sl_centrocosto'] ? $_POST['sl_centrocosto'] : 0;
             $detalle = $_POST['txt_det_egr'];
 
             if ($id == -1) {
                 $sql = "INSERT INTO far_orden_egreso(fec_egreso,hor_egreso,id_tipo_egreso,
-                        id_cliente,id_centrocosto,id_dependencia,detalle,val_total,id_sede,id_bodega,id_usr_crea,fec_creacion,estado)
+                        id_cliente,id_centrocosto,detalle,val_total,id_sede,id_bodega,id_usr_crea,fec_creacion,estado)
                     VALUES('$fec_egr','$hor_egr',$id_tipegr,
-                        $id_tercero,0,$id_depende,'$detalle',0,$id_sede,$id_bodega,$id_usr_ope,'$fecha_ope',1)";
+                        $id_tercero,$id_cencosto,'$detalle',0,$id_sede,$id_bodega,$id_usr_ope,'$fecha_ope',1)";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -60,7 +60,7 @@ try {
 
                 if ($obj_egreso['estado'] == 1) {
                     $sql = "UPDATE far_orden_egreso 
-                        SET id_tipo_egreso=$id_tipegr,id_cliente=$id_tercero,id_dependencia=$id_depende,detalle='$detalle'
+                        SET id_tipo_egreso=$id_tipegr,id_cliente=$id_tercero,id_centrocosto=$id_cencosto,detalle='$detalle'
                         WHERE id_egreso=" . $id;
                     $rs = $cmd->query($sql);
 

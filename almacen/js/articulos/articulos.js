@@ -317,7 +317,7 @@
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../common/cargar_preslote_ls.php",
+                    url: "../common/cargar_prescomercial_ls.php",
                     dataType: "json",
                     type: 'POST',
                     data: { term: request.term }

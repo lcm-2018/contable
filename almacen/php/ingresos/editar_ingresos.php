@@ -121,12 +121,12 @@ try {
 
                 $sql = 'SELECT far_orden_ingreso.id_sede,far_orden_ingreso.id_bodega,far_orden_ingreso.detalle,
                             far_orden_ingreso_detalle.id_lote,
-                            far_orden_ingreso_detalle.cantidad*far_presentacion_lote.cantidad AS cantidad,
-                            far_orden_ingreso_detalle.valor/far_presentacion_lote.cantidad AS valor                             
+                            far_orden_ingreso_detalle.cantidad*IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad,
+                            far_orden_ingreso_detalle.valor/IFNULL(far_presentacion_comercial.cantidad,1) AS valor                             
                         FROM far_orden_ingreso_detalle 
                         INNER JOIN far_orden_ingreso ON (far_orden_ingreso.id_ingreso = far_orden_ingreso_detalle.id_ingreso) 
                         INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_ingreso_detalle.id_lote)
-                        INNER JOIN far_presentacion_lote ON (far_presentacion_lote.id_presentacion = far_orden_ingreso_detalle.id_presentacion)
+                        INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom = far_orden_ingreso_detalle.id_presentacion)
                         WHERE far_orden_ingreso_detalle.id_ingreso=' . $id;
                 $rs = $cmd->query($sql);
                 $objs_detalles = $rs->fetchAll();

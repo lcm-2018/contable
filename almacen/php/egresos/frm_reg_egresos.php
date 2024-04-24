@@ -100,9 +100,9 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="sl_dependencia" class="small">Dependencia</label>
-                        <select class="form-control form-control-sm" id="sl_dependencia" name="sl_dependencia">
-                            <?php dependencias($cmd, '', $obj['id_dependencia']) ?>
+                        <label for="sl_centrocosto" class="small">Centro Costo</label>
+                        <select class="form-control form-control-sm" id="sl_centrocosto" name="sl_centrocosto">
+                            <?php centros_costo($cmd, '', $obj['id_centrocosto']) ?>
                         </select>
                     </div>
                     <div class="form-group col-md-12">

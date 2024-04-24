@@ -80,8 +80,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_dependencia_filtro">
-                                        <?php dependencias($cmd,'--Dependencia--') ?>
+                                    <select class="form-control form-control-sm" id="sl_centrocosto_filtro">
+                                        <?php centros_costo($cmd,'--Centro Costo--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
@@ -121,7 +121,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Hora Egreso</th>
                                         <th>Detalle</th>
                                         <th>Tercero</th>
-                                        <th>Dependencia</th>
+                                        <th>Centro Costo</th>
                                         <th>Tipo Egreso</th>
                                         <th>Vr. Total</th>
                                         <th>Sede</th>

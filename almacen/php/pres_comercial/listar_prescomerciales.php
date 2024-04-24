@@ -16,9 +16,9 @@ if ($length != -1){
 $col = $_POST['order'][0]['column']+1;
 $dir = $_POST['order'][0]['dir'];
 
-$where = "WHERE far_subgrupos.id_subgrupo<>0";
+$where = "WHERE far_presentacion_comercial.id_prescom<>0";
 if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND far_subgrupos.nom_subgrupo LIKE '" . $_POST['nombre'] . "%'";
+    $where .= " AND far_presentacion_comercial.nom_presentacion LIKE '" . $_POST['nombre'] . "%'";
 }
 
 try {
@@ -26,24 +26,21 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM far_subgrupos WHERE id_subgrupo<>0";
+    $sql = "SELECT COUNT(*) AS total FROM far_presentacion_comercial WHERE id_prescom<>0";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(*) AS total FROM far_subgrupos $where";
+    $sql = "SELECT COUNT(*) AS total FROM far_presentacion_comercial $where";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT far_subgrupos.id_subgrupo,far_subgrupos.cod_subgrupo,far_subgrupos.nom_subgrupo,far_grupos.nom_grupo,
-                IF(far_subgrupos.estado=1,'ACTIVO','INACTIVO') AS estado
-            FROM far_subgrupos
-            INNER JOIN far_grupos ON (far_grupos.id_grupo=far_subgrupos.id_grupo)
+    $sql = "SELECT id_prescom,nom_presentacion,cantidad
+            FROM far_presentacion_comercial
             $where ORDER BY $col $dir $limit";
-
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;
@@ -56,23 +53,21 @@ $eliminar = NULL;
 $data = [];
 if (!empty($objs)) {
     foreach ($objs as $obj) {
-        $id = $obj['id_subgrupo'];
+        $id = $obj['id_prescom'];
         /*Permisos del usuario
-            5001-Opcion [General][Subgrupos]
+            5016-Opcion [Presentacion Comercial]
             1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
         */    
-        if (PermisosUsuario($permisos, 5001, 3) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5016, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }
-        if (PermisosUsuario($permisos, 5001, 4) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5016, 4) || $id_rol == 1) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
         $data[] = [
-            "id_subgrupo" => $id,
-            "cod_subgrupo" => $obj['cod_subgrupo'],
-            "nom_subgrupo" => mb_strtoupper($obj['nom_subgrupo']),
-            "nom_grupo" => mb_strtoupper($obj['nom_grupo']),
-            "estado" => $obj['estado'],
+            "id_prescom" => $id,
+            "nom_presentacion" => mb_strtoupper($obj['nom_presentacion']),
+            "cantidad" => $obj['cantidad'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }

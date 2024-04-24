@@ -789,12 +789,32 @@ $rol = $_SESSION['rol'];
                             <div class="collapse" id="pagesCollapseArticulos" aria-labelledby="headingOne">
                                 <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
                                     <?php if (PermisosUsuario($permisos, 50010, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/dependencias/index.php?var=3">
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/centros_costo/index.php?var=3">
                                             <div class="div-icono">
-                                                <i class="fas fa-tablet fa-sm" style="color: #E74C3C;"></i>
+                                                <i class="fas fa-file-invoice-dollar fa-sm" style="color: #E74C3C;"></i>
                                             </div>
                                             <div>
-                                                Dependencias
+                                                Centros Costo
+                                            </div>
+                                        </a>
+                                    <?php } ?>
+                                    <?php if (PermisosUsuario($permisos, 50015, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/centrocosto_areas/index.php?var=3">
+                                            <div class="div-icono">
+                                                <i class="fas fa-stream fa-sm" style="color: #E74C3C;"></i>
+                                            </div>
+                                            <div>
+                                                Areas
+                                            </div>
+                                        </a>
+                                    <?php } ?>
+                                    <?php if (PermisosUsuario($permisos, 50016, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pres_comercial/index.php?var=3">
+                                            <div class="div-icono">
+                                                <i class="fas fa-ticket-alt fa-sm" style="color: #E74C3C;"></i>
+                                            </div>
+                                            <div>
+                                                Presentación Comercial
                                             </div>
                                         </a>
                                     <?php } ?>

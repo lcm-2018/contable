@@ -21,7 +21,7 @@ function sedes($cmd, $titulo = '', $id = 0)
     }
 }
 
-function bodegas($cmd, $titulo = '', $idsede = 0, $id = 0)
+function bodegas_sede($cmd, $titulo = '', $idsede = 0, $id = 0)
 {  
     try {
         echo '<option value="">' . $titulo . '</option>';
@@ -40,6 +40,26 @@ function bodegas($cmd, $titulo = '', $idsede = 0, $id = 0)
             }
             $cmd = null;
         }
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+function bodegas($cmd, $titulo = '', $id = 0)
+{  
+    try {
+        echo '<option value="">' . $titulo . '</option>';
+        $sql = "SELECT far_bodegas.id_bodega,far_bodegas.nombre FROM far_bodegas";
+        $rs = $cmd->query($sql);
+        $objs = $rs->fetchAll();
+        foreach ($objs as $obj) {
+            if ($obj['id_bodega']  == $id) {
+                echo '<option value="' . $obj['id_bodega'] . '" selected="selected">' . $obj['nombre'] . '</option>';
+            } else {
+                echo '<option value="' . $obj['id_bodega'] . '">' . $obj['nombre'] . '</option>';
+            }
+        }
+        $cmd = null;
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
@@ -108,18 +128,18 @@ function bodegas_usuario($cmd, $titulo = '', $idsede = 0, $id = 0)
     }
 }
 
-function dependencias($cmd, $titulo = '', $id = 0)
+function centros_costo($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_dependencia,nom_dependencia FROM tb_dependencias WHERE id_dependencia<>0";
+        $sql = "SELECT id_centro,nom_centro FROM tb_centrocostos WHERE id_centro<>0";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
-            if ($obj['id_dependencia']  == $id) {
-                echo '<option value="' . $obj['id_dependencia'] . '" selected="selected">' . $obj['nom_dependencia'] . '</option>';
+            if ($obj['id_centro']  == $id) {
+                echo '<option value="' . $obj['id_centro'] . '" selected="selected">' . $obj['nom_centro'] . '</option>';
             } else {
-                echo '<option value="' . $obj['id_dependencia'] . '">' . $obj['nom_dependencia'] . '</option>';
+                echo '<option value="' . $obj['id_centro'] . '">' . $obj['nom_centro'] . '</option>';
             }
         }
         $cmd = null;
@@ -305,4 +325,24 @@ function estados_registros($titulo = '',$estado = 2)
     echo '<option value="1"' . $selected . '>ACTIVO</option>';
     $selected = ($estado == 0) ? 'selected="selected"' : '';
     echo '<option value="0"' . $selected . '>INACTIVO</option>';
+}
+
+function tipo_area($cmd, $titulo ='', $id = 0)
+{
+    try {
+        echo '<option value="">' . $titulo . '</option>';
+        $sql = "SELECT id_tipo,nom_tipo FROM far_area_tipo WHERE id_tipo<>0";
+        $rs = $cmd->query($sql);
+        $objs = $rs->fetchAll();
+        foreach ($objs as $obj) {
+            if ($obj['id_tipo']  == $id) {
+                echo '<option value="' . $obj['id_tipo'] . '" selected="selected">' . $obj['nom_tipo'] . '</option>';
+            } else {
+                echo '<option value="' . $obj['id_tipo'] . '">' . $obj['nom_tipo'] . '</option>';
+            }
+        }
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
 }

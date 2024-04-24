@@ -135,7 +135,7 @@
         let filas = $('#tb_lotes').DataTable().rows().count();
         if (filas == 0) {
             $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe seleccionar un registro para reclacular');
+            $('#divMsgError').html('Debe seleccionar un registro para reclacular kardex');
         } else {
             var data = $('#frm_lotes').serialize();
             var tipo = $("input[name='rdo_opcion']:checked").val(),

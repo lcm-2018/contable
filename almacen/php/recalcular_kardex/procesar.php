@@ -43,7 +43,7 @@ if (isset($_POST['tipo'])) {
                 $cmd->rollBack();
             }
         } else {
-            $res['mensaje'] = 'Debe seleccionar un registro para reclacular';
+            $res['mensaje'] = 'Debe seleccionar un registro para reclacular kardex';
         }    
 
         $cmd = null;

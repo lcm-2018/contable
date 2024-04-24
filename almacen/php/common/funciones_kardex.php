@@ -75,9 +75,10 @@ function recalcular_kardex($cmd, $idlot, $tipo, $iding, $idegr, $idtra, $iddev, 
         foreach ($objs_kar as $kar) {
 
             if ($kar['id_ingreso']) {       //Si el movimiento es un Ingreso
-                $sql = "SELECT far_orden_ingreso_detalle.cantidad*far_presentacion_lote.cantidad AS cantidad,far_orden_ingreso_detalle.valor/far_presentacion_lote.cantidad AS valor 
+                $sql = "SELECT far_orden_ingreso_detalle.cantidad*IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad,
+                            far_orden_ingreso_detalle.valor/IFNULL(far_presentacion_comercial.cantidad,1) AS valor 
                         FROM far_orden_ingreso_detalle 
-                        INNER JOIN far_presentacion_lote ON (far_presentacion_lote.id_presentacion = far_orden_ingreso_detalle.id_presentacion)
+                        INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_orden_ingreso_detalle.id_presentacion)
                         WHERE id_ingreso=" . $kar['id_ingreso'] . " AND id_lote=" . $kar['id_lote'];
                 $rs = $cmd->query($sql);
                 $obj_ing = $rs->fetch();

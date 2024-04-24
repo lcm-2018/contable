@@ -17,26 +17,22 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-    if ((PermisosUsuario($permisos, 5002, 2) && $oper == 'add' && $_POST['id_articulo'] == -1) ||
-        (PermisosUsuario($permisos, 5002, 3) && $oper == 'add' && $_POST['id_articulo'] != -1) ||
-        (PermisosUsuario($permisos, 5002, 4) && $oper == 'del') || $id_rol == 1) {
+    if ((PermisosUsuario($permisos, 5015, 2) && $oper == 'add' && $_POST['id_area'] == -1) ||
+        (PermisosUsuario($permisos, 5015, 3) && $oper == 'add' && $_POST['id_area'] != -1) ||
+        (PermisosUsuario($permisos, 5015, 4) && $oper == 'del') || $id_rol == 1
+    ) {
 
         if ($oper == 'add') {
-            $id = $_POST['id_articulo'];
-            $cod_art = $_POST['txt_cod_art'];
-            $nom_art = $_POST['txt_nom_art'];
-            $id_subgrp = $_POST['sl_subgrp_art'] ? $_POST['sl_subgrp_art'] : 0;
-            $top_min = $_POST['txt_topmin_art'];
-            $top_max = $_POST['txt_topmax_art'];
-            $id_unimed = $_POST['id_txt_unimed_art'] ? $_POST['id_txt_unimed_art'] : 0;
-            $es_clinic = $_POST['rdo_escli_art'];
-            $id_medins = $_POST['sl_medins_art'] ? $_POST['sl_medins_art'] : 'NULL';
-            $estado = $_POST['sl_estado'];
+            $id = $_POST['id_area'];
+            $nom_area = $_POST['txt_nom_area'];
+            $id_cencos = $_POST['sl_centrocosto'] ? $_POST['sl_centrocosto'] : 0;
+            $id_tipare = $_POST['sl_tipo_area'] ? $_POST['sl_tipo_area'] : 0;
+            $id_respon = $_POST['id_txt_responsable'] ? $_POST['id_txt_responsable'] : 0;
+            $id_bodega = $_POST['sl_bodega'] ? $_POST['sl_bodega'] : 'NULL';
 
             if ($id == -1) {
-                $sql = "INSERT INTO far_medicamentos(cod_medicamento,nom_medicamento,id_subgrupo,top_min,top_max,
-                            id_unidadmedida_2,id_unidadmedida,id_formafarmaceutica,id_atc,es_clinico,id_tip_medicamento,estado,id_usr_crea) 
-                        VALUES($cod_art,'$nom_art',$id_subgrp,$top_min,$top_max,$id_unimed,0,0,0,$es_clinic,$id_medins,$estado,$id_usr_crea)";
+                $sql = "INSERT INTO far_centrocosto_area(nom_area,id_centrocosto,id_tipo_area,id_responsable,id_bodega,id_usr_crea,fec_crea) 
+                        VALUES('$nom_area',$id_cencos,$id_tipare,$id_respon,$id_bodega,$id_usr_crea,'$fecha_crea')";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -49,10 +45,9 @@ try {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }
             } else {
-                $sql = "UPDATE far_medicamentos SET cod_medicamento=$cod_art,nom_medicamento='$nom_art',
-                            id_subgrupo=$id_subgrp,top_min=$top_min,top_max=$top_max,id_unidadmedida_2=$id_unimed,
-                            es_clinico=$es_clinic,id_tip_medicamento=$id_medins,estado=$estado
-                        WHERE id_med=" . $id;
+                $sql = "UPDATE far_centrocosto_area 
+                        SET nom_area='$nom_area',id_centrocosto=$id_cencos,id_tipo_area=$id_tipare,id_responsable=$id_respon,id_bodega=$id_bodega 
+                        WHERE id_area=" . $id;
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -66,7 +61,7 @@ try {
 
         if ($oper == 'del') {
             $id = $_POST['id'];
-            $sql = "DELETE FROM far_medicamentos WHERE id_med=" . $id;
+            $sql = "DELETE FROM far_centrocosto_area WHERE id_area=" . $id;
             $rs = $cmd->query($sql);
             if ($rs) {
                 $res['mensaje'] = 'ok';

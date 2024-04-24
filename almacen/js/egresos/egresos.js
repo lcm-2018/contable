@@ -38,7 +38,7 @@
                     data.fec_ini = $('#txt_fecini_filtro').val();
                     data.fec_fin = $('#txt_fecfin_filtro').val();
                     data.id_tercero = $('#sl_tercero_filtro').val();
-                    data.id_depende = $('#sl_dependencia_filtro').val();
+                    data.id_cencost = $('#sl_centrocosto_filtro').val();
                     data.id_tipegr = $('#sl_tipegr_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
                 }
@@ -50,7 +50,7 @@
                 { 'data': 'hor_egreso' },
                 { 'data': 'detalle' },
                 { 'data': 'nom_tercero' },
-                { 'data': 'nom_dependencia' },
+                { 'data': 'nom_centro' },
                 { 'data': 'nom_tipo_egreso' },
                 { 'data': 'val_total' },
                 { 'data': 'nom_sede' },
@@ -125,7 +125,7 @@
         if ($('#sl_tip_egr').find('option:selected').attr('data-intext') == 2) {
             error += verifica_vacio($('#sl_tercero'));
         } else {
-            error += verifica_vacio($('#sl_dependencia'));
+            error += verifica_vacio($('#sl_centrocosto'));
         }
 
         error += verifica_vacio($('#txt_det_egr'));
@@ -370,7 +370,7 @@
                 fec_ini: $('#txt_fecini_filtro').val(),
                 fec_fin: $('#txt_fecfin_filtro').val(),
                 id_tercero: $('#sl_tercero_filtro').val(),
-                id_depende: $('#sl_dependencia_filtro').val(),
+                id_depende: $('#sl_centrocosto_filtro').val(),
                 id_tipegr: $('#sl_tipegr_filtro').val(),
                 estado: $('#sl_estado_filtro').val()
             }, function(he) {

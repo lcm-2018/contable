@@ -10,7 +10,7 @@ include '../../../permisos.php';
 include '../common/funciones_generales.php';
 
 $oper = isset($_POST['oper']) ? $_POST['oper'] : exit('Acción no permitida');
-$fecha_crea = new DateTime('now', new DateTimeZone('America/Bogota'));
+$fecha_crea = date('Y-m-d H:i:s');
 $id_usr_crea = $_SESSION['id_user'];
 $res = array();
 

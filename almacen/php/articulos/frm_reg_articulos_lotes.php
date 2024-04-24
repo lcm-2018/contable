@@ -15,9 +15,9 @@ $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $id_articulo = isset($_POST['id_articulo']) ? $_POST['id_articulo'] : 0;
 $sql = "SELECT far_medicamento_lote.*,
             far_bodegas.nombre AS nom_bodega,
-            far_presentacion_lote.nom_presentacion,far_presentacion_lote.cantidad AS cantidad_umpl
+            far_presentacion_comercial.nom_presentacion,far_presentacion_comercial.cantidad AS cantidad_umpl
         FROM far_medicamento_lote
-        INNER JOIN far_presentacion_lote ON (far_presentacion_lote.id_presentacion=far_medicamento_lote.id_presentacion)
+        INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
         INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_medicamento_lote.id_bodega)
         WHERE id_lote=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
