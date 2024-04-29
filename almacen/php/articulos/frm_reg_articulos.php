@@ -30,6 +30,8 @@ if (empty($obj)) {
     $obj['estado'] = 1;
     $obj['es_clinico'] = 0;
 }
+$imprimir = $id != -1 ? '' : 'disabled="disabled"';
+
 ?>
 
 <div class="px-0">
@@ -71,7 +73,7 @@ if (empty($obj)) {
                         <input type="hidden" id="id_txt_unimed_art" name="id_txt_unimed_art" value="<?php echo $obj['id_unidadmedida_2'] ?>">
                     </div>
                     <div class="form-group col-md-2">
-                        <label class="small">Para Uso Clínico</label>
+                        <label class="small">Para Uso Asistencial</label>
                         <div class="form-control form-control-sm" id="rdo_escli_art">
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="rdo_escli_art" id="rdo_escli_art_si" value="1" <?php echo $obj['es_clinico'] == 1 ? 'checked' : '' ?>>
@@ -153,6 +155,7 @@ if (empty($obj)) {
     </div>
     <div class="text-center pt-3">    
         <button type="button" class="btn btn-primary btn-sm" id="btn_guardar">Guardar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir" <?php echo $imprimir ?>>Imprimir</button>
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>

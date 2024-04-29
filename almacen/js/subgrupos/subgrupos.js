@@ -150,11 +150,11 @@
         $.post("imp_subgrupos.php", {
             nombre: $('#txt_nombre_filtro').val()
         }, function(he) {
-            $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-lg');
-            $('#divTamModalForms').addClass('modal-xl');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
         });
     });
 

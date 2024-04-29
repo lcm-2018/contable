@@ -38,7 +38,7 @@
                     data.fec_ini = $('#txt_fecini_filtro').val();
                     data.fec_fin = $('#txt_fecfin_filtro').val();
                     data.id_tercero = $('#sl_tercero_filtro').val();
-                    data.id_depende = $('#sl_dependencia_filtro').val();
+                    data.id_cencost = $('#sl_centrocosto_filtro').val();
                     data.id_tipegr = $('#sl_tipegr_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
                 }
@@ -50,7 +50,7 @@
                 { 'data': 'hor_egreso' },
                 { 'data': 'detalle' },
                 { 'data': 'nom_tercero' },
-                { 'data': 'nom_dependencia' },
+                { 'data': 'nom_centro' },
                 { 'data': 'nom_tipo_egreso' },
                 { 'data': 'val_total' },
                 { 'data': 'nom_sede' },
@@ -125,7 +125,7 @@
         if ($('#sl_tip_egr').find('option:selected').attr('data-intext') == 2) {
             error += verifica_vacio($('#sl_tercero'));
         } else {
-            error += verifica_vacio($('#sl_dependencia'));
+            error += verifica_vacio($('#sl_centrocosto'));
         }
 
         error += verifica_vacio($('#txt_det_egr'));
@@ -149,6 +149,7 @@
                     $('#sl_sede_egr').prop('disabled', true);
                     $('#sl_bodega_egr').prop('disabled', true);
                     $('#btn_cerrar').prop('disabled', false);
+                    $('#btn_imprimir').prop('disabled', false);
 
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");
@@ -351,7 +352,7 @@
         });
     });
 
-    //Imprimir registros
+    //Imprimir listado de registros
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_egresos');
         $('.is-invalid').removeClass('is-invalid');
@@ -369,17 +370,30 @@
                 fec_ini: $('#txt_fecini_filtro').val(),
                 fec_fin: $('#txt_fecfin_filtro').val(),
                 id_tercero: $('#sl_tercero_filtro').val(),
-                id_depende: $('#sl_dependencia_filtro').val(),
+                id_depende: $('#sl_centrocosto_filtro').val(),
                 id_tipegr: $('#sl_tipegr_filtro').val(),
                 estado: $('#sl_estado_filtro').val()
             }, function(he) {
-                $('#divTamModalForms').removeClass('modal-sm');
-                $('#divTamModalForms').removeClass('modal-lg');
-                $('#divTamModalForms').addClass('modal-xl');
-                $('#divModalForms').modal('show');
-                $("#divForms").html(he);
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
             });
         }
+    });
+
+    //Imprimit una Orden de Egreso
+    $('#divForms').on("click", "#btn_imprimir", function() {
+        $.post("imp_egreso.php", {
+            id: $('#id_egreso').val()
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
     });
 
 })(jQuery);

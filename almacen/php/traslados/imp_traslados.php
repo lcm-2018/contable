@@ -84,9 +84,9 @@ try {
         </tr>     
     </table>
 
-    <table style="width:100% !important; border-collapse: collapse;">
-        <thead style="background-color: white !important;font-size:80%">            
-            <tr style="background-color: #CED3D3; text-align:center; border:#A9A9A9 1px solid">
+    <table style="width:100% !important">
+        <thead style="font-size:80%">                
+            <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th rowspan="2">Id</th>
                 <th rowspan="2">No. Traslado</th>
                 <th rowspan="2">Fecha Traslado</th>
@@ -97,7 +97,7 @@ try {
                 <th rowspan="2">Vr. Total</th>
                 <th rowspan="2">Estado</th>
             </tr>
-            <tr style="background-color: #CED3D3; text-align:center; border:#A9A9A9 1px solid">
+            <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>Sede</th>
                 <th>Bodega</th>
                 <th>Sede</th>
@@ -124,11 +124,10 @@ try {
             echo $tabla;
             ?>            
         </tbody>
-        <tfoot style="background-color:white !important; font-size:60%"> 
-            <tr style="background-color:#CED3D3;">
+        <tfoot style="font-size:60%"> 
+            <tr style="background-color:#CED3D3; color:#000000">
                 <td colspan="11" style="text-align:left">
-                    No. de Registros: <?php echo count($objs); ?>&nbsp;&nbsp;-&nbsp;&nbsp;
-                    Usuario: <?php echo mb_strtoupper($_SESSION['user']); ?>     
+                    No. de Registros: <?php echo count($objs); ?>  
                 </td>
             </tr>
         </tfoot>

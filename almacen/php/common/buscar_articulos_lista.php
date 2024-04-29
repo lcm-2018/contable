@@ -53,8 +53,9 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_medicamentos.id_med,far_medicamentos.cod_medicamento,
-                far_medicamentos.nom_medicamento,far_medicamentos.val_promedio,
+                far_medicamentos.nom_medicamento,
 	            SUM(far_medicamento_lote.existencia) as existencia,
+                far_medicamentos.val_promedio,
                 GROUP_CONCAT(far_medicamento_lote.lote,'[Fv:',far_medicamento_lote.fec_vencimiento,']') as lotes
             FROM far_medicamento_lote
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)"

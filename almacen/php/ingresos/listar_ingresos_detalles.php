@@ -45,16 +45,17 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_orden_ingreso_detalle.id_ing_detalle,
-	            far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,far_medicamento_lote.lote,
-                far_presentacion_lote.nom_presentacion,far_presentacion_lote.cantidad AS cantidad_umpl,
+	            far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
+                far_medicamento_lote.lote,far_medicamento_lote.fec_vencimiento,
+                far_presentacion_comercial.nom_presentacion,
 	            far_orden_ingreso_detalle.cantidad,far_orden_ingreso_detalle.valor_sin_iva,
 	            far_orden_ingreso_detalle.iva,far_orden_ingreso_detalle.valor,
-	            far_orden_ingreso_detalle.valor*far_orden_ingreso_detalle.cantidad AS val_total,
+	            (far_orden_ingreso_detalle.valor*far_orden_ingreso_detalle.cantidad) AS val_total,
 	            far_orden_ingreso_detalle.observacion
             FROM far_orden_ingreso_detalle
             INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_ingreso_detalle.id_lote)
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_medicamento_lote.id_med)
-            INNER JOIN far_presentacion_lote ON (far_presentacion_lote.id_presentacion = far_orden_ingreso_detalle.id_presentacion)
+            INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom = far_orden_ingreso_detalle.id_presentacion)
             WHERE far_orden_ingreso_detalle.id_ingreso=" . $_POST['id_ingreso'] . $where . " ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -82,6 +83,7 @@ if (!empty($objs)) {
             "cod_medicamento" => $obj['cod_medicamento'],
             "nom_medicamento" => $obj['nom_medicamento'],
             "lote" => $obj['lote'],
+            "fec_vencimiento" => $obj['fec_vencimiento'],
             "nom_presentacion" => $obj['nom_presentacion'],
             "cantidad" => $obj['cantidad'],
             "valor_sin_iva" => formato_valor($obj['valor_sin_iva']),

@@ -54,10 +54,11 @@ function datos_lote($cmd, $id_lote){
         $res = array();
         $sql = "SELECT far_medicamento_lote.id_lote,far_medicamento_lote.lote,
                     far_medicamentos.nom_medicamento AS nom_articulo,far_medicamentos.val_promedio,
-                    far_presentacion_lote.id_presentacion,far_presentacion_lote.nom_presentacion,far_presentacion_lote.cantidad AS cantidad_umpl
+                    far_medicamento_lote.id_presentacion,far_presentacion_comercial.nom_presentacion,
+                    IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl
                 FROM far_medicamento_lote
                 INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
-                INNER JOIN far_presentacion_lote ON (far_presentacion_lote.id_presentacion=far_medicamento_lote.id_presentacion)
+                INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
                 WHERE far_medicamento_lote.id_lote=$id_lote";
         $rs = $cmd->query($sql);
         $obj = $rs->fetch();
@@ -104,5 +105,3 @@ function bitacora($accion, $opcion, $detalle, $id_usuario, $login) {
     $log= "Fecha: $fecha, Id Usuario-Login: $usuario, Accion: $accion, Opcion: $opcion, Registro: $detalle,IP:$ip\r\n";
     file_put_contents("$dir/$archivo.log", $log, FILE_APPEND | LOCK_EX);
 }
-
-?>

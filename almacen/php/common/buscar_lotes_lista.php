@@ -53,12 +53,12 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_medicamento_lote.id_lote,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-	            far_medicamento_lote.lote,far_presentacion_lote.nom_presentacion,
-                ROUND(far_medicamento_lote.existencia/far_presentacion_lote.cantidad,1) AS existencia_umpl,
+	            far_medicamento_lote.lote,far_presentacion_comercial.nom_presentacion,
+                ROUND(far_medicamento_lote.existencia/IFNULL(far_presentacion_comercial.cantidad,1),1) AS existencia_umpl,
 	            far_medicamento_lote.existencia,far_medicamentos.val_promedio,far_medicamento_lote.fec_vencimiento
             FROM far_medicamento_lote
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
-            INNER JOIN far_presentacion_lote ON (far_presentacion_lote.id_presentacion=far_medicamento_lote.id_presentacion)"
+            INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)"
             . $where . " ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);

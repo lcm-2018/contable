@@ -34,7 +34,7 @@ include '../../../permisos.php';
                             <div class="row">
                                 <div class="col-md-11">
                                     <i class="fas fa-list-ul fa-lg" style="color:#1D80F7"></i>
-                                    DEPENDENCIAS
+                                    AREAS DE CENTRO DE COSTO
                                 </div>
                             </div>
                         </div>
@@ -58,27 +58,30 @@ include '../../../permisos.php';
                             </div>
 
                             <!--Lista de registros en la tabla
-                                5010-Opcion [General][Dependencias]
+                                5015-Opcion [General][Centro Costo-Areas]
                                 1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
                             -->
                             <?php
-                            if (PermisosUsuario($permisos, 5010, 2) || $id_rol == 1) {
+                            if (PermisosUsuario($permisos, 5015, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';
                             } else {
                                 echo '<input type="hidden" id="peReg" value="0">';
                             }
                             ?>
-                            <table id="tb_dependencias" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <table id="tb_cencos_areas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>
                                     <tr class="text-center centro-vertical">
                                         <th>Id</th>                                        
-                                        <th>Nombres</th>                                        
+                                        <th>Nombre</th>
+                                        <th>Centro Costo</th>
+                                        <th>Tipo Area</th>
+                                        <th>Responsable</th>
+                                        <th>Bodega</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                             </table>
                         </div>
-
                     </div>
                 </div>
             </main>
@@ -87,7 +90,7 @@ include '../../../permisos.php';
         <?php include '../../../modales.php' ?>
     </div>
     <?php include '../../../scripts.php' ?>    
-    <script type="text/javascript" src="../../js/dependencias/dependencias.js?v=<?php echo date('YmdHis') ?>"></script>
+    <script type="text/javascript" src="../../js/centrocosto_areas/centrocosto_areas.js?v=<?php echo date('YmdHis') ?>"></script>
 </body>
 
 </html>

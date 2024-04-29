@@ -45,9 +45,10 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_orden_egreso_detalle.id_egr_detalle,
-	            far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,far_medicamento_lote.lote,
+	            far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
+                far_medicamento_lote.lote,far_medicamento_lote.fec_vencimiento,
 	            far_orden_egreso_detalle.cantidad,far_orden_egreso_detalle.valor,
-	            far_orden_egreso_detalle.valor*far_orden_egreso_detalle.cantidad AS val_total
+	            (far_orden_egreso_detalle.valor*far_orden_egreso_detalle.cantidad) AS val_total
             FROM far_orden_egreso_detalle
             INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_egreso_detalle.id_lote)
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_medicamento_lote.id_med)
@@ -78,6 +79,7 @@ if (!empty($objs)) {
             "cod_medicamento" => $obj['cod_medicamento'],
             "nom_medicamento" => $obj['nom_medicamento'],
             "lote" => $obj['lote'],
+            "fec_vencimiento" => $obj['fec_vencimiento'],
             "cantidad" => $obj['cantidad'],
             "valor" => formato_valor($obj['valor']),
             "val_total" => formato_valor($obj['val_total']),

@@ -37,7 +37,6 @@ try {
     $sql = "SELECT COUNT(*) AS total 
             FROM far_pedido_detalle 
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_pedido_detalle.id_medicamento)
-            INNER JOIN far_for_farmaceutica ON (far_for_farmaceutica.id_for = far_medicamentos.id_formafarmaceutica)
             WHERE id_pedido=" . $_POST['id_pedido'] . $where; 
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
@@ -45,12 +44,10 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_pedido_detalle.id_ped_detalle,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-                    far_medicamentos.concentracion,far_for_farmaceutica.descripcion AS for_farmaceutica,
                     far_pedido_detalle.cantidad,far_pedido_detalle.valor,
                     (far_pedido_detalle.cantidad*far_pedido_detalle.valor) AS val_total
                 FROM far_pedido_detalle
                 INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_pedido_detalle.id_medicamento)
-                INNER JOIN far_for_farmaceutica ON (far_for_farmaceutica.id_for = far_medicamentos.id_formafarmaceutica)
             WHERE far_pedido_detalle.id_pedido=" . $_POST['id_pedido']. $where . " ORDER BY $col $dir $limit";
            
 
@@ -78,8 +75,6 @@ if (!empty($objs)) {
             "id_ped_detalle" => $id,
             "cod_medicamento" => $obj['cod_medicamento'],
             "nom_medicamento" => $obj['nom_medicamento'],
-            "concentracion" => $obj['concentracion'],
-            "for_farmaceutica" => $obj['for_farmaceutica'],
             "cantidad" => $obj['cantidad'],
             "valor" => formato_valor($obj['valor']),           
             "val_total" => formato_valor($obj['val_total']),

@@ -45,7 +45,8 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_traslado_detalle.id_tra_detalle,
-	            far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,far_medicamento_lote.lote,
+	            far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
+                far_medicamento_lote.lote,far_medicamento_lote.fec_vencimiento,
 	            far_traslado_detalle.cantidad,far_traslado_detalle.valor,
 	            far_traslado_detalle.valor*far_traslado_detalle.cantidad AS val_total
             FROM far_traslado_detalle
@@ -78,6 +79,7 @@ if (!empty($objs)) {
             "cod_medicamento" => $obj['cod_medicamento'],
             "nom_medicamento" => $obj['nom_medicamento'],
             "lote" => $obj['lote'],
+            "fec_vencimiento" => $obj['fec_vencimiento'],
             "cantidad" => $obj['cantidad'],
             "valor" => formato_valor($obj['valor']),
             "val_total" => formato_valor($obj['val_total']),

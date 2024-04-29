@@ -48,6 +48,7 @@ if (empty($obj)) {
 $guardar = in_array($obj['estado'],[1]) ? '' : 'disabled="disabled"';
 $cerrar = in_array($obj['estado'],[1]) && $id != -1 ? '' : 'disabled="disabled"';
 $anular = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
+$imprimir = $id != -1 ? '' : 'disabled="disabled"';
 
 ?>
 
@@ -100,7 +101,7 @@ $anular = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-3">
                         <label for="sl_bodega_proveedor" class="small">Bodega Proveedora A donde se solicita</label>
                         <select class="form-control form-control-sm" id="sl_bodega_proveedor" name="sl_bodega_proveedor" <?php echo $editar ?>> 
-                            <?php bodegas($cmd, '', $obj['id_sede_origen'], $obj['id_bodega_origen']) ?>   
+                            <?php bodegas_sede($cmd, '', $obj['id_sede_origen'], $obj['id_bodega_origen']) ?>   
                         </select>
                     </div> 
                     <div class="form-group col-md-12">
@@ -138,6 +139,7 @@ $anular = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
         <button type="button" class="btn btn-primary btn-sm" id="btn_guardar" <?php echo $guardar ?>>Guardar</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_cerrar" <?php echo $cerrar ?>>Cerrar</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_anular" <?php echo $anular ?>>Anular</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir" <?php echo $imprimir ?>>Imprimir</button>
         <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>

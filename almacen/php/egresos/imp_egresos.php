@@ -42,13 +42,13 @@ if (isset($_POST['estado']) && strlen($_POST['estado'])) {
 
 try {
     $sql = "SELECT far_orden_egreso.id_egreso,far_orden_egreso.num_egreso,far_orden_egreso.fec_egreso,far_orden_egreso.hor_egreso,
-                    far_orden_egreso.detalle,tb_terceros.nom_tercero,tb_dependencias.nom_dependencia,
+                    far_orden_egreso.detalle,tb_terceros.nom_tercero,tb_centrocostos.nom_centro,
                     far_orden_egreso_tipo.nom_tipo_egreso,far_orden_egreso.val_total,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
                     CASE far_orden_egreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
                     FROM far_orden_egreso
                     INNER JOIN far_orden_egreso_tipo ON (far_orden_egreso_tipo.id_tipo_egreso=far_orden_egreso.id_tipo_egreso)
                     INNER JOIN tb_terceros ON (tb_terceros.id_tercero=far_orden_egreso.id_cliente)
-                    INNER JOIN tb_dependencias ON (tb_dependencias.id_dependencia=far_orden_egreso.id_dependencia)
+                    INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_orden_egreso.id_centrocosto)
                     INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_orden_egreso.id_sede)
                     INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_egreso.id_bodega)$where ORDER BY far_orden_egreso.id_egreso DESC";
     $res = $cmd->query($sql);
@@ -87,16 +87,16 @@ try {
         </tr>     
     </table>
 
-    <table style="width:100% !important; border-collapse: collapse;">
-        <thead style="background-color: white !important;font-size:80%">            
-            <tr style="background-color: #CED3D3; text-align:center; border:#A9A9A9 1px solid">
+    <table style="width:100% !important">
+        <thead style="font-size:80%">                
+            <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>Id</th>
                 <th>No. Egreso</th>
                 <th>Fecha Egreso</th>
                 <th>Hora Egreso</th>
                 <th>Detalle</th>
                 <th>Tercero</th>
-                <th>Dependencia</th>
+                <th>Centro Costo</th>
                 <th>Tipo Egreso</th>
                 <th>Vr. Total</th>
                 <th>Sede</th>
@@ -115,7 +115,7 @@ try {
                         <td>' . $obj['hor_egreso'] . '</td>                  
                         <td style="text-align:left">' . $obj['detalle'] . '</td>                      
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>   
-                        <td style="text-align:left">' . mb_strtoupper($obj['nom_dependencia']) . '</td> 
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_centro']) . '</td> 
                         <td>' . mb_strtoupper($obj['nom_tipo_egreso']) . '</td>   
                         <td>' . formato_valor($obj['val_total']). '</td>                             
                         <td>' . mb_strtoupper($obj['nom_sede']) . '</td>   
@@ -125,11 +125,10 @@ try {
             echo $tabla;
             ?>            
         </tbody>
-        <tfoot style="background-color:white !important; font-size:60%"> 
-            <tr style="background-color:#CED3D3;">
+        <tfoot style="font-size:60%"> 
+            <tr style="background-color:#CED3D3; color:#000000">
                 <td colspan="12" style="text-align:left">
-                    No. de Registros: <?php echo count($objs); ?>&nbsp;&nbsp;-&nbsp;&nbsp;
-                    Usuario: <?php echo mb_strtoupper($_SESSION['user']); ?>     
+                    No. de Registros: <?php echo count($objs); ?> 
                 </td>
             </tr>
         </tfoot>

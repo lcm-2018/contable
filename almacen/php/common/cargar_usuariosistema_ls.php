@@ -11,9 +11,9 @@ $term = isset($_POST['term']) ? $_POST['term'] : exit('Acción no permitida');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT id_presentacion,nom_presentacion,cantidad
-            FROM far_presentacion_lote
-            WHERE nom_presentacion LIKE '%$term%'";
+    $sql = "SELECT id_usuario,CONCAT_WS(' ',nombre1,nombre2,apellido1,apellido2) AS nom_usuario
+            FROM seg_usuarios_sistema
+            WHERE CONCAT(nombre1,nombre2,apellido1,apellido2) LIKE '%$term%'";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;
@@ -23,9 +23,8 @@ try {
 
 foreach ($objs as $obj) {
     $data[] = [
-        "id" => $obj['id_presentacion'],
-        "label" => $obj['nom_presentacion'],
-        "cantidad" => $obj['cantidad'],
+        "id" => $obj['id_usuario'],
+        "label" => $obj['nom_usuario'],
     ];
 }
 

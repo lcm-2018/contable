@@ -59,8 +59,9 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_orden_ingreso.id_ingreso,far_orden_ingreso.num_ingreso,far_orden_ingreso.fec_ingreso,far_orden_ingreso.hor_ingreso,
-	            far_orden_ingreso.num_factura,far_orden_ingreso.fec_factura,far_orden_ingreso.detalle,tb_terceros.nom_tercero,
-	            far_orden_ingreso_tipo.nom_tipo_ingreso,far_orden_ingreso.val_total,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
+	            far_orden_ingreso.num_factura,far_orden_ingreso.fec_factura,far_orden_ingreso.detalle,
+                tb_terceros.nom_tercero,far_orden_ingreso_tipo.nom_tipo_ingreso,far_orden_ingreso.val_total,
+                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
 	            CASE far_orden_ingreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
             FROM far_orden_ingreso
             INNER JOIN far_orden_ingreso_tipo ON (far_orden_ingreso_tipo.id_tipo_ingreso=far_orden_ingreso.id_tipo_ingreso)

@@ -1,7 +1,54 @@
 <?php
 
-$arr = $_POST['art'];
-$ar = implode(",",$arr);
+if (isset($_POST['tipo'])) {
+    session_start();
 
-print_r($ar);
+    include '../../../conexion.php';
+    include '../common/funciones_generales.php';
+    include '../common/funciones_kardex.php';
 
+    try {
+        
+        $idlot = isset($_POST['art']) ? implode(",",$_POST['art']) : '';
+
+        if ($idlot != ''){            
+            $tipo = $_POST['tipo'];
+            $iding = $_POST['id_ing'];
+            $idegr = $_POST['id_egr'];
+            $idtra = $_POST['id_tra'];
+            $iddev = 0;
+            $fecini = $_POST['fec_ini'];
+
+            set_time_limit(0);
+            $res = array();
+
+            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+
+            $cmd->beginTransaction();
+
+            recalcular_kardex($cmd, $idlot, $tipo, $iding, $idegr, $idtra, $iddev, $fecini);
+
+            /*Cuenta cuantos errores ocurrieron al ejecutar el script*/
+            $errores = error_get_last();
+            if (!$errores) {
+                $cmd->commit();
+                $res['mensaje'] = 'ok';
+                $accion = 'Actualizar kardex';
+                $opcion = 'Recalcular Kardex';
+                $detalle = 'Recalcular Kardex en la fecha : ' . date('Y-m-d H:i:s');
+                bitacora($accion, $opcion, $detalle, $_SESSION['id_user'], $_SESSION['user']);
+            } else {
+                $res['mensaje'] = 'Error de Ejecución de Proceso';
+                $cmd->rollBack();
+            }
+        } else {
+            $res['mensaje'] = 'Debe seleccionar un registro para reclacular kardex';
+        }    
+
+        $cmd = null;
+    } catch (PDOException $e) {
+        $res['mensaje'] = $e->getCode();
+    }
+    echo json_encode($res);
+}

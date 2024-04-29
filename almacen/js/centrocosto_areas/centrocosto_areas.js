@@ -9,14 +9,14 @@
 
     $(document).ready(function() {
         //Tabla de Registros
-        $('#tb_dependencias').DataTable({
+        $('#tb_cencos_areas').DataTable({
             dom: setdom,
             buttons: [{
                 action: function(e, dt, node, config) {
-                    $.post("frm_reg_dependencias.php", function(he) {
+                    $.post("frm_reg_cencos_areas.php", function(he) {
                         $('#divTamModalForms').removeClass('modal-xl');
-                        $('#divTamModalForms').removeClass('modal-lg');
-                        $('#divTamModalForms').addClass('modal-sm');
+                        $('#divTamModalForms').removeClass('modal-sm');
+                        $('#divTamModalForms').addClass('modal-lg');
                         $('#divModalForms').modal('show');
                         $("#divForms").html(he);
                     });
@@ -26,9 +26,8 @@
             processing: true,
             serverSide: true,
             searching: false,
-
             ajax: {
-                url: 'listar_dependencias.php',
+                url: 'listar_cencos_areas.php',
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
@@ -36,13 +35,17 @@
                 }
             },
             columns: [
-                { 'data': 'id_dependencia' }, //Index=0              
-                { 'data': 'nom_dependencia' },
+                { 'data': 'id_area' }, //Index=0              
+                { 'data': 'nom_area' },
+                { 'data': 'nom_centrocosto' },
+                { 'data': 'nom_tipo_area' },
+                { 'data': 'usr_responsable' },
+                { 'data': 'nom_bodega' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: 1 },
-                { orderable: false, targets: 2 }
+                { class: 'text-wrap', targets: [1, 2] },
+                { orderable: false, targets: 6 }
             ],
             order: [
                 [0, "desc"]
@@ -54,25 +57,45 @@
         });
 
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
-        $('#tb_dependencias').wrap('<div class="overflow"/>');
+        $('#tb_cencos_areas').wrap('<div class="overflow"/>');
     });
 
     //Buascar registros
     $('#btn_buscar_filtro').on("click", function() {
-        reloadtable('tb_dependencias');
+        reloadtable('tb_cencos_areas');
     });
 
     $('.filtro').keypress(function(e) {
         if (e.keyCode == 13) {
-            reloadtable('tb_dependencias');
+            reloadtable('tb_cencos_areas');
         }
     });
 
+    // Autocompletar Usuarios reposnables
+    $('#divForms').on("input", "#txt_responsable", function() {
+        $(this).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "../common/cargar_usuariosistema_ls.php",
+                    dataType: "json",
+                    type: 'POST',
+                    data: { term: request.term }
+                }).done(function(data) {
+                    response(data);
+                });
+            },
+            minLength: 2,
+            select: function(event, ui) {
+                $('#id_txt_responsable').val(ui.item.id);
+            }
+        });
+    });
+
     //Editar un registro    
-    $('#tb_dependencias').on('click', '.btn_editar', function() {
+    $('#tb_cencos_areas').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');
-        $.post("frm_reg_dependencias.php", { id: id }, function(he) {
-            $('#divTamModalForms').addClass('modal-sm');
+        $.post("frm_reg_cencos_areas.php", { id: id }, function(he) {
+            $('#divTamModalForms').addClass('modal-lg');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
@@ -81,23 +104,24 @@
     //Guardar registro 
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
-        var error = verifica_vacio($('#txt_nom_dependencia'));
+        var error = verifica_vacio($('#txt_nom_area'));
+        error += verifica_vacio($('#sl_centrocosto'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Los datos resaltados son obligatorios');
         } else {
-            var data = $('#frm_reg_dependencias').serialize();
+            var data = $('#frm_reg_cencos_areas').serialize();
             $.ajax({
                 type: 'POST',
-                url: 'editar_dependencias.php',
+                url: 'editar_cencos_areas.php',
                 dataType: 'json',
                 data: data + "&oper=add"
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
-                    let pag = ($('#id_dependencia').val() == -1) ? 0 : $('#tb_dependencias').DataTable().page.info().page;
-                    reloadtable('tb_dependencias', pag);
-                    $('#id_dependencia').val(r.id);
+                    let pag = ($('#id_area').val() == -1) ? 0 : $('#tb_cencos_areas').DataTable().page.info().page;
+                    reloadtable('tb_cencos_areas', pag);
+                    $('#id_area').val(r.id);
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");
                 } else {
@@ -111,23 +135,23 @@
     });
 
     //Borrar un registro 
-    $('#tb_dependencias').on('click', '.btn_eliminar', function() {
+    $('#tb_cencos_areas').on('click', '.btn_eliminar', function() {
         let id = $(this).attr('value');
-        confirmar_del('dependencias', id);
+        confirmar_del('cencos_area', id);
     });
 
-    $('#divModalConfDel').on("click", "#dependencias", function() {
+    $('#divModalConfDel').on("click", "#cencos_area", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
-            url: 'editar_dependencias.php',
+            url: 'editar_cencos_areas.php',
             dataType: 'json',
             data: { id: id, oper: 'del' }
         }).done(function(r) {
             $('#divModalConfDel').modal('hide');
             if (r.mensaje == 'ok') {
-                let pag = $('#tb_dependencias').DataTable().page.info().page;
-                reloadtable('tb_dependencias', pag);
+                let pag = $('#tb_cencos_areas').DataTable().page.info().page;
+                reloadtable('tb_cencos_areas', pag);
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
             } else {
@@ -141,15 +165,15 @@
 
     //Imprimir registros
     $('#btn_imprime_filtro').on('click', function() {
-        reloadtable('tb_dependencias');
-        $.post("imp_dependencias.php", {
+        reloadtable('tb_cencos_areas');
+        $.post("imp_cencos_areas.php", {
             nombre: $('#txt_nombre_filtro').val()
         }, function(he) {
-            $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-lg');
-            $('#divTamModalForms').addClass('modal-xl');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
         });
     });
 

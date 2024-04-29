@@ -9,7 +9,7 @@ include '../../../permisos.php';
 //Permisos: 1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir
 
 $oper = isset($_POST['oper']) ? $_POST['oper'] : exit('Acción no permitida');
-$fecha_crea = new DateTime('now', new DateTimeZone('America/Bogota'));
+$fecha_crea = date('Y-m-d H:i:s');
 $id_usr_crea = $_SESSION['id_user'];
 $res = array();
 

@@ -158,6 +158,7 @@
                         $('#sl_sede_destino').prop('disabled', true);
                         $('#sl_bodega_destino').prop('disabled', true);
                         $('#btn_cerrar').prop('disabled', false);
+                        $('#btn_imprimir').prop('disabled', false);
 
                         $('#divModalDone').modal('show');
                         $('#divMsgDone').html("Proceso realizado con éxito");
@@ -304,7 +305,7 @@
                 type: 'POST',
                 url: 'editar_traslados_detalles.php',
                 dataType: 'json',
-                data: data + "&id_traslado=" + $('#id_traslado').val() + '&oper=add'
+                data: data + '&id_traslado=' + $('#id_traslado').val() + '&oper=add'
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
                     let pag = ($('#id_detalle').val() == -1) ? 0 : $('#tb_traslados_detalles').DataTable().page.info().page;
@@ -361,7 +362,7 @@
         });
     });
 
-    //Imprimir registros
+    //Imprimir listado de registros
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_traslados');
         $('.is-invalid').removeClass('is-invalid');
@@ -383,13 +384,26 @@
                 id_boddes: $('#sl_boddes_filtro').val(),
                 estado: $('#sl_estado_filtro').val()
             }, function(he) {
-                $('#divTamModalForms').removeClass('modal-sm');
-                $('#divTamModalForms').removeClass('modal-lg');
-                $('#divTamModalForms').addClass('modal-xl');
-                $('#divModalForms').modal('show');
-                $("#divForms").html(he);
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
             });
         }
+    });
+
+    //Imprimit un Traslado
+    $('#divForms').on("click", "#btn_imprimir", function() {
+        $.post("imp_traslado.php", {
+            id: $('#id_traslado').val()
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
     });
 
 })(jQuery);

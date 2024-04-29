@@ -58,7 +58,7 @@ if (!empty($objs)) {
     foreach ($objs as $obj) {
         $id = $obj['id_subgrupo'];
         /*Permisos del usuario
-            5001-Opcion [Articulos][Subgrupos]
+            5001-Opcion [General][Subgrupos]
             1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
         */    
         if (PermisosUsuario($permisos, 5001, 3) || $id_rol == 1) {

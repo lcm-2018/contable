@@ -1,51 +1,5 @@
 <?php
 
-if (isset($_POST['id_lot'])) {
-    session_start();
-
-    include '../../../conexion.php';
-    include '../common/funciones_generales.php';
-
-    try {
-        $idlot = $_POST['id_lot'];
-        $tipo = $_POST['tipo'];
-        $iding = $_POST['id_ing'];
-        $idegr = $_POST['id_egr'];
-        $idtra = $_POST['id_tra'];
-        $iddev = $_POST['id_dev'];
-        $fecini = $_POST['fec_ini'];
-
-        set_time_limit(0);
-        $res = array();
-
-        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-
-        $cmd->beginTransaction();
-
-        recalcular_kardex($cmd, $idlot, $tipo, $iding, $idegr, $idtra, $iddev, $fecini);
-
-        /*Cuenta cuantos errores ocurrieron al ejecutar el script*/
-        $errores = error_get_last();
-        if (!$errores) {
-            $cmd->commit();
-            $res['mensaje'] = 'ok';
-            $accion = 'Actualizar kardex';
-            $opcion = 'Recalcular Kardex';
-            $detalle = 'Recalcular Kardex en la fecha : ' . date('Y-m-d H:i:s');
-            bitacora($accion, $opcion, $detalle, $_SESSION['id_user'], $_SESSION['user']);
-        } else {
-            $res['mensaje'] = 'Error de Ejecución de Proceso';
-            $cmd->rollBack();
-        }
-
-        $cmd = null;
-    } catch (PDOException $e) {
-        $res['mensaje'] = $e->getCode();
-    }
-    echo json_encode($res);
-}
-
 /*---------------------------------------------------
 FUNCION DE RECALCULAR KARDEX
 -----------------------------------------------------*/
@@ -121,9 +75,10 @@ function recalcular_kardex($cmd, $idlot, $tipo, $iding, $idegr, $idtra, $iddev, 
         foreach ($objs_kar as $kar) {
 
             if ($kar['id_ingreso']) {       //Si el movimiento es un Ingreso
-                $sql = "SELECT far_orden_ingreso_detalle.cantidad*far_presentacion_lote.cantidad AS cantidad,far_orden_ingreso_detalle.valor/far_presentacion_lote.cantidad AS valor 
+                $sql = "SELECT far_orden_ingreso_detalle.cantidad*IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad,
+                            far_orden_ingreso_detalle.valor/IFNULL(far_presentacion_comercial.cantidad,1) AS valor 
                         FROM far_orden_ingreso_detalle 
-                        INNER JOIN far_presentacion_lote ON (far_presentacion_lote.id_presentacion = far_orden_ingreso_detalle.id_presentacion)
+                        INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_orden_ingreso_detalle.id_presentacion)
                         WHERE id_ingreso=" . $kar['id_ingreso'] . " AND id_lote=" . $kar['id_lote'];
                 $rs = $cmd->query($sql);
                 $obj_ing = $rs->fetch();
