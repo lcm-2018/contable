@@ -13,7 +13,7 @@ try {
     $sql = "SELECT
                 numero
             FROM
-                seg_tes_referencia
+                tes_referencia
             WHERE estado =0;";
     $rs = $cmd->query($sql);
     $referencia = $rs->fetch();
@@ -27,7 +27,7 @@ try {
             $sql = "SELECT
                 MAX(numero) as valor
             FROM
-                seg_tes_referencia
+                tes_referencia
            ";
             $rs = $cmd->query($sql);
             $referencia = $rs->fetch();
@@ -36,8 +36,8 @@ try {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
         $estado = 0;
-        // Realizo un insert en la tabla seg_tes_referencia donde numero = ref
-        $query = $cmd->prepare("INSERT INTO seg_tes_referencia (numero, estado,id_user_reg, fec_reg) VALUES (?, ?, ?, ?)");
+        // Realizo un insert en la tabla tes_referencia donde numero = ref
+        $query = $cmd->prepare("INSERT INTO tes_referencia (numero, estado,id_user_reg, fec_reg) VALUES (?, ?, ?, ?)");
         $query->bindParam(1, $ref, PDO::PARAM_INT);
         $query->bindParam(2, $estado, PDO::PARAM_INT);
         $query->bindParam(3, $iduser, PDO::PARAM_INT);

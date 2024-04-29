@@ -4,29 +4,85 @@ if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../index.php");</script>';
     exit();
 }
-include '../conexion.php';
-include '../permisos.php';
-include '../financiero/consultas.php';
+include_once '../conexion.php';
+include_once '../permisos.php';
+include_once '../financiero/consultas.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
 
 <?php include '../head.php';
 // Consulta tipo de presupuesto
-$id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no permitido');
+$id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : 0;
+$id_crp = isset($_POST['id_crp']) ? $_POST['id_crp'] : 0;
 $tipo_dato = $_POST['tipo_dato'];
+$id_vigencia = $_SESSION['id_vigencia'];
+
+$datosCrp = [];
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+if ($id_doc == 0) {
+    try {
+        $sql = "SELECT
+                    `pto_crp`.`id_pto_crp`
+                    , `pto_crp`.`id_tercero_api`
+                    , `pto_crp`.`fecha`
+                    , `pto_crp`.`objeto`
+                FROM
+                    `pto_crp`
+                WHERE (`pto_crp`.`id_pto_crp` = $id_crp) LIMIT 1";
+        $rs = $cmd->query($sql);
+        $datosCrp = $rs->fetch();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    try {
+        $sql = "SELECT
+                    MAX(`id_manu`) AS `id_manu` 
+                FROM
+                    `ctb_doc`
+                WHERE (`id_vigencia` = $id_vigencia AND `id_tipo_doc` = $tipo_dato)";
+        $rs = $cmd->query($sql);
+        $consecutivo = $rs->fetch();
+        $id_manu = !empty($consecutivo) ? $consecutivo['id_manu'] + 1 : 1;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
 
-// Variables que no llegan de presupuesto
-$fecha_doc = date('Y-m-d');
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 5, $cmd);
-$fecha = fechaSesion($_SESSION['vigencia'], $_SESSION['id_user'], $cmd);
-$fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
-$fecha_fact = $fecha;
-$fecha_ven = strtotime('+30 day', strtotime($fecha_doc));
-$fecha_ven = date('Y-m-d', $fecha_ven); // fecha final con 30 dias sumados
+    try {
+        $estado = 1;
+        $id_tercero = $datosCrp['id_tercero_api'];
+        $detalle = $datosCrp['objeto'];
+        $iduser = $_SESSION['id_user'];
+        $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+        $fecha = $date->format('Y-m-d');
+        $fecha2 = $date->format('Y-m-d H:i:s');
+        $query = "INSERT INTO `ctb_doc`
+                        (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`, `id_crp`)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $query = $cmd->prepare($query);
+        $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
+        $query->bindParam(2, $tipo_dato, PDO::PARAM_INT);
+        $query->bindParam(3, $id_manu, PDO::PARAM_INT);
+        $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
+        $query->bindParam(5, $fecha, PDO::PARAM_STR);
+        $query->bindParam(6, $detalle, PDO::PARAM_STR);
+        $query->bindParam(7, $estado, PDO::PARAM_INT);
+        $query->bindParam(8, $iduser, PDO::PARAM_INT);
+        $query->bindParam(9, $fecha2);
+        $query->bindParam(10, $id_crp, PDO::PARAM_INT);
+        $query->execute();
+        if ($cmd->lastInsertId() > 0) {
+            $id_doc = $cmd->lastInsertId();
+        } else {
+            echo $query->errorInfo()[2];
+            exit();
+        }
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
 try {
     $sql = "SELECT
                 `ctb_fuente`.`nombre` AS `fuente`
@@ -36,6 +92,7 @@ try {
                 , `ctb_doc`.`detalle`
                 , `ctb_doc`.`id_tercero`
                 , `ctb_doc`.`estado`
+                , `ctb_doc`.`id_crp`
             FROM
                 `ctb_doc`
                 INNER JOIN `ctb_fuente` 
@@ -61,28 +118,6 @@ try {
 }
 
 $fecha = date('Y-m-d', strtotime($datosDoc['fecha']));
-// Consulto el valor de id_pto_doc en pto_documento_detalles cuando id_ctb_doc es igual a $id_doc
-try {
-    $sql = "SELECT
-                `ctb_doc`.`id_ctb_doc`
-                , `pto_crp`.`id_pto_crp`
-                , `pto_crp`.`id_tercero_api`
-                , `pto_crp`.`fecha`
-                , `pto_crp`.`objeto`
-            FROM
-                `ctb_doc`
-                INNER JOIN `pto_cop_detalle` 
-                    ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                INNER JOIN `pto_crp_detalle` 
-                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
-                INNER JOIN `pto_crp` 
-                    ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
-            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc) LIMIT 1";
-    $rs = $cmd->query($sql);
-    $datosCrp = $rs->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
 // Consulto el valor de causacion de costo asociado al registro en la tabla ctb_causa_costos
 try {
     $sql = "SELECT
@@ -123,14 +158,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-// Consulto el tipo de documentos en ctb_tipo_doc
-try {
-    $sql = "SELECT `id_ctb_tipodoc`, `tipo` FROM `ctb_tipo_doc` ORDER BY `tipo` ASC";
-    $rs = $cmd->query($sql);
-    $tipodoc = $rs->fetchAll();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
+
 // Consulto los datos de la factura que esten asociados seg_ctb_factura
 try {
     $sql = "SELECT
@@ -177,7 +205,7 @@ if (!empty($datosDoc)) {
 $ver = 'readonly';
 ?>
 
-<body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ? 'sb-sidenav-toggled' : '' ?>">
+<body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] == '1' ? 'sb-sidenav-toggled' : '' ?>">
     <?php include '../navsuperior.php' ?>
     <div id="layoutSidenav">
         <?php include '../navlateral.php' ?>
@@ -211,7 +239,7 @@ $ver = 'readonly';
                                             </div>
                                             <div class="col-10"><input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $datosDoc['id_manu']; ?>" required readonly>
                                                 <input type="hidden" id="tipodato" name="tipodato" value="<?php echo $tipo_dato; ?>">
-                                                <input type="hidden" id="id_crpp" name="id_crpp" value="<?php echo !empty($datosCrp) ? $datosCrp['id_pto_crp'] : 0 ?>">
+                                                <input type="hidden" id="id_crpp" name="id_crpp" value="<?php echo $datosDoc['id_crp'] > 0 ? $datosDoc['id_crp'] : 0 ?>">
 
                                             </div>
                                         </div>
@@ -219,7 +247,7 @@ $ver = 'readonly';
                                             <div class="col-2">
                                                 <div class="col"><span class="small">FECHA:</span></div>
                                             </div>
-                                            <div class="col-10"> <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" min="<?php echo $fecha_doc; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_doc; ?>" readonly></div>
+                                            <div class="col-10"> <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datosDoc['fecha'])); ?>" readonly></div>
                                         </div>
                                         <div class="row mb-1">
                                             <div class="col-2">
@@ -233,135 +261,18 @@ $ver = 'readonly';
                                             <div class="col-2">
                                                 <div class="col"><span class="small">OBJETO:</span></div>
                                             </div>
-                                            <div class="col-10"><textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-span="Default select example" rows="3" required="required" readonly><?php !empty($datosCrp) ? $datosCrp['objeto'] : '' ?></textarea></div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <div class="col-2">
-                                                <div class="col"><span class="small">DETALLE:</span></div>
+                                            <div class="col-10">
+                                                <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-span="Default select example" rows="3" required="required" readonly><?php echo $datosDoc['detalle']; ?></textarea>
                                             </div>
-                                            <div class="col-10"><textarea id="detalle" type="text" name="detalle" class="form-control form-control-sm py-0 sm" aria-span="Default select example" rows="2" readonly><?php echo $datosDoc['detalle']; ?></textarea></div>
                                         </div>
                                         <?php
                                         if ($tipo_dato == '3') {
                                         ?>
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <div class="col"><span class="small"></span></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-center"><span class="small">Tipo documento:</span></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-center"><span class="small">Número de documento:</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-center"><span class="small text-center">Fecha factura:</span></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-center"><span class="small">Fecha vencimiento:</span></div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <div class="col"><span class="small">DOCUMENTO:</span></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div>
-                                                        <!--Realizo select con los datos de $tipodoc-->
-                                                        <select class="form-control form-control-sm" id="tipoDoc" name="tipoDoc" onchange="consecutivoDocEqui(value);" required>
-                                                            <option value="">-- Selecionar --</option>
-                                                            <?php foreach ($tipodoc as $tipo) :
-                                                                if ($tipo_doc == $tipo['id_ctb_tipodoc']) {
-                                                                    echo '<option value="' . $tipo['id_ctb_tipodoc'] . '" selected>' . $tipo['tipo'] . '</option>';
-                                                                } else {
-                                                                    echo '<option value="' . $tipo['id_ctb_tipodoc'] . '">' . $tipo['tipo'] . '</option>';
-                                                                }
-                                                            endforeach; ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div><input type="text" name="numFac" id="numFac" class="form-control form-control-sm" value="<?php echo $num_doc; ?>" required style="text-align: right;"></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div><input type="date" name="fechaDoc" id="fechaDoc" class="form-control form-control-sm" value="<?php echo $fecha_fact; ?>"></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div><input type="date" name="fechaVen" id="fechaVen" class="form-control form-control-sm" value="<?php echo $fecha_ven; ?>"></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div><span class="small"></span></div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <div class="col"><span class="small"></span></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-center"><span class="small">VALOR:</span></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-center"><span class="small">IVA:</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-center"><span class="small">BASE:</span></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-center"><span class="small"></span></div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <div class="col"><span class="small">VALOR FACTURA:</span></div>
-                                                </div>
-                                                <div class="col-2"><input type="text" name="valor_pagar" id="valor_pagar" value="<?php echo $valor_factura; ?>" class="form-control form-control-sm" style="text-align: right;" required onkeyup="valorMiles(id)"></div>
-                                                <div class="col-2">
-                                                    <input type="text" name="valor_iva" id="valor_iva" value="<?php echo $valor_iva; ?>" class="form-control form-control-sm" style="text-align: right;" onkeyup="valorMiles(id)" onchange="calculoValorBase();" ondblclick="calculoIva();" required>
-                                                </div>
-                                                <div class="col-2"><input type="text" name="valor_base" id="valor_base" value="<?php echo $valor_base; ?>" class="form-control form-control-sm" style="text-align: right;" onkeyup="valorMiles(id)"></div>
-                                                <div class="col-2"><button type="button" id="bottonGuardarCxp" class="btn btn-danger btn-sm" onclick="procesaCausacionCxp('<?php echo $id_crp; ?>')">Guardar</button></div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <div class="col"><span class="small">IMPUTACION:</span></div>
-                                                </div>
-                                                <div class="col-2"><input type="text" name="valor" id="valor" value="<?php echo $valor_causado; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly></div>
-                                                <div class=" col-2 text-left">
-                                                    <a class="btn btn-outline-success btn-sm btn-circle shadow-gb" onclick="cargaRubrosRp('<?php echo $id_crp; ?>')"><span class="fas fa-plus fa-lg"></span></a>
-                                                </div>
-                                                <div class="col-2">
-                                                </div>
-                                            </div>
-
-                                            <div class="row ">
-                                                <div class="col-2">
-                                                    <div class="col"><span class="small">CENTROS DE COSTOS:</span></div>
-                                                </div>
-                                                <div class="col-2"><input type="text" name="valor_costo" id="valor_costo" value="<?php echo $valor_costo; ?>" class="form-control form-control-sm" style="text-align: right;" required></div>
-                                                <div class=" col-2"><a class="btn btn-outline-warning btn-sm btn-circle shadow-gb" onclick="cargaCentrosCosto('<?php echo $id_doc; ?>')"><span class="fas fa-eye fa-lg"></span></a>
-                                                    <a class="btn btn-outline-primary btn-sm btn-circle shadow-gb" onclick="consultaCentrosCosto()"><span class="fas fa-hospital-user fa-lg"></span></a>
-                                                    <a class="btn btn-outline-success btn-sm btn-circle shadow-gb" onclick="ajustarCausacionCostos('<?php echo $id_doc; ?>')"><span class="far fa-edit fa-lg"></span></a>
-                                                </div>
-                                            </div>
-                                            <div class="row pb-2">
-                                                <div class="col-2">
-                                                    <div class="col"><span class="small">DESCUENTOS:</span></div>
-                                                </div>
-                                                <div class="col-2"><input type="text" name="descuentos" id="descuentos" class="form-control form-control-sm" style="text-align: right;" value="<?php echo $valor_ret; ?>" required onkeyup="valorMiles(id)"></div>
-                                                <div class="col-8"><a class="btn btn-outline-primary btn-sm btn-circle shadow-gb" onclick="cargaDescuentos('<?php echo $id_doc; ?>')"><span class="fas fa-minus fa-lg"></span></a></div>
-                                            </div>
-                                            <div class="row ">
-                                                <div class="col-2">
-                                                    <div><span class="small"></span></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-align: center">
-                                                        <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoCxp();">Generar movimiento</button>
-                                                    </div>
-                                                </div>
+                                            <div class="btn-group btn-group-sm mt-2" role="group">
+                                                <button type="button" class="btn btn-outline-success" onclick="FacturarCtasPorPagar('<?php echo $id_doc; ?>')"><i class="fas fa-file-invoice-dollar fa-lg mr-2"></i>Facturación</button>
+                                                <button type="button" class="btn btn-outline-primary" onclick="ImputacionCtasPorPagar('<?php echo $id_doc; ?>')"><i class="fas fa-file-signature fa-lg mr-2"></i>Imputación</button>
+                                                <button type="button" class="btn btn-outline-warning" onclick="CentroCostoCtasPorPagar('<?php echo $id_doc; ?>')"><i class="fas fa-kaaba fa-lg mr-2"></i></i>Centro Costo</button>
+                                                <button type="button" class="btn btn-outline-info" onclick="DesctosCtasPorPagar('<?php echo $id_doc; ?>')"><i class="fas fa-donate fa-lg mr-2"></i>Descuentos</button>
                                             </div>
                                         <?php
                                         }

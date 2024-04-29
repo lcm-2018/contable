@@ -152,7 +152,7 @@ if (!empty($listappto)) {
         }
         $base = base64_encode($id_ctb . '|' . $id_ctb_doc);
         if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
-            $editar = '<a value="' . $id_ctb . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas  fa-pencil-alt fa-lg"></span></a>';
+            $editar = '<a class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar" text="' . $id_ctb . '"><span class="fas  fa-pencil-alt fa-lg"></span></a>';
             $detalles = '<a text ="' . $base . '" onclick="cargarListaDetalle(this)" class="btn btn-outline-warning btn-sm btn-circle shadow-gb"  title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
             $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoDoc(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
             $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">

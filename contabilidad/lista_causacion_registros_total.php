@@ -6,60 +6,62 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../permisos.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
 // Consulta tipo de presupuesto
 $vigencia = $_SESSION['vigencia'];
-$id_cop_add = $_POST['id_cop_add'] ?? 0;
+$id_vigencia = $_SESSION['id_vigencia'];
+$id_doc = isset($_POST['id_doc']) ?  $_POST['id_doc'] : exit('Acceso no disponible');
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT id_pto_presupuestos FROM pto_presupuestos WHERE id_pto_tipo = 2 AND vigencia = '$_SESSION[vigencia]'";
+    $sql = "SELECT
+                `ctb_doc`.`id_ctb_doc`
+                , `pto_crp_detalle`.`id_tercero_api`
+                , IFNULL(`pto_crp_detalle`.`valor`,0) - IFNULL(`pto_crp_detalle`.`valor_liberado`,0) AS `valor_crp` 
+                , `pto_cdp_detalle`.`id_rubro`
+                , `pto_cargue`.`cod_pptal`
+                , `pto_cargue`.`nom_rubro`
+                , IFNULL(`t1`.`valor`,0) - IFNULL(`t1`.`valor_liberado`,0) AS `valor_cop` 
+            FROM
+                `ctb_doc`
+                INNER JOIN `pto_crp` 
+                    ON (`ctb_doc`.`id_crp` = `pto_crp`.`id_pto_crp`)
+                INNER JOIN `pto_crp_detalle` 
+                    ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                INNER JOIN `pto_cdp_detalle` 
+                    ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                INNER JOIN `pto_cargue` 
+                    ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN 
+            (SELECT
+                `id_pto_crp_det`
+                , IFNULL(SUM(`valor`),0) AS `valor`
+                , IFNULL(SUM(`valor_liberado`),0) AS `valor_liberado`
+            FROM
+                `pto_cop_detalle`
+            WHERE (`id_ctb_doc` = $id_doc) 
+            GROUP BY `id_pto_crp_det`) AS `t1`  
+                    ON (`t1`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
-    $listappto = $rs->fetch();
+    $listado = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+//consulto los datos del cop
 try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-        ctb_doc.id_ctb_doc
-        , ctb_doc.id_manu as causacion 
-        , ctb_doc.id_tercero
-        , ctb_doc.fecha
-        , pto_documento.id_manu as registro
-        ,  contratacion.num_contrato
-        , SUM(pto_documento_detalles.valor)  AS valor 
-        , IFNULL(pagado.pagos,0) AS val_pagado
-    FROM	
-        ctb_doc
-        INNER JOIN pto_documento_detalles ON (ctb_doc.id_ctb_doc = pto_documento_detalles.id_ctb_doc)
-        INNER JOIN pto_documento ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-        LEFT JOIN (
-        SELECT 
-            SUM(pto_documento_detalles.valor) AS pagos 
-            ,pto_documento_detalles.id_ctb_cop
-        FROM pto_documento_detalles 
-        INNER JOIN ctb_doc ON (ctb_doc.id_ctb_doc = pto_documento_detalles.id_ctb_cop)
-        WHERE pto_documento_detalles.tipo_mov ='PAG' AND pto_documento_detalles.estado <5
-        GROUP BY ctb_doc.id_ctb_doc
-        ) AS pagado ON (ctb_doc.id_ctb_doc = pagado.id_ctb_cop)
-        LEFT JOIN (
-            SELECT DISTINCT
-            ctt_contratos.num_contrato
-            ,pto_documento_detalles.id_ctb_doc
-        FROM
-        pto_documento_detalles
-        INNER JOIN ctt_adquisiciones ON (pto_documento_detalles.id_auto_dep = ctt_adquisiciones.id_cdp)
-        INNER JOIN ctt_contratos ON (ctt_contratos.id_compra = ctt_adquisiciones.id_adquisicion)
-        ) AS contratacion ON (ctb_doc.id_ctb_doc = contratacion.id_ctb_doc)
-    WHERE pto_documento_detalles.tipo_mov ='COP' AND ctb_doc.estado =1 AND ctb_doc.vigencia =$vigencia
-    GROUP BY ctb_doc.id_ctb_doc;";
-    $sql2 = $sql;
+                `id_pto_crp_det`
+                , `valor`
+                , `valor_liberado`
+                , `id_pto_cop_det`
+            FROM
+                `pto_cop_detalle`
+            WHERE (`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
-    $listado = $rs->fetchAll();
+    $detalles = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -170,7 +172,7 @@ try {
                                 <td class="text-left"><?php echo $fecha; ?></td>
                                 <td class="text-left"><?php echo $ccnit; ?></td>
                                 <td class="text-left"><?php echo $tercero; ?></td>
-                                <td class="text-right"> <?php echo number_format($saldo_rp, 2, ',', '.'); ?></td>
+                                <td class="text-right"><?php echo number_format($saldo_rp, 2, ',', '.'); ?></td>
 
                                 <td class="text-center"> <?php echo $editar; ?></td>
                             </tr>
@@ -185,8 +187,8 @@ try {
         </div>
     </div>
     <div class="text-right pt-3">
-        <a type="button" class="btn btn-primary btn-sm" data-dismiss="modal"> Procesar lote</a>
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <a type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Guardar</a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Aceptar</a>
     </div>
 </div>
 <?php

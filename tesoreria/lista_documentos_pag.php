@@ -229,9 +229,9 @@ if ($_POST['tipo_dato'] == 'CTCB') {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
 }
-// consultar si estado es 0 en seg_tes_referencia
+// consultar si estado es 0 en tes_referencia
 try {
-    $sql = "SELECT numero FROM  seg_tes_referencia  WHERE estado =0;";
+    $sql = "SELECT numero FROM  tes_referencia  WHERE estado =0;";
     $rs = $cmd->query($sql);
     $pagos_ref = $rs->fetch();
     if ($rs->rowCount() > 0) {

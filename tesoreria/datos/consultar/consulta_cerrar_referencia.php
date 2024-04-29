@@ -11,7 +11,7 @@ try {
 }
 // Incio la transaccion
 try {
-    $query = $cmd->prepare("UPDATE seg_tes_referencia SET estado=1 WHERE id_referencia=?");
+    $query = $cmd->prepare("UPDATE tes_referencia SET estado=1 WHERE id_referencia=?");
     $query->bindParam(1, $data, PDO::PARAM_INT);
     $query->execute();
     $response[] = array("value" => "ok");
