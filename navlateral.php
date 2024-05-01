@@ -543,7 +543,7 @@ $rol = $_SESSION['rol'];
                                         </div>
                                     </a>
                                 <?php }
-                                if (PermisosUsuario($permisos, 5502, 0) || $id_rol == 1) {
+                                if (false) {
                                 ?>
                                     <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/lista_documentos_mov.php">
                                         <div class="div-icono">

@@ -17,15 +17,15 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // Consultar el valor a de los descuentos realizados a la cuenta de ctb_causa_retencion
 try {
     $sql = "SELECT
-                seg_tes_referencia.id_referencia
-                , seg_tes_referencia.numero
-                , seg_tes_referencia.fec_reg
+                tes_referencia.id_referencia
+                , tes_referencia.numero
+                , tes_referencia.fec_reg
                 , SUM(ctb_libaux.credito) as valor
-                , seg_tes_referencia.estado
+                , tes_referencia.estado
             FROM
                 ctb_libaux
             INNER JOIN ctb_doc ON (ctb_libaux.id_ctb_doc = ctb_doc.id_ctb_doc)
-            INNER JOIN seg_tes_referencia ON (seg_tes_referencia.numero = ctb_doc.id_plano);";
+            INNER JOIN tes_referencia ON (tes_referencia.numero = ctb_doc.id_plano)";
     $rs = $cmd->query($sql);
     $referencias = $rs->fetchAll();
 } catch (PDOException $e) {

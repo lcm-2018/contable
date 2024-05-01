@@ -424,7 +424,7 @@ document.addEventListener("submit", (e) => {
 });
 
 $('#divModalForms').on('click', '#gestionarMvtoCtb', function () {
-	var opcion = $(this).attr('text');
+	var id = $(this).attr('text');
 	$('.is-invalid').removeClass('is-invalid');
 	if ($('#fecha').val() == '') {
 		$('#fecha').addClass('is-invalid');
@@ -443,7 +443,7 @@ $('#divModalForms').on('click', '#gestionarMvtoCtb', function () {
 		$('#objeto').focus();
 		mjeError('El objeto no puede estar vacio');
 	} else {
-		var datos = $('#formGetMvtoCtb').serialize() + '&opcion=' + opcion;
+		var datos = $('#formGetMvtoCtb').serialize() + '&id=' + id;
 		url = "datos/registrar/registrar_mvto_contable_doc.php";
 		$.ajax({
 			type: 'POST',
@@ -668,14 +668,13 @@ let cerrarDocumentoCtb = function (dato) {
 	})
 		.then((response) => response.json())
 		.then((response) => {
-			if (response[0].value == "ok") {
+			if (response.status == "ok") {
 				//mje("Documento cerrado");
 				console.log(response);
-				let id = "tableMvtoContable";
-				reloadtable(id);
-				document.getElementById("editar_" + dato).style.display = "none";
+				$('#tableMvtoContable').DataTable().ajax.reload();
+				$('#tableMvtoContableDetalle').DataTable().ajax.reload();
 			} else {
-				mjeError("Documento no cerrado", "Verifique sumas iguales y cuentas");
+				mjeError("Documento no cerrado", "Verifique información ingresada" + response.msg);
 			}
 		});
 };
@@ -710,6 +709,18 @@ function CargarListadoCxp(dato) {
 }
 
 // Cargar formulario formadd_mvto_contable.php para registrar movimientos contables
+$('#tableMvtoContable').on('click', '.editar', function () {
+	var id_detalle = $(this).attr('text');
+	let id_doc = $("#id_ctb_doc").val();
+	$.post("datos/registrar/formadd_mvto_contable.php", { id_doc: id_doc, id_detalle: id_detalle }, function (he) {
+		$("#divTamModalForms").removeClass("modal-xl");
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").addClass("modal-lg");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+
+});
 function cargarFormCxp(busqueda) {
 	fetch("datos/registrar/formadd_mvto_contable.php", {
 		method: "POST",
@@ -798,7 +809,7 @@ function CausaNomina(boton) {
 }
 // Cargar lista detalle de registros contables
 function cargarListaDetalleCont(id_doc) {
-	let tipo_dato = "NCXP";
+	let tipo_dato = "3";
 	let tipo_mov = "RP";
 	console.log(id_doc);
 	$(
@@ -907,19 +918,18 @@ document.addEventListener("keyup", (e) => {
 // ********************************************************* AFECTACION PRESUPUESTAL DE CUENTAS POR PAGAR *************************
 
 // Cargar lista de rubros para realizar la causación del valor
-let cargaRubrosRp = function (dato) {
-	let id_doc = id_ctb_doc.value;
-	if (id_doc == 0) {
+let cargaRubrosRp = function (id_doc) {
+	if (id_doc == '0') {
 		mjeError("No puede seleccionar imputación presupuestal", "Primero guarde el documento");
 		return false;
 	} else {
-		$.post("lista_causacion_registros_total.php", { id_crp: dato }, function (he) {
-			$("#divTamModalForms").removeClass("modal-sm");
-			$("#divTamModalForms").removeClass("modal-3x");
-			$("#divTamModalForms").removeClass("modal-lg");
-			$("#divTamModalForms").addClass("modal-xl");
-			$("#divModalForms").modal("show");
-			$("#divForms").html(he);
+		$.post("lista_causacion_registros_total.php", { id_doc: id_doc }, function (he) {
+			$("#divTamModalReg").removeClass("modal-sm");
+			$("#divTamModalReg").removeClass("modal-3x");
+			$("#divTamModalReg").removeClass("modal-lg");
+			$("#divTamModalReg").addClass("modal-xl");
+			$("#divModalReg").modal("show");
+			$("#divFormsReg").html(he);
 		});
 	}
 };
@@ -937,6 +947,43 @@ let validarValorMaximo = function (id) {
 };
 
 // Guardar los rubros y el valor de la afectación presupuestal asociada a la cuenta por pagar
+var DetalleImputacionCtasPorPagar = function () {
+	var band = true;
+	var valor = 0;
+	var min, max;
+	$('.is-invalid').removeClass('is-invalid');
+	$('.ValImputacion').each(function () {
+		valor = $(this).val();
+		min = Number($(this).attr('min'));
+		max = Number($(this).attr('max'));
+		valor = Number(valor.replace(/\,/g, "", ""));
+		if (valor < min || valor > max) {
+			$(this).addClass('is-invalid');
+			$(this).focus();
+			mjeError('El valor debe estar entre ' + min.toLocaleString("es-MX") + ' y ' + max.toLocaleString("es-MX"));
+			band = false;
+			return false;
+		}
+	});
+	if (band) {
+		var data = $('#formImputacion').serialize();
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: 'datos/registrar/registrar_mvto_cobp.php',
+			data: data,
+			success: function (r) {
+				if (r.status == 'ok') {
+					mje('Proceso realizado correctamente');
+					ImputacionCtasPorPagar($('#id_ctb_doc').val());
+				} else {
+					mjeError('Error:', r.msg);
+				}
+			}
+		});
+	}
+};
+/*
 let rubrosaObligar = function () {
 	let formDatos = new FormData(rubrosObligar);
 	let datos = {};
@@ -970,7 +1017,7 @@ let rubrosaObligar = function () {
 			}
 		});
 };
-
+*/
 //********************************************** CAUSACION DE CUENTAS POR PAGAR POR CENTROS DE COSTO ***************/
 
 // Cargar lista de centros de costo para realizar la causación del valor
@@ -1231,7 +1278,7 @@ let calculoIva = function () {
 	let base = pago - iva;
 	valor_iva.value = iva.toLocaleString("es-MX");
 	valor_base.value = base.toLocaleString("es-MX");
-	neto_pago.value = base.toLocaleString("es-MX");
+	//neto_pago.value = base.toLocaleString("es-MX");
 };
 
 // Muestra el select según el tipo de retención seleccionado
@@ -1526,6 +1573,147 @@ const procesaCausacionCxp = (id) => {
 		});
 };
 
+const ProcesaFacturas = (boton) => {
+	$('.is-invalid').removeClass('is-invalid');
+	id = boton.getAttribute("text");
+	if ($('#tipoDoc').val() == '0') {
+		$('#tipoDoc').addClass('is-invalid');
+		$('#tipoDoc').focus();
+		mjeError("Debe seleccionar un tipo de documento");
+	} else if (Number($('#numFac').val()) <= 0) {
+		$('#numFac').addClass('is-invalid');
+		$('#numFac').focus();
+		mjeError("Debe ingresar el número de factura");
+	} else if ('#fechaDoc' == '') {
+		$('#fechaDoc').addClass('is-invalid');
+		$('#fechaDoc').focus();
+		mjeError("Debe ingresar la fecha del documento");
+	} else if ($('#fechaDoc').attr('min') > $('#fechaDoc').val() || $('#fechaDoc').attr('max') < $('#fechaDoc').val()) {
+		$('#fechaDoc').addClass('is-invalid');
+		$('#fechaDoc').focus();
+		mjeError("La fecha del documento debe estar entre " + $('#fechaDoc').attr('min') + " y " + $('#fechaDoc').attr('max'));
+	} else if ($('#fechaVen').val() == '') {
+		$('#fechaVen').addClass('is-invalid');
+		$('#fechaVen').focus();
+		mjeError("Debe ingresar la fecha de vencimiento");
+	} else if ($('#fechaVen').attr('min') > $('#fechaVen').val() || $('#fechaVen').attr('max') < $('#fechaVen').val()) {
+		$('#fechaVen').addClass('is-invalid');
+		$('#fechaVen').focus();
+		mjeError("La fecha de vencimiento debe estar entre " + $('#fechaVen').attr('min') + " y " + $('#fechaVen').attr('max'));
+	} else if ($('#fechaVen').val() < $('#fechaDoc').val()) {
+		$('#fechaVen').addClass('is-invalid');
+		$('#fechaVen').focus();
+		mjeError("La fecha de vencimiento debe ser mayor a la fecha del documento");
+	} else if (Number($('#valor_pagar').val()) <= 0) {
+		$('#valor_pagar').addClass('is-invalid');
+		$('#valor_pagar').focus();
+		mjeError("Debe ingresar el valor a pagar");
+	} else if (Number($('#valor_iva').val()) < 0) {
+		$('#valor_iva').addClass('is-invalid');
+		$('#valor_iva').focus();
+		mjeError("El valor del IVA no puede ser menor a cero");
+	} else if (Number($('#valor_base').val()) < 0) {
+		$('#valor_base').addClass('is-invalid');
+		$('#valor_base').focus();
+		mjeError("Debe ingresar el valor base");
+	} else if ($('#detalle').val() == '' || $('#detalle').val().length > 200) {
+		$('#detalle').addClass('is-invalid');
+		$('#detalle').focus();
+		mjeError("Debe ingresar un detalle válido o menor a 200 caracteres");
+	} else {
+		$.ajax({
+			type: "POST",
+			url: "datos/registrar/registrar_mvto_contable_doc_cxp.php",
+			data: $('#formFacturaCXP').serialize() + "&id_doc=" + id,
+			dataType: "json",
+			success: function (response) {
+				if (response.status == "ok") {
+					FacturarCtasPorPagar(id);
+					mje("Registro guardado");
+				} else {
+					mjeError("Error: " + response.msg);
+				}
+			}
+		});
+	}
+	return false;
+};
+const FacturarCtasPorPagar = (id) => {
+	let url = "lista_facturas_cxp.php";
+	$.post(url, { id: id }, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-xl");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+};
+const ImputacionCtasPorPagar = (id) => {
+	let url = "lista_imputacion_cxp.php";
+	$.post(url, { id: id }, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-xl");
+		$("#divTamModalForms").addClass("modal-lg");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+};
+const CentroCostoCtasPorPagar = (id) => {
+	let url = "lista_centro_costo_cxp.php";
+	$.post(url, { id: id }, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-xl");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+};
+const DesctosCtasPorPagar = (id) => {
+	let url = "lista_descuentos_cxp.php";
+	$.post(url, { id: id }, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-xl");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+};
+
+const editarFactura = (boton) => {
+	var data = atob(boton.getAttribute("text"));
+	FacturarCtasPorPagar(data);
+
+};
+const eliminarFactura = (boton) => {
+	var id = boton.getAttribute("text");
+	Swal.fire({
+		title: '¿Está seguro de eliminar el registro?',
+		text: "No podrá revertir esta acción",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonColor: '#3085d6',
+		cancelButtonColor: '#d33',
+		confirmButtonText: 'Si, eliminar',
+		cancelButtonText: 'Cancelar'
+	}).then((result) => {
+		if (result.isConfirmed) {
+			$.ajax({
+				type: "POST",
+				url: "datos/eliminar/eliminar_mvto_contable_doc_cxp.php",
+				data: { id: id },
+				dataType: "json",
+				success: function (response) {
+					if (response.status == "ok") {
+						mje("Registro eliminado");
+						FacturarCtasPorPagar(response.id);
+					} else {
+						mjeError("Error: " + response.msg);
+					}
+				}
+			});
+		}
+	});
+};
 // Genera movimiento cuando se hace procesamiento automatico del documento cxp
 const generaMovimientoCxp = () => {
 	let id = id_ctb_doc.value;
@@ -1759,25 +1947,23 @@ const imprimirCertificadoIngresos = () => {
 };
 
 // Parametrizacion documento equivalente
-const consecutivoDocEqui = (id) => {
-	if (id == 3) {
-		fetch("datos/consultar/consultarDocEquivalente.php", {
-			method: "POST",
-			body: JSON.stringify({ id: id }),
+const consecutivoDocumento = (id) => {
+	fetch("datos/consultar/consultarConsecutivo.php", {
+		method: "POST",
+		body: JSON.stringify({ id: id }),
+	})
+		.then((response) => response.json())
+		.then((response) => {
+			console.log(response);
+			if (response.status == "ok") {
+				$('#numFac').val(response.consecutivo);
+			} else {
+				mjeError("Error: " + response.msg);
+			}
 		})
-			.then((response) => response.json())
-			.then((response) => {
-				console.log(response);
-				if (response[0].value == "ok") {
-					numFac.value = parseInt(response[0].tipo) + 1;
-				} else {
-					mjeError("Error al cargar");
-				}
-			})
-			.catch((error) => {
-				console.log("Error:");
-			});
-	}
+		.catch((error) => {
+			console.log("Error:");
+		});
 };
 
 const EnviaDocumentoSoporte = (boton) => {

@@ -724,3 +724,7 @@ div[slider]>input[type=range]::-ms-tooltip {
     top: 0 !important;
     z-index: 999 !important;
 }
+
+.caps {
+    text-transform: uppercase !important;
+}
