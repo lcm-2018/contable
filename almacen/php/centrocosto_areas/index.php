@@ -76,6 +76,7 @@ include '../../../permisos.php';
                                         <th>Centro Costo</th>
                                         <th>Tipo Area</th>
                                         <th>Responsable</th>
+                                        <th>Sede</th>
                                         <th>Bodega</th>
                                         <th>Acciones</th>
                                     </tr>

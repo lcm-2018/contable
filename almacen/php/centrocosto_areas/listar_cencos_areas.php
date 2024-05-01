@@ -42,11 +42,12 @@ try {
                 tb_centrocostos.nom_centro AS nom_centrocosto, 
                 far_area_tipo.nom_tipo AS nom_tipo_area,              
                 CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_responsable,
-                far_bodegas.nombre AS nom_bodega
+                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega
             FROM far_centrocosto_area    
             INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_centrocosto_area.id_centrocosto)
             INNER JOIN far_area_tipo ON (far_area_tipo.id_tipo=far_centrocosto_area.id_tipo_area)
             INNER JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_centrocosto_area.id_responsable)
+            INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_centrocosto_area.id_sede)
             LEFT JOIN far_bodegas ON (far_bodegas.id_bodega=far_centrocosto_area.id_bodega)
             $where ORDER BY $col $dir $limit";
 
@@ -79,6 +80,7 @@ if (!empty($objs)) {
             "nom_centrocosto" => mb_strtoupper($obj['nom_centrocosto']), 
             "nom_tipo_area" => mb_strtoupper($obj['nom_tipo_area']), 
             "usr_responsable" => mb_strtoupper($obj['usr_responsable']), 
+            "nom_sede" => mb_strtoupper($obj['nom_sede']), 
             "nom_bodega" => mb_strtoupper($obj['nom_bodega']), 
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];

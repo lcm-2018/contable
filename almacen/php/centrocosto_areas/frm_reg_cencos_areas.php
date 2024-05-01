@@ -30,6 +30,7 @@ if (empty($obj)) {
     $obj['id_centrocosto'] = 0;
     $obj['id_tipo_area'] = 0;
     $obj['id_responsable'] = 0;
+    $obj['id_sede'] = 0;
 }
 
 ?>
@@ -58,15 +59,21 @@ if (empty($obj)) {
                             <?php tipo_area($cmd, '', $obj['id_tipo_area']) ?>
                         </select>
                     </div>                  
-                    <div class="form-group col-md-5">
+                    <div class="form-group col-md-4">
                         <label for="txt_responsable" class="small">Responsable</label>
                         <input type="text" class="form-control form-control-sm" id="txt_responsable" value="<?php echo $obj['usr_responsable'] ?>">
                         <input type="hidden" id="id_txt_responsable" name="id_txt_responsable" value="<?php echo $obj['id_responsable'] ?>">
                     </div>
                     <div class="form-group col-md-4">
+                        <label for="sl_sede" class="small">Sede</label>
+                        <select class="form-control form-control-sm" id="sl_sede" name="sl_sede">
+                            <?php sedes($cmd, '', $obj['id_sede']) ?>   
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
                         <label for="sl_bodega" class="small">Bodega</label>
                         <select class="form-control form-control-sm" id="sl_bodega" name="sl_bodega">
-                            <?php bodegas($cmd, '', $obj['id_bodega']) ?>
+                            <?php bodegas_sede($cmd, '', $obj['id_sede'], $obj['id_bodega']) ?>   
                         </select>
                     </div>
                 </div>    

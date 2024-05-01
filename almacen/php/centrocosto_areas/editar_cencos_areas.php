@@ -28,11 +28,12 @@ try {
             $id_cencos = $_POST['sl_centrocosto'] ? $_POST['sl_centrocosto'] : 0;
             $id_tipare = $_POST['sl_tipo_area'] ? $_POST['sl_tipo_area'] : 0;
             $id_respon = $_POST['id_txt_responsable'] ? $_POST['id_txt_responsable'] : 0;
+            $id_sede = $_POST['sl_sede'] ? $_POST['sl_sede'] : 1;
             $id_bodega = $_POST['sl_bodega'] ? $_POST['sl_bodega'] : 'NULL';
 
             if ($id == -1) {
-                $sql = "INSERT INTO far_centrocosto_area(nom_area,id_centrocosto,id_tipo_area,id_responsable,id_bodega,id_usr_crea,fec_crea) 
-                        VALUES('$nom_area',$id_cencos,$id_tipare,$id_respon,$id_bodega,$id_usr_crea,'$fecha_crea')";
+                $sql = "INSERT INTO far_centrocosto_area(nom_area,id_centrocosto,id_tipo_area,id_responsable,id_sede,id_bodega,id_usr_crea,fec_crea) 
+                        VALUES('$nom_area',$id_cencos,$id_tipare,$id_respon,$id_sede,$id_bodega,$id_usr_crea,'$fecha_crea')";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -46,7 +47,8 @@ try {
                 }
             } else {
                 $sql = "UPDATE far_centrocosto_area 
-                        SET nom_area='$nom_area',id_centrocosto=$id_cencos,id_tipo_area=$id_tipare,id_responsable=$id_respon,id_bodega=$id_bodega 
+                        SET nom_area='$nom_area',id_centrocosto=$id_cencos,id_tipo_area=$id_tipare,
+                            id_responsable=$id_respon,id_sede=$id_sede,id_bodega=$id_bodega 
                         WHERE id_area=" . $id;
                 $rs = $cmd->query($sql);
 

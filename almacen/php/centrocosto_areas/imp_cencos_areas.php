@@ -20,11 +20,12 @@ try {
             tb_centrocostos.nom_centro AS nom_centrocosto, 
             far_area_tipo.nom_tipo AS nom_tipo_area,              
             CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_responsable,
-            far_bodegas.nombre AS nom_bodega
+            tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega
         FROM far_centrocosto_area    
         INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_centrocosto_area.id_centrocosto)
         INNER JOIN far_area_tipo ON (far_area_tipo.id_tipo=far_centrocosto_area.id_tipo_area)
         INNER JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_centrocosto_area.id_responsable)
+        INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_centrocosto_area.id_sede)
         LEFT JOIN far_bodegas ON (far_bodegas.id_bodega=far_centrocosto_area.id_bodega)
         $where ORDER BY far_centrocosto_area.id_area DESC";
     $res = $cmd->query($sql);
@@ -71,6 +72,7 @@ try {
                 <th>Centro Costo</th>
                 <th>Tipo Area</th>
                 <th>Responsable</th>
+                <th>Sede</th>
                 <th>Bodega</th>
             </tr>
         </thead>
@@ -84,6 +86,7 @@ try {
                     <td>' .$obj['nom_centrocosto'] .'</td>
                     <td>' .$obj['nom_tipo_area'] .'</td>
                     <td>' .$obj['usr_responsable'] .'</td>
+                    <td>' .$obj['nom_sede'] .'</td>
                     <td>' .$obj['nom_bodega'] .'</td></tr>';
             }            
             echo $tabla;
@@ -91,7 +94,7 @@ try {
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="6" style="text-align:left">
+                <td colspan="7" style="text-align:left">
                     No. de Registros: <?php echo count($objs); ?>
                 </td>
             </tr>

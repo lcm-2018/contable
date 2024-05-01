@@ -40,12 +40,13 @@
                 { 'data': 'nom_centrocosto' },
                 { 'data': 'nom_tipo_area' },
                 { 'data': 'usr_responsable' },
+                { 'data': 'nom_sede' },
                 { 'data': 'nom_bodega' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [1, 2] },
-                { orderable: false, targets: 6 }
+                { orderable: false, targets: 7 }
             ],
             order: [
                 [0, "desc"]
@@ -106,6 +107,7 @@
         $('.is-invalid').removeClass('is-invalid');
         var error = verifica_vacio($('#txt_nom_area'));
         error += verifica_vacio($('#sl_centrocosto'));
+        error += verifica_vacio($('#sl_sede'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
