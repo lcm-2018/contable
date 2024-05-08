@@ -5,6 +5,11 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
+include_once '../../../financiero/consultas.php';
+function pesos($valor)
+{
+    return '$ '.number_format($valor, 2, '.', ',');
+}
 $data = isset($_POST['id']) ? explode('|', base64_decode($_POST['id'])) : exit('Acceso no disponible');
 $id = $data[0];
 $detalle = $data[1];
@@ -24,9 +29,10 @@ try {
     } else {
         $response['msg'] = $query->errorInfo()[2];
     }
-    $cmd = null;
 } catch (PDOException $e) {
     $response['msg'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-
+$acumulado = GetValoresCxP($id, $cmd);
+$acumulado = $acumulado['val_factura'];
+$response['acumulado'] = pesos($acumulado);
 echo json_encode($response);

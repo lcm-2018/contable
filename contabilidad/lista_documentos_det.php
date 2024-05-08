@@ -19,7 +19,10 @@ $tipo_dato = $_POST['tipo_dato'];
 $id_vigencia = $_SESSION['id_vigencia'];
 
 $datosCrp = [];
-
+function pesos($valor)
+{
+    return '$ ' . number_format($valor, 2, '.', ',');
+}
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 if ($id_doc == 0) {
@@ -83,26 +86,7 @@ if ($id_doc == 0) {
         echo $e->getMessage();
     }
 }
-try {
-    $sql = "SELECT
-                `ctb_fuente`.`nombre` AS `fuente`
-                , `ctb_doc`.`id_ctb_doc`
-                , `ctb_doc`.`fecha`
-                , `ctb_doc`.`id_manu`
-                , `ctb_doc`.`detalle`
-                , `ctb_doc`.`id_tercero`
-                , `ctb_doc`.`estado`
-                , `ctb_doc`.`id_crp`
-            FROM
-                `ctb_doc`
-                INNER JOIN `ctb_fuente` 
-                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
-            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
-    $rs = $cmd->query($sql);
-    $datosDoc = $rs->fetch(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
+$datosDoc = GetValoresCxP($id_doc, $cmd);
 try {
     $sql = "SELECT
                 `id_ctb_doc`
@@ -118,70 +102,7 @@ try {
 }
 
 $fecha = date('Y-m-d', strtotime($datosDoc['fecha']));
-// Consulto el valor de causacion de costo asociado al registro en la tabla ctb_causa_costos
-try {
-    $sql = "SELECT
-                SUM(`valor`) AS `valor`
-            FROM
-                `ctb_causa_costos`
-            WHERE (`id_ctb_doc` = $id_doc AND `estado` = 2)";
-    $rs = $cmd->query($sql);
-    $sumaCosto = $rs->fetch();
-    $valor_costo = number_format(!empty($sumaCosto) ? $sumaCosto['valor'] : 0, 2, '.', ',');
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
 
-// Consulto la causacion de retenciones asociadas al registro en la tabla seg_ctb_retenciones
-try {
-    $sql = "SELECT
-                SUM(`valor_retencion`) AS `valor`
-            FROM
-                `ctb_causa_retencion`";
-    $rs = $cmd->query($sql);
-    $sumaRet = $rs->fetch();
-    $valor_ret = number_format(!empty($sumaRet) ? $sumaRet['valor'] : 0, 2, '.', ',');
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-// consulto el valor causado valor en la tabla pto_documento_detalles
-try {
-    $sql = "SELECT
-                `id_ctb_doc`
-                , IFNULL(SUM(`valor`),0) - IFNULL(SUM(`valor_liberado`),0) AS `valor` 
-            FROM
-                `pto_cop_detalle`
-            WHERE (`id_ctb_doc` = $id_doc)";
-    $rs = $cmd->query($sql);
-    $sumaCausado = $rs->fetch();
-    $valor_causado = number_format(!empty($sumaCausado) ? $sumaCausado['valor'] : 0, 2, '.', ',');
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-
-// Consulto los datos de la factura que esten asociados seg_ctb_factura
-try {
-    $sql = "SELECT
-                `ctb_factura`.`id_ctb_doc`
-                , `ctb_factura`.`id_tipo_doc`
-                , `ctb_factura`.`num_doc`
-                , `ctb_factura`.`fecha_fact`
-                , `ctb_factura`.`fecha_ven`
-                , `ctb_factura`.`valor_pago`
-                , `ctb_factura`.`valor_iva`
-                , `ctb_factura`.`valor_base`
-                , `ctb_factura`.`detalle`
-                , `ctb_tipo_doc`.`tipo`
-            FROM
-                `ctb_factura`
-                INNER JOIN `ctb_tipo_doc` 
-                    ON (`ctb_factura`.`id_tipo_doc` = `ctb_tipo_doc`.`id_ctb_tipodoc`)
-            WHERE (`ctb_factura`.`id_ctb_doc` = $id_doc)";
-    $rs = $cmd->query($sql);
-    $datosFactura = $rs->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
 // Consulto tercero registrado en contratación del api de tercero para mostrar el nombre
 // Consulta terceros en la api ********************************************* API
 if (!empty($datosDoc)) {
@@ -268,11 +189,32 @@ $ver = 'readonly';
                                         <?php
                                         if ($tipo_dato == '3') {
                                         ?>
-                                            <div class="btn-group btn-group-sm mt-2" role="group">
-                                                <button type="button" class="btn btn-outline-success" onclick="FacturarCtasPorPagar('<?php echo $id_doc; ?>')"><i class="fas fa-file-invoice-dollar fa-lg mr-2"></i>Facturación</button>
-                                                <button type="button" class="btn btn-outline-primary" onclick="ImputacionCtasPorPagar('<?php echo $id_doc; ?>')"><i class="fas fa-file-signature fa-lg mr-2"></i>Imputación</button>
-                                                <button type="button" class="btn btn-outline-warning" onclick="CentroCostoCtasPorPagar('<?php echo $id_doc; ?>')"><i class="fas fa-kaaba fa-lg mr-2"></i></i>Centro Costo</button>
-                                                <button type="button" class="btn btn-outline-info" onclick="DesctosCtasPorPagar('<?php echo $id_doc; ?>')"><i class="fas fa-donate fa-lg mr-2"></i>Descuentos</button>
+                                            <div class="input-group input-group-sm mb-1 mt-3">
+                                                <div class="input-group-prepend col-2 pr-0">
+                                                    <button class="btn btn-outline-success btn-block text-left" type="button" onclick="FacturarCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-file-invoice-dollar fa-lg mr-2"></i>Facturación</button>
+                                                </div>
+                                                <div class="form-control col-4" readonly id="valFactura"><?php echo pesos($datosDoc['val_factura']); ?></div>
+                                            </div>
+                                            <div class="input-group input-group-sm mb-1">
+                                                <div class="input-group-prepend col-2 pr-0">
+                                                    <button class="btn btn-outline-primary btn-block text-left" type="button" onclick="ImputacionCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-file-signature fa-lg mr-2"></i>Imputación</button>
+                                                </div>
+                                                <div class="form-control col-4" readonly id="valImputacion"><?php echo pesos($datosDoc['val_imputacion']); ?></div>
+                                            </div>
+                                            <div class="input-group input-group-sm mb-1">
+                                                <div class="input-group-prepend col-2 pr-0">
+                                                    <button class="btn btn-outline-warning btn-block text-left" type="button" onclick="CentroCostoCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-kaaba fa-lg mr-2"></i></i>Centro Costo</button>
+                                                </div>
+                                                <div class="form-control col-4" readonly id="valCentroCosto"><?php echo pesos($datosDoc['val_ccosto']); ?></div>
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend col-2 pr-0">
+                                                    <button class="btn btn-outline-info btn-block text-left" type="button" onclick="DesctosCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-donate fa-lg mr-2"></i>Descuentos</button>
+                                                </div>
+                                                <div class="form-control col-4" readonly id="valDescuentos"><?php echo pesos($datosDoc['val_retencion']); ?></div>
+                                            </div>
+                                            <div class="text-center py-2">
+                                                <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoCxp();" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>
                                             </div>
                                         <?php
                                         }

@@ -1,95 +1,74 @@
 <?php
 session_start();
-if (isset($_POST)) {
-    //Recibir variables por POST
-    $id_sede = $_POST['id_sede'];
-    $id_cc = $_POST['id_cc'];
-    $id_doc = $_POST['id_doc'];
-    $valor_cc = str_replace(",", "", $_POST['valor_cc']);
-    $iduser = $_SESSION['id_user'];
-    $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-    $fecha2 = $date->format('Y-m-d H:i:s');
-    //
-    include '../../../conexion.php';
-    include '../../../permisos.php';
-    try {
-        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        if (empty($_POST['id'])) {
-            $query = $cmd->prepare("INSERT INTO ctb_causa_costos (id_ctb_doc, id_sede, id_cc,valor,id_user_reg,fecha_reg) VALUES (?, ?, ?, ?,?,?)");
-            $query->bindParam(1, $id_doc, PDO::PARAM_INT);
-            $query->bindParam(2, $id_sede, PDO::PARAM_INT);
-            $query->bindParam(3, $id_cc, PDO::PARAM_INT);
-            $query->bindParam(4, $valor_cc, PDO::PARAM_STR);
-            $query->bindParam(5, $iduser, PDO::PARAM_INT);
-            $query->bindParam(6, $fecha2);
-            $query->execute();
-            if ($cmd->lastInsertId() > 0) {
-                $id = $cmd->lastInsertId();
-                // consultar y cargar el cuerpo de la tabla
-                $sql = "SELECT
-                `ctb_causa_costos`.`id`
-                ,`ctb_causa_costos`.`id_ctb_doc`
-                , `ctb_causa_costos`.`valor`
-                , `tb_sedes`.`nom_sede`
-                , `tb_municipios`.`nom_municipio`
-                , `tb_centros_costo`.`descripcion`
-                FROM
-                `ctb_causa_costos`
-                INNER JOIN `tb_sedes` 
-                    ON (`ctb_causa_costos`.`id_sede` = `tb_sedes`.`id_sede`)
-                INNER JOIN `tb_municipios` 
-                    ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`)
-                INNER JOIN `tb_centros_costo` 
-                    ON (`tb_centros_costo`.`id_centro` = `ctb_causa_costos`.`id_cc`)
-                WHERE (`ctb_causa_costos`.`id_ctb_doc` =$id_doc AND estado =0);";
-                $rs = $cmd->query($sql);
-                $rubros = $rs->fetchAll();
-                foreach ($rubros as $ce) {
-                    $id_doc = $ce['id_ctb_doc'];
-                    $id = $ce['id'];
-                    // Obtener el saldo del registro por obligar
-
-                    if ((intval($permisos['editar'])) === 1) {
-                        $editar = '<a value="' . $id_doc . '" onclick="eliminarCentroCosto(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-                        $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-                    ...
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a value="' . $id_doc . '" class="dropdown-item sombra carga" href="#">Historial</a>
-                    </div>';
-                    } else {
-                        $editar = null;
-                        $detalles = null;
-                    }
-                    $valor = number_format($ce['valor'], 2, '.', ',');
-                    $response = '<tr id="' . $id . '">
-                        <td class="text-left">' . $ce['nom_municipio'] . '</td>
-                        <td class="text-left">' . $ce['nombre'] . '</td>
-                        <td class="text-left">' . $ce['descripcion'] . '</td>
-                        <td class="text-right">' . number_format($valor_cc, 2, '.', ',') . '</td>
-                        <td class="text-center">' . $editar . $acciones . '</td>
-                    </tr>';
-                }
-            } else {
-                print_r($query->errorInfo()[2]);
-            }
-            $cmd = null;
-        } else {
-            $id = $_POST['id_cc'];
-            $query = $cmd->prepare("UPDATE pto_documento SET id_manu = :id_manu, fecha = :fecha, objeto =:objeto, id_usuer_act=:id_usuer_act,fec_act=:fec_act WHERE id_pto_doc = :id_pto_doc");
-            $query->bindParam(":id_manu", $id_manu);
-            $query->bindParam(":fecha", $fecha);
-            $query->bindParam(":objeto", $objeto);
-            $query->bindParam(":id_usuer_act", $iduser);
-            $query->bindParam(":fec_act", $date);
-            $query->bindParam(":id_pto_doc", $id);
-            $query->execute();
-            $cmd = null;
-            // $response[] = array("value" => 'modificado', "id" => $id);
-        }
-        echo ($response);
-    } catch (PDOException $e) {
-        echo $e->getMessage();
-    }
+if (!isset($_SESSION['user'])) {
+    echo '<script>window.location.replace("../../../index.php");</script>';
+    exit();
 }
+include_once '../../../conexion.php';
+include_once '../../../permisos.php';
+include_once '../../../financiero/consultas.php';
+function pesos($valor)
+{
+    return '$ ' . number_format($valor, 2, '.', ',');
+}
+$id_detalle = isset($_POST['id_detalle']) ? $_POST['id_detalle'] : exit('Acceso no disponible');
+$id_doc = $_POST['id_doc'];
+$id_municipio = $_POST['id_municipio'];
+$id_sede = $_POST['id_sede'];
+$id_cc = $_POST['id_cc'];
+$valor_cc = str_replace(',', '', $_POST['valor_cc']);
+$iduser = $_SESSION['id_user'];
+$fecha = new DateTime('now', new DateTimeZone('America/Bogota'));
+$fecha2 = $fecha->format('Y-m-d H:i:s');
+$response['status'] = 'error';
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    if ($id_detalle == '0') {
+        $sql = "INSERT INTO `ctb_causa_costos`
+                    (`id_ctb_doc`,`id_area_cc`,`valor`,`id_user_reg`,`fecha_reg`)
+                VALUES (?, ?, ?, ?, ?)";
+        $sql = $cmd->prepare($sql);
+        $sql->bindParam(1, $id_doc, PDO::PARAM_INT);
+        $sql->bindParam(2, $id_cc, PDO::PARAM_INT);
+        $sql->bindParam(3, $valor_cc, PDO::PARAM_STR);
+        $sql->bindParam(4, $iduser, PDO::PARAM_INT);
+        $sql->bindParam(5, $fecha2, PDO::PARAM_STR);
+        $sql->execute();
+        if ($cmd->lastInsertId() > 0) {
+            $response['status'] = 'ok';
+        } else {
+            $response['msg'] = $sql->errorInfo()[2];
+        }
+    } else {
+        $sql = "UPDATE `ctb_causa_costos`
+                    SET `id_area_cc` = ?, `valor` = ?
+                WHERE `id` = ?";
+        $sql = $cmd->prepare($sql);
+        $sql->bindParam(1, $id_cc, PDO::PARAM_INT);
+        $sql->bindParam(2, $valor_cc, PDO::PARAM_STR);
+        $sql->bindParam(3, $id_detalle, PDO::PARAM_INT);
+        if (!($sql->execute())) {
+            echo $sql->errorInfo()[2];
+            exit();
+        } else {
+            if ($sql->rowCount() > 0) {
+                $sql = $sql = "UPDATE `ctb_causa_costos` SET `id_user_act` = ?,`fecha_act` = ? WHERE `id` = ?";
+                $sql = $cmd->prepare($sql);
+                $sql->bindValue(1, $iduser, PDO::PARAM_INT);
+                $sql->bindParam(2, $fecha2);
+                $sql->bindParam(3, $id_detalle, PDO::PARAM_INT);
+                $sql->execute();
+                $response['status'] = 'ok';
+            } else {
+                $response['msg'] = 'No se realizó ningún cambio';
+            }
+        }
+    }
+} catch (PDOException $e) {
+    $response['msg'] = $e->getMessage();
+}
+$acumulado = GetValoresCxP($id_doc, $cmd);
+$acumulado = $acumulado['val_ccosto'];
+$response['acumulado'] = pesos($acumulado);
+echo json_encode($response);

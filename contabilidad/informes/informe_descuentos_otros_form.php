@@ -22,13 +22,13 @@ $fecha_actual = $fecha->format('Y-m-d');
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $sql = "SELECT
-        `seg_ctb_retenciones`.`id_retencion`
-        ,`seg_ctb_retenciones`.`nombre_retencion`
+        `ctb_retenciones`.`id_retencion`
+        ,`ctb_retenciones`.`nombre_retencion`
         FROM
-        `seg_ctb_retenciones`
-        INNER JOIN `seg_ctb_retencion_tipo` 
-            ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
-        WHERE (`seg_ctb_retencion_tipo`.`id_retencion_tipo` =6);";
+        `ctb_retenciones`
+        INNER JOIN `ctb_retencion_tipo` 
+            ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
+        WHERE (`ctb_retencion_tipo`.`id_retencion_tipo` =6);";
 $rs = $cmd->query($sql);
 $otras = $rs->fetchAll();
 ?>

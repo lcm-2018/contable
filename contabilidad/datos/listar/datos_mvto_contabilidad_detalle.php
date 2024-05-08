@@ -24,7 +24,7 @@ try {
                 , `ctb_doc`.`estado`
             FROM
                 `ctb_libaux`
-                INNER JOIN `ctb_pgcp` 
+                LEFT JOIN `ctb_pgcp` 
                     ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
                 INNER JOIN `ctb_doc` 
                     ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)

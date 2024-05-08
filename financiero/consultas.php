@@ -190,3 +190,64 @@ function Nivel($numero)
     }
     return array_key_exists($cantidad, $mapeo) ? $mapeo[$cantidad] : 'error';
 }
+
+function GetValoresCxP($id_doc, $cmd)
+{
+    try {
+        $sql = "SELECT
+                    `ctb_fuente`.`nombre` AS `fuente`
+                    , `ctb_doc`.`id_ctb_doc`
+                    , `ctb_doc`.`fecha`
+                    , `ctb_doc`.`id_manu`
+                    , `ctb_doc`.`detalle`
+                    , `ctb_doc`.`id_tercero`
+                    , `ctb_doc`.`estado`
+                    , `ctb_doc`.`id_crp`
+                    , IFNULL(`factura`.`val_factura`,0) AS `val_factura`
+                    , IFNULL(`imputacion`.`val_imputacion`,0) AS `val_imputacion`
+                    , IFNULL(`centro_costo`.`val_ccosto`,0) AS `val_ccosto`
+                    , IFNULL(`retencion`.`val_retencion`,0) AS `val_retencion`
+                FROM
+                    `ctb_doc`
+                    INNER JOIN `ctb_fuente` 
+                        ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                    LEFT JOIN
+                        (SELECT
+                            `id_ctb_doc`
+                            , SUM(`valor_base`) AS `val_factura`
+                        FROM
+                            `ctb_factura`
+                        WHERE (`id_ctb_doc` = $id_doc)) AS `factura`
+                        ON (`ctb_doc`.`id_ctb_doc` = `factura`.`id_ctb_doc`)
+                    LEFT JOIN 
+                        (SELECT
+                            `id_ctb_doc`
+                            , SUM(`valor`) AS `val_imputacion`
+                        FROM
+                            `pto_cop_detalle`
+                        WHERE (`id_ctb_doc` = $id_doc)) AS `imputacion`
+                        ON (`ctb_doc`.`id_ctb_doc` = `imputacion`.`id_ctb_doc`)
+                    LEFT JOIN
+                        (SELECT
+                            `id_ctb_doc`
+                            , SUM(`valor`) AS `val_ccosto`
+                        FROM
+                            `ctb_causa_costos`
+                        WHERE (`id_ctb_doc` = $id_doc)) AS `centro_costo`
+                        ON (`ctb_doc`.`id_ctb_doc` = `centro_costo`.`id_ctb_doc`)
+                    LEFT JOIN
+                        (SELECT
+                            `id_ctb_doc`
+                            , SUM(`valor_retencion`) AS `val_retencion`
+                        FROM
+                            `ctb_causa_retencion`
+                        WHERE (`id_ctb_doc` = $id_doc)) AS `retencion`
+                        ON (`ctb_doc`.`id_ctb_doc` = `retencion`.`id_ctb_doc`)
+                WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
+        $rs = $cmd->query($sql);
+        $datosDoc = $rs->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    return $datosDoc;
+}

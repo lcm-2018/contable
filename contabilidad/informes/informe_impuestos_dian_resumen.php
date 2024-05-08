@@ -56,23 +56,23 @@ try {
 //Consulto descuentos de rete ICA
 try {
     $sql = "SELECT
-    `seg_ctb_retencion_tipo`.`id_retencion_tipo`
-    , `seg_ctb_retencion_tipo`.`tipo`
-    , `seg_ctb_retenciones`.`nombre_retencion`
+    `ctb_retencion_tipo`.`id_retencion_tipo`
+    , `ctb_retencion_tipo`.`tipo`
+    , `ctb_retenciones`.`nombre_retencion`
     , SUM(`ctb_causa_retencion`.`valor_base`) AS base
     , SUM(`ctb_causa_retencion`.`valor_retencion`) AS retencion
 FROM
-    `seg_ctb_retenciones`
-    INNER JOIN `seg_ctb_retencion_tipo` 
-        ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
+    `ctb_retenciones`
+    INNER JOIN `ctb_retencion_tipo` 
+        ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
     INNER JOIN `ctb_causa_retencion` 
-        ON (`seg_ctb_retenciones`.`id_retencion` = `ctb_causa_retencion`.`id_retencion`)
+        ON (`ctb_retenciones`.`id_retencion` = `ctb_causa_retencion`.`id_retencion`)
     INNER JOIN `ctb_doc` 
         ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-WHERE (`seg_ctb_retencion_tipo`.`id_retencion_tipo` =1
+WHERE (`ctb_retencion_tipo`.`id_retencion_tipo` =1
     AND `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte'
     AND `ctb_causa_retencion`.`id_terceroapi` ={$sede})
-GROUP BY `seg_ctb_retenciones`.`nombre_retencion`;
+GROUP BY `ctb_retenciones`.`nombre_retencion`;
             ";
     $res = $cmd->query($sql);
     $causaciones = $res->fetchAll();
@@ -82,23 +82,23 @@ GROUP BY `seg_ctb_retenciones`.`nombre_retencion`;
 //Consulto descuentos de sobretasa
 try {
     $sql = "SELECT
-    `seg_ctb_retencion_tipo`.`id_retencion_tipo`
-    , `seg_ctb_retencion_tipo`.`tipo`
-    , `seg_ctb_retenciones`.`nombre_retencion`
+    `ctb_retencion_tipo`.`id_retencion_tipo`
+    , `ctb_retencion_tipo`.`tipo`
+    , `ctb_retenciones`.`nombre_retencion`
     , SUM(`ctb_causa_retencion`.`valor_base`) AS base
     , SUM(`ctb_causa_retencion`.`valor_retencion`) AS retencion
 FROM
-    `seg_ctb_retenciones`
-    INNER JOIN `seg_ctb_retencion_tipo` 
-        ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
+    `ctb_retenciones`
+    INNER JOIN `ctb_retencion_tipo` 
+        ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
     INNER JOIN `ctb_causa_retencion` 
-        ON (`seg_ctb_retenciones`.`id_retencion` = `ctb_causa_retencion`.`id_retencion`)
+        ON (`ctb_retenciones`.`id_retencion` = `ctb_causa_retencion`.`id_retencion`)
     INNER JOIN `ctb_doc` 
         ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-WHERE (`seg_ctb_retencion_tipo`.`id_retencion_tipo` =2
+WHERE (`ctb_retencion_tipo`.`id_retencion_tipo` =2
     AND `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte'
     AND `ctb_causa_retencion`.`id_terceroapi` ={$sede})
-GROUP BY `seg_ctb_retenciones`.`nombre_retencion`;
+GROUP BY `ctb_retenciones`.`nombre_retencion`;
             ";
     $res = $cmd->query($sql);
     $sobretasa = $res->fetchAll();

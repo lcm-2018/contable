@@ -82,9 +82,13 @@ try {
                     $max = $l['valor_crp'] - $l['valor_cop'];
                     $key = array_search($l['id_pto_crp_det'], array_column($detalles, 'id_pto_crp_det'));
                     $bg_color = $key !== false ? 'border-success' : 'border-secondary';
+                    $id_detalle = $key !== false ? $detalles[$key]['id_pto_cop_det'] . '-' . $l['id_pto_crp_det'] : '0-' . $l['id_pto_crp_det'];
+                    $id_detalle = $id_detalle . '-' . $l['id_tercero_api'];
+                    $value = $key !== false ? $detalles[$key]['valor'] : $max;
+                    $max = $key !== false ? $max + $detalles[$key]['valor'] : $max;
                 ?>
                     <div class="form-row">
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <?php if ($band) { ?>
                                 <span class="small">Código presupuestal</span>
                             <?php } ?>
@@ -96,16 +100,16 @@ try {
                             <?php } ?>
                             <div class="form-control form-control-sm text-left <?php echo $bg_color ?>"><?php echo $l['nom_rubro'] ?></div>
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <?php if ($band) { ?>
-                                <span for="valor" class="small">Valor</span>
-                            <?php }
-                            $key = array_search($l['id_pto_crp_det'], array_column($detalles, 'id_pto_crp_det'));
-                            $id_detalle = $key !== false ? $detalles[$key]['id_pto_cop_det'] . '-' . $l['id_pto_crp_det'] : '0-' . $l['id_pto_crp_det'];
-                            $id_detalle = $id_detalle . '-' . $l['id_tercero_api'];
-                            $value = $key !== false ? $detalles[$key]['valor'] : $max;
-                            $max = $key !== false ? $max + $detalles[$key]['valor'] : $max;
-                            ?>
+                                <span for="valor" class="small">Valor RP</span>
+                            <?php } ?>
+                            <div class="form-control form-control-sm text-left <?php echo $bg_color ?>"><?php echo number_format($max,2) ?></div>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <?php if ($band) { ?>
+                                <span for="valor" class="small">Valor CxP</span>
+                            <?php } ?>
                             <input type="text" name="valor[<?php echo $id_detalle ?>]" id="valor" onkeyup="valorMiles(id)" class="form-control form-control-sm text-right ValImputacion" min="0" max="<?php echo $max ?>" value="<?php echo number_format($value, 2) ?>">
                         </div>
                     </div>

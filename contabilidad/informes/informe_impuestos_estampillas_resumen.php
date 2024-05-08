@@ -43,14 +43,14 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
     $sql = "SELECT
-    `seg_ctb_retenciones`.`nombre_retencion`
+    `ctb_retenciones`.`nombre_retencion`
     , SUM(`ctb_causa_retencion`.`valor_retencion`) as valor_retencion
 FROM
     `ctb_causa_retencion`
-    INNER JOIN `seg_ctb_retenciones` 
-        ON (`ctb_causa_retencion`.`id_retencion` = `seg_ctb_retenciones`.`id_retencion`)
-    INNER JOIN `seg_ctb_retencion_tipo` 
-        ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
+    INNER JOIN `ctb_retenciones` 
+        ON (`ctb_causa_retencion`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
+    INNER JOIN `ctb_retencion_tipo` 
+        ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
     INNER JOIN `ctb_doc` 
         ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
 WHERE (`ctb_causa_retencion`.`id_retencion` =$id_des

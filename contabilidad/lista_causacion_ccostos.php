@@ -16,29 +16,29 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-    `ctb_causa_costos`.`id`
-    ,`ctb_causa_costos`.`id_ctb_doc`
-    , `ctb_causa_costos`.`valor`
-    , `tb_sedes`.`nom_sede`
-    , `tb_municipios`.`nom_municipio`
-    , `tb_centros_costo`.`descripcion`
-    FROM
-    `ctb_causa_costos`
-    INNER JOIN `tb_sedes` 
-        ON (`ctb_causa_costos`.`id_sede` = `tb_sedes`.`id_sede`)
-    INNER JOIN `tb_municipios` 
-        ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`)
-    INNER JOIN `tb_centros_costo` 
-        ON (`tb_centros_costo`.`id_centro` = `ctb_causa_costos`.`id_cc`)
-    WHERE (`ctb_causa_costos`.`id_ctb_doc` =$id_doc);";
+                `ctb_causa_costos`.`id`
+                , `ctb_causa_costos`.`id_ctb_doc`
+                , `ctb_causa_costos`.`valor`
+                , `tb_sedes`.`nom_sede`
+                , `tb_municipios`.`nom_municipio`
+                , `far_centrocosto_area`.`nom_area` AS `descripcion`
+            FROM
+                `ctb_causa_costos`
+                INNER JOIN `far_centrocosto_area` 
+                    ON (`ctb_causa_costos`.`id_area_cc` = `far_centrocosto_area`.`id_area`)
+                INNER JOIN `tb_sedes` 
+                    ON (`far_centrocosto_area`.`id_sede` = `tb_sedes`.`id_sede`)
+                INNER JOIN `tb_municipios` 
+                    ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`)
+            WHERE (`ctb_causa_costos`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll();
-
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 ?>
+
 <script>
     $('#tableCausacionCostos').DataTable({
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +

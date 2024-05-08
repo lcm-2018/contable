@@ -5,6 +5,11 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
+include_once '../../../financiero/consultas.php';
+function pesos($valor)
+{
+    return '$ ' . number_format($valor, 2, '.', ',');
+}
 
 $id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no disponible');
 $data = $_POST['valor'];
@@ -34,7 +39,7 @@ try {
     $query->bindParam(2, $id_cop_det, PDO::PARAM_INT);
     foreach ($data as $key => $value) {
         $ids = explode("-", $key);
-        $valor = str_replace(',','',$value);
+        $valor = str_replace(',', '', $value);
         if ($ids[0] == '0') {
             $id_crp_det = $ids[1];
             $id_tercero_api = $ids[2];
@@ -58,4 +63,7 @@ try {
 } catch (PDOException $e) {
     $response['msg'] = $e->getMessage();
 }
+$acumulado = GetValoresCxP($id_doc, $cmd);
+$acumulado = $acumulado['val_imputacion'];
+$response['acumulado'] = pesos($acumulado);
 echo json_encode($response);

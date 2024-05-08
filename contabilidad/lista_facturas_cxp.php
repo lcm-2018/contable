@@ -133,6 +133,7 @@ if (empty($detalle)) {
             <h5 style="color: white;">LISTA DE FACTURAS DE CUENTA POR PAGAR </h5>
         </div>
         <div class="px-3 py-2">
+            <input type="hidden" id="totFactura" value="<?php echo '15000' ?>">
             <form id="formFacturaCXP">
                 <input type="hidden" name="id_cta_factura" id="id_cta_factura" value="<?php echo $detalle['id_cta_factura'] ?>">
                 <div class="form-row">

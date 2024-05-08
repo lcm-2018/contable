@@ -7,25 +7,22 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-    `tb_centro_costo_x_sede`.`id_sede`
-    ,`tb_centros_costo`.`descripcion`
-    ,`tb_centros_costo`.`id_centro`
-    FROM
-    `tb_centro_costo_x_sede`
-    INNER JOIN `tb_centros_costo` 
-        ON (`tb_centro_costo_x_sede`.`id_centro_c` = `tb_centros_costo`.`id_centro`)
-    WHERE (`tb_centro_costo_x_sede`.`id_sede` =$_post[id])";
+                `id_area`
+                , `nom_area`
+            FROM
+                `far_centrocosto_area`
+            WHERE (`id_sede` = {$_post['id']})";
     $rs = $cmd->query($sql);
     $centros = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$response = '
+$response = '<label for="id_cc" class="small">CENTRO DE COSTO</label>
 <select class="form-control form-control-sm py-0 sm" id="id_cc" name="id_cc" >
-<option value="">-- Seleccionar --</option>';
+<option value="0">-- Seleccionar --</option>';
 foreach ($centros as $sed) {
-    $response .= '<option value="' . $sed['id_centro'] . '">' . $sed['descripcion'] .  '</option>';
+    $response .= '<option value="' . $sed['id_area'] . '">' . $sed['nom_area'] .  '</option>';
 }
 $response .= "</select>";
 echo $response;

@@ -24,7 +24,7 @@ try {
                 , `ctb_pgcp`.`tipo_dato`
             FROM
                 `ctb_libaux`
-                INNER JOIN `ctb_pgcp` 
+                LEFT JOIN `ctb_pgcp` 
                     ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
             WHERE (`ctb_libaux`.`id_ctb_libaux` = $id_detalle)";
     $rs = $cmd->query($sql);

@@ -5,7 +5,11 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
-
+include_once '../../../financiero/consultas.php';
+function pesos($valor)
+{
+    return '$ ' . number_format($valor, 2, '.', ',');
+}
 $id_cta_factura = $_POST['id_cta_factura'];
 $id_ctb_doc = $_POST['id_doc'];
 $id_tipo_doc = $_POST['tipoDoc'];
@@ -91,4 +95,7 @@ if ($id_cta_factura == 0) {
         $response['msg'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
 }
+$acumulado = GetValoresCxP($id_ctb_doc, $cmd);
+$acumulado = $acumulado['val_factura'];
+$response['acumulado'] = pesos($acumulado);
 echo json_encode($response);

@@ -672,7 +672,19 @@ let cerrarDocumentoCtb = function (dato) {
 				//mje("Documento cerrado");
 				console.log(response);
 				$('#tableMvtoContable').DataTable().ajax.reload();
-				$('#tableMvtoContableDetalle').DataTable().ajax.reload();
+				$('#tableMvtoContableDetalle').DataTable().ajax.reload(function (json) {
+					// Obtener los datos del tfoot de la DataTable
+					var tfootData = json.tfoot;
+					// Construir el tfoot de la DataTable
+					var tfootHtml = '<tfoot><tr>';
+					$.each(tfootData, function (index, value) {
+						tfootHtml += '<th>' + value + '</th>';
+					});
+					tfootHtml += '</tr></tfoot>';
+					// Reemplazar el tfoot existente en la tabla
+					$('#tableMvtoContableDetalle').find('tfoot').remove();
+					$('#tableMvtoContableDetalle').append(tfootHtml);
+				});
 			} else {
 				mjeError("Documento no cerrado", "Verifique información ingresada" + response.msg);
 			}
@@ -976,6 +988,7 @@ var DetalleImputacionCtasPorPagar = function () {
 				if (r.status == 'ok') {
 					mje('Proceso realizado correctamente');
 					ImputacionCtasPorPagar($('#id_ctb_doc').val());
+					$('#valImputacion').html(r.acumulado);
 				} else {
 					mjeError('Error:', r.msg);
 				}
@@ -1126,6 +1139,45 @@ let mostrarCentroCostos = function (dato) {
 };
 
 // Guardar datos de causación de costos
+var guardarCostos = function () {
+	var valor = Number($('#valor_cc').val().replace(/\,/g, "", ""));
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#id_municipio').val() == '0') {
+		$('#municipio').addClass('is-invalid');
+		$('#municipio').focus();
+		mjeError('Debe seleccionar un municipio');
+	} else if ($('#id_sede').val() == '0') {
+		$('#id_sede').addClass('is-invalid');
+		$('#id_sede').focus();
+		mjeError('Debe seleccionar una sede');
+	} else if ($('#id_cc').val() == '0') {
+		$('#id_cc').addClass('is-invalid');
+		$('#id_cc').focus();
+		mjeError('Debe seleccionar un centro de costo');
+	} else if (valor <= 0) {
+		$('#valor_cc').addClass('is-invalid');
+		$('#valor_cc').focus();
+		mjeError('El valor del centro de costo debe ser mayor a cero');
+	} else {
+		var data = $('#formGuardaCentroCosto').serialize();
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: 'datos/registrar/registrar_mvto_costos.php',
+			data: data,
+			success: function (r) {
+				if (r.status == 'ok') {
+					mje('Proceso realizado correctamente');
+					CentroCostoCtasPorPagar($('#id_ctb_doc').val(), 0);
+					$('#valCentroCosto').html(r.acumulado);
+				} else {
+					mjeError('Error:', r.msg);
+				}
+			}
+		});
+	}
+
+};
 document.addEventListener("submit", (e) => {
 	e.preventDefault();
 	if (e.target.id == "formAddCentroCosto") {
@@ -1179,34 +1231,45 @@ const valorRegCostos = async (url, datos) => {
 			return response;
 		});
 };
-
+//Editar centro de costo asignado a una causación
+const editarCentroCosto = (dato) => {
+	CentroCostoCtasPorPagar($('#id_ctb_doc').val(), dato);
+};
 // Eliminar centro de costo asignado a una causación
 const eliminarCentroCosto = (dato) => {
-	let id_ctb_doc = id_doc.value;
-	let data = [id_ctb_doc, 0];
-
-	fetch("datos/eliminar/eliminar_mvto_costos.php", {
-		method: "POST",
-		body: JSON.stringify({ id: dato }),
-	})
-		.then((response) => response.json())
-		.then((response) => {
-			if (response[0].value == "ok") {
-				mje("Registro eliminado exitosamente");
-				// Eliminar la fila de la tabla
-				$("#" + dato).remove();
-				let sumacosto = valorRegCostos("datos/consultar/consulta_costos_valor.php", data);
-				sumacosto.then((response) => {
-					let valortotal = parseFloat(response[0].valorcc);
-					valor_costo.value = valortotal.toLocaleString("es-MX");
+	//confirmar eliminación
+	Swal.fire({
+		title: "¿Está seguro de eliminar el registro?",
+		text: "No podrá revertir esta acción",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#3085d6",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si, eliminar",
+		cancelButtonText: "Cancelar",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			fetch("datos/eliminar/eliminar_mvto_costos.php", {
+				method: "POST",
+				body: JSON.stringify({ id: dato, id_doc: $('#id_ctb_doc').val() }),
+			})
+				.then((response) => response.json())
+				.then((response) => {
+					if (response[0].value == "ok") {
+						mje("Registro eliminado exitosamente");
+						CentroCostoCtasPorPagar($('#id_ctb_doc').val(), 0);
+						$('#valCentroCosto').html(response[0].acumulado);
+					} else {
+						mjeError("Error al eliminar");
+					}
+				})
+				.catch((error) => {
+					console.log("Error:");
 				});
-			} else {
-				mjeError("Error al eliminar");
-			}
-		})
-		.catch((error) => {
-			console.log("Error:");
-		});
+		}
+	});
+
+
 };
 
 // Ajustar causación de centros de costo por cambio en el valor a pagar
@@ -1283,45 +1346,49 @@ let calculoIva = function () {
 
 // Muestra el select según el tipo de retención seleccionado
 const mostrarRetenciones = (dato) => {
-	console.log(dato);
-	let id_doc = id_ctb_doc.value;
-	tarifa.value = "";
+	let id_doc = $("#id_ctb_doc").val();
 	fetch("datos/consultar/consulta_retenciones.php", {
 		method: "POST",
 		body: JSON.stringify({ id: dato }),
 	})
 		.then((response) => response.text())
 		.then((response) => {
-			divRete.innerHTML = response;
+			$('#divRete').html(response);
 		})
 		.catch((error) => {
 			console.log("Error:");
 		});
 	if (dato == 3) {
 		// Enviar y consultar el valor causado por cada sede ======= Valor causado por sede
-		fetch("datos/consultar/consulta_baseica_sede.php", {
-			method: "POST",
-			body: JSON.stringify({ id_doc: id_doc }),
-		})
-			.then((response) => response.text())
-			.then((response) => {
-				divSede.innerHTML = response;
+		if ($('#factura_des').val() != '0|0') {
+			let valores = $('#factura_des').val();
+			fetch("datos/consultar/consulta_baseica_sede.php", {
+				method: "POST",
+				body: JSON.stringify({ id_doc: id_doc, valores: valores }),
 			})
-			.catch((error) => {
-				console.log("Error:");
-			});
-		// Treer consulta de sobretasa bomberil
-		fetch("datos/consultar/consulta_retenciones_sobre.php", {
-			method: "POST",
-			body: JSON.stringify({ id_doc: id_doc }),
-		})
-			.then((response) => response.text())
-			.then((response) => {
-				divSobre.innerHTML = response;
+				.then((response) => response.text())
+				.then((response) => {
+					divSede.innerHTML = response;
+				})
+				.catch((error) => {
+					console.log("Error:");
+				});
+			// Treer consulta de sobretasa bomberil
+			fetch("datos/consultar/consulta_retenciones_sobre.php", {
+				method: "POST",
+				body: JSON.stringify({ id_doc: id_doc }),
 			})
-			.catch((error) => {
-				console.log("Error:");
-			});
+				.then((response) => response.text())
+				.then((response) => {
+					divSobre.innerHTML = response;
+				})
+				.catch((error) => {
+					console.log("Error:");
+				});
+		} else {
+			mjeError("Debe seleccionar una factura");
+			$('#tipo_rete').val('0');
+		}
 	} else {
 		// ocultar div   id="divSobre"
 		divSobre.innerHTML = "";
@@ -1336,38 +1403,92 @@ const aplicaDescuentoRetenciones = (retencion) => {
 	let valor = parseFloat(valor_base.value.replace(/\,/g, "", ""));
 	let iva = parseFloat(valor_iva.value.replace(/\,/g, "", ""));
 	let tipoRetencion = document.querySelector("#tipo_rete").value;
-	if (tipoRetencion == 3) {
-		let datos = document.querySelector("#id_rete_sede").value;
-		let datos2 = datos.split("_");
-		valor = datos2[1];
-		id_terceroapi.value = datos2[0];
-	}
-	fetch("datos/consultar/aplica_retenciones.php", {
-		method: "POST",
-		body: JSON.stringify({ id: retencion, base: valor, iva: iva }),
-	})
-		.then((response) => response.json())
-		.then((response) => {
-			console.log(response);
-			if (response[0].value == "ok") {
-				let descuento = response[0].desc;
-				valor_rte.value = descuento.toLocaleString("es-MX");
-				tarifa.value = response[0].tarifa;
-				if (tipoRetencion == 3) {
-					id_terceroapi.value = datos2[0];
-				} else {
-					id_terceroapi.value = response[0].terceroapi;
-				}
-			} else {
-				mjeError("Error al modificar");
+	let band = true;
+	$('.is-invalid').removeClass('is-invalid');
+	if (valor > 0) {
+		if (tipoRetencion == 3) {
+			let datos = $("#id_rete_sede").val();
+			let datos2 = datos.split("_");
+			valor = datos2[1];
+			id_terceroapi.value = datos2[0];
+			if ($('#id_rete_sede').val() == '0') {
+				$('#id_rete_sede').addClass('is-invalid');
+				$('#id_rete_sede').focus();
+				$('#id_rete').val('0');
+				mjeError('Debe seleccionar una sede');
+				band = false;
 			}
-		})
-		.catch((error) => {
-			console.log("Error:");
-		});
+		}
+		if (band) {
+			fetch("datos/consultar/aplica_retenciones.php", {
+				method: "POST",
+				body: JSON.stringify({ id: retencion, base: valor, iva: iva }),
+			})
+				.then((response) => response.json())
+				.then((response) => {
+					console.log(response);
+					if (response[0].value == "ok") {
+						let descuento = response[0].desc;
+						valor_rte.value = descuento.toLocaleString("es-MX");
+						tarifa.value = response[0].tarifa;
+						id_rango.value = response[0].id_rango;
+						if (tipoRetencion == 3) {
+							id_terceroapi.value = datos2[0];
+						} else {
+							id_terceroapi.value = response[0].terceroapi;
+						}
+					} else {
+						mjeError("Error al modificar");
+					}
+				})
+				.catch((error) => {
+					console.log("Error:");
+				});
+		}
+	} else {
+		mjeError("El valor base debe ser mayor a cero", 'Verifique: Seleccione factura');
+		$("#id_rete").val("0");
+	}
 };
-
+var ValorBase = function (data) {
+	data = data.split("|");
+	$("#valor_base").val(data[0]);
+	$("#valor_iva").val(data[1]);
+};
 // Guardar valor de la retención
+var GuardarRetencion = function () {
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#tipo_rete').val() == '0') {
+		$('#tipo_rete').addClass('is-invalid');
+		$('#tipo_rete').focus();
+		mjeError('Debe seleccionar un tipo retención');
+	} else if ($('#id_rete').val() == '0') {
+		$('#id_rete').addClass('is-invalid');
+		$('#id_rete').focus();
+		mjeError('Debe seleccionar una retención');
+	} else if (Number($('#valor_rte').val()) < 0) {
+		$('#valor_rte').addClass('is-invalid');
+		$('#valor_rte').focus();
+		mjeError('Debe ingresar un valor de retención');
+	} else {
+		var data = $('#formAddRetencioness').serialize();
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: 'datos/registrar/registrar_mvto_retenciones.php',
+			data: data,
+			success: function (r) {
+				if (r.status == 'ok') {
+					mje('Proceso realizado correctamente');
+					DesctosCtasPorPagar($('#id_ctb_doc').val(), $('#factura_des').val());
+					$('#valDescuentos').html(r.acumulado);
+				} else {
+					mjeError('Error:', r.msg);
+				}
+			}
+		});
+	}
+};
 document.addEventListener("submit", (e) => {
 	e.preventDefault();
 	if (e.target.id == "formAddRetencioness") {
@@ -1474,19 +1595,15 @@ const eliminarRetencion = (id) => {
 
 	fetch("datos/eliminar/eliminar_mvto_retenciones.php", {
 		method: "POST",
-		body: JSON.stringify({ id: id }),
+		body: JSON.stringify({ id: id, id_doc: $('#id_ctb_doc').val() }),
 	})
 		.then((response) => response.json())
 		.then((response) => {
 			console.log(response);
 			if (response[0].value == "ok") {
 				mje("Registro eliminado");
-				$("#" + id).remove();
-				let valorRetenido = valorRegRetenciones("datos/consultar/consulta_retenciones_valor ", data);
-				valorRetenido.then((response) => {
-					let valorret = parseFloat(response[0].valor_ret);
-					descuentos.value = valorret.toLocaleString("es-MX");
-				});
+				DesctosCtasPorPagar($('#id_ctb_doc').val(), $('#factura_des').val());
+				$('#valDescuentos').html(response[0].acumulado);
 			} else {
 				mjeError("Error al eliminar");
 			}
@@ -1629,6 +1746,7 @@ const ProcesaFacturas = (boton) => {
 			success: function (response) {
 				if (response.status == "ok") {
 					FacturarCtasPorPagar(id);
+					$('#valFactura').html(response.acumulado);
 					mje("Registro guardado");
 				} else {
 					mjeError("Error: " + response.msg);
@@ -1658,9 +1776,9 @@ const ImputacionCtasPorPagar = (id) => {
 		$("#divForms").html(he);
 	});
 };
-const CentroCostoCtasPorPagar = (id) => {
+const CentroCostoCtasPorPagar = (id, id_detalle) => {
 	let url = "lista_centro_costo_cxp.php";
-	$.post(url, { id: id }, function (he) {
+	$.post(url, { id: id, id_detalle: id_detalle }, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-lg");
 		$("#divTamModalForms").addClass("modal-xl");
@@ -1668,12 +1786,12 @@ const CentroCostoCtasPorPagar = (id) => {
 		$("#divForms").html(he);
 	});
 };
-const DesctosCtasPorPagar = (id) => {
+const DesctosCtasPorPagar = (id, fc) => {
 	let url = "lista_descuentos_cxp.php";
-	$.post(url, { id: id }, function (he) {
+	$.post(url, { id: id, fc: fc }, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
-		$("#divTamModalForms").removeClass("modal-lg");
-		$("#divTamModalForms").addClass("modal-xl");
+		$("#divTamModalForms").removeClass("modal-xl");
+		$("#divTamModalForms").addClass("modal-lg");
 		$("#divModalForms").modal("show");
 		$("#divForms").html(he);
 	});
@@ -1682,6 +1800,7 @@ const DesctosCtasPorPagar = (id) => {
 const editarFactura = (boton) => {
 	var data = atob(boton.getAttribute("text"));
 	FacturarCtasPorPagar(data);
+	$('#tipoDoc').focus();
 
 };
 const eliminarFactura = (boton) => {
@@ -1706,6 +1825,7 @@ const eliminarFactura = (boton) => {
 					if (response.status == "ok") {
 						mje("Registro eliminado");
 						FacturarCtasPorPagar(response.id);
+						$('#valFactura').html(response.acumulado);
 					} else {
 						mjeError("Error: " + response.msg);
 					}
@@ -1716,24 +1836,35 @@ const eliminarFactura = (boton) => {
 };
 // Genera movimiento cuando se hace procesamiento automatico del documento cxp
 const generaMovimientoCxp = () => {
-	let id = id_ctb_doc.value;
-	let valor_fac = parseFloat(valor_pagar.value.replace(/\,/g, "", ""));
-	let valor_inp = parseFloat(valor.value.replace(/\,/g, "", ""));
-	let valor_cos = parseFloat(valor_costo.value.replace(/\,/g, "", ""));
+	var val_fac = $('#valFactura').text().replace(/[\s$]+/g, "").replace(/\,/g, "");
+	var val_inp = $('#valImputacion').text().replace(/[\s$]+/g, "").replace(/\,/g, "");
+	var val_cos = $('#valCentroCosto').text().replace(/[\s$]+/g, "").replace(/\,/g, "");
 	// verificar si los tres valores son iguales
-	if (valor_fac == valor_inp && valor_fac == valor_cos) {
-		let id_crp = id_crpp.value;
+	if (val_fac == val_inp && val_fac == val_cos) {
+		let id_crp = $('#id_crpp').val();
+		let id_doc = $('#id_ctb_doc').val();
 		fetch("datos/registrar/registrar_mvto_libaux_auto_cxp.php", {
 			method: "POST",
-			body: JSON.stringify({ id: id, id_crp: id_crp }),
+			body: JSON.stringify({ id_doc: id_doc, id_crp: id_crp }),
 		})
 			.then((response) => response.json())
 			.then((response) => {
 				console.log(response);
-				if (response[0].value == "ok") {
+				if (response.status == "ok") {
 					mje("Movimiento generado con éxito ");
-					let id = "tableMvtoContableDetalle";
-					reloadtable(id);
+					$('#tableMvtoContableDetalle').DataTable().ajax.reload(function (json) {
+						// Obtener los datos del tfoot de la DataTable
+						var tfootData = json.tfoot;
+						// Construir el tfoot de la DataTable
+						var tfootHtml = '<tfoot><tr>';
+						$.each(tfootData, function (index, value) {
+							tfootHtml += '<th>' + value + '</th>';
+						});
+						tfootHtml += '</tr></tfoot>';
+						// Reemplazar el tfoot existente en la tabla
+						$('#tableMvtoContableDetalle').find('tfoot').remove();
+						$('#tableMvtoContableDetalle').append(tfootHtml);
+					});
 				} else {
 					mjeError("Error al guardar");
 				}
@@ -1742,7 +1873,7 @@ const generaMovimientoCxp = () => {
 				console.log("Error:");
 			});
 	} else {
-		mjeError("Falta registrar imputación presupuestal y costos");
+		mjeError("Los valores de Facturación, imputacion y centro de costo no son iguales");
 		return false;
 	}
 };
@@ -2629,4 +2760,20 @@ function redireccionar5(ruta) {
 			.appendTo("body")
 			.submit();
 	}, 100);
+}
+
+function obtenerNumeroSemana(fecha) {
+	let fechaAuxiliar = new Date("2024-05-02"); // necesito traer una fecha para hacer el calculo 
+	let numeroDia = (fecha.getDay() + 6) % 7;
+
+	fechaAuxiliar.setDate(fechaAuxiliar.getDate() - numeroDia + 1);
+	let primerJueves = fechaAuxiliar.valueOf();
+
+	fechaAuxiliar.setMonth(0, 1);
+
+	if (fechaAuxiliar.getDay() !== 4) {
+		fechaAuxiliar.setMonth(0, 1 + ((4 - fechaAuxiliar.getDay()) + 7) % 7);
+	}
+
+	return 1 + Math.ceil((primerJueves - fechaAuxiliar) / 604800000);
 }

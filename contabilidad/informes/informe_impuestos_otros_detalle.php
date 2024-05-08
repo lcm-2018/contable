@@ -44,8 +44,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // consulto la tabla seg_terceros para obtener el id_tercero_api
 try {
     $sql = "SELECT
-    `seg_ctb_retenciones`.`id_retencion`
-    , `seg_ctb_retenciones`.`nombre_retencion`
+    `ctb_retenciones`.`id_retencion`
+    , `ctb_retenciones`.`nombre_retencion`
     , `ctb_doc`.`id_manu`
     , `ctb_doc`.`fecha`
     , `ctb_causa_retencion`.`id_terceroapi`
@@ -53,13 +53,13 @@ try {
     , `ctb_causa_retencion`.`valor_retencion`
 FROM
     `ctb_causa_retencion`
-    INNER JOIN `seg_ctb_retenciones` 
-        ON (`ctb_causa_retencion`.`id_retencion` = `seg_ctb_retenciones`.`id_retencion`)
-    INNER JOIN `seg_ctb_retencion_tipo` 
-        ON (`seg_ctb_retenciones`.`id_retencion_tipo` = `seg_ctb_retencion_tipo`.`id_retencion_tipo`)
+    INNER JOIN `ctb_retenciones` 
+        ON (`ctb_causa_retencion`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
+    INNER JOIN `ctb_retencion_tipo` 
+        ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
     INNER JOIN `ctb_doc` 
         ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-WHERE (`seg_ctb_retenciones`.`id_retencion` = $id_des
+WHERE (`ctb_retenciones`.`id_retencion` = $id_des
     AND `ctb_doc`.`fecha`  BETWEEN '$fecha_inicial' AND '$fecha_corte');";
     $res = $cmd->query($sql);
     $descuentos = $res->fetchAll();
