@@ -19,16 +19,16 @@
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
-                    data.id_sede = $('#sl_sede_fil').val();
-                    data.id_bodega = $('#sl_bodega_fil').val();
-                    data.codigo = $('#txt_codigo_fil').val();
-                    data.nombre = $('#txt_nombre_fil').val();
-                    data.fecini = $('#txt_fecha_fil').val();
-                    data.id_ing = $('#txt_id_ing_fil').val();
-                    data.id_egr = $('#txt_id_egr_fil').val();
-                    data.id_tra = $('#txt_id_tra_fil').val();
+                    data.id_sede = $('#sl_sede_filtro').val();
+                    data.id_bodega = $('#sl_bodega_filtro').val();
+                    data.codigo = $('#txt_codigo_filtro').val();
+                    data.nombre = $('#txt_nombre_filtro').val();
+                    data.fecini = $('#txt_fecha_filtro').val();
+                    data.id_ing = $('#txt_id_ing_filtro').val();
+                    data.id_egr = $('#txt_id_egr_filtro').val();
+                    data.id_tra = $('#txt_id_tra_filtro').val();
                     data.opcion = $("input[name='rdo_opcion']:checked").val();
-                    data.selfil = $('#chk_sel_fil').is(':checked') ? 1 : 0;
+                    data.selfil = $('#chk_sel_filtro').is(':checked') ? 1 : 0;
                 }
             },
             columns: [
@@ -61,32 +61,32 @@
     });
 
     //Buascar registros de Articulos
-    $('#sl_sede_fil').on("change", function() {
-        $('#sl_bodega_fil').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), titulo: '--Bodega--' }, function() {});
+    $('#sl_sede_filtro').on("change", function() {
+        $('#sl_bodega_filtro').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), titulo: '--Bodega--' }, function() {});
     });
-    $('#sl_sede_fil').trigger('change');
+    $('#sl_sede_filtro').trigger('change');
 
     $('.chk_aplica').change(function() {
-        $('#txt_codigo_fil').prop('disabled', true);
-        $('#txt_nombre_fil').prop('disabled', true);
-        $('#txt_fecha_fil').prop('disabled', true);
-        $('#txt_id_ing_fil').prop('disabled', true);
-        $('#txt_id_egr_fil').prop('disabled', true);
-        $('#txt_id_tra_fil').prop('disabled', true);
+        $('#txt_codigo_filtro').prop('disabled', true);
+        $('#txt_nombre_filtro').prop('disabled', true);
+        $('#txt_fecha_filtro').prop('disabled', true);
+        $('#txt_id_ing_filtro').prop('disabled', true);
+        $('#txt_id_egr_filtro').prop('disabled', true);
+        $('#txt_id_tra_filtro').prop('disabled', true);
         if ($("input[name='rdo_opcion']:checked").val() == 'O') {
-            $('#txt_codigo_fil').prop('disabled', false);
-            $('#txt_nombre_fil').prop('disabled', false);
-            $('#txt_fecha_fil').prop('disabled', false);
-            $('#txt_codigo_fil').focus();
+            $('#txt_codigo_filtro').prop('disabled', false);
+            $('#txt_nombre_filtro').prop('disabled', false);
+            $('#txt_fecha_filtro').prop('disabled', false);
+            $('#txt_codigo_filtro').focus();
         } else if ($("input[name='rdo_opcion']:checked").val() == 'I') {
-            $('#txt_id_ing_fil').prop('disabled', false);
-            $('#txt_id_ing_fil').focus();
+            $('#txt_id_ing_filtro').prop('disabled', false);
+            $('#txt_id_ing_filtro').focus();
         } else if ($("input[name='rdo_opcion']:checked").val() == 'E') {
-            $('#txt_id_egr_fil').prop('disabled', false);
-            $('#txt_id_egr_fil').focus();
+            $('#txt_id_egr_filtro').prop('disabled', false);
+            $('#txt_id_egr_filtro').focus();
         } else if ($("input[name='rdo_opcion']:checked").val() == 'T') {
-            $('#txt_id_tra_fil').prop('disabled', false);
-            $('#txt_id_tra_fil').focus();
+            $('#txt_id_tra_filtro').prop('disabled', false);
+            $('#txt_id_tra_filtro').focus();
         }
     });
 
@@ -94,18 +94,18 @@
         $('.is-invalid').removeClass('is-invalid');
         var error = 0;
         if ($("input[name='rdo_opcion']:checked").val() == 'O') {
-            error += verifica_vacio($('#txt_codigo_fil'));
-            error += verifica_vacio($('#txt_nombre_fil'));
+            error += verifica_vacio($('#txt_codigo_filtro'));
+            error += verifica_vacio($('#txt_nombre_filtro'));
             if (error == 1) {
                 $('.is-invalid').removeClass('is-invalid');
                 error = 0;
             }
         } else if ($("input[name='rdo_opcion']:checked").val() == 'I') {
-            error += verifica_vacio($('#txt_id_ing_fil'));
+            error += verifica_vacio($('#txt_id_ing_filtro'));
         } else if ($("input[name='rdo_opcion']:checked").val() == 'E') {
-            error += verifica_vacio($('#txt_id_egr_fil'));
+            error += verifica_vacio($('#txt_id_egr_filtro'));
         } else if ($("input[name='rdo_opcion']:checked").val() == 'T') {
-            error += verifica_vacio($('#txt_id_tra_fil'));
+            error += verifica_vacio($('#txt_id_tra_filtro'));
         }
 
         if (error >= 1) {
@@ -126,7 +126,7 @@
         }
     });
 
-    $('#chk_sel_fil').change(function() {
+    $('#chk_sel_filtro').change(function() {
         buscar_articulo();
     });
 
@@ -139,10 +139,10 @@
         } else {
             var data = $('#frm_lotes').serialize();
             var tipo = $("input[name='rdo_opcion']:checked").val(),
-                id_ing = $("#txt_id_ing_fil").val(),
-                id_egr = $("#txt_id_egr_fil").val(),
-                id_tra = $("#txt_id_tra_fil").val(),
-                fec_ini = $("#txt_fecha_fil").val();
+                id_ing = $("#txt_id_ing_filtro").val(),
+                id_egr = $("#txt_id_egr_filtro").val(),
+                id_tra = $("#txt_id_tra_filtro").val(),
+                fec_ini = $("#txt_fecha_filtro").val();
 
             $.ajax({
                 type: 'POST',
@@ -151,7 +151,7 @@
                 data: data + '&tipo=' + tipo + '&id_ing=' + id_ing + '&id_egr=' + id_egr + '&id_tra=' + id_tra + '&fec_ini=' + fec_ini
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
-                    $('#chk_sel_fil').prop('checked', false)
+                    $('#chk_sel_filtro').prop('checked', false)
                     reloadtable('tb_lotes');
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");

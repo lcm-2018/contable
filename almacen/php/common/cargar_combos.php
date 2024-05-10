@@ -327,6 +327,15 @@ function estados_registros($titulo = '',$estado = 2)
     echo '<option value="0"' . $selected . '>INACTIVO</option>';
 }
 
+function estados_sino($titulo = '',$estado = 2)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>SI</option>';
+    $selected = ($estado == 0) ? 'selected="selected"' : '';
+    echo '<option value="0"' . $selected . '>NO</option>';
+}
+
 function tipo_area($cmd, $titulo ='', $id = 0)
 {
     try {

@@ -52,12 +52,12 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <div class="form-group col-md-4">
                                     <div class="form-row">
                                         <div class="form-group col-md-6">
-                                            <select class="filtro form-control form-control-sm" id="sl_sede_fil">
+                                            <select class="filtro form-control form-control-sm" id="sl_sede_filtro">
                                                 <?php sedes_usuario($cmd, '--Sede--') ?>
                                             </select>
                                         </div>
                                         <div class="form-group col-md-6">
-                                            <select class="filtro form-control form-control-sm" id="sl_bodega_fil">
+                                            <select class="filtro form-control form-control-sm" id="sl_bodega_filtro">
                                             </select>
                                         </div>    
                                     </div>
@@ -69,10 +69,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             </div>
                                         </div>
                                         <div class="form-group col-md-4">
-                                            <input type="text" class="filtro form-control form-control-sm" id="txt_codigo_fil" placeholder="Codigo" disabled="disabled">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_codigo_filtro" placeholder="Codigo" disabled="disabled">
                                         </div>
                                         <div class="form-group col-md-4">
-                                            <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_fil" placeholder="Nombre" disabled="disabled">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre" disabled="disabled">
                                         </div>
                                     </div>
                                     <div class="form-row">    
@@ -80,7 +80,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             <label class="form-control-sm">Fecha Inicial de proceso Recalcular Kardex</label>
                                         </div>
                                         <div class="form-group col-md-4">
-                                            <input type="date" class="filtro form-control form-control-sm" id="txt_fecha_fil" name="txt_fecha_fil" placeholder="Fecha Inicial" disabled="disabled">
+                                            <input type="date" class="filtro form-control form-control-sm" id="txt_fecha_filtro" name="txt_fecha_filtro" placeholder="Fecha Inicial" disabled="disabled">
                                         </div>
                                     </div>   
                                 </div>
@@ -93,7 +93,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             </div>
                                         </div>    
                                         <div class="form-group col-md-4">
-                                            <input type="text" class="filtro form-control form-control-sm" id="txt_id_ing_fil" placeholder="Id. Ingreso" disabled="disabled">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_id_ing_filtro" placeholder="Id. Ingreso" disabled="disabled">
                                         </div>
                                     </div>
                                     <div class="form-row">
@@ -104,7 +104,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             </div>
                                         </div>    
                                         <div class="form-group col-md-4">
-                                            <input type="text" class="filtro form-control form-control-sm" id="txt_id_egr_fil" placeholder="Id. Egreso" disabled="disabled">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_id_egr_filtro" placeholder="Id. Egreso" disabled="disabled">
                                         </div>
                                     </div>
                                     <div class="form-row">
@@ -115,7 +115,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             </div>
                                         </div>    
                                         <div class="form-group col-md-4">
-                                            <input type="text" class="filtro form-control form-control-sm" id="txt_id_tra_fil" placeholder="Id. Traslado" disabled="disabled">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_id_tra_filtro" placeholder="Id. Traslado" disabled="disabled">
                                         </div>
                                     </div>                              
                                 </div> 
@@ -138,8 +138,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <thead>
                                         <tr class="text-center centro-vertical">
                                             <th rowspan="2">
-                                                <label for="chk_sel_fil">Sel.</label>
-                                                <input type="checkbox" id="chk_sel_fil">
+                                                <label for="chk_sel_filtri">Sel.</label>
+                                                <input type="checkbox" id="chk_sel_filtro">
                                             </th>
                                             <th colspan="3">Articulo</th>
                                             <th colspan="5">Lote</th>
