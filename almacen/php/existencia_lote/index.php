@@ -82,16 +82,16 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <div class="form-group col-md-2">
                                     <div class="form-check form-check-inline">
                                         <input class="filtro form-check-input" type="checkbox" id="chk_artact_filtro" checked>
-                                        <label class="filtro form-check-label small" for="chk_artact_filtro">Articulos Activos</label>
+                                        <label class="form-check-label small" for="chk_artact_filtro">Articulos Activos</label>
                                     </div>    
                                 </div>
                                 <div class="form-group col-md-2">
                                     <input class="filtro form-check-input" type="checkbox" id="chk_lotact_filtro" checked>
-                                    <label class="filtro form-check-label small" for="chk_lotact_filtro">Lotes Activos</label>
+                                    <label class="form-check-label small" for="chk_lotact_filtro">Lotes Activos</label>
                                 </div>
                                 <div class="form-group col-md-2">
                                     <input class="filtro form-check-input" type="checkbox" id="chk_conexi_filtro" checked>
-                                    <label class="filtro form-check-label small" for="chk_conexi_filtro">Con Existencias</label>
+                                    <label class="form-check-label small" for="chk_conexi_filtro">Con Existencias</label>
                                 </div>                                                                                              
                             </div>
 

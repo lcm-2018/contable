@@ -14,57 +14,74 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $idusr = $_SESSION['id_user'];
 $idrol = $_SESSION['rol'];
 
-$where = " WHERE 1";
+$where_usr = " WHERE 1";
 if($idrol !=1){
-    $where .= " AND far_medicamento_lote.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
+    $where_usr .= " AND far_kardex.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
 
+$fecha = $_POST['fecha'] ? $_POST['fecha'] : date('Y-m-d');
+$titulo = "REPORTE DE EXISTENCIAS";
+
+$where_kar = " AND far_kardex.estado=1";
 if (isset($_POST['id_sede']) && $_POST['id_sede']) {
-    $where .= " AND far_medicamento_lote.id_bodega IN (SELECT id_bodega FROM tb_sedes_bodega WHERE id_sede=" . $_POST['id_sede'] . ")";
+    $where_kar .= " AND far_kardex.id_sede='" . $_POST['id_sede'] . "'";
 }
 if (isset($_POST['id_bodega']) && $_POST['id_bodega']) {
-    $where .= " AND far_medicamento_lote.id_bodega='" . $_POST['id_bodega'] . "'";
+    $where_kar .= " AND far_kardex.id_bodega='" . $_POST['id_bodega'] . "'";
 }
+if (isset($_POST['fecha']) && $_POST['fecha']) {
+    $where_kar .= " AND far_kardex.fec_movimiento<='" . $_POST['fecha'] . "'";
+    $titulo = "REPORTE DE EXISTENCIAS A: " . $fecha;
+}
+
+$where_art = " WHERE 1";
 if (isset($_POST['codigo']) && $_POST['codigo']) {
-    $where .= " AND far_medicamentos.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";
+    $where_art .= " AND far_medicamentos.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";
 }
 if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND far_medicamentos.nom_medicamento LIKE '" . $_POST['nombre'] . "%'";
+    $where_art .= " AND far_medicamentos.nom_medicamento LIKE '" . $_POST['nombre'] . "%'";
 }
 if (isset($_POST['id_subgrupo']) && $_POST['id_subgrupo']) {
-    $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];
+    $where_art .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];
 }
 if (isset($_POST['artactivo']) && $_POST['artactivo']) {
-    $where .= " AND far_medicamentos.estado=1";
-}
-if (isset($_POST['lotactivo']) && $_POST['lotactivo']) {
-    $where .= " AND far_medicamento_lote.estado=1";
+    $where_art .= " AND far_medicamentos.estado=1";
 }
 if (isset($_POST['conexistencia']) && $_POST['conexistencia']) {
-    $where .= " AND far_medicamento_lote.existencia>=1";
+    $where_art .= " AND e.existencia_fecha>=1";
 }
 
 try {
-    $sql = "SELECT far_medicamento_lote.id_lote,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
-                far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,far_subgrupos.nom_subgrupo,
-                far_medicamento_lote.lote,far_medicamento_lote.existencia,far_medicamentos.val_promedio,
-                (far_medicamento_lote.existencia*far_medicamentos.val_promedio) AS val_total,
-                far_medicamento_lote.fec_vencimiento,
-	            IF(far_medicamentos.estado=1,'ACTIVO','INACTIVO') AS estado
-            FROM far_medicamento_lote
-            INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
+    $sql = "SELECT far_medicamentos.id_med,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
+                far_subgrupos.nom_subgrupo,e.existencia_fecha,v.val_promedio_fecha,
+                (e.existencia_fecha*v.val_promedio_fecha) AS val_total
+            FROM far_medicamentos
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)
-            INNER JOIN far_bodegas ON (far_bodegas.id_bodega = far_medicamento_lote.id_bodega)
-            INNER JOIN tb_sedes_bodega ON (tb_sedes_bodega.id_bodega = far_bodegas.id_bodega)
-            INNER JOIN tb_sedes ON (tb_sedes.id_sede = tb_sedes_bodega.id_sede)
-            $where ORDER BY far_medicamentos.nom_medicamento,far_medicamento_lote.lote ASC";
+            INNER JOIN (SELECT id_med,SUM(existencia_lote) AS existencia_fecha FROM far_kardex
+                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex $where_usr $where_kar GROUP BY id_lote)                        
+                        GROUP BY id_med	
+                        ) AS e ON (e.id_med = far_medicamentos.id_med)	
+            INNER JOIN (SELECT id_med,val_promedio AS val_promedio_fecha FROM far_kardex
+                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex				
+                                            WHERE fec_movimiento<='$fecha' AND estado=1 
+                                            GROUP BY id_med)
+                        ) AS v ON (v.id_med = far_medicamentos.id_med) 
+            $where_art ORDER BY far_medicamentos.nom_medicamento ASC";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
 
-    $sql = "SELECT SUM(far_medicamento_lote.existencia*far_medicamentos.val_promedio) AS val_total
-            FROM far_medicamento_lote 
-            INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
-            $where";
+    $sql = "SELECT SUM(e.existencia_fecha*v.val_promedio_fecha) AS val_total
+            FROM far_medicamentos
+            INNER JOIN (SELECT id_med,SUM(existencia_lote) AS existencia_fecha FROM far_kardex
+                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex $where_usr $where_kar GROUP BY id_lote)                        
+                        GROUP BY id_med	
+                        ) AS e ON (e.id_med = far_medicamentos.id_med)	
+            INNER JOIN (SELECT id_med,val_promedio AS val_promedio_fecha FROM far_kardex
+                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex				
+                                            WHERE fec_movimiento<='$fecha' AND estado=1 
+                                            GROUP BY id_med)
+                        ) AS v ON (v.id_med = far_medicamentos.id_med) 
+            $where_art";
     $rs = $cmd->query($sql);
     $obj_tot = $rs->fetch();
 
@@ -98,7 +115,7 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>REPORTE DE EXISTENCIAS</th>
+            <th><?php echo $titulo; ?></th>
         </tr>     
     </table> 
 
@@ -106,17 +123,12 @@ try {
         <thead style="font-size:60%">                
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>ID</th>
-                <th>Sede</th>
-                <th>Bodega</th>
                 <th>Código</th>
                 <th>Nombre</th>
                 <th>Subgrupo</th>
-                <th>Lote</th>
                 <th>Existencia</th>
                 <th>Vr. Promedio</th>
                 <th>Vr. Total</th>
-                <th>Fecha Vencimiento</th>
-                <th>Estado</th>
             </tr>
         </thead>
         <tbody style="font-size: 60%;">
@@ -124,35 +136,28 @@ try {
             $tabla = '';
             foreach ($objs as $obj) {
                 $tabla .=  '<tr class="resaltar"> 
-                        <td>' . $obj['id_lote'] . '</td>
-                        <td>' . mb_strtoupper($obj['nom_sede']) . '</td>
-                        <td>' . mb_strtoupper($obj['nom_bodega']) . '</td>
+                        <td>' . $obj['id_med'] . '</td>
                         <td>' . $obj['cod_medicamento'] . '</td>
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_medicamento']) . '</td>   
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_subgrupo']) . '</td>   
-                        <td>' . $obj['lote'] . '</td>   
-                        <td>' . $obj['existencia'] . '</td>   
-                        <td>' . formato_valor($obj['val_promedio']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']) . '</td>  
-                        <td>' . $obj['fec_vencimiento'] . '</td>    
-                        <td>' . $obj['estado'] . '</td></tr>';
+                        <td>' . $obj['existencia_fecha'] . '</td>   
+                        <td>' . formato_valor($obj['val_promedio_fecha']) . '</td>   
+                        <td>' . formato_valor($obj['val_total']) . '</td></tr>';
             }
             echo $tabla;
             ?>            
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="3" style="text-align:left">
+                <td colspan="5" style="text-align:left">
                     No. de Registros: <?php echo count($objs); ?>  
                 </td>
-                <td colspan="5"></td>
                 <td style="text-align:left">
                     TOTAL:
                 </td>
                 <td colspan="1" style="text-align:center">
                     <?php echo formato_valor($obj_tot['val_total']); ?>  
                 </td>
-                <td colspan="2"></td>
             </tr>
         </tfoot>
     </table>

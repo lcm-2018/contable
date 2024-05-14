@@ -35,7 +35,8 @@ try {
             (far_medicamentos.existencia*far_medicamentos.val_promedio) AS val_total,
             IF(far_medicamentos.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_medicamentos
-            INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo) $where ORDER BY far_medicamentos.id_med DESC ";
+            INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo) $where 
+            ORDER BY far_medicamentos.cod_medicamento ASC";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
 

@@ -47,7 +47,7 @@ if (isset($_POST['lotactivo']) && $_POST['lotactivo']) {
     $where .= " AND far_medicamento_lote.estado=1";
 }
 if (isset($_POST['conexistencia']) && $_POST['conexistencia']) {
-    $where .= " AND far_medicamentos.existencia>=1";
+    $where .= " AND far_medicamento_lote.existencia>=1";
 }
 
 try {

@@ -49,7 +49,7 @@
                 { orderable: false, targets: [0, 12] }
             ],
             order: [
-                [0, "desc"]
+                [4, "ASC"]
             ],
             lengthMenu: [
                 [10, 25, 50, -1],
@@ -76,10 +76,6 @@
         if (e.keyCode == 13) {
             reloadtable('tb_lotes');
         }
-    });
-
-    $('.filtro').mouseup(function(e) {
-        reloadtable('tb_lotes');
     });
 
     //Examinar una tarjeta kardex
