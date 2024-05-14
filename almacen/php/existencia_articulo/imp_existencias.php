@@ -11,7 +11,7 @@ include '../common/funciones_generales.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$where = "WHERE far_medicamentos.id_med<>0";
+$where = "WHERE 1";
 if (isset($_POST['codigo']) && $_POST['codigo']) {
     $where .= " AND far_medicamentos.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";
 }
@@ -124,7 +124,7 @@ try {
                 <td colspan="1" style="text-align:center">
                     <?php echo formato_valor($obj_tot['val_total']); ?>  
                 </td>
-                <td></td>
+                <td colspan="1"></td>
             </tr>
         </tfoot>
     </table>

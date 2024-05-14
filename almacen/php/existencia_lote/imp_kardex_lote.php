@@ -12,16 +12,20 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $titulo = "TARJETA KARDEX A: " . date('Y-m-d');
-$where = " WHERE far_kardex.id_med=" . $_POST['id_articulo'] . " AND (far_kardex.can_ingreso>0 OR far_kardex.can_egreso>0) AND far_kardex.estado=1";
+$where = " WHERE far_kardex.id_lote=" . $_POST['id_lote'] . " AND (far_kardex.can_ingreso>0 OR far_kardex.can_egreso>0) AND far_kardex.estado=1";
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
     $where .= " AND far_kardex.fec_movimiento BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
     $titulo = "TARJETA KARDEX ENTRE: " . $_POST['fec_ini'] . " y " . $_POST['fec_ini'];
 }
 
 try {
-    $sql = "SELECT cod_medicamento,nom_medicamento FROM far_medicamentos WHERE id_med=" . $_POST['id_articulo'] . " LIMIT 1";
-    $rs = $cmd->query($sql);
-    $obj_e = $rs->fetch();
+    $sql = "SELECT far_medicamento_lote.lote,far_medicamento_lote.fec_vencimiento,
+            far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento 
+        FROM far_medicamento_lote 
+        INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
+        WHERE far_medicamento_lote.id_lote=" . $_POST['id_lote'] . " LIMIT 1";
+        $rs = $cmd->query($sql);
+        $obj_e = $rs->fetch();
 
     $sql = "SELECT id_kardex,fec_movimiento,comprobante,nom_sede,nom_bodega,lote,detalle,val_ingreso,val_promedio,can_ingreso,can_egreso,existencia
             FROM (
@@ -101,6 +105,9 @@ try {
     <table style="width:100%; font-size:60%; text-align:left; border:#A9A9A9 1px solid;">
         <tr style="border:#A9A9A9 1px solid">
             <td>Articulo: <?php echo $obj_e['nom_medicamento'];?> - Código: <?php echo $obj_e['cod_medicamento']; ?></td>
+        </tr>        
+        <tr style="border:#A9A9A9 1px solid">
+            <td>Lote: <?php echo $obj_e['lote'];?> - Fecha Vencimiento: <?php echo $obj_e['fec_vencimiento']; ?></td>
         </tr>        
     </table>
 

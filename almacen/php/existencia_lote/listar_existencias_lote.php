@@ -73,13 +73,11 @@ try {
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_medicamento_lote.id_lote,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
                 far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,far_subgrupos.nom_subgrupo,
-                far_medicamento_lote.lote,far_presentacion_comercial.nom_presentacion,
-                far_medicamento_lote.existencia,far_medicamentos.val_promedio,
+                far_medicamento_lote.lote,far_medicamento_lote.existencia,far_medicamentos.val_promedio,
                 (far_medicamento_lote.existencia*far_medicamentos.val_promedio) AS val_total,
                 far_medicamento_lote.fec_vencimiento,
 	            IF(far_medicamentos.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_medicamento_lote
-            INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega = far_medicamento_lote.id_bodega)
@@ -110,7 +108,6 @@ if (!empty($objs)) {
             "nom_medicamento" => mb_strtoupper($obj['nom_medicamento']),
             "nom_subgrupo" => mb_strtoupper($obj['nom_subgrupo']),
             "lote" => $obj['lote'],
-            "nom_presentacion" => mb_strtoupper($obj['nom_presentacion']),
             "existencia" => $obj['existencia'],
             "val_promedio" => formato_valor($obj['val_promedio']),
             "val_total" => formato_valor($obj['val_total']),

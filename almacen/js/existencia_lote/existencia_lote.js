@@ -37,7 +37,6 @@
                 { 'data': 'nom_medicamento' },
                 { 'data': 'nom_subgrupo' },
                 { 'data': 'lote' },
-                { 'data': 'nom_presentacion' },
                 { 'data': 'existencia' },
                 { 'data': 'val_promedio' },
                 { 'data': 'val_total' },
@@ -46,8 +45,8 @@
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4, 7] },
-                { orderable: false, targets: [0, 13] }
+                { class: 'text-wrap', targets: [4] },
+                { orderable: false, targets: [0, 12] }
             ],
             order: [
                 [0, "desc"]

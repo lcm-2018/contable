@@ -106,7 +106,6 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Nombre</th>
                                         <th>Subgrupo</th>
                                         <th>Lote</th>
-                                        <th>Presentación Comercial</th>
                                         <th>Existencia</th>
                                         <th>Vr. Promedio</th>
                                         <th>Vr. Total</th>
