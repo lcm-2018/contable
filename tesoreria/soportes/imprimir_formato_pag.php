@@ -163,22 +163,22 @@ try {
 try {
     /*
     $sql = "SELECT
-                `seg_tes_detalle_pago`.`id_detalle_pago`
+                `tes_detalle_pago`.`id_detalle_pago`
                 ,`tb_bancos`.`nom_banco`
-                , `seg_tes_cuentas`.`nombre`
-                , `seg_tes_forma_pago`.`forma_pago`
-                , `seg_tes_detalle_pago`.`documento`
-                , `seg_tes_detalle_pago`.`valor`
-                , `seg_tes_detalle_pago`.`id_forma_pago`
+                , `tes_cuentas`.`nombre`
+                , `tes_forma_pago`.`forma_pago`
+                , `tes_detalle_pago`.`documento`
+                , `tes_detalle_pago`.`valor`
+                , `tes_detalle_pago`.`id_forma_pago`
             FROM
-                `seg_tes_detalle_pago`
-                INNER JOIN `seg_tes_forma_pago` 
-                    ON (`seg_tes_detalle_pago`.`id_forma_pago` = `seg_tes_forma_pago`.`id_forma_pago`)
-                INNER JOIN `seg_tes_cuentas` 
-                    ON (`seg_tes_detalle_pago`.`id_tes_cuenta` = `seg_tes_cuentas`.`id_tes_cuenta`)
+                `tes_detalle_pago`
+                INNER JOIN `tes_forma_pago` 
+                    ON (`tes_detalle_pago`.`id_forma_pago` = `tes_forma_pago`.`id_forma_pago`)
+                INNER JOIN `tes_cuentas` 
+                    ON (`tes_detalle_pago`.`id_tes_cuenta` = `tes_cuentas`.`id_tes_cuenta`)
                 INNER JOIN `tb_bancos` 
-                    ON (`seg_tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
-            WHERE (`seg_tes_detalle_pago`.`id_ctb_doc` = $id_doc);";
+                    ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
+            WHERE (`tes_detalle_pago`.`id_ctb_doc` = $id_doc);";
     $rs = $cmd->query($sql);
     $formapago = $rs->fetchAll();*/
     $formapago = [];

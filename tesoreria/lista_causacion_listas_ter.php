@@ -6,33 +6,41 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../permisos.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
-$id_doc = $_POST['id_doc'] ?? '';
-$ccnit = $_POST['ccnit'] ?? '';
-$id_cop = $_POST['id_cop'] ?? '';
+
+$id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : 0;
+$id_tercero = isset($_POST['id_tercero']) ? $_POST['id_tercero'] : 0;
+$id_cop = isset($_POST['id_cop']) ? $_POST['id_cop'] : 0;
 // Consulta tipo de presupuesto
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 try {
-    $sql = "SELECT
-    `pto_documento_detalles`.`id_ctb_doc`
-    , `ctb_doc`.`fecha`
-    , SUM(`pto_documento_detalles`.`valor`) as valor
-    , `ctb_doc`.`id_tercero`
-    , `ctb_doc`.`id_manu`
-    , `pto_documento_detalles`.`estado`
-FROM
-    `ctb_doc`
-    INNER JOIN `pto_documento_detalles` 
-        ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
-WHERE (`ctb_doc`.`id_tercero` =$ccnit 
-    AND `pto_documento_detalles`.`tipo_mov` ='COP'
-    AND `pto_documento_detalles`.`estado` =0)
-GROUP BY `pto_documento_detalles`.`id_ctb_doc`;";
+    $sql = "SELECT * 
+            FROM 
+                (SELECT
+                    `pto_cop_detalle`.`id_pto_cop_det`
+                    , IFNULL(`pto_cop_detalle`.`valor`-`pto_cop_detalle`.`valor_liberado`,0) AS `val_cop`
+                    , IFNULL(`pagado`.`val_pag`,0) AS `val_pag` 
+                    , `ctb_doc`.`id_manu`
+                    , `ctb_doc`.`id_ctb_doc`
+                    , `ctb_doc`.`fecha`
+                FROM
+                    `pto_cop_detalle`
+                INNER JOIN `ctb_doc` 
+                    ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN 
+                    (SELECT
+                        `id_pto_cop_det`
+                        , `valor` - `valor_liberado` AS `val_pag`
+                    FROM
+                        `pto_pag_detalle`
+                        INNER JOIN `ctb_doc` 
+                            ON (`pto_pag_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    WHERE (`id_tercero_api` = $id_tercero AND `ctb_doc`.`estado` = 2)
+                    GROUP BY `id_pto_cop_det`) AS `pagado`
+                    ON (`pto_cop_detalle`.`id_pto_cop_det` = `pagado`.`id_pto_cop_det`)
+                WHERE `pto_cop_detalle`.`id_tercero_api` = $id_tercero AND `ctb_doc`.`estado` = 2) AS `t1`
+            WHERE `val_cop` > `val_pag`";
     $rs = $cmd->query($sql);
     $causaciones = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -96,17 +104,8 @@ GROUP BY `pto_documento_detalles`.`id_ctb_doc`;";
                         foreach ($causaciones as $ce) {
                             $id = $ce['id_ctb_doc'];
                             $fecha = $ce['fecha'];
-                            // Obtener el valor pagado asociado al documento
-                            try {
-                                $sql = "SELECT sum(valor) as valorpag FROM pto_documento_detalles WHERE id_ctb_cop =$id AND tipo_mov='PAG' AND estado <0";
-                                $rs = $cmd->query($sql);
-                                $sumacrp = $rs->fetch();
-                                $valor_pagos = $sumacrp['valorpag'];
-                            } catch (PDOException $e) {
-                                echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-                            }
-
-                            if ((intval($permisos['editar'])) === 1) {
+                            
+                            if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
                                 $editar = '<a value="' . $id_doc . '" onclick="cargaRubrosPago(' . $id . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
                                 $borrar = '<a value="' . $id_doc . '" onclick="eliminarFormaPago(' . $id_doc . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
@@ -119,17 +118,17 @@ GROUP BY `pto_documento_detalles`.`id_ctb_doc`;";
                                 $editar = null;
                                 $detalles = null;
                             }
-                            $saldo = $ce['valor'] - $valor_pagos;
+                            $saldo = $ce['val_cop'] - $ce['val_pag'];
                             if ($saldo == 0) {
                                 $editar = null;
                             }
                             $fecha_doc = date('Y-m-d',  strtotime($fecha));
                         ?>
                             <tr id="<?php echo $id; ?>">
-                                <td><?php echo $ce['id_manu']; ?></td>
-                                <td><?php echo $fecha_doc;  ?></td>
-                                <td> <?php echo number_format($ce['valor'], 2, '.', ','); ?></td>
-                                <td> <?php echo number_format($valor_pagos, 2, '.', ','); ?></td>
+                                <td class="text-left"><?php echo $ce['id_manu']; ?></td>
+                                <td class="text-left"><?php echo $fecha_doc;  ?></td>
+                                <td class="text-right">$ <?php echo number_format($ce['val_cop'], 2, '.', ','); ?></td>
+                                <td class="text-right">$ <?php echo number_format($ce['val_pag'], 2, '.', ','); ?></td>
                                 <td> <?php echo $editar .  $acciones; ?></td>
 
                             </tr>

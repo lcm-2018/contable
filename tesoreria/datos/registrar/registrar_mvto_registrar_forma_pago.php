@@ -18,7 +18,7 @@ if (isset($_POST)) {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     try {
-        $query = $cmd->prepare("INSERT INTO seg_tes_detalle_pago (id_ctb_doc,id_ctb_pag,id_tes_cuenta,id_forma_pago,documento,valor,id_user_reg,fecha_reg) VALUES (?, ?, ?, ?, ?, ?,?,?)");
+        $query = $cmd->prepare("INSERT INTO tes_detalle_pago (id_ctb_doc,id_ctb_pag,id_tes_cuenta,id_forma_pago,documento,valor,id_user_reg,fecha_reg) VALUES (?, ?, ?, ?, ?, ?,?,?)");
         $query->bindParam(1, $id_ctb_doc, PDO::PARAM_INT);
         $query->bindParam(2, $id_pto_cop, PDO::PARAM_INT);
         $query->bindParam(3, $cuenta_banco, PDO::PARAM_INT);
@@ -46,21 +46,21 @@ if (isset($_POST)) {
             $query->execute();
             // consultar y cargar el cuerpo de la tabla
             $sql = "SELECT
-                    `seg_tes_detalle_pago`.`id_detalle_pago`
+                    `tes_detalle_pago`.`id_detalle_pago`
                     ,`tb_bancos`.`nom_banco`
-                    , `seg_tes_cuentas`.`nombre`
-                    , `seg_tes_forma_pago`.`forma_pago`
-                    , `seg_tes_detalle_pago`.`documento`
-                    , `seg_tes_detalle_pago`.`valor`
+                    , `tes_cuentas`.`nombre`
+                    , `tes_forma_pago`.`forma_pago`
+                    , `tes_detalle_pago`.`documento`
+                    , `tes_detalle_pago`.`valor`
                     FROM
-                    `seg_tes_detalle_pago`
-                    INNER JOIN `seg_tes_forma_pago` 
-                        ON (`seg_tes_detalle_pago`.`id_forma_pago` = `seg_tes_forma_pago`.`id_forma_pago`)
-                    INNER JOIN `seg_tes_cuentas` 
-                        ON (`seg_tes_detalle_pago`.`id_tes_cuenta` = `seg_tes_cuentas`.`id_tes_cuenta`)
+                    `tes_detalle_pago`
+                    INNER JOIN `tes_forma_pago` 
+                        ON (`tes_detalle_pago`.`id_forma_pago` = `tes_forma_pago`.`id_forma_pago`)
+                    INNER JOIN `tes_cuentas` 
+                        ON (`tes_detalle_pago`.`id_tes_cuenta` = `tes_cuentas`.`id_tes_cuenta`)
                     INNER JOIN `tb_bancos` 
-                        ON (`seg_tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
-                    WHERE (`seg_tes_detalle_pago`.`id_ctb_doc` =$id_ctb_doc);";
+                        ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
+                    WHERE (`tes_detalle_pago`.`id_ctb_doc` =$id_ctb_doc);";
             $rs = $cmd->query($sql);
             $rubros = $rs->fetchAll();
 

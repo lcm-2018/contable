@@ -4,12 +4,9 @@ if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../index.php");</script>';
     exit();
 }
-include '../conexion.php';
-include '../permisos.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
+include_once '../conexion.php';
+include_once '../permisos.php';
+
 $id_doc = $_POST['id_doc'] ?? '';
 $id_cop = $_POST['id_cop'] ?? '';
 $valor_pago = $_POST['valor'] ?? 0;
@@ -20,21 +17,21 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 try {
     $sql = "SELECT
-    `seg_tes_detalle_pago`.`id_detalle_pago`
-    ,`tb_bancos`.`nom_banco`
-    , `seg_tes_cuentas`.`nombre`
-    , `seg_tes_forma_pago`.`forma_pago`
-    , `seg_tes_detalle_pago`.`documento`
-    , `seg_tes_detalle_pago`.`valor`
-    FROM
-    `seg_tes_detalle_pago`
-    INNER JOIN `seg_tes_forma_pago` 
-        ON (`seg_tes_detalle_pago`.`id_forma_pago` = `seg_tes_forma_pago`.`id_forma_pago`)
-    INNER JOIN `seg_tes_cuentas` 
-        ON (`seg_tes_detalle_pago`.`id_tes_cuenta` = `seg_tes_cuentas`.`id_tes_cuenta`)
-    INNER JOIN `tb_bancos` 
-        ON (`seg_tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
-    WHERE (`seg_tes_detalle_pago`.`id_ctb_doc` =$id_doc);";
+                `tes_detalle_pago`.`id_detalle_pago`
+                ,`tb_bancos`.`nom_banco`
+                , `tes_cuentas`.`nombre`
+                , `tes_forma_pago`.`forma_pago`
+                , `tes_detalle_pago`.`documento`
+                , `tes_detalle_pago`.`valor`
+            FROM
+                `tes_detalle_pago`
+                INNER JOIN `tes_forma_pago` 
+                    ON (`tes_detalle_pago`.`id_forma_pago` = `tes_forma_pago`.`id_forma_pago`)
+                INNER JOIN `tes_cuentas` 
+                    ON (`tes_detalle_pago`.`id_tes_cuenta` = `tes_cuentas`.`id_tes_cuenta`)
+                INNER JOIN `tb_bancos` 
+                    ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
+            WHERE (`tes_detalle_pago`.`id_ctb_doc` = $id_doc);";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -48,9 +45,9 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-// Consultar forma de pago de seg_tes_forma_pago
+// Consultar forma de pago de tes_forma_pago
 try {
-    $sql = "SELECT `id_forma_pago`, `forma_pago` FROM `seg_tes_forma_pago` ORDER BY `forma_pago` ASC";
+    $sql = "SELECT `id_forma_pago`, `forma_pago` FROM `tes_forma_pago` ORDER BY `forma_pago` ASC";
     $rs = $cmd->query($sql);
     $formas_pago = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -60,11 +57,11 @@ try {
 // Consultar el valor a de los descuentos realizados a la cuenta de ctb_causa_retencion
 try {
     $sql = "SELECT
-    `id_ctb_cop`
-    FROM
-    `pto_documento_detalles`
-    WHERE (`id_ctb_doc` =$id_doc)
-    GROUP BY `id_ctb_cop`;";
+                `id_pto_cop_det`
+            FROM
+                `pto_cop_detalle`
+            WHERE (`id_ctb_doc` = $id_doc)
+            GROUP BY `id_pto_cop_det`";
     $rs = $cmd->query($sql);
     $des_documentos = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -74,7 +71,7 @@ try {
 // recorro los documentos relacionados
 foreach ($des_documentos as $des) {
     try {
-        $sql = "SELECT SUM(`valor_retencion`) AS `valor` FROM `ctb_causa_retencion` WHERE `id_ctb_doc` = {$des['id_ctb_cop']}";
+        $sql = "SELECT SUM(`valor_retencion`) AS `valor` FROM `ctb_causa_retencion` WHERE `id_ctb_doc` = {$des['id_pto_cop_det']}";
         $rs = $cmd->query($sql);
         $descuentos = $rs->fetch();
         $valor_descuento = $valor_descuento + $descuentos['valor'];
@@ -84,7 +81,7 @@ foreach ($des_documentos as $des) {
 }
 // consultar el valor registrado en seg_test_detalle_pago para el id_ctb_doc
 try {
-    $sql = "SELECT SUM(`valor`) AS `valor` FROM `seg_tes_detalle_pago` WHERE `id_ctb_doc` = $id_doc";
+    $sql = "SELECT SUM(`valor`) AS `valor` FROM `tes_detalle_pago` WHERE `id_ctb_doc` = $id_doc";
     $rs = $cmd->query($sql);
     $pagos = $rs->fetch();
     $valor_programado = $pagos['valor'];

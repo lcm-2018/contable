@@ -251,3 +251,39 @@ function GetValoresCxP($id_doc, $cmd)
     }
     return $datosDoc;
 }
+
+function GetValoresCeva($id_pag, $cmd)
+{
+    try {
+        $sql = "SELECT
+                    `ctb_fuente`.`nombre` AS `fuente`
+                    , `ctb_doc`.`id_ctb_doc`
+                    , `ctb_doc`.`fecha`
+                    , `ctb_doc`.`id_manu`
+                    , `ctb_doc`.`detalle`
+                    , `ctb_doc`.`id_tercero`
+                    , `ctb_doc`.`estado`
+                    , `tes_rel_pag_cop`.`id_doc_cop`
+                    , IFNULL(`pagado`.`valor`,0) AS `val_pagado`
+                FROM
+                    `ctb_doc`
+                    INNER JOIN `ctb_fuente` 
+                        ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                    LEFT JOIN  `tes_rel_pag_cop` 
+                        ON (`tes_rel_pag_cop`.`id_doc_pag` = `ctb_doc`.`id_ctb_doc`)
+                    LEFT JOIN 
+                        (SELECT
+                            `id_ctb_doc`
+                            , IFNULL(SUM(`valor`) - SUM(`valor_liberado`),0) AS `valor`
+                        FROM
+                            `pto_pag_detalle`
+                        WHERE (`id_ctb_doc` = $id_pag)) AS `pagado`
+                            ON (`ctb_doc`.`id_ctb_doc` = `pagado`.`id_ctb_doc`)
+                WHERE (`ctb_doc`.`id_ctb_doc` = $id_pag)";
+        $rs = $cmd->query($sql);
+        $datosDoc = $rs->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    return $datosDoc;
+}

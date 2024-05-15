@@ -99,7 +99,7 @@ if (!empty($listappto)) {
             $enviar = '<button id ="enviar_' . $id_ctb . '" value="' . $lp['id_nomina'] . '" onclick="EnviarNomina(this)" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Procesar nómina (Soporte Electrónico)"><span class="fas fa-paper-plane fa-lg"></span></button>';
         }
         // fin api terceros
-        $dif = NULL;
+        $dif = 0;
         $key = array_search($id_ctb, array_column($suma, 'id_ctb_doc'));
         if ($key !== false) {
             $dif = $suma[$key]['debito'] - $suma[$key]['credito'];
@@ -107,13 +107,14 @@ if (!empty($listappto)) {
         if ($dif != 0) {
             $valor_total = 'Error';
         } else {
-            $valor_total = number_format($suma[$key]['credito'], 2, ',', '.');
+            $valor_total = number_format(!empty($suma) ? $suma[$key]['credito'] : 0, 2, ',', '.');
         }
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
 
 
         // Sumar el valor del crp de la tabla id_pto_mtvo asociado al CDP
         // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
+        $editar = $detalles = $acciones = $borrar = null;
         if ($fecha <= $fecha_cierre) {
             $anular = null;
             $cerrar = null;
@@ -121,15 +122,11 @@ if (!empty($listappto)) {
             $anular = '<a value="' . $id_ctb . '" class="dropdown-item sombra " href="#" onclick="anularDocumentoTes(' . $id_ctb . ');">Anulación</a>';
         }
         if ((PermisosUsuario($permisos, 5601, 3) || $id_rol == 1)) {
-            $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" onclick="cargarListaDetallePagoEdit(' . $id_ctb . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Editar_' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
-            $detalles = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
+            $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Editar_' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+            $detalles = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" title="Detalles" onclick="cargarListaDetallePagoEdit(' . $id_ctb . ')"><span class="fas fa-eye fa-lg"></span></a>';
             $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoTes(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
             // Acciones teniendo en cuenta el tipo de rol
             //si es lider de proceso puede abrir o cerrar documentos
-        } else {
-            $editar = null;
-            $detalles = null;
-            $acciones = null;
         }
         if ((PermisosUsuario($permisos, 5601, 4) || $id_rol == 1)) {
             $borrar = '<a value="' . $id_ctb . '" onclick="eliminarRegistroTec(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
@@ -147,8 +144,6 @@ if (!empty($listappto)) {
             <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Duplicar</a>
             <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Parametrizar</a>
             </div>';
-        } else {
-            $borrar = null;
         }
 
         if ($estado >= 2) {
@@ -175,7 +170,7 @@ if (!empty($listappto)) {
             'ccnit' => $ccnit,
             'tercero' => $tercero,
             'valor' =>  '<div class="text-right">' . $valor_total . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $borrar . $imprimir . $acciones . $enviar . $dato . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir . $acciones . $enviar . $dato . '</div>',
         ];
     }
 } else {

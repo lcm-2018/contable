@@ -14,12 +14,12 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $cmd->beginTransaction();
 
-    $sql = "SELECT id_pgcp from seg_tes_cuentas WHERE id_tes_cuenta=$data";
+    $sql = "SELECT id_pgcp from tes_cuentas WHERE id_tes_cuenta=$data";
     $rs = $cmd->query($sql);
     $cuenta = $rs->fetch();
     $id_pgcp = $cuenta['id_pgcp'];
     // update ctb_libaux set estado='C' where id_ctb_doc=$data;
-    $query = $cmd->prepare("UPDATE seg_tes_cuentas SET estado=0 WHERE id_tes_cuenta=?");
+    $query = $cmd->prepare("UPDATE tes_cuentas SET estado=0 WHERE id_tes_cuenta=?");
     $query->bindParam(1, $data, PDO::PARAM_INT);
     $query->execute();
     // Actualizo el campo estado de la tabla pto_documento_detalles

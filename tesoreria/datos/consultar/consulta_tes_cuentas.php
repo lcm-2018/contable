@@ -6,15 +6,15 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-   `seg_tes_cuentas`.`id_tes_cuenta`
-   , `seg_tes_cuentas`.`nombre`
-   , `seg_tes_cuentas`.`id_banco`
+   `tes_cuentas`.`id_tes_cuenta`
+   , `tes_cuentas`.`nombre`
+   , `tes_cuentas`.`id_banco`
     FROM
-   `seg_tes_cuentas`
+   `tes_cuentas`
    INNER JOIN `tb_bancos` 
-       ON (`seg_tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
-    WHERE (`seg_tes_cuentas`.`id_banco` ={$_post['id']} AND `seg_tes_cuentas`.`estado` = 0)
-    ORDER BY `seg_tes_cuentas`.`nombre` ASC;";
+       ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
+    WHERE (`tes_cuentas`.`id_banco` ={$_post['id']} AND `tes_cuentas`.`estado` = 0)
+    ORDER BY `tes_cuentas`.`nombre` ASC;";
     $rs = $cmd->query($sql);
     $retenciones = $rs->fetchAll();
     $cmd = null;

@@ -21,45 +21,38 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 try {
-    $sql = "SELECT
-                ctb_doc.id_ctb_doc
-                , ctb_doc.id_manu as causacion 
-                , ctb_doc.id_tercero
-                , ctb_doc.fecha
-                , pto_documento.id_manu as registro
-                ,  contratacion.num_contrato
-                , SUM(pto_documento_detalles.valor)  AS valor 
-                , IFNULL(pagado.pagos,0) AS val_pagado
-            FROM	
-                ctb_doc
-                INNER JOIN pto_documento_detalles 
-                    ON (ctb_doc.id_ctb_doc = pto_documento_detalles.id_ctb_doc)
-                INNER JOIN pto_documento 
-                    ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-                LEFT JOIN (
-                        SELECT 
-                            SUM(pto_documento_detalles.valor) AS pagos 
-                            ,pto_documento_detalles.id_ctb_cop
-                        FROM pto_documento_detalles 
-                        INNER JOIN ctb_doc ON (ctb_doc.id_ctb_doc = pto_documento_detalles.id_ctb_cop)
-                        WHERE pto_documento_detalles.tipo_mov ='PAG' AND pto_documento_detalles.estado <5
-                        GROUP BY ctb_doc.id_ctb_doc
-                        ) AS pagado 
-                    ON (ctb_doc.id_ctb_doc = pagado.id_ctb_cop)
-                LEFT JOIN (
-                        SELECT DISTINCT
-                            ctt_contratos.num_contrato
-                            ,pto_documento_detalles.id_ctb_doc
-                        FROM
-                            pto_documento_detalles
-                        INNER JOIN ctt_adquisiciones 
-                            ON (pto_documento_detalles.id_auto_dep = ctt_adquisiciones.id_cdp)
-                        INNER JOIN ctt_contratos 
-                            ON (ctt_contratos.id_compra = ctt_adquisiciones.id_adquisicion)
-                        ) AS contratacion 
-                    ON (ctb_doc.id_ctb_doc = contratacion.id_ctb_doc)
-            WHERE pto_documento_detalles.tipo_mov ='COP' AND ctb_doc.estado =1 AND ctb_doc.vigencia =$vigencia
-            GROUP BY ctb_doc.id_ctb_doc;";
+    $sql = "SELECT * FROM 
+                (SELECT
+                    `ctb_doc`.`id_ctb_doc`
+                    , `ctb_doc`.`id_manu` AS `causacion`
+                    , `pto_crp`.`id_manu` AS `registro`
+                    , `ctb_doc`.`id_tercero`
+                    , `ctb_doc`.`fecha`
+                    , `pto_cop_detalle`.`valor`
+                    , IFNULL(`pto_pag_detalle`.`valor_pago`,0) AS `valor_pagado`
+                    , `ctt_contratos`.`num_contrato`
+                FROM
+                    `pto_cop_detalle`
+                    LEFT JOIN 
+                    (SELECT
+                        `id_pto_cop_det`
+                        , IFNULL(SUM(`valor`),0) - IFNULL(SUM(`valor_liberado`),0) AS valor_pago
+                    FROM
+                        `pto_pag_detalle`
+                    GROUP BY `id_pto_cop_det`)AS `pto_pag_detalle`
+                        ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                    INNER JOIN `ctb_doc` 
+                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    INNER JOIN `pto_crp` 
+                        ON ( `pto_crp`.`id_pto_crp` = `ctb_doc`.`id_crp`)
+                    INNER JOIN `pto_cdp` 
+                        ON (`pto_crp`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
+                    INNER JOIN `ctt_adquisiciones` 
+                        ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
+                    INNER JOIN `ctt_contratos` 
+                        ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
+                WHERE `ctb_doc`.`id_crp` IS NOT NULL) AS `t1`  
+            WHERE  `valor` > `valor_pagado`";
     $sql2 = $sql;
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();
@@ -119,7 +112,7 @@ $terceros = json_decode($result, true);
 <div class="px-0">
     <div class="shadow">
         <div class="card-header" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">LISTA DE OBLIGACIONES PARA PAGO DE TESORERIA </h5>
+            <h5 style="color: white;">LISTA DE OBLIGACIONES PARA PAGO DE TESORERÍA</h5>
         </div>
         <div class="pb-3"></div>
         <div class="px-3">
@@ -142,21 +135,20 @@ $terceros = json_decode($result, true);
 
                         $id_doc = $ce['id_ctb_doc'];
                         $fecha = date('Y-m-d', strtotime($ce['fecha']));
+                        $editar = null;
+
                         // Consulta terceros en la api
 
                         $key = array_search($ce['id_tercero'], array_column($terceros, 'id_tercero'));
-                        $tercero = $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['razon_social'];
-                        $ccnit = $terceros[$key]['cc_nit'];
+                        $tercero = $key !== false ? ltrim($terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['razon_social']) : '';
+                        $ccnit = $key !== false ? $terceros[$key]['cc_nit'] : '';
 
                         // fin api terceros
 
-                        $saldo_rp = $ce['valor'] - $ce['val_pagado'];
+                        $saldo_rp = $ce['valor'] - $ce['valor_pagado'];
 
-                        if ((intval($permisos['editar'])) === 1) {
-                            $editar = '<a value="' . $id_doc . '" onclick="cargarListaDetallePago(' . $id_doc . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-plus-square fa-lg"></span></a>';
-                        } else {
-                            $editar = null;
-                            $detalles = null;
+                        if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
+                            $editar = '<a value="' . $id_doc . '" onclick="cargarListaDetallePago(' . $id_doc . ',0)" class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-plus-square fa-lg"></span></a>';
                         }
 
                         if ($saldo_rp > 0) {
@@ -169,7 +161,6 @@ $terceros = json_decode($result, true);
                                 <td class="text-left"><?php echo $ccnit; ?></td>
                                 <td class="text-left"><?php echo $tercero; ?></td>
                                 <td class="text-right"> <?php echo number_format($saldo_rp, 2, ',', '.'); ?></td>
-
                                 <td class="text-center"> <?php echo $editar; ?></td>
                             </tr>
                     <?php
@@ -183,8 +174,7 @@ $terceros = json_decode($result, true);
         </div>
     </div>
     <div class="text-right pt-3">
-        <a type="button" class="btn btn-primary btn-sm" data-dismiss="modal"> Procesar lote</a>
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>
 <?php

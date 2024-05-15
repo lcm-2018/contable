@@ -151,8 +151,8 @@ $terceros = json_decode($result, true);
                             `ctb_libaux`.`cuenta`
                             , `ctb_doc`.`fecha`
                             , `ctb_doc`.`tipo_doc`
-                            , `seg_tes_detalle_pago`.`documento`
-                            , `seg_tes_forma_pago`.`forma_pago` 
+                            , `tes_detalle_pago`.`documento`
+                            , `tes_forma_pago`.`forma_pago` 
                             , `ctb_doc`.`id_manu`
                             , `ctb_doc`.`id_tercero`
                             , `ctb_libaux`.`id_tercero`
@@ -164,10 +164,10 @@ $terceros = json_decode($result, true);
                             `ctb_libaux`
                             INNER JOIN `ctb_doc` 
                                 ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                            LEFT JOIN `seg_tes_detalle_pago` 
-                                ON (`seg_tes_detalle_pago`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                            LEFT JOIN `seg_tes_forma_pago` 
-                                ON (`seg_tes_detalle_pago`.`id_forma_pago` = `seg_tes_forma_pago`.`id_forma_pago`)
+                            LEFT JOIN `tes_detalle_pago` 
+                                ON (`tes_detalle_pago`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                            LEFT JOIN `tes_forma_pago` 
+                                ON (`tes_detalle_pago`.`id_forma_pago` = `tes_forma_pago`.`id_forma_pago`)
                         WHERE `ctb_libaux`.`cuenta` ='{$cta['cuenta']}' AND `ctb_doc`.`estado`=1 
                             AND `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte';";
                 $res = $cmd->query($sql);

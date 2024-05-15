@@ -6,7 +6,7 @@ $pdo = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 // consulto si el id de la cuenta fue utilizado en seg_fin_chequera_cont
 try {
-    $query = $pdo->prepare("SELECT id_tes_cuenta FROM seg_tes_detalle_pago WHERE id_tes_cuenta = ?");
+    $query = $pdo->prepare("SELECT id_tes_cuenta FROM tes_detalle_pago WHERE id_tes_cuenta = ?");
     $query->bindParam(1, $id);
     $query->execute();
     // consulto cuantos registros genera la sentencia
@@ -14,7 +14,7 @@ try {
         $response[] = array("value" => 'no');
     } else {
         try {
-            $query = $pdo->prepare("DELETE FROM seg_tes_cuentass WHERE id_tes_cuenta = ? ");
+            $query = $pdo->prepare("DELETE FROM tes_cuentass WHERE id_tes_cuenta = ? ");
             $query->bindParam(1, $id);
             $query->execute();
             $response[] = array("value" => 'ok');

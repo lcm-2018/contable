@@ -1,91 +1,85 @@
 <?php
 session_start();
-if (isset($_POST)) {
-    //Recibir variables por POST
-    $numDoc = $_POST['numDoc'];
-    $tipodato = $_POST['tipodato'];
-    $fecha = $_POST['fecha'];
-    $id_tercero = $_POST['id_tercero'];
-    $referencia = $_POST['referencia'];
-    $objeto = $_POST['objeto'];
-    $vigencia = $_SESSION['vigencia'];
-    $id_arq = $_POST['id_arqueo'];
-    $id_sede = 1;
-    $id_ref = $_POST['ref_mov'] ?? 0;
-    $iduser = $_SESSION['id_user'];
-    $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-    $fecha2 = $date->format('Y-m-d H:i:s');
-    //
-    include '../../../conexion.php';
+if (!isset($_SESSION['user'])) {
+    echo '<script>window.location.replace("../../../index.php");</script>';
+    exit();
+}
+include '../../../conexion.php';
+$fecha = $_POST['fecha'];
+$id_tipo_doc = $_POST['id_ctb_doc'];
+$id_tercero = $_POST['id_tercero'];
+$detalle = $_POST['objeto'];
+$id_reg = $_POST['id'];
+$iduser = $_SESSION['id_user'];
+$date = new DateTime('now', new DateTimeZone('America/Bogota'));
+$fecha2 = $date->format('Y-m-d H:i:s');
+$id_vigencia = $_SESSION['id_vigencia'];
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                MAX(`id_manu`) AS `id_manu` 
+            FROM
+                `ctb_doc`
+            WHERE (`id_vigencia` = $id_vigencia AND `id_tipo_doc` = $id_tipo_doc)";
+    $rs = $cmd->query($sql);
+    $consecutivo = $rs->fetch();
+    $id_manu = !empty($consecutivo) ? $consecutivo['id_manu'] + 1 : 1;
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 
-    try {
-        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    } catch (Exception $e) {
-        die("No se pudo conectar: " . $e->getMessage());
-    }
-
-    try {
-        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $cmd->beginTransaction();
-        if ($_POST['id_ctb_doc'] < 1) {
-
-            $query = $cmd->prepare("INSERT INTO ctb_doc (vigencia,id_sede, tipo_doc, id_manu,id_tercero, fecha, detalle, id_plano,id_ref, id_user_reg, fec_reg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)");
-            $query->bindParam(1, $vigencia, PDO::PARAM_INT);
-            $query->bindParam(2, $id_sede, PDO::PARAM_INT);
-            $query->bindParam(3, $tipodato, PDO::PARAM_STR);
-            $query->bindParam(4, $numDoc, PDO::PARAM_INT);
-            $query->bindParam(5, $id_tercero, PDO::PARAM_INT);
-            $query->bindParam(6, $fecha, PDO::PARAM_STR);
-            $query->bindParam(7, $objeto, PDO::PARAM_STR);
-            $query->bindParam(8, $referencia, PDO::PARAM_INT);
-            $query->bindParam(9, $id_ref, PDO::PARAM_INT);
-            $query->bindParam(10, $iduser, PDO::PARAM_INT);
-            $query->bindParam(11, $fecha2);
-            $query->execute();
-            if ($cmd->lastInsertId() > 0) {
-                $id = $cmd->lastInsertId();
-                $response[] = array("value" => 'ok', "id" => $id);
-            } else {
-                $response[] = array("value" => 'error1');
-                print_r($query->errorInfo()[2]);
-            }
-            //cambio el estado de seg_tes_causa_arqueo a 1
-            if ($id_arq > 0) {
-                $query = $cmd->prepare("UPDATE seg_tes_causa_arqueo SET estado = 1 WHERE id_ctb_doc = ?");
-                $query->bindParam(1, $id_arq, PDO::PARAM_INT);
-                $query->execute();
-                if ($query->rowCount() > 0) {
-                    $response[] = array("value" => 'modificado', "id" => $id);
-                } else {
-                    print_r($query->errorInfo()[2]);
-                }
-            }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    if ($id_reg == 0) {
+        $estado = 1;
+        $query = "INSERT INTO `ctb_doc`
+                    (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $query = $cmd->prepare($query);
+        $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
+        $query->bindParam(2, $id_tipo_doc, PDO::PARAM_INT);
+        $query->bindParam(3, $id_manu, PDO::PARAM_INT);
+        $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
+        $query->bindParam(5, $fecha, PDO::PARAM_STR);
+        $query->bindParam(6, $detalle, PDO::PARAM_STR);
+        $query->bindParam(7, $estado, PDO::PARAM_INT);
+        $query->bindParam(8, $iduser, PDO::PARAM_INT);
+        $query->bindParam(9, $fecha2);
+        $query->execute();
+        if ($cmd->lastInsertId() > 0) {
+            echo 'ok';
         } else {
-            $id = $_POST['id_ctb_doc'];
-            $query = $cmd->prepare("UPDATE ctb_doc SET id_manu = ?,id_tercero=?, fecha = ?, detalle =?, id_plano=?, id_ref=?, id_usuer_act=?,fec_act=? WHERE id_ctb_doc = ?");
-            $query->bindParam(1, $numDoc, PDO::PARAM_INT);
-            $query->bindParam(2, $id_tercero, PDO::PARAM_INT);
-            $query->bindParam(3, $fecha, PDO::PARAM_STR);
-            $query->bindParam(4, $objeto, PDO::PARAM_STR);
-            $query->bindParam(5, $referencia, PDO::PARAM_INT);
-            $query->bindParam(6, $id_ref, PDO::PARAM_INT);
-            $query->bindParam(7, $iduser, PDO::PARAM_INT);
-            $query->bindParam(8, $fecha2);
-            $query->bindParam(9, $id, PDO::PARAM_INT);
-            $query->execute();
+            echo $query->errorInfo()[2] . $query->queryString . 'id_tipo_doc: ' . $id_tipo_doc;
+        }
+    } else {
+        $query = "UPDATE `ctb_doc`
+                    SET `id_tercero` = ?, `fecha` = ?, `detalle` = ?
+                WHERE (`id_ctb_doc` = ?)";
+        $query = $cmd->prepare($query);
+        $query->bindParam(1, $id_tercero, PDO::PARAM_INT);
+        $query->bindParam(2, $fecha, PDO::PARAM_STR);
+        $query->bindParam(3, $detalle, PDO::PARAM_STR);
+        $query->bindParam(4, $id_reg, PDO::PARAM_INT);
+        if (!($query->execute())) {
+            echo $query->errorInfo()[2] . $query->queryString;
+        } else {
             if ($query->rowCount() > 0) {
-                $response[] = array("value" => 'mod', "id" => $id);
+                $query = "UPDATE `ctb_doc` SET `id_user_act` = ?, `fecha_act` = ? WHERE (`id_ctb_doc` = ?)";
+                $query = $cmd->prepare($query);
+                $query->bindParam(1, $iduser, PDO::PARAM_INT);
+                $query->bindParam(2, $fecha2, PDO::PARAM_STR);
+                $query->bindParam(3, $id_reg, PDO::PARAM_INT);
+                $query->execute();
+                echo 'ok';
             } else {
-                print_r($query->errorInfo()[2]);
+                echo 'No se realizó ningún cambio';
             }
         }
-        $cmd->commit();
-    } catch (Exception $e) {
-        $response = null;
-        $response[] = array("value" => 'error3');
-        $cmd->rollBack();
-        echo "Failed: " . $e->getMessage();
     }
-    echo json_encode($response);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getMessage();
 }

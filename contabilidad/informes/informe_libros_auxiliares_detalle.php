@@ -224,17 +224,17 @@ $terceros = json_decode($result, true);
                     // Consulto la referencia cuando se realizan movimientos de tesoreria
                     try {
                         $sql = "SELECT
-                            `seg_tes_detalle_pago`.`id_ctb_doc`
-                            , `seg_tes_cuentas`.`cta_contable`
-                            , CONCAT(`seg_tes_forma_pago`.`forma_pago` , ' ', `seg_tes_detalle_pago`.`documento`) AS formapago
+                            `tes_detalle_pago`.`id_ctb_doc`
+                            , `tes_cuentas`.`cta_contable`
+                            , CONCAT(`tes_forma_pago`.`forma_pago` , ' ', `tes_detalle_pago`.`documento`) AS formapago
                         FROM
-                            `seg_tes_detalle_pago`
-                            INNER JOIN `seg_tes_forma_pago` 
-                                ON (`seg_tes_detalle_pago`.`id_forma_pago` = `seg_tes_forma_pago`.`id_forma_pago`)
-                            INNER JOIN `seg_tes_cuentas` 
-                                ON (`seg_tes_detalle_pago`.`id_tes_cuenta` = `seg_tes_cuentas`.`id_tes_cuenta`)
-                        WHERE (`seg_tes_detalle_pago`.`id_ctb_doc` ={$tp['id_ctb_doc']}
-                            AND `seg_tes_cuentas`.`cta_contable`= '{$cta['cuenta']}');";
+                            `tes_detalle_pago`
+                            INNER JOIN `tes_forma_pago` 
+                                ON (`tes_detalle_pago`.`id_forma_pago` = `tes_forma_pago`.`id_forma_pago`)
+                            INNER JOIN `tes_cuentas` 
+                                ON (`tes_detalle_pago`.`id_tes_cuenta` = `tes_cuentas`.`id_tes_cuenta`)
+                        WHERE (`tes_detalle_pago`.`id_ctb_doc` ={$tp['id_ctb_doc']}
+                            AND `tes_cuentas`.`cta_contable`= '{$cta['cuenta']}');";
                         $res = $cmd->query($sql);
                         $forma = $res->fetch();
                     } catch (PDOException $e) {

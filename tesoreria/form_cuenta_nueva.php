@@ -22,17 +22,17 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 if (isset($_POST['id'])) {
     try {
         $sql = "SELECT
-          seg_tes_cuentas.id_banco
-        , seg_tes_cuentas.id_tipo_cuenta
-        , seg_tes_cuentas.cta_contable
-        , seg_tes_cuentas.nombre
-        , seg_tes_cuentas.numero
-        , seg_tes_cuentas.estado
-        , seg_tes_cuentas.id_tes_cuenta
-        , seg_tes_cuentas.id_pgcp
+          tes_cuentas.id_banco
+        , tes_cuentas.id_tipo_cuenta
+        , tes_cuentas.cta_contable
+        , tes_cuentas.nombre
+        , tes_cuentas.numero
+        , tes_cuentas.estado
+        , tes_cuentas.id_tes_cuenta
+        , tes_cuentas.id_pgcp
 
     FROM
-        seg_tes_cuentas
+        tes_cuentas
     WHERE id_tes_cuenta =$id;";
         $rs = $cmd->query($sql);
         $cuentas = $rs->fetch();

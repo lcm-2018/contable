@@ -230,7 +230,7 @@ if ($id_r == 3) {
                             // Obtener el saldo del registro por obligar valor del registro - el valor obligado efectivamente
                             $key = array_search($id_crp, array_column($liquidados, 'id_pto_crp'));
                             $valor_liquidado = $key !== false ? $liquidados[$key]['valor'] : 0;
-                            $key = array_search($id_crp, array_column($causados, 'id_pto_doc'));
+                            $key = array_search($id_crp, array_column($causados, 'id_pto_crp'));
                             $valor_causado = $key !== false ? $causados[$key]['valor'] : 0;
                             $saldo_rp = $valor_liquidado - $valor_causado;
                             if ($ce['num_contrato'] != '') {

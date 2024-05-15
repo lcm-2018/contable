@@ -9,12 +9,12 @@ try {
                 ctb_pgcp.id_pgcp
                 , ctb_pgcp.cuenta
                 , ctb_pgcp.nombre
-                , seg_tes_cuentas.id_tes_cuenta
-                , seg_tes_cuentas.id_banco
+                , tes_cuentas.id_tes_cuenta
+                , tes_cuentas.id_banco
             FROM 
                 ctb_pgcp
-            LEFT JOIN seg_tes_cuentas ON (seg_tes_cuentas.cta_contable=ctb_pgcp.cuenta)
-            WHERE seg_tes_cuentas.id_tes_cuenta IS NULL AND tipo_dato ='D' AND cuenta LIKE '1110%' OR cuenta LIKE '1132%' ;";
+            LEFT JOIN tes_cuentas ON (tes_cuentas.cta_contable=ctb_pgcp.cuenta)
+            WHERE tes_cuentas.id_tes_cuenta IS NULL AND tipo_dato ='D' AND cuenta LIKE '1110%' OR cuenta LIKE '1132%' ;";
     $rs = $cmd->query($sql);
     $retenciones = $rs->fetchAll();
     $cmd = null;

@@ -169,16 +169,16 @@ FROM
                 $pagos = $pago['pagado'];
                 //Consulta cuenta de banco donde se realizó el pago
                 $sql = "SELECT
-                            `seg_tes_detalle_pago`.`id_ctb_pag` 
-                            , `seg_tes_cuentas`.`numero` 
+                            `tes_detalle_pago`.`id_ctb_pag` 
+                            , `tes_cuentas`.`numero` 
                             , CONCAT(`tb_bancos`.`cod_banco`, ' - ', `tb_bancos`.`nom_banco`) AS banco
                         FROM
-                            `seg_tes_cuentas`
+                            `tes_cuentas`
                             INNER JOIN `tb_bancos` 
-                                ON (`seg_tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
-                            INNER JOIN `seg_tes_detalle_pago` 
-                                ON (`seg_tes_detalle_pago`.`id_tes_cuenta` = `seg_tes_cuentas`.`id_tes_cuenta`)
-                        WHERE (`seg_tes_detalle_pago`.`id_ctb_pag` ='{$rp['id_ctb_doc']}');";
+                                ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
+                            INNER JOIN `tes_detalle_pago` 
+                                ON (`tes_detalle_pago`.`id_tes_cuenta` = `tes_cuentas`.`id_tes_cuenta`)
+                        WHERE (`tes_detalle_pago`.`id_ctb_pag` ='{$rp['id_ctb_doc']}');";
                 $res = $cmd->query($sql);
                 $cuenta = $res->fetch();
                 $banco = $cuenta['banco'];

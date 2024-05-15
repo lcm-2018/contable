@@ -14,18 +14,18 @@ try {
     $sql = "SELECT
                 tb_bancos.nom_banco
                 , seg_tes_tipocuenta.tipo_cuenta
-                , seg_tes_cuentas.nombre
-                , seg_tes_cuentas.numero
-                , seg_tes_cuentas.cta_contable
-                , seg_tes_cuentas.estado
-                , seg_tes_cuentas.id_tes_cuenta
+                , tes_cuentas.nombre
+                , tes_cuentas.numero
+                , tes_cuentas.cta_contable
+                , tes_cuentas.estado
+                , tes_cuentas.id_tes_cuenta
 
             FROM
-                seg_tes_cuentas
+                tes_cuentas
                 INNER JOIN tb_bancos 
-                    ON (seg_tes_cuentas.id_banco = tb_bancos.id_banco)
+                    ON (tes_cuentas.id_banco = tb_bancos.id_banco)
                 INNER JOIN seg_tes_tipocuenta 
-                    ON (seg_tes_cuentas.id_tipo_cuenta = seg_tes_tipocuenta.id_tipo_cuenta);";
+                    ON (tes_cuentas.id_tipo_cuenta = seg_tes_tipocuenta.id_tipo_cuenta);";
     $rs = $cmd->query($sql);
     $lista = $rs->fetchAll();
 } catch (PDOException $e) {

@@ -40,13 +40,13 @@ if (isset($_POST)) {
 
     // consulto la cuenta de banco aociadas a la forma de pago
     $sq2 = "SELECT
-    `seg_tes_cuentas`.`cta_contable`
-    , `seg_tes_detalle_pago`.`valor`
+    `tes_cuentas`.`cta_contable`
+    , `tes_detalle_pago`.`valor`
     FROM
-    `seg_tes_detalle_pago`
-    INNER JOIN `seg_tes_cuentas` 
-        ON (`seg_tes_detalle_pago`.`id_tes_cuenta` = `seg_tes_cuentas`.`id_tes_cuenta`)
-    WHERE (`seg_tes_detalle_pago`.`id_ctb_doc` =$id_doc);";
+    `tes_detalle_pago`
+    INNER JOIN `tes_cuentas` 
+        ON (`tes_detalle_pago`.`id_tes_cuenta` = `tes_cuentas`.`id_tes_cuenta`)
+    WHERE (`tes_detalle_pago`.`id_ctb_doc` =$id_doc);";
     $rs = $cmd->query($sq2);
     $formapago = $rs->fetchAll();
     // Consulto el numero de documentos asociados al pago 
@@ -60,12 +60,12 @@ if (isset($_POST)) {
     // Consulto la cuenta asociada la documento relacionado
     try {
         $sql = "SELECT
-                    `seg_ctb_referencia`.`cuenta`
-                    ,`seg_ctb_referencia`.`accion`
+                    `ctb_referencia`.`cuenta`
+                    ,`ctb_referencia`.`accion`
                 FROM
                     `ctb_doc`
-                    INNER JOIN `seg_ctb_referencia` 
-                        ON (`ctb_doc`.`id_ref` = `seg_ctb_referencia`.`id_ctb_referencia`)
+                    INNER JOIN `ctb_referencia` 
+                        ON (`ctb_doc`.`id_ref` = `ctb_referencia`.`id_ctb_referencia`)
                 WHERE (`ctb_doc`.`id_ctb_doc` =$id_doc);";
         $rs = $cmd->query($sql);
         $cuenta_ctb = $rs->fetch();
@@ -94,11 +94,11 @@ if (isset($_POST)) {
             $query->bindParam(11, $id_tipo_bn_sv, PDO::PARAM_INT);
             $query->bindParam(12, $iduser, PDO::PARAM_INT);
             $query->bindParam(13, $fecha2);
-            // Consulto la cuenta registrada como referencia en la tabla seg_ctb_referencia
+            // Consulto la cuenta registrada como referencia en la tabla ctb_referencia
             $sql = $cmd->prepare("SELECT
                                     SUM(`valor`) as valor
                                 FROM
-                                    `seg_tes_detalle_pago`
+                                    `tes_detalle_pago`
                                 WHERE `id_ctb_doc` = ?");
             $sql->bindParam(1, $id_doc, PDO::PARAM_INT);
             $sql->execute();
@@ -152,7 +152,7 @@ if (isset($_POST)) {
             $sql = $cmd->prepare("SELECT
                                     SUM(`valor`) as creditos
                                 FROM
-                                    `seg_tes_detalle_pago`
+                                    `tes_detalle_pago`
                                 WHERE `id_ctb_doc` = ?;");
             $sql->bindParam(1, $id_doc, PDO::PARAM_INT);
             $sql->execute();

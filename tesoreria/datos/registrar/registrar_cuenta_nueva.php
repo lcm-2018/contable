@@ -25,7 +25,7 @@ if (isset($_POST)) {
     if (!empty($_POST['id_cuenta'])) {
         $id_cuenta = $_POST['id_cuenta'];
         $estado = 0;
-        $query = $cmd->prepare("UPDATE seg_tes_cuentas SET id_banco=?, id_tipo_cuenta=?, nombre=?, numero=?, cta_contable=?, estado=?,id_user_act=?, fecha_act=? WHERE id_tes_cuenta=?");
+        $query = $cmd->prepare("UPDATE tes_cuentas SET id_banco=?, id_tipo_cuenta=?, nombre=?, numero=?, cta_contable=?, estado=?,id_user_act=?, fecha_act=? WHERE id_tes_cuenta=?");
         $query->bindParam(1, $banco, PDO::PARAM_INT);
         $query->bindParam(2, $tipo_cuenta, PDO::PARAM_INT);
         $query->bindParam(3, $nombre, PDO::PARAM_STR);
@@ -44,7 +44,7 @@ if (isset($_POST)) {
     } else {
         $estado = 0;
         // Realizo el insert
-        $query = $cmd->prepare("INSERT INTO seg_tes_cuentas (id_banco,id_tipo_cuenta,id_pgcp,nombre,numero,cta_contable,estado,id_user_reg, fecha_reg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $query = $cmd->prepare("INSERT INTO tes_cuentas (id_banco,id_tipo_cuenta,id_pgcp,nombre,numero,cta_contable,estado,id_user_reg, fecha_reg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $query->bindParam(1, $banco, PDO::PARAM_INT);
         $query->bindParam(2, $tipo_cuenta, PDO::PARAM_INT);
         $query->bindParam(3, $id_pgcp, PDO::PARAM_INT);

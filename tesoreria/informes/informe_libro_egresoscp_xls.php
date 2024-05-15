@@ -200,14 +200,14 @@ FROM
                 // Consulto la cuenta bancaria 
                 try {
                     $sql = "SELECT
-                    `seg_tes_detalle_pago`.`id_ctb_doc`
-                    , `seg_tes_cuentas`.`nombre`
-                    , `seg_tes_cuentas`.`cta_contable`
+                    `tes_detalle_pago`.`id_ctb_doc`
+                    , `tes_cuentas`.`nombre`
+                    , `tes_cuentas`.`cta_contable`
                 FROM
-                    `seg_tes_detalle_pago`
-                    INNER JOIN `seg_tes_cuentas` 
-                        ON (`seg_tes_detalle_pago`.`id_tes_cuenta` = `seg_tes_cuentas`.`id_tes_cuenta`)
-                WHERE (`seg_tes_detalle_pago`.`id_ctb_doc` ='$id_ctb_doc');";
+                    `tes_detalle_pago`
+                    INNER JOIN `tes_cuentas` 
+                        ON (`tes_detalle_pago`.`id_tes_cuenta` = `tes_cuentas`.`id_tes_cuenta`)
+                WHERE (`tes_detalle_pago`.`id_ctb_doc` ='$id_ctb_doc');";
                     $res = $cmd->query($sql);
                     $cuenta_ban = $res->fetch();
                 } catch (PDOException $e) {

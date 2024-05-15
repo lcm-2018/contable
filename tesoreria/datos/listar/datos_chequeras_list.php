@@ -14,7 +14,7 @@ try {
     $sql = "SELECT
                 seg_fin_chequeras.fecha
                 , seg_fin_chequeras.id_chequera
-                , seg_tes_cuentas.nombre
+                , tes_cuentas.nombre
                 , seg_fin_chequeras.numero
                 , seg_fin_chequeras.inicial
                 , seg_fin_chequeras.maximo AS final
@@ -22,8 +22,8 @@ try {
                 , tb_bancos.nom_banco
             FROM
                 seg_fin_chequeras
-                INNER JOIN seg_tes_cuentas ON (seg_fin_chequeras.id_cuenta = seg_tes_cuentas.id_tes_cuenta)
-                INNER JOIN tb_bancos ON (seg_tes_cuentas.id_banco = tb_bancos.id_banco)
+                INNER JOIN tes_cuentas ON (seg_fin_chequeras.id_cuenta = tes_cuentas.id_tes_cuenta)
+                INNER JOIN tb_bancos ON (tes_cuentas.id_banco = tb_bancos.id_banco)
 
             LEFT JOIN (
                 SELECT
