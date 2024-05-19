@@ -76,6 +76,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             </div>
 
                             <!--Lista de registros en la tabla-->
+                            <!-- Permisos: 1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir -->
                             <?php
                             if (PermisosUsuario($permisos, 5002, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';
