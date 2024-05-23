@@ -15,9 +15,7 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 ?>
 
-<body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] === '1') {
-                                echo 'sb-sidenav-toggled';
-                            } ?>">
+<body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ? 'sb-sidenav-toggled' : ''; ?>">
 
     <?php include '../navsuperior.php' ?>
     <div id="layoutSidenav">
@@ -32,53 +30,32 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <i class="fas fa-users fa-lg" style="color:#1D80F7"></i>
                                     LISTA DE CUENTAS BANCARIAS
                                 </div>
-                                <input type="hidden" id="peReg" value="<?php echo $permisos['registrar']; ?>">
-
+                                <?php
+                                if (PermisosUsuario($permisos, 5607, 0) || $id_rol == 1) {
+                                    echo '<input type="hidden" id="peReg" value="1">';
+                                } else {
+                                    echo '<input type="hidden" id="peReg" value="0">';
+                                }
+                                ?>
                             </div>
                         </div>
                         <div class="card-body" id="divCuerpoPag">
-                            <div>
-                                <div clas="row">
-                                    <div class="center-block">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend px-1">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <br>
-                                <table id="tableCuentasBanco" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 17%;">Banco</th>
-                                            <th style="width: 14%;">Tipo de cuenta</th>
-                                            <th style="width: 35%;">Nombre</th>
-                                            <th style="width: 8%;">Número</th>
-                                            <th style="width: 8%;">Código</th>
-                                            <th style="width: 7%;">Estado</th>
-                                            <th style="width: 10%;">Acciones</th>
-
-                                        </tr>
-                                    </thead>
-                                    <tbody id="modificartabletableCuentasBanco">
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th>Banco</th>
-                                            <th>Tipo de cuenta</th>
-                                            <th>Nombre</th>
-                                            <th>Número</th>
-                                            <th>Código</th>
-                                            <th>Estado</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            <div class="text-center pt-4">
-                            </div>
+                            <table id="tableCuentasBanco" class="table table-striped table-bordered table-sm table-hover shadow" style="width:100%">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th>Banco</th>
+                                        <th>Tipo de cuenta</th>
+                                        <th>Nombre</th>
+                                        <th>Número</th>
+                                        <th>Código</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modificartabletableCuentasBanco">
+                                </tbody>
+                            </table>
                         </div>
-
                     </div>
                 </div>
             </main>

@@ -6,28 +6,24 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../permisos.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
-$id_ctb_doc = $_POST['id_doc'] ?? '';
+
+$id_ctb_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no autorizado');
 // Consulta tipo de presupuesto
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-    `pto_documento_detalles`.`rubro`
-    , `pto_cargue`.`nom_rubro`
-    , `pto_documento_detalles`.`valor`
-    , `pto_documento_detalles`.`id_detalle`
-FROM
-    `ctb_doc`
-    INNER JOIN `pto_documento_detalles` 
-        ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
-    INNER JOIN `pto_cargue` 
-        ON (`pto_documento_detalles`.`rubro` = `pto_cargue`.`cod_pptal`)
-WHERE (`pto_cargue`.`vigencia` =$_SESSION[vigencia]
-    AND `ctb_doc`.`id_ctb_doc` =$id_ctb_doc);";
+                `pto_documento_detalles`.`rubro`
+                , `pto_cargue`.`nom_rubro`
+                , `pto_documento_detalles`.`valor`
+                , `pto_documento_detalles`.`id_detalle`
+            FROM
+                `ctb_doc`
+                INNER JOIN `pto_documento_detalles` 
+                    ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
+                INNER JOIN `pto_cargue` 
+                    ON (`pto_documento_detalles`.`rubro` = `pto_cargue`.`cod_pptal`)
+            WHERE (`pto_cargue`.`vigencia` = {$_SESSION['vigencia']} AND `ctb_doc`.`id_ctb_doc` = $id_ctb_doc);";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll();
 } catch (PDOException $e) {

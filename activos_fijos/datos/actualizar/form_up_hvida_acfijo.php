@@ -198,14 +198,14 @@ if ($tipoIN == 'DO') {
 } else {
     $ot = 'checked';
 }
-$ruta_del = $hvgral['url_img'] == '' ? '' : $hvgral['url_img'] . $hvgral['nomb_img'];
+$ruta_del = !empty($hvgral) ? '' : $hvgral['url_img'] . $hvgral['nomb_img'];
 $ruta_img = $ruta_del != '' ? $_SESSION['urlin'] . substr($ruta_del, 5) : '';
 $v_max_ref = 300;
 $hz_max_ref = 50000;
 $w_max_ref = 1000;
 $ma_max_ref = 10000;
 $gc_max_ref = 1000;
-if ($rangos['id_fmto'] == '') {
+if (!empty($rangos)) {
     $id_rango = 0;
     $v_min = $hz_min = $w_min = $ma_min = $gc_min = 0;
     $v_max = $v_max_ref;
@@ -227,7 +227,7 @@ if ($rangos['id_fmto'] == '') {
     $gc_max = $rangos['gc_max'];
 }
 $r1 = $r2 = $r3 = $u1 = $u2 = $u3 = null;
-if ($apoyos['id_apoyo'] == '') {
+if (!empty($apoyos)) {
     $id_apoyo = 0;
     $riesgo = $uso = $diagnostico = $prevencion = $rehabilitacion = $analis_lab = $tratamiento = $id_user_reg = '';
 } else {

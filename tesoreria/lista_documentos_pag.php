@@ -115,24 +115,37 @@ try {
 }
 $valor_teso = 0;
 $valor_pago = 0;
+try {
+    $sql = "SELECT
+                `id_ctb_doc`
+                , SUM(`valor`) AS `valor`
+            FROM
+                `tes_detalle_pago`
+            WHERE (`id_ctb_doc` = $id_doc_pag)";
+    $rs = $cmd->query($sql);
+    $values = $rs->fetch();
+    $valor_pago = !empty($values) ? $values['valor'] : 0;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 if ($tipo_dato == '9' || $tipo_dato == '11') {
     if ($tipo_dato == '9') {
         $id_arq = $id_doc_pag;
     }
     try {
         $sql = "SELECT
-                    `seg_tes_causa_arqueo`.`id_causa_arqueo`
-                    ,`seg_ctb_doc`.`id_ctb_doc`
-                    ,`seg_ctb_doc`.`id_manu`
-                    , `seg_ctb_doc`.`fecha`
-                    , `seg_ctb_doc`.`id_tercero`
-                    , `seg_ctb_doc`.`detalle`
-                    , SUM(`seg_tes_causa_arqueo`.`valor_arq`) as valor
+                    `tes_causa_arqueo`.`id_causa_arqueo`
+                    ,`ctb_doc`.`id_ctb_doc`
+                    ,`ctb_doc`.`id_manu`
+                    , `ctb_doc`.`fecha`
+                    , `ctb_doc`.`id_tercero`
+                    , `ctb_doc`.`detalle`
+                    , SUM(`tes_causa_arqueo`.`valor_arq`) as valor
                 FROM
-                    `seg_tes_causa_arqueo`
-                    INNER JOIN `seg_ctb_doc` 
-                        ON (`seg_tes_causa_arqueo`.`id_ctb_doc` = `seg_ctb_doc`.`id_ctb_doc`)
-                WHERE `seg_tes_causa_arqueo`.`id_ctb_doc` =$id_arq;";
+                    `tes_causa_arqueo`
+                    INNER JOIN `ctb_doc` 
+                        ON (`tes_causa_arqueo`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                WHERE `tes_causa_arqueo`.`id_ctb_doc` = $id_arq";
         $sql2 = $sql;
         $rs = $cmd->query($sql);
         $arqueo = $rs->fetch();
@@ -153,15 +166,16 @@ try {
                 INNER JOIN `ctb_fuente` 
                     ON (`ctb_referencia`.`id_ctb_fuente` = `ctb_fuente`.`id_doc_fuente`)
             WHERE (`ctb_fuente`.`id_doc_fuente` = $tipo_dato)";
-    echo $sql;
     $rs = $cmd->query($sql);
     $referencia = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+
 $datosDoc = GetValoresCeva($id_doc_pag, $cmd);
 $id_manu = $datosDoc['id_manu'];
-$id_cop = $datosDoc['id_doc_cop'];
+$id_cop = $datosDoc['id_doc_cop'] > 0 ? $datosDoc['id_doc_cop'] : 0;
+$id_ref = $datosDoc['id_ref'];
 if (!empty($datosDoc)) {
     $id_t = ['0' => $datosDoc['id_tercero']];
     $payload = json_encode($id_t);
@@ -244,6 +258,30 @@ $ver = 'readonly';
                                                 <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $datosDoc['id_tercero']; ?>">
                                             </div>
                                         </div>
+                                        <div class="row mb-1">
+                                            <div class="col-2">
+                                                <span class="small">CONCEPTO:</span>
+                                            </div>
+                                            <div class="col-10">
+                                                <select name="ref_mov" id="ref_mov" class="form-control form-control-sm" readonly>
+                                                    <option value="0"></option>
+                                                    <?php foreach ($referencia as $rf) {
+                                                        if ($datosDoc['id_ref_ctb'] == $rf['id_ctb_referencia']) {
+                                                            echo '<option value="' . $rf['id_ctb_referencia'] . '" selected>' . $rf['nombre'] . '</option>';
+                                                        }
+                                                    ?>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <div class="col-2">
+                                                <span class="small">REFERENCIA:</span>
+                                            </div>
+                                            <div class="col-10">
+                                                <input type="text" name="referencia" id="referencia" value="<?php echo $datosDoc['id_ref']; ?>" class="form-control form-control-sm" readonly>
+                                            </div>
+                                        </div>
                                         <div class="row mb-3">
                                             <div class="col-2">
                                                 <span class="small">OBJETO:</span>
@@ -252,98 +290,74 @@ $ver = 'readonly';
                                                 <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-label="Default select example" rows="3" required="required" readonly><?php echo $datosDoc['detalle']; ?></textarea>
                                             </div>
                                         </div>
-                                        <?php if (!empty($referencia)) { ?>
-                                            <div class="row">
+                                        <?php if ($tipo_dato == '9') { ?>
+                                            <div class="row mb-1">
                                                 <div class="col-2">
-                                                    <div class="col"><label for="fecha" class="small">CONCEPTO:</label></div>
+                                                    <label for="arqueo_caja" class="small">ARQUEO DE CAJA:</label>
                                                 </div>
                                                 <div class="col-4">
-                                                    <select name="ref_mov" id="ref_mov" class="form-control form-control-sm" required>
-                                                        <option value="0">...Seleccione...</option>
-                                                        <?php foreach ($referencia as $rf) :
-                                                            if ($id_ref == $rf['id_ctb_referencia']) {
-                                                                echo '<option value="' . $rf['id_ctb_referencia'] . '" selected>' . $rf['nombre'] . '</option>';
-                                                            } else {
-                                                                echo '<option value="' . $rf['id_ctb_referencia'] . '">' . $rf['nombre'] . '</option>';
-                                                            }
-                                                        ?>
-                                                        <?php endforeach; ?>
-                                                    </select>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" name="arqueo_caja" id="arqueo_caja" value="<?php echo $valor_teso; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly>
+                                                        <div class="input-group-append">
+                                                            <?php if ($datosDoc['estado'] == 1) { ?>
+                                                                <a class="btn btn-outline-success btn-sm" onclick="cargaArqueoCaja('<?php echo $id_cop; ?>')"><span class="fas fa-cash-register fa-lg"></span></a>
+                                                            <?php } ?>
+                                                        </div>
+                                                    </div>
                                                 </div>
+                                            </div>
+                                        <?php }
+                                        if ($tipo_dato == '13' || $tipo_dato == '14' || $tipo_dato == '15') { ?>
+                                            <div class="row mb-1">
                                                 <div class="col-2">
+                                                    <label for="arqueo_caja" class="small">CAJA MENOR:</label>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" name="arqueo_caja" id="arqueo_caja" value="<?php echo $valor_pago; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly>
+                                                        <div class="input-group-append">
+                                                            <?php if ($datosDoc['estado'] == 1) { ?>
+                                                                <a class="btn btn-outline-success btn-sm" onclick="cargaLegalizacionCajaMenor('<?php echo $id_cop; ?>')"><span class="fas fa-cash-register fa-lg"></span></a>
+                                                            <?php } ?>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        <?php } ?>
-                                        <div class="row">
-                                            <div class="col-2">
-                                                <div class="col"><label for="fecha" class="small">REFERENCIA :</label></div>
-                                            </div>
-                                            <div class="col-2"><input type="text" name="referencia" id="referencia" value="<?php echo $ref; ?>" class="form-control form-control-sm" style="text-align: right;"></div>
-                                            <div class=" col-2 text-left" style="padding-top: 3px;">&nbsp;
-                                                <input type="checkbox" class="custom-control-input" id="checkboxId" onclick="definirReferenciaPago();" <?php echo $chek; ?>>
-                                                <label class="custom-control-label" for="checkboxId"></label>
-                                            </div>
-                                            <div class="col-2">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-2">
-                                                <div class="col"><label for="fecha" class="small"></label></div>
-                                            </div>
-                                            <div class="col-2"><button type="button" class="btn btn-danger btn-sm" onclick="procesaCausacionPago('<?php echo $id_doc_pag; ?>')">Guardar</button></div>
-                                            <div class="col-2">
-                                            </div>
-                                        </div>
-                                        <?php if ($tipo_dato == '9') { ?>
-                                            <div class="row">
+                                        <?php }
+                                        if ($tipo_dato == '6' || $tipo_dato == '16' || $tipo_dato == '7' || $tipo_dato == '12') { ?>
+                                            <div class="row mb-1">
                                                 <div class="col-2">
-                                                    <div class="col"><label for="fecha" class="small">ARQUEO DE CAJA:</label></div>
+                                                    <label for="fecha" class="small">PRESUPUESTO:</label>
                                                 </div>
-                                                <div class="col-2"><input type="text" name="arqueo_caja" id="arqueo_caja" value="<?php echo $valor_teso; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly></div>
-                                                <div class=" col-2 text-left">
-                                                    <a class="btn btn-outline-success btn-sm btn-circle shadow-gb" onclick="cargaArqueoCaja('<?php echo $id_cop; ?>')"><span class="fas fa-cash-register fa-lg"></span></a>
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" name="arqueo_caja" id="arqueo_caja" value="<?php echo $valor_pago; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly>
+                                                        <div class="input-group-append">
+                                                            <?php if ($datosDoc['estado'] == 1) { ?>
+                                                                <a class="btn btn-outline-success btn-sm" onclick="cargaPresupuestoIng('')"><span class="fas fa-plus fa-lg"></span></a>
+                                                            <?php } ?>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="col-2"></div>
-                                            </div>
-                                        <?php } ?>
-                                        <?php if ($tipo_dato == '15' || $tipo_dato == '13' || $tipo_dato == '14') { ?>
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <div class="col"><label for="fecha" class="small">CAJA MENOR:</label></div>
-                                                </div>
-                                                <div class="col-2"><input type="text" name="arqueo_caja" id="arqueo_caja" value="<?php echo $valor_pago; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly></div>
-                                                <div class=" col-2 text-left">
-                                                    <a class="btn btn-outline-success btn-sm btn-circle shadow-gb" onclick="cargaLegalizacionCajaMenor('<?php echo $id_cop; ?>')"><span class="fas fa-cash-register fa-lg"></span></a>
-                                                </div>
-                                                <div class="col-2"></div>
-                                            </div>
-                                        <?php } ?>
-                                        <?php if ($tipo_dato == '6' || $tipo_dato == '16' || $tipo_dato == '7' || $tipo_dato == '12') { ?>
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <div class="col"><label for="fecha" class="small">PRESUPUESTO:</label></div>
-                                                </div>
-                                                <div class="col-2"><input type="text" name="arqueo_caja" id="arqueo_caja" value="<?php echo $valor_pago; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly></div>
-                                                <div class=" col-2 text-left">
-                                                    <a class="btn btn-outline-success btn-sm btn-circle shadow-gb" onclick="cargaPresupuestoIng('')"><span class="fas fa-plus fa-lg"></span></a>
-                                                </div>
-                                                <div class="col-2"></div>
                                             </div>
                                         <?php } ?>
                                         <?php
                                         if ($id_cop > 0) {
                                         ?>
-                                            <div class="row">
+                                            <div class="row mb-1">
                                                 <div class="col-2">
-                                                    <div class="col"><label for="fecha" class="small">IMPUTACION:</label></div>
+                                                    <label for="fecha" class="small">IMPUTACION:</label>
                                                 </div>
-                                                <div class="col-2"><input type="text" name="valor" id="valor" value="<?php echo $datosDoc['val_pagado']; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly></div>
-                                                <div class=" col-2 text-left">
-                                                    <a class="btn btn-outline-success btn-sm btn-circle shadow-gb" onclick="cargaListaCausaciones('<?php echo $id_cop; ?>')"><span class="fas fa-plus fa-lg"></span></a>
-                                                    <a class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" onclick="cargaListaInputaciones('<?php echo $id_cop; ?>')"><span class="fas fa-search fa-lg"></span></a>
-
-                                                </div>
-                                                <div class="col-2">
+                                                <div class="col-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" name="valor" id="valor" value="<?php echo $datosDoc['val_pagado']; ?>" class="form-control" style="text-align: right;" required readonly>
+                                                        <div class="input-group-append" id="button-addon4">
+                                                            <?php if ($datosDoc['estado'] == 1) { ?>
+                                                                <a class="btn btn-outline-success" onclick="cargaListaCausaciones('<?php echo $id_cop; ?>')"><span class="fas fa-plus fa-lg"></span></a>
+                                                                <a class="btn btn-outline-secondary" onclick="cargaListaInputaciones('<?php echo $id_cop; ?>')"><span class="fas fa-search fa-lg"></span></a>
+                                                            <?php } ?>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -356,54 +370,77 @@ $ver = 'readonly';
                                         }
                                         ?>
 
-                                        <div class="row">
+                                        <div class="row mb-1">
                                             <div class="col-2">
-                                                <div class="col"><label for="fecha" class="small">FORMA DE PAGO:</label></div>
+                                                <label class="small">FORMA DE PAGO :</label>
                                             </div>
-                                            <div class="col-2"><input type="text" name="forma_pago" id="forma_pago" value="<?php echo $valor_pago; ?>" class="form-control form-control-sm" style="text-align: right;" required <?php echo $campo_req; ?>></div>
-                                            <div class=" col-2 text-left">
-                                                <a class="btn btn-outline-primary btn-sm btn-circle shadow-gb" onclick="cargaFormaPago('<?php echo $id_cop; ?>')"><span class="fas fa-wallet fa-lg"></span></a>
-                                            </div>
-                                            <div class="col-2"></div>
-                                        </div>
-
-
-                                        <div class="row ">
-                                            <div class="col-2">
-                                                <div><label for="fecha" class="small"></label></div>
-                                            </div>
-                                            <div class="col-2">
-                                                <div class="text-align: center">
-                                                    <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoPag('<?php echo $id_doc_pag; ?>')">Generar movimiento</button>
+                                            <div class="col-4">
+                                                <div class="input-group input-group-sm">
+                                                    <input type="text" name="forma_pago" id="forma_pago" value="<?php echo $valor_pago; ?>" class="form-control" style="text-align: right;" required <?php echo $campo_req; ?>>
+                                                    <div class="input-group-append">
+                                                        <?php if ($datosDoc['estado'] == 1) { ?>
+                                                            <a class="btn btn-outline-primary" onclick="cargaFormaPago(<?php echo $id_cop; ?>,0)"><span class="fas fa-wallet fa-lg"></span></a>
+                                                        <?php } ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-
+                                        <?php if ($datosDoc['estado'] == 1) { ?>
+                                            <div class="row ">
+                                                <div class="col-2">
+                                                    <div><label for="fecha" class="small"></label></div>
+                                                </div>
+                                                <div class="col-2">
+                                                    <div class="text-align: center">
+                                                        <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoPag('<?php echo $id_doc_pag; ?>')">Generar movimiento</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php } ?>
                                     </div>
                                 </div>
-                                <br>
+                                <input type="hidden" id="id_ctb_doc" name="id_ctb_doc" value="<?php echo $id_doc_pag; ?>">
                                 <table id="tableMvtoContableDetallePag" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                                     <thead>
                                         <tr>
-                                            <th style="width: 55%;">Cuenta</th>
-                                            <th style="width: 15%;">Debito</th>
-                                            <th style="width: 15%;">Credito</th>
-                                            <th style="width: 15%;">Acciones</th>
+                                            <th style="width: 35%;">Cuenta</th>
+                                            <th style="width: 35%;">Tercero</th>
+                                            <th style="width: 10%;">Debito</th>
+                                            <th style="width: 10%;">Credito</th>
+                                            <th style="width: 10%;">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody id="modificartableMvtoContableDetallePag">
                                     </tbody>
+                                    <?php if ($datosDoc['estado'] == '1') { ?>
+                                        <tr>
+                                            <td>
+                                                <input type="text" name="codigoCta" id="codigoCta" class="form-control form-control-sm" value="" required>
+                                                <input type="hidden" name="id_codigoCta" id="id_codigoCta" class="form-control form-control-sm" value="0">
+                                                <input type="hidden" name="tipoDato" id="tipoDato" value="0">
+                                            </td>
+                                            <td><input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm" required>
+                                                <input type="hidden" name="idTercero" id="idTercero" value="0">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="valorDebito" id="valorDebito" class="form-control form-control-sm text-right" value="0" required onkeyup="valorMiles(id)" onchange="llenarCero(id)">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="valorCredito" id="valorCredito" class="form-control form-control-sm text-right" value="0" required onkeyup="valorMiles(id)" onchange="llenarCero(id)">
+                                            </td>
+                                            <td class="text-center">
+                                                <button text="0" class="btn btn-primary btn-sm" onclick="GestMvtoDetallePag(this)">Agregar</button>
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
                             </div>
-                            <input type="hidden" id="id_ctb_doc" name="id_ctb_doc" value="<?php echo $id_doc_pag; ?>">
-                            <input type="text" name="codigoCta" id="codigoCta" class="form-control form-control-sm" value="" required>
-                            <input type="hidden" name="id_codigoCta" id="id_codigoCta" class="form-control form-control-sm" value="">
                         </form>
                     </div>
 
                     </table>
                     <div class="text-center pt-4">
                         <a type="button" class="btn btn-primary btn-sm" onclick="imprimirFormatoTes(<?php echo $id_doc_pag; ?>);" style="width: 5rem;"> <span class="fas fa-print "></span></a>
-                        <a onclick="terminarDetalleTes('<?php echo $tipo_dato; ?>','<?php echo $tipo_var; ?>')" class="btn btn-danger btn-sm" style="width: 7rem;" href="#"> Terminar</a>
+                        <a onclick="terminarDetalleTes(<?php echo $tipo_dato; ?>,<?php echo $tipo_var; ?>)" class="btn btn-danger btn-sm" style="width: 7rem;" href="#"> Terminar</a>
                     </div>
                 </div>
         </div>

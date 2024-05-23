@@ -26,7 +26,7 @@ if (isset($_POST)) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
     try {
-        $query = $cmd->prepare("INSERT INTO seg_tes_causa_arqueo (id_ctb_doc, fecha, id_tercero,id_tercero_api, valor_fac, valor_arq,observaciones, id_user_reg, fec_reg) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)");
+        $query = $cmd->prepare("INSERT INTO tes_causa_arqueo (id_ctb_doc, fecha, id_tercero,id_tercero_api, valor_fac, valor_arq,observaciones, id_user_reg, fec_reg) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)");
         $query->bindParam(1, $id_ctb_doc, PDO::PARAM_INT);
         $query->bindParam(2, $fecha_arqueo, PDO::PARAM_STR);
         $query->bindParam(3, $id_facturador, PDO::PARAM_INT);
@@ -39,18 +39,18 @@ if (isset($_POST)) {
         $query->execute();
         if ($cmd->lastInsertId() > 0) {
             $id = $cmd->lastInsertId();
-            $sql = "SELECT `seg_tes_causa_arqueo`.`id_causa_arqueo`
-                            , `seg_tes_causa_arqueo`.`fecha`
-                            , `seg_tes_causa_arqueo`.`id_tercero`
-                            , `seg_tes_causa_arqueo`.`valor_arq`
-                            , `seg_tes_causa_arqueo`.`valor_fac`
-                            , CONCAT(`seg_tes_facturador`.`nom1`, ' ', `seg_tes_facturador`.`nom2`, ' ', `seg_tes_facturador`.`ape1`, ' ', `seg_tes_facturador`.`ape2`) AS `facturador`
-                            , `seg_tes_causa_arqueo`.`id_ctb_doc`
+            $sql = "SELECT `tes_causa_arqueo`.`id_causa_arqueo`
+                            , `tes_causa_arqueo`.`fecha`
+                            , `tes_causa_arqueo`.`id_tercero`
+                            , `tes_causa_arqueo`.`valor_arq`
+                            , `tes_causa_arqueo`.`valor_fac`
+                            , CONCAT(`tes_facturador`.`nom1`, ' ', `tes_facturador`.`nom2`, ' ', `tes_facturador`.`ape1`, ' ', `tes_facturador`.`ape2`) AS `facturador`
+                            , `tes_causa_arqueo`.`id_ctb_doc`
                     FROM
-                            `seg_tes_facturador`
-                    INNER JOIN `seg_tes_causa_arqueo` 
-                    ON (`seg_tes_facturador`.`cc` = `seg_tes_causa_arqueo`.`id_tercero`)
-                    WHERE `seg_tes_causa_arqueo`.`id_causa_arqueo` =$id;";
+                            `tes_facturador`
+                    INNER JOIN `tes_causa_arqueo` 
+                    ON (`tes_facturador`.`cc` = `tes_causa_arqueo`.`id_tercero`)
+                    WHERE `tes_causa_arqueo`.`id_causa_arqueo` =$id;";
             $rs = $cmd->query($sql);
             $rubros = $rs->fetchAll();
             foreach ($rubros as $ce) {

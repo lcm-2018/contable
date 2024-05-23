@@ -86,8 +86,7 @@ try {
         <div class="card-header" style="background-color: #16a085 !important;">
             <h5 style="color: white;">LISTA DE CAUSACIONES PARA PAGO DEL TERCERO</h5>
         </div>
-        <div class="pb-3"></div>
-        <div class="px-5">
+        <div class="px-3 pt-2">
             <table id="tableCausacionPagos" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 100%;">
                 <thead>
                     <tr>
@@ -104,7 +103,7 @@ try {
                         foreach ($causaciones as $ce) {
                             $id = $ce['id_ctb_doc'];
                             $fecha = $ce['fecha'];
-                            
+
                             if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
                                 $editar = '<a value="' . $id_doc . '" onclick="cargaRubrosPago(' . $id . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
                                 $borrar = '<a value="' . $id_doc . '" onclick="eliminarFormaPago(' . $id_doc . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
@@ -138,10 +137,8 @@ try {
                     </div>
                 </tbody>
             </table>
-            <div class="text-right pt-3">
-                <a type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Cerrar</a>
-
-
+            <div class="text-right py-3">
+                <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
             </div>
 
         </div>

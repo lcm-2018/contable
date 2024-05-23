@@ -6,15 +6,16 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                ctb_pgcp.id_pgcp
-                , ctb_pgcp.cuenta
-                , ctb_pgcp.nombre
-                , tes_cuentas.id_tes_cuenta
-                , tes_cuentas.id_banco
-            FROM 
-                ctb_pgcp
-            LEFT JOIN tes_cuentas ON (tes_cuentas.cta_contable=ctb_pgcp.cuenta)
-            WHERE tes_cuentas.id_tes_cuenta IS NULL AND tipo_dato ='D' AND cuenta LIKE '1110%' OR cuenta LIKE '1132%' ;";
+                `ctb_pgcp`.`id_pgcp`
+                , `ctb_pgcp`.`cuenta`
+                , `ctb_pgcp`.`nombre`
+                , `tes_cuentas`.`id_tes_cuenta`
+                , `tes_cuentas`.`id_banco`
+            FROM
+                `tes_cuentas`
+                INNER JOIN `ctb_pgcp` 
+                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+            WHERE `tes_cuentas`.`id_tes_cuenta` IS NULL AND `ctb_pgcp`.`tipo_dato` = 'D' AND(`ctb_pgcp`.`cuenta` LIKE '1132%' OR `ctb_pgcp`.`cuenta` LIKE '1110%')";
     $rs = $cmd->query($sql);
     $retenciones = $rs->fetchAll();
     $cmd = null;

@@ -263,6 +263,8 @@ function GetValoresCeva($id_pag, $cmd)
                     , `ctb_doc`.`detalle`
                     , `ctb_doc`.`id_tercero`
                     , `ctb_doc`.`estado`
+                    , `ctb_doc`.`id_ref`
+                    , `ctb_doc`.`id_ref_ctb`
                     , `tes_rel_pag_cop`.`id_doc_cop`
                     , IFNULL(`pagado`.`valor`,0) AS `val_pagado`
                 FROM

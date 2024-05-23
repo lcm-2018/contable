@@ -5,7 +5,7 @@ include '../../../conexion.php';
 try {
     $pdo = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $query = $pdo->prepare("DELETE FROM seg_tes_causa_arqueo WHERE id_causa_arqueo = ?");
+    $query = $pdo->prepare("DELETE FROM tes_causa_arqueo WHERE id_causa_arqueo = ?");
     $query->bindParam(1, $id);
     $query->execute();
     if ($query->rowCount() > 0) {

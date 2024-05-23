@@ -198,18 +198,18 @@ try {
 if ($documento['id_tipo_doc'] == 'CICP') {
     try {
         $sql = "SELECT
-                    `seg_tes_causa_arqueo`.`id_causa_arqueo`
-                    , `seg_tes_causa_arqueo`.`fecha`
-                    , `seg_tes_causa_arqueo`.`id_tercero`
-                    , `seg_tes_causa_arqueo`.`valor_arq`
-                    , `seg_tes_causa_arqueo`.`valor_fac`
-                    , CONCAT(`seg_tes_facturador`.`nom1`, ' ', `seg_tes_facturador`.`nom2`, ' ', `seg_tes_facturador`.`ape1`, ' ', `seg_tes_facturador`.`ape2`) AS `facturador`
-                    , `seg_tes_causa_arqueo`.`id_ctb_doc`
+                    `tes_causa_arqueo`.`id_causa_arqueo`
+                    , `tes_causa_arqueo`.`fecha`
+                    , `tes_causa_arqueo`.`id_tercero`
+                    , `tes_causa_arqueo`.`valor_arq`
+                    , `tes_causa_arqueo`.`valor_fac`
+                    , CONCAT(`tes_facturador`.`nom1`, ' ', `tes_facturador`.`nom2`, ' ', `tes_facturador`.`ape1`, ' ', `tes_facturador`.`ape2`) AS `facturador`
+                    , `tes_causa_arqueo`.`id_ctb_doc`
                 FROM
-                    `seg_tes_facturador`
-                    INNER JOIN `seg_tes_causa_arqueo` 
-                        ON (`seg_tes_facturador`.`cc` = `seg_tes_causa_arqueo`.`id_tercero`)
-                WHERE (`seg_tes_causa_arqueo`.`id_ctb_doc` =$id_doc);";
+                    `tes_facturador`
+                    INNER JOIN `tes_causa_arqueo` 
+                        ON (`tes_facturador`.`cc` = `tes_causa_arqueo`.`id_tercero`)
+                WHERE (`tes_causa_arqueo`.`id_ctb_doc` =$id_doc);";
         $res = $cmd->query($sql);
         $facturadores = $res->fetchAll();
     } catch (PDOException $e) {
