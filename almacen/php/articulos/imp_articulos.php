@@ -16,7 +16,7 @@ if (isset($_POST['codigo']) && $_POST['codigo']) {
     $where .= " AND far_medicamentos.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";
 }
 if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND far_medicamentos.nom_medicamento LIKE '" . $_POST['nombre'] . "%'";
+    $where .= " AND far_medicamentos.nom_medicamento LIKE '%" . $_POST['nombre'] . "%'";
 }
 if (isset($_POST['subgrupo']) && $_POST['subgrupo']) {
     $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['subgrupo'];

@@ -40,7 +40,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <div class="row">
                                 <div class="col-md-11">
                                     <i class="fas fa-list-ul fa-lg" style="color:#1D80F7"></i>
-                                    PEDIDOS
+                                    PEDIDOS BODEGA
                                 </div>
                             </div>
                         </div>

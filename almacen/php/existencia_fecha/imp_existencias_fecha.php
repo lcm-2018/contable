@@ -14,15 +14,14 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $idusr = $_SESSION['id_user'];
 $idrol = $_SESSION['rol'];
 
-$where_usr = " WHERE 1";
-if($idrol !=1){
-    $where_usr .= " AND far_kardex.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
-}
-
 $fecha = $_POST['fecha'] ? $_POST['fecha'] : date('Y-m-d');
 $titulo = "REPORTE DE EXISTENCIAS";
 
-$where_kar = " AND far_kardex.estado=1";
+$where_kar = " WHERE far_kardex.estado=1";
+if($idrol !=1){
+    $where_kar .= " AND far_kardex.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
+}
+
 if (isset($_POST['id_sede']) && $_POST['id_sede']) {
     $where_kar .= " AND far_kardex.id_sede='" . $_POST['id_sede'] . "'";
 }
@@ -58,7 +57,7 @@ try {
             FROM far_medicamentos
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)
             INNER JOIN (SELECT id_med,SUM(existencia_lote) AS existencia_fecha FROM far_kardex
-                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex $where_usr $where_kar GROUP BY id_lote)                        
+                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex $where_kar GROUP BY id_lote)                        
                         GROUP BY id_med	
                         ) AS e ON (e.id_med = far_medicamentos.id_med)	
             INNER JOIN (SELECT id_med,val_promedio AS val_promedio_fecha FROM far_kardex
@@ -73,7 +72,7 @@ try {
     $sql = "SELECT SUM(e.existencia_fecha*v.val_promedio_fecha) AS val_total
             FROM far_medicamentos
             INNER JOIN (SELECT id_med,SUM(existencia_lote) AS existencia_fecha FROM far_kardex
-                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex $where_usr $where_kar GROUP BY id_lote)                        
+                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex $where_kar GROUP BY id_lote)                        
                         GROUP BY id_med	
                         ) AS e ON (e.id_med = far_medicamentos.id_med)	
             INNER JOIN (SELECT id_med,val_promedio AS val_promedio_fecha FROM far_kardex
@@ -155,7 +154,7 @@ try {
                 <td style="text-align:left">
                     TOTAL:
                 </td>
-                <td colspan="1" style="text-align:center">
+                <td style="text-align:center">
                     <?php echo formato_valor($obj_tot['val_total']); ?>  
                 </td>
             </tr>

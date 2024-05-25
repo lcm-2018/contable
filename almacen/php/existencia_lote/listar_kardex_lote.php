@@ -18,9 +18,10 @@ $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 
 $where_art = " WHERE far_kardex.id_lote=" . $_POST['id_lote'] . " AND (far_kardex.can_ingreso>0 OR far_kardex.can_egreso>0) AND far_kardex.estado=1";
-$where = "";
+
+$where = $where_art;
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
-    $where = " AND far_kardex.fec_movimiento BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+    $where .= " AND far_kardex.fec_movimiento BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
 }
 
 try {
@@ -34,7 +35,7 @@ try {
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(*) AS total FROM far_kardex $where_art $where";
+    $sql = "SELECT COUNT(*) AS total FROM far_kardex $where";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
@@ -49,7 +50,7 @@ try {
                 INNER JOIN far_orden_ingreso ON (far_kardex.id_ingreso = far_orden_ingreso.id_ingreso)
                 INNER JOIN tb_sedes ON (far_kardex.id_sede = tb_sedes.id_sede)
                 INNER JOIN far_bodegas ON (far_kardex.id_bodega = far_bodegas.id_bodega)
-                INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where_art $where                
+                INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where                
                 UNION ALL
                 SELECT far_kardex.id_kardex,far_kardex.fec_movimiento,CONCAT_WS('-','E',far_orden_egreso.num_egreso) AS comprobante,
 			        tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,far_medicamento_lote.lote,far_kardex.detalle,
@@ -58,7 +59,7 @@ try {
                 INNER JOIN far_orden_egreso ON (far_kardex.id_egreso = far_orden_egreso.id_egreso)
                 INNER JOIN tb_sedes ON (far_kardex.id_sede = tb_sedes.id_sede)
                 INNER JOIN far_bodegas ON (far_kardex.id_bodega = far_bodegas.id_bodega)
-                INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where_art $where 
+                INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where 
                 UNION ALL
                 SELECT far_kardex.id_kardex,far_kardex.fec_movimiento,CONCAT_WS('-','TE',far_traslado.num_traslado) AS comprobante,
 			        tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,far_medicamento_lote.lote,far_kardex.detalle,
@@ -67,7 +68,7 @@ try {
                 INNER JOIN far_traslado ON (far_kardex.id_egreso_tra = far_traslado.id_traslado)
                 INNER JOIN tb_sedes ON (far_kardex.id_sede = tb_sedes.id_sede)
                 INNER JOIN far_bodegas ON (far_kardex.id_bodega = far_bodegas.id_bodega)
-                INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where_art $where 
+                INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where 
                 UNION ALL
                 SELECT far_kardex.id_kardex,far_kardex.fec_movimiento,CONCAT_WS('-','TI',far_traslado.num_traslado) AS comprobante,
 			        tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,far_medicamento_lote.lote,far_kardex.detalle,
@@ -76,7 +77,7 @@ try {
                 INNER JOIN far_traslado ON (far_kardex.id_ingreso_tra = far_traslado.id_traslado)
                 INNER JOIN tb_sedes ON (far_kardex.id_sede = tb_sedes.id_sede)
                 INNER JOIN far_bodegas ON (far_kardex.id_bodega = far_bodegas.id_bodega)
-                INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where_art $where
+                INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where
             ) AS t ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();

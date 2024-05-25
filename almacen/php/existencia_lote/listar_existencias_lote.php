@@ -24,7 +24,7 @@ if($idrol !=1){
     $where_usr .= " AND far_medicamento_lote.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
 
-$where = "";
+$where = $where_usr;
 if (isset($_POST['id_sede']) && $_POST['id_sede']) {
     $where .= " AND far_medicamento_lote.id_bodega IN (SELECT id_bodega FROM tb_sedes_bodega WHERE id_sede=" . $_POST['id_sede'] . ")";
 }
@@ -65,7 +65,7 @@ try {
     //Consulta el total de registros aplicando el filtro
     $sql = "SELECT COUNT(*) AS total FROM far_medicamento_lote
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
-            $where_usr $where";
+            $where";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
@@ -83,7 +83,7 @@ try {
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega = far_medicamento_lote.id_bodega)
             INNER JOIN tb_sedes_bodega ON (tb_sedes_bodega.id_bodega = far_bodegas.id_bodega)
             INNER JOIN tb_sedes ON (tb_sedes.id_sede = tb_sedes_bodega.id_sede)
-            $where_usr $where ORDER BY $col $dir $limit";
+            $where ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;
