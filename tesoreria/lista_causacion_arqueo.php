@@ -7,43 +7,55 @@ if (!isset($_SESSION['user'])) {
 include '../conexion.php';
 include '../permisos.php';
 include '../financiero/consultas.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
-$id_doc = $_POST['id_doc'] ?? '';
-$id_cop = $_POST['id_cop'] ?? '';
-$valor_pago = $_POST['valor'] ?? 0;
+
+$id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no disponible');
+$id_cop = isset($_POST['id_cop']) ? $_POST['id_cop'] : 0;
+$valor_pago = isset($_POST['valor']) ? $_POST['valor'] : 0;
 $fecha_doc = $_POST['fecha'] ?? '';
 $valor_descuento = 0;
+$vigencia = $_SESSION['vigencia'];
 // Consulta tipo de presupuesto
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // Control de fechas
 //$fecha_doc = date('Y-m-d');
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 5, $cmd);
-$fecha = fechaSesion($_SESSION['vigencia'], $_SESSION['id_user'], $cmd);
-$fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
+$fecha_cierre = fechaCierre($vigencia, 5, $cmd);
+$fecha = fechaSesion($vigencia, $_SESSION['id_user'], $cmd);
+$fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
 
 try {
     $sql = "SELECT
-                `cc`
-                , `nom1`
-                , `nom2`
-                , `ape1`
-                , `ape2`
-                , `id_tercero_api`
+                `id_tercero_api`
             FROM
-                `seg_tes_facturador`
-            WHERE (`estado` =1);";
+                `tes_facturador`
+            WHERE (`estado` = 1)";
     $rs = $cmd->query($sql);
     $facturador = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$id_t = [];
+$terceros = [];
+if (!empty($facturador)) {
+    foreach ($facturador as $fact) {
+        $id_t[] = $fact['id_tercero_api'];
+    }
+    $payload = json_encode($id_t);
+    //API URL
+    $url = $api . 'terceros/datos/res/lista/terceros';
+    $ch = curl_init($url);
+    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $result = curl_exec($ch);
+    curl_close($ch);
+    $terceros = json_decode($result, true);
+}
 // consultar los conceptos asociados al recuado del arqueo
 try {
-    $sql = "SELECT id_concepto_arq,concepto FROM seg_tes_concepto_arqueo WHERE estado = 0";
+    $sql = "SELECT `id_concepto_arq`,`concepto` FROM `tes_concepto_arqueo` WHERE `estado` = 1";
     $rs = $cmd->query($sql);
     $conceptos = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -52,18 +64,18 @@ try {
 // Consultar los arqueos registrados en seg_tes_arqueo_caja
 try {
     $sql = "SELECT
-                `seg_tes_causa_arqueo`.`id_causa_arqueo`
-                , `seg_tes_causa_arqueo`.`fecha`
-                , `seg_tes_causa_arqueo`.`id_tercero`
-                , `seg_tes_causa_arqueo`.`valor_arq`
-                , `seg_tes_causa_arqueo`.`valor_fac`
-                , CONCAT(`seg_tes_facturador`.`nom1`, ' ', `seg_tes_facturador`.`nom2`, ' ', `seg_tes_facturador`.`ape1`, ' ', `seg_tes_facturador`.`ape2`) AS `facturador`
-                , `seg_tes_causa_arqueo`.`id_ctb_doc`
+                `tes_causa_arqueo`.`id_ctb_doc`
+                , `tes_causa_arqueo`.`id_causa_arqueo`
+                , `tes_causa_arqueo`.`fecha`
+                , `tes_causa_arqueo`.`id_tercero`
+                , `tes_causa_arqueo`.`valor_arq`
+                , `tes_causa_arqueo`.`valor_fac`
+                , `tes_causa_arqueo`.`observaciones`
             FROM
-                `seg_tes_facturador`
-                INNER JOIN `seg_tes_causa_arqueo` 
-                    ON (`seg_tes_facturador`.`cc` = `seg_tes_causa_arqueo`.`id_tercero`)
-            WHERE (`seg_tes_causa_arqueo`.`id_ctb_doc` =$id_doc);";
+                `tes_facturador`
+                INNER JOIN `tes_causa_arqueo` 
+                    ON (`tes_facturador`.`id_tercero_api` = `tes_causa_arqueo`.`id_tercero`)
+            WHERE (`tes_causa_arqueo`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
     $arqueos = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -111,61 +123,49 @@ $valor_pagar = 0;
         <div class="card-header" style="background-color: #16a085 !important;">
             <h5 style="color: white;">LISTA DE ARQUEO DE CAJA POR FECHA</h5>
         </div>
-        <div class="pb-3"></div>
-        <div class="px-5">
+        <div class="px-3 pt-2">
             <form id="formAddFacturador">
-                <div class="row">
-                    <div class="col-2">
-                        <div class="col"><label for="numDoc" class="small">FECHA:</label></div>
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="fecha_arqueo" class="small">FECHA:</label>
+                        <input type="date" name="fecha_arqueo" id="fecha_arqueo" class="form-control form-control-sm" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_doc; ?>">
+                        <input type="hidden" name="id_doc" id="id_doc" value="<?php echo $id_doc; ?>">
                     </div>
-                    <div class="col-6">
-                        <div class="col"><label for="numDoc" class="small">FACTURADOR:</label></div>
-                    </div>
-
-                    <div class="col-2">
-                        <div class="col"><label for="numDoc" class="small">VALOR FACTURADO:</label></div>
-                    </div>
-                    <div class="col-2">
-                        <div class="col"><label for="numDoc" class="small">VALOR:</label></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-2">
-                        <div class="col">
-                            <input type="date" name="fecha_arqueo" id="fecha_arqueo" class="form-control form-control-sm" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_doc; ?>">
-                            <input type="hidden" name="id_doc" id="id_doc" value="<?php echo $id_doc; ?>">
-                        </div>
-                    </div>
-                    <div class="col-6">
+                    <div class="form-group col-md-6">
+                        <label for="id_facturador" class="small">FACTURADOR:</label>
                         <div class="col" id="divBanco">
                             <select name="id_facturador" id="id_facturador" class="form-control form-control-sm" required onchange="calcularCopagos2(this)">
-                                <option value="0">...Seleccione...</option>
-                                <?php foreach ($facturador as $fact) : ?>
-                                    <option value="<?php echo $fact['cc']; ?>"><?php echo $fact['ape1'] . ' ' . $fact['ape2'] . ' ' . $fact['nom1'] . ' ' . $fact['nom2']; ?></option>
-                                <?php endforeach; ?>
+                                <option value="0">--Seleccione--</option>
+                                <?php foreach ($facturador as $fact) {
+                                    $key = array_search($fact['id_tercero_api'], array_column($terceros, 'id_tercero'));
+                                    $nombre = $key !== false ? ltrim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']) : '---';
+                                    $cc = $key !== false ? $terceros[$key]['cc_nit'] : '';
+                                    echo '<option value="' . $fact['id_tercero_api'] . '">' . $nombre . ' -> ' . $cc . '</option>';
+                                }
+                                ?>
                             </select>
                         </div>
                     </div>
-                    <div class="col-2">
+                    <div class="form-group col-md-2">
+                        <label for="valor_fact" class="small">VALOR FACTURADO:</label>
                         <div class="col" id="divForma">
                             <input type="text" name="valor_fact" id="valor_fact" class="form-control form-control-sm" value="<?php echo $valor_pagar; ?>" required style="text-align: right;" onkeyup="valorMiles(id)" readonly>
                         </div>
                     </div>
-                    <div class="col-2">
+                    <div class="form-group col-md-2">
+                        <label for="valor_arq" class="small">VALOR:</label>
                         <div class="btn-group">
                             <input type="text" name="valor_arq" id="valor_arq" class="form-control form-control-sm" value="<?php echo $valor_pagar; ?>" required style="text-align: right;" onkeyup="valorMiles(id)" ondblclick="copiarValor()" onchange="validarDiferencia()">
                             <button type="submit" class="btn btn-primary btn-sm" id="registrarMvtoDetalle">+</button>
                         </div>
                     </div>
                 </div>
-                <div class="row mb-2"></div>
-                <div class="row mb-2">
-                    <div class="col-6">
-                        <div class="col"><textarea class="form-control form-control-sm" name="observaciones" id="observaciones" cols="600" rows="1" placeholder="OBSERVACIONES:"></textarea></div>
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <textarea class="form-control form-control-sm" name="observaciones" id="observaciones" rows="3" placeholder="OBSERVACIONES:"></textarea>
                     </div>
                 </div>
             </form>
-            <br>
             <table id="tableCausacionArqueo" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 100%;">
                 <thead>
                     <tr>
@@ -183,7 +183,7 @@ $valor_pagar = 0;
                         foreach ($arqueos as $ce) {
                             //$id_doc = $ce['id_ctb_doc'];
                             $id = $ce['id_causa_arqueo'];
-                            if ((intval($permisos['editar'])) === 1) {
+                            if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
                                 $borrar = '<a value="' . $id_doc . '" onclick="eliminarRecaduoArqeuo(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
@@ -212,13 +212,10 @@ $valor_pagar = 0;
                     </div>
                 </tbody>
             </table>
-            <div class="text-right pt-3">
-                <a type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Cerrar</a>
-
-
-            </div>
-
         </div>
-
+        <div class="text-right py-3">
+            <a type="button" class="btn btn-success btn-sm" onclick="GuardaMvtoDetalle(<?php echo $id_doc ?>,0)">Guardar</a>
+            <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
+        </div>
 
     </div>

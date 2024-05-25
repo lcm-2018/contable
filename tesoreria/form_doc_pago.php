@@ -30,13 +30,50 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `id_ctb_doc`, `id_manu`, `id_tercero`, `fecha`, `detalle`
+                `ctb_referencia`.`id_ctb_referencia`
+                , `ctb_referencia`.`nombre`
+            FROM
+                `ctb_referencia`
+                INNER JOIN `ctb_fuente` 
+                    ON (`ctb_referencia`.`id_ctb_fuente` = `ctb_fuente`.`id_doc_fuente`)
+            WHERE (`ctb_fuente`.`id_doc_fuente` = $id_ctb_doc)";
+    $rs = $cmd->query($sql);
+    $referencia = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `id_ctb_doc`, `id_manu`, `id_tercero`, `fecha`, `detalle`, `id_ref_ctb`, `id_ref`
             FROM
                 `ctb_doc`
             WHERE (`id_ctb_doc` = $id_documento)";
     $rs = $cmd->query($sql);
     $datos = $rs->fetch();
     $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `numero` FROM `tes_referencia`  WHERE `estado` = 1";
+    $rs = $cmd->query($sql);
+    $pagos_ref = $rs->fetch();
+    if (empty($datos)) {
+        if ($rs->rowCount() > 0) {
+            $ref = $pagos_ref['numero'];
+            $chek = 'checked';
+        } else {
+            $ref = 0;
+            $chek = '';
+        }
+    } else {
+        $ref = $datos['id_ref'];
+        $chek = $ref > 0 ? 'checked' : '';
+    }
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -50,6 +87,8 @@ if (empty($datos)) {
     $datos['id_tercero'] = 0;
     $datos['fecha'] = $fecha;
     $datos['detalle'] = '';
+    $datos['id_ref_ctb'] = 0;
+    $datos['id_ref'] = '';
     $tercero = '';
 } else {
     $payload = json_encode(array(0 => $datos['id_tercero']));
@@ -72,18 +111,44 @@ if (empty($datos)) {
         <div class="card-header" style="background-color: #16a085 !important;">
             <h5 style="color: white;">GESTIÓN DOCUMENTOS: <b><?php echo $fuente; ?></b></h5>
         </div>
-        <form id="formGetMvtoCtb">
+        <form id="formGetMvtoTes">
             <input type="hidden" name="id_ctb_doc" value="<?php echo $id_ctb_doc; ?>">
             <div class="form-row px-4 pt-2">
                 <div class="form-group col-md-6">
-                    <label for="fecha" class="small">FECHA </label>
+                    <label for="fecha" class="small">FECHA</label>
                     <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datos['fecha'])); ?>" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>">
                 </div>
                 <div class="form-group col-md-6">
                     <label for="numDoc" class="small">NUMERO</label>
                     <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" readonly value="<?php echo $datos['id_manu'] ?>">
                 </div>
-
+            </div>
+            <div class="form-row px-4">
+                <div class="form-group col-md-6">
+                    <label for="ref_mov" class="small">CONCEPTO</label>
+                    <select name="ref_mov" id="ref_mov" class="form-control form-control-sm" required>
+                        <option value="0">--Seleccione--</option>
+                        <?php foreach ($referencia as $rf) {
+                            if ($datos['id_ref_ctb'] == $rf['id_ctb_referencia']) {
+                                echo '<option value="' . $rf['id_ctb_referencia'] . '" selected>' . $rf['nombre'] . '</option>';
+                            } else {
+                                echo '<option value="' . $rf['id_ctb_referencia'] . '">' . $rf['nombre'] . '</option>';
+                            }
+                        ?>
+                        <?php } ?>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="numDoc" class="small">REFERENCIA</label>
+                    <div class="input-group">
+                        <input type="text" name="referencia" id="referencia" value="<?php echo $ref; ?>" class="form-control form-control-sm" style="text-align: right;">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <input type="checkbox" id="checkboxId" onclick="definirReferenciaPago();" <?php echo $chek; ?>>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="form-row px-4  ">
                 <div class="form-group col-md-12">

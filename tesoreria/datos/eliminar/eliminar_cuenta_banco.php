@@ -2,29 +2,36 @@
 $_post = json_decode(file_get_contents('php://input'), true);
 $id = $_post['id'];
 include '../../../conexion.php';
-$pdo = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 // consulto si el id de la cuenta fue utilizado en seg_fin_chequera_cont
+$response['status'] = 'error';
 try {
-    $query = $pdo->prepare("SELECT id_tes_cuenta FROM tes_detalle_pago WHERE id_tes_cuenta = ?");
+    $pdo = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $query = "SELECT `id_tes_cuenta` FROM `tes_detalle_pago` WHERE `id_tes_cuenta` = ?";
+    $query = $pdo->prepare($query);
     $query->bindParam(1, $id);
     $query->execute();
     // consulto cuantos registros genera la sentencia
     if ($query->rowCount() > 0) {
-        $response[] = array("value" => 'no');
+        $response['msg'] = 'La cuenta no se puede eliminar porque tiene registros asociados';
     } else {
         try {
-            $query = $pdo->prepare("DELETE FROM tes_cuentass WHERE id_tes_cuenta = ? ");
-            $query->bindParam(1, $id);
-            $query->execute();
-            $response[] = array("value" => 'ok');
-            $cmd = null;
+            $sql = "DELETE FROM `tes_cuentas` WHERE `id_tes_cuenta` = ?";
+            $sql = $pdo->prepare($sql);
+            $sql->bindParam(1, $id);
+            $sql->execute();
+            if ($sql->rowCount() > 0) {
+                $response['status'] = 'ok';
+            } else {
+                $response['msg'] = $pdo->errorInfo()[2];
+            }
+            $pdo = null;
         } catch (PDOException $e) {
-            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+            $response['msg'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
     }
 } catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    $response['msg'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 
 echo json_encode($response);

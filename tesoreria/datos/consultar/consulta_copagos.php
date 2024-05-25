@@ -63,7 +63,7 @@ WHERE fec_factura <> IFNULL(DATE_FORMAT(fec_anulacion,'%Y-%m-%d'),'1900-01-01') 
     echo $e->getMessage();
 }
 // Consulto el valor que el facturador ya tiene registrado en esa fecha
-$sql = "SELECT SUM(`valor_fac`) as valor FROM `seg_tes_causa_arqueo` WHERE (`id_tercero` =$tercero AND `fecha` ='$fecha');";
+$sql = "SELECT SUM(`valor_fac`) as valor FROM `tes_causa_arqueo` WHERE (`id_tercero` =$tercero AND `fecha` ='$fecha');";
 $res = $cmd->query($sql);
 $registro = $res->fetch();
 

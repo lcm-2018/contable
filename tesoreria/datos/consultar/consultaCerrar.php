@@ -2,63 +2,49 @@
 
 include '../../../conexion.php';
 $data = file_get_contents("php://input");
-$estado = 1;
-// Realizo conexion con la base de datos
+// Incio la transaccion
+$response['status'] = 'error';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-} catch (Exception $e) {
-    die("No se pudo conectar: " . $e->getMessage());
-}
-// Incio la transaccion
-try {
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $cmd->beginTransaction();
-
-    $sql = "SELECT sum(debito) as debito, sum(credito) as credito FROM ctb_libaux WHERE id_ctb_doc=$data GROUP BY id_ctb_doc";
+    $sql = "SELECT 
+                SUM(`debito`) as `debito`, SUM(`credito`) as `credito` 
+            FROM 
+                `ctb_libaux` 
+            WHERE (`id_ctb_doc`= $data)";
     $rs = $cmd->query($sql);
     $sumaMov = $rs->fetch();
     $dif = $sumaMov['debito'] - $sumaMov['credito'];
 
     $sql = "SELECT
-    `cuenta`
-    , `id_ctb_doc`
-    FROM
-    `ctb_libaux`
-    WHERE (`id_ctb_doc` =$data);";
+                `id_cuenta`, `id_ctb_doc`
+            FROM
+                `ctb_libaux`
+            WHERE (`id_ctb_doc` = $data)";
     $rs = $cmd->query($sql);
     $cuentas = $rs->fetchAll();
+    if ($sumaMov['debito'] == 0 || $sumaMov['credito'] == 0) {
+        $dif = 3;
+    }
     foreach ($cuentas as $rp) {
-        $cuenta = $rp['cuenta'];
-        if ($cuenta == null) {
+        if ($rp['id_cuenta'] == '') {
             $dif = 3;
+            break;
         }
     }
-    // Consulto el tipo_doc de la tabla ctb_doc
-    $sql = "SELECT tipo_doc FROM ctb_doc WHERE id_ctb_doc=$data LIMIT 1";
-    $rs = $cmd->query($sql);
-    $datos = $rs->fetch();
-    $tipo_doc = $datos['tipo_doc'];
-    if ($tipo_doc == 'CMCN' || $tipo_doc == 'CMMT') {
-        $estado = 5;
-    }
     if ($dif == 0) {
-        // update ctb_libaux set estado='C' where id_ctb_doc=$data;
-        $query = $cmd->prepare("UPDATE ctb_doc SET estado=$estado WHERE id_ctb_doc=?");
-        $query->bindParam(1, $data, PDO::PARAM_INT);
+        $estado = 2;
+        $query = "UPDATE `ctb_doc` SET `estado`= ? WHERE `id_ctb_doc`= ?";
+        $query = $cmd->prepare($query);
+        $query->bindParam(1, $estado, PDO::PARAM_INT);
+        $query->bindParam(2, $data, PDO::PARAM_INT);
         $query->execute();
-        // Actualizo el campo estado de la tabla pto_documento_detalles
-        $query = $cmd->prepare("UPDATE pto_documento_detalles SET estado=0 WHERE id_ctb_doc=?");
-        $query->bindParam(1, $data, PDO::PARAM_INT);
-        $query->execute();
-        $response[] = array("value" => "ok");
+        $response['status'] = 'ok';
     } else {
-        $response[] = array("value" => "no");
+        $response['msg'] = 'Error en el movimiento contable';
     }
-    $cmd->commit();
+    $cmd = null;
 } catch (Exception $e) {
-    $cmd->rollBack();
-    $response[] = array("value" => "no");
+    $response['msg'] = $e->getMessage();
 }
 echo json_encode($response);
-$cmd = null;

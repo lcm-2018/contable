@@ -20,18 +20,18 @@ try {
 
 try {
     $sql = "SELECT
-                `seg_tes_causa_arqueo`.`id_causa_arqueo`
+                `tes_causa_arqueo`.`id_causa_arqueo`
                 ,`ctb_doc`.`id_ctb_doc`
                 ,`ctb_doc`.`id_manu`
                 , `ctb_doc`.`fecha`
                 , `ctb_doc`.`id_tercero`
                 , `ctb_doc`.`detalle`
-                , SUM(`seg_tes_causa_arqueo`.`valor_arq`) as valor
+                , SUM(`tes_causa_arqueo`.`valor_arq`) as valor
             FROM
-                `seg_tes_causa_arqueo`
+                `tes_causa_arqueo`
                 INNER JOIN `ctb_doc` 
-                    ON (`seg_tes_causa_arqueo`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                    WHERE (`seg_tes_causa_arqueo`.`estado` =0) 
+                    ON (`tes_causa_arqueo`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    WHERE (`tes_causa_arqueo`.`estado` =0) 
             GROUP BY `ctb_doc`.`id_manu`;";
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();

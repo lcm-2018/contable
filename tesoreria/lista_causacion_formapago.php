@@ -7,8 +7,9 @@ if (!isset($_SESSION['user'])) {
 include_once '../conexion.php';
 include_once '../permisos.php';
 
-$id_doc = $_POST['id_doc'] ?? '';
-$id_cop = $_POST['id_cop'] ?? '';
+$id_doc = $_POST['id_doc'] ?? 0;
+$id_cop = $_POST['id_cop'] ?? 0;
+$id_fp = $_POST['id_fp'] ?? 0;
 $valor_pago = $_POST['valor'] ?? 0;
 $valor_descuento = 0;
 // Consulta tipo de presupuesto
@@ -126,64 +127,53 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
 
     <div class="shadow">
         <div class="card-header" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">LISTA DE CUENTAS BANCARIAS Y FORMA DE PAGO </h5>
+            <h5 style="color: white;">LISTA DE CUENTAS BANCARIAS Y FORMA DE PAGO</h5>
         </div>
-        <div class="pb-3"></div>
-        <div class="px-5">
+        <div class="px-4 mt-3">
             <form id="formAddFormaPago">
-                <div class="row">
-                    <div class="col-2">
-                        <div class="col"><label for="numDoc" class="small">BANCO:</label></div>
+                <input type="hidden" name="id_doc" id="id_doc" value="<?php echo $id_doc; ?>">
+                <input type="hidden" name="id_pto_cop" id="id_pto_cop" value="<?php echo $id_cop; ?>">
+                <div class="form-row">
+                    <div class="col-md-3 form-group">
+                        <label for="banco" class="small">BANCO</label>
+                        <select name="banco" id="banco" class="form-control form-control-sm" required onclick="mostrarCuentas(value);">
+                            <option value="0">--Seleccione--</option>
+                            <?php foreach ($bancos as $banco) : ?>
+                                <option value="<?php echo $banco['id_banco']; ?>"><?php echo $banco['nom_banco']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
-                    <div class="col-4">
-                        <div class="col"><label for="numDoc" class="small">CUENTA:</label></div>
-                    </div>
-                    <div class="col-2">
-                        <div class="col"><label for="numDoc" class="small">FORMA DE PAGO:</label></div>
-                    </div>
-                    <div class="col-2">
-                        <div class="col"><label for="numDoc" class="small">DOCUMENTO:</label></div>
-                    </div>
-                    <div class="col-2">
-                        <div class="col"><label for="numDoc" class="small">VALOR:</label></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-2">
-                        <div class="col">
-                            <select name="banco" id="banco" class="form-control form-control-sm" required onclick="mostrarCuentas(value);">
-                                <option value="0">...Seleccione...</option>
-                                <?php foreach ($bancos as $banco) : ?>
-                                    <option value="<?php echo $banco['id_banco']; ?>"><?php echo $banco['nom_banco']; ?></option>
-                                <?php endforeach; ?>
-                                <input type="hidden" name="id_doc" id="id_doc" value="<?php echo $id_doc; ?>">
-                                <input type="hidden" name="id_pto_cop" id="id_pto_cop" value="<?php echo $id_cop; ?>">
+                    <div class="col-md-3">
+                        <label for="numDoc" class="small">CUENTA</label>
+                        <div id="divBanco">
+                            <select name="cuenta" id="cuenta" class="form-control form-control-sm">
+                                <option value="0">--Seleccione--</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="col-4">
-                        <div class="col" id="divBanco"><input type="text" name="cuenta" id="cuenta" class="form-control form-control-sm" value="" required></div>
-                    </div>
-                    <div class="col-2">
-                        <div class="col" id="divForma">
+                    <div class="col-md-2">
+                        <label for="numDoc" class="small">FORMA DE PAGO</label>
+                        <div id="divForma">
                             <select name="forma_pago_det" id="forma_pago_det" class="form-control form-control-sm" required onchange="buscarCheque(value);">
-                                <option value="0">...Seleccione...</option>
+                                <option value="0">--Seleccione--</option>
                                 <?php foreach ($formas_pago as $forma_pago) : ?>
                                     <option value="<?php echo $forma_pago['id_forma_pago']; ?>"><?php echo $forma_pago['forma_pago']; ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
-                    <div class="col-2">
-                        <div class="col" id="divCosto"><input type="text" name="documento" id="documento" class="form-control form-control-sm" value="" required></div>
+                    <div class="col-md-2">
+                        <label for="numDoc" class="small">DOCUMENTO</label>
+                        <div id="divCosto"><input type="text" name="documento" id="documento" class="form-control form-control-sm" value="" required></div>
                     </div>
-                    <div class="col-2">
+                    <div class="col-md-2">
+                        <label for="numDoc" class="small">VALOR</label>
                         <div class="btn-group"><input type="text" name="valor_pag" id="valor_pag" class="form-control form-control-sm" max="<?php echo $valor_pagar; ?>" value="<?php echo $valor_pagar; ?>" required style="text-align: right;" onkeyup="valorMiles(id)" ondblclick="valorMovTeroreria('');">
-                            <button type="submit" class="btn btn-primary btn-sm" id="registrarMvtoDetalle">+</button>
+                            <button type="submit" class="btn btn-primary btn-sm" id="">+</button>
                         </div>
                     </div>
                 </div>
-
-            </form> <br>
+            </form>
             <table id="tableCausacionPagos" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 100%;">
                 <thead>
                     <tr>
@@ -201,7 +191,7 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                         foreach ($rubros as $ce) {
                             //$id_doc = $ce['id_ctb_doc'];
                             $id = $ce['id_detalle_pago'];
-                            if ((intval($permisos['editar'])) === 1) {
+                            if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
                                 $editar = '<a value="' . $id_doc . '" onclick="eliminarFormaPago(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
@@ -216,8 +206,8 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                             $valor = number_format($ce['valor'], 2, '.', ',');
                         ?>
                             <tr id="<?php echo $id; ?>">
-                                <td><?php echo $ce['nom_banco']; ?></td>
-                                <td><?php echo $ce['nombre']; ?></td>
+                                <td class="text-left"><?php echo $ce['nom_banco']; ?></td>
+                                <td class="text-left"><?php echo $ce['nombre']; ?></td>
                                 <td> <?php echo $ce['forma_pago']; ?></td>
                                 <td> <?php echo $ce['documento']; ?></td>
                                 <td> <?php echo number_format($ce['valor'], 2, '.', ','); ?></td>
@@ -230,12 +220,10 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                     </div>
                 </tbody>
             </table>
-            <div class="text-right pt-3">
-                <a type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Cerrar</a>
-
-
+            <div class="text-right py-3">
+                <a type="button" class="btn btn-success btn-sm" onclick="GuardaFormaPago()">Guardar</a>
+                <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
             </div>
-
         </div>
 
 
