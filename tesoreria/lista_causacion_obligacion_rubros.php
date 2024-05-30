@@ -6,34 +6,54 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../permisos.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
-$id_pto_doc = $_POST['id_cop'] ?? '';
+
+$id_cop = $_POST['id_cop'] ?? '';
 $id_pag_doc = $_POST['id_doc'] ?? '';
 // Consulta tipo de presupuesto
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-    `pto_documento_detalles`.`id_detalle`
-    ,`pto_documento_detalles`.`id_documento`
-    , `pto_documento_detalles`.`rubro`
-    , `pto_documento_detalles`.`id_tercero_api`
-    , `pto_cargue`.`nom_rubro`
-    , `pto_documento_detalles`.`valor`
-    , `pto_documento_detalles`.`id_ctb_doc`
-    , `pto_cargue`.`vigencia`
-    FROM
-    `pto_documento_detalles`
-    INNER JOIN `pto_cargue` 
-        ON (`pto_documento_detalles`.`rubro` = `pto_cargue`.`cod_pptal`)
-    WHERE (`pto_documento_detalles`.`id_ctb_doc` ='$id_pto_doc'
-    AND `pto_documento_detalles`.`tipo_mov` = 'COP'
-    AND `pto_cargue`.`vigencia` ='$_SESSION[vigencia]');";
+    $sql = "SELECT 
+                `t1`.`id_tercero_api`
+                , `t1`.`id_pto_crp_det`
+                , `t1`.`id_pto_cop_det`
+                , `t1`.`rubro`
+                , `t1`.`nom_rubro`
+                , `t1`.`valor`
+                , IFNULL(`t1`.`val_cop`,0) AS `val_cop`
+                , IFNULL(`t2`.`val_pag`,0) AS `val_pag`
+            FROM 	   
+                (SELECT
+                    `pto_cop_detalle`.`id_tercero_api`
+                    , `pto_cop_detalle`.`id_pto_cop_det`
+                    , `pto_cop_detalle`.`id_pto_crp_det`
+                    , IFNULL(`pto_cop_detalle`.`valor`,0) - IFNULL(`pto_cop_detalle`.`valor_liberado`,0) AS `val_cop`
+                    , `pto_cargue`.`cod_pptal` AS `rubro`
+                    , `pto_cargue`.`nom_rubro`
+                    , IFNULL(`pto_crp_detalle`.`valor`,0) - IFNULL(`pto_crp_detalle`.`valor_liberado`,0) AS `valor`
+                FROM
+                    `pto_cop_detalle`
+                    INNER JOIN `pto_crp_detalle` 
+                        ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                    INNER JOIN `pto_cdp_detalle` 
+                        ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                    INNER JOIN `pto_cargue` 
+                        ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                WHERE `id_ctb_doc` = $id_cop
+                GROUP BY `pto_cop_detalle`.`id_pto_crp_det`) AS `t1`
+                        LEFT JOIN
+                            (SELECT
+                                `pto_cop_detalle`.`id_pto_crp_det`
+                                , SUM(IFNULL(`pto_pag_detalle`.`valor`,0) - IFNULL(`pto_pag_detalle`.`valor_liberado`,0)) AS `val_pag`
+                            FROM
+                                `pto_pag_detalle`
+                                INNER JOIN `pto_cop_detalle` 
+                                    ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                            GROUP BY `pto_cop_detalle`.`id_pto_crp_det`) AS `t2`
+                        ON (`t1`.`id_pto_crp_det` = `t2`.`id_pto_crp_det`)";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll();
+    $tercero = !empty($rubros) ? $rubros[0]['id_tercero_api'] : 0;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -73,18 +93,21 @@ try {
 
     <div class="shadow">
         <div class="card-header" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">LISTA DE REGISTROS PRESUPUESTALES PARA PAGO <?php echo '' ?></h5>
+            <h5 style="color: white;">LISTA DE REGISTROS PRESUPUESTALES PARA PAGO</h5>
         </div>
         <div class="pb-3"></div>
-        <input type="hidden" name="id_pto_rp" id="id_pto_rp" value="<?php echo $id_pto_doc; ?>">
+        <input type="hidden" name="id_pto_rp" id="id_pto_rp" value="<?php echo $id_cop; ?>">
         <form id="rubrosPagar">
+            <input type="hidden" name="id_pag_doc" value="<?php echo $id_pag_doc; ?>">
+            <input type="hidden" name="id_tercero" value="<?php echo $tercero; ?>">
             <div class="px-3">
                 <table id="tableContrtacionRpRubros" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 100%;">
                     <thead>
                         <tr>
                             <th style="width: 45%;">Rubro</th>
-                            <th style="width: 20%;">Valor Rp</th>
-                            <th style="width: 20%;">Valor Cxp</th>
+                            <th style="width: 15%;">Valor Rp</th>
+                            <th style="width: 15%;">Valor Causado</th>
+                            <th style="width: 15%;">Valor Cxp</th>
                             <th style="width: 15%;">Acciones</th>
                         </tr>
                     </thead>
@@ -92,24 +115,13 @@ try {
 
                         <?php
                         foreach ($rubros as $ce) {
-                            $id_doc = $ce['id_ctb_doc'];
-                            $id_pto_mvto = $ce['id_pto_mvto'];
-                            // Consultar el valor del registro COP OBLIGADO de la tabla pto_documento_detalles
-                            $sql = "SELECT sum(valor) as saldo FROM pto_documento_detalles WHERE rubro = '$ce[rubro]' AND tipo_mov = 'PAG' AND id_ctb_cop = $id_doc";
-                            $rs = $cmd->query($sql);
-                            $saldo = $rs->fetch();
-                            $pagado = $saldo['saldo'];
-                            if ($ce['id_tercero_api' != '']) {
-                                $tercero = "GROUP BY id_tercero_api";
-                            } else {
-                                $tercero = "";
-                            }
-                            $sq3 = "SELECT sum(valor) as comprom FROM pto_documento_detalles WHERE rubro = '$ce[rubro]' AND tipo_mov = 'COP' AND id_ctb_doc = $id_doc " . $tercero;
-                            $rs3 = $cmd->query($sq3);
-                            $com = $rs3->fetch();
-                            $obligado = $com['comprom'];
+                            $editar = $detalles = null;
+                            $id_doc = 0;
+                            $id_det_cop = $ce['id_pto_cop_det'];
+                            $pagado = $ce['val_pag'];
+                            $obligado = $ce['valor'];
                             $valor =  $obligado - $pagado;
-                            if ((intval($permisos['editar'])) === 1) {
+                            if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
                                 $editar = '<a value="' . $id_doc . '"  class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-print fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
@@ -117,17 +129,19 @@ try {
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <a value="' . $id_doc . '" class="dropdown-item sombra carga" href="#">Historial</a>
                             </div>';
+                            }
+                            if (PermisosUsuario($permisos, 5601, 4) || $id_rol == 1) {
                                 $borrar = '<a value="' . $id_doc . '" onclick="eliminarImputacionPag(' . $id_doc . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-                            } else {
-                                $editar = null;
-                                $detalles = null;
                             }
                             $valor_obl = number_format($obligado, 2, '.', ',');
                         ?>
                             <tr>
-                                <td class="text-left"><?php echo $ce['rubro'] . ' - ' . $ce['nom_rubro'] . ' ' . $obligado . ' ' . $pagado; ?></td>
-                                <td class="text-right"><?php echo number_format($ce['valor'], 2, '.', ','); ?></td>
-                                <td class="text-right"><input type="text" name="rub_<?php echo $id_pto_mvto; ?>" id="rub_<?php echo  $id_pto_mvto; ?>" class="form-control form-control-sm" value="<?php echo $ce['valor']; ?>" style="text-align: right;" required onkeyup="valorMiles(id)" max="<?php echo $valor; ?>" onchange="validarValorMaximo(id)"></td>
+                                <td class="text-left"><?php echo $ce['rubro'] . ' - ' . $ce['nom_rubro']; ?></td>
+                                <td class="text-right"><?php echo '$ ' . number_format($ce['valor'], 2, '.', ','); ?></td>
+                                <td class="text-right"><?php echo '$ ' . number_format($ce['val_cop'], 2, '.', ','); ?></td>
+                                <td class="text-right">
+                                    <input type="text" name="detalle[<?php echo $id_det_cop; ?>]" id="detalle_<?php echo $id_det_cop; ?>" class="form-control form-control-sm detalle-pag" value="<?php echo $ce['val_cop']; ?>" style="text-align: right;" required onkeyup="valorMiles(id)" max="<?php echo $ce['val_cop']; ?>">
+                                </td>
                                 <td class="text-center"> <?php echo $editar  .  $acciones; ?></td>
                             </tr>
                         <?php
@@ -136,17 +150,16 @@ try {
 
                     </tbody>
                 </table>
-            </div>
-            <div class="text-right pt-3">
-                <a type="button" class="btn btn-primary btn-sm" onclick="rubrosaPagar(<?php echo $id_doc; ?>);"> Aceptar</a>
-                <a type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Cancelar</a>
-
-
+                <div class="text-right py-3">
+                    <a type="button" class="btn btn-primary btn-sm" onclick="rubrosaPagar(<?php echo $id_doc; ?>);"> Aceptar</a>
+                    <a type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Cancelar</a>
+                </div>
             </div>
         </form>
     </div>
 
 
 </div>
+
 <?php
 $cmd = null;

@@ -465,6 +465,43 @@ let cargaRubrosPago = function (dato) {
 
 // Guardar los rubros y el valor de la afectación presupuestal asociada a la cuenta por pagar
 let rubrosaPagar = function (doc) {
+	var max = 0;
+	var bandera = true;
+	var valor;
+	$('.is-invalid').removeClass('is-invalid');
+	//recorrer las input con clases detalle-pag 
+	$.each($('.detalle-pag'), function () {
+		max = $(this).attr('max');
+		//quitar las comas y convertir a numero
+		valor = $(this).val().replace(/\,/g, "", "");
+		if (Number(valor) <= 0 || Number(valor) > max) {
+			$(this).addClass('is-invalid');
+			$(this).focus();
+			mjeError('El valor no puede ser menor a cero o mayor al saldo', '');
+			bandera = false;
+			return false;
+		}
+	});
+	if (bandera) {
+		var data = $('#rubrosPagar').serialize();
+		$.ajax({
+			type: 'POST',
+			url: 'datos/registrar/registrar_mvto_pago.php',
+			data: data,
+			dataType: 'json',
+			success: function (r) {
+				if (r.status == 'ok') {
+					valor = r.valor;
+					$('#valor').val(valor.toLocaleString('es-MX'));
+					$('#divModalForms').modal('hide');
+					mje('Proceso realizado correctamente', 'Exito');
+				} else {
+					mjeError('Error: ' + r.msg);
+				}
+			}
+		});
+	}
+	return false;
 	let formDatos = new FormData(rubrosPagar);
 	let id_cop = 0;
 	let datos = {};
@@ -1074,6 +1111,8 @@ var GuardaFormaPago = function () {
 			data: datos,
 			success: function (r) {
 				if (r.status == 'ok') {
+					let value = r.valor;
+					$('#forma_pago').val(value.toLocaleString('es-MX'));
 					mje('Proceso realizado correctamente');
 					cargaFormaPago(0, 0);
 				} else {
@@ -1165,11 +1204,12 @@ const eliminarFormaPago = (dato) => {
 const generaMovimientoPag = () => {
 	let id = id_ctb_doc.value;
 	let id_cop = id_cop_pag.value;
+	let tipo = $('#tipodato').val();
 	// verificar si los tres valores son iguales
 	let id_crp = $('#id_crp').length ? $('#id_crp').val() : 0;
 	fetch("datos/registrar/registrar_mvto_libaux_auto_pag.php", {
 		method: "POST",
-		body: JSON.stringify({ id: id, id_crp: id_crp, id_cop: id_cop }),
+		body: JSON.stringify({ id: id, id_crp: id_crp, id_cop: id_cop, tipo: tipo }),
 	})
 		.then((response) => response.json())
 		.then((response) => {
@@ -1509,7 +1549,57 @@ const changeEstadoAnulacionCtb = async () => {
 };
 // ========================================== Gestión de chequeras ======================================================
 // Enviar datos para anulacion
-const guardarChequera = async () => {
+//Guardar datos de chequera
+const GuardarChequera = () => {
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#banco').val() == '0') {
+		$('#banco').addClass('is-invalid');
+		$('#banco').focus();
+		mjeError('Debe seleccionar un banco');
+	} else if ($('#cuentas').val() == '0') {
+		$('#cuentas').addClass('is-invalid');
+		$('#cuentas').focus();
+		mjeError('Debe seleccionar una cuenta');
+	} else if ($('#num_chequera').val() == '') {
+		$('#num_chequera').addClass('is-invalid');
+		$('#num_chequera').focus();
+		mjeError('Debe digitar un número de chequera');
+	} else if ($('#fecha').val() == '') {
+		$('#fecha').addClass('is-invalid');
+		$('#fecha').focus();
+		mjeError('Debe digitar una fecha');
+	} else if (Number($('#inicial').val()) <= 0) {
+		$('#inicial').addClass('is-invalid');
+		$('#inicial').focus();
+		mjeError('El valor inicial debe ser mayor a cero');
+	} else if (Number($('#maximo').val()) <= 0) {
+		$('#maximo').addClass('is-invalid');
+		$('#maximo').focus();
+		mjeError('El valor máximo debe ser mayor a cero');
+	} else if (Number($('#inicial').val()) >= Number($('#maximo').val())) {
+		$('#inicial').addClass('is-invalid');
+		$('#inicial').focus();
+		mjeError('El valor inicial debe ser mayor al valor máximo');
+	} else {
+		var data = $('#formNuevaChequera').serialize();
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: "datos/registrar/registrar_chequera_nueva.php",
+			data: data,
+			success: function (r) {
+				if (r.status == 'ok') {
+					$('#divModalForms').modal('hide');
+					$('#tableFinChequeras').DataTable().ajax.reload();
+					mje('Chequera guardada con  éxito...');
+				} else {
+					mjeError('Error: ' + r.msg);
+				}
+			}
+		});
+	}
+};
+const SSguardarChequera = async () => {
 	let formEnvio = new FormData(formNuevaChequera);
 	for (var pair of formEnvio.entries()) {
 		console.log(pair[0] + ", " + pair[1]);
@@ -1558,7 +1648,7 @@ const editarDatosChequera = (id) => {
 	});
 };
 // Eliminar chequera
-const eliminarChequera = (comp) => {
+const eliminarChequera = (id) => {
 	Swal.fire({
 		title: "¿Está seguro de eliminar el registro?",
 		text: "No podrá revertir esta acción",
@@ -1572,17 +1662,16 @@ const eliminarChequera = (comp) => {
 		if (result.isConfirmed) {
 			fetch("datos/eliminar/eliminar_chequera.php", {
 				method: "POST",
-				body: JSON.stringify({ id: comp }),
+				body: JSON.stringify({ id: id }),
 			})
 				.then((response) => response.json())
 				.then((response) => {
 					console.log(response);
-					if (response[0].value == "ok") {
-						let tabla = "tableFinChequeras";
-						reloadtable(tabla);
+					if (response.status == "ok") {
+						$('#tableFinChequeras').DataTable().ajax.reload();
 						mje("Registro eliminado");
 					} else {
-						mjeError("Error al eliminar");
+						mjeError("Error:" + response.msg);
 					}
 				})
 				.catch((error) => {

@@ -9,9 +9,9 @@ try {
                 MAX(seg_fin_chequera_cont.contador) as valor
             FROM
                 seg_fin_chequera_cont
-                INNER JOIN seg_fin_chequeras 
-                    ON (seg_fin_chequera_cont.id_chequera = seg_fin_chequeras.id_chequera)
-            WHERE seg_fin_chequeras.id_cuenta ={$_post['id']};";
+                INNER JOIN fin_chequeras 
+                    ON (seg_fin_chequera_cont.id_chequera = fin_chequeras.id_chequera)
+            WHERE fin_chequeras.id_cuenta ={$_post['id']};";
     $rs = $cmd->query($sql);
     $cheques = $rs->fetch();
     $cheque = $cheques['valor'] + 1;

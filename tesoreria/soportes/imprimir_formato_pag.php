@@ -161,7 +161,6 @@ try {
 
 // Consulta para mostrar la forma de pago
 try {
-    /*
     $sql = "SELECT
                 `tes_detalle_pago`.`id_detalle_pago`
                 ,`tb_bancos`.`nom_banco`
@@ -178,10 +177,9 @@ try {
                     ON (`tes_detalle_pago`.`id_tes_cuenta` = `tes_cuentas`.`id_tes_cuenta`)
                 INNER JOIN `tb_bancos` 
                     ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
-            WHERE (`tes_detalle_pago`.`id_ctb_doc` = $id_doc);";
+            WHERE (`tes_detalle_pago`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
-    $formapago = $rs->fetchAll();*/
-    $formapago = [];
+    $formapago = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -195,7 +193,7 @@ try {
 }
 // si tipo de documento es CICP es un recibo de caja
 
-if ($documento['id_tipo_doc'] == 'CICP') {
+if ($documento['id_tipo_doc'] == '9') {
     try {
         $sql = "SELECT
                     `tes_causa_arqueo`.`id_causa_arqueo`
@@ -304,7 +302,7 @@ $terceros = isset($terceros[0]) ? $terceros : [];
             </tr>
             <tr>
                 <td class='text-left' style="width:18%">CC/NIT:</td>
-                <td class='text-left'><?php echo $num_doc; ?></td>
+                <td class='text-left'><?php echo number_format($num_doc, 0, '', '.'); ?></td>
             </tr>
             <tr>
                 <td class='text-left'>OBJETO:</td>
@@ -445,7 +443,7 @@ $terceros = isset($terceros[0]) ? $terceros : [];
             ?>
         <?php }
         ?>
-        <?php if ($documento['id_tipo_doc'] == 'CICP') { ?>
+        <?php if ($documento['id_tipo_doc'] == '9') { ?>
             <div class="row">
                 <div class="col-12">
                     <div style="text-align: left">

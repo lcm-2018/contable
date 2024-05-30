@@ -358,7 +358,16 @@ try {
                     `id_empleado`, CONCAT(`anio`, `mes`) AS `corte`
                 FROM
                     `nom_liq_bsp`
-                WHERE `id_bonificaciones` IN (SELECT MAX(`id_bonificaciones`) AS `id_bsp` FROM `nom_liq_bsp` GROUP BY `id_empleado`)) AS `t1`
+                WHERE `id_bonificaciones` 
+                IN (
+                    SELECT 
+                        MAX(`id_bonificaciones`) AS `id_bsp` 
+                        FROM `nom_liq_bsp`
+                            INNER JOIN `nom_nominas`
+                                ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                        WHERE `nom_nominas`.`tipo` <> 'RA'
+                        GROUP BY `id_empleado`
+                )) AS `t1`
             INNER JOIN 
                 (SELECT
                     `id_empleado`, `cant_dias`, CONCAT(`anio`, `mes`) AS `compara`
