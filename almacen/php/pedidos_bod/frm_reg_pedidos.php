@@ -144,4 +144,4 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
     </div>
 </div>
 
-<script type="text/javascript" src="../../js/pedidos/pedidos_reg.js?v=<?php echo date('YmdHis') ?>"></script>
+<script type="text/javascript" src="../../js/pedidos_bod/pedidos_bod_reg.js?v=<?php echo date('YmdHis') ?>"></script>

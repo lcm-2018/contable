@@ -854,7 +854,7 @@ $rol = $_SESSION['rol'];
                             <div class="collapse" id="pagesCollapsePedidos" aria-labelledby="headingOne">
                                 <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
                                 <?php if (PermisosUsuario($permisos, 5005, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos/index.php">
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos_alm/index.php">
                                             <div class="form-row">
                                                 <div class="div-icono">
                                                     <i class="fa fa-database fa-sm" style="color: #E74C3C;"></i>
@@ -866,7 +866,7 @@ $rol = $_SESSION['rol'];
                                         </a>
                                     <?php } ?>
                                     <?php if (PermisosUsuario($permisos, 5003, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos/index.php">
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos_bod/index.php">
                                             <div class="form-row">
                                                 <div class="div-icono">
                                                     <i class="fa fa-th-large fa-sm" style="color: #E74C3C;"></i>
@@ -878,7 +878,7 @@ $rol = $_SESSION['rol'];
                                         </a>
                                     <?php } ?>
                                     <?php if (PermisosUsuario($permisos, 5004, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos/index.php">
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos_dep/index.php">
                                             <div class="form-row">
                                                 <div class="div-icono">
                                                     <i class="fa fa-share-square-o fa-sm" style="color: #E74C3C;"></i>

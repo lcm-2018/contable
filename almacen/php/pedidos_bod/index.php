@@ -145,7 +145,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
         <?php include '../../../modales.php' ?>
     </div>
     <?php include '../../../scripts.php' ?>
-    <script type="text/javascript" src="../../js/pedidos/pedidos.js?v=<?php echo date('YmdHis') ?>"></script>
+    <script type="text/javascript" src="../../js/pedidos_bod/pedidos_bod.js?v=<?php echo date('YmdHis') ?>"></script>
 </body>
 
 </html>
