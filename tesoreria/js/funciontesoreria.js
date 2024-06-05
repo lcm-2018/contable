@@ -218,10 +218,74 @@ var tabla;
 			}],
 		});
 		$("#tableCuentasBanco").wrap('<div class="overflow" />');
+
+		$("#tableConcBancaria").DataTable({
+			dom: "<'row'<'col-md-5'l><'col-md-2'B><'col-md-5'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+			buttons: [
+				{
+					text: '<div class="input-group input-group-sm border border-warning">' +
+						'<div class="input-group-prepend">' +
+						'<label class="input-group-text bg-warning text-light" for="slcMesConcBanc">MES</label>' +
+						'</div>' +
+						'<select class="custom-select" id="slcMesConcBanc" onchange="recargarConciliacion()">' +
+						'<option value="00">--Seleccionar--</option>' +
+						'<option value="01">ENERO</option>' +
+						'<option value="02">FEBRERO</option>' +
+						'<option value="03">MARZO</option>' +
+						'<option value="04">ABRIL</option>' +
+						'<option value="05">MAYO</option>' +
+						'<option value="06">JUNIO</option>' +
+						'<option value="07">JULIO</option>' +
+						'<option value="08">AGOSTO</option>' +
+						'<option value="09">SEPTIEMBRE</option>' +
+						'<option value="10">OCTUBRE</option>' +
+						'<option value="11">NOVIEMBRE</option>' +
+						'<option value="12">DICIEMBRE</option>' +
+						'</select>' +
+						'</div>',
+					action: function (e, dt, node, config) {
+					},
+				},
+			],
+			language: setIdioma,
+			ajax: {
+				url: "datos/listar/cuentas_conciliar.php",
+				data: function (d) {
+					d.mes = $("#slcMesConcBanc").length ? $("#slcMesConcBanc").val() : '00';
+				},
+				type: "POST",
+				dataType: "json",
+			},
+			columns: [
+				{ data: "banco" },
+				{ data: "tipo" },
+				{ data: "nombre" },
+				{ data: "numero" },
+				{ data: "saldo" },
+				{ data: "estado" },
+				{ data: "botones" }
+			],
+			order: [[0, "desc"]],
+			"pageLength": 10,
+			columnDefs: [{
+				class: 'text-wrap',
+				targets: [2]
+			}],
+			processing: true,
+		});
+		$("#tableConcBancaria").wrap('<div class="overflow" />');
+		if ($("#slcMesConcBanc").length) {
+			$(".dt-button").addClass("p-0 border-0");
+			$(".dt-button").attr('disabled', true)
+		}
 		//Fin dataTable
 	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
+//Recargar consiliación bancaria
+function recargarConciliacion() {
+	$('#tableConcBancaria').DataTable().ajax.reload();
+};
 // Recargar a la tabla de documento contable  por acciones en el select
 function cambiaListadoTesoreria(dato) {
 	$(

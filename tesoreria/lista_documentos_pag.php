@@ -200,7 +200,6 @@ $ver = 'readonly';
 <html lang="es">
 
 <?php include '../head.php'; ?>
-
 <body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ?  'sb-sidenav-toggled' : '' ?>">
     <?php include '../navsuperior.php' ?>
     <div id="layoutSidenav">
