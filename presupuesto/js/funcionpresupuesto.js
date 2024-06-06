@@ -62,7 +62,7 @@
     $('#areaReporte').on('click', '#btnExcelEntrada', function () {
         let tableHtml = $('#areaImprimir').html();
         let encodedTable = btoa(unescape(encodeURIComponent(tableHtml)));
-        $('<form action="' + window.urlin + '/almacen/informes/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encodedTable + '" /></form>').appendTo('body').submit();
+        $('<form action="' + window.urlin + '/financiero/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encodedTable + '" /></form>').appendTo('body').submit();
     });
     // Valido que el numerico con separador de miles
     $("#divModalForms").on("keyup", "#valorAprob", function () {
@@ -2749,17 +2749,16 @@ const cargarReportePresupuesto = (id) => {
 
 // Funcion para generar formato de Modificaciones
 const generarInforme = (boton) => {
+    var data;
     let id = boton.value;
-    let fecha_corte = fecha.length ? fecha.value : '';
-    let t_ppto = document.getElementById('tipo_pto');
-    if (t_ppto && t_ppto.length > 0) {
-        var tipo = t_ppto.value;
-        fecha_corte = [tipo, fecha_corte]
-    }
+    let fecha_corte = $('#fecha').length ? $('#fecha').val() : '';
     let archivo = '';
     const areaImprimir = document.getElementById("areaImprimir");
     if (id == 1) {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_gas_xls.php";
+        let mes = $("#mes").length ? $("#mes").is(":checked") : false;
+        mes = mes ? 1 : 0;
+        data = { fecha_corte: fecha_corte, mes: mes };
     }
     if (id == 2) {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_ing_xls.php";
@@ -2769,6 +2768,9 @@ const generarInforme = (boton) => {
     }
     if (id == 4) {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_trimestral.php";
+        let tipo_ppto = $('#tipo_pto').val();
+        let informe = $('#informe').val();
+        data = { fecha_corte: fecha_corte, tipo_ppto: tipo_ppto, informe: informe };
     }
     if (id == 5) {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_gas_xls_consulta.php";
@@ -2779,20 +2781,18 @@ const generarInforme = (boton) => {
     boton.disabled = true;
     var span = boton.querySelector("span")
     span.classList.add("spinner-border", "spinner-border-sm");
-    fetch(archivo, {
-        method: "POST",
-        body: fecha_corte,
-    })
-        .then((response) => response.text())
-        .then((response) => {
+    $.ajax({
+        url: archivo,
+        type: "POST",
+        data: data,
+        success: function (response) {
             boton.disabled = false;
             span.classList.remove("spinner-border", "spinner-border-sm")
             areaImprimir.innerHTML = response;
-        })
-        .catch((error) => {
-            console.log("Error:");
-        });
-    //redireccionar3(ruta);
+        }, error: function (error) {
+            console.log("Error:" + error);
+        }
+    });
 };
 // Funcion para generar libros presupuestales
 const generarInformeLibros = (boton) => {

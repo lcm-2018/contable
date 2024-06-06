@@ -5,9 +5,9 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
-$data = explode(',', file_get_contents("php://input"));
-$tipo_pto = $data['0'];
-$id_corte = $data['1'];
+$tipo_pto = isset($_POST['tipo_ppto']) ? $_POST['tipo_ppto'] : exit('Acceso no permitido');
+$id_corte = $_POST['fecha_corte'];
+$informe = $_POST['informe'];
 $fecha_ini = $vigencia . '-01-01';
 switch ($id_corte) {
     case 1:
@@ -41,9 +41,9 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 try {
     $sql = "SELECT
-                `nombre`
-                , `nit`
-                , `dig_ver`
+                `razon_social_ips` AS `nombre`
+                , `nit_ips` AS `nit`
+                , `dv` AS `dig_ver`
             FROM
                 `tb_datos_ips`";
     $res = $cmd->query($sql);
@@ -51,158 +51,157 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$sqlDelete = "DELETE FROM `tmp_ctb_libaux`";
-$deleteResult = $cmd->query($sqlDelete);
-// Cargo la informacion de la tabla tmp_ctb_libaux
-// Cargar la información del archivo SQL en la tabla tmp_ctb_libaux
-$sqlFilePath = "C:/Users/LCM01/Downloads/in2.sql"; // Ruta al archivo SQL
-//$sqlFilePath = "/home/admin/in2.sql"; // Ruta al archivo SQL
-$sqlContent = file_get_contents($sqlFilePath); // Leer el contenido del archivo
-
-if ($sqlContent !== false) {
-    // Ejecutar el contenido del archivo SQL como consulta
-    $sqlin = $cmd->exec($sqlContent);
-
-    if ($sqlin === false) {
-        echo "Error al cargar datos: " . implode(" ", $cmd->errorInfo());
-    }
-} else {
-    echo "Error al leer el archivo SQL.";
-}
-try {
-    $sql = "SELECT
-                `pto_homologa_ingresos`.`id_cgr`
-                , `pto_codigo_cgr`.`codigo` AS `codigo_cgr`
+if ($informe == 1) {
+    try {
+        $sql = "SELECT 
+                `pto_cargue`.`id_cargue`
+                , `pto_cargue`.`id_pto`
                 , `pto_cargue`.`cod_pptal`
                 , `pto_cargue`.`nom_rubro`
-                , `pto_cargue`.`tipo_dato`  
-                , SUM(`inicial`) AS `inicial`
-                , SUM(`adicion`) AS `adicion`
-                , SUM(`reduccion`) AS `reduccion` 
-            FROM
-                (SELECT
-                    `pto_cargue`.`cod_pptal`
-                    , `pto_cargue`.`nom_rubro`
-                    , CASE `pto_cargue`.`tipo_dato` WHEN 1 THEN 'D' WHEN 0 THEN 'M' END AS `tipo_dato`
-                    , `pto_cargue`.`valor_aprobado` AS `inicial`
-                    , IFNULL(`adicion`.`valor`,0) AS `adicion`
-                    , IFNULL(`reduccion`.`valor`,0) AS `reduccion`  
-                FROM
-                    `pto_cargue`
-                    LEFT JOIN (
-                        SELECT
-                            `pto_cargue`.`cod_pptal`
-                            , `pto_cargue`.`nom_rubro`    
-                            , SUM(`pto_documento_detalles`.`valor`) AS `valor`    
-                        FROM
-                            `pto_cargue`
-                            INNER JOIN `pto_documento_detalles` 
-                                ON (`pto_cargue`.`cod_pptal` = `pto_documento_detalles`.`rubro`)
-                            INNER JOIN `pto_documento` 
-                                ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-                        WHERE `pto_documento_detalles`.`tipo_mov` = 'ADI' AND `pto_documento`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' 
-                        GROUP BY `pto_cargue`.`cod_pptal`
-                    ) AS adicion 
-                        ON (`pto_cargue`.`cod_pptal` = `adicion`.`cod_pptal`)
-                    LEFT JOIN (
-                        SELECT
-                            `pto_cargue`.`cod_pptal`
-                            , `pto_cargue`.`nom_rubro`    
-                            , SUM(`pto_documento_detalles`.`valor`) AS `valor`    
-                        FROM
-                            `pto_cargue`
-                            INNER JOIN `pto_documento_detalles` ON (`pto_cargue`.`cod_pptal` = `pto_documento_detalles`.`rubro`)
-                            INNER JOIN `pto_documento` ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-                            INNER JOIN `pto_presupuestos` ON (`pto_documento`.`id_pto_presupuestos` = `pto_presupuestos`.`id_pto`)
-                        WHERE `pto_presupuestos`.`id_tipo` = 2 AND `pto_documento_detalles`.`tipo_mov` = 'RED' AND `pto_documento`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' 
-                        GROUP BY `pto_cargue`.`cod_pptal`
-                    ) AS `reduccion` 
-                        ON (`pto_cargue`.`cod_pptal` = `reduccion`.`cod_pptal`)
-                    LEFT JOIN (
-                        SELECT `cod_pptal`,`nom_rubro`,SUM(`valor`) AS `valor` FROM (	
-                            SELECT
-                                `pto_cargue`.`cod_pptal`
-                                , `pto_cargue`.`nom_rubro`    
-                                , `pto_documento_detalles`.`valor` AS `valor`    
-                            FROM
-                                `pto_cargue`
-                                INNER JOIN `pto_documento_detalles` ON (`pto_cargue`.`cod_pptal` = `pto_documento_detalles`.`rubro`)
-                                INNER JOIN `pto_documento` ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-                                INNER JOIN `pto_presupuestos` ON (`pto_documento`.`id_pto_presupuestos` = `pto_presupuestos`.`id_pto`)
-                            WHERE `pto_presupuestos`.`id_tipo` = 1 AND `pto_documento_detalles`.`tipo_mov` = 'RAD' AND date_format(`pto_documento`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte'
-                            UNION ALL
-                            SELECT
-                                `pto_cargue`.`cod_pptal`
-                                , `pto_cargue`.`nom_rubro`    
-                                , `tmp_ctb_libaux`.`valordeb` AS `valor`    
-                            FROM
-                                `pto_cargue`
-                                INNER JOIN `tmp_ctb_libaux` ON (`tmp_ctb_libaux`.`cuenta` = `pto_cargue`.`cod_pptal`)
-                            WHERE `tmp_ctb_libaux`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `tmp_ctb_libaux`.`tipo` = 'RAD'
-                        ) AS `rec` GROUP BY `cod_pptal`	 
-                    ) AS `reconocimiento` 
-                        ON (`pto_cargue`.`cod_pptal`=`reconocimiento`.`cod_pptal`)
-                    LEFT JOIN (
-                        SELECT `cod_pptal`,`nom_rubro`,SUM(`valor`) AS `valor` FROM (	
-                            SELECT
-                                `pto_cargue`.`cod_pptal`
-                                , `pto_cargue`.`nom_rubro`    
-                                , `pto_documento_detalles`.`valor` AS `valor`    
-                            FROM
-                                `pto_cargue`
-                                INNER JOIN `pto_documento_detalles` ON (`pto_cargue`.`cod_pptal` = `pto_documento_detalles`.`rubro`)
-                                INNER JOIN `pto_documento` ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-                                INNER JOIN `pto_presupuestos` ON (`pto_documento`.`id_pto_presupuestos` = `pto_presupuestos`.`id_pto`)
-                            WHERE `pto_presupuestos`.`id_tipo` = 1 AND `pto_documento_detalles`.`tipo_mov` = 'REC' AND `pto_documento`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte'
-                            UNION ALL
-                            SELECT
-                                `pto_cargue`.`cod_pptal`
-                                , `pto_cargue`.`nom_rubro`    
-                                , `tmp_ctb_libaux`.`valordeb` AS `valor`    
-                            FROM
-                                `pto_cargue`
-                                INNER JOIN `tmp_ctb_libaux` ON (`tmp_ctb_libaux`.`cuenta`=`pto_cargue`.`cod_pptal`)
-                            WHERE `tmp_ctb_libaux`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `tmp_ctb_libaux`.`tipo` = 'REC'
-                        ) AS `rec` GROUP BY `cod_pptal`	 
-                    ) AS `recaudo` 
-                        ON (`pto_cargue`.`cod_pptal` = `recaudo`.`cod_pptal`)                    
-                WHERE `vigencia` = '$vigencia') AS `ejecucion`  
-                LEFT JOIN `pto_cargue` 
-                    ON (`pto_cargue`.`cod_pptal` = `ejecucion`.`cod_pptal`) 
-                LEFT JOIN `pto_presupuestos` 
-                    ON (`pto_cargue`.`id_pto_presupuestos` = `pto_presupuestos`.`id_pto`) 
-                LEFT JOIN `pto_homologa_ingresos` 
-                    ON (`pto_homologa_ingresos`.`id_pto` = `pto_cargue`.`id_pto_cargue`) 
-                LEFT JOIN `pto_codigo_cgr` 
-                    ON (`pto_homologa_ingresos`.`id_cgr` = `pto_codigo_cgr`.`id_cod`) 
-            WHERE `pto_presupuestos`.`id_tipo` = 1 
-            GROUP BY   `pto_cargue`.`cod_pptal` , `pto_cargue`.`nom_rubro` , `pto_cargue`.`tipo_dato`
-            ORDER BY `pto_cargue`.`cod_pptal`";
-    //echo $sql;
-    $res = $cmd->query($sql);
-    $rubros = $res->fetchAll();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-$data = [];
-foreach ($rubros as $fila) {
-    $id = $fila['id_cgr'];
-    $ini = $fila['inicial'];
-    $def = $fila['inicial'] + $fila['adicion'] - $fila['reduccion'];
-    if (isset($data[$id])) {
-        $val_i = $data[$fila['id_cgr']]['inicial'];
-        $val_d = $data[$fila['id_cgr']]['definitivo'];
-        $val_ini = $val_i + $ini;
-        $val_def = $val_d + $def;
-    } else {
-        $val_ini = $ini;
-        $val_def = $def;
+                , `pto_cargue`.`tipo_dato`
+                , `pto_codigo_cgr`.`codigo` AS `codigo_cgr`
+                , `pto_codigo_cgr`.`id_cod` AS `id_cgr`
+                , `pto_cargue`.`valor_aprobado` AS `inicial`
+                , IFNULL(`adicion`.`valor`,0) AS `adicion` 
+                , IFNULL(`reduccion`.`valor`,0) AS `reduccion` 
+                , IFNULL(`credito`.`valor`,0) AS `credito` 
+                , IFNULL(`contracredito`.`valor`,0) AS `contracredito` 
+                , IFNULL(`comprometido`.`valor`,0) AS `val_comprometido` 
+                , IFNULL(`registrado`.`valor`,0) AS `val_registrado` 
+                , IFNULL(`causado`.`valor`,0) AS `val_causado` 
+                , IFNULL(`pagado`.`valor`,0) AS `val_pagado`
+            FROM `pto_cargue`
+                INNER JOIN `pto_homologa_gastos` 
+                    ON (`pto_homologa_gastos`.`id_cargue` = `pto_cargue`.`id_cargue`)
+                INNER JOIN `pto_codigo_cgr` 
+                    ON (`pto_homologa_gastos`.`id_cgr` = `pto_codigo_cgr`.`id_cod`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_mod_detalle`.`id_cargue`
+                        , SUM(`pto_mod_detalle`.`valor_deb`) AS `valor`
+                    FROM
+                        `pto_mod_detalle`
+                        INNER JOIN `pto_mod` 
+                            ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 2)
+                    GROUP BY `pto_mod_detalle`.`id_cargue`) AS `adicion`
+                    ON(`adicion`.`id_cargue` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_mod_detalle`.`id_cargue`
+                        , SUM(`pto_mod_detalle`.`valor_deb`) AS `valor`
+                    FROM
+                        `pto_mod_detalle`
+                        INNER JOIN `pto_mod` 
+                            ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 3)
+                    GROUP BY `pto_mod_detalle`.`id_cargue`) AS `reduccion`
+                    ON(`reduccion`.`id_cargue` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_mod_detalle`.`id_cargue`
+                        , SUM(`pto_mod_detalle`.`valor_deb`) AS `valor`
+                    FROM
+                        `pto_mod_detalle`
+                        INNER JOIN `pto_mod` 
+                            ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 1)
+                    GROUP BY `pto_mod_detalle`.`id_cargue`) AS `credito`
+                    ON(`credito`.`id_cargue` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_mod_detalle`.`id_cargue`
+                        , SUM(`pto_mod_detalle`.`valor_deb`) AS `valor`
+                    FROM
+                        `pto_mod_detalle`
+                        INNER JOIN `pto_mod` 
+                            ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 6)
+                    GROUP BY `pto_mod_detalle`.`id_cargue`) AS `contracredito`
+                    ON(`contracredito`.`id_cargue` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_cdp_detalle`.`id_rubro`
+                        , SUM(IFNULL(`pto_cdp_detalle`.`valor`,0)) - SUM(IFNULL(`pto_cdp_detalle`.`valor_liberado`,0)) AS `valor`
+                    FROM
+                        `pto_cdp_detalle`
+                        INNER JOIN `pto_cdp` 
+                            ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
+                        INNER JOIN `pto_cargue` 
+                            ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                    WHERE (`pto_cdp`.`estado` = 2 AND `pto_cdp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte')
+                    GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `comprometido`
+                    ON(`comprometido`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_cdp_detalle`.`id_rubro`
+                        , SUM(IFNULL(`pto_crp_detalle`.`valor`,0)) - SUM(IFNULL(`pto_crp_detalle`.`valor_liberado`,0)) AS `valor`
+                    FROM
+                        `pto_crp_detalle`
+                        INNER JOIN `pto_crp` 
+                            ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                        INNER JOIN `pto_cdp_detalle` 
+                            ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                    WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` = 2)
+                    GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `registrado`
+                    ON(`registrado`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_cdp_detalle`.`id_rubro`
+                        , SUM(IFNULL(`pto_cop_detalle`.`valor`,0)) - SUM(IFNULL(`pto_cop_detalle`.`valor_liberado`,0)) AS `valor`
+                    FROM
+                        `pto_cop_detalle`
+                        INNER JOIN `ctb_doc` 
+                            ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        INNER JOIN `pto_crp_detalle` 
+                            ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                        INNER JOIN `pto_cdp_detalle` 
+                            ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                    WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte')
+                    GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `causado`
+                    ON(`causado`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_cdp_detalle`.`id_rubro`
+                        , SUM(IFNULL(`pto_pag_detalle`.`valor`,0)) - SUM(IFNULL(`pto_pag_detalle`.`valor_liberado`,0)) AS `valor`
+                    FROM
+                        `pto_pag_detalle`
+                        INNER JOIN `ctb_doc` 
+                            ON (`pto_pag_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        INNER JOIN `pto_cop_detalle` 
+                            ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                        INNER JOIN `pto_crp_detalle` 
+                            ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                        INNER JOIN `pto_cdp_detalle` 
+                            ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                    WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte')
+                    GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `pagado`
+                    ON(`pagado`.`id_rubro` = `pto_cargue`.`id_cargue`)";
+        $res = $cmd->query($sql);
+        $rubros = $res->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
-    $data[$fila['id_cgr']] = [
-        'codigo' => $fila['codigo_cgr'],
-        'inicial' => $val_ini,
-        'definitivo' => $val_def,
-    ];
+    $data = [];
+    foreach ($rubros as $fila) {
+        $id = $fila['id_cgr'];
+        $ini = $fila['inicial'];
+        $def = $fila['inicial'] + $fila['adicion'] - $fila['reduccion'] + $fila['credito'] - $fila['contracredito'];
+        if (isset($data[$id])) {
+            $val_i = $data[$fila['id_cgr']]['inicial'];
+            $val_d = $data[$fila['id_cgr']]['definitivo'];
+            $val_ini = $val_i + $ini;
+            $val_def = $val_d + $def;
+        } else {
+            $val_ini = $ini;
+            $val_def = $def;
+        }
+        $data[$fila['id_cgr']] = [
+            'codigo' => $fila['codigo_cgr'],
+            'inicial' => $val_ini,
+            'definitivo' => $val_def,
+        ];
+    }
 }
 ?>
 <style>
@@ -244,14 +243,16 @@ foreach ($rubros as $fila) {
             <td colspan="3" style="text-align:center"><?php echo $vigencia; ?></td>
         </tr>
         <?php
-        foreach ($data as $key => $d) {
-            if ($key != '') {
-                echo '<tr class="resaltar">';
-                echo '<td colspan="3">D</td>';
-                echo '<td colspan="3">' . $d['codigo'] . '</td>';
-                echo '<td colspan="3" style="text-align:right">' . $d['inicial'] . '</td>';
-                echo '<td colspan="3" style="text-align:right">' . $d['definitivo'] . '</td>';
-                echo '</tr>';
+        if (!empty($data)) {
+            foreach ($data as $key => $d) {
+                if ($key != '') {
+                    echo '<tr class="resaltar">';
+                    echo '<td colspan="3">D</td>';
+                    echo '<td colspan="3">' . $d['codigo'] . '</td>';
+                    echo '<td colspan="3" style="text-align:right">' . $d['inicial'] . '</td>';
+                    echo '<td colspan="3" style="text-align:right">' . $d['definitivo'] . '</td>';
+                    echo '</tr>';
+                }
             }
         }
         ?>
