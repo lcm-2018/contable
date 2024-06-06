@@ -876,23 +876,7 @@ $rol = $_SESSION['rol'];
                                                 </div>
                                             </div>
                                         </a>
-                                    <?php } ?>
-                                    <!--<?php if (PermisosUsuario($permisos, 5004, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos_dep/index.php">
-                                            <div class="form-row">
-                                                <div class="div-icono">
-                                                    <i class="fa fa-share-square-o fa-sm" style="color: #E74C3C;"></i>
-                                                </div>
-                                                <div>
-                                                    Dependencia
-                                                </div>
-                                            </div>
-                                        </a>
-<<<<<<< HEAD
-                                    <?php } ?>-->                                    
-=======
-                                    <?php } ?>
->>>>>>> 43ecb648c9cc52a23e4a1484481b709a16479cfe
+                                    <?php } ?>                                    
                                 </nav>
                             </div>
                             <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapseMovimientos" aria-expanded="false" aria-controls="pagesCollapseMovimientos">
