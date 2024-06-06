@@ -39,7 +39,7 @@ $fecha_actual = $fecha->format('Y-m-d');
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    <div class="row mb-2">
                         <div class="col-2"></div>
                         <div class="col-3 small">CORTE TRIMESTRE:</div>
                         <div class="col-3">
@@ -49,6 +49,17 @@ $fecha_actual = $fecha->format('Y-m-d');
                                 <option value="2">30 DE JUNIO</option>
                                 <option value="3">30 DE SEPTIEMBRE</option>
                                 <option value="4">31 DE DICIEMBRE</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-2"></div>
+                        <div class="col-3 small">TIPO INFORME:</div>
+                        <div class="col-3">
+                            <select name="informe" id="informe" class="form-control form-control-sm">
+                                <option value="0">--Seleccionar--</option>
+                                <option value="1">PROGRAMACION</option>
+                                <option value="2">EJECUCIÓN</option>
                             </select>
                         </div>
                     </div>
