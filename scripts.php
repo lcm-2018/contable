@@ -19,7 +19,6 @@
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/contratacion/gestion/js/funciones_contrataciones.js?v=<?php echo date('YmdHis') ?>"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/contratacion/no_obligados/js/funciones_no_obligados.js?v=<?php echo date('YmdHis') ?>"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/contratacion/adquisiciones/js/funciones_adquisiciones.js?v=<?php echo date('YmdHis') ?>"></script>
-    <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/activos_fijos/js/funciones_activosfijos.js?v=<?php echo date('YmdHis') ?>"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/presupuesto/js/funcionpresupuesto.js?v=<?php echo date('YmdHis') ?>"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/contabilidad/js/funcioncontabilidad.js?v=<?php echo date('YmdHis') ?>"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/tesoreria/js/funciontesoreria.js?v=<?php echo date('YmdHis') ?>"></script>
