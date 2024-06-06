@@ -21,155 +21,155 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 //
 try {
     $sql = "SELECT
-    pto_cargue.cod_pptal
-    , pto_cargue.nom_rubro
-    , pto_cargue.tipo_dato
-    , IF(pto_cargue.tipo_dato = 1, pto_cargue.valor_aprobado, 0) AS inicial
-    , IFNULL(adicion.valor,0) AS adicion
-    , IFNULL(adicion_mes.valor,0) AS adicion_mes
-    , IFNULL(reduccion.valor,0) AS reduccion
-    , IFNULL(reduccion_mes.valor,0) AS reduccion_mes
-    , IFNULL(credito.valor,0) AS credito
-    , IFNULL(credito_mes.valor,0) AS credito_mes
-    , IFNULL(contracredito.valor,0) AS contracredito
-    , IFNULL(contracredito_mes.valor,0) AS contracredito_mes
-    , IFNULL(compromiso_cdp.valor,0) AS compromiso_cdp
-    , IFNULL(compromiso_cdp_mes.valor,0) AS compromiso_cdp_mes
-    , IFNULL(compromiso_crp.valor,0) AS compromiso_crp
-    , IFNULL(compromiso_crp_mes.valor,0) AS compromiso_crp_mes
-    , IFNULL(obligacion.valor,0) AS obligacion
-    , IFNULL(obligacion_mes.valor,0) AS obligacion_mes
-    , IFNULL(pagos.valor,0) AS pagos
-    , IFNULL(pagos_mes.valor,0) AS pagos_mes
-FROM pto_cargue
-INNER JOIN pto_presupuestos ON (pto_cargue.id_pto_presupuestos = pto_presupuestos.id_pto_presupuestos)
-LEFT JOIN (
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini' AND '$fecha_corte' AND pto_documento_detalles.tipo_mov ='ADI' AND pto_documento_detalles.mov =0
-	GROUP BY pto_documento_detalles.rubro
-) AS adicion ON (adicion.rubro=pto_cargue.cod_pptal) 
-LEFT JOIN (
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND pto_documento_detalles.tipo_mov ='ADI' AND pto_documento_detalles.mov =0
-	GROUP BY pto_documento_detalles.rubro
-) AS adicion_mes ON (adicion_mes.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini' AND' $fecha_corte' AND pto_documento_detalles.tipo_mov ='RED' AND pto_documento_detalles.mov =1
-        GROUP BY pto_documento_detalles.rubro
-) AS reduccion ON (reduccion.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes'AND'$fecha_corte' AND pto_documento_detalles.tipo_mov ='RED' AND pto_documento_detalles.mov =1 
-        GROUP BY pto_documento_detalles.rubro
-) AS reduccion_mes ON (reduccion_mes.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini'AND'$fecha_corte' AND pto_documento_detalles.tipo_mov ='TRA' AND pto_documento_detalles.mov =1 
-        GROUP BY pto_documento_detalles.rubro
-) AS credito ON (credito.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes'AND'$fecha_corte' AND pto_documento_detalles.tipo_mov ='TRA' AND pto_documento_detalles.mov =1 
-        GROUP BY pto_documento_detalles.rubro
-) AS credito_mes ON (credito_mes.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini'AND'$fecha_corte' AND pto_documento_detalles.tipo_mov ='TRA' AND pto_documento_detalles.mov =0 
-        GROUP BY pto_documento_detalles.rubro
-) AS contracredito ON (contracredito.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes'AND'$fecha_corte' AND pto_documento_detalles.tipo_mov ='TRA' AND pto_documento_detalles.mov =0 
-        GROUP BY pto_documento_detalles.rubro
-) AS contracredito_mes ON (contracredito_mes.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini'AND'$fecha_corte' AND (pto_documento_detalles.tipo_mov ='CDP' OR pto_documento_detalles.tipo_mov ='LCD') AND pto_documento_detalles.mov =0 
-        GROUP BY pto_documento_detalles.rubro
-) AS compromiso_cdp ON (compromiso_cdp.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes'AND'$fecha_corte' AND (pto_documento_detalles.tipo_mov ='CDP' OR pto_documento_detalles.tipo_mov ='LCD') AND pto_documento_detalles.mov =0 
-        GROUP BY pto_documento_detalles.rubro
-) AS compromiso_cdp_mes ON (compromiso_cdp_mes.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini'AND'$fecha_corte' AND (pto_documento_detalles.tipo_mov ='CRP' OR pto_documento_detalles.tipo_mov ='LRP') AND pto_documento_detalles.mov =0 
-        GROUP BY pto_documento_detalles.rubro
-) AS compromiso_crp ON (compromiso_crp.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
-	FROM pto_documento_detalles
-	INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
-	INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
-	WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes'AND'$fecha_corte' AND (pto_documento_detalles.tipo_mov ='CRP' OR pto_documento_detalles.tipo_mov ='LRP')  AND pto_documento_detalles.mov =0 
-        GROUP BY pto_documento_detalles.rubro
-) AS compromiso_crp_mes ON (compromiso_crp_mes.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT `pto_documento_detalles`.`rubro`, SUM(`pto_documento_detalles`.`valor`) AS valor
-	FROM `ctb_doc`
-	INNER JOIN `pto_documento_detalles` ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
-	WHERE `ctb_doc`.`estado`=1 AND `ctb_doc`.`fecha`  BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_documento_detalles`.`tipo_mov` ='COP'
-	GROUP BY pto_documento_detalles.rubro
-) AS obligacion ON (obligacion.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT `pto_documento_detalles`.`rubro`, SUM(`pto_documento_detalles`.`valor`) AS valor
-	FROM `ctb_doc`
-	INNER JOIN `pto_documento_detalles` ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
-	WHERE `ctb_doc`.`estado`=1 AND `ctb_doc`.`fecha`  BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_documento_detalles`.`tipo_mov` ='COP'
-	GROUP BY pto_documento_detalles.rubro
-) AS obligacion_mes ON (obligacion_mes.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT `pto_documento_detalles`.`rubro`, SUM(`pto_documento_detalles`.`valor`) AS valor
-	FROM `ctb_doc`
-	INNER JOIN `pto_documento_detalles` ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
-	WHERE `ctb_doc`.`estado`=1 AND `ctb_doc`.`fecha`  BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_documento_detalles`.`tipo_mov` ='PAG'
-	GROUP BY pto_documento_detalles.rubro
-) AS pagos ON (pagos.rubro=pto_cargue.cod_pptal)
-LEFT JOIN(
-	SELECT `pto_documento_detalles`.`rubro`, SUM(`pto_documento_detalles`.`valor`) AS valor
-	FROM `ctb_doc`
-	INNER JOIN `pto_documento_detalles` ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
-	WHERE `ctb_doc`.`estado`=1 AND `ctb_doc`.`fecha`  BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_documento_detalles`.`tipo_mov` ='PAG'
-	GROUP BY pto_documento_detalles.rubro
-) AS pagos_mes ON (pagos_mes.rubro=pto_cargue.cod_pptal)
-WHERE pto_cargue.vigencia =2023 AND pto_presupuestos.id_pto_tipo =2 
-GROUP BY   pto_cargue.cod_pptal , pto_cargue.nom_rubro , pto_cargue.tipo_dato
-ORDER BY pto_cargue.cod_pptal";
+                pto_cargue.cod_pptal
+                , pto_cargue.nom_rubro
+                , pto_cargue.tipo_dato
+                , IF(pto_cargue.tipo_dato = 1, pto_cargue.valor_aprobado, 0) AS inicial
+                , IFNULL(adicion.valor,0) AS adicion
+                , IFNULL(adicion_mes.valor,0) AS adicion_mes
+                , IFNULL(reduccion.valor,0) AS reduccion
+                , IFNULL(reduccion_mes.valor,0) AS reduccion_mes
+                , IFNULL(credito.valor,0) AS credito
+                , IFNULL(credito_mes.valor,0) AS credito_mes
+                , IFNULL(contracredito.valor,0) AS contracredito
+                , IFNULL(contracredito_mes.valor,0) AS contracredito_mes
+                , IFNULL(compromiso_cdp.valor,0) AS compromiso_cdp
+                , IFNULL(compromiso_cdp_mes.valor,0) AS compromiso_cdp_mes
+                , IFNULL(compromiso_crp.valor,0) AS compromiso_crp
+                , IFNULL(compromiso_crp_mes.valor,0) AS compromiso_crp_mes
+                , IFNULL(obligacion.valor,0) AS obligacion
+                , IFNULL(obligacion_mes.valor,0) AS obligacion_mes
+                , IFNULL(pagos.valor,0) AS pagos
+                , IFNULL(pagos_mes.valor,0) AS pagos_mes
+            FROM pto_cargue
+            INNER JOIN pto_presupuestos ON (pto_cargue.id_pto_presupuestos = pto_presupuestos.id_pto_presupuestos)
+            LEFT JOIN (
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini' AND '$fecha_corte' AND pto_documento_detalles.tipo_mov ='ADI' AND pto_documento_detalles.mov =0
+                GROUP BY pto_documento_detalles.rubro
+            ) AS adicion ON (adicion.rubro=pto_cargue.cod_pptal) 
+            LEFT JOIN (
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND pto_documento_detalles.tipo_mov ='ADI' AND pto_documento_detalles.mov =0
+                GROUP BY pto_documento_detalles.rubro
+            ) AS adicion_mes ON (adicion_mes.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini' AND' $fecha_corte' AND pto_documento_detalles.tipo_mov ='RED' AND pto_documento_detalles.mov =1
+                    GROUP BY pto_documento_detalles.rubro
+            ) AS reduccion ON (reduccion.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes'AND'$fecha_corte' AND pto_documento_detalles.tipo_mov ='RED' AND pto_documento_detalles.mov =1 
+                    GROUP BY pto_documento_detalles.rubro
+            ) AS reduccion_mes ON (reduccion_mes.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini'AND'$fecha_corte' AND pto_documento_detalles.tipo_mov ='TRA' AND pto_documento_detalles.mov =1 
+                    GROUP BY pto_documento_detalles.rubro
+            ) AS credito ON (credito.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes'AND'$fecha_corte' AND pto_documento_detalles.tipo_mov ='TRA' AND pto_documento_detalles.mov =1 
+                    GROUP BY pto_documento_detalles.rubro
+            ) AS credito_mes ON (credito_mes.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado = 0 AND pto_documento.fecha BETWEEN '$fecha_ini'AND'$fecha_corte' AND pto_documento_detalles.tipo_mov ='TRA' AND pto_documento_detalles.mov =0 
+                    GROUP BY pto_documento_detalles.rubro
+            ) AS contracredito ON (contracredito.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes'AND'$fecha_corte' AND pto_documento_detalles.tipo_mov ='TRA' AND pto_documento_detalles.mov =0 
+                    GROUP BY pto_documento_detalles.rubro
+            ) AS contracredito_mes ON (contracredito_mes.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini'AND'$fecha_corte' AND (pto_documento_detalles.tipo_mov ='CDP' OR pto_documento_detalles.tipo_mov ='LCD') AND pto_documento_detalles.mov =0 
+                    GROUP BY pto_documento_detalles.rubro
+            ) AS compromiso_cdp ON (compromiso_cdp.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes'AND'$fecha_corte' AND (pto_documento_detalles.tipo_mov ='CDP' OR pto_documento_detalles.tipo_mov ='LCD') AND pto_documento_detalles.mov =0 
+                    GROUP BY pto_documento_detalles.rubro
+            ) AS compromiso_cdp_mes ON (compromiso_cdp_mes.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini'AND'$fecha_corte' AND (pto_documento_detalles.tipo_mov ='CRP' OR pto_documento_detalles.tipo_mov ='LRP') AND pto_documento_detalles.mov =0 
+                    GROUP BY pto_documento_detalles.rubro
+            ) AS compromiso_crp ON (compromiso_crp.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT pto_documento_detalles.rubro,SUM(pto_documento_detalles.valor) AS valor
+                FROM pto_documento_detalles
+                INNER JOIN pto_cargue ON (pto_documento_detalles.rubro = pto_cargue.cod_pptal)
+                INNER JOIN pto_documento  ON (pto_documento_detalles.id_pto_doc = pto_documento.id_pto_doc)
+                WHERE pto_documento.estado =0 AND pto_documento.fecha BETWEEN '$fecha_ini_mes'AND'$fecha_corte' AND (pto_documento_detalles.tipo_mov ='CRP' OR pto_documento_detalles.tipo_mov ='LRP')  AND pto_documento_detalles.mov =0 
+                    GROUP BY pto_documento_detalles.rubro
+            ) AS compromiso_crp_mes ON (compromiso_crp_mes.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT `pto_documento_detalles`.`rubro`, SUM(`pto_documento_detalles`.`valor`) AS valor
+                FROM `ctb_doc`
+                INNER JOIN `pto_documento_detalles` ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
+                WHERE `ctb_doc`.`estado`=1 AND `ctb_doc`.`fecha`  BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_documento_detalles`.`tipo_mov` ='COP'
+                GROUP BY pto_documento_detalles.rubro
+            ) AS obligacion ON (obligacion.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT `pto_documento_detalles`.`rubro`, SUM(`pto_documento_detalles`.`valor`) AS valor
+                FROM `ctb_doc`
+                INNER JOIN `pto_documento_detalles` ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
+                WHERE `ctb_doc`.`estado`=1 AND `ctb_doc`.`fecha`  BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_documento_detalles`.`tipo_mov` ='COP'
+                GROUP BY pto_documento_detalles.rubro
+            ) AS obligacion_mes ON (obligacion_mes.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT `pto_documento_detalles`.`rubro`, SUM(`pto_documento_detalles`.`valor`) AS valor
+                FROM `ctb_doc`
+                INNER JOIN `pto_documento_detalles` ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
+                WHERE `ctb_doc`.`estado`=1 AND `ctb_doc`.`fecha`  BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_documento_detalles`.`tipo_mov` ='PAG'
+                GROUP BY pto_documento_detalles.rubro
+            ) AS pagos ON (pagos.rubro=pto_cargue.cod_pptal)
+            LEFT JOIN(
+                SELECT `pto_documento_detalles`.`rubro`, SUM(`pto_documento_detalles`.`valor`) AS valor
+                FROM `ctb_doc`
+                INNER JOIN `pto_documento_detalles` ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
+                WHERE `ctb_doc`.`estado`=1 AND `ctb_doc`.`fecha`  BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_documento_detalles`.`tipo_mov` ='PAG'
+                GROUP BY pto_documento_detalles.rubro
+            ) AS pagos_mes ON (pagos_mes.rubro=pto_cargue.cod_pptal)
+            WHERE pto_cargue.vigencia = 2023 AND pto_presupuestos.id_pto_tipo =2 
+            GROUP BY   pto_cargue.cod_pptal , pto_cargue.nom_rubro , pto_cargue.tipo_dato
+            ORDER BY pto_cargue.cod_pptal";
     $res = $cmd->query($sql);
     $rubros = $res->fetchAll();
 } catch (PDOException $e) {

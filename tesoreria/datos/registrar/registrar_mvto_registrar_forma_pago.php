@@ -39,7 +39,7 @@ try {
         $sql = "SELECT
                     `id_chequera`
                 FROM
-                    `seg_fin_chequeras`
+                    `fin_chequeras`
                 WHERE `id_cuenta` = $cuenta_banco AND `estado` = 1";
         $rs = $cmd->query($sql);
         $cheques = $rs->fetch();
@@ -49,7 +49,11 @@ try {
         $query->bindParam(2, $documento, PDO::PARAM_INT);
         $query->execute();
         */
+        $query = "SELECT SUM(`valor`) AS `valor` FROM `tes_detalle_pago` WHERE `id_ctb_doc` = $id_ctb_doc";
+        $rs = $cmd->query($query);
+        $valor = $rs->fetch();
         $response['status'] = 'ok';
+        $response['valor'] = $valor['valor'];
     } else {
         $response['msg'] = $query->errorInfo()[2];
     }

@@ -19,7 +19,7 @@ try {
             FROM 
                 (SELECT
                     `pto_cop_detalle`.`id_pto_cop_det`
-                    , IFNULL(`pto_cop_detalle`.`valor`-`pto_cop_detalle`.`valor_liberado`,0) AS `val_cop`
+                    , IFNULL(`pto_cop_detalle`.`valor`,0) - IFNULL(`pto_cop_detalle`.`valor_liberado`,0) AS `val_cop`
                     , IFNULL(`pagado`.`val_pag`,0) AS `val_pag` 
                     , `ctb_doc`.`id_manu`
                     , `ctb_doc`.`id_ctb_doc`
@@ -31,7 +31,7 @@ try {
                 LEFT JOIN 
                     (SELECT
                         `id_pto_cop_det`
-                        , `valor` - `valor_liberado` AS `val_pag`
+                        , IFNULL(`valor`,0) - IFNULL(`valor_liberado`,0) AS `val_pag`
                     FROM
                         `pto_pag_detalle`
                         INNER JOIN `ctb_doc` 

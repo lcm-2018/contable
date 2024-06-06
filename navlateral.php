@@ -714,7 +714,7 @@ $rol = $_SESSION['rol'];
                                             <?php
                                             if (PermisosUsuario($permisos, 5606, 0) || $id_rol == 1) {
                                             ?>
-                                                <a class="nav-link sombra" href="#">
+                                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/tesoreria/conciliacion_bancaria.php">
                                                     <div class="div-icono">
                                                         <i class="fas fa-handshake fa-sm" style="color: #9A9B9B;"></i>
                                                     </div>
@@ -853,7 +853,7 @@ $rol = $_SESSION['rol'];
                             </a>
                             <div class="collapse" id="pagesCollapsePedidos" aria-labelledby="headingOne">
                                 <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
-                                <?php if (PermisosUsuario($permisos, 5005, 1) || $id_rol == 1) { ?>
+                                    <?php if (PermisosUsuario($permisos, 5005, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos_alm/index.php">
                                             <div class="form-row">
                                                 <div class="div-icono">
@@ -888,9 +888,13 @@ $rol = $_SESSION['rol'];
                                                 </div>
                                             </div>
                                         </a>
+<<<<<<< HEAD
                                     <?php } ?>-->                                    
+=======
+                                    <?php } ?>
+>>>>>>> 43ecb648c9cc52a23e4a1484481b709a16479cfe
                                 </nav>
-                            </div>        
+                            </div>
                             <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapseMovimientos" aria-expanded="false" aria-controls="pagesCollapseMovimientos">
                                 <div class="form-row">
                                     <div class="div-icono">
