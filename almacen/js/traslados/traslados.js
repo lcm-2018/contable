@@ -370,7 +370,7 @@
         verifica += verifica_vacio($('#txt_fecfin_filtro'));
         if (verifica >= 1) {
             $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe escribir un rango de fechas');
+            $('#divMsgError').html('Debe especificar un rango de fechas');
         } else {
             $.post("imp_traslados.php", {
                 id_sedori: $('#sl_sedori_filtro').val(),

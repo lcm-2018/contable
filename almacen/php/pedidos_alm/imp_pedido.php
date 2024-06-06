@@ -14,29 +14,28 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 
 try {
-    $sql = "SELECT far_pedido.id_pedido,far_pedido.num_pedido,far_pedido.fec_pedido,far_pedido.hor_pedido,far_pedido.detalle,far_pedido.val_total,
-            ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
-            sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
-            CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
-            CASE far_pedido.estado WHEN 0 THEN far_pedido.fec_anulacion WHEN 1 THEN far_pedido.fec_creacion WHEN 2 THEN far_pedido.fec_cierre END AS fec_estado,
-            CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
-            usr.descripcion AS usr_perfil,usr.nom_firma
-        FROM far_pedido             
-        INNER JOIN tb_sedes AS ss ON (ss.id_sede = far_pedido.id_sede_destino)
-        INNER JOIN far_bodegas AS bs ON (bs.id_bodega = far_pedido.id_bodega_destino)           
-        INNER JOIN tb_sedes AS sp ON (sp.id_sede = far_pedido.id_sede_origen)
-        INNER JOIN far_bodegas AS bp ON (bp.id_bodega = far_pedido.id_bodega_origen)
-        LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_pedido.id_usr_cierre)
-        WHERE id_pedido=" . $id . " LIMIT 1";
+    $sql = "SELECT far_alm_pedido.id_pedido,far_alm_pedido.num_pedido,far_alm_pedido.fec_pedido,far_alm_pedido.hor_pedido,far_alm_pedido.detalle,far_alm_pedido.val_total,
+                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,                    
+                CASE far_alm_pedido.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' 
+                    WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS estado,
+                CASE far_alm_pedido.estado WHEN 1 THEN far_alm_pedido.fec_creacion WHEN 2 THEN far_alm_pedido.fec_confirma 
+                    WHEN 3 THEN far_alm_pedido.fec_acepta WHEN 4 THEN far_alm_pedido.fec_cierre WHEN 0 THEN far_alm_pedido.fec_anulacion END AS fec_estado,
+                CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_confirma,
+                usr.descripcion AS usr_perfil,usr.nom_firma
+            FROM far_alm_pedido             
+            INNER JOIN tb_sedes ON (tb_sedes.id_sede = far_alm_pedido.id_sede)
+            INNER JOIN far_bodegas ON (far_bodegas.id_bodega = far_alm_pedido.id_bodega)           
+            LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_alm_pedido.id_usr_confirma)
+            WHERE id_pedido=" . $id . " LIMIT 1";
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
 
     $sql = "SELECT far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-            far_pedido_detalle.cantidad,far_pedido_detalle.valor,
-            (far_pedido_detalle.cantidad*far_pedido_detalle.valor) AS val_total
-        FROM far_pedido_detalle
-        INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_pedido_detalle.id_medicamento)
-        WHERE far_pedido_detalle.id_pedido=" . $id . " ORDER BY far_pedido_detalle.id_ped_detalle";
+            far_alm_pedido_detalle.cantidad,far_alm_pedido_detalle.valor,
+            (far_alm_pedido_detalle.cantidad*far_alm_pedido_detalle.valor) AS val_total
+        FROM far_alm_pedido_detalle
+        INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_alm_pedido_detalle.id_medicamento)
+        WHERE far_alm_pedido_detalle.id_pedido=" . $id . " ORDER BY far_alm_pedido_detalle.id_ped_detalle";
     $rs = $cmd->query($sql);
     $obj_ds = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -71,7 +70,7 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>ORDEN DE PEDIDO DE BODEGA</th>
+            <th>ORDEN DE PEDIDO DE ALMACEN</th>
         </tr>
     </table>
 
@@ -93,21 +92,15 @@ try {
             <td><?php echo $obj_e['fec_estado']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="3">Sede y Bodega DE donde se solicita</td>
-            <td colspan="3">Sede y Bodega Proveedora A donde se solicita</td>
+            <td>Sede</td>
+            <td>Sede</td>
+            <td colspan="4">Detalle</td>
         </tr>
         <tr>
-            <td colspan="2"><?php echo $obj_e['nom_sede_solicita']; ?></td>
-            <td><?php echo $obj_e['nom_bodega_solicita']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_sede_provee']; ?></td>
-            <td><?php echo $obj_e['nom_bodega_provee']; ?></td>
-        </tr>
-        <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="6">Detalle</td>
-        </tr>
-        <tr>
-            <td colspan="6"><?php echo $obj_e['detalle']; ?></td>
-        </tr>
+            <td><?php echo $obj_e['nom_sede']; ?></td>
+            <td><?php echo $obj_e['nom_bodega']; ?></td>
+            <td colspan="4"><?php echo $obj_e['detalle']; ?></td>        
+        </tr>        
     </table>
 
     <table style="width:100% !important">
@@ -156,12 +149,12 @@ try {
         <tr>
             <td style="vertical-align: top">
                 <div>-------------------------------------------------</div>
-                <div><?php echo $obj_e['usr_cierra']; ?></div>
+                <div><?php echo $obj_e['usr_confirma']; ?></div>
                 <div><?php echo $obj_e['usr_perfil']; ?></div>
             </td>
             <td style="vertical-align: top">
                 <div>-------------------------------------------------</div>
-                <div>Entregado Por</div>
+                <div>Aceptado Por</div>
             </td>
         </tr>        
     </table>

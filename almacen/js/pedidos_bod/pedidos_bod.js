@@ -373,7 +373,7 @@
         verifica += verifica_vacio($('#txt_fecfin_filtro'));
         if (verifica >= 1) {
             $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe escribir un rango de fechas');
+            $('#divMsgError').html('Debe especificar un rango de fechas');
         } else {
             $.post("imp_pedidos.php", {
                 id_sedsol: $('#sl_sedsol_filtro').val(),

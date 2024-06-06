@@ -28,27 +28,27 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM far_pedido_detalle WHERE id_pedido=" . $_POST['id_pedido'];
+    $sql = "SELECT COUNT(*) AS total FROM far_alm_pedido_detalle WHERE id_pedido=" . $_POST['id_pedido'];
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
     $sql = "SELECT COUNT(*) AS total 
-            FROM far_pedido_detalle 
-            INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_pedido_detalle.id_medicamento)
+            FROM far_alm_pedido_detalle 
+            INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_alm_pedido_detalle.id_medicamento)
             WHERE id_pedido=" . $_POST['id_pedido'] . $where; 
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT far_pedido_detalle.id_ped_detalle,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-                    far_pedido_detalle.cantidad,far_pedido_detalle.valor,
-                    (far_pedido_detalle.cantidad*far_pedido_detalle.valor) AS val_total
-                FROM far_pedido_detalle
-                INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_pedido_detalle.id_medicamento)
-            WHERE far_pedido_detalle.id_pedido=" . $_POST['id_pedido']. $where . " ORDER BY $col $dir $limit";
+    $sql = "SELECT far_alm_pedido_detalle.id_ped_detalle,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
+                    far_alm_pedido_detalle.cantidad,far_alm_pedido_detalle.valor,
+                    (far_alm_pedido_detalle.cantidad*far_alm_pedido_detalle.valor) AS val_total
+                FROM far_alm_pedido_detalle
+                INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_alm_pedido_detalle.id_medicamento)
+            WHERE far_alm_pedido_detalle.id_pedido=" . $_POST['id_pedido']. $where . " ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;
@@ -63,10 +63,10 @@ if (!empty($objs)) {
     foreach ($objs as $obj) {
         $id = $obj['id_ped_detalle'];
         //Permite crear botones en la cuadricula si tiene permisos de 1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir
-        if (PermisosUsuario($permisos, 5003, 3) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5005, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }
-        if (PermisosUsuario($permisos, 5003, 4) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5005, 4) || $id_rol == 1) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
         $data[] = [
