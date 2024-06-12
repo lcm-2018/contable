@@ -877,7 +877,9 @@ $rol = $_SESSION['rol'];
                                             </div>
                                         </a>
                                     <?php } ?>
-                                    <!--<?php if (PermisosUsuario($permisos, 5004, 1) || $id_rol == 1) { ?>
+                                    <?php
+                                    //if (PermisosUsuario($permisos, 5004, 1) || $id_rol == 1) { 
+                                    if (false) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos_dep/index.php">
                                             <div class="form-row">
                                                 <div class="div-icono">
@@ -888,11 +890,7 @@ $rol = $_SESSION['rol'];
                                                 </div>
                                             </div>
                                         </a>
-<<<<<<< HEAD
-                                    <?php } ?>-->                                    
-=======
                                     <?php } ?>
->>>>>>> 43ecb648c9cc52a23e4a1484481b709a16479cfe
                                 </nav>
                             </div>
                             <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapseMovimientos" aria-expanded="false" aria-controls="pagesCollapseMovimientos">

@@ -278,6 +278,34 @@ var tabla;
 			$(".dt-button").addClass("p-0 border-0");
 			$(".dt-button").attr('disabled', true)
 		}
+		$("#tableDetConciliacion").DataTable({
+			dom: setdom,
+			language: setIdioma,
+			ajax: {
+				url: "datos/listar/datos_detalles_conciliacion.php",
+				data: function (d) {
+					d.id_cuenta = $("#id_cuenta").val();
+				},
+				type: "POST",
+				dataType: "json",
+			},
+			columns: [
+				{ data: "fecha" },
+				{ data: "no_comprobante" },
+				{ data: "tercero" },
+				{ data: "documento" },
+				{ data: "debito" },
+				{ data: "credito" },
+				{ data: "estado" }
+			],
+			order: [[0, "desc"]],
+			"pageLength": 10,
+			columnDefs: [{
+				class: 'text-wrap',
+				targets: [2]
+			}],
+		});
+		$("#tableDetConciliacion").wrap('<div class="overflow" />');
 		//Fin dataTable
 	});
 })(jQuery);
@@ -1356,6 +1384,14 @@ const imprSelecTes = (nombre, id) => {
 	ventimp.document.close();
 	ventimp.print();
 	ventimp.close();
+};
+const ConciliacionBancaria = (id) => {
+	let mes = document.getElementById("slcMesConcBanc").value;
+	$('<form action="detalle_conciliacion_bancaria.php" method="post">' +
+		'<input type="hidden" name="id_cuenta" value="' + id + '" />' +
+		'<input type="hidden" name="mes" value="' + mes + '" />' +
+		'</form>').appendTo("body").submit();
+
 };
 var valoresid = [];
 //=========================================== scrip para seleccion de varias casuaciones ===========================================

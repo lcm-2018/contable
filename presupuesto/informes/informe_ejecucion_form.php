@@ -69,7 +69,9 @@ $fecha_actual = $fecha->format('Y-m-d');
                             <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
                         </a>
                         <a type="button" class="btn btn-danger" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
-
+                        <a type="" id="btnPlanoEntrada" class="btn btn-outline-warning" value="01" title="Exprotar archivo plano separado por Tabulaciones">
+                            <span class="fas fa-file-export fa-lg" aria-hidden="true"></span>
+                        </a>
                     </div>
                 </form>
             </div>

@@ -5,8 +5,6 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../conexion.php';
-include '../../permisos.php';
-include '../../financiero/consultas.php';
 
 $vigencia = $_SESSION['vigencia'];
 // concateno la fecha con el año vigencia
@@ -27,18 +25,18 @@ $fecha_actual = $fecha->format('Y-m-d');
             <h5 class="card-header small">Ejecución presupuestal de gastos</h5>
             <div class="card-body">
                 <form>
-                    <div class="row">
+                    <div class="row mb-1">
                         <div class="col-2"></div>
                         <div class="col-3 small">Fecha de inicial:</div>
                         <div class="col-3"><input type="date" name="fecha_ini" id="fecha_ini" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_min; ?>"></div>
                     </div>
 
-                    <div class="row">
+                    <div class="row mb-1">
                         <div class="col-2"></div>
                         <div class="col-3 small">Fecha de corte:</div>
                         <div class="col-3"><input type="date" name="fecha" id="fecha" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_actual; ?>"></div>
                     </div>
-                    <div class="row">
+                    <div class="row mb-1">
                         <div class="col-2"></div>
                         <div class="col-3 small">Movimiento del mes:</div>
                         <div class="col-3"><input type="checkbox" id="mes" name="mes" value="0"></div>
