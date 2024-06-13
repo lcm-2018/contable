@@ -64,6 +64,31 @@
         let encodedTable = btoa(unescape(encodeURIComponent(tableHtml)));
         $('<form action="' + window.urlin + '/financiero/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encodedTable + '" /></form>').appendTo('body').submit();
     });
+    $('#areaReporte').on('click', '#btnPlanoEntrada', function () {
+        let tableHtml = $('#areaImprimir').html();
+
+        let tempDiv = $('<div>').html(tableHtml);
+
+        let plainText = '';
+        let rowCount = 0;
+        tempDiv.find('tr').each(function () {
+            rowCount++;
+            // Si la fila actual es mayor que 5, entonces la procesamos
+            if (rowCount > 5) {
+                $(this).find('td, th').each(function () {
+                    plainText += $(this).text() + '\t';
+                });
+                plainText = plainText.trim(); // Eliminar la última tabulación
+                plainText += '\n';
+            }
+        });
+
+        // Codificar el texto en Base64
+        let encodedTable = btoa(unescape(encodeURIComponent(plainText)));
+
+        // Enviar el formulario con el contenido codificado
+        $('<form action="' + window.urlin + '/financiero/reporte_txt.php" method="post"><input type="hidden" name="txt" value="' + encodedTable + '" /></form>').appendTo('body').submit();
+    });
     // Valido que el numerico con separador de miles
     $("#divModalForms").on("keyup", "#valorAprob", function () {
         let id = "valorAprob";
@@ -2762,6 +2787,9 @@ const generarInforme = (boton) => {
     }
     if (id == 2) {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_ing_xls.php";
+        let mes = $("#mes").length ? $("#mes").is(":checked") : false;
+        mes = mes ? 1 : 0;
+        data = { fecha_corte: fecha_corte, mes: mes };
     }
     if (id == 3) {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_gas_xls_mes.php";

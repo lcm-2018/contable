@@ -64,7 +64,7 @@ if ($fin_mes != 0) {
         foreach ($lista as $lp) {
             $editar = $borrar = $acciones = $cerrar = null;
             $id_ctb = $lp['id_tes_cuenta'];
-            $estado = '<a href="javascript:void(0)" class="conciliar" text="' . $id_ctb . '"><span class="badge badge-success">Activa</span></a>';
+            $estado = '<a href="javascript:void(0)" onclick="ConciliacionBancaria(' . $id_ctb . ')"><span class="badge badge-warning">Conciliar</span></a>';
             if (PermisosUsuario($permisos, 5606, 5) || $id_rol == 1) {
                 $imprimir = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" onclick="ImpConcBanc(' . $id_ctb . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb"  title="Editar_' . $id_ctb . '"><span class="fas fa-print fa-lg"></span></a>';
                 //si es lider de proceso puede abrir o cerrar documentos
