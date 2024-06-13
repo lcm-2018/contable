@@ -1046,7 +1046,7 @@ $rol = $_SESSION['rol'];
                             <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapseAcfGeneral" aria-expanded="false" aria-controls="pagesCollapseAcfGeneral">
                                 <div class="form-row">
                                     <div class="div-icono">
-                                        <i class="fa fa-list fa-sm" style="color: #FFC300CC;"></i>
+                                    <i class="fa fa-tags fa-sm" style="color: #FFC300CC;"></i>
                                     </div>
                                     <div>
                                         General
@@ -1068,18 +1068,18 @@ $rol = $_SESSION['rol'];
                                     <?php } ?>
                                 </nav>
                             </div>
-                            <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapsePedidos" aria-expanded="false" aria-controls="pagesCollapsePedidos">
+                            <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapseMovimientos" aria-expanded="false" aria-controls="pagesCollapseMovimientos">
                                 <div class="form-row">
                                     <div class="div-icono">
-                                        <i class="fa fa-file-invoice fa-sm" style="color: #FFC300CC;"></i>
+                                    <i class="fas fa-sliders fa-sm" style="color: #FFC300CC;"></i>
                                     </div>
                                     <div>
-                                        Art. Activo Fijo
+                                        Movimientos
                                     </div>
                                 </div>
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-caret-down"></i></div>
                             </a>
-                            <div class="collapse" id="pagesCollapsePedidos" aria-labelledby="headingOne">
+                            <div class="collapse" id="pagesCollapseMovimientos" aria-labelledby="headingOne">
                                 <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
                                     <?php if (PermisosUsuario($permisos, 5702, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/pedidos/index.php?var=3">
@@ -1104,19 +1104,58 @@ $rol = $_SESSION['rol'];
                                                 </div>
                                             </div>
                                         </a>
-                                    <?php } ?>
-                                    <?php if (PermisosUsuario($permisos, 5704, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/activo_fijo/index.php?var=3">
+                                    <?php } ?>                                    
+                                </nav>
+                            </div>
+                            <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapseMantenimiento" aria-expanded="false" aria-controls="pagesCollapseMovimientos">
+                                <div class="form-row">
+                                    <div class="div-icono">
+                                    <i class="fas fa-cogs" style="color: #FFC300CC;"></i>
+                                    </div>
+                                    <div>
+                                        Mantenimiento
+                                    </div>
+                                </div>
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-caret-down"></i></div>
+                            </a>
+                            <div class="collapse" id="pagesCollapseMantenimiento" aria-labelledby="headingOne">
+                                <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
+                                    <?php if (PermisosUsuario($permisos, 5702, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/pedidos/index.php?var=3">
                                             <div class="form-row">
                                                 <div class="div-icono">
-                                                    <i class="fa fa-barcode fa-sm" style="color: #E74C3C;"></i>
+                                                    <i class="fa fa-pencil-square-o fa-sm" style="color: #E74C3C;"></i>
                                                 </div>
                                                 <div>
-                                                    Activo Fijo
+                                                    Hoja de Vida
                                                 </div>
                                             </div>
                                         </a>
                                     <?php } ?>
+                                    <?php if (PermisosUsuario($permisos, 5703, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/ingresos/index.php?var=3">
+                                            <div class="form-row">
+                                                <div class="div-icono">
+                                                    <i class="far fa-clipboard" style="color: #E74C3C;"></i>
+                                                </div>
+                                                <div>
+                                                    Registros
+                                                </div>
+                                            </div>
+                                        </a>
+                                    <?php } ?>  
+                                    <?php if (PermisosUsuario($permisos, 5703, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/ingresos/index.php?var=3">
+                                            <div class="form-row">
+                                                <div class="div-icono">
+                                                    <i class="fas fa-sort-amount-down-alt fa-sm" style="color: #E74C3C;"></i>
+                                                </div>
+                                                <div>
+                                                    Progreso
+                                                </div>
+                                            </div>
+                                        </a>
+                                    <?php } ?>                                   
                                 </nav>
                             </div>
                         </nav>
