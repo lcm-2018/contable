@@ -2825,65 +2825,66 @@ const generarInforme = (boton) => {
 // Funcion para generar libros presupuestales
 const generarInformeLibros = (boton) => {
     let id = boton.value;
-    let tipo = tipo_libro.value;
-    let fecha_corte = fecha.value;
-    let archivo = 0;
+    let tipo = $('#tipo_libro').val();
+    let fecha_ini = $('#fecha_ini').val();
+    let fecha_corte = $('#fecha').val();
+    let ruta = window.urlin + "/presupuesto/informes/";
+    var data = { fecha_corte: fecha_corte, fecha_ini: fecha_ini };
     if (tipo == 1) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_cdp_xls.php";
+        ruta = ruta + "informe_libro_cdp_xls.php";
     }
     if (tipo == 2) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_crp_xls.php";
+        ruta = ruta + "informe_libro_crp_xls.php";
     }
     if (tipo == 3) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_cop_xls.php";
+        ruta = ruta + "informe_libro_cop_xls.php";
     }
     if (tipo == 4) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_pag_xls.php";
+        ruta = ruta + "informe_libro_pag_xls.php";
     }
     if (tipo == 5) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_cxp.php";
+        ruta = ruta + "informe_libro_cxp.php";
     }
     if (tipo == 6) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_ft04.php";
+        ruta = ruta + "informe_libro_ft04.php";
     }
     if (tipo == 7) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_cdp_anula_xls.php";
+        ruta = ruta + "informe_libro_cdp_anula_xls.php";
     }
     if (tipo == 8) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_crp_anula_xls.php";
+        ruta = ruta + "informe_libro_crp_anula_xls.php";
     }
     if (tipo == 9) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_rad_xls.php";
+        ruta = ruta + "informe_libro_rad_xls.php";
     }
     if (tipo == 10) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_rec_xls.php";
+        ruta = ruta + "informe_libro_rec_xls.php";
     }
     if (tipo == 11) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_mod_anula_xls.php";
+        ruta = ruta + "informe_libro_mod_anula_xls.php";
     }
     if (tipo == 13) {
-        archivo = window.urlin + "/presupuesto/informes/informe_libro_pag_anula.php";
+        ruta = ruta + "informe_libro_pag_anula.php";
     }
     if (id == 20) {
-        archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_ing_xls.php ";
+        ruta = ruta + "informe_ejecucion_ing_xls.php ";
     }
     boton.disabled = true;
     var span = boton.querySelector("span")
     span.classList.add("spinner-border", "spinner-border-sm");
     areaImprimir.innerHTML = "";
-    fetch(archivo, {
-        method: "POST",
-        body: fecha_corte,
-    })
-        .then((response) => response.text())
-        .then((response) => {
+    $.ajax({
+        url: ruta,
+        type: "POST",
+        data: data,
+        success: function (response) {
             boton.disabled = false;
             span.classList.remove("spinner-border", "spinner-border-sm")
             areaImprimir.innerHTML = response;
-        })
-        .catch((error) => {
-            console.log("Error:");
-        });
+        }, error: function (error) {
+            console.log("Error:" + error);
+        }
+    });
 };
 
 // Funcion para redireccionar la recarga de la pagina

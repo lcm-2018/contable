@@ -27,10 +27,10 @@ $fecha_actual = $fecha->format('Y-m-d');
             <h5 class="card-header small">Libros presupuestales de ejecución presupuestal</h5>
             <div class="card-body">
                 <form>
-                    <div class="row">
-                        <div class="col-2"></div>
-                        <div class="col-3 small">Tipo de libro:</div>
-                        <div class="col-3">
+                    <div class="row mb-1">
+                        <div class="col-md-3"></div>
+                        <div class="col-md-3 small">Tipo de libro:</div>
+                        <div class="col-md-3">
                             <select name="tipo_libro" id="tipo_libro" class="form-control form-control-sm">
                                 <option value="0">-- Selecionar --</option>
                                 <option value="1">Certificado de disponibilidad presupuestal</option>
@@ -43,16 +43,16 @@ $fecha_actual = $fecha->format('Y-m-d');
                             </select>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-2"></div>
-                        <div class="col-3 small">Fecha de inicial:</div>
-                        <div class="col-3"><input type="date" name="fecha_ini" id="fecha_ini" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_min; ?>"></div>
+                    <div class="row mb-1">
+                        <div class="col-md-3"></div>
+                        <div class="col-md-3 small">Fecha de inicial:</div>
+                        <div class="col-md-3"><input type="date" name="fecha_ini" id="fecha_ini" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_min; ?>"></div>
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-2"></div>
-                        <div class="col-3 small">Fecha de corte:</div>
-                        <div class="col-3"><input type="date" name="fecha" id="fecha" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_actual; ?>"></div>
+                        <div class="col-md-3"></div>
+                        <div class="col-md-3 small">Fecha de corte:</div>
+                        <div class="col-md-3"><input type="date" name="fecha" id="fecha" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_actual; ?>"></div>
                     </div>
                     <div class="text-center">
                         <button value="1" class="btn btn-primary" onclick="generarInformeLibros(this);"><span></span> Consultar</button>
@@ -64,7 +64,7 @@ $fecha_actual = $fecha->format('Y-m-d');
                 </form>
             </div>
             <br>
-            <div id="areaImprimir" class="table-responsive px-2">
+            <div id="areaImprimir" class="table-responsive px-2" style="font-size: 80%;">
             </div>
         </div>
     </div>

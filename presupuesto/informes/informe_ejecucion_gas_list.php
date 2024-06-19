@@ -52,7 +52,7 @@ $fecha_actual = $fecha->format('Y-m-d');
                 </form>
             </div>
             <br>
-            <div id="areaImprimir" class="table-responsive px-2">
+            <div id="areaImprimir" class="table-responsive px-2" style="font-size: 80%;">
             </div>
         </div>
     </div>

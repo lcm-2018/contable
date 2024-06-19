@@ -2206,39 +2206,28 @@ const consultaCentrosCosto = () => {
 // Autocomplete para la selección del tercero que se asigna al registro presupuestal
 document.addEventListener("keyup", (e) => {
 	if (e.target.id == "codigoctaini") {
-		let valor = "";
 		$("#codigoctaini").autocomplete({
 			source: function (request, response) {
 				$.ajax({
 					url: "../datos/consultar/consultaPgcp.php",
-					type: "post",
 					dataType: "json",
-					data: {
-						search: request.term,
-						valor: valor,
-					},
+					type: 'POST',
+					data: { term: request.term },
 					success: function (data) {
 						response(data);
-					},
+					}
 				});
 			},
+			minLength: 2,
 			select: function (event, ui) {
-				$("#codigoctaini").val(ui.item.label);
-				$("#id_codigoctaini").val(ui.item.value);
-
-				return false;
-			},
-			focus: function (event, ui) {
-				$("#id_codigoctaini").val(ui.item.label);
-				return false;
-			},
+				$("#id_codigoctaini").val(ui.item.id);
+			}
 		});
 	}
 });
 // Cuenta final
 document.addEventListener("keyup", (e) => {
 	if (e.target.id == "codigoctafin") {
-		let valor = "";
 		$("#codigoctafin").autocomplete({
 			source: function (request, response) {
 				$.ajax({
@@ -2247,7 +2236,6 @@ document.addEventListener("keyup", (e) => {
 					dataType: "json",
 					data: {
 						search: request.term,
-						valor: valor,
 					},
 					success: function (data) {
 						response(data);
@@ -2255,15 +2243,8 @@ document.addEventListener("keyup", (e) => {
 				});
 			},
 			select: function (event, ui) {
-				$("#codigoctafin").val(ui.item.label);
-				$("#id_codigoctafin").val(ui.item.value);
-
-				return false;
-			},
-			focus: function (event, ui) {
-				$("#id_codigoctafin").val(ui.item.label);
-				return false;
-			},
+				$("#id_codigoctafin").val(ui.item.id);
+			}
 		});
 	}
 });
@@ -2628,6 +2609,9 @@ const changeEstadoAnulaCtb = async () => {
 
 const cargarReporteContable = (id) => {
 	let url = "";
+	if (id == 1) {
+		url = "informe_contaduria_cgn_form.php";
+	}
 	if (id == 21) {
 		url = "informe_descuentos_mpio_form.php";
 	}
@@ -2662,74 +2646,110 @@ const cargarReporteContable = (id) => {
 		});
 };
 // Funcion para generar formato de Modificaciones
-const generarInformeCtb = (id) => {
-	let cta_inicial = 0;
-	let cta_final = 0;
-	let fecha_inicial = fecha_ini.value;
-	let fecha_final = fecha_fin.value;
-	if (id == 9) {
-		cta_inicial = id_codigoctaini.value;
-		cta_final = id_codigoctafin.value;
+const generarInformeCtb = (boton) => {
+	var id = boton.value;
+	var fecha_inicial = $("#fecha_ini").length ? $("#fecha_ini").val() : 0;
+	var fecha_final = $("#fecha_fin").length ? $("#fecha_fin").val() : 0;
+	var cta_inicial = 0;
+	var cta_final = 0;
+	var band = false;
+	if ($("#codigoctaini").length) {
+		if ($("#id_codigoctaini").val() == '0' || $("#id_codigoctafin").val() == '0') {
+			mjeError("Debe seleccionar una cuenta inicial y final");
+			band = true;
+		} else {
+			cta_inicial = $("#id_codigoctaini").val();
+			cta_final = $("#id_codigoctafin").val();
+		}
 	}
-	let sede = tipo_sede.value;
-	let archivo = 0;
-	if (sede == 0) {
-		mjeError("Debe seleccionar una sede");
-		return;
-	} else {
-		if (id == 1) {
-			archivo = window.urlin + "/contabilidad/informes/informe_impuestos_mpio_resumen.php";
-		}
-		if (id == 2) {
-			archivo = window.urlin + "/contabilidad/informes/informe_impuestos_mpio_detalle.php";
-		}
-		if (id == 3) {
-			archivo = window.urlin + "/contabilidad/informes/informe_impuestos_mpio_exogena.php";
-		}
-		if (id == 4) {
-			archivo = window.urlin + "/contabilidad/informes/informe_impuestos_dian_resumen.php";
-		}
-		if (id == 5) {
-			archivo = window.urlin + "/contabilidad/informes/informe_impuestos_dian_detalle.php";
-		}
-		if (id == 6) {
-			archivo = window.urlin + "/contabilidad/informes/informe_impuestos_otros_resumen.php";
-		}
-		if (id == 7) {
-			archivo = window.urlin + "/contabilidad/informes/informe_impuestos_otros_detalle.php";
-		}
-		if (id == 8) {
-			archivo = window.urlin + "/contabilidad/informes/informe_impuestos_otros_detalle.php";
-		}
-		if (id == 9) {
-			archivo = window.urlin + "/contabilidad/informes/informe_libros_auxiliares_detalle.php";
-		}
-		if (id == 10) {
-			archivo = window.urlin + "/contabilidad/informes/informe_impuestos_estampillas_resumen.php";
-		}
-		if (id == 11) {
-			archivo = window.urlin + "/contabilidad/informes/informe_impuestos_estampillas_detalle.php";
-		}
-		if (id == 12) {
-			archivo = window.urlin + "/contabilidad/informes/informe_balance_prueba_detalle.php";
-		}
-		let ruta = {
-			url: archivo,
-			name1: "fec_inicial",
-			valor1: fecha_inicial,
-			name2: "fec_final",
-			valor2: fecha_final,
-			name3: "mpio",
-			valor3: sede,
-			name4: "cta_inicial",
-			valor4: cta_inicial,
-			name5: "cta_final",
-			valor5: cta_final,
-		};
-		redireccionar5(ruta);
+	if (band) {
+		return false;
 	}
+	var data = {
+		id: id,
+		fecha_inicial: fecha_inicial,
+		fecha_final: fecha_final,
+		cta_inicial: cta_inicial,
+		cta_final: cta_final,
+	}
+
+	var ruta = window.urlin + "/contabilidad/informes/";
+
+	if (id == 1) {
+		ruta = ruta + "informe_impuestos_mpio_resumen.php";
+	} else if (id == 2) {
+		ruta = ruta + "informe_impuestos_mpio_detalle.php";
+	} else if (id == 3) {
+		ruta = ruta + "informe_impuestos_mpio_exogena.php";
+	} else if (id == 4) {
+		ruta = ruta + "informe_impuestos_dian_resumen.php";
+	} else if (id == 5) {
+		ruta = ruta + "informe_impuestos_dian_detalle.php";
+	} else if (id == 6) {
+		ruta = ruta + "informe_impuestos_otros_resumen.php";
+	} else if (id == 7) {
+		ruta = ruta + "informe_impuestos_otros_detalle.php";
+	} else if (id == 8) {
+		ruta = ruta + "informe_impuestos_otros_detalle.php";
+	} else if (id == 9) {
+		ruta = ruta + "informe_libros_auxiliares_rango.php";
+	} else if (id == 10) {
+		ruta = ruta + "informe_impuestos_estampillas_resumen.php";
+	} else if (id == 11) {
+		ruta = ruta + "informe_impuestos_estampillas_detalle.php";
+	} else if (id == 12) {
+		ruta = ruta + "informe_balance_prueba_detalle.php";
+	} else if (id == 13) {
+		ruta = ruta + "informe_contaduria_detalle.php";
+	}
+	boton.disabled = true;
+	var span = boton.querySelector("span")
+	span.classList.add("spinner-border", "spinner-border-sm");
+	$.ajax({
+		url: ruta,
+		type: "POST",
+		data: data,
+		success: function (response) {
+			boton.disabled = false;
+			span.classList.remove("spinner-border", "spinner-border-sm")
+			areaImprimir.innerHTML = response;
+		}, error: function (error) {
+			console.log("Error:" + error);
+		}
+	});
 };
 
+$('#areaReporte').on('dblclick', '#tbBalancePrueba tr', function () {
+	var cuenta = $(this).find('td:eq(0)').text();
+	var tipo = $(this).find('td:eq(2)').text();
+	var saldo = $(this).find('td:eq(6)').text();
+	var f_ini = $('#fecha_ini').val();
+	var f_fin = $('#fecha_fin').val();
+	$('#divModalEspera').modal('show');
+	$.ajax({
+		url: window.urlin + "/contabilidad/informes/informe_libros_auxiliares_detalle.php",
+		type: "POST",
+		data: { cuenta: cuenta, tipo: tipo, saldo: saldo, f_ini: f_ini, f_fin: f_fin },
+		success: function (r) {
+			setTimeout(function () {
+				hideModalEspera()
+				let encodedTable = btoa(unescape(encodeURIComponent(r)));
+				$('<form action="' + window.urlin + '/financiero/reporte_excel.php" method="post">' +
+					'<input type="hidden" name="xls" value="' + encodedTable + '" />' +
+					'<input type="hidden" name="head" value="1" />' +
+					'</form>').appendTo('body').submit();
+			}, 1000);
+		}, error: function (error) {
+			console.log("Error:" + error);
+			hideModalEspera()
+		}
+	});
+	function hideModalEspera() {
+		$('#divModalEspera').modal('hide');
+		$('.modal-backdrop').remove();
+	}
+
+});
 function redireccionar5(ruta) {
 	setTimeout(() => {
 		$(

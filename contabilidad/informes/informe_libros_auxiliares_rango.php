@@ -7,12 +7,10 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
-$fecha_inicial = $_POST['f_ini'];
-$fecha_corte = $_POST['f_fin'];
-$cuenta = $_POST['cuenta'];
-$tipo = $_POST['tipo'];
-$saldo = $_POST['saldo'];
-$condicion = $tipo == 'M' ? "LIKE '$cuenta%'" : "= '$cuenta'";
+$fecha_inicial = $_POST['fecha_inicial'];
+$fecha_corte = $_POST['fecha_final'];
+$cta_inicial = $_POST['cta_inicial'];
+$cta_final = $_POST['cta_final'];
 
 function pesos($valor)
 {
@@ -20,10 +18,19 @@ function pesos($valor)
 }
 
 include '../../conexion.php';
-
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `id_pgcp`, `cuenta`, `nombre` FROM `ctb_pgcp` WHERE `id_pgcp` IN ('$cta_inicial', '$cta_final') ORDER BY `cuenta` ASC";
+    $res = $cmd->query($sql);
+    $cta = $res->fetchAll();
+} catch (PDOException $e) {
+    echo 'Error: ' . $e->getMessage();
+    exit();
+}
+$cta_inicial = $cta[0]['cuenta'];
+$cta_final = $cta[0]['cuenta'];
+try {
 
     // Consultar cuentas con movimiento
     $sql = "SELECT
@@ -50,19 +57,10 @@ try {
                 ON `tes_detalle_pago`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`
             LEFT JOIN `tes_forma_pago` 
                 ON `tes_detalle_pago`.`id_forma_pago` = `tes_forma_pago`.`id_forma_pago`
-            WHERE `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2 AND `ctb_pgcp`.`cuenta` $condicion
+            WHERE `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2 AND (`ctb_pgcp`.`cuenta` LIKE '$cta_inicial%' OR `ctb_pgcp`.`cuenta` LIKE '$cta_final%')
             ORDER BY `ctb_pgcp`.`fecha`, `ctb_pgcp`.`cuenta` ASC";
     $res = $cmd->query($sql);
     $cuentas = $res->fetchAll();
-} catch (PDOException $e) {
-    echo 'Error: ' . $e->getMessage();
-    exit();
-}
-
-try {
-    $sql = "SELECT `cuenta`, `nombre` FROM `ctb_pgcp` WHERE `cuenta` = '$cuenta'";
-    $res = $cmd->query($sql);
-    $cta = $res->fetch();
 } catch (PDOException $e) {
     echo 'Error: ' . $e->getMessage();
     exit();
@@ -89,18 +87,16 @@ if (count($id_t) > 0) {
     $terceros = json_decode($result, true);
 }
 
-$nom_informe = "LIBRO AUXILIAR DETALLADO DE LA CUENTA $cuenta";
+$nom_informe = "LIBRO AUXILIAR";
 include_once '../../financiero/encabezado_empresa.php';
 
 $saldo = 0;
 $total_deb = 0;
 $total_cre = 0;
-$primer_caracter = substr($cta['cuenta'], 0, 1);
-$bandera = in_array($primer_caracter, [1, 5, 6, 7]);
 ?>
-<label class="text-right"> <b><?php echo $cta['cuenta'] . ' - ' . $cta['nombre']; ?></b></label>
+<label class="text-right"> <b><?php echo $cta[0]['cuenta'] . ' - ' . $cta[0]['nombre'] . ' => ' . $cta[1]['cuenta'] . ' - ' . $cta[1]['nombre']; ?></b></label>
 <table class="table-bordered bg-light" style="width:100% !important;" border="1">
-    <tr>
+    <tr style="text-align: center;">
         <td>Fecha</td>
         <td>Tipo documento</td>
         <td>Documento</td>
@@ -121,6 +117,8 @@ $bandera = in_array($primer_caracter, [1, 5, 6, 7]);
           </tr>";
     $total_ret = 0;
     foreach ($cuentas as $tp) {
+        $primer_caracter = substr($tp['cuenta'], 0, 1);
+        $bandera = in_array($primer_caracter, [1, 5, 6, 7]);
         if ($bandera) {
             $saldo = $saldo + $tp['debito'] - $tp['credito'];
         } else {

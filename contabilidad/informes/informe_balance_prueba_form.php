@@ -34,53 +34,38 @@ $otras = $rs->fetchAll();
 ?>
 
 <div class="row justify-content-center">
-    <div class="col-sm-10 ">
+    <div class="col-md-12 ">
         <div class="card">
-            <h5 class="card-header small">INFORME BALANCE DE PRUEBA </h5>
+            <h5 class="card-header small">INFORME BALANCE DE PRUEBA</h5>
             <div class="card-body">
                 <form>
-                    <div class="row">
-                        <div class="col-2"></div>
-                        <div class="col-3 small">Fecha de inicial:</div>
-                        <div class="col-3"><input type="date" name="fecha_ini" id="fecha_ini" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_min; ?>"></div>
+                    <div class="row mb-1">
+                        <div class="col-3"></div>
+                        <div class="col-md-2"><span class="small">Fecha de inicial:</span></div>
+                        <div class="col-md-4"><input type="date" name="fecha_ini" id="fecha_ini" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_min; ?>"></div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-2"></div>
-                        <div class="col-3 small">Fecha de corte:</div>
-                        <div class="col-3"><input type="date" name="fecha_fin" id="fecha_fin" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_actual; ?>"></div>
+                    <div class="row mb-1">
+                        <div class="col-3"></div>
+                        <div class="col-md-2 small">Fecha de corte:</div>
+                        <div class="col-md-4"><input type="date" name="fecha_fin" id="fecha_fin" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_actual; ?>"></div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-2"></div>
-                        <div class="col-3 small">CUENTA INICIAL:</div>
-                        <div class="col-6">
-                            <input type="text" name="codigoctaini" id="codigoctaini" class="form-control form-control-sm" value="" required>
-                            <input type="hidden" name="id_codigoctaini" id="id_codigoctaini" class="form-control form-control-sm" value="">
-                            <input type="hidden" name="tipo_sede" id="tipo_sede" class="form-control form-control-sm" value="1">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-2"></div>
-                        <div class="col-3 small">CUENTA FINAL:</div>
-                        <div class="col-6">
-                            <input type="text" name="codigoctafin" id="codigoctafin" class="form-control form-control-sm" value="" required>
-                            <input type="hidden" name="id_codigoctafin" id="id_codigoctafin" class="form-control form-control-sm" value="">
-
-                        </div>
-                    </div>
-
-                    <div class="px-50">&nbsp; </div>
                     <div class="row">
                         <div class="col-12">
                             <div class="text-center pt-3">
-                                <a type="button" class="btn btn-primary btn-sm" onclick="generarInformeCtb(12);"> Libro auxiliar</a>
+                                <button class="btn btn-primary" onclick="generarInformeCtb(this)" value="12"><span></span>Libro auxiliar</button>
+                                <a type="" id="btnExcelEntrada" class="btn btn-outline-success" value="01" title="Exprotar a Excel">
+                                    <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
+                                </a>
+                                <a type="button" class="btn btn-danger" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
                             </div>
                         </div>
                     </div>
+                </form>
             </div>
-            </form>
+            <br>
+            <div id="areaImprimir" class="table-responsive px-2" style="font-size: 80%;">
+            </div>
         </div>
     </div>
-</div>
 </div>

@@ -6,82 +6,82 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
-$fecha_corte = file_get_contents("php://input");
+$fecha_corte = $_POST['fecha_corte'];
+$fecha_ini = $_POST['fecha_ini'];
 function pesos($valor)
 {
     return '$' . number_format($valor, 2);
 }
 include '../../conexion.php';
-include '../../financiero/consultas.php';
+
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 //
 try {
-    $sql = "SELECT
-    `pto_documento_detalles`.`tipo_mov`
-    , `pto_documento`.`id_manu`
-    , `pto_documento`.`fecha`
-    , `pto_documento`.`objeto`
-    , `pto_documento_detalles`.`rubro`
-    , `pto_cargue`.`nom_rubro`
-    , sum(`pto_documento_detalles`.`valor`) as valor
-    , `pto_documento_detalles`.`id_documento`
-    FROM
-        `pto_documento_detalles`
-        LEFT JOIN `pto_cargue` 
-            ON (`pto_documento_detalles`.`rubro` = `pto_cargue`.`cod_pptal`)
-        INNER JOIN `pto_documento` 
-            ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-    WHERE ((`pto_documento_detalles`.`tipo_mov` ='CDP' OR `pto_documento_detalles`.`tipo_mov`='LCD') AND `pto_documento`.`fecha` <= '$fecha_corte' AND `pto_documento`.`estado`=0)
-    GROUP BY `pto_documento_detalles`.`tipo_mov`,`pto_documento_detalles`.`rubro`, `pto_documento_detalles`.`id_documento`
-    ORDER BY `pto_documento`.`fecha` ASC;
-";
+    $sql = "SELECT 
+                `taux`.`id_pto_cdp`
+                , `taux`.`fecha`
+                , `taux`.`id_manu`
+                , `taux`.`objeto`
+                , `taux`.`id_rubro`
+                , `taux`.`rubro`
+                , `taux`.`nom_rubro`
+                , IFNULL(`t1`.`valor`,0) AS `val_cdp`
+                , IFNULL(`t2`.`valor`,0) AS `val_crp`
+            FROM
+                (SELECT
+                    `pto_cdp`.`id_pto_cdp`
+                    , `pto_cdp`.`fecha`
+                    , `pto_cdp`.`id_manu`
+                    , `pto_cdp`.`objeto`
+                    , `pto_cdp_detalle`.`id_rubro`
+                    , `pto_cargue`.`cod_pptal` AS `rubro`
+                    , `pto_cargue`.`nom_rubro`
+                FROM
+                    `pto_cdp_detalle`
+                    INNER JOIN `pto_cdp` 
+                        ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
+                    INNER JOIN `pto_cargue` 
+                        ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                    WHERE (`pto_cdp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_cdp`.`estado` <> 0)) AS `taux`
+                LEFT JOIN
+                    (SELECT
+                        `id_pto_cdp`
+                        , `id_rubro`
+                        , SUM(IFNULL(`valor`,0)) - SUM(IFNULL(`valor_liberado`,0)) AS `valor`
+                    FROM
+                        `pto_cdp_detalle`
+                    GROUP BY `id_pto_cdp`, `id_rubro`) AS `t1`
+                    ON (`t1`.`id_pto_cdp` = `taux`.`id_pto_cdp` AND `t1`.`id_rubro` = `taux`.`id_rubro`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_cdp_detalle`.`id_pto_cdp`
+                        , `pto_cdp_detalle`.`id_rubro`
+                        , SUM(IFNULL(`pto_crp_detalle`.`valor`,0)) - SUM(IFNULL(`pto_crp_detalle`.`valor_liberado`,0)) AS `valor`
+                    FROM
+                        `pto_crp_detalle`
+                        INNER JOIN `pto_cdp_detalle` 
+                            ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                        INNER JOIN `pto_crp` 
+                            ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                    WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` <> 0)
+                    GROUP BY `pto_cdp_detalle`.`id_pto_cdp`, `pto_cdp_detalle`.`id_rubro`) AS `t2`
+                    ON (`t2`.`id_pto_cdp` = `taux`.`id_pto_cdp` AND `t2`.`id_rubro` = `taux`.`id_rubro`)
+            ORDER BY `taux`.`fecha` ASC";
     $res = $cmd->query($sql);
     $causaciones = $res->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-// consulto el nombre de la empresa de la tabla tb_datos_ips
-try {
-    $sql = "SELECT
-    `nombre`
-    , `nit`
-    , `dig_ver`
-FROM
-    `tb_datos_ips`;";
-    $res = $cmd->query($sql);
-    $empresa = $res->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-?>
-<style>
-    .resaltar:nth-child(even) {
-        background-color: #F8F9F9;
-    }
+$nom_informe = "RELACION DE CERTIFICADOS DE DISPONIBILIDAD PRESUPUESTAL";
+include_once '../../financiero/encabezado_empresa.php';
 
-    .resaltar:nth-child(odd) {
-        background-color: #ffffff;
-    }
-</style>
-<table style="width:100% !important; border-collapse: collapse;">
+?>
+
+<table class="table-hover" style="width:100% !important; border-collapse: collapse;" border="1">
     <thead>
-        <tr>
-            <td rowspan="4" style="text-align:center"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
-            <td colspan="7" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
-        </tr>
-        <tr>
-            <td colspan="7" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
-        </tr>
-        <tr>
-            <td colspan="7" style="text-align:center"><?php echo 'RELACION DE CERTIFICADOS DE DISPONIBILIDAD PRESUPUESTAL'; ?></td>
-        </tr>
-        <tr>
-            <td colspan="7" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
-        </tr>
-        <tr style="background-color: #CED3D3; text-align:center;font-size:9px;">
-            <th>Tipo</th>
-            <th>No disponibilidad</th>
+        <tr class="centrar">
+            <th>CDP</th>
             <th>Fecha</th>
             <th>Objeto</th>
             <th>Rubro</th>
@@ -90,68 +90,22 @@ FROM
             <th>Saldo</th>
         </tr>
     </thead>
-    <tbody style="font-size:9px;">
+    <tbody>
         <?php
         foreach ($causaciones as $rp) {
-            // consulto el valor registrado de cada cdp y rubro
-            $sql = "SELECT
-                SUM(`pto_documento_detalles`.`valor`) AS `valor_rp`
-            FROM
-                `pto_documento_detalles`
-                INNER JOIN `pto_documento` 
-                    ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-            WHERE `pto_documento_detalles`.`rubro` ='{$rp['rubro']}'
-                AND `pto_documento`.`fecha` <='$fecha_corte'
-                AND `pto_documento_detalles`.`id_auto_dep` ={$rp['id_pto_doc']}
-                AND `pto_documento_detalles`.`tipo_mov`='CRP' 
-            GROUP BY `pto_documento_detalles`.`rubro`;";
-            $res = $cmd->query($sql);
-            $reg2 = $res->fetch();
-            // consulto el valor registrado de cada cdp y rubro
-            $sql = "SELECT
-     SUM(`pto_documento_detalles`.`valor`) AS `valor_rp`
- FROM
-     `pto_documento_detalles`
-     INNER JOIN `pto_documento` 
-         ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
- WHERE `pto_documento_detalles`.`rubro` ='{$rp['rubro']}'
-     AND `pto_documento`.`fecha` <='$fecha_corte'
-     AND `pto_documento_detalles`.`id_auto_dep` ={$rp['id_pto_doc']}
-     AND `pto_documento_detalles`.`tipo_mov`='LRP' 
- GROUP BY `pto_documento_detalles`.`rubro`;";
-            $res = $cmd->query($sql);
-            $reg3 = $res->fetch();
-            // consulto el valor anulado de cada cdp y rubro
-            $sql = "SELECT
-                SUM(`pto_documento_detalles`.`valor`) AS `valor_lcd`
-            FROM
-                `pto_documento_detalles`
-                INNER JOIN `pto_documento` 
-                    ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-            WHERE `pto_documento_detalles`.`rubro` ='{$rp['rubro']}'
-                AND `pto_documento`.`fecha` <='$fecha_corte'
-                AND `pto_documento_detalles`.`id_auto_dep` ={$rp['id_pto_doc']}
-                AND `pto_documento_detalles`.`tipo_mov`='LCD' 
-            GROUP BY `pto_documento_detalles`.`rubro`;";
-            $sql2 = $sql;
-            $res = $cmd->query($sql);
-            $reg = $res->fetch();
-            $valor_cdp = $rp['valor'] +  $reg['valor_lcd'];
-            $saldo =  $valor_cdp - $reg2['valor_rp'] - $reg3['valor_rp'];
-            $fecha = date('Y-m-d', strtotime($rp['fecha']));
-            if ($valor_cdp >= 0) {
-                echo "<tr>
-                        <td style='text-aling:left'>" . $rp['tipo_mov'] .  "</td>
-                        <td style='text-aling:left'>" . $rp['id_manu'] . "</td>
-                        <td style='text-aling:left'>" .   $fecha   . "</td>
-                        <td style='text-aling:left'>" . $rp['objeto'] . "</td>
-                        <td style='text-aling:left'" . $rp['rubro'] . "</td>
-                        <td style='text-aling:left'>" .  $rp['nom_rubro'] . "</td>
-                        <td style='text-aling:right'>" . number_format($valor_cdp, 2, ".", ",")  . "</td>
-                        <td style='text-aling:right'>" . number_format($saldo, 2, ".", ",") . "</td>
-                    </tr>";
-                $saldo = 0;
-                $valor_cdp = 0;
+            $fecha = date("Y-m-d", strtotime($rp['fecha']));
+            $valor_cdp = $rp['val_cdp'];
+            $saldo = $rp['val_cdp'] - $rp['val_crp'];
+            if ($valor_cdp > 0) {
+                echo "<tr>";
+                echo "<td>" . $rp['id_manu'] . "</td>";
+                echo "<td style='white-space: nowrap;'>" . $fecha . "</td>";
+                echo "<td>" . $rp['objeto'] . "</td>";
+                echo "<td>" . $rp['rubro'] . "</td>";
+                echo "<td>" . $rp['nom_rubro'] . "</td>";
+                echo "<td style='text-align:right;'>" . pesos($valor_cdp) . "</td>";
+                echo "<td style='text-align:right;'>" . pesos($saldo) . "</td>";
+                echo "</tr>";
             }
         }
         ?>

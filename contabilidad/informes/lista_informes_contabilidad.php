@@ -6,7 +6,6 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../conexion.php';
 include '../../permisos.php';
-include '../../financiero/consultas.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -15,9 +14,7 @@ include '../../financiero/consultas.php';
 
 ?>
 
-<body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] === '1') {
-                                echo 'sb-sidenav-toggled';
-                            } ?>">
+<body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ? 'sb-sidenav-toggled' : '' ?>">
 
     <?php include '../../navsuperior.php' ?>
     <div id="layoutSidenav">
@@ -56,13 +53,7 @@ include '../../financiero/consultas.php';
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle sombra" data-toggle="dropdown" href="#" role="button" aria-expanded="false">Entidades de control </a>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item sombra" href="#" onclick="abrirLink(1);">Contraloría SIA</a>
-                                    <a class="dropdown-item sombra" href="#" onclick="abrirLink(2);">Cuipo ingresos</a>
-                                    <a class="dropdown-item sombra" id="settings-tab2" href="#" onclick="abrirLink(3);">Cuipo gastos</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item sombra" href="#" onclick="abrirLink(13);">Sia Observa</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item sombra" href="#" onclick="abrirLink(1);">Ministerio Salud SIHO</a>
+                                    <a class="dropdown-item sombra" href="#" onclick="cargarReporteContable(1);">Contaduría CGN</a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">
@@ -98,16 +89,7 @@ include '../../financiero/consultas.php';
 
             <?php include '../../footer.php' ?>
         </div>
-        <!-- Modal formulario-->
-        <div class="modal fade" id="divModalForms" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-            <div id="divTamModalForms" class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-body text-center" id="divForms">
-
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php include '../../modales.php' ?>
     </div>
 
 

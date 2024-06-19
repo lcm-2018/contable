@@ -381,7 +381,7 @@ try {
         <tr>
             <td colspan="23" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
         </tr>
-        <tr style="background-color: #CED3D3; text-align:center;font-size:9px;">
+        <tr style="background-color: #CED3D3; text-align:center;">
             <th>Descripcion</th>
             <th>Rubro</th>
             <th>Estado</th>
@@ -424,7 +424,7 @@ try {
             <th>Cuentas por pagar</th>
         </tr>
     </thead>
-    <tbody style="font-size:9px;">
+    <tbody>
         <?php
         foreach ($acum as $key => $value) {
             $keyrb = array_search($key, array_column($rubros, 'cod_pptal'));

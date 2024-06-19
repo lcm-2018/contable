@@ -11,6 +11,7 @@ $vigencia = $_SESSION['vigencia'];
 $fecha_inicial = $_POST['fecha_inicial'];
 $fecha_corte = $_POST['fecha_final'];
 $inicio = $_SESSION['vigencia'] . '-01-01';
+$parametro = 2;
 // contar los caracteres de $cuenta_ini
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -65,38 +66,10 @@ try {
 } catch (Exception $e) {
     echo $e->getMessage();
 }
-try {
-    $sql = "SELECT `cuenta`,`nombre`, `id_pgcp`,`tipo_dato` FROM `ctb_pgcp` WHERE (`estado` = 1)";
-    $res = $cmd->query($sql);
-    $cuentas = $res->fetchAll();
-} catch (Exception $e) {
-    echo $e->getMessage();
-}
-$acum = [];
-foreach ($datos as $dato) {
-    $cuenta = $dato['cuenta'];
-    foreach ($cuentas as $c) {
-        if (($c['tipo_dato'] == 'M' && strpos($cuenta, $c['cuenta']) === 0) || ($c['tipo_dato'] != 'M' && $cuenta == $c['cuenta'])) {
-            if (!isset($acum[$c['cuenta']])) {
-                $acum[$c['cuenta']] = [
-                    'cuenta' => $c['cuenta'],
-                    'nombre' => $c['nombre'],
-                    'debitoi' => 0,
-                    'creditoi' => 0,
-                    'debito' => 0,
-                    'credito' => 0,
-                    'tipo' => $c['tipo_dato']
-                ];
-            }
-            $acum[$c['cuenta']]['debitoi'] += $dato['debitoi'];
-            $acum[$c['cuenta']]['creditoi'] += $dato['creditoi'];
-            $acum[$c['cuenta']]['debito'] += $dato['debito'];
-            $acum[$c['cuenta']]['credito'] += $dato['credito'];
-        }
-    }
-}
 
-$nom_informe = "LIBRO MAYOR Y BALANCE";
+$acum = [];
+
+$nom_informe = "CONTADURÍA CGN";
 include_once '../../financiero/encabezado_empresa.php';
 
 ?>
@@ -110,49 +83,44 @@ include_once '../../financiero/encabezado_empresa.php';
         </tr>
     </thead>
 </table>
-<table class="table-hover" style="width:100% !important; border-collapse: collapse;" border="1">
+<table style="width:100% !important; border-collapse: collapse;" border="1">
     <thead>
         <tr class="centrar">
             <td>Cuenta</td>
-            <td>Nombre</td>
-            <td>Tipo</td>
             <td>Inicial</td>
             <td>Debito</td>
             <td>Credito</td>
             <td>Saldo Final</td>
         </tr>
     </thead>
-    <tbody id="tbBalancePrueba">
+    <tbody>
         <?php
-        if (!empty($acum)) {
-            foreach ($acum as $tp) {
-                $nat1 = substr($tp['cuenta'], 0, 1);
-                $nat2 = substr($tp['cuenta'], 0, 2);
-                if ($nat1 == '1' || $nat1 == '5' || $nat1 == '6' || $nat1 == '7' || $nat2 == '81' || $nat2 == '83' || $nat2 == '99') {
-                    $naturaleza = "D";
-                }
-                if ($nat1 == '2' || $nat1 == '3' || $nat1 == '4' || $nat2 == '91' || $nat2 == '92'  || $nat2 == '93' || $nat2 == '89') {
-                    $naturaleza = "C";
-                }
-                if ($naturaleza == "D") {
-                    $saldo_ini = $tp['debitoi'] - $tp['creditoi'];
-                    $saldo = $saldo_ini + $tp['debito'] - $tp['credito'];
-                } else {
-                    $saldo_ini = $tp['creditoi'] - $tp['debitoi'];
-                    $saldo = $saldo_ini + $tp['credito'] - $tp['debito'];
+        if (!empty($datos)) {
+            $separarCadenaResultados = [];
+            foreach ($datos as $tp) {
+                $cuenta = $tp['cuenta'];
+                $nat = substr($cuenta, 0, 2);
+                $naturaleza = ($nat[0] == '1' || $nat[0] == '5' || $nat[0] == '6' || $nat[0] == '7' || $nat == '81' || $nat == '83' || $nat == '99') ? "D" : "C";
+
+                if (!isset($separarCadenaResultados[$cuenta])) {
+                    $separarCadenaResultados[$cuenta] = SepararCadena($cuenta, $parametro);
                 }
 
+                $debitoi = $tp['debitoi'];
+                $creditoi = $tp['creditoi'];
+                $debito = $tp['debito'];
+                $credito = $tp['credito'];
+
+                $saldo_ini = ($naturaleza == "D") ? $debitoi - $creditoi : $creditoi - $debitoi;
+                $saldo = $saldo_ini + (($naturaleza == "D") ? $debito - $credito : $credito - $debito);
+
                 echo "<tr>
-                    <td class='text'>" . $tp['cuenta'] . "</td>
-                    <td class='text'>" . $tp['nombre'] . "</td>
-                    <td class='text-center'>" . $tp['tipo'] . "</td>
-                    <td class='text-right'>" . $saldo_ini . "</td>
-                    <td class='text-right'>" . $tp['debito'] . "</td>
-                    <td class='text-right'>" . $tp['credito'] . "</td>
-                    <td class='text-right'>" . $saldo . "</td>
+                        <td class='text'>" . $separarCadenaResultados[$cuenta] . "</td>
+                        <td class='text-right'>" . Decimales($saldo_ini) . "</td>
+                        <td class='text-right'>" . Decimales($debito) . "</td>
+                        <td class='text-right'>" . Decimales($credito) . "</td>
+                        <td class='text-right'>" . Decimales($saldo) . "</td>
                     </tr>";
-                $saldo_ini = 0;
-                $saldo = 0;
             }
         } else {
             echo "<tr><td colspan='7'>No hay datos para mostrar</td></tr>";
@@ -160,3 +128,21 @@ include_once '../../financiero/encabezado_empresa.php';
         ?>
     </tbody>
 </table>
+<?php
+function SepararCadena($cadena, $tam)
+{
+    if (strlen($cadena) <= 1) {
+        return $cadena;
+    }
+    $resultado = substr($cadena, 0, 1) . '.' . substr($cadena, 1, 1) . '.' . substr($cadena, 2, 2) . '.' . substr($cadena, 4, 2);
+    $resto = substr($cadena, 6);
+    for ($i = 0; $i < strlen($resto); $i += $tam) {
+        $resultado .= '.' . substr($resto, $i, $tam);
+    }
+    return $resultado;
+}
+
+function Decimales($numero)
+{
+    return number_format($numero, 2, '.', '');
+}
