@@ -81,6 +81,15 @@ var tabla;
 			$("#divForms").html(he);
 		});
 	}
+	GetFormDocCaja = function (id_doc, id_var, id_detalle) {
+		$.post("form_doc_caja.php", { id_tipo: id_doc, id_var: id_var, id_detalle: id_detalle }, function (he) {
+			$("#divTamModalForms").removeClass("modal-xl");
+			$("#divTamModalForms").removeClass("modal-sm");
+			$("#divTamModalForms").addClass("modal-lg");
+			$("#divModalForms").modal("show");
+			$("#divForms").html(he);
+		});
+	}
 	FormCuentasBanco = function (id_tes_cuenta) {
 		$.post("form_cuenta_nueva.php", { id_tes_cuenta: id_tes_cuenta }, function (he) {
 			$("#divTamModalForms").removeClass("modal-xl");
@@ -97,28 +106,66 @@ var tabla;
 		let id_doc = $("#id_ctb_tipo").val();
 		let id_var = $("#var_tip").val();
 		// obtener el value de id_ctb_tipo
-		tabla = $("#tableMvtoTesoreriaPagos").DataTable({
-			dom: setdom,
-			buttons: [
-				{
-					text: ' <span class="fas fa-plus-circle fa-lg"></span>',
-					action: function (e, dt, node, config) {
-						GetFormDocCtb(id_doc, id_var, 0);
+		if (id_doc == 13) {
+			$("#tableMvtoTesoreriaPagos").DataTable({
+				dom: setdom,
+				buttons: [
+					{
+						text: ' <span class="fas fa-plus-circle fa-lg"></span>',
+						action: function (e, dt, node, config) {
+							GetFormDocCaja(id_doc, id_var, 0);
+						},
 					},
+				],
+				language: setIdioma,
+				ajax: {
+					url: "datos/listar/datos_mvto_caja.php",
+					data: function (d) {
+						d.id_doc = id_doc;
+					},
+					type: "POST",
+					dataType: "json",
 				},
-			],
-			language: setIdioma,
-			ajax: {
-				url: "datos/listar/datos_mvto_tesoreria.php",
-				data: function (d) {
-					d.id_doc = id_doc;
+				columns: [
+					{ data: "acto" },
+					{ data: "num_acto" },
+					{ data: "nombre_caja" },
+					{ data: "fecha_ini" },
+					{ data: "fecha_acto" },
+					{ data: "valor_total" },
+					{ data: "valor_minimo" },
+					{ data: "num_poliza" },
+					{ data: "porcentaje" },
+					{ data: "estado" },
+					{ data: "botones" },
+
+				],
+				order: [[0, "desc"]],
+			});
+		} else {
+			$("#tableMvtoTesoreriaPagos").DataTable({
+				dom: setdom,
+				buttons: [
+					{
+						text: ' <span class="fas fa-plus-circle fa-lg"></span>',
+						action: function (e, dt, node, config) {
+							GetFormDocCtb(id_doc, id_var, 0);
+						},
+					},
+				],
+				language: setIdioma,
+				ajax: {
+					url: "datos/listar/datos_mvto_tesoreria.php",
+					data: function (d) {
+						d.id_doc = id_doc;
+					},
+					type: "POST",
+					dataType: "json",
 				},
-				type: "POST",
-				dataType: "json",
-			},
-			columns: [{ data: "numero" }, { data: "fecha" }, { data: "ccnit" }, { data: "tercero" }, { data: "valor" }, { data: "botones" }],
-			order: [[0, "desc"]],
-		});
+				columns: [{ data: "numero" }, { data: "fecha" }, { data: "ccnit" }, { data: "tercero" }, { data: "valor" }, { data: "botones" }],
+				order: [[0, "desc"]],
+			});
+		}
 		$("#tableMvtoTesoreriaPagos").wrap('<div class="overflow" />');
 		// dataTable de movimientos contables
 
@@ -296,7 +343,8 @@ var tabla;
 				{ data: "documento" },
 				{ data: "debito" },
 				{ data: "credito" },
-				{ data: "estado" }
+				{ data: "estado" },
+				{ data: "accion" }
 			],
 			order: [[0, "desc"]],
 			"pageLength": 10,
@@ -314,17 +362,6 @@ var tabla;
 function recargarConciliacion() {
 	$('#tableConcBancaria').DataTable().ajax.reload();
 };
-// Recargar a la tabla de documento contable  por acciones en el select
-function cambiaListadoTesoreria(dato) {
-	$(
-		'<form action="lista_documentos_com.php" method="post">\n\
-    <input type="hidden" name="tipo_doc" value="' +
-		dato +
-		'" /></form>'
-	)
-		.appendTo("body")
-		.submit();
-}
 // Cargar lista de registros para obligar en contabilidad de
 let CargaObligaPago = function (dato) {
 	$.post("lista_causacion_obligaciones.php", {}, function (he) {
@@ -417,7 +454,12 @@ $('#modificartableMvtoTesoreriaPagos').on('click', '.modificar', function () {
 	let id_var = $("#var_tip").val();
 	GetFormDocCtb(id_doc, id_var, id_detalle);
 });
-
+$('#modificartableMvtoTesoreriaPagos').on('click', '.editarCaja', function () {
+	var id_detalle = $(this).attr('text');
+	let id_doc = $("#id_ctb_tipo").val();
+	let id_var = $("#var_tip").val();
+	GetFormDocCaja(id_doc, id_var, id_detalle);
+});
 // Carga el listado de imputación presupuestal para ingresos
 let cargaLegalizacionCajaMenor = function (dato) {
 	let id_pto_do = id_ctb_doc.value;
@@ -657,6 +699,67 @@ $('#divModalForms').on('click', '#gestionarMvtoCtbPag', function () {
 	} else {
 		var datos = $('#formGetMvtoTes').serialize() + '&id=' + id;
 		url = "datos/registrar/registrar_mvto_contable_doc_pag.php";
+		$.ajax({
+			type: 'POST',
+			url: url,
+			data: datos,
+			success: function (r) {
+				if (r == 'ok') {
+					$('#divModalForms').modal('hide');
+					mje('Proceso realizado correctamente');
+					$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+				} else {
+					mjeError('Error:', r);
+				}
+
+			}
+		});
+	}
+	return false;
+
+});
+$('#divModalForms').on('click', '#gestionarMvtoCtbCaja', function () {
+	var id = $(this).attr('text');
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#slcTipActo').val() == '0') {
+		$('#slcTipActo').addClass('is-invalid');
+		$('#slcTipActo').focus();
+		mjeError('El tipo de acto no puede estar vacio');
+	} else if ($('#numActo').val() == '') {
+		$('#numActo').addClass('is-invalid');
+		$('#numActo').focus();
+		mjeError('El número de acto no puede estar vacio');
+	} else if ($('#txtNomCaja').val() == '') {
+		$('#txtNomCaja').addClass('is-invalid');
+		$('#txtNomCaja').focus();
+		mjeError('El nombre de la caja no puede estar vacio');
+	} else if ($('#fecIniciaCaja').val() == '') {
+		$('#fecIniciaCaja').addClass('is-invalid');
+		$('#fecIniciaCaja').focus();
+		mjeError('La fecha de inicio no puede estar vacia');
+	} else if ($('#fecActoDc').val() == '') {
+		$('#fecActoDc').addClass('is-invalid');
+		$('#fecActoDc').focus();
+		mjeError('La fecha del acto no puede estar vacia');
+	} else if ($('#txtPoliza').val() == '') {
+		$('#txtPoliza').addClass('is-invalid');
+		$('#txtPoliza').focus();
+		mjeError('La poliza no puede estar vacia');
+	} else if (Number($('#valTotal').val()) <= 0) {
+		$('#valTotal').addClass('is-invalid');
+		$('#valTotal').focus();
+		mjeError('El valor total debe ser mayor a cero');
+	} else if (Number($('#valMinimo').val()) <= 0) {
+		$('#valMinimo').addClass('is-invalid');
+		$('#valMinimo').focus();
+		mjeError('El valor minimo debe ser mayor a cero');
+	} else if (Number($('#porcentajeCs').val()) <= 0) {
+		$('#porcentajeCs').addClass('is-invalid');
+		$('#porcentajeCs').focus();
+		mjeError('El porcentaje de caja menor debe ser mayor a cero');
+	} else {
+		var datos = $('#formGetMvtoCaja').serialize() + '&id=' + id;
+		url = "datos/registrar/registrar_mvto_contable_caja.php";
 		$.ajax({
 			type: 'POST',
 			url: url,
@@ -929,7 +1032,48 @@ const eliminarRegistroTec = (id) => {
 		}
 	});
 };
+const eliminarRegistroCaja = (id) => {
+	// mensaje de confirmación
+	Swal.fire({
+		title: "¿Está seguro de eliminar el registro?",
+		text: "No podrá revertir esta acción",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#3085d6",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si, eliminar",
+		cancelButtonText: "Cancelar",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			fetch("datos/eliminar/eliminar_mvto_caja.php", {
+				method: "POST",
+				body: JSON.stringify({ id: id }),
+			})
+				.then((response) => response.json())
+				.then((response) => {
+					if (response.status == "ok") {
+						mje("Registro eliminado");
+						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+					} else {
+						mjeError("Error al eliminar: " + response.msg);
+					}
+				})
+				.catch((error) => {
+					console.log("Error:");
+				});
+		}
+	});
+};
 
+function cargarResponsableCaja(id_caja, id_detalle) {
+	$.post("lista_caja_menor_responsable.php", { id_caja: id_caja, id_detalle: id_detalle }, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-xl");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+}
 function cargarListaDetallePag(id_doc) {
 	/* $('<form action="lista_documentos_det.php" method="post"><input type="hidden" name="id_doc" value="' + id_doc + '" /></form>')
 	  .appendTo("body")
@@ -944,7 +1088,122 @@ function cargarListaDetallePag(id_doc) {
 	};
 	redireccionar2(ruta);
 }
+function GuardaRespCaja() {
+	var id = $('#id_caja').val();
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#id_tercero').val() == '0') {
+		$('#tercerocrp').addClass('is-invalid');
+		$('#tercerocrp').focus();
+		mjeError('El responsable no puede estar vacio');
+	} else if ($('#fecha_ini').val() == '') {
+		$('#fecha_ini').addClass('is-invalid');
+		$('#fecha_ini').focus();
+		mjeError('La fecha de inicio no puede estar vacia');
+	} else if ($('#fecha_fin').val() == '') {
+		$('#fecha_fin').addClass('is-invalid');
+		$('#fecha_fin').focus();
+		mjeError('La fecha de fin no puede estar vacia');
+	} else if ($('#fecha_ini').val() > $('#fecha_fin').val()) {
+		$('#fecha_ini').addClass('is-invalid');
+		$('#fecha_ini').focus();
+		mjeError('La fecha de inicio no puede ser mayor a la fecha de fin');
+	} else if (Number($('#reg').val()) == 1 && Number($('#id_detalle').val()) == 0) {
+		mjeError('Esta caja ya tiene un usuario activo responsable', 'Desactive los usuarios anteriores');
+	} else {
+		var data = $('#formAddResponsableCaja').serialize();
+		$.ajax({
+			type: 'POST',
+			url: 'datos/registrar/guarda_resposable.php',
+			data: data,
+			dataType: 'json',
+			success: function (r) {
+				if (r.status == 'ok') {
+					cargarResponsableCaja(id, 0);
+					mje('Proceso realizado correctamente', 'Exito');
+				} else {
+					mjeError('Error: ' + r.msg);
+				}
+			}
+		});
+	}
+}
+function GuardarRubrosCaja() {
+	var id = $('#id_caja').val();
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#slcConcepto').val() == '0') {
+		$('#slcConcepto').addClass('is-invalid');
+		$('#slcConcepto').focus();
+		mjeError('Debe seleccionar un tipo de gasto');
+	} else if (Number($('#numValor').val()) <= 0) {
+		$('#numValor').addClass('is-invalid');
+		$('#numValor').focus();
+		mjeError('El valor no puede ser menor o igual a cero');
+	} else if ($('#id_rubroCod').val() == '0') {
+		$('#rubroCod').addClass('is-invalid');
+		$('#rubroCod').focus();
+		mjeError('Debe seleccionar un tipo de rubro');
+	} else if ($('#tipoRubro').val() == '0') {
+		$('#rubroCod').addClass('is-invalid');
+		$('#rubroCod').focus();
+		mjeError('El rubro no es un detalle', 'Seleccione un rubro de detalle');
+	} else if ($('#id_codigoCta').val() == '0') {
+		$('#codigoCta').addClass('is-invalid');
+		$('#codigoCta').focus();
+		mjeError('Debe seleccionar una cuenta contable');
+	} else if ($('#tipoDato').val() != 'D') {
+		$('#codigoCta').addClass('is-invalid');
+		$('#codigoCta').focus();
+		mjeError('La cuenta seleccionada no es de tipo detalle', 'Seleccione una cuenta de detalle');
+	} else {
+		var data = $('#formAddRubrosCaja').serialize();
+		$.ajax({
+			type: 'POST',
+			url: 'datos/registrar/guarda_rubros.php',
+			data: data,
+			dataType: 'json',
+			success: function (r) {
+				if (r.status == 'ok') {
+					cargarRubrosCaja(id, 0);
+					mje('Proceso realizado correctamente', 'Exito');
+				} else {
+					mjeError('Error: ' + r.msg);
+				}
+			}
+		});
+	}
+}
+function EditResponsableCaja(detalle) {
+	let id = $('#id_caja').val();
+	cargarResponsableCaja(id, detalle);
+	$('#tercerocrp').focus();
+}
+function EditRubroCaja(detalle) {
+	let id = $('#id_caja').val();
+	cargarRubrosCaja(id, detalle);
+	$('#slcConcepto').focus();
+}
+function ModEstadoResposableCaja(id, estado) {
+	let id_caja = $('#id_caja').val();
+	$.ajax({
+		type: 'POST',
+		url: 'datos/registrar/mod_estado_responsable_caja.php',
+		data: { id: id, estado: estado },
+		success: function (r) {
+			cargarResponsableCaja(id_caja, 0);
+		}
+	});
+	return false;
+}
 
+function cargarRubrosCaja(id_caja, id_detalle) {
+	$.post("lista_caja_menor_rubros.php", { id_caja: id_caja, id_detalle: id_detalle }, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-xl");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+}
 //============================================  FORMA DE PAGO ============================================*/
 
 // Cargar lista de centros de costo para realizar la causación del valor
@@ -2132,4 +2391,56 @@ function redireccionar6(ruta) {
 			.appendTo("body")
 			.submit();
 	}, 100);
+}
+function GuardaSaldoExtracto() {
+	let id_conciliacion = $('#id_conciliacion').val();
+	let id_cuenta = $('#id_cuenta').val();
+	let mes = $('#cod_mes').val();
+	let saldo = $('#saldoExtracto').val();
+	$.ajax({
+		type: 'POST',
+		dataType: 'json',
+		url: "datos/registrar/guarda_saldo_extracto.php",
+		data: { id_cuenta: id_cuenta, mes: mes, saldo: saldo, id_conciliacion: id_conciliacion },
+		success: function (r) {
+			if (r.status == 'ok') {
+				mje('Proceso realizado correctamente');
+				$('#id_conciliacion').val(r.id_conciliacion);
+			} else {
+				mjeError('Error:', r.msg);
+			}
+
+		}
+	});
+}
+
+function GuardaDetalleConciliacion(check) {
+	var id_conciliacion = $('#id_conciliacion').val();
+	var id_libaux = check.getAttribute('text');
+	if (id_conciliacion == '0') {
+		mjeError('Debe guardar el saldo del extracto');
+		return false;
+	} else {
+		var opc = check.checked ? 1 : 0;
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: "datos/registrar/guarda_detalle_conciliacion.php",
+			data: { id_conciliacion: id_conciliacion, id_libaux: id_libaux, opc: opc },
+			success: function (r) {
+				if (r.status == 'ok') {
+					let salLib = $('#salLib').val();
+					var valor = Number(salLib) + Number(r.debito) - Number(r.credito);
+					$('#saldoConcilia').val(valor.toLocaleString('es-MX'));
+					$('#tableDetConciliacion').DataTable().ajax.reload();
+					mje('Proceso realizado correctamente');
+				} else {
+					mjeError('Error:', r.msg);
+				}
+
+			}
+		});
+	}
+
+
 }

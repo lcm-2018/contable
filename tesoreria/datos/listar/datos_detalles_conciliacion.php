@@ -20,6 +20,7 @@ try {
                 , `ctb_libaux`.`credito`
                 , '--' AS `documento`
                 , `ctb_libaux`.`id_ctb_libaux`
+                , `tes_conciliacion_detalle`.`id_ctb_libaux` AS `conciliado`
             FROM
                 `ctb_libaux`
                 INNER JOIN `ctb_pgcp` 
@@ -30,6 +31,8 @@ try {
                     ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                 INNER JOIN `ctb_fuente` 
                     ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                LEFT JOIN `tes_conciliacion_detalle`
+                    ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)   
             WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_cuenta AND `ctb_doc`.`estado` = 2)";
     $rs = $cmd->query($sql);
     $lista = $rs->fetchAll();
@@ -59,9 +62,11 @@ if (!empty($lista)) {
     $terceros = json_decode($result, true);
 
     foreach ($lista as $lp) {
-        $check = '<input type="checkbox" name="check[' . $lp['id_ctb_libaux'] . ']" onclick="alert()">';
+        $chk = $lp['conciliado'] > 0 ? 'checked' : '';
+        $check = '<input ' . $chk . ' type="checkbox" name="check[]" onclick="GuardaDetalleConciliacion(this)" text="' . $lp['id_ctb_libaux'] . '">';
         $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero'));
         $nombre = $key !== false ? ltrim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']) : '---';
+        $estado = $lp['conciliado'] > 0 ? 'Conciliado' : 'Pendiente';
         $data[] = [
 
             'fecha' => date('Y-m-d', strtotime($lp['fecha'])),
@@ -70,7 +75,8 @@ if (!empty($lista)) {
             'documento' => $lp['documento'],
             'debito' => '<div class="text-right">' . pesos($lp['debito']) . '</div>',
             'credito' => '<div class="text-right">' . pesos($lp['credito']) . '</div>',
-            'estado' => '<div class="text-center vertical-align-middle">' . $check . '</div>',
+            'estado' => '<div class="text-center">' . $estado . '</div>',
+            'accion' => '<div class="text-center vertical-align-middle">' . $check . '</div>',
         ];
     }
 } else {

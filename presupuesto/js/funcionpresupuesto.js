@@ -1589,7 +1589,7 @@ document.addEventListener("keyup", (e) => {
         $("#rubroCod").autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: "datos/consultar/consultaRubrosMod.php",
+                    url: window.urlin+"/presupuesto/datos/consultar/consultaRubrosMod.php",
                     type: "post",
                     dataType: "json",
                     data: {

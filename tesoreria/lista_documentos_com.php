@@ -82,7 +82,7 @@ try {
                                     REGISTRO DE MOVIMIENTOS DE TESORERIA
                                 </div>
                                 <?php
-                                if (((PermisosUsuario($permisos, 5601, 2) && $tipo == 1) || (PermisosUsuario($permisos, 5602, 2) && $tipo == 2) || PermisosUsuario($permisos, 5603, 2) && $tipo == 3) || (PermisosUsuario($permisos, 5604, 2) && $tipo == 4)|| $id_rol == 1) {
+                                if (((PermisosUsuario($permisos, 5601, 2) && $tipo == 1) || (PermisosUsuario($permisos, 5602, 2) && $tipo == 2) || PermisosUsuario($permisos, 5603, 2) && $tipo == 3) || (PermisosUsuario($permisos, 5604, 2) && $tipo == 4) || $id_rol == 1) {
                                     echo '<input type="hidden" id="peReg" value="1">';
                                 } else {
                                     echo '<input type="hidden" id="peReg" value="0">';
@@ -145,30 +145,36 @@ try {
                                 </div>
                                 <br>
                                 <?php if ($tipo_doc != '0') { ?>
-                                    <table id="tableMvtoTesoreriaPagos" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
+                                    <table id="tableMvtoTesoreriaPagos" class="table table-striped table-bordered table-sm table-hover shadow" style="width:100%">
                                         <thead>
-                                            <tr>
-                                                <th style="width: 8%;">Numero</th>
-                                                <th style="width: 8%;">Fecha</th>
-                                                <th style="width: 8%;">CC/Nit</th>
-                                                <th style="width: 40%;">Tercero</th>
-                                                <th style="width: 12%;">Valor</th>
-                                                <th style="width: 12%;">Acciones</th>
-
+                                            <tr class="text-center">
+                                                <?php if ($tipo_doc != '13') { ?>
+                                                    <th style="width: 8%;">Numero</th>
+                                                    <th style="width: 8%;">Fecha</th>
+                                                    <th style="width: 8%;">CC/Nit</th>
+                                                    <th style="width: 40%;">Tercero</th>
+                                                    <th style="width: 12%;">Valor</th>
+                                                    <th style="width: 12%;">Acciones</th>
+                                                <?php
+                                                } else { ?>
+                                                    <th>Acto</th>
+                                                    <th>Num. Acto</th>
+                                                    <th>Nombre Caja</th>
+                                                    <th>Inicia</th>
+                                                    <th>Acto</th>
+                                                    <th>Total</th>
+                                                    <th>Minimo.</th>
+                                                    <th>Póliza</th>
+                                                    <th>%</th>
+                                                    <th>Estado</th>
+                                                    <th>Acciones</th>
+                                                <?php
+                                                }
+                                                ?>
                                             </tr>
                                         </thead>
                                         <tbody id="modificartableMvtoTesoreriaPagos">
                                         </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <th>Numero</th>
-                                                <th>Fecha</th>
-                                                <th>CC/Nit</th>
-                                                <th>Tercero</th>
-                                                <th>Valor</th>
-                                                <th>Acciones</th>
-                                            </tr>
-                                        </tfoot>
                                     </table>
                                 <?php } ?>
                             </div>
