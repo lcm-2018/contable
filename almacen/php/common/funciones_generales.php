@@ -78,13 +78,15 @@ function datos_lote($cmd, $id_lote){
 function datos_articulo($cmd, $id_med){
     try {
         $res = array();
-        $sql = "SELECT id_med,nom_medicamento AS nom_articulo,val_promedio
+        $sql = "SELECT id_med,nom_medicamento,val_promedio
                 FROM far_medicamentos
                 WHERE id_med=$id_med";
         $rs = $cmd->query($sql);
         $obj = $rs->fetch();
         if (isset($obj['id_med'])) {
-            $res = array('id_med' => $obj['id_med'], 'nom_articulo' => $obj['nom_articulo'], 'val_promedio' => $obj['val_promedio']);
+            $res = array('id_med' => $obj['id_med'], 
+                        'nom_articulo' => $obj['nom_medicamento'], 
+                        'val_promedio' => $obj['val_promedio']);
         } else {
             $res = array('id_med' => '', 'nom_articulo' => '', 'val_promedio' => '');
         }

@@ -16,7 +16,7 @@ if ($length != -1) {
 $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 
-$where_gen = " WHERE far_medicamentos.estado=1";
+$where_gen = " WHERE far_medicamentos.estado=1 AND far_subgrupos.id_grupo IN (1,2)";
 
 $where = $where_gen;
 if (isset($_POST['codigo']) && $_POST['codigo']) {
@@ -34,21 +34,24 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM far_medicamentos" . $where_gen;
+    $sql = "SELECT COUNT(*) AS total FROM far_medicamentos
+            INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)" . $where_gen;
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(*) AS total FROM far_medicamentos" . $where;
+    $sql = "SELECT COUNT(*) AS total FROM far_medicamentos
+            INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)" . $where;
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT id_med,cod_medicamento,nom_medicamento,existencia,val_promedio
-            FROM far_medicamentos"            
-            . $where . " GROUP BY id_med ORDER BY $col $dir $limit";
+            FROM far_medicamentos
+            INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)"            
+            . $where . " ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();

@@ -72,7 +72,7 @@ $data = [];
 if (!empty($objs)) {
     foreach ($objs as $obj) {
         $id = $obj['id_med'];
-        //Permite crear botones en la cuadricula si tiene permisos de 3-Editar,4-Eliminar
+        //Permite crear botones en la cuadricula si tiene permisos de 1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir
         if (PermisosUsuario($permisos, 5701, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }

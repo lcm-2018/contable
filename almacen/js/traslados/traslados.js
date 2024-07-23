@@ -152,6 +152,7 @@
                         let pag = ($('#id_traslado').val() == -1) ? 0 : $('#tb_traslados').DataTable().page.info().page;
                         reloadtable('tb_traslados', pag);
                         $('#id_traslado').val(r.id);
+                        $('#txt_ide').val(r.id);
 
                         $('#sl_sede_origen').prop('disabled', true);
                         $('#sl_bodega_origen').prop('disabled', true);

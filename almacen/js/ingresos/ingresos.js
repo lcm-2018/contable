@@ -137,6 +137,7 @@
                     let pag = ($('#id_ingreso').val() == -1) ? 0 : $('#tb_ingresos').DataTable().page.info().page;
                     reloadtable('tb_ingresos', pag);
                     $('#id_ingreso').val(r.id);
+                    $('#txt_ide').val(r.id);
 
                     $('#btn_cerrar').prop('disabled', false);
                     $('#btn_imprimir').prop('disabled', false);

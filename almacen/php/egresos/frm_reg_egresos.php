@@ -55,6 +55,10 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
             <form id="frm_reg_orden_egreso">
                 <input type="hidden" id="id_egreso" name="id_egreso" value="<?php echo $id ?>">
                 <div class="form-row">
+                    <div class="form-group col-md-1">
+                        <label for="txt_fec_ing" class="small">Id.</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_ide" name="txt_ide" class="small" value="<?php echo ($id==-1?'':$id) ?>" readonly="readonly">
+                    </div>
                     <div class="form-group col-md-2">
                         <label for="sl_sede_egr" class="small" required>Sede</label>
                         <select class="form-control form-control-sm" id="sl_sede_egr" name="sl_sede_egr" <?php echo $editar ?>>
@@ -67,7 +71,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             <?php bodegas_usuario($cmd, '', $obj['id_sede'], $obj['id_bodega']) ?>   
                         </select>
                     </div>
-                    <div class="form-group col-md-7">
+                    <div class="form-group col-md-6">
                         <div class="form-row">
                             <div class="form-group col-md-3">
                                 <label for="txt_fec_egr" class="small">Fecha egreso</label>
