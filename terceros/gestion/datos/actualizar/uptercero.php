@@ -185,10 +185,10 @@ if ($tercero !== '0') {
                         <select id="slcDptoEmp" name="slcDptoEmp" class="form-control form-control-sm py-0 sm" aria-label="Default select example">
                             <?php
                             foreach ($dpto as $d) {
-                                if ($d['id_dpto'] !== $tercero['departamento']) {
-                                    echo '<option value="' . $d['id_dpto'] . '">' . $d['nom_departamento'] . '</option>';
+                                if ($d['id_departamento'] !== $tercero['departamento']) {
+                                    echo '<option value="' . $d['id_departamento'] . '">' . $d['nom_departamento'] . '</option>';
                                 } else {
-                                    echo '<option selected value="' . $d['id_dpto'] . '">' . $d['nom_departamento'] . '</option>';
+                                    echo '<option selected value="' . $d['id_departamento'] . '">' . $d['nom_departamento'] . '</option>';
                                 }
                             }
                             ?>

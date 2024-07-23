@@ -28,7 +28,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$id_t[] = $doc['id_tercero'];
+$id_t[] = $doc['id_tercero'] > 0 ? $doc['id_tercero'] : 0;
 $id_tercero_gen = $doc['id_tercero'];
 $num_doc = '';
 // Valor total del cdp
@@ -168,21 +168,22 @@ foreach ($retenciones as $ret) {
         $id_t[] = $ret['id_terceroapi'];
     }
 }
-if (count($id_t) > 1) {
+$terceros = [];
+if (!empty($id_t)) {
     $id_t = array_unique($id_t);
+    $payload = json_encode($id_t);
+    //API URL
+    $url = $api . 'terceros/datos/res/lista/terceros';
+    $ch = curl_init($url);
+    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $result = curl_exec($ch);
+    curl_close($ch);
+    $terceros = json_decode($result, true);
 }
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 try {
     $sql = "SELECT `razon_social_ips` AS `nombre`, `nit_ips` AS `nit`, `dv` AS `dig_ver` FROM `tb_datos_ips`;";
@@ -272,7 +273,12 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                 <td class='text-left' style="width:18%">TERCERO:</td>
                 <td class='text-left'>
                     <?php
-                    $response = NombreTercero($id_tercero_gen, $terceros);
+                    if ($id_tercero_gen  > 0) {
+                        $response = NombreTercero($id_tercero_gen, $terceros);
+                    } else {
+                        $response['nombre'] = '---';
+                        $response['cc_nit'] = '---';
+                    }
                     echo $response['nombre'];
                     ?>
                 </td>

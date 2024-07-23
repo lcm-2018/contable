@@ -8,7 +8,7 @@ if (!isset($_SESSION['user'])) {
 include '../../conexion.php';
 include '../../permisos.php';
 date_default_timezone_set('America/Bogota');
-$key = array_search('51', array_column($perm_modulos, 'id_modulo'));
+$key = array_search('1', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
     exit();
@@ -67,10 +67,47 @@ try {
             FROM
                 `nom_empleado`
                 LEFT JOIN  
-                (SELECT 
-                    `id_empleado`,`val_bsp`,`mes`,`anio`
-                FROM `nom_liq_bsp`
-                WHERE `id_bonificaciones` IN (SELECT MAX(`id_bonificaciones`) FROM `nom_liq_bsp` WHERE `id_empleado`IN ($ids) GROUP BY `id_empleado`)) AS `t1`
+                    (SELECT
+                        `ts1`.`id_empleado`, `val_bsp`,`mes`,`anio` 
+                    FROM 
+                        (SELECT 
+                            `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
+                        FROM 
+                            `nom_liq_bsp`
+                        WHERE `id_bonificaciones` IN 
+                            (SELECT
+                                MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                            FROM
+                                `nom_liq_bsp`
+                            INNER JOIN `nom_nominas`
+                                ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                            WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                            GROUP BY `nom_liq_bsp`.`id_empleado`
+                            UNION ALL
+                            SELECT
+                                MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                            FROM
+                                `nom_liq_bsp`
+                            INNER JOIN `nom_nominas` 
+                                ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                            WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                            GROUP BY `nom_liq_bsp`.`id_empleado`)
+                        GROUP BY `id_empleado`) AS  `ts1`
+                    ON (`nom_empleado`.`id_empleado` = `ts1`.`id_empleado`)
+                INNER JOIN
+                    (SELECT 
+                        `id_empleado`,`mes`,`anio` 
+                    FROM  `nom_liq_bsp` 
+                    WHERE  `id_bonificaciones` IN 
+                        (SELECT
+                            MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                        FROM
+                            `nom_liq_bsp`
+                        INNER JOIN `nom_nominas` 
+                            ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                        WHERE (`nom_nominas`.`tipo` = 'N' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                        GROUP BY `nom_liq_bsp`.`id_empleado`)) AS `ts2`
+                    ON (`ts1`.`id_empleado` = `ts2`.`id_empleado`)) AS `t1`
                     ON (`t1`.`id_empleado` = `nom_empleado`.`id_empleado`)
                 LEFT JOIN 
                 (SELECT 
@@ -116,7 +153,7 @@ try {
                     , SUM(`nom_liq_vac`.`val_prima_vac`) AS `val_prima_vac`
                     , SUM(`nom_liq_vac`.`val_liq`) AS `val_liq`
                     , SUM(`nom_liq_vac`.`val_bon_recrea`) AS `val_bon_recrea`
-                    , `nom_vacaciones`.`corte` AS `corte`  
+                    , `nom_vacaciones`.`corte`  
                 FROM
                     `nom_liq_vac`
                 INNER JOIN `nom_vacaciones` 
@@ -125,7 +162,7 @@ try {
                     (SELECT 
                         MAX(`nom_vacaciones`.`id_vac`) 
                     FROM  `nom_vacaciones`
-                    INNER JOIN  nom_liq_vac
+                    INNER JOIN  `nom_liq_vac`
                         ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
                     INNER JOIN `nom_nominas`
                         ON (`nom_liq_vac`.`id_nomina` = `nom_nominas`.`id_nomina`)
@@ -135,7 +172,7 @@ try {
                     SELECT 
                         MAX(`nom_vacaciones`.`id_vac`) 
                     FROM  `nom_vacaciones`
-                    INNER JOIN  nom_liq_vac
+                    INNER JOIN  `nom_liq_vac`
                         ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
                     INNER JOIN `nom_nominas`
                         ON (`nom_liq_vac`.`id_nomina` = `nom_nominas`.`id_nomina`)
@@ -170,8 +207,8 @@ try {
     $sql = "SELECT `anio`, `id_concepto`, `valor`
             FROM
                 `nom_valxvigencia`
-            INNER JOIN `tb_vigencias` 
-                ON (`nom_valxvigencia`.`id_vigencia` = `tb_vigencias`.`id_vigencia`)
+            INNER JOIN `con_vigencias` 
+                ON (`nom_valxvigencia`.`id_vigencia` = `con_vigencias`.`id_vigencia`)
             WHERE `anio` = '$vigencia'";
     $rs = $cmd->query($sql);
     $val_vig = $rs->fetchAll();

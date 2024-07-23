@@ -106,20 +106,24 @@ $fecha = date('Y-m-d', strtotime($datosDoc['fecha']));
 // Consulto tercero registrado en contratación del api de tercero para mostrar el nombre
 // Consulta terceros en la api ********************************************* API
 if (!empty($datosDoc)) {
-    $id_t = ['0' => $datosDoc['id_tercero']];
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res_api = curl_exec($ch);
-    curl_close($ch);
-    $dat_ter = json_decode($res_api, true);
-    $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
+    if ($datosDoc['id_tercero'] > 0) {
+        $id_t = ['0' => $datosDoc['id_tercero']];
+        $payload = json_encode($id_t);
+        //API URL
+        $url = $api . 'terceros/datos/res/lista/terceros';
+        $ch = curl_init($url);
+        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $res_api = curl_exec($ch);
+        curl_close($ch);
+        $dat_ter = json_decode($res_api, true);
+        $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
+    } else {
+        $tercero = '---';
+    }
 } else {
     $tercero = '';
 }

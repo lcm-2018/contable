@@ -113,9 +113,28 @@ try {
                 `nom_empleado`
                 LEFT JOIN  
                 (SELECT 
-                    `id_empleado`,`val_bsp`
-                FROM `nom_liq_bsp`
-                WHERE `id_bonificaciones` IN (SELECT MAX(`id_bonificaciones`) FROM `nom_liq_bsp` WHERE `id_empleado`IN ($ids) GROUP BY `id_empleado`)) AS `t1`
+                    `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
+                FROM 
+                    `nom_liq_bsp`
+                WHERE `id_bonificaciones` IN 
+                    (SELECT
+                        MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                    FROM
+                        `nom_liq_bsp`
+                    INNER JOIN `nom_nominas`
+                        ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                    WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                    GROUP BY `nom_liq_bsp`.`id_empleado`
+                    UNION ALL
+                    SELECT
+                        MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                    FROM
+                        `nom_liq_bsp`
+                    INNER JOIN `nom_nominas` 
+                        ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                    WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                    GROUP BY `nom_liq_bsp`.`id_empleado`)
+                GROUP BY `id_empleado`) AS `t1`
                     ON (`t1`.`id_empleado` = `nom_empleado`.`id_empleado`)
                 LEFT JOIN
                 (SELECT   

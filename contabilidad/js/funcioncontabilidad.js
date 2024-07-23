@@ -451,8 +451,7 @@ $('#divModalForms').on('click', '#gestionarMvtoCtb', function () {
 			data: datos,
 			success: function (r) {
 				if (r == 'ok') {
-					let id_t = 'tableMvtoContable';
-					reloadtable(id_t);
+					$('#tableMvtoContable').DataTable().ajax.reload();
 					$('#divModalForms').modal('hide');
 					mje('Proceso realizado correctamente');
 				} else {

@@ -13,8 +13,8 @@
         $('#divModalupEmpHecho').modal('hide');
         window.location = '../listempleados.php';
     });
-    $("#btnConfirDelEmpleado").click(function () { //del empleado confirmado
-        $('#divModalConfirmarDel').modal('hide');
+    $("#divModalConfDel").on('click', '#btnConfirDelEmpleado', function () { //del empleado confirmado
+        $('#divModalConfDel').modal('hide');
         $.ajax({
             type: 'POST',
             url: 'eliminar/delempleado.php',
@@ -23,7 +23,7 @@
                 if (r === '1') {
                     rowdel();
                     $('#divModalDone').modal('show');
-                    $('#divMsgExitoDelEmpl').html("Empleado eliminado correctamente");
+                    $('#divMsgDone').html("Empleado eliminado correctamente");
                 } else {
                     $('#divModalError').modal('show');
                     $('#divMsgError').html(r);
@@ -2560,8 +2560,9 @@
             url: 'eliminar/busempleado.php',
             data: { idempleado: idempleado },
             success: function (r) {
-                $('#divModalConfirmarDel').modal('show');
-                $('#divConfirmdel').html(r);
+                $('#divModalConfDel').modal('show');
+                $('#divMsgConfdel').html(r);
+                $('#divBtnsModalDel').html('<button type="button" class="btn btn-danger btn-sm" id="btnConfirDelEmpleado">Eliminar</button><button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>');
             }
         });
         return false;

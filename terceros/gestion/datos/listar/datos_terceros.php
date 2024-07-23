@@ -44,7 +44,8 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $result = curl_exec($ch);
 curl_close($ch);
 $terceros = json_decode($result, true);
-if ($terceros != '0') {
+$data = [];
+if (!empty($terEmpr)) {
     foreach ($terEmpr as $t) {
         $idter = $t['no_doc'];
         $key = array_search($idter, array_column($terceros, 'cc_nit'));
@@ -90,8 +91,6 @@ if ($terceros != '0') {
             ];
         }
     }
-} else {
-    $data = [];
 }
 
 $datos = ['data' => $data];

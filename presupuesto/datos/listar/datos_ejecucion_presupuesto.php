@@ -69,6 +69,8 @@ try {
                 WHERE `pto_cdp`.`id_pto` = $id_pto_presupuestos) AS `t1`
                 GROUP BY `id_pto_cdp`) AS `t2` 
                 ON(`t2`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
+            WHERE `pto_cdp`.`id_pto` = $id_pto_presupuestos
+            ORDER BY `pto_cdp`.`id_manu` DESC
             LIMIT $start, $length";
     $rs = $cmd->query($sql);
     $listappto = $rs->fetchAll();

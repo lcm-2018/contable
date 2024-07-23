@@ -78,10 +78,28 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT 
-                `id_empleado`,`val_bsp`
-            FROM `nom_liq_bsp`
+                `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
+            FROM 
+                `nom_liq_bsp`
             WHERE `id_bonificaciones` IN 
-            (SELECT MAX(`id_bonificaciones`) FROM `nom_liq_bsp` WHERE `id_empleado`IN ($ids) GROUP BY `id_empleado`)";
+                (SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas`
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`
+                UNION ALL
+                SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas` 
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`)
+            GROUP BY `id_empleado`";
     $rs = $cmd->query($sql);
     $bon_servicios = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;

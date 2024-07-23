@@ -211,7 +211,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar departamento--</option>
                                                 <?php
                                                 foreach ($dpto as $d) {
-                                                    echo '<option value="' . $d['id_dpto'] . '">' . $d['nom_departamento'] . '</option>';
+                                                    echo '<option value="' . $d['id_departamento'] . '">' . $d['nom_departamento'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -245,7 +245,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar departamento--</option>
                                                 <?php
                                                 foreach ($dpto as $d) {
-                                                    echo '<option value="' . $d['id_dpto'] . '">' . $d['nom_departamento'] . '</option>';
+                                                    echo '<option value="' . $d['id_departamento'] . '">' . $d['nom_departamento'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -316,7 +316,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar departamento--</option>
                                                 <?php
                                                 foreach ($dpto as $d) {
-                                                    echo '<option value="' . $d['id_dpto'] . '">' . $d['nom_departamento'] . '</option>';
+                                                    echo '<option value="' . $d['id_departamento'] . '">' . $d['nom_departamento'] . '</option>';
                                                 }
                                                 ?>
                                             </select>

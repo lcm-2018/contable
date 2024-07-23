@@ -325,11 +325,29 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT
-            `val_bsp`,`id_empleado`
-        FROM
-            `nom_liq_bsp`
-        WHERE `id_bonificaciones` IN ( SELECT MAX(`id_bonificaciones`) FROM `nom_liq_bsp` GROUP BY `id_empleado`)";
+    $sql = "SELECT 
+                `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
+            FROM 
+                `nom_liq_bsp`
+            WHERE `id_bonificaciones` IN 
+                (SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas`
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`
+                UNION ALL
+                SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas` 
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`)
+            GROUP BY `id_empleado`";
     $res = $cmd->query($sql);
     $bonxserv = $res->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {

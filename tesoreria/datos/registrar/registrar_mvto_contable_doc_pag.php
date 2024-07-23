@@ -9,13 +9,14 @@ $fecha = $_POST['fecha'];
 $id_tipo_doc = $_POST['id_ctb_doc'];
 $id_tercero = $_POST['id_tercero'];
 $detalle = $_POST['objeto'];
-$referencia = $_POST['referencia'] > 0 ? $_POST['referencia'] : NULL;
-$id_ref_ctb = $_POST['ref_mov'] > 0 ? $_POST['ref_mov'] : NULL;
+$referencia = isset($_POST['referencia']) ? $_POST['referencia'] : NULL;
+$id_ref_ctb = isset($_POST['ref_mov']) ? $_POST['ref_mov'] : NULL;
 $id_reg = $_POST['id'];
 $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha2 = $date->format('Y-m-d H:i:s');
 $id_vigencia = $_SESSION['id_vigencia'];
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -54,6 +55,15 @@ try {
         $query->bindParam(11, $id_ref_ctb, PDO::PARAM_INT);
         $query->execute();
         if ($cmd->lastInsertId() > 0) {
+            if (isset($_POST['id_caja'])) {
+                $id = $cmd->lastInsertId();
+                $id_caja = $_POST['id_caja'];
+                $query = "INSERT INTO `tes_caja_doc` (`id_ctb_doc`, `id_caja`) VALUES (?, ?)";
+                $query = $cmd->prepare($query);
+                $query->bindParam(1, $id, PDO::PARAM_INT);
+                $query->bindParam(2, $id_caja, PDO::PARAM_INT);
+                $query->execute();
+            }
             echo 'ok';
         } else {
             echo $query->errorInfo()[2] . $query->queryString . 'id_tipo_doc: ' . $id_tipo_doc;
@@ -72,7 +82,18 @@ try {
         if (!($query->execute())) {
             echo $query->errorInfo()[2] . $query->queryString;
         } else {
-            if ($query->rowCount() > 0) {
+            $up = false;
+            if (isset($_POST['id_caja'])) {
+                $sql = "UPDATE `tes_caja_doc` SET `id_caja` = ? WHERE (`id_ctb_doc` = ?)";
+                $sql = $cmd->prepare($sql);
+                $sql->bindParam(1, $_POST['id_caja'], PDO::PARAM_INT);
+                $sql->bindParam(2, $id_reg, PDO::PARAM_INT);
+                $sql->execute();
+                if ($sql->rowCount() > 0) {
+                    $up = true;
+                }
+            }
+            if ($query->rowCount() > 0 || $up) {
                 $query = "UPDATE `ctb_doc` SET `id_user_act` = ?, `fecha_act` = ? WHERE (`id_ctb_doc` = ?)";
                 $query = $cmd->prepare($query);
                 $query->bindParam(1, $iduser, PDO::PARAM_INT);

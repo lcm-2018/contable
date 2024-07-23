@@ -204,7 +204,6 @@ var tabla;
 			}
 		});
 		$("#tableMvtoContableDetallePag").wrap('<div class="overflow" />');
-
 		// Lista de chequeras creadas en el sistema
 		$("#tableFinChequeras").DataTable({
 			dom: setdom,
@@ -532,8 +531,15 @@ function cargarListaArqueoConsignacion(id_doc) {
 function cargarListaDetallePagoEdit(id_doc) {
 	let tipo_dato = $("#id_ctb_tipo").val();
 	let tipo_movi = $("#var_tip").val();
+	let url;
+	if (tipo_dato == '14') {
+		url = 'lista_documentos_caja.php';
+	} else {
+		url = 'lista_documentos_pag.php';
 
-	$('<form action="lista_documentos_pag.php" method="post"><input type="hidden" name="id_doc" value="' +
+	}
+
+	$('<form action="' + url + '" method="post"><input type="hidden" name="id_doc" value="' +
 		id_doc +
 		'" /><input type="hidden" name="tipo_dato" value="' +
 		tipo_dato +
@@ -697,23 +703,35 @@ $('#divModalForms').on('click', '#gestionarMvtoCtbPag', function () {
 		$('#objeto').focus();
 		mjeError('El objeto no puede estar vacio');
 	} else {
-		var datos = $('#formGetMvtoTes').serialize() + '&id=' + id;
-		url = "datos/registrar/registrar_mvto_contable_doc_pag.php";
-		$.ajax({
-			type: 'POST',
-			url: url,
-			data: datos,
-			success: function (r) {
-				if (r == 'ok') {
-					$('#divModalForms').modal('hide');
-					mje('Proceso realizado correctamente');
-					$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
-				} else {
-					mjeError('Error:', r);
-				}
-
+		var band = true;
+		if ($('#id_caja').length) {
+			if ($('#id_caja').val() == '0') {
+				$('#id_caja').addClass('is-invalid');
+				$('#id_caja').focus();
+				mjeError('La caja no puede estar vacia');
+				band = false;
+				return false;
 			}
-		});
+		}
+		if (band) {
+			var datos = $('#formGetMvtoTes').serialize() + '&id=' + id;
+			url = "datos/registrar/registrar_mvto_contable_doc_pag.php";
+			$.ajax({
+				type: 'POST',
+				url: url,
+				data: datos,
+				success: function (r) {
+					if (r == 'ok') {
+						$('#divModalForms').modal('hide');
+						mje('Proceso realizado correctamente');
+						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+					} else {
+						mjeError('Error:', r);
+					}
+
+				}
+			});
+		}
 	}
 	return false;
 
@@ -1588,7 +1606,53 @@ const generaMovimientoPag = () => {
 			console.log("Error:");
 		});
 };
+const generaMovimientoCaja = () => {
+	let id = id_ctb_doc.value;
+	let id_cop = id_cop_pag.value;
+	let tipo = $('#tipodato').val();
+	// verificar si los tres valores son iguales
+	let id_crp = $('#id_crp').length ? $('#id_crp').val() : 0;
+	fetch("datos/registrar/registrar_mvto_libaux_auto_caja.php", {
+		method: "POST",
+		body: JSON.stringify({ id: id, id_crp: id_crp, id_cop: id_cop, tipo: tipo }),
+	})
+		.then((response) => response.json())
+		.then((response) => {
+			console.log(response);
+			if (response.status == "ok") {
+				mje("Movimiento generado con éxito ");
+				$('#tableMvtoContableDetallePag').DataTable().ajax.reload(function (json) {
+					// Obtener los datos del tfoot de la DataTable
+					var tfootData = json.tfoot;
+					// Construir el tfoot de la DataTable
+					var tfootHtml = '<tfoot><tr>';
+					$.each(tfootData, function (index, value) {
+						tfootHtml += '<th>' + value + '</th>';
+					});
+					tfootHtml += '</tr></tfoot>';
+					// Reemplazar el tfoot existente en la tabla
+					$('#tableMvtoContableDetallePag').find('tfoot').remove();
+					$('#tableMvtoContableDetallePag').append(tfootHtml);
+				});
+			} else {
+				mjeError("Error: " + response.msg);
+			}
+		})
+		.catch((error) => {
+			console.log("Error:");
+		});
+};
 
+const ImputacionCtasCajas = (id) => {
+	let url = "lista_imputacion_caja.php";
+	$.post(url, { id: id }, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-xl");
+		$("#divTamModalForms").addClass("modal-lg");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+};
 /*=================================   IMPRESION DE FORMATOS =====================================*/
 const imprimirFormatoTes = (id) => {
 	if (id == "") {
