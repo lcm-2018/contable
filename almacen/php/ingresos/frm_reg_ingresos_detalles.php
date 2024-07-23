@@ -73,11 +73,11 @@ if (empty($obj)) {
                         <input type="text" class="form-control form-control-sm" id="txt_can_lot" value="<?php echo $obj['cantidad_umpl'] ?>" readonly="readonly">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="txt_can_ing" class="small">Cantidad</label>
+                        <label for="txt_can_ing" class="small">Cantidadd</label>
                         <input type="number" class="form-control form-control-sm numberint" id="txt_can_ing" name="txt_can_ing" required value="<?php echo $obj['cantidad'] ?>">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="txt_val_uni" class="small">Vr. Unitario</label>
+                        <label for="txt_val_uni" class="small">Vr. Unitarioo</label>
                         <input type="text" class="form-control form-control-sm numberfloat" id="txt_val_uni" name="txt_val_uni" required value="<?php echo $obj['valor_sin_iva'] ?>">
                     </div>
                     <div class="form-group col-md-3">

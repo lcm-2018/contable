@@ -62,6 +62,10 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
             <form id="frm_reg_pedidos">
                 <input type="hidden" id="id_pedido" name="id_pedido" value="<?php echo $id ?>">
                 <div class="form-row">
+                    <div class="form-group col-md-1">
+                        <label for="txt_fec_ing" class="small">Id.</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_ide" name="txt_ide" class="small" value="<?php echo ($id==-1?'':$id) ?>" readonly="readonly">
+                    </div>
                     <div class="form-group col-md-2">
                         <label for="txt_fec_pedido" class="small">Fecha Pedido</label>
                         <input type="text" class="form-control form-control-sm" id="txt_fec_pedido" name="txt_fec_pedido" class="small" value="<?php echo $obj['fec_pedido'] ?>" readonly="readonly">

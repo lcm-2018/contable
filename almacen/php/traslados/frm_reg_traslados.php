@@ -61,7 +61,11 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
             <!--Formulario de registro de traslado-->
             <form id="frm_reg_traslados">
                 <input type="hidden" id="id_traslado" name="id_traslado" value="<?php echo $id ?>">
-                <div class="form-row">                    
+                <div class="form-row">  
+                    <div class="form-group col-md-1">
+                        <label for="txt_fec_ing" class="small">Id.</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_ide" name="txt_ide" class="small" value="<?php echo ($id==-1?'':$id) ?>" readonly="readonly">
+                    </div>                  
                     <div class="form-group col-md-2">
                         <label for="txt_fec_traslado" class="small">Fecha traslado</label>
                         <input type="text" class="form-control form-control-sm" id="txt_fec_traslado" name="txt_fec_traslado" class="small" value="<?php echo $obj['fec_traslado'] ?>" readonly="readonly">

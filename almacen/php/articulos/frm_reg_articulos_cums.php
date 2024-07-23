@@ -49,7 +49,7 @@ if (empty($obj)) {
                     </div>
                     <div class="form-group col-md-3">
                         <label for="txt_cod_ium" class="small">IUM</label>
-                        <input type="text" class="form-control form-control-sm number" id="txt_cod_ium" name="txt_cod_ium" value="<?php echo $obj['ium'] ?>">
+                        <input type="number" class="form-control form-control-sm number" id="txt_cod_ium" name="txt_cod_ium" value="<?php echo $obj['ium'] ?>">
                     </div>
                     <div class="form-group col-md-6">
                         <label for="txt_lab_cum" class="small">Laboratorio</label>

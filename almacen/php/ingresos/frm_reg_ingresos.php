@@ -59,7 +59,11 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
             <form id="frm_reg_orden_ingreso">
                 <input type="hidden" id="id_ingreso" name="id_ingreso" value="<?php echo $id ?>">
                 <div class="form-row">
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-1">
+                        <label for="txt_fec_ing" class="small">Id.</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_ide" name="txt_ide" class="small" value="<?php echo ($id==-1?'':$id) ?>" readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-3">
                         <label for="txt_nom_bod" class="small">Bodega</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_bod" class="small" value="<?php echo $obj['nom_bodega'] ?>" readonly="readonly">
                         <input type="hidden" id="id_txt_nom_bod" name="id_txt_nom_bod" value="<?php echo $obj['id_bodega'] ?>">
@@ -102,7 +106,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-12">
-                    <label for="txt_det_ing" class="small">Detalle</label>                   
+                        <label for="txt_det_ing" class="small">Detalle</label>                   
                         <textarea class="form-control" id="txt_det_ing" name="txt_det_ing" rows="2"><?php echo $obj['detalle'] ?></textarea>
                     </div>
                 </div>

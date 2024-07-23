@@ -102,6 +102,11 @@ var verifica_valmin = function(objeto, val = 0, msg = "") {
     return error;
 };
 
+var showError = function(error) {
+    $('#divModalError').modal('show');
+    $('#divMsgError').html(error);
+}
+
 $(function() {
     //clase con Dato numerico
     $('#divForms,#divModalReg').on("input", ".number", function() {

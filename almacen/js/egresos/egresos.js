@@ -145,6 +145,7 @@
                     let pag = ($('#id_egreso').val() == -1) ? 0 : $('#tb_egresos').DataTable().page.info().page;
                     reloadtable('tb_egresos', pag);
                     $('#id_egreso').val(r.id);
+                    $('#txt_ide').val(r.id);
 
                     $('#sl_sede_egr').prop('disabled', true);
                     $('#sl_bodega_egr').prop('disabled', true);
