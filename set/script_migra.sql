@@ -1,12 +1,15 @@
 INSERT  INTO `seg_rol`
 	(`id_rol`,`nom_rol`,`id_usr_crea`) 
-VALUES (0,'NINGUNO',NULL),(1,'ADMINISTRADOR',NULL),(2,'ADMISION Y CITAS',NULL),(3,'FACTURACION',NULL),(4,'MEDICOS',NULL),(5,'ENFERMERAS',NULL),(6,'LABORATORIO',NULL),(7,'BACTERIOLOGO',NULL),(8,'PSICOLOGO',NULL),(9,'ODONTOLOGOS',NULL),(10,'ESPECIALISTAS MEDICINA',NULL),(11,'FARMACIA',NULL),(12,'NUTRICIONISTA',NULL),(13,'POSCONSULTA',NULL),(14,'PYP',NULL);
+VALUES (1,'ADMINISTRADOR',NULL),(2,'ADMISION Y CITAS',NULL),(3,'FACTURACION',NULL),(4,'MEDICOS',NULL),(5,'ENFERMERAS',NULL),(6,'LABORATORIO',NULL),(7,'BACTERIOLOGO',NULL),(8,'PSICOLOGO',NULL),(9,'ODONTOLOGOS',NULL),(10,'ESPECIALISTAS MEDICINA',NULL),(11,'FARMACIA',NULL),(12,'NUTRICIONISTA',NULL),(13,'POSCONSULTA',NULL),(14,'PYP',NULL);
+
+INSERT  INTO `seg_rol` (`nom_rol`,`id_usr_crea`) VALUES ('NINGUNO',NULL);
 UPDATE `seg_rol` SET `id_rol` = 0 WHERE `nom_rol` = 'NINGUNO';
+ALTER TABLE `seg_rol` AUTO_INCREMENT = 1;
 
 INSERT INTO `bd_cronhis`.`seg_usuarios_sistema`
 	(`id_user_fin`,`login`,`clave`,`id_rol`,`id_tipo_doc`,`num_documento`,`apellido1`,`apellido2`,`nombre1`,`nombre2`,`email`,`fec_creacion`,`estado`)
 SELECT 
-	`id_usuario`,`login`,`clave`,`id_rol`,4 AS doc, `documento`,`apellido1`,`apellido2`,`nombre1`,`nombre2`,`correo`,`fec_reg`,`estado`
+	`id_usuario`,`login`,`clave`,`id_rol`,4 AS `doc`, `documento`,`apellido1`,`apellido2`,`nombre1`,`nombre2`,`correo`,`fec_reg`,`estado`
 FROM `financiero`.`seg_usuarios`
 WHERE `id_usuario` <> 1;
 
@@ -138,8 +141,8 @@ FROM `financiero`.`seg_nominas`
 WHERE `id_nomina` > 0;
 
 INSERT INTO `bd_cronhis`.`nom_nominas`
-	(`id_nomina`,`descripcion`,`mes`,`vigencia`,`tipo`,`estado`,`planilla`,`id_incremento`,`fec_reg`,`id_user_reg`,`fec_act`)
-VALUES(0,'INICIAL',NULL,NULL,'N',5,5,NULL,NULL,25,NULL);
+	(`descripcion`,`mes`,`vigencia`,`tipo`,`estado`,`planilla`,`id_incremento`,`fec_reg`,`id_user_reg`,`fec_act`)
+VALUES('INICIAL',NULL,NULL,'N',5,5,NULL,NULL,25,NULL);
 
 UPDATE `bd_cronhis`.`nom_nominas` SET `id_nomina` = 0 WHERE `descripcion` = 'INICIAL';
 
@@ -284,6 +287,7 @@ FROM
     `financiero`.`seg_terceros`
     INNER JOIN `financiero`.`tb_terceros_api` 
         ON (`seg_terceros`.`id_tercero_api` = `tb_terceros_api`.`id_tercero`);
+
 		
 INSERT INTO `bd_cronhis`.`seg_terceros`
 	(`id_tercero`,`id_tercero_api`,`tipo_doc`,`no_doc`,`estado`,`fec_inicio`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`)
@@ -317,7 +321,7 @@ SELECT
 		WHEN `vigencia` = 2023 THEN 7
 		WHEN `vigencia` = 2024 THEN 8
 	END,`nombre`,`descripcion`,0 AS `est`,`id_user_reg`,`fec_reg`,`id_usuer_act`,`fec_act`
-FROM `financiero`.`seg_pto_presupuestos`
+FROM `financiero`.`seg_pto_presupuestos`;
 
 INSERT INTO `bd_cronhis`.`pto_cargue`
 	(`id_cargue`,`id_pto`,`id_tipo_recurso`,`cod_pptal`,`nom_rubro`,`tipo_dato`,`valor_aprobado`,`tipo_pto`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`)
@@ -488,6 +492,23 @@ GROUP BY `id_pto_doc`,`id_pto_cdp_det`,`id_tercero_api`;
 INSERT INTO `bd_cronhis`.`ctb_doc`
 	(`id_ctb_doc`,`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_ref`,`id_ref_ctb`,`id_crp`,`id_tercero`,`fecha`,`detalle`,`id_nomina`,`estado`,`id_user_reg`,`fecha_reg`,`id_user_act`,`fecha_act`)
 SELECT
+	`id_ctb_doc`
+	, `tt`.`vigencia`
+	, `tt`.`tipo_doc`
+	, `tt`.`id_manu`
+	, 1 AS `idrefctb`
+	, `tt`.`id_ref`
+	, `tt`.`crp`
+	, `tt`.`id_tercero`
+	, `tt`.`fecha`
+	, `tt`.`detalle`
+	, `tt`.`id_nomina`
+	, `tt`.`estado`
+	, `tt`.`id_usuario`
+	, `tt`.`fec_reg`
+	, `tt`.`user_act`
+	, `tt`.`fec_act`
+FROM (SELECT
 	`seg_ctb_doc`.`id_ctb_doc`
 	, CASE
 		WHEN `vigencia` = 2023 THEN 7
@@ -523,13 +544,24 @@ SELECT
 	, CASE
 		WHEN `taux`.`id_crp` = 0 THEN NULL
 		WHEN `taux`.`id_crp` = 1904 THEN NULL
+		WHEN `taux`.`id_crp` = 4786 THEN NULL
+		WHEN `taux`.`id_crp` = 4787 THEN NULL
+		WHEN `taux`.`id_crp` = 4788 THEN NULL
+		WHEN `taux`.`id_crp` = 4789 THEN NULL
+		WHEN `taux`.`id_crp` = 4790 THEN NULL
+		WHEN `taux`.`id_crp` = 4792 THEN NULL
+		WHEN `taux`.`id_crp` = 4797 THEN NULL
+		WHEN `taux`.`id_crp` = 4798 THEN NULL
+		WHEN `taux`.`id_crp` = 4799 THEN NULL
+		WHEN `taux`.`id_crp` = 4800 THEN NULL
+		WHEN `taux`.`id_crp` = 4801 THEN NULL		
 		ELSE `taux`.`id_crp`
 	END AS `crp`,`id_tercero`,`fecha`,`detalle`,`id_nomina`
 	, CASE
 		WHEN `seg_ctb_doc`.`estado` = 0 THEN 2
 		WHEN `seg_ctb_doc`.`estado` = 5 THEN 0
 		ELSE 1
-	END AS `estado`,`bd_cronhis`.`seg_usuarios_sistema`.`id_usuario`,`fec_reg`,`bd_cronhis`.`seg_usuarios_sistema`.`id_usuario`,`fec_act`
+	END AS `estado`,`bd_cronhis`.`seg_usuarios_sistema`.`id_usuario`,`fec_reg`,`bd_cronhis`.`seg_usuarios_sistema`.`id_usuario` AS `user_act`,`fec_act`
 FROM `financiero`.`seg_ctb_doc`
 LEFT JOIN `bd_cronhis`.`seg_usuarios_sistema`
 	ON(`financiero`.`seg_ctb_doc`.`id_user_reg` = `bd_cronhis`.`seg_usuarios_sistema`.`id_user_fin`)
@@ -541,7 +573,7 @@ LEFT JOIN
 		FROM `financiero`.`seg_ctb_libaux`
 		ORDER BY `id_crp` DESC) AS `t1`
 	GROUP BY `id_ctb_doc`) AS `taux`
-	ON(`seg_ctb_doc`.`id_ctb_doc` = `taux`.`id_ctb_doc`);
+	ON(`seg_ctb_doc`.`id_ctb_doc` = `taux`.`id_ctb_doc`)) AS `tt`;
 
 UPDATE `bd_cronhis`.`ctb_doc` SET `id_tercero` = NULL WHERE `id_tercero` = 0;
 
@@ -557,6 +589,7 @@ SELECT
 FROM `financiero`.`seg_ctb_pgcp`
 LEFT JOIN `bd_cronhis`.`seg_usuarios_sistema`
 	ON(`financiero`.`seg_ctb_pgcp`.`id_user_reg` = `bd_cronhis`.`seg_usuarios_sistema`.`id_user_fin`);
+
 
 INSERT INTO `bd_cronhis`.`ctb_libaux`
 	(`id_ctb_libaux`,`id_ctb_doc`,`id_tercero_api`,`id_cuenta`,`debito`,`credito`,`id_user_reg`,`fecha_reg`,`id_user_act`,`fecha_act`)
@@ -642,8 +675,8 @@ INSERT INTO `bd_cronhis`.`ctb_retencion_rango`
 SELECT
 	`id_rango`,`id_vigencia`,`id_retencion`,`valor_base`,`valor_tope`,`tarifa`,1 AS`estado`
 FROM `financiero`.`seg_ctb_retencion_rango`
-INNER JOIN `con_vigencias`
-	ON (`con_vigencias`.`anio` = `seg_ctb_retencion_rango`.`vigencia`);
+INNER JOIN `tb_vigencias`
+	ON (`tb_vigencias`.`anio` = `seg_ctb_retencion_rango`.`vigencia`);
 
 INSERT INTO `bd_cronhis`.`ctb_causa_retencion`
 	(`id_causa_retencion`,`id_ctb_doc`,`id_rango`,`valor_base`,`tarifa`,`valor_retencion`,`id_terceroapi`)
@@ -653,3 +686,72 @@ FROM `financiero`.`seg_ctb_causa_retencion`
 LEFT JOIN `financiero`.`seg_ctb_retencion_rango`
 	ON(`seg_ctb_retencion_rango`.`id_retencion` = `seg_ctb_causa_retencion`.`id_retencion`);
 
+INSERT INTO `bd_cronhis`.`pto_pag_detalle`
+            (`id_ctb_doc`,`id_pto_cop_det`,`valor`,`valor_liberado`,`id_tercero_api`)
+SELECT
+	`taux`.`id_ctb_cop`
+	, `t2`.`id_pto_cop_det`
+	, `taux`.`valor`
+	, 0 AS `liberado`
+	, `taux`.`id_tercero_api`
+FROM	
+	(SELECT
+		`seg_pto_mvto`.`id_ctb_cop`,`seg_pto_mvto`.`id_ctb_doc`,IFNULL(`seg_pto_mvto`.`id_tercero_api`,0) AS `id_tercero_api`,`seg_pto_mvto`.`rubro`
+		,CASE
+			WHEN `seg_pto_mvto`.`estado` = 0 THEN 2
+			WHEN `seg_pto_mvto`.`estado` = 5 THEN 0
+			ELSE 1
+		END AS `estado`,SUM(`seg_pto_mvto`.`valor`) AS `valor`,`seg_pto_documento`.`id_pto_presupuestos`
+	FROM `financiero`.`seg_pto_mvto`
+	INNER JOIN `financiero`.`seg_pto_documento`
+		ON(`financiero`.`seg_pto_mvto`.`id_pto_doc` = `financiero`.`seg_pto_documento`.`id_pto_doc`)
+	WHERE `seg_pto_mvto`.`tipo_mov` = 'PAG'
+	GROUP BY `seg_pto_mvto`.`id_pto_doc`,`seg_pto_mvto`.`id_ctb_doc`,`seg_pto_mvto`.`id_tercero_api`,`seg_pto_mvto`.`rubro`) AS `taux`
+	LEFT JOIN 
+		(SELECT 
+			`pto_cargue`.`id_cargue`
+			, `pto_cargue`.`id_pto`
+			, `pto_cargue`.`cod_pptal`
+		FROM `bd_cronhis`.`pto_cargue`) AS `t1`
+		ON(`taux`.`id_pto_presupuestos` = `t1`.`id_pto` AND `taux`.`rubro` = `t1`.`cod_pptal`)
+	LEFT JOIN 
+		(SELECT
+			`pto_cop_detalle`.`id_ctb_doc`
+			, `pto_cop_detalle`.`id_pto_cop_det`
+			, `pto_cop_detalle`.`id_pto_crp_det`
+			, `pto_cargue`.`id_cargue`
+			, IFNULL(`pto_cop_detalle`.`id_tercero_api`,0) AS `id_tercero_api`
+		FROM
+				`bd_cronhis`.`pto_cop_detalle`
+		INNER JOIN `bd_cronhis`.`pto_crp_detalle` 
+			ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+		INNER JOIN `bd_cronhis`.`pto_cdp_detalle` 
+			ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+		INNER JOIN `bd_cronhis`.`pto_cargue` 
+			ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)) AS `t2`
+		ON(`t1`.`id_cargue` = `t2`.`id_cargue` 
+			AND `t2`.`id_ctb_doc` = `taux`.`id_ctb_cop` 
+			AND `t2`.`id_tercero_api` = `taux`.`id_tercero_api`)
+WHERE `taux`.`id_ctb_cop` <> 0;
+
+INSERT INTO `bd_cronhis`.`tes_cuentas`
+	(`id_tes_cuenta`,`id_banco`,`id_tipo_cuenta`,`id_cuenta`,`nombre`,`numero`,`estado`,`id_user_reg`,`fecha_reg`)
+SELECT
+	`seg_tes_cuentas`.`id_tes_cuenta`,`seg_tes_cuentas`.`id_banco`,`seg_tes_cuentas`.`id_tipo_cuenta`,`ctb_pgcp`.`id_pgcp`,`seg_tes_cuentas`.`nombre`,`seg_tes_cuentas`.`numero`
+	,CASE
+		WHEN `seg_tes_cuentas`.`estado` = 1 THEN 0
+		WHEN `seg_tes_cuentas`.`estado` = 0 THEN 1
+		ELSE 0
+	END AS `estado`
+	,`seg_tes_cuentas`.`id_user_reg`,`seg_tes_cuentas`.`fecha_reg`
+FROM `financiero`.`seg_tes_cuentas`
+LEFT JOIN `bd_cronhis`.`ctb_pgcp`
+	ON(`seg_tes_cuentas`.`cta_contable` = `ctb_pgcp`.`cuenta`);
+
+INSERT INTO `bd_cronhis`.`tes_detalle_pago`
+	(`id_detalle_pago`,`id_ctb_doc`,`id_tes_cuenta`,`id_forma_pago`,`documento`,`valor`,`id_user_reg`,`fecha_reg`)
+SELECT
+	`id_detalle_pago`,`id_ctb_doc`,`id_tes_cuenta`,`id_forma_pago`,`documento`,`valor`,`seg_usuarios_sistema`.`id_usuario`,`fecha_reg`
+FROM `financiero`.`seg_tes_detalle_pago`
+INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
+	ON (`seg_tes_detalle_pago`.`id_user_reg` = `seg_usuarios_sistema`.`id_user_fin`);

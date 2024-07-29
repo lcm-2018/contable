@@ -539,7 +539,13 @@ if (isset($_POST['check'])) {
     }
     foreach ($list_liquidar as $i) {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-        $sql = "SELECT * FROM `nom_liq_salario` WHERE `mes` = '$mes' AND `anio` = '$anio' AND `id_empleado` = $i";
+        $sql = "SELECT
+                    `seg_liq_salario`.`id_sal_liq`
+                FROM
+                    `seg_liq_salario`
+                    INNER JOIN `seg_nominas` 
+                        ON (`seg_liq_salario`.`id_nomina` = `seg_nominas`.`id_nomina`)
+                WHERE (`seg_nominas`.`mes` = '$mes' AND `seg_nominas`.`vigencia` = '$anio' AND `seg_nominas`.`tipo` = 'N' AND `seg_liq_salario`.`id_empleado` = $i)";
         $rs = $cmd->query($sql);
         $nomliq = $rs->fetch();
         $cmd = null;

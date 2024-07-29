@@ -128,7 +128,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-if ($tipo_dato == '9' || $tipo_dato == '11') {
+if ($tipo_dato == '9') {
     if ($tipo_dato == '9') {
         $id_arq = $id_doc_pag;
     }
@@ -190,7 +190,7 @@ if (!empty($datosDoc)) {
     $res_api = curl_exec($ch);
     curl_close($ch);
     $dat_ter = json_decode($res_api, true);
-    $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
+    $tercero = ltrim($dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social']);
 } else {
     $tercero = '';
 }
