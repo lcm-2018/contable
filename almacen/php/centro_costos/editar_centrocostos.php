@@ -25,13 +25,12 @@ try {
         if ($oper == 'add') {
             $id = $_POST['id_centrocosto'];
             $nom_centro = $_POST['txt_nom_centrocosto'];
-            $cuenta = $_POST['txt_cuenta'];
             $es_clinico = $_POST['rdo_escli_cec'];
             $id_respon = $_POST['id_txt_responsable'] ? $_POST['id_txt_responsable'] : 0;
 
             if ($id == -1) {
-                $sql = "INSERT INTO tb_centrocostos(nom_centro,cuenta,es_clinico,id_responsable,id_usr_crea) 
-                        VALUES('$nom_centro','$cuenta',$es_clinico,$id_respon,$id_usr_crea)";
+                $sql = "INSERT INTO tb_centrocostos(nom_centro,es_clinico,id_responsable,id_usr_crea) 
+                        VALUES('$nom_centro',$es_clinico,$id_respon,$id_usr_crea)";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -45,7 +44,7 @@ try {
                 }
             } else {
                 $sql = "UPDATE tb_centrocostos 
-                        SET nom_centro='$nom_centro',cuenta='$cuenta',es_clinico=$es_clinico,id_responsable=$id_respon 
+                        SET nom_centro='$nom_centro',es_clinico=$es_clinico,id_responsable=$id_respon 
                         WHERE id_centro=" . $id;
                 $rs = $cmd->query($sql);
 

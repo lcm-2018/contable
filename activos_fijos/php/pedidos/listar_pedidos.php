@@ -50,7 +50,7 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_alm_pedido.id_pedido,far_alm_pedido.num_pedido,far_alm_pedido.fec_pedido,far_alm_pedido.hor_pedido,
-	            far_alm_pedido.detalle,far_alm_pedido.val_total,tb_sedes.nom_sede,
+	            far_alm_pedido.detalle,far_alm_pedido.val_total,tb_sedes.nom_sede,far_alm_pedido.estado,
 	            CASE far_alm_pedido.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' 
                                             WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'CERRADO'
                                             WHEN 0 THEN 'ANULADO' END AS nom_estado
@@ -86,6 +86,7 @@ if (!empty($objs)) {
             "detalle" => $obj['detalle'],
             "val_total" => formato_valor($obj['val_total']),
             "nom_sede" => mb_strtoupper($obj['nom_sede']),
+            "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];

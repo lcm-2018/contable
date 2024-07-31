@@ -46,23 +46,24 @@
                 { 'data': 'detalle' },
                 { 'data': 'val_total' },
                 { 'data': 'nom_sede' },
+                { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [4] },
                 { type: "numeric-comma", targets: 5 },
-                { orderable: false, targets: 8 }
+                { visible: false, targets: 7 },
+                { orderable: false, targets: 9 }
             ],
             rowCallback: function(row, data) {
-                var estado = $($(row).find("td")[7]).text();
-                if (estado == 'PENDIENTE') {
+                if (data.estado == 1) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
-                } else if (estado == 'CONFIRMADO') {
+                } else if (data.estado == 2) {
                     $($(row).find("td")[0]).css("background-color", "cyan");
-                } else if (estado == 'ACEPTADO') {
+                } else if (data.estado == 3) {
                     $($(row).find("td")[0]).css("background-color", "teal");
-                } else if (estado == 'ANULADO') {
+                } else if (data.estado == 0) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
             },

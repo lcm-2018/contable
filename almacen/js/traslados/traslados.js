@@ -53,19 +53,20 @@
                 { 'data': 'nom_sede_destino' },
                 { 'data': 'nom_bodega_destino' },
                 { 'data': 'val_total' },
+                { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [4, 5, 6, 7, 8] },
                 { type: "numeric-comma", targets: 9 },
-                { orderable: false, targets: 11 }
+                { visible: false, targets: 10 },
+                { orderable: false, targets: 12 }
             ],
             rowCallback: function(row, data) {
-                var estado = $($(row).find("td")[10]).text();
-                if (estado == 'PENDIENTE') {
+                if (data.estado == 1) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
-                } else if (estado == 'ANULADO') {
+                } else if (data.estado == 0) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
             },

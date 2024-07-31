@@ -41,15 +41,11 @@ if (empty($obj)) {
             <form id="frm_reg_centrocostos">
                 <input type="hidden" id="id_centrocosto" name="id_centrocosto" value="<?php echo $id ?>">
                 <div class=" form-row">                   
-                    <div class="form-group col-md-8">
+                    <div class="form-group col-md-5">
                         <label for="txt_nom_centrocosto" class="small">Nombre</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_centrocosto" name="txt_nom_centrocosto" value="<?php echo $obj['nom_centro'] ?>">
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label for="txt_cuenta" class="small">Cuenta</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_cuenta" name="txt_cuenta" value="<?php echo $obj['cuenta'] ?>">
-                    </div>                 
-                    <div class="form-group col-md-4">
+                    </div>                                    
+                    <div class="form-group col-md-3">
                         <label class="small">Para Uso Asistencial</label>
                         <div class="form-control form-control-sm" id="rdo_escli_cec">
                             <div class="form-check form-check-inline">
@@ -62,12 +58,24 @@ if (empty($obj)) {
                             </div>
                         </div>
                     </div>
-                    <div class="form-group col-md-8">
+                    <div class="form-group col-md-4">
                         <label for="txt_responsable" class="small">Responsable</label>
                         <input type="text" class="form-control form-control-sm" id="txt_responsable" value="<?php echo $obj['usr_respon'] ?>">
                         <input type="hidden" id="id_txt_responsable" name="id_txt_responsable" value="<?php echo $obj['id_responsable'] ?>">
                     </div>
-                </div>    
+                </div>
+                <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                    <thead>
+                        <tr class="text-center centro-vertical">
+                            <th>Id</th>
+                            <th>Cuenta Contable</th>
+                            <th>Fecha Inicio de Vigencia</th>
+                            <th>Cuenta Vigente</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                </table>
             </form>
         </div>
     </div>
@@ -76,3 +84,5 @@ if (empty($obj)) {
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>
+
+<script type="text/javascript" src="../../js/centro_costos/centro_costos_reg.js?v=<?php echo date('YmdHis') ?>"></script>

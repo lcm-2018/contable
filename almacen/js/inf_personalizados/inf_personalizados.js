@@ -23,11 +23,7 @@
             },
             columns: [
                 { 'data': 'id_consulta' }, //Index=0
-                { 'data': 'nom_consulta' },
-                { 'data': 'botones' }
-            ],
-            columnDefs: [
-                { orderable: false, targets: [2] }
+                { 'data': 'nom_consulta' }
             ],
             order: [
                 [1, "ASC"]
@@ -62,19 +58,18 @@
                 type: 'POST',
                 data: { id: id }
             }).done(function(data) {
-                $('#txt_id_con').val(data.id_consulta);
-                $('#txt_nom_con').val(data.nom_consulta);
-                $('#txt_des_con').val(data.des_consulta);
+                $('#txt_id_consulta').val(data.id_consulta);
+                $('#txt_nom_consulta').val(data.nom_consulta);
+                $('#txt_des_consulta').val(data.des_consulta);
+                $('#frm_parametros').html('');
                 var parametros = JSON.parse(data.parametros),
-                    form = $('#frm_parametros'),
                     i = 0,
                     str = '';
-                form.html('');
                 if (parametros[0].label) {
                     for (i in parametros) {
                         str = '<label class="form-control-sm">&nbsp;' + parametros[i].label + '</label>';
                         str += '<input type="text" class="form-control-sm" title="' + parametros[i].title + '"/><br/>';
-                        form.append(str);
+                        $('#frm_parametros').append(str);
                     }
                 }
             });
@@ -90,7 +85,7 @@
         $('#dv_resultado').html('');
         $('.is-invalid').removeClass('is-invalid');
 
-        var error = verifica_vacio($('#txt_nom_con'));
+        var error = verifica_vacio($('#txt_nom_consulta'));
         error += verifica_vacio($('#txt_limite'));
 
         if (error >= 1) {
@@ -101,7 +96,7 @@
             $('#divModalEspera').modal('show');
             var parametros = new Array(),
                 i = 1,
-                id = $('#txt_id_con').val(),
+                id = $('#txt_id_consulta').val(),
                 limite = $('#txt_limite').val();
 
             $('#frm_parametros input:text').each(function() {
@@ -134,11 +129,11 @@
 
     //Imprimir la consulta
     $('#btn_imprimir_consulta').on('click', function() {
-        if ($('#txt_id_con').val()) {
+        if ($('#txt_id_consulta').val()) {
             $('#divModalEspera').modal('show');
             var parametros = new Array(),
                 i = 1,
-                id = $('#txt_id_con').val(),
+                id = $('#txt_id_consulta').val(),
                 limite = $('#txt_limite').val();
 
             $('#frm_parametros input:text').each(function() {
@@ -173,11 +168,11 @@
 
     //Enviar archivo csv
     $('#btn_exportar_consulta').on('click', function() {
-        if ($('#txt_id_con').val()) {
+        if ($('#txt_id_consulta').val()) {
             $('#divModalEspera').modal('show');
             var parametros = new Array(),
                 i = 1,
-                id = $('#txt_id_con').val();
+                id = $('#txt_id_consulta').val();
 
             $('#frm_parametros input:text').each(function() {
                 var regExp1 = /^(((\d{4})(-)(0[13578]|10|12)(-)(0[1-9]|[12][0-9]|3[01]))|((\d{4})(-)(0[469]|1??1)(-)([0][1-9]|[12][0-9]|30))|((\d{4})(-)(02)(-)(0[1-9]|1[0-9]|2[0-8]))|(([02468]??[048]00)(-)(02)(-)(29))|(([13579][26]00)(-)(02)(-)(29))|(([0-9][0-9][0][48])(-)(0??2)(-)(29))|(([0-9][0-9][2468][048])(-)(02)(-)(29))|(([0-9][0-9][13579][26])(-)(02??)(-)(29)))$/;
@@ -208,6 +203,61 @@
                     $('#lbl_archivo').html(data.mensaje);
                 }
             }).fail(function() {
+                alert('Ocurrió un error');
+            });
+        }
+    });
+
+    /* Editar una consulta */
+    $(document).keydown(function(e) {
+        if (e.keyCode == 113) {
+            e.preventDefault();
+            if ($('#txt_id_consulta').val()) {
+                $.post("frm_reg_consulta.php", { id: $('#txt_id_consulta').val() }, function(he) {
+                    $('#divTamModalForms').removeClass('modal-sm');
+                    $('#divTamModalForms').removeClass('modal-lg');
+                    $('#divTamModalForms').addClass('modal-xl');
+                    $('#divModalForms').modal('show');
+                    $("#divForms").html(he);
+                });
+            }
+        }
+    });
+
+    //Guardar Consulta 
+    $('#divForms').on("click", "#btn_guardar", function() {
+        $('.is-invalid').removeClass('is-invalid');
+        var error = verifica_vacio($('#txt_nom_con'));
+        error += verifica_vacio($('#sl_opcion'));
+        error += verifica_vacio($('#txt_des_con'));
+        error += verifica_vacio($('#txt_con_sql'));
+
+        if (error >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Los datos resaltados son obligatorios');
+        } else {
+            var data = $('#frm_reg_consulta').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'editar_consulta.php',
+                dataType: 'json',
+                data: data
+            }).done(function(r) {
+                if (r.mensaje == 'ok') {
+                    let pag = $('#tb_consultas').DataTable().page.info().page;
+                    reloadtable('tb_consultas', pag);
+
+                    $('#txt_nom_consulta').val(r.nom_consulta);
+                    $('#txt_des_consulta').val(r.des_consulta);
+                    $('#frm_parametros').html('');
+
+                    $('#divModalDone').modal('show');
+                    $('#divMsgDone').html("Proceso realizado con éxito");
+                } else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r.mensaje);
+                }
+            }).always(function() {}).fail(function() {
                 alert('Ocurrió un error');
             });
         }

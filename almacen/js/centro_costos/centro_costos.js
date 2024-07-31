@@ -14,9 +14,9 @@
             buttons: [{
                 action: function(e, dt, node, config) {
                     $.post("frm_reg_centrocostos.php", function(he) {
-                        $('#divTamModalForms').removeClass('modal-xl');
                         $('#divTamModalForms').removeClass('modal-sm');
-                        $('#divTamModalForms').addClass('modal-lg');
+                        $('#divTamModalForms').removeClass('modal-lg');
+                        $('#divTamModalForms').addClass('modal-xl');
                         $('#divModalForms').modal('show');
                         $("#divForms").html(he);
                     });
@@ -26,7 +26,6 @@
             processing: true,
             serverSide: true,
             searching: false,
-
             ajax: {
                 url: 'listar_centrocostos.php',
                 type: 'POST',
@@ -38,13 +37,13 @@
             columns: [
                 { 'data': 'id_centro' }, //Index=0              
                 { 'data': 'nom_centro' },
-                { 'data': 'cuenta' },
                 { 'data': 'es_clinico' },
+                { 'data': 'cuenta' },
                 { 'data': 'usr_respon' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: 1 },
+                { class: 'text-wrap', targets: [1, 3] },
                 { orderable: false, targets: 5 }
             ],
             order: [
@@ -95,7 +94,7 @@
     $('#tb_centro_costos').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');
         $.post("frm_reg_centrocostos.php", { id: id }, function(he) {
-            $('#divTamModalForms').addClass('modal-lg');
+            $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
@@ -161,6 +160,124 @@
             alert('Ocurrió un error');
         });
     });
+
+    /* ---------------------------------------------------
+    CUENTAS CONTABLES
+    -----------------------------------------------------*/
+
+    //Editar un registro 
+    $('#divForms').on('click', '#tb_cuentas .btn_editar', function() {
+        let id = $(this).attr('value');
+        $.post("frm_reg_centrocostos_cta.php", { id: id }, function(he) {
+            $('#divTamModalReg').addClass('modal-lg');
+            $('#divModalReg').modal('show');
+            $("#divFormsReg").html(he);
+        });
+    });
+
+    // Autocompletar cuenta contable 
+    $('#divFormsReg').on("input", "#txt_cta_con", function() {
+        $(this).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "../common/cargar_cta_contable_ls.php",
+                    dataType: "json",
+                    type: 'POST',
+                    data: { term: request.term }
+                }).done(function(data) {
+                    response(data);
+                });
+            },
+            minLength: 2,
+            select: function(event, ui) {
+                var that = $(this);
+                if (ui.item.tipo == 'D' || ui.item.id == '') {
+                    $('#id_txt_cta_con').val(ui.item.id);
+                } else {
+                    $('#id_txt_cta_con').val('-1');
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html('Debe seleccionar una cuenta tipo detalle');
+                }
+            },
+        });
+    });
+
+    //Guardar registro Cuenta
+    $('#divFormsReg').on("click", "#btn_guardar_cta", function() {
+        $('.is-invalid').removeClass('is-invalid');
+
+        var error = verifica_vacio_2($('#id_txt_cta_con'), $('#txt_cta_con'));
+        error += verifica_vacio($('#txt_fec_vig'));
+        error += verifica_vacio($('#sl_estado_cta'));
+
+        var error1 = verifica_valmin_2($('#id_txt_cta_con'), $('#txt_cta_con'), 0);
+
+        if (error >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Los datos resaltados son obligatorios');
+        } else if (error1 >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Todas las cuentas deben ser tipo detalle')
+        } else {
+            var data = $('#frm_reg_centrocostos_cta').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'editar_centrocostos_cta.php',
+                dataType: 'json',
+                data: data + "&id_cencos=" + $('#id_centrocosto').val() + "&oper=add"
+            }).done(function(r) {
+                if (r.mensaje == 'ok') {
+                    let pag = ($('#txt_cta_con').val() == -1) ? 0 : $('#tb_cuentas').DataTable().page.info().page;
+                    reloadtable('tb_cuentas', pag);
+                    pag = $('#tb_centro_costos').DataTable().page.info().page;
+                    reloadtable('tb_centro_costos', pag);
+                    $('#txt_cta_con').val(r.id);
+                    $('#divModalReg').modal('hide');
+                    $('#divModalDone').modal('show');
+                    $('#divMsgDone').html("Proceso realizado con éxito");
+                } else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r.mensaje);
+                }
+            }).always(function() {}).fail(function() {
+                alert('Ocurrió un error');
+            });
+        }
+    });
+
+    //Borrarr un registro CUM de Articulo
+    $('#divForms').on('click', '#tb_cuentas .btn_eliminar', function() {
+        let id = $(this).attr('value');
+        confirmar_del('cuenta', id);
+    });
+    $('#divModalConfDel').on("click", "#cuenta", function() {
+        var id = $(this).attr('value');
+        $.ajax({
+            type: 'POST',
+            url: 'editar_centrocostos_cta.php',
+            dataType: 'json',
+            data: { id: id, id_cencos: $('#id_centrocosto').val(), oper: 'del' }
+        }).done(function(r) {
+            $('#divModalConfDel').modal('hide');
+            if (r.mensaje == 'ok') {
+                let pag = $('#tb_cuentas').DataTable().page.info().page;
+                reloadtable('tb_cuentas', pag);
+                $('#divModalDone').modal('show');
+                $('#divMsgDone').html("Proceso realizado con éxito");
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function() {}).fail(function() {
+            alert('Ocurrió un error');
+        });
+    });
+
+
+
+
+
+
 
     //Imprimir registros
     $('#btn_imprime_filtro').on('click', function() {

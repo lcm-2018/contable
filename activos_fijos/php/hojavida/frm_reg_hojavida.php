@@ -13,7 +13,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id_hv']) ? $_POST['id_hv'] : -1;
 $sql = "SELECT 
-            HV.id,
+            HV.id_activo_fijo,
             HV.placa,
             HV.serial,
             HV.id_marca,
@@ -21,8 +21,8 @@ $sql = "SELECT
             HV.tipo_activo,
             HV.id_articulo,
             HV.modelo,
-            HV.id_sede,
-            HV.id_area,
+            HV.id_sede,SD.nom_sede,
+            HV.id_area,AR.nom_area,
             HV.id_proveedor,
             HV.lote,
             HV.fecha_fabricacion,
@@ -34,7 +34,7 @@ $sql = "SELECT
             HV.tel_representante,
             HV.imagen,
             HV.recom_fabricante,
-            HV.tipo_adquisicion,
+            HV.id_tipo_ingreso,
             HV.fecha_adquisicion,
             HV.fecha_instalacion,
             HV.periodo_garantia,
@@ -61,15 +61,15 @@ $sql = "SELECT
             HV.estado_general,
             HV.causa_est_general,
             HV.fecha_fuera_servicio,
-            HV.id_usr_reg,
-            HV.fecha_reg,
-            HV.id_usr_act,
-            HV.fecha_act,
+            HV.id_usr_crea,
+            HV.fec_creacion,
+            HV.id_usr_actualiza,
+            HV.fec_actualiza,
             HV.estado
         FROM acf_hojavida HV
         LEFT JOIN tb_sedes SD ON (SD.id_sede=HV.id_sede)
         LEFT JOIN far_centrocosto_area AR ON (AR.id_area=HV.id_area)
-        WHERE HV.id=" . $id . " LIMIT 1";
+        WHERE HV.id_activo_fijo=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 
@@ -86,8 +86,6 @@ if (empty($obj)) {
     endfor;
     //Inicializa variable por defecto
     $obj['estado'] = 1;
-    $obj['nom_estado'] = 'PENDIENTE';
-    $obj['val_total'] = 0;
 
     $bodega = sede_principal($cmd);
     $obj['id_sede'] = $bodega['id_sede'];
@@ -96,28 +94,7 @@ if (empty($obj)) {
     $area = area_principal($cmd);
     $obj['id_area'] = $area['id_area'];
     $obj['nom_area'] = $area['nom_area'];
-
-    $fecha = fecha_hora_servidor();
-    $obj['fec_ingreso'] = $fecha['fecha'];
-    $obj['hor_ingreso'] = $fecha['hora'];
-
-    $estado = estado_activo_seleccionado($obj['estado']);
-} else {
-    
-    $bodega = sede_principal($cmd);
-    $obj['id_sede'] = $bodega['id_sede'];
-    $obj['nom_sede'] = $bodega['nom_sede'];
-    
-    if($obj['id_area'] == null) {
-        $area = area_principal($cmd);
-        $obj['id_area'] = $area['id_area'];
-        $obj['nom_area'] = $area['nom_area'];
-    }
-    $estado = estado_activo_seleccionado($obj['estado']);
 }
-$guardar = in_array($obj['estado'],[1]) ? '' : 'disabled="disabled"';
-$cerrar = in_array($obj['estado'],[1]) && $id != -1 ? '' : 'disabled="disabled"';
-$anular = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
 $imprimir = $id != -1 ? '' : 'disabled="disabled"';
 
 ?>
@@ -243,7 +220,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-4">
                         <label for="calif_4725" class="small">Calificación 4725</label>
                         <select class="form-control form-control-sm" id="calif_4725" name="calif_4725">
-                            <?php calif4725('--Calif 4725--', $obj['calif_4725']) ?>
+                            <?php calif4725('', $obj['calif_4725']) ?>
                         </select>
                     </div>
                     <div class="form-group col-md-4">
@@ -299,7 +276,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-4">
                         <label for="uso" class="small">Uso</label>
                         <select class="form-control form-control-sm" id="uso" name="uso">
-                            <?php usos('--Usos--', $obj['uso']) ?>
+                            <?php usos('', $obj['uso']) ?>
                         </select>
                     </div>
                     <div class="form-group col-md-4">
@@ -325,7 +302,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-4">
                         <label for="estado_general" class="small">Estado General</label>
                         <select class="form-control form-control-sm" id="estado_general" name="estado_general">
-                            <?php estado_general_activo('--Estado--', $obj['estado_general']) ?>
+                            <?php estado_general_activo('', $obj['estado_general']) ?>
                         </select>
                     </div>
                     <div class="form-group col-md-4">
@@ -334,8 +311,9 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     </div>
                     <div class="form-group col-md-4">
                         <label for="estado" class="small">Estado</label>
-                        <input type="text" class="form-control form-control-sm" id="nom_estado" class="small" value="<?php echo $estado['nombre'] ?>" readonly="readonly">
-                        <input type="hidden" id="estado" name="estado" value="<?php echo $estado['id'] ?>">
+                        <select class="form-control form-control-sm" id="sl_estado" name="sl_estado">
+                            <?php estado_activo('', $obj['estado']) ?>
+                        </select>
                     </div>
                     <div class="form-group col-md-12">
                         <label for="causa_est_general" class="small">Causa del Estado General</label>
@@ -347,11 +325,9 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     </div>
                 </div>
                 <div class="form-group mt-3">
-                    <button type="button" class="btn btn-primary btn-sm" id="btn_guardar" <?php echo $guardar ?>>Guardar</button>
-                    <button type="button" class="btn btn-primary btn-sm" id="btn_cerrar" <?php echo $cerrar ?>>Cerrar</button>
-                    <button type="button" class="btn btn-primary btn-sm" id="btn_anular" <?php echo $anular ?>>Anular</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btn_guardar">Guardar</button>
                     <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir" <?php echo $imprimir ?>>Imprimir</button>
-                    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>
+                    <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
                 </div>
             </form>
         </div>

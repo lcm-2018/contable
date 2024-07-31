@@ -179,7 +179,7 @@ function tipo_documento_activo($titulo = '', $estado = 3)
 
 }
 
-function estado_activo($titulo = '', $estado = 3)
+function estado_activo($titulo = '', $estado = 0)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';
@@ -187,7 +187,9 @@ function estado_activo($titulo = '', $estado = 3)
     $selected = ($estado == 2) ? 'selected="selected"' : '';
     echo '<option value="2"' . $selected . '>EN MANTENIMIENTO</option>';
     $selected = ($estado == 3) ? 'selected="selected"' : '';
-    echo '<option value="3"' . $selected . '>DADO DE BAJA</option>';
+    echo '<option value="3"' . $selected . '>INACTIVO</option>';
+    $selected = ($estado == 4) ? 'selected="selected"' : '';
+    echo '<option value="4"' . $selected . '>DADO DE BAJA</option>';
 
 }
 

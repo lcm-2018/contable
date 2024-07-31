@@ -34,7 +34,7 @@ include '../../../permisos.php';
                             <div class="row">
                                 <div class="col-md-11">
                                     <i class="fas fa-list-ul fa-lg" style="color:#1D80F7"></i>
-                                    CENTROS DE COSTO
+                                    CUENTAS DE FACTURACIÓN
                                 </div>
                             </div>
                         </div>
@@ -49,7 +49,7 @@ include '../../../permisos.php';
                                 </div>
                                 <div class="form-group col-md-1">
                                     <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
-                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>                                       
+                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
                                     </a>
                                     <a type="button" id="btn_imprime_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
                                         <span class="fas fa-print" aria-hidden="true"></span>                                       
@@ -58,27 +58,46 @@ include '../../../permisos.php';
                             </div>
 
                             <!--Lista de registros en la tabla
-                                5010-Opcion [General][Dependencias]
+                                5507-Opcion [Otros][Cuentas Facturación]
                                 1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
                             -->
                             <?php
-                            if (PermisosUsuario($permisos, 5010, 2) || $id_rol == 1) {
+                            if (PermisosUsuario($permisos, 5507, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';
                             } else {
                                 echo '<input type="hidden" id="peReg" value="0">';
                             }
                             ?>
-                            <table id="tb_centro_costos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>
                                     <tr class="text-center centro-vertical">
-                                        <th>Id</th>                                        
-                                        <th>Nombre</th>
-                                        <th>Cuenta</th>
-                                        <th>Para Uso Asistencial</th>
-                                        <th>Responsable</th>
-                                        <th>Acciones</th>
+                                        <th rowspan="2">Id</th>
+                                        <th rowspan="2">Régimen</th>
+                                        <th rowspan="2">Cobertura</th>
+                                        <th rowspan="2">Modalidad</th>
+                                        <th rowspan="2">Fecha Inicio de Vigencia</th>
+                                        <th colspan="10">Cuentas</th>
+                                        <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Acciones</th>
+                                    </tr>
+                                    <tr class="text-center centro-vertical">
+                                        <th>Presup.</th>
+                                        <th>Debito</th>
+                                        <th>Credito</th>
+                                        <th>Copago</th>
+                                        <th>GI_deb.</th>
+                                        <th>GI_cre.</th>
+                                        <th>G_def.</th>
+                                        <th>Devol.</th>
+                                        <th>Caja</th>
+                                        <th>Vigente</th>
                                     </tr>
                                 </thead>
+                            </table>
+                            <table class="table-bordered table-sm col-md-2">
+                                <tr>
+                                    <td style="background-color:#ffc107">Cuentas Contables Vigentes</td>
+                                </tr>
                             </table>
                         </div>
                     </div>
@@ -89,7 +108,7 @@ include '../../../permisos.php';
         <?php include '../../../modales.php' ?>
     </div>
     <?php include '../../../scripts.php' ?>    
-    <script type="text/javascript" src="../../js/centro_costos/centro_costos.js?v=<?php echo date('YmdHis') ?>"></script>
+    <script type="text/javascript" src="../../js/cuentas_fac/cuentas_fac.js?v=<?php echo date('YmdHis') ?>"></script>
 </body>
 
 </html>

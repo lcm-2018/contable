@@ -72,6 +72,7 @@ try {
     $sql = "SELECT far_orden_egreso.id_egreso,far_orden_egreso.num_egreso,far_orden_egreso.fec_egreso,far_orden_egreso.hor_egreso,
 	            far_orden_egreso.detalle,tb_terceros.nom_tercero,tb_centrocostos.nom_centro,
 	            far_orden_egreso_tipo.nom_tipo_egreso,far_orden_egreso.val_total,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
+                far_orden_egreso.estado,
 	            CASE far_orden_egreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
             FROM far_orden_egreso
             INNER JOIN far_orden_egreso_tipo ON (far_orden_egreso_tipo.id_tipo_egreso=far_orden_egreso.id_tipo_egreso)
@@ -114,6 +115,7 @@ if (!empty($objs)) {
             "nom_sede" => mb_strtoupper($obj['nom_sede']),
             "nom_bodega" => mb_strtoupper($obj['nom_bodega']),
             "nom_estado" => $obj['nom_estado'],
+            "estado" => $obj['estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }

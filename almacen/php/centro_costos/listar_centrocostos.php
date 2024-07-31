@@ -38,11 +38,19 @@ try {
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT tb_centrocostos.id_centro,tb_centrocostos.nom_centro,tb_centrocostos.cuenta,
+    $sql = "SELECT tb_centrocostos.id_centro,tb_centrocostos.nom_centro,
                 IF(tb_centrocostos.es_clinico=1,'SI','NO') AS es_clinico,
+                CONCAT_WS(' - ',ctb_pgcp.cuenta,ctb_pgcp.nombre) AS cuenta,
                 CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_respon
             FROM tb_centrocostos    
             INNER JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=tb_centrocostos.id_responsable)
+            LEFT JOIN (SELECT tb_centrocostos_cta.id_cencos,MAX(tb_centrocostos_cta.id_cec_cta) AS id
+                        FROM tb_centrocostos_cta
+                        WHERE tb_centrocostos_cta.estado=1 AND tb_centrocostos_cta.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d')
+                        GROUP BY tb_centrocostos_cta.id_cencos
+                        ) AS c ON (c.id_cencos=tb_centrocostos.id_centro)
+            LEFT JOIN tb_centrocostos_cta ON (tb_centrocostos_cta.id_cec_cta=c.id)
+            LEFT JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=tb_centrocostos_cta.id_cuenta)            
             $where ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -71,8 +79,8 @@ if (!empty($objs)) {
         $data[] = [
             "id_centro" => $id,          
             "nom_centro" => mb_strtoupper($obj['nom_centro']), 
-            "cuenta" => $obj['cuenta'],
             "es_clinico" => $obj['es_clinico'],
+            "cuenta" => $obj['cuenta'],
             "usr_respon" => mb_strtoupper($obj['usr_respon']), 
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];

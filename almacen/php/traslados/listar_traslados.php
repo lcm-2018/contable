@@ -70,7 +70,7 @@ try {
                 far_traslado.detalle,
                 tb_so.nom_sede AS nom_sede_origen,tb_bo.nombre AS nom_bodega_origen,
                 tb_sd.nom_sede AS nom_sede_destino,tb_bd.nombre AS nom_bodega_destino,
-                far_traslado.val_total,
+                far_traslado.val_total,far_traslado.estado,
                 CASE far_traslado.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
             FROM far_traslado
             INNER JOIN tb_sedes AS tb_so ON (tb_so.id_sede=far_traslado.id_sede_origen)
@@ -110,6 +110,7 @@ if (!empty($objs)) {
             "nom_sede_destino" => mb_strtoupper($obj['nom_sede_destino']),
             "nom_bodega_destino" => mb_strtoupper($obj['nom_bodega_destino']),
             "val_total" => formato_valor($obj['val_total']),            
+            "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];

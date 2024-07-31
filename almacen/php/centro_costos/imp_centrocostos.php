@@ -17,9 +17,17 @@ if (isset($_POST['nombre']) && $_POST['nombre']) {
 
 try {
     $sql = "SELECT tb_centrocostos.id_centro,tb_centrocostos.nom_centro,tb_centrocostos.cuenta,
+            CONCAT_WS(' - ',ctb_pgcp.cuenta,ctb_pgcp.nombre) AS cuenta,             
             CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_respon
-        FROM tb_centrocostos    
+        FROM tb_centrocostos
         INNER JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=tb_centrocostos.id_responsable) 
+        LEFT JOIN (SELECT tb_centrocostos_cta.id_cencos,MAX(tb_centrocostos_cta.id_cec_cta) AS id
+                        FROM tb_centrocostos_cta
+                        WHERE tb_centrocostos_cta.estado=1 AND tb_centrocostos_cta.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d')
+                        GROUP BY tb_centrocostos_cta.id_cencos
+                        ) AS c ON (c.id_cencos=tb_centrocostos.id_centro)
+        LEFT JOIN tb_centrocostos_cta ON (tb_centrocostos_cta.id_cec_cta=c.id)
+        LEFT JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=tb_centrocostos_cta.id_cuenta)            
         $where ORDER BY tb_centrocostos.id_centro DESC";
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
@@ -62,7 +70,7 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Cuenta</th>
+                <th>Cuenta Contable Vigente</th>
                 <th>Responsable</th>
             </tr>
         </thead>
@@ -73,7 +81,7 @@ try {
                 $tabla .=  '<tr class="resaltar" style="text-align:center"> 
                     <td>' .$obj['id_centro'] .'</td>                    
                     <td style="text-align:left">' . mb_strtoupper($obj['nom_centro']). '</td>
-                    <td>' .$obj['cuenta'] .'</td>
+                    <td style="text-align:left">' .$obj['cuenta'] .'</td>
                     <td>' .$obj['usr_respon'] .'</td></tr>';
             }            
             echo $tabla;

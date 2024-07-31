@@ -13,7 +13,7 @@
             dom: setdom,
             buttons: [{
                 action: function(e, dt, node, config) {
-                    $.post("form_reg_hojavida.php", function(he) {
+                    $.post("frm_reg_hojavida.php", function(he) {
                         $('#divTamModalForms').removeClass('modal-sm');
                         $('#divTamModalForms').removeClass('modal-lg');
                         $('#divTamModalForms').addClass('modal-xl');
@@ -36,6 +36,7 @@
                     data.serial = $('#txt_serial_filtro').val();
                     data.marca = $('#sl_marcas_filtro').val();
                     data.tipoactivo = $('#sl_tipoactivo_filtro').val();
+                    data.estado = $('#sl_estado_filtro').val();
                 }
             },
             columns: [
@@ -47,18 +48,24 @@
                 { 'data': 'marca' },
                 { 'data': 'valor' },
                 { 'data': 'tipo_activo' },
+                { 'data': 'nom_sede' },
+                { 'data': 'nom_area' },
+                { 'data': 'estado' },
+                { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4, 5] },
-                { type: "numeric-comma", targets: 6 },
-                { orderable: false, targets: 8 }
+                { class: 'text-wrap', targets: [2, 5] },
+                { type: "numeric-comma", targets: 7 },
+                { visible: false, targets: 10 },
+                { orderable: false, targets: 12 }
             ],
             rowCallback: function(row, data) {
-                var estado = $($(row).find("td")[12]).text();
-                if (estado == 'PENDIENTE') {
-                    $($(row).find("td")[0]).css("background-color", "yellow");
-                } else if (estado == 'ANULADO') {
+                if (data.estado == 2) {
+                    $($(row).find("td")[0]).css("background-color", "red");
+                } else if (data.estado == 3) {
+                    $($(row).find("td")[0]).css("background-color", "green");
+                } else if (data.estado == 4) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
             },
@@ -90,12 +97,18 @@
     //Editar un registro hoja de vida
     $('#tb_hojavida').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');
-        $.post("form_reg_hojavida.php", { id_hv: id }, function(he) {
+        $.post("frm_reg_hojavida.php", { id_hv: id }, function(he) {
             $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
     });
+
+
+
+
+
+
 
     //Registrar componentes
     $('#tb_hojavida').on('click', '.btn_componente', function() {
@@ -128,7 +141,7 @@
     //Guardar hoja de vida
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
-        
+
         var error = verifica_vacio_2($('#id_sede'), $('#nom_sede'));
         error += verifica_vacio($('#placa'));
         error += verifica_vacio($('#serial'));
@@ -148,7 +161,7 @@
                 type: 'POST',
                 url: 'editar_hoja_vida.php',
                 dataType: 'json',
-                data: data +"&id_hv=" + $('#id_hv').val() + '&oper=add'
+                data: data + "&id_hv=" + $('#id_hv').val() + '&oper=add'
             }).done(function(res) {
                 if (res.mensaje == 'ok') {
                     let pag = ($('#tb_hojavida').val() == -1) ? 0 : $('#tb_hojavida').DataTable().page.info().page;
@@ -177,25 +190,25 @@
     $('#divForms').on("click", "#btn_guardar_imagen", function() {
         $('.is-invalid').removeClass('is-invalid');
 
-        var file =  $('#uploadImageAcf')[0].files[0];
+        var file = $('#uploadImageAcf')[0].files[0];
 
-        if(!file) {
+        if (!file) {
             showError('Por favor, selecciona un archivo')
             return;
         }
-        
+
         var validImageTypes = ["image/jpeg", "image/png", "image/gif"];
-        
+
         if (!validImageTypes.includes(file.type)) {
             showError('Por favor, selecciona un archivo de imagen válido')
             return;
         }
-    
+
         let datos = new FormData();
         datos.append('id_hv', $('#id_hv').val());
-        datos.append('oper','add');
+        datos.append('oper', 'add');
         datos.append('uploadImageAcf', file);
-        
+
         var error = 0
 
         if (error >= 1) {
@@ -231,8 +244,7 @@
         }
     });
 
-
-     //Descarar imagen  hoja de vida
+    //Descarar imagen  hoja de vida
     $('#divForms').on("click", "#btn_descargar_imagen", function() {
         $('.is-invalid').removeClass('is-invalid');
 
@@ -266,15 +278,15 @@
         var error = verifica_vacio($('#tipo'));
         error += verifica_vacio($('#descripcion'));
 
-        var file =  $('#uploadDocAcf')[0].files[0];
-        if(!$('#archivo').val()) {
-            if(!file) {
+        var file = $('#uploadDocAcf')[0].files[0];
+        if (!$('#archivo').val()) {
+            if (!file) {
                 showError('Por favor, selecciona un archivo')
                 return;
             }
-            
+
             var validImageTypes = ["application/pdf", "application/pdf"];
-            
+
             if (!validImageTypes.includes(file.type)) {
                 showError('Por favor, selecciona un documento válido')
                 return;
@@ -289,7 +301,7 @@
         datos.append('descripcion', $('#descripcion').val());
         datos.append('archivo', $('#archivo').val());
 
-        datos.append('oper','add');
+        datos.append('oper', 'add');
         datos.append('uploadDocAcf', file);
 
         var error = 0
@@ -347,7 +359,7 @@
                 type: 'POST',
                 url: 'editar_componente.php',
                 dataType: 'json',
-                data: data +"&id_componente=" + $('#id_componente').val() + "&id_hv=" + $('#id_hv').val() + '&oper=add'
+                data: data + "&id_componente=" + $('#id_componente').val() + "&id_hv=" + $('#id_hv').val() + '&oper=add'
             }).done(function(res) {
                 if (res.mensaje == 'ok') {
                     let pag = ($('#tb_componentes_activofijo').val() == -1) ? 0 : $('#tb_componentes_activofijo').DataTable().page.info().page;

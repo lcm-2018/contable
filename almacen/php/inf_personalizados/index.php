@@ -59,7 +59,6 @@ include '../../../permisos.php';
                                                         <tr class="text-center centro-vertical">
                                                             <th>Id</th>
                                                             <th>Nombre</th>
-                                                            <th>Acciones</th>
                                                         </tr>
                                                     </thead>
                                                 </table>
@@ -68,13 +67,13 @@ include '../../../permisos.php';
                                     </td>
                                     <td style="width:50% !important">
                                         <div class="form-row">
-                                            <input type="hidden" class="form-control form-control-sm" id="txt_id_con" name="txt_id_con" readonly="readonly">
+                                            <input type="hidden" class="form-control form-control-sm" id="txt_id_consulta" name="txt_id_consulta" readonly="readonly">
                                             <div class="form-group col-md-12">
-                                                <label for="txt_det_ing" class="small">Detalles del Reporte</label>
-                                                <input type="text" class="form-control form-control-sm" id="txt_nom_con" name="txt_nom_con" readonly="readonly">
+                                                <label for="txt_nom_con" class="small">Detalles del Reporte</label>
+                                                <input type="text" class="form-control form-control-sm" id="txt_nom_consulta" name="txt_nom_consulta" readonly="readonly">
                                             </div>
                                             <div class="form-group col-md-12">
-                                                <textarea class="form-control form-control-sm" id="txt_des_con" name="txt_des_con" rows="3" readonly="readonly"></textarea>
+                                                <textarea class="form-control form-control-sm" id="txt_des_consulta" name="txt_des_consulta" rows="3" readonly="readonly"></textarea>
                                             </div>
                                             <div class="form-group col-md-12">
                                                 <form id="frm_parametros"></form>
@@ -82,27 +81,27 @@ include '../../../permisos.php';
                                             <div class="form-group col-md-12">
                                                 <a type="button" id="btn_buscar_consulta" class="btn btn-outline-success btn-sm">
                                                     <span class="fas fa-search fa-lg" aria-hidden="true">
-                                                        <label for="txt_det_ing" class="small">Consultar</label>
+                                                        <label class="small">Consultar</label>
                                                     </span>
                                                 </a>
                                                 <a type="button" id="btn_imprimir_consulta" class="btn btn-outline-success btn-sm">
                                                     <span class="fas fa-search fa-lg" aria-hidden="true">
-                                                        <label for="txt_det_ing" class="small">Imprimir</label>
+                                                        <label class="small">Imprimir</label>
                                                     </span>
                                                 </a>
                                                 <a type="button" id="btn_exportar_consulta" class="btn btn-outline-success btn-sm">
                                                     <span class="fas fa-search fa-lg" aria-hidden="true">
-                                                        <label for="txt_det_ing" class="small">Exportar</label>
+                                                        <label class="small">Exportar</label>
                                                     </span>                                                    
                                                 </a>       
                                                 <label id="lbl_archivo"></label>                                        
                                             </div>
                                             <div class="form-group col-md-4">
-                                                <label for="txt_det_ing" class="small">Límite Registros a Visualizar</label>
+                                                <label for="txt_limite" class="small">Límite Registros a Visualizar</label>
                                                 <input type="number" class="form-control form-control-sm" id="txt_limite" name="txt_limite" value="100">
                                             </div>
                                             <div class="form-group col-md-8">
-                                                <label for="txt_det_ing" class="small">
+                                                <label class="small">
                                                     Esto solo aplica en el caso de visualizar los datos en pantalla.
                                                     Utilice la opción Exportar para envía el total de los datos a un archivo.
                                                     En consultas grandes y/o pesadas es recomendable limitar el máximo de registros

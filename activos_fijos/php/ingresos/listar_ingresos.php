@@ -60,7 +60,7 @@ try {
                 acf_orden_ingreso.num_factura,acf_orden_ingreso.fec_factura,acf_orden_ingreso.detalle,
                 tb_terceros.nom_tercero,far_orden_ingreso_tipo.nom_tipo_ingreso,
                 acf_orden_ingreso.val_total,
-                tb_sedes.nom_sede,
+                tb_sedes.nom_sede,acf_orden_ingreso.estado,
 	        CASE acf_orden_ingreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
             FROM acf_orden_ingreso
             INNER JOIN far_orden_ingreso_tipo ON (far_orden_ingreso_tipo.id_tipo_ingreso=acf_orden_ingreso.id_tipo_ingreso)
@@ -100,6 +100,7 @@ if (!empty($objs)) {
             "nom_tipo_ingreso" => mb_strtoupper($obj['nom_tipo_ingreso']),
             "val_total" => formato_valor($obj['val_total']),
             "nom_sede" => mb_strtoupper($obj['nom_sede']),
+            "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];

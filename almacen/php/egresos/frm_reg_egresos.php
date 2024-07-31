@@ -110,7 +110,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-12">
-                    <label for="txt_det_egr" class="small">Detalle</label>                   
+                        <label for="txt_det_egr" class="small">Detalle</label>                   
                         <textarea class="form-control" id="txt_det_egr" name="txt_det_egr" rows="2"><?php echo $obj['detalle'] ?></textarea>
                     </div>
                 </div>

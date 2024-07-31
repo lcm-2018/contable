@@ -13,7 +13,8 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT id_lab,nom_laboratorio
             FROM far_laboratorios
-            WHERE nom_laboratorio LIKE '%$term%'";
+            WHERE nom_laboratorio LIKE '%$term%'
+            ORDER BY nom_laboratorio";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;

@@ -37,7 +37,7 @@ try {
                 $id_pres = $_POST['id_txt_pre_lote'] ? $_POST['id_txt_pre_lote'] : 0;
                 $id_cum = $_POST['sl_cum_lot'] ? $_POST['sl_cum_lot'] : 0;
                 $id_bodega = $_POST['id_txt_nom_bod'];
-                $estado = $_POST['sl_estado'];
+                $estado = $_POST['sl_estado_lot'];
 
                 if ($id == -1) {
 

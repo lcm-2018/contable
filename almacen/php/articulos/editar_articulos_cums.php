@@ -30,7 +30,7 @@ try {
                 $cod_ium = $_POST['txt_cod_ium'];
                 $id_lab = $_POST['id_txt_lab_cum'] ? $_POST['id_txt_lab_cum'] : 0;
                 $id_precom = $_POST['id_txt_precom_cum'] ? $_POST['id_txt_precom_cum'] : 0;
-                $estado = $_POST['sl_estado'];
+                $estado = $_POST['sl_estado_cum'];
 
                 if ($id == -1) {
                     $sql = "INSERT INTO far_medicamento_cum(cum,ium,id_lab,id_prescom,estado,id_usr_crea,id_med,con_sismed,uni_fac_sismed)  

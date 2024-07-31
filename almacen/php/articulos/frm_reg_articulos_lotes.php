@@ -78,8 +78,8 @@ if (empty($obj)) {
                         </select>
                     </div>                    
                     <div class="form-group col-md-3">
-                        <label for="sl_estado" class="small">Estado</label>
-                        <select class="form-control form-control-sm" id="sl_estado" name="sl_estado">
+                        <label for="sl_estado_lot" class="small">Estado</label>
+                        <select class="form-control form-control-sm" id="sl_estado_lot" name="sl_estado_lot">
                             <?php estados_registros('', $obj['estado']) ?>
                         </select>
                     </div>

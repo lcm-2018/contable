@@ -613,6 +613,17 @@ $rol = $_SESSION['rol'];
                                                     </div>
                                                 </a>
                                             <?php }
+                                            if (PermisosUsuario($permisos, 5507, 0) || $id_rol == 1) {
+                                                ?>
+                                                    <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/php/cuentas_fac/index.php">
+                                                    <div class="div-icono">
+                                                        <i class="fas fas fa-clipboard-check fa-sm" style="color: black;"></i>
+                                                    </div>
+                                                    <div>
+                                                        Cuentas Facturación
+                                                    </div>
+                                                </a>
+                                            <?php }
                                             ?>
                                         </nav>
                                     </div>
@@ -792,12 +803,12 @@ $rol = $_SESSION['rol'];
                             <div class="collapse" id="pagesCollapseArticulos" aria-labelledby="headingOne">
                                 <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
                                     <?php if (PermisosUsuario($permisos, 5010, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/centros_costo/index.php?var=3">
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/centro_costos/index.php?var=3">
                                             <div class="div-icono">
                                                 <i class="fas fa-file-invoice-dollar fa-sm" style="color: #E74C3C;"></i>
                                             </div>
                                             <div>
-                                                Centros Costo
+                                                Centro Costos
                                             </div>
                                         </a>
                                     <?php } ?>

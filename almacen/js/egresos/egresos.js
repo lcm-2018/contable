@@ -56,18 +56,19 @@
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_bodega' },
                 { 'data': 'nom_estado' },
+                { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [4, 5, 6] },
                 { type: "numeric-comma", targets: 8 },
-                { orderable: false, targets: 12 }
+                { visible: false, targets: 12 },
+                { orderable: false, targets: 13 }
             ],
             rowCallback: function(row, data) {
-                var estado = $($(row).find("td")[11]).text();
-                if (estado == 'PENDIENTE') {
+                if (data.estado == 1) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
-                } else if (estado == 'ANULADO') {
+                } else if (data.estado == 0) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
             },

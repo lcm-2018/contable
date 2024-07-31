@@ -52,19 +52,20 @@
                 { 'data': 'nom_tipo_ingreso' },
                 { 'data': 'val_total' },
                 { 'data': 'nom_sede' },
+                { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [6, 7] },
                 { type: "numeric-comma", targets: 9 },
-                { orderable: false, targets: 12 }
+                { visible: false, targets: 11 },
+                { orderable: false, targets: 13 }
             ],
             rowCallback: function(row, data) {
-                var estado = $($(row).find("td")[11]).text();
-                if (estado == 'PENDIENTE') {
+                if (data.estado == 1) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
-                } else if (estado == 'ANULADO') {
+                } else if (data.estado == 0) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
             },

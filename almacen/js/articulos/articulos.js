@@ -118,6 +118,7 @@
         error += verifica_vacio($('#txt_topmin_art'));
         error += verifica_vacio($('#txt_topmax_art'));
         error += verifica_vacio_2($('#id_txt_unimed_art'), $('#txt_unimed_art'));
+        error += verifica_vacio($('#sl_estado'));
 
         if ($('input[name=rdo_escli_art]:checked').val() == 1) {
             error += verifica_vacio($('#sl_medins_art'));
@@ -188,7 +189,7 @@
     //Editar un registro CUM
     $('#divForms').on('click', '#tb_articulos_cums .btn_editar', function() {
         let id = $(this).attr('value');
-        $.post("frm_reg_articulos_cums.php", { id: id, id_articulo: $('#id_articulo').val() }, function(he) {
+        $.post("frm_reg_articulos_cums.php", { id: id }, function(he) {
             $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
@@ -241,6 +242,7 @@
         var error = verifica_vacio($('#txt_cod_cum'));
         error += verifica_vacio_2($('#id_txt_lab_cum'), $('#txt_lab_cum'));
         error += verifica_vacio_2($('#id_txt_precom_cum'), $('#txt_precom_cum'));
+        error += verifica_vacio($('#sl_estado_cum'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
@@ -340,6 +342,7 @@
         var error = verifica_vacio_2($('#id_txt_nom_bod'), $('#txt_nom_bod'));
         error += verifica_vacio($('#txt_num_lot'));
         error += verifica_vacio($('#txt_fec_ven'));
+        error += verifica_vacio($('#sl_estado_lot'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');

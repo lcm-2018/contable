@@ -49,7 +49,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
                             <!--Opciones de filtros -->
                             <div class="form-row">
-                                <div class="form-group col-md-1">
+                                <div class="form-group col-md-2">
                                     <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
                                 </div>
                                 <div class="form-group col-md-1">
@@ -68,6 +68,11 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <?php tipos_activo('--Tipo Activo--') ?>
                                     </select>
                                 </div>
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
+                                        <?php estado_activo('--Estado--') ?>
+                                    </select>
+                                </div>
                                 <div class="form-group col-md-1">
                                     <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
                                         <span class="fas fa-search fa-lg" aria-hidden="true"></span>
@@ -78,9 +83,9 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 </div>
                             </div>
 
-                            <!--Lista de registros en la tabla-->
+                            <!--Lista de registros en la tabla-->                            
                             <?php
-                            if (PermisosUsuario($permisos, 5006, 2) || $id_rol == 1) {
+                            if (PermisosUsuario($permisos, 5704, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';
                             } else {
                                 echo '<input type="hidden" id="peReg" value="0">';
@@ -90,22 +95,27 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <thead>
                                     <tr class="text-center centro-vertical">
                                         <th>Id</th>
-                                        <th>Codigo</th>
-                                        <th>Nombre</th>
-                                        <th>Placa</th>>
+                                        <th>Cod. Articulo</th>
+                                        <th>Articulo</th>
+                                        <th>Placa</th>
                                         <th>Serial</th>
                                         <th>Marca</th>
                                         <th>Valor</th>
                                         <th>Tipo Activo</th>
+                                        <th>Sede</th>
+                                        <th>Area</th>
+                                        <th>Estado</th>
+                                        <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                             </table>
-                            <table class="table-bordered table-sm col-md-2">
+                            <table class="table-bordered table-sm col-md-4">
                                 <tr>
-                                    <td style="background-color:yellow">Pendiente</td>
-                                    <td>Cerrado</td>
-                                    <td style="background-color:gray">Anulado</td>
+                                    <td>Activo</td>
+                                    <td style="background-color:red">En mantenimiento</td>
+                                    <td style="background-color:green">Inactivo</td>
+                                    <td style="background-color:gray">Dado de baja</td>
                                 </tr>
                             </table>
                         </div>

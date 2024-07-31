@@ -118,6 +118,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th colspan="2">Unidad Destino</th>
                                         <th rowspan="2">Vr. Total</th>
                                         <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Estado</th>
                                         <th rowspan="2">Acciones</th>
                                     </tr>
                                     <tr class="text-center centro-vertical">
