@@ -318,6 +318,17 @@ if (esta === -1) {
         });
         return false;
     });
+    $('#passuser').on('focus', function () {
+        $(this).on('keydown', function (e) {
+            if (e.originalEvent.getModifierState("CapsLock")) {
+                $('#caps-lock-message').show();
+            } else {
+                $('#caps-lock-message').hide();
+            }
+        }).on('blur', function () {
+            $('#caps-lock-message').hide();
+        });
+    });
     //Modal cierre de periodos 
     $('#hrefCierre').on('click', function () {
         $.post(window.urlin + "/actualizar/datos_up_permisos.php", function (he) {

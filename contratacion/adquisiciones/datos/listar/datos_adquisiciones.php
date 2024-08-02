@@ -1,7 +1,4 @@
 <?php
-
-use Sabberworm\CSS\Value\PrimitiveValue;
-
 session_start();
 if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../../../index.php");</script>';
@@ -14,16 +11,7 @@ function pesos($valor)
 include '../../../../conexion.php';
 include '../../../../permisos.php';
 $vigencia = $_SESSION['vigencia'];
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_adquisicion`, `estado` FROM `ctt_adquisiciones` WHERE `estado` = '3' AND `vigencia` = '$vigencia'";
-    $rs = $cmd->query($sql);
-    $estado_cot = $rs->fetchAll();
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -34,71 +22,39 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$id_user = $_SESSION['id_user'];
-if (isset($estado_cot)) {
-    $nit = $_SESSION['nit_emp'];
-    $estado = 4;
-    $ids = [];
-    foreach ($estado_cot as $ec) {
-        $ids[] = $ec['id_adquisicion'];
-    }
-    $payload = json_encode(['ids' => $ids, 'nit' => $nit]);
-    $url = $api . 'terceros/datos/res/listar/estado_cotizacion';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $res =  json_decode($result, true);
-    foreach ($estado_cot as $ec) {
-        $id_adqui = $ec['id_adquisicion'];
-        $verf = 0;
-        $key = array_search($id_adqui, array_column($res, 'id_adq'));
-        if ($key !== false) {
-            $verf = $res[$key]['estado'];
-        }
-        if ($verf == 2) {
-            try {
-                $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-                $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                $sql = "UPDATE `ctt_adquisiciones` SET `estado`= ?, `id_user_act` = ?, `fec_act` = ? WHERE `id_adquisicion` = ?";
-                $sql = $cmd->prepare($sql);
-                $sql->bindParam(1, $estado, PDO::PARAM_INT);
-                $sql->bindParam(2, $id_user, PDO::PARAM_INT);
-                $sql->bindValue(3, $date->format('Y-m-d H:i:s'));
-                $sql->bindParam(4, $id_adqui, PDO::PARAM_INT);
-                $sql->execute();
-                if (!($sql->rowCount() > 0)) {
-                    echo $sql->errorInfo()[2];
-                }
-                $cmd = null;
-            } catch (PDOException $e) {
-                echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-            }
-        } else {
-        }
-    }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `id_area` FROM `tb_area_responsable` WHERE `id_user` = $iduser GROUP BY `id_area`";
+    $rs = $cmd->query($sql);
+    $areas = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-if ($_SESSION['id_user'] == 1) {
+
+if ($id_rol == '1') {
     $usuario = '';
 } else {
-    $usuario = " AND ctt_adquisiciones.id_user_reg =" . $id_user;
+    if (!empty($areas)) {
+        $areas = array_column($areas, 'id_area');
+        $areas = implode(',', $areas);
+        $usuario = " AND `ctt_adquisiciones`.`id_area` IN ($areas)";
+    } else {
+        $usuario = " AND `ctt_adquisiciones`.`id_user_reg` =" . $iduser;
+    }
 }
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT modalidad, id_adquisicion, val_contrato, ctt_adquisiciones.estado, fecha_adquisicion, objeto, id_tercero_api
+    $sql = "SELECT `modalidad`, `id_adquisicion`, `val_contrato`, `ctt_adquisiciones`.`estado`, `fecha_adquisicion`, `objeto`, `id_tercero_api`
             FROM
-                ctt_adquisiciones
-            INNER JOIN ctt_modalidad 
-                ON (ctt_adquisiciones.id_modalidad = ctt_modalidad.id_modalidad)
-            LEFT JOIN seg_terceros
-                ON (ctt_adquisiciones.id_tercero = seg_terceros.id_tercero)
-            WHERE vigencia = '$vigencia'" . $usuario;
+                `ctt_adquisiciones`
+            INNER JOIN `ctt_modalidad` 
+                ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
+            LEFT JOIN `seg_terceros`
+                ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
+            WHERE `vigencia` = '$vigencia'" . $usuario;
     $rs = $cmd->query($sql);
     $ladquis = $rs->fetchAll();
     $cmd = null;
@@ -184,10 +140,11 @@ if (!empty($ladquis)) {
         $key = array_search($est, array_column($estado_adq, 'id'));
         $keyt = array_search($la['id_tercero_api'], array_column($terceros, 'id_tercero'));
         if ($keyt === false) {
-            $tercer = '';
+            $tercer = '---';
         } else {
             $tercer = $terceros[$keyt]['apellido1'] . ' ' . $terceros[$keyt]['apellido2'] . ' ' .  $terceros[$keyt]['nombre1'] . ' ' .  $terceros[$keyt]['nombre2'] . ' ' . $terceros[$keyt]['razon_social'];
         }
+        $estd = $estado_adq[$key]['descripcion'];
         $data[] = [
             'id' => $id_adq,
             'modalidad' => $la['modalidad'],
@@ -196,7 +153,7 @@ if (!empty($ladquis)) {
             'fecha' => $la['fecha_adquisicion'],
             'objeto' => $la['objeto'],
             'tercero' => $tercer,
-            'estado' => $estado_adq[$key]['descripcion'],
+            'estado' => $estd,
             'botones' => '<div class="text-center">' . $editar . $borrar . $detalles . $accion . $anular . $duplicar . '</div>',
         ];
     }

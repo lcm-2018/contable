@@ -7,6 +7,7 @@ if (!isset($_SESSION['user'])) {
 include '../../../../conexion.php';
 include '../../../../permisos.php';
 $id_ct = isset($_POST['id_csp']) ? $_POST['id_csp'] : exit('Acción no permitida');
+$id_ct = $id_ct == '' ? 0 : $id_ct;
 function pesos($valor)
 {
     return '$' . number_format($valor, 2, ",", ".");

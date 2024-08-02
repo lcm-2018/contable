@@ -587,6 +587,61 @@
         $('<form action="datos/listar/homologa_esc_honor.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>')
             .appendTo('body').submit();
     });
+    $('.subirHomologacion').on('click', function () {
+        let tipo = $(this).attr('text');
+        $.post("datos/cargar/homologacion.php", { tipo: tipo }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-lg');
+            //$('#divTamModalForms').addClass('modal-sm');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+    $('#divModalForms').on('click', '#btnGuardaHomologacion', function () {
+        let tipo = $(this).attr('text');
+        if ($('#fileHomologacion').val() === '') {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('¡Debe elegir un archivo!');
+        } else {
+            let archivo = $('#fileHomologacion').val();
+            let ext = archivo.substring(archivo.lastIndexOf(".")).toLowerCase();
+            if (ext !== '.csv') {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html('¡Solo se permite documentos .csv!');
+                return false;
+            } else if ($('#fileHomologacion')[0].files[0].size > 2097152) {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html('¡Documento debe tener un tamaño menor a 2Mb!');
+                return false;
+            }
+            let datos = new FormData();
+            datos.append('fileHomologacion', $('#fileHomologacion')[0].files[0]);
+            datos.append('tipo', tipo);
+            $('#btnGuardaHomologacion').attr('disabled', true);
+            $('#btnGuardaHomologacion').html('<i class="fas fa-spinner fa-pulse"></i> Cargando...');
+            $.ajax({
+                type: 'POST',
+                url: 'registrar/new_homologacion.php',
+                contentType: false,
+                data: datos,
+                processData: false,
+                cache: false,
+                success: function (r) {
+                    $('#btnGuardaHomologacion').attr('disabled', false);
+                    $('#btnGuardaHomologacion').html('Guardar');
+                    if (r == '1') {
+                        $('#divModalForms').modal('hide');
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html('Proceso realizado Correctamente');
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r);
+                    }
+                }
+            });
+        }
+        return false;
+    });
     $(document).ready(function () {
         var maxBnSv = 100;
         var inputHTML = '<div class="input-group input-group-sm mb-3"><input name="txtBnSv[]" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm"><div class="input-group-prepend"><a href="javascript:void(0);" class="btn btn-outline-danger btn_removeBnSv" title="Quitar"><span class="fas fa-minus-circle fa-lg"></span></a></div></div>';

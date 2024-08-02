@@ -668,22 +668,7 @@ let cerrarDocumentoCtb = function (dato) {
 		.then((response) => response.json())
 		.then((response) => {
 			if (response.status == "ok") {
-				//mje("Documento cerrado");
-				console.log(response);
-				$('#tableMvtoContable').DataTable().ajax.reload();
-				$('#tableMvtoContableDetalle').DataTable().ajax.reload(function (json) {
-					// Obtener los datos del tfoot de la DataTable
-					var tfootData = json.tfoot;
-					// Construir el tfoot de la DataTable
-					var tfootHtml = '<tfoot><tr>';
-					$.each(tfootData, function (index, value) {
-						tfootHtml += '<th>' + value + '</th>';
-					});
-					tfootHtml += '</tr></tfoot>';
-					// Reemplazar el tfoot existente en la tabla
-					$('#tableMvtoContableDetalle').find('tfoot').remove();
-					$('#tableMvtoContableDetalle').append(tfootHtml);
-				});
+				location.reload();
 			} else {
 				mjeError("Documento no cerrado", "Verifique información ingresada" + response.msg);
 			}

@@ -53,7 +53,9 @@ $totCredito = 0;
 if (!empty($listappto)) {
     $id_t = [];
     foreach ($listappto as $lp) {
-        $id_t[] = $lp['id_tercero_api'];
+        if ($lp['id_tercero_api'] != '') {
+            $id_t[] = $lp['id_tercero_api'];
+        }
     }
     $payload = json_encode($id_t);
     //API URL
@@ -67,6 +69,7 @@ if (!empty($listappto)) {
     $res_api = curl_exec($ch);
     curl_close($ch);
     $terceros = json_decode($res_api, true);
+    $terceros = $terceros == '0' || $terceros == '' ? [] : $terceros;
     foreach ($listappto as $lp) {
         $id = $lp['id_ctb_libaux'];
         $id_ctb = $lp['id_ctb_doc'];

@@ -38,6 +38,9 @@ include 'head.php';
                                     </div>
                                 </div>
                             </div>
+                            <div id="caps-lock-message" class="invalid-feedback">
+                                <i class="fas fa-exclamation-triangle"></i> Bloq Mayús activado
+                            </div>
                             <div class="justify-content-between mt-4 mb-0">
                                 <center><button class="btn btn-primary" id="btnLogin">Iniciar</button></center>
                             </div>

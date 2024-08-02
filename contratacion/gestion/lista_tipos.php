@@ -22,9 +22,7 @@ $vigencia = $_SESSION['vigencia'];
 <html lang="es">
 <?php include '../../head.php' ?>
 
-<body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] == '1') {
-                                echo 'sb-sidenav-toggled';
-                            } ?>">
+<body class="sb-nav-fixed <?php $_SESSION['navarlat'] == '1' ? 'sb-sidenav-toggled' : '' ?>">
     <?php include '../../navsuperior.php' ?>
     <div id="layoutSidenav">
         <?php include '../../navlateral.php' ?>
@@ -194,15 +192,39 @@ $vigencia = $_SESSION['vigencia'];
                                         </h5>
                                     </div>
                                     <div id="collapeseMsOp" class="collapse" aria-labelledby="masOpciones">
-                                        <div class="card-body">
-                                            <button type="button" class="btn btn-outline-success" id="btnExcelHomolgBnSv">
-                                                <span class="fas fa-file-excel"></span>
-                                                Homolagación de bienes y/o servicios
-                                            </button>
-                                            <button type="button" class="btn btn-outline-warning" id="btnExcelHomolgEscHonor">
-                                                <span class="fas fa-file-excel"></span>
-                                                Homolagación escala de honorarios
-                                            </button>
+                                        <div class="card-body form-inline">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <span class="fas fa-file-excel mr-2 text-success"></span>
+                                                        Homolagación de servicios
+                                                    </span>
+                                                </div>
+                                                <div class="input-group-append" id="button-addon4">
+                                                    <button type="button" class="btn btn-outline-primary" id="btnExcelHomolgBnSv" title="Descargar Formato de homologación de servicios">
+                                                        <span class="fas fa-download"></span>
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-warning subirHomologacion" text="1" title="Subir Formato de homologación de servicios">
+                                                        <span class="fas fa-upload"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="input-group px-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <span class="fas fa-file-excel mr-2 text-success"></span>
+                                                        Homolagación escala de honorarios
+                                                    </span>
+                                                </div>
+                                                <div class="input-group-append" id="button-addon4">
+                                                    <button type="button" class="btn btn-outline-primary" id="btnExcelHomolgEscHonor" title="Descargar Formato de homologación escala de honorarios">
+                                                        <span class="fas fa-download"></span>
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-warning subirHomologacion" text="2" title="Subir Formato de homologación escala honorarios">
+                                                        <span class="fas fa-upload"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

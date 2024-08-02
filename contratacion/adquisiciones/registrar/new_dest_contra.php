@@ -17,7 +17,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     if ($accion == '0') {
         $sql = "INSERT INTO `ctt_destino_contrato`
-                (`id_adquisicion`, `id_centro_costo`, `horas_mes`, `id_user_reg`, `fec_reg`)
+                (`id_adquisicion`, `id_area_cc`, `horas_mes`, `id_user_reg`, `fec_reg`)
             VALUES (?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $id_compra, PDO::PARAM_INT);
@@ -48,7 +48,7 @@ try {
         $sql->bindParam(1, $id_compra, PDO::PARAM_INT);
         $sql->execute();
         $sql = "INSERT INTO `ctt_destino_contrato`
-                (`id_adquisicion`, `id_centro_costo`, `horas_mes`, `id_user_reg`, `fec_reg`)
+                (`id_adquisicion`, `id_area_cc`, `horas_mes`, `id_user_reg`, `fec_reg`)
             VALUES (?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $id_compra, PDO::PARAM_INT);

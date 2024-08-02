@@ -48,12 +48,12 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `tb_centro_costo_x_sede`.`id_x_sede`,`tb_centro_costo_x_sede`.`id_sede`, `tb_centros_costo`.`descripcion`
+                `far_centrocosto_area`.`id_area`,`far_centrocosto_area`.`id_centrocosto`, `tb_centrocostos`.`nom_centro`
             FROM
-                `tb_centro_costo_x_sede`
-                INNER JOIN `tb_centros_costo` 
-                    ON (`tb_centro_costo_x_sede`.`id_centro_c` = `tb_centros_costo`.`id_centro`) 
-            ORDER BY `tb_centros_costo`.`descripcion` ASC";
+                `far_centrocosto_area`
+                INNER JOIN `tb_centrocostos` 
+                    ON (`far_centrocosto_area`.`id_centrocosto` = `tb_centrocostos`.`id_centro`) 
+            ORDER BY `tb_centrocostos`.`nom_centro` ASC";
     $rs = $cmd->query($sql);
     $centros_costo = $rs->fetchAll();
     $cmd = null;
@@ -74,12 +74,16 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `ctt_destino_contrato`.`id_destino`, `tb_centro_costo_x_sede`.`id_sede`, `ctt_destino_contrato`.`id_centro_costo`, `ctt_destino_contrato`.`horas_mes`
+                `ctt_destino_contrato`.`id_destino`
+                , `far_centrocosto_area`.`id_area`
+                , `far_centrocosto_area`.`id_sede`
+                , `far_centrocosto_area`.`id_centrocosto`
+                , `ctt_destino_contrato`.`horas_mes`
             FROM
                 `ctt_destino_contrato`
-                INNER JOIN `tb_centro_costo_x_sede` 
-                    ON (`ctt_destino_contrato`.`id_centro_costo` = `tb_centro_costo_x_sede`.`id_x_sede`)
-            WHERE `ctt_destino_contrato`.`id_adquisicion` = '$id_adq' ORDER BY `ctt_destino_contrato`.`id_destino` ASC";
+            INNER JOIN `far_centrocosto_area` 
+                ON (`ctt_destino_contrato`.`id_area_cc` = `far_centrocosto_area`.`id_area`)
+            WHERE `ctt_destino_contrato`.`id_adquisicion` = $id_adq ORDER BY `ctt_destino_contrato`.`id_destino` ASC";
     $rs = $cmd->query($sql);
     $destinos = $rs->fetchAll();
     $cmd = null;
@@ -90,12 +94,18 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT 
-                *
+                `ctt_adquisiciones`.`id_tipo_bn_sv`
+                , `ctt_modalidad`.`modalidad`
+                , `ctt_adquisiciones`.`id_adquisicion`
+                , `ctt_adquisiciones`.`fecha_adquisicion`
+                , `ctt_adquisiciones`.`estado`
+                , `ctt_adquisiciones`.`objeto`
+                , `ctt_adquisiciones`.`id_cont_api`
             FROM
-                ctt_adquisiciones
-            INNER JOIN ctt_modalidad 
-                ON (ctt_adquisiciones.id_modalidad = ctt_modalidad.id_modalidad) 
-            WHERE id_adquisicion = '$id_adq'";
+                `ctt_adquisiciones`
+            INNER JOIN `ctt_modalidad` 
+                ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`) 
+            WHERE `id_adquisicion` = $id_adq";
     $rs = $cmd->query($sql);
     $adquisicion = $rs->fetch();
     $cmd = null;
@@ -125,21 +135,38 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`no_doc`
-                , `seg_terceros`.`id_tercero_api`
-                , `ctt_adquisiciones`.`id_adquisicion`
-                , `ctt_adquisiciones`.`estado`
+                `id_tercero_api`
             FROM
-                `ctt_adquisiciones`
-            INNER JOIN `seg_terceros` 
-                ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
-            WHERE  `ctt_adquisiciones`.`id_adquisicion` =  '$id_adq' AND `ctt_adquisiciones`.`estado` >= '5' LIMIT 1";
+                `ctt_orden_compra`
+            WHERE (`id_adq` = $id_adq)";
     $rs = $cmd->query($sql);
     $seleccionada = $rs->fetch();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                 `ctt_bien_servicio`.`bien_servicio`
+                , `ctt_orden_compra_detalle`.`cantidad`
+                , `ctt_orden_compra_detalle`.`val_unid`
+                , `ctt_orden_compra_detalle`.`id_detalle`
+            FROM
+                `ctt_orden_compra_detalle`
+                INNER JOIN `ctt_orden_compra` 
+                    ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
+                INNER JOIN `ctt_bien_servicio` 
+                    ON (`ctt_orden_compra_detalle`.`id_servicio` = `ctt_bien_servicio`.`id_b_s`)
+            WHERE (`ctt_orden_compra`.`id_adq` = $id_adq)";
+    $rs = $cmd->query($sql);
+    $detalles_orden = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -270,6 +297,13 @@ if (!empty($adquisicion)) {
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid p-2">
+                        <?php
+                        if (PermisosUsuario($permisos, 5302, 1) || $id_rol == 1) {
+                            echo '<input type="hidden" id="peReg" value="1">';
+                        } else {
+                            echo '<input type="hidden" id="peReg" value="0">';
+                        }
+                        ?>
                         <div class="card mb-4">
                             <div class="card-header" id="divTituloPag">
                                 <div class="row">
@@ -302,21 +336,21 @@ if (!empty($adquisicion)) {
                                                 <div class="shadow detalles-empleado">
                                                     <div class="row">
                                                         <div class="div-mostrar bor-top-left col-md-4">
-                                                            <label class="lbl-mostrar pb-2">MODALIDAD CONTRATACIÓN</label>
+                                                            <span class="lbl-mostrar pb-2">MODALIDAD CONTRATACIÓN</span>
                                                             <div class="div-cont pb-2"><?php echo $adquisicion['modalidad'] ?></div>
                                                         </div>
                                                         <div class="div-mostrar col-md-2">
-                                                            <label class="lbl-mostrar pb-2">ADQUISICIÓN</label>
+                                                            <span class="lbl-mostrar pb-2">ADQUISICIÓN</span>
                                                             <input type="hidden" id="id_compra" value="<?php echo $id_adq ?>">
                                                             <input type="hidden" id="id_contrato_compra" value="<?php echo isset($contrato['id_contrato_compra']) ? $contrato['id_contrato_compra'] : '' ?>">
                                                             <div class="div-cont pb-2">ADQ-<?php echo mb_strtoupper($adquisicion['id_adquisicion']) ?></div>
                                                         </div>
                                                         <div class="div-mostrar col-md-3">
-                                                            <label class="lbl-mostrar pb-2">FECHA</label>
+                                                            <span class="lbl-mostrar pb-2">FECHA</span>
                                                             <div class="div-cont pb-2"><?php echo $adquisicion['fecha_adquisicion'] ?></div>
                                                         </div>
                                                         <div class="div-mostrar bor-top-right col-md-3">
-                                                            <label class="lbl-mostrar pb-2">ESTADO</label>
+                                                            <span class="lbl-mostrar pb-2">ESTADO</span>
                                                             <?php
                                                             $estad = $adquisicion['estado'];
                                                             $key = array_search($estad, array_column($estado_adq, 'id'));
@@ -326,7 +360,7 @@ if (!empty($adquisicion)) {
                                                     </div>
                                                     <div class="row">
                                                         <div class="div-mostrar bor-down-right bor-down-left col-md-12">
-                                                            <label class="lbl-mostrar pb-2">OBJETO</label>
+                                                            <span class="lbl-mostrar pb-2">OBJETO</span>
                                                             <div class="div-cont text-left pb-2"><?php echo $adquisicion['objeto'] ?></div>
                                                         </div>
                                                     </div>
@@ -356,7 +390,7 @@ if (!empty($adquisicion)) {
                                                 <?php
                                                 $tipo_contrato = '0';
                                                 foreach ($bnsv as $bs) {
-                                                    if ($bs['id_tipo'] == '10') {
+                                                    if ($bs['id_tipo'] == '1') {
                                                         $tipo_contrato = '1';
                                                     }
                                                 }
@@ -453,12 +487,13 @@ if (!empty($adquisicion)) {
                                                         <fieldset class="border p-2 bg-light">
                                                             <div id="contenedor">
                                                                 <?php
+                                                                $disabled = $adquisicion['estado'] <= 5 ? '' : 'disabled';
                                                                 if ($value == '0') {
                                                                 ?>
                                                                     <div class="form-row px-4 pt-2">
                                                                         <div class="form-group col-md-4 mb-2">
                                                                             <label class="small">SEDE</label>
-                                                                            <select name="slcSedeAC[]" class="form-control form-control-sm slcSedeAC">
+                                                                            <select name="slcSedeAC[]" class="form-control form-control-sm slcSedeAC" <?php echo $disabled ?>>
                                                                                 <option value="0">--Seleccione--</option>
                                                                                 <?php
                                                                                 foreach ($sedes as $s) {
@@ -469,24 +504,25 @@ if (!empty($adquisicion)) {
                                                                         </div>
                                                                         <div class="form-group col-md-4 mb-2">
                                                                             <label class="small">CENTRO DE COSTO</label>
-                                                                            <select name="slcCentroCosto[]" class="form-control form-control-sm slcCentroCosto">
+                                                                            <select name="slcCentroCosto[]" class="form-control form-control-sm slcCentroCosto" <?php echo $disabled ?>>
                                                                                 <option value="0">--Seleccionar Sede--</option>
                                                                             </select>
                                                                         </div>
                                                                         <div class="form-group col-md-4 mb-2">
-                                                                            <label for="numHorasMes" class="small">Horas asignadas / mes</label>
+                                                                            <label class="small">Horas asignadas / mes</label>
                                                                             <div class="input-group input-group-sm">
-                                                                                <input type="number" name="numHorasMes[]" class="form-control">
-                                                                                <div class="input-group-append">
-                                                                                    <button class="btn btn-outline-success" type="button" id="addRowSedes"><i class="fas fa-plus"></i></button>
-                                                                                </div>
+                                                                                <input type="number" name="numHorasMes[]" class="form-control" <?php echo $disabled ?>>
+                                                                                <?php if ($disabled == '') { ?>
+                                                                                    <div class="input-group-append">
+                                                                                        <button class="btn btn-outline-success" type="button" id="addRowSedes"><i class="fas fa-plus"></i></button>
+                                                                                    </div>
+                                                                                <?php } ?>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                     <?php
                                                                 } else {
                                                                     $control = 0;
-                                                                    $disabled = $adquisicion['estado'] <= 5 ? '' : 'disabled';
                                                                     foreach ($destinos as $d) {
                                                                     ?>
                                                                         <div class="form-row px-4 pt-2">
@@ -509,11 +545,11 @@ if (!empty($adquisicion)) {
                                                                                 <select name="slcCentroCosto[]" class="form-control form-control-sm slcCentroCosto" <?php echo $disabled ?>>
                                                                                     <?php
                                                                                     foreach ($centros_costo as $cc) {
-                                                                                        if ($cc['id_sede'] == $d['id_sede']) {
-                                                                                            if ($cc['id_x_sede'] == $d['id_centro_costo']) {
-                                                                                                echo '<option value="' . $cc['id_x_sede'] . '" selected>' . $cc['descripcion'] . '</option>';
+                                                                                        if ($cc['id_area'] == $d['id_area']) {
+                                                                                            if ($cc['id_area'] == $d['id_area']) {
+                                                                                                echo '<option value="' . $cc['id_area'] . '" selected>' . $cc['nom_centro'] . '</option>';
                                                                                             } else {
-                                                                                                echo '<option value="' . $cc['id_x_sede'] . '">' . $cc['descripcion'] . '</option>';
+                                                                                                echo '<option value="' . $cc['id_area'] . '">' . $cc['nom_centro'] . '</option>';
                                                                                             }
                                                                                         }
                                                                                     }
@@ -571,7 +607,7 @@ if (!empty($adquisicion)) {
                                                             </div>
                                                             <div>
                                                                 <?php $j++;
-                                                                echo $j ?>. COTIZACIONES RECIBIDAS.
+                                                                echo $j ?>. ORDEN DE COMPRA.
                                                             </div>
                                                         </div>
                                                     </a>
@@ -581,118 +617,60 @@ if (!empty($adquisicion)) {
                                                 <div class="card-body">
                                                     <div id="accordion">
                                                         <?php
-                                                        $id_cot_rec = $id_adq . '|' . $_SESSION['nit_emp'];
-                                                        $url = $api . 'terceros/datos/res/listar/cot_recibidas/' . $id_cot_rec;
-                                                        $ch = curl_init($url);
-                                                        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                                                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-                                                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                                                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                                        $result = curl_exec($ch);
-                                                        curl_close($ch);
-                                                        $recibe =  json_decode($result, true);
-                                                        $cstv = 0;
-                                                        if ($recibe != 0) {
-                                                            foreach ($recibe as $rc) {
-                                                                $ter_slc = $cot_slc = '';
-                                                                $seleccionada['no_doc'] = isset($seleccionada['no_doc']) ? $seleccionada['no_doc'] : NULL;
-                                                                if ($rc['cc_nit'] == $seleccionada['no_doc']) {
-                                                                    $ter_slc = '<i class="far fa-check-circle fa-lg" style="color:#8E44AD"></i>';
-                                                                    $cot_slc = 'bg-slc';
-                                                                }
-                                                        ?>
-                                                                <!-- parte-->
-                                                                <div class="card">
-                                                                    <div class="card-header <?php echo $cot_slc != '' ? $cot_slc : 'card-header-detalles' ?> py-0 headings" id="<?php echo 'cotRec' . $cstv ?>" title="<?php echo $cot_slc != '' ? 'COTIZACIÓN SELECCIONADA' : '' ?>">
-                                                                        <h5 class="mb-0">
-                                                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapsecotRec<?php echo $cstv ?>" aria-expanded="true" aria-controls="collapsecotRec<?php echo $cstv ?>">
-                                                                                <div class="form-row">
-                                                                                    <div class="div-icono">
-                                                                                        <span class="fas fa-list-ul fa-lg" style="color: #F1C40F;"></span>
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <?php echo mb_strtoupper($rc['apellido1'] . ' ' . $rc['apellido2'] . ' ' . $rc['nombre1'] . ' ' . $rc['nombre2'] . ' ' . $rc['razon_social'] . ' ' . $rc['cc_nit']) ?>
-                                                                                    </div>
-                                                                                    <div class="ml-auto mr-0 mr-md-3 my-2 my-md-0 con-icon">
-                                                                                        <?php echo $ter_slc ?>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </a>
-                                                                        </h5>
-                                                                    </div>
-                                                                    <div id="collapsecotRec<?php echo $cstv ?>" class="collapse" aria-labelledby="cotRec<?php echo $cstv ?>">
-                                                                        <div class="card-body">
-                                                                            <?php
-                                                                            $dat_cot_rec = $id_adq . '|' . $_SESSION['nit_emp'] . '|' . $rc['id_tercero'];
-                                                                            $url = $api . 'terceros/datos/res/listar/datos_cotiz_recibidas/' . $dat_cot_rec;
-                                                                            $ch = curl_init($url);
-                                                                            //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                                                                            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-                                                                            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                                                                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                                                            $result = curl_exec($ch);
-                                                                            curl_close($ch);
-                                                                            $datos_cotiza =  json_decode($result, true);
-                                                                            if ($datos_cotiza != 0) {
-                                                                                if ($estad == 4) {
-                                                                                    if (PermisosUsuario($permisos, 5302, 2) || $id_rol == 1) {
-                                                                                        echo '<div class="text-center"><button value="' . $id_adq . '|' . $rc['cc_nit'] . '" class="btn btn-info btn-sm btnSlcCot"><i class="far fa-check-square">&nbsp&nbsp;</i>SELECCIONAR COTIZACIÓN</button></div>';
-                                                                                    }
-                                                                                }
-                                                                            ?>
-                                                                                <table class="table table-striped table-bordered table-sm nowrap table-hover shadow tableCotRecibidas" style="width:100%">
-                                                                                    <thead>
-                                                                                        <tr>
-                                                                                            <th>Bien o Servicio</th>
-                                                                                            <th>Cantidad</th>
-                                                                                            <th>Val. Estimado Unidad</th>
-                                                                                            <th>Valor Cotizado Unidad</th>
-                                                                                            <th>Diferencia</th>
-                                                                                        </tr>
-                                                                                    </thead>
-                                                                                    <tbody class="modificarCotizaciones">
-                                                                                        <?php
-                                                                                        foreach ($datos_cotiza as $dc) {
-                                                                                        ?>
-                                                                                            <tr>
-                                                                                                <td><?php echo $dc['bien_servicio'] ?></td>
-                                                                                                <td><?php echo $dc['cantidad'] ?></td>
-                                                                                                <td class="text-right"><?php echo pesos($dc['val_estimado_unid']) ?></td>
-                                                                                                <td class="text-right"><?php echo pesos($dc['valor']) ?></td>
-                                                                                                <?php
-                                                                                                $dif =  $dc['valor'] - $dc['val_estimado_unid'];
-                                                                                                $signo = '';
-                                                                                                if ($dif == 0) {
-                                                                                                    $text_clas = 'text-gray';
-                                                                                                } else if ($dif < 0) {
-                                                                                                    $text_clas = 'text-green';
-                                                                                                } else {
-                                                                                                    $text_clas = 'text-red';
-                                                                                                    $signo = '+';
-                                                                                                }
-                                                                                                ?>
-                                                                                                <td class="<?php echo $text_clas ?> text-right"><?php echo $signo . pesos($dif) ?></td>
-                                                                                            </tr>
-                                                                                        <?php
-                                                                                        }
-                                                                                        ?>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            <?php
-                                                                            } else {
-                                                                            ?>
-                                                                                <div class="p-3 mb-2 bg-warning text-white">NO HAY COTIZACIONES RECIBIDAS</div>
-                                                                            <?php
-                                                                            }
-                                                                            ?>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                        <?php
-                                                                $cstv++;
-                                                            }
+                                                        if (!empty($seleccionada)) {
+                                                            $id_t = array('id_tercero' => $seleccionada['id_tercero_api']);
+                                                            $payload = json_encode($id_t);
+                                                            //API URL
+                                                            $url = $api . 'terceros/datos/res/lista/terceros';
+                                                            $ch = curl_init($url);
+                                                            //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                                                            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+                                                            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                                                            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+                                                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                                            $result = curl_exec($ch);
+                                                            curl_close($ch);
+                                                            $terceros = json_decode($result, true);
+                                                            $tercero = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
+                                                            $cc_nit = number_format($terceros[0]['cc_nit'], 0, '', '.');
+                                                        } else {
+                                                            $tercero = '---';
                                                         }
                                                         ?>
+                                                        <table class="table table-striped table-bordered table-sm nowrap table-hover shadow tableCotRecibidas" style="width:100%">
+                                                            <thead>
+                                                                <tr class="text-center">
+                                                                    <th>TERCERO:</th>
+                                                                    <th colspan="4"><?php echo  $tercero; ?></th>
+                                                                    <th><?php echo  $cc_nit; ?></th>
+                                                                </tr>
+                                                                <tr class="text-center">
+                                                                    <th>#</th>
+                                                                    <th>Bien o Servicio</th>
+                                                                    <th>Cantidad</th>
+                                                                    <th>Val. Unidad</th>
+                                                                    <th>Total</th>
+                                                                    <th>Acciones</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody class="modificarCotizaciones">
+                                                                <?php
+                                                                foreach ($detalles_orden as $dc) {
+                                                                ?>
+                                                                    <tr>
+                                                                        <td><?php echo $dc['id_detalle'] ?></td>
+                                                                        <td><?php echo $dc['bien_servicio'] ?></td>
+                                                                        <td><?php echo $dc['cantidad'] ?></td>
+                                                                        <td class="text-right"><?php echo pesos($dc['val_unid']) ?></td>
+                                                                        <td class="text-right"><?php echo pesos($dc['val_unid'] * $dc['cantidad']) ?></td>
+                                                                        <td></td>
+                                                                    </tr>
+                                                                <?php
+                                                                }
+                                                                ?>
+                                                            </tbody>
+                                                        </table>
+
                                                     </div>
                                                 </div>
                                             </div>

@@ -303,7 +303,7 @@ try {
                     try {
                         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-                        $sql = "SELECT `id_sede` FROM `tb_centro_costo_x_sede` WHERE `id_x_sede` = $id_cc";
+                        $sql = "SELECT `id_sede` FROM `far_centrocosto_area` WHERE `id_sede` = $id_cc";
                         $rs = $cmd->query($sql);
                         $cencos = $rs->fetch();
                         $cmd = null;
@@ -315,15 +315,15 @@ try {
                         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                         $sql = "SELECT
-                                    `tb_centro_costo_x_sede`.`id_x_sede`
-                                    , `tb_centros_costo`.`descripcion`
+                                    `far_centrocosto_area`.`id_sede`
+                                    , `tb_centrocostos`.`descripcion`
                                 FROM
-                                    `tb_centro_costo_x_sede`
+                                    `far_centrocosto_area`
                                     INNER JOIN `tb_sedes` 
-                                        ON (`tb_centro_costo_x_sede`.`id_sede` = `tb_sedes`.`id_sede`)
-                                    INNER JOIN `tb_centros_costo` 
-                                        ON (`tb_centro_costo_x_sede`.`id_centro_c` = `tb_centros_costo`.`id_centro`)
-                                WHERE `tb_centro_costo_x_sede`.`id_sede` = $id_sede";
+                                        ON (`far_centrocosto_area`.`id_sede` = `tb_sedes`.`id_sede`)
+                                    INNER JOIN `tb_centrocostos` 
+                                        ON (`far_centrocosto_area`.`id_centrocosto` = `tb_centrocostos`.`id_centro`)
+                                WHERE `far_centrocosto_area`.`id_sede` = $id_sede";
                         $rs = $cmd->query($sql);
                         $centros = $rs->fetchAll();
                         $cmd = null;
@@ -349,8 +349,8 @@ try {
                                 <select name="slcCentroCosto[]" class="form-control form-control-sm slcCentroCosto">
                                     <?php
                                     foreach ($centros as $c) {
-                                        $slc = $c['id_x_sede'] == $des['id_centro_costo'] ? 'selected' : '';
-                                        echo '<option value="' . $c['id_x_sede'] . '" ' . $slc . '>' . $c['descripcion'] . '</option>';
+                                        $slc = $c['id_sede'] == $des['id_centro_costo'] ? 'selected' : '';
+                                        echo '<option value="' . $c['id_sede'] . '" ' . $slc . '>' . $c['descripcion'] . '</option>';
                                     }
                                     ?>
                                 </select>
@@ -383,8 +383,8 @@ try {
                                 <select name="slcCentroCosto[]" class="form-control form-control-sm slcCentroCosto">
                                     <?php
                                     foreach ($centros as $c) {
-                                        $slc = $c['id_x_sede'] == $des['id_centro_costo'] ? 'selected' : '';
-                                        echo '<option value="' . $c['id_x_sede'] . '" ' . $slc . '>' . $c['descripcion'] . '</option>';
+                                        $slc = $c['id_sede'] == $des['id_centro_costo'] ? 'selected' : '';
+                                        echo '<option value="' . $c['id_sede'] . '" ' . $slc . '>' . $c['descripcion'] . '</option>';
                                     }
                                     ?>
                                 </select>

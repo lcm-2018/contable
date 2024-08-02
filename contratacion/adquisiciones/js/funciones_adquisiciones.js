@@ -185,6 +185,18 @@
         $('#tableUpAdqBnSv').wrap('<div class="overflow" />');
 
         $('.tableCotRecibidas').DataTable({
+            dom: setdom,
+            buttons: [{
+                action: function (e, dt, node, config) {
+                    $.post("datos/registrar/formadd_adquisicion.php", function (he) {
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').removeClass('modal-sm');
+                        $('#divTamModalForms').addClass('modal-lg');
+                        $('#divModalForms').modal('show');
+                        $("#divForms").html(he);
+                    });
+                }
+            }],
             language: setIdioma,
             "lengthMenu": [
                 [10, 25, 50, -1],

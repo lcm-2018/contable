@@ -1,3 +1,8 @@
+/* 
+Tabla `seg_usuarios_sistema` tiene campo temporal `id_user_fin` que se debe eliminar
+Tabla `tb_centrocostos` tiene campo temporal `id_centro_fin` que se debe eliminar
+Tabla `far_centrocosto_area` tiene campo temporal `id_x_sede` que se debe eliminar
+*/
 INSERT  INTO `seg_rol`
 	(`id_rol`,`nom_rol`,`id_usr_crea`) 
 VALUES (1,'ADMINISTRADOR',NULL),(2,'ADMISION Y CITAS',NULL),(3,'FACTURACION',NULL),(4,'MEDICOS',NULL),(5,'ENFERMERAS',NULL),(6,'LABORATORIO',NULL),(7,'BACTERIOLOGO',NULL),(8,'PSICOLOGO',NULL),(9,'ODONTOLOGOS',NULL),(10,'ESPECIALISTAS MEDICINA',NULL),(11,'FARMACIA',NULL),(12,'NUTRICIONISTA',NULL),(13,'POSCONSULTA',NULL),(14,'PYP',NULL);
@@ -755,3 +760,119 @@ SELECT
 FROM `financiero`.`seg_tes_detalle_pago`
 INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
 	ON (`seg_tes_detalle_pago`.`id_user_reg` = `seg_usuarios_sistema`.`id_user_fin`);
+
+INSERT INTO `bd_cronhis`.`tb_tipo_contratacion`
+	(`id_tipo`,`id_tipo_compra`,`tipo_contrato`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`)
+VALUES
+(1,2,"PRESTACION DE SERVICIOS",NULL,NULL,NULL,NULL),
+(2,2,"OTROS SERVICIOS",NULL,NULL,NULL,NULL);
+
+INSERT INTO `bd_cronhis`.`tb_tipo_bien_servicio`
+	(`id_tipo_b_s`,`id_tipo_cotrato`,`tipo_bn_sv`,`cta_contable`,`objeto_definido`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`)
+SELECT
+	`id_tipo_b_s`,1 AS `tipo_contrato`,`tipo_bn_sv`,`cta_contable`,`objeto_definido`,`seg_usuarios_sistema`.`id_usuario`,`fec_reg`,`seg_usuarios_sistema`.`id_usuario` AS `act`,`fec_act`
+FROM `financiero`.`seg_tipo_bien_servicio`
+INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
+	ON (`seg_tipo_bien_servicio`.`id_user_reg` = `seg_usuarios_sistema`.`id_user_fin`)
+WHERE `seg_tipo_bien_servicio`.`id_tipo_cotrato` IN (53,52,10,43,44,47,51,26,36,33,31,30,45,56)
+UNION ALL
+SELECT
+	`id_tipo_b_s`,1 AS `tipo_contrato`,`tipo_bn_sv`,`cta_contable`,`objeto_definido`,`seg_usuarios_sistema`.`id_usuario`,`fec_reg`,`seg_usuarios_sistema`.`id_usuario` AS `act`,`fec_act`
+FROM `financiero`.`seg_tipo_bien_servicio`
+INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
+	ON (`seg_tipo_bien_servicio`.`id_user_reg` = `seg_usuarios_sistema`.`id_user_fin`)
+WHERE `seg_tipo_bien_servicio`.`id_tipo_cotrato` IN (27,34,46,42,18,50,16,21,28,49,55);
+
+INSERT INTO `bd_cronhis`.`ctt_estado_adq`
+	(`id`,`descripcion`)
+SELECT
+	`id`,`descripcion`
+FROM `financiero`.`seg_estado_adq`;
+
+INSERT INTO `bd_cronhis`.`ctt_adquisiciones`
+	(`id_adquisicion`,`id_modalidad`,`id_empresa`,`id_sede`,`id_area`,`id_cdp`,`fecha_adquisicion`,`val_contrato`,`vigencia`,`id_tipo_bn_sv`,`obligaciones`,`objeto`,`id_tercero`,`entregas`,`estado`,`id_cont_api`,`id_supervision`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`)
+SELECT
+	`id_adquisicion`,`id_modalidad`,1 AS `id_empresa`,`id_sede`,`id_area`
+	,CASE
+		WHEN `seg_adquisiciones`.`id_cdp` = 1 THEN NULL
+		ELSE `seg_adquisiciones`.`id_cdp`
+	END AS `id_cdp`
+	,`fecha_adquisicion`,`val_contrato`,`vigencia`,`id_tipo_bn_sv`
+	,`obligaciones`,`seg_adquisiciones`.`objeto`,`id_tercero`,`entregas`,`seg_adquisiciones`.`estado`,`id_cont_api`,`id_supervision`,`seg_usuarios_sistema`.`id_usuario`,`seg_adquisiciones`.`fec_reg`,`seg_usuarios_sistema`.`id_usuario` AS `act`,`seg_adquisiciones`.`fec_act`
+FROM `financiero`.`seg_adquisiciones`
+INNER JOIN `bd_cronhis`.`tb_tipo_bien_servicio`
+	ON(`bd_cronhis`.`tb_tipo_bien_servicio`.`id_tipo_b_s` = `financiero`.`seg_adquisiciones`.`id_tipo_bn_sv`)
+INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
+	ON (`financiero`.`seg_adquisiciones`.`id_user_reg` = `bd_cronhis`.`seg_usuarios_sistema`.`id_user_fin`)
+LEFT JOIN `bd_cronhis`.`pto_cdp`
+	ON(`financiero`.`seg_adquisiciones`.`id_cdp` = `bd_cronhis`.`pto_cdp`.`id_pto_cdp`);
+
+INSERT INTO `bd_cronhis`.`ctt_adquisicion_detalles`
+	(`id_detalle_adq`,`id_adquisicion`,`id_bn_sv`,`cantidad`,`val_estimado_unid`,`id_user_reg`,`fec_reg`)
+SELECT
+	`id_detalle_adq`,`seg_detalle_adquisicion`.`id_adquisicion`,`id_bn_sv`,`cantidad`,`val_estimado_unid`
+	,`seg_usuarios_sistema`.`id_usuario`,`seg_detalle_adquisicion`.`fec_reg`
+FROM `financiero`.`seg_detalle_adquisicion`
+INNER JOIN `bd_cronhis`.`ctt_adquisiciones`
+	ON(`financiero`.`seg_detalle_adquisicion`.`id_adquisicion` = `bd_cronhis`.`ctt_adquisiciones`.`id_adquisicion`)
+INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
+	ON (`financiero`.`seg_detalle_adquisicion`.`id_user_reg` = `bd_cronhis`.`seg_usuarios_sistema`.`id_user_fin`);
+
+INSERT INTO `bd_cronhis`.`tb_centrocostos`
+	(`id_centro_fin`,`nom_centro`,`es_clinico`)
+SELECT `id_centro`,`descripcion`, 0 AS `clinico` 
+FROM `financiero`.`seg_centros_costo`
+WHERE `seg_centros_costo`.`id_centro` IN (0,3,9,11,12,13,14);
+
+UPDATE `bd_cronhis`.`tb_centrocostos` SET `id_centro_fin` = 1 WHERE `id_centro`= 7;
+UPDATE `bd_cronhis`.`tb_centrocostos` SET `id_centro_fin` = 2 WHERE `id_centro`= 2;
+UPDATE `bd_cronhis`.`tb_centrocostos` SET `id_centro_fin` = 4 WHERE `id_centro`= 3;
+UPDATE `bd_cronhis`.`tb_centrocostos` SET `id_centro_fin` = 5 WHERE `id_centro`= 6;
+UPDATE `bd_cronhis`.`tb_centrocostos` SET `id_centro_fin` = 6 WHERE `id_centro`= 20;
+UPDATE `bd_cronhis`.`tb_centrocostos` SET `id_centro_fin` = 7 WHERE `id_centro`= 5;
+UPDATE `bd_cronhis`.`tb_centrocostos` SET `id_centro_fin` = 8 WHERE `id_centro`= 1;
+UPDATE `bd_cronhis`.`tb_centrocostos` SET `id_centro_fin` = 10 WHERE `id_centro`= 8;
+
+INSERT INTO `bd_cronhis`.`far_centrocosto_area`
+	(`nom_area`,`id_centrocosto`,`id_x_sede`,`id_tipo_area`,`id_responsable`,`id_sede`)
+SELECT
+	`tb_centrocostos`.`nom_centro`,`tb_centrocostos`.`id_centro`,`seg_centro_costo_x_sede`.`id_x_sede`,0 AS `tipo`, 1 AS `responsable`
+	,CASE
+		WHEN `seg_centro_costo_x_sede`.`id_sede` = 1 THEN 1
+		WHEN `seg_centro_costo_x_sede`.`id_sede` = 2 THEN 2
+		WHEN `seg_centro_costo_x_sede`.`id_sede` = 3 THEN 3
+		ELSE 3
+	END AS `id_sede`
+FROM `financiero`.`seg_centro_costo_x_sede`
+LEFT JOIN `bd_cronhis`.`tb_centrocostos`
+	ON(`financiero`.`seg_centro_costo_x_sede`.`id_centrocosto` = `bd_cronhis`.`tb_centrocostos`.`id_centro_fin`);
+
+INSERT INTO `bd_cronhis`.`ctt_destino_contrato`
+	(`id_destino`,`id_adquisicion`,`id_area_cc`,`horas_mes`,`id_user_reg`,`fec_reg`)
+SELECT
+	`seg_destino_contrato`.`id_destino`
+	,`seg_destino_contrato`.`id_adquisicion`
+	,`far_centrocosto_area`.`id_area`
+	,`seg_destino_contrato`.`horas_mes`
+	,`seg_usuarios_sistema`.`id_usuario`
+	,`seg_destino_contrato`.`fec_reg`
+FROM `financiero`.`seg_destino_contrato`
+INNER JOIN `bd_cronhis`.`ctt_adquisiciones`
+	ON(`bd_cronhis`.`ctt_adquisiciones`.`id_adquisicion` = `financiero`.`seg_destino_contrato`.`id_adquisicion`)
+INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
+	ON (`financiero`.`seg_destino_contrato`.`id_user_reg` = `bd_cronhis`.`seg_usuarios_sistema`.`id_user_fin`)
+LEFT JOIN `bd_cronhis`.`far_centrocosto_area`
+	ON(`financiero`.`seg_destino_contrato`.`id_centro_costo` = `bd_cronhis`.`far_centrocosto_area`.`id_x_sede`);
+
+INSERT INTO `bd_cronhis`.`ctt_orden_compra`
+	(`id_adq`,`id_tercero_api`,`estado`,`fec_reg`)
+SELECT
+	`seg_cotiza_tercero`.`id_cot` AS `id_adq`
+	, `seg_cotiza_tercero`.`id_tercero`
+	, `seg_cotiza_tercero`.`estado`
+	, `seg_cotiza_tercero`.`fec_reg`
+FROM `docs_api`.`seg_cotiza_tercero`
+INNER JOIN `bd_cronhis`.`ctt_adquisiciones`
+	ON(`bd_cronhis`.`ctt_adquisiciones`.`id_adquisicion` = `docs_api`.`seg_cotiza_tercero`.`id_cot`)
+WHERE `seg_cotiza_tercero`.`nit` = '844001355'
+GROUP BY id_cot;
