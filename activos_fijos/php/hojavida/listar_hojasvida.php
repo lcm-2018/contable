@@ -28,8 +28,8 @@ if (isset($_POST['nombre']) && $_POST['nombre']) {
 if (isset($_POST['placa']) && $_POST['placa']) {
     $where .= " AND HV.placa='" . $_POST['placa'] . "'";
 }
-if (isset($_POST['serial']) && $_POST['serial']) {
-    $where .= " AND HV.serial='" . $_POST['serial'] . "'";
+if (isset($_POST['num_serial']) && $_POST['num_serial']) {
+    $where .= " AND HV.num_serial='" . $_POST['num_serial'] . "'";
 }
 if (isset($_POST['marca']) && $_POST['marca']) {
     $where .= " AND M.id=" . $_POST['marca'] . "";
@@ -62,7 +62,7 @@ try {
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT HV.id_activo_fijo,
                 FM.cod_medicamento cod_articulo,FM.nom_medicamento nom_articulo,
-                HV.placa,HV.serial,
+                HV.placa,HV.num_serial,
                 M.descripcion marca,HV.valor,
                 S.nom_sede,AR.nom_area,
                 CASE HV.tipo_activo WHEN 1 THEN 'PROPIEDAD, PLANTA Y EQUIPO' WHEN 2 THEN 'PROPIDAD PARA LA VENTA' 
@@ -96,12 +96,12 @@ if (!empty($objs)) {
         //Permite crear botones en la cuadricula si tiene permisos de 1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir
         if (PermisosUsuario($permisos, 5704, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+        }        
+        if (PermisosUsuario($permisos, 5704, 3) || $id_rol == 1) {
+            $imagen =  '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_imagen" title="Imagen"><span class="fas fa-file-image-o fa-lg"></span></a>';
         }
         if (PermisosUsuario($permisos, 5704, 3) || $id_rol == 1) {
             $componente =  '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_componente" title="Componente"><span class="fas fa-laptop fa-lg"></span></a>';
-        }
-        if (PermisosUsuario($permisos, 5704, 3) || $id_rol == 1) {
-            $imagen =  '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_imagen" title="Imagen"><span class="fas fa-file-image-o fa-lg"></span></a>';
         }
         if (PermisosUsuario($permisos, 5704, 3) || $id_rol == 1) {
             $archivos =  '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_archivos" title="Archivos"><span class="fas fa-paperclip fa-lg"></span></a>';
@@ -114,7 +114,7 @@ if (!empty($objs)) {
             "cod_articulo" => $obj['cod_articulo'],
             "nom_articulo" => $obj['nom_articulo'],
             "placa" => $obj['placa'],
-            "serial" => $obj['serial'],
+            "num_serial" => $obj['num_serial'],
             "marca" => $obj['marca'],
             "valor" => $obj['valor'],
             "tipo_activo" => $obj['tipo_activo'],
@@ -122,7 +122,7 @@ if (!empty($objs)) {
             "nom_area" => $obj['nom_area'],
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
-            "botones" => '<div class="text-center centro-vertical">' . $editar . $componente . $imagen . $archivos . $eliminar . '</div>',
+            "botones" => '<div class="text-center centro-vertical">' . $editar . $imagen . $componente . $archivos . $eliminar . '</div>',
         ];
     }
 }

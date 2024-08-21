@@ -27,13 +27,13 @@
             serverSide: true,
             searching: false,
             ajax: {
-                url: 'listar_activosfijos.php',
+                url: 'listar_hojasvida.php',
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
                     data.nombre = $('#txt_nombre_filtro').val();
                     data.placa = $('#txt_placa_filtro').val();
-                    data.serial = $('#txt_serial_filtro').val();
+                    data.num_serial = $('#txt_serial_filtro').val();
                     data.marca = $('#sl_marcas_filtro').val();
                     data.tipoactivo = $('#sl_tipoactivo_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
@@ -44,7 +44,7 @@
                 { 'data': 'cod_articulo' },
                 { 'data': 'nom_articulo' },
                 { 'data': 'placa' },
-                { 'data': 'serial' },
+                { 'data': 'num_serial' },
                 { 'data': 'marca' },
                 { 'data': 'valor' },
                 { 'data': 'tipo_activo' },
@@ -104,62 +104,28 @@
         });
     });
 
-
-
-
-
-
-
-    //Registrar componentes
-    $('#tb_hojavida').on('click', '.btn_componente', function() {
-        let id = $(this).attr('value');
-        $.post("form_componente_hojavida.php", { id_hv: id }, function(he) {
-            $('#divTamModalForms').addClass('modal-xl');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
-        });
-    });
-
-    $('#tb_hojavida').on('click', '.btn_imagen', function() {
-        let id = $(this).attr('value');
-        $.post("acf_reg_imagen.php", { id_hv: id }, function(he) {
-            $('#divTamModalForms').addClass('modal-xl');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
-        });
-    });
-
-    $('#tb_hojavida').on('click', '.btn_archivos', function() {
-        let id = $(this).attr('value');
-        $.post("acf_reg_documentos.php", { id_hv: id }, function(he) {
-            $('#divTamModalForms').addClass('modal-xl');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
-        });
-    });
-
     //Guardar hoja de vida
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
 
         var error = verifica_vacio_2($('#id_sede'), $('#nom_sede'));
-        error += verifica_vacio($('#placa'));
-        error += verifica_vacio($('#serial'));
-        error += verifica_vacio($('#id_marca'));
-        error += verifica_vacio($('#valor'));
-
-        error += verifica_vacio($('#id_proveedor'));
+        error += verifica_vacio_2($('#id_area'), $('#nom_area'));
         error += verifica_vacio($('#id_articulo'));
-
+        error += verifica_vacio($('#placa'));
+        error += verifica_vacio($('#num_serial'));
+        error += verifica_vacio($('#id_marca'));
+        error += verifica_vacio($('#id_proveedor'));
+        error += verifica_vacio($('#valor'));
+        error += verifica_vacio($('#estado'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Los datos resaltados son obligatorios');
         } else {
-            var data = $('#acf_reg_hoja_vida').serialize();
+            var data = $('#acf_reg_hojavida').serialize();
             $.ajax({
                 type: 'POST',
-                url: 'editar_hoja_vida.php',
+                url: 'editar_hojavida.php',
                 dataType: 'json',
                 data: data + "&id_hv=" + $('#id_hv').val() + '&oper=add'
             }).done(function(res) {
@@ -168,7 +134,6 @@
                     reloadtable('tb_hojavida', pag);
                     $('#id_hv').val(res.id_hv);
 
-                    $('#btn_cerrar').prop('disabled', false);
                     $('#btn_imprimir').prop('disabled', false);
 
                     $('#divModalDone').modal('show');
@@ -186,218 +151,23 @@
         }
     });
 
-    //Guardar archivos hoja de vida
-    $('#divForms').on("click", "#btn_guardar_imagen", function() {
-        $('.is-invalid').removeClass('is-invalid');
-
-        var file = $('#uploadImageAcf')[0].files[0];
-
-        if (!file) {
-            showError('Por favor, selecciona un archivo')
-            return;
-        }
-
-        var validImageTypes = ["image/jpeg", "image/png", "image/gif"];
-
-        if (!validImageTypes.includes(file.type)) {
-            showError('Por favor, selecciona un archivo de imagen válido')
-            return;
-        }
-
-        let datos = new FormData();
-        datos.append('id_hv', $('#id_hv').val());
-        datos.append('oper', 'add');
-        datos.append('uploadImageAcf', file);
-
-        var error = 0
-
-        if (error >= 1) {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Los datos resaltados son obligatorios');
-        } else {
-            $.ajax({
-                type: 'POST',
-                url: 'editar_imagenes_hv.php',
-                contentType: false,
-                data: datos,
-                processData: false,
-                cache: false,
-            }).done(function(res) {
-                var res = JSON.parse(res);
-                if (res.mensaje == 'ok') {
-                    let pag = ($('#tb_hojavida').val() == -1) ? 0 : $('#tb_hojavida').DataTable().page.info().page;
-                    reloadtable('tb_hojavida', pag);
-                    $('#id_hv').val(res.id_hv);
-                    $('#imagen').val(res.nombre_imagen);
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html("Proceso realizado con éxito");
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(res.mensaje);
-                }
-            }).always(
-                function() {}
-            ).fail(function(xhr, textStatus, errorThrown) {
-                console.error(xhr.responseText)
-                alert('Ocurrió un error');
-            });
-        }
-    });
-
-    //Descarar imagen  hoja de vida
-    $('#divForms').on("click", "#btn_descargar_imagen", function() {
-        $('.is-invalid').removeClass('is-invalid');
-
-        let nombreImagen = $('#imagen').val()
-
-        // Construir la URL relativa al archivo
-        var urlDescarga = '../../imagenes/activos_fijos/' + nombreImagen
-
-        // Redirigir al usuario a la URL para iniciar la descarga
-        window.open(urlDescarga, '_blank');
-    });
-
-
-    //Descarar documento  hoja de vida
-    $('#divModalReg').on("click", "#btn_descargar_documento", function() {
-        $('.is-invalid').removeClass('is-invalid');
-
-        let nombreImagen = $('#archivo').val()
-
-        // Construir la URL relativa al archivo
-        var urlDescarga = '../../imagenes/activos_fijos/' + nombreImagen
-
-        // Redirigir al usuario a la URL para iniciar la descarga
-        window.open(urlDescarga, '_blank');
-    });
-
-    //Guardar documentos hoja de vida
-    $('#divModalReg').on("click", "#btn_guardar_documentos", function() {
-        $('.is-invalid').removeClass('is-invalid');
-
-        var error = verifica_vacio($('#tipo'));
-        error += verifica_vacio($('#descripcion'));
-
-        var file = $('#uploadDocAcf')[0].files[0];
-        if (!$('#archivo').val()) {
-            if (!file) {
-                showError('Por favor, selecciona un archivo')
-                return;
-            }
-
-            var validImageTypes = ["application/pdf", "application/pdf"];
-
-            if (!validImageTypes.includes(file.type)) {
-                showError('Por favor, selecciona un documento válido')
-                return;
-            }
-        }
-
-        let datos = new FormData();
-
-        datos.append('id_hv', $('#id_hv').val());
-        datos.append('id_hv_doc', $('#id_hv_doc').val());
-        datos.append('tipo', $('#tipo').val());
-        datos.append('descripcion', $('#descripcion').val());
-        datos.append('archivo', $('#archivo').val());
-
-        datos.append('oper', 'add');
-        datos.append('uploadDocAcf', file);
-
-        var error = 0
-
-
-        if (error >= 1) {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Los datos resaltados son obligatorios');
-        } else {
-            $.ajax({
-                type: 'POST',
-                url: 'editar_documentos_hv.php',
-                contentType: false,
-                data: datos,
-                processData: false,
-                cache: false,
-            }).done(function(res) {
-                var res = JSON.parse(res);
-                if (res.mensaje == 'ok') {
-                    let pag = ($('#tb_lista_documentos_acf').val() == -1) ? 0 : $('#tb_lista_documentos_acf').DataTable().page.info().page;
-                    reloadtable('tb_lista_documentos_acf', pag);
-                    $('#id_hv').val(res.id_hv);
-                    $('#id_hv_doc').val(res.id_hv_doc);
-                    $('#archivo').val(res.nombre_archivo);
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html("Proceso realizado con éxito");
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(res.mensaje);
-                }
-            }).always(
-                function() {}
-            ).fail(function(xhr, textStatus, errorThrown) {
-                console.error(xhr.responseText)
-                alert('Ocurrió un error');
-            });
-        }
-    });
-
-    //Guardar documentos hoja de vida
-    $('#divModalReg').on("click", "#btn_guardar_componente", function() {
-        $('.is-invalid').removeClass('is-invalid');
-
-        var error = verifica_vacio($('#id_articulo'));
-        error += verifica_vacio($('#serial'));
-        error += verifica_vacio($('#id_marca'));
-        error += verifica_vacio($('#modelo'));
-
-        if (error >= 1) {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Los datos resaltados son obligatorios');
-        } else {
-            var data = $('#frm_reg_componente').serialize();
-            $.ajax({
-                type: 'POST',
-                url: 'editar_componente.php',
-                dataType: 'json',
-                data: data + "&id_componente=" + $('#id_componente').val() + "&id_hv=" + $('#id_hv').val() + '&oper=add'
-            }).done(function(res) {
-                if (res.mensaje == 'ok') {
-                    let pag = ($('#tb_componentes_activofijo').val() == -1) ? 0 : $('#tb_componentes_activofijo').DataTable().page.info().page;
-                    reloadtable('tb_componentes_activofijo', pag);
-                    $('#id_componente').val(res.id_hv_doc);
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html("Proceso realizado con éxito");
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(res.mensaje);
-                }
-            }).always(
-                function() {}
-            ).fail(function(xhr, textStatus, errorThrown) {
-                console.error(xhr.responseText)
-                alert('Ocurrió un error');
-            });
-        }
-    });
-
-
-    //Borrar un registro Orden Ingreso
-    $('#tb_ingresos').on('click', '.btn_eliminar', function() {
+    //Borrar un registro Hoja de Vida
+    $('#tb_hojavida').on('click', '.btn_eliminar', function() {
         let id = $(this).attr('value');
-        confirmar_del('ingresos_del', id);
+        confirmar_del('hojavida_del', id);
     });
-    $('#divModalConfDel').on("click", "#ingresos_del", function() {
+    $('#divModalConfDel').on("click", "#hojavida_del", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
-            url: 'editar_orden_ingreso.php',
+            url: 'editar_hojavida.php',
             dataType: 'json',
             data: { id: id, oper: 'del' }
         }).done(function(r) {
             $('#divModalConfDel').modal('hide');
             if (r.mensaje == 'ok') {
-                let pag = $('#tb_ingresos').DataTable().page.info().page;
-                reloadtable('tb_ingresos', pag);
+                let pag = $('#tb_hojavida').DataTable().page.info().page;
+                reloadtable('tb_hojavida', pag);
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
             } else {
@@ -412,197 +182,161 @@
         });
     });
 
-    //Cerrar un registro Orden Ingreso
-    $('#divForms').on("click", "#btn_cerrar", function() {
-        confirmar_proceso('ingresos_close');
+    /* -----------------------------------------------------
+    REGISTRAR IMAGEN
+    -------------------------------------------------------- */
+
+    $('#tb_hojavida').on('click', '.btn_imagen', function() {
+        let id = $(this).attr('value');
+        $.post("frm_reg_imagen.php", { id_hv: id }, function(he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
     });
-    $('#divModalConfDel').on("click", "#ingresos_close", function() {
+
+    //Guardar imagen de activo fijo
+    $('#divForms').on("click", "#btn_guardar_imagen", function() {
+        var file = $('#uploadImageAcf')[0].files[0];
+        if (file) {
+            var validImageTypes = ["image/jpeg", "image/png", "image/gif"];
+            if (!validImageTypes.includes(file.type)) {
+                showError('Por favor, selecciona un archivo de imagen válido')
+                return;
+            }
+        }
+        var del_imagen = $('#imagen').val().trim() == '' ? 1 : 0;
+        var act_imagen = file ? 1 : 0;
+        let datos = new FormData();
+        datos.append('id_hv', $('#id_hv').val());
+        datos.append('imagen', $('#imagen').val());
+        datos.append('del_imagen', del_imagen);
+        datos.append('act_imagen', act_imagen);
+        datos.append('oper', 'add');
+        datos.append('uploadImageAcf', file);
+
         $.ajax({
             type: 'POST',
-            url: 'editar_ingresos.php',
-            dataType: 'json',
-            data: { id: $('#id_ingreso').val(), oper: 'close' }
-        }).done(function(r) {
-            $('#divModalConfDel').modal('hide');
-            if (r.mensaje == 'ok') {
-                let pag = $('#tb_ingresos').DataTable().page.info().page;
-                reloadtable('tb_ingresos', pag);
-
-                $('#txt_num_ing').val(r.num_ingreso);
-                $('#txt_est_ing').val('CERRADO');
-
-                $('#btn_guardar').prop('disabled', true);
-                $('#btn_cerrar').prop('disabled', true);
-                $('#btn_anular').prop('disabled', false);
-
+            url: 'editar_imagen.php',
+            contentType: false,
+            data: datos,
+            processData: false,
+            cache: false,
+        }).done(function(res) {
+            var res = JSON.parse(res);
+            if (res.mensaje == 'ok') {
+                $('#imagen').val(res.nombre_imagen);
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
             } else {
                 $('#divModalError').modal('show');
-                $('#divMsgError').html(r.mensaje);
+                $('#divMsgError').html(res.mensaje);
             }
-        }).always(function() {}).fail(function(xhr, textStatus, errorThrown) {
+        }).always(
+            function() {}
+        ).fail(function(xhr, textStatus, errorThrown) {
             console.error(xhr.responseText)
             alert('Ocurrió un error');
         });
     });
 
-    //Anular un registro Orden Ingreso
-    $('#divForms').on("click", "#btn_anular", function() {
-        confirmar_proceso('ingresos_annul');
-    });
-    $('#divModalConfDel').on("click", "#ingresos_annul", function() {
-        $.ajax({
-            type: 'POST',
-            url: 'editar_ingresos.php',
-            dataType: 'json',
-            data: { id: $('#id_ingreso').val(), oper: 'annul' }
-        }).done(function(r) {
-            $('#divModalConfDel').modal('hide');
-            if (r.mensaje == 'ok') {
-                let pag = $('#tb_ingresos').DataTable().page.info().page;
-                reloadtable('tb_ingresos', pag);
-
-                $('#txt_est_ing').val('ANULADO');
-
-                $('#btn_guardar').prop('disabled', true);
-                $('#btn_cerrar').prop('disabled', true);
-                $('#btn_anular').prop('disabled', true);
-
-                $('#divModalDone').modal('show');
-                $('#divMsgDone').html("Proceso realizado con éxito");
-            } else {
-                $('#divModalError').modal('show');
-                $('#divMsgError').html(r.mensaje);
-            }
-        }).always(function() {}).fail(function() {
-            alert('Ocurrió un error');
-        });
+    //Visualizar la imagen  hoja de vida
+    $('#divForms').on("click", "#btn_ver_imagen", function() {
+        if ($('#imagen').val()) {
+            let nombreImagen = $('#imagen').val()
+                //Construir la URL relativa al archivo
+            var urlDescarga = '../../imagenes/' + nombreImagen
+                // Redirigir al usuario a la URL para iniciar la descarga
+            window.open(urlDescarga, '_blank');
+        }
     });
 
-    /* ---------------------------------------------------
-    DETALLES
-    -----------------------------------------------------*/
-    $('#divModalBus').on('dblclick', '#tb_lotes_articulos tr', function() {
-        let idMed = $(this).find('td:eq(0)').text();
-        $.post("acf_reg_orden_ingreso_detalle.php", { idMed: idMed }, function(he) {
-            $('#divTamModalReg').addClass('modal-lg');
-            $('#divModalReg').modal('show');
-            $("#divFormsReg").html(he);
-
-        });
+    // Borrar imagen
+    $('#divForms').on("click", "#btn_borrar_imagen", function() {
+        $('#imagen').val('');
     });
 
-    $('#divForms').on('click', '#tb_ingresos_detalles .btn_editar', function() {
+    /* -----------------------------------------------------
+    REGISTRAR COMPONENTES
+    -------------------------------------------------------- */
+
+    $('#tb_hojavida').on('click', '.btn_componente', function() {
         let id = $(this).attr('value');
-        $.post("acf_reg_orden_ingreso_detalle.php", { id: id }, function(he) {
+        $.post("frm_componentes_hojavida.php", { id_hv: id }, function(he) {
+            $('#divTamModalForms').addClass('modal-xl');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+
+    //Editar un componente
+    $('#divForms').on('click', '#tb_componentes_hojavida .btn_editar', function() {
+        let id = $(this).attr('value');
+        $.post("frm_reg_componente.php", { id: id }, function(he) {
             $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
         });
     });
 
-    //Editar activos fijos
-    $('#divForms').on('click', '#tb_ingresos_detalles .btn_activofijo', function() {
-        let id = $(this).attr('value');
-        $.post("acf_reg_activofijo.php", { id: id }, function(he) {
-            $('#divTamModalReg').addClass('modal-xl');
-            $('#divModalReg').modal('show');
-            $("#divFormsReg").html(he);
-        });
-    });
-
-    // Autocompletar Presentacion de Lote
-    $('#divFormsReg').on("input", "#txt_pre_lot", function() {
-        $(this).autocomplete({
-            source: function(request, response) {
-                $.ajax({
-                    url: "../common/cargar_prescomercial_ls.php",
-                    dataType: "json",
-                    type: 'POST',
-                    data: { term: request.term }
-                }).done(function(data) {
-                    response(data);
-                });
-            },
-            minLength: 2,
-            select: function(event, ui) {
-                $('#id_txt_pre_lot').val(ui.item.id);
-                $('#txt_can_lot').val(ui.item.cantidad);
-            }
-        });
-    });
-
-    $('#divModalReg').on('input', '#txt_val_uni, #sl_por_iva', function() {
-        var valor = $('#txt_val_uni').val() ? $('#txt_val_uni').val() : 0,
-            iva = $('#sl_por_iva').val() ? $('#sl_por_iva').val() : 0;
-        $('#txt_val_cos').val(parseFloat(valor) + parseFloat(valor) * parseFloat(iva) / 100);
-    });
-
-    //Guardar registro Detalle
-    $('#divFormsReg').on("click", "#btn_guardar_detalle", function() {
+    //Guardar componente
+    $('#divModalReg').on("click", "#btn_guardar_componente", function() {
         $('.is-invalid').removeClass('is-invalid');
 
-        var error = verifica_vacio($('#txt_can_ing'));
-        error += verifica_vacio($('#txt_val_uni'));
-        error += verifica_vacio($('#txt_val_cos'));
+        var error = verifica_vacio($('#id_articulo'));
+        error += verifica_vacio($('#num_serial'));
+        error += verifica_vacio($('#id_marca'));
+        error += verifica_vacio($('#modelo'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Los datos resaltados son obligatorios');
-        } else if (!verifica_valmin($('#txt_can_ing'), 1, "La cantidad debe ser mayor igual a 1")) {
-            var data = $('#acf_reg_ingresos_detalles').serialize();
+        } else {
+            var data = $('#frm_reg_componente').serialize();
             $.ajax({
                 type: 'POST',
-                url: 'editar_orden_ingreso_detalle.php',
+                url: 'editar_componente.php',
                 dataType: 'json',
-                data: data + "&id_ingreso=" + $('#id_ingreso').val() + '&oper=add'
-            }).done(function(r) {
-                if (r.mensaje == 'ok') {
-                    let pag = ($('#id_detalle').val() == -1) ? 0 : $('#tb_ingresos_detalles').DataTable().page.info().page;
-                    reloadtable('tb_ingresos_detalles', pag);
-                    pag = $('#tb_ingresos').DataTable().page.info().page;
-                    reloadtable('tb_ingresos', pag);
-
-                    $('#id_detalle').val(r.id);
-                    $('#txt_val_tot').val(r.val_total);
-
-                    $('#divModalReg').modal('hide');
+                data: data + '&id_hv=' + $('#id_hv').val() + '&oper=add'
+            }).done(function(res) {
+                if (res.mensaje == 'ok') {
+                    let pag = ($('#tb_componentes_hojavida').val() == -1) ? 0 : $('#tb_componentes_hojavida').DataTable().page.info().page;
+                    reloadtable('tb_componentes_hojavida', pag);
+                    $('#id_componente').val(res.id_componente);
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");
                 } else {
                     $('#divModalError').modal('show');
-                    $('#divMsgError').html(r.mensaje);
+                    $('#divMsgError').html(res.mensaje);
                 }
-            }).always(function() {}).fail(function(xhr, textStatus, errorThrown) {
+            }).always(
+                function() {}
+            ).fail(function(xhr, textStatus, errorThrown) {
                 console.error(xhr.responseText)
-                alert('Error al guardar detalle');
+                alert('Ocurrió un error');
             });
         }
     });
 
-    //Borrarr un registro Detalle
-    $('#divForms').on('click', '#tb_ingresos_detalles .btn_eliminar', function() {
+    //Borrar componente
+    $('#divForms').on('click', '#tb_componentes_hojavida .btn_eliminar', function() {
         let id = $(this).attr('value');
-        confirmar_del('detalle', id);
+        confirmar_del('componente_del', id);
     });
-    $('#divModalConfDel').on("click", "#detalle", function() {
+    $('#divModalConfDel').on("click", "#componente_del", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
-            url: 'editar_orden_ingreso_detalle.php',
+            url: 'editar_componente.php',
             dataType: 'json',
-            data: { id: id, id_ingreso: $('#id_ingreso').val(), oper: 'del' }
+            data: { id: id, id_hv: $('#id_hv').val(), oper: 'del' }
         }).done(function(r) {
             $('#divModalConfDel').modal('hide');
             if (r.mensaje == 'ok') {
-                let pag = $('#tb_ingresos_detalles').DataTable().page.info().page;
-                reloadtable('tb_ingresos_detalles', pag);
-                pag = $('#tb_ingresos').DataTable().page.info().page;
-                reloadtable('tb_ingresos', pag);
-
-                $('#txt_val_tot').val(r.val_total);
-
+                let pag = $('#tb_componentes_hojavida').DataTable().page.info().page;
+                reloadtable('tb_componentes_hojavida', pag);
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
             } else {
@@ -615,44 +349,130 @@
         });
     });
 
-    //Imprimir listado de registros
-    $('#btn_imprime_filtro').on('click', function() {
-        reloadtable('tb_ingresos');
+    /* -----------------------------------------------------
+     REGISTRAR DOCUMENTOS
+     -------------------------------------------------------- */
+
+    $('#tb_hojavida').on('click', '.btn_archivos', function() {
+        let id = $(this).attr('value');
+        $.post("frm_documentos_hojavida.php", { id_hv: id }, function(he) {
+            $('#divTamModalForms').addClass('modal-xl');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+
+    //Editar documento
+    $('#divForms').on('click', '#tb_documentos_hojavida .btn_editar', function() {
+        let id = $(this).attr('value');
+        $.post("frm_reg_documento.php", { id: id }, function(he) {
+            $('#divTamModalReg').addClass('modal-lg');
+            $('#divModalReg').modal('show');
+            $("#divFormsReg").html(he);
+        });
+    });
+
+    //Guardar documentos
+    $('#divModalReg').on("click", "#btn_guardar_documento", function() {
         $('.is-invalid').removeClass('is-invalid');
-        var verifica = verifica_vacio($('#txt_fecini_filtro'));
-        verifica += verifica_vacio($('#txt_fecfin_filtro'));
-        if (verifica >= 1) {
+
+        var error = verifica_vacio($('#tipo'));
+        error += verifica_vacio($('#descripcion'));
+
+        if (error >= 1) {
             $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe escribir un rango de fechas');
-        } else {
-            $.post("imp_ingresos.php", {
-                id_ing: $('#txt_iding_filtro').val(),
-                num_ing: $('#txt_numing_filtro').val(),
-                fec_ini: $('#txt_fecini_filtro').val(),
-                fec_fin: $('#txt_fecfin_filtro').val(),
-                id_tercero: $('#sl_tercero_filtro').val(),
-                id_tiping: $('#sl_tiping_filtro').val(),
-                estado: $('#sl_estado_filtro').val()
-            }, function(he) {
-                $('#divTamModalImp').removeClass('modal-sm');
-                $('#divTamModalImp').removeClass('modal-lg');
-                $('#divTamModalImp').addClass('modal-xl');
-                $('#divModalImp').modal('show');
-                $("#divImp").html(he);
-            });
+            $('#divMsgError').html('Los datos resaltados son obligatorios');
+            return;
+        }
+        var file = $('#uploadDocAcf')[0].files[0];
+        var nuevo_file = file ? 1 : 0;
+        if (!$('#archivo').val()) {
+            if (!file) {
+                showError('Por favor, selecciona un archivo')
+                return;
+            }
+            var validImageTypes = ["application/pdf", "application/pdf"];
+            if (!validImageTypes.includes(file.type)) {
+                showError('Por favor, selecciona un documento válido')
+                return;
+            }
+        }
+
+        let datos = new FormData();
+        datos.append('id_hv', $('#id_hv').val());
+        datos.append('id_documento', $('#id_documento').val());
+        datos.append('tipo', $('#tipo').val());
+        datos.append('descripcion', $('#descripcion').val());
+        datos.append('archivo', $('#archivo').val());
+        datos.append('oper', 'add');
+        datos.append('uploadDocAcf', file);
+        datos.append('nuevo_file', nuevo_file);
+
+        $.ajax({
+            type: 'POST',
+            url: 'editar_documento.php',
+            contentType: false,
+            data: datos,
+            processData: false,
+            cache: false,
+        }).done(function(res) {
+            var res = JSON.parse(res);
+            if (res.mensaje == 'ok') {
+                let pag = ($('#tb_documentos_hojavida').val() == -1) ? 0 : $('#tb_documentos_hojavida').DataTable().page.info().page;
+                reloadtable('tb_documentos_hojavida', pag);
+                $('#id_documento').val(res.id_documento);
+                $('#archivo').val(res.nombre_archivo);
+                $('#divModalDone').modal('show');
+                $('#divMsgDone').html("Proceso realizado con éxito");
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(res.mensaje);
+            }
+        }).always(
+            function() {}
+        ).fail(function(xhr, textStatus, errorThrown) {
+            console.error(xhr.responseText)
+            alert('Ocurrió un error');
+        });
+    });
+
+    //Descarar documento
+    $('#divModalReg').on("click", "#btn_ver_documento", function() {
+        if ($('#archivo').val()) {
+            let nombreDocumento = $('#archivo').val()
+                // Construir la URL relativa al archivo
+            var urlDescarga = '../../documentos/' + nombreDocumento
+                // Redirigir al usuario a la URL para iniciar la descarga
+            window.open(urlDescarga, '_blank');
         }
     });
 
-    //Imprimit una Orden de Ingreso
-    $('#divForms').on("click", "#btn_imprimir", function() {
-        $.post("imp_ingreso.php", {
-            id: $('#id_ingreso').val()
-        }, function(he) {
-            $('#divTamModalImp').removeClass('modal-sm');
-            $('#divTamModalImp').removeClass('modal-lg');
-            $('#divTamModalImp').addClass('modal-xl');
-            $('#divModalImp').modal('show');
-            $("#divImp").html(he);
+    //Borrar documento
+    $('#divForms').on('click', '#tb_documentos_hojavida .btn_eliminar', function() {
+        let id = $(this).attr('value');
+        confirmar_del('documentos_del', id);
+    });
+    $('#divModalConfDel').on("click", "#documentos_del", function() {
+        var id = $(this).attr('value');
+        $.ajax({
+            type: 'POST',
+            url: 'editar_documento.php',
+            dataType: 'json',
+            data: { id: id, id_hv: $('#id_hv').val(), oper: 'del' }
+        }).done(function(r) {
+            $('#divModalConfDel').modal('hide');
+            if (r.mensaje == 'ok') {
+                let pag = $('#tb_documentos_hojavida').DataTable().page.info().page;
+                reloadtable('tb_documentos_hojavida', pag);
+                $('#divModalDone').modal('show');
+                $('#divMsgDone').html("Proceso realizado con éxito");
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function() {}).fail(function(xhr, textStatus, errorThrown) {
+            console.error(xhr.responseText)
+            alert('Ocurrió un error');
         });
     });
 

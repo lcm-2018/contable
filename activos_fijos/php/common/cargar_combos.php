@@ -251,7 +251,7 @@ function tipos_activo($titulo = '', $valor = 0)
 }
 
 
-function articulosActivosFijos($cmd, $titulo = '', $id = 0)
+function articulos_ActivosFijos($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
@@ -261,7 +261,7 @@ function articulosActivosFijos($cmd, $titulo = '', $id = 0)
                 FROM far_medicamentos FM 
                 INNER JOIN far_subgrupos SG ON SG.id_subgrupo = FM.id_subgrupo 
                 INNER JOIN far_grupos G ON G.id_grupo = SG.id_grupo
-                WHERE FM.estado=1 AND G.id_grupo IN (3 , 4, 5)";
+                WHERE FM.estado=1 AND G.id_grupo IN (3,4,5)";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {

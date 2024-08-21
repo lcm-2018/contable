@@ -141,9 +141,9 @@ try {
                     $rs2 = $cmd->query($sql);
 
                     //Crear la hojas de vida de los activos fijos
-                    $sql = "INSERT INTO acf_hojavida(id_ingreso,id_articulo,placa,serial,id_marca,valor,tipo_activo,id_proveedor,id_tipo_ingreso,id_sede,id_area,id_usr_crea,fec_creacion,estado) 
+                    $sql = "INSERT INTO acf_hojavida(id_ingreso,id_articulo,placa,num_serial,id_marca,valor,tipo_activo,id_proveedor,id_tipo_ingreso,id_sede,id_area,id_usr_crea,fec_creacion,estado) 
                             SELECT $id,acf_orden_ingreso_acfs.id_articulo,
-                                acf_orden_ingreso_acfs.placa,acf_orden_ingreso_acfs.serial,acf_orden_ingreso_acfs.id_marca,
+                                acf_orden_ingreso_acfs.placa,acf_orden_ingreso_acfs.num_serial,acf_orden_ingreso_acfs.id_marca,
                                 acf_orden_ingreso_acfs.valor,acf_orden_ingreso_acfs.tipo_activo,acf_orden_ingreso.id_provedor,
                                 acf_orden_ingreso.id_tipo_ingreso,acf_orden_ingreso.id_sede,1,$id_usr_ope,'$fecha_ope',1
                             FROM acf_orden_ingreso_acfs

@@ -83,7 +83,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 </div>
                             </div>
 
-                            <!--Lista de registros en la tabla-->                            
+                            <!--Lista de registros-->                            
                             <?php
                             if (PermisosUsuario($permisos, 5704, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';
@@ -98,7 +98,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Cod. Articulo</th>
                                         <th>Articulo</th>
                                         <th>Placa</th>
-                                        <th>Serial</th>
+                                        <th>No. Serial</th>
                                         <th>Marca</th>
                                         <th>Valor</th>
                                         <th>Tipo Activo</th>
