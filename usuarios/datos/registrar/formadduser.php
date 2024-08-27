@@ -4,10 +4,11 @@ if (!isset($_SESSION['user'])) {
     header('Location: <?php echo $_SESSION["urlin"] ?>/index.php');
     exit;
 }
-if ($_SESSION['id_user'] != 1) {
+include '../../../conexion.php';
+include '../../../permisos.php';
+if ($id_rol != 1) {
     exit('Usuario no autorizado');
 }
-include '../../../conexion.php';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

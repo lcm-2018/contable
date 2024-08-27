@@ -14,25 +14,52 @@ $vigencia = $_SESSION['vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `ctt_adquisicion_detalles`.`id_bn_sv`
-                , `ctt_adquisicion_detalles`.`id_adquisicion`
-                , `ctt_adquisicion_detalles`.`cantidad`
-                , `ctt_adquisicion_detalles`.`val_estimado_unid`
-                , `ctt_bien_servicio`.`bien_servicio`
-            FROM
-                `ctt_adquisicion_detalles`
-                INNER JOIN `ctt_bien_servicio` 
-                    ON (`ctt_adquisicion_detalles`.`id_bn_sv` = `ctt_bien_servicio`.`id_b_s`)
-            WHERE `id_adquisicion` = '$id_compra'  LIMIT 1 ";
+    $sql = "SELECT `id_orden` FROM `ctt_adquisiciones` WHERE `id_adquisicion` = $id_compra LIMIT 1";
     $rs = $cmd->query($sql);
-    $oferta = $rs->fetch();
+    $adquisicion = $rs->fetch();
+    if ($adquisicion['id_orden'] == '') {
+        $sql = "SELECT
+                `ctt_bien_servicio`.`bien_servicio`
+                , `ctt_orden_compra_detalle`.`cantidad`
+                , `ctt_orden_compra_detalle`.`val_unid` AS `val_estimado_unid`
+                , `ctt_orden_compra_detalle`.`id_detalle`
+                , `ctt_orden_compra_detalle`.`id_servicio` AS `id_bn_sv`
+            FROM
+                `ctt_orden_compra_detalle`
+                INNER JOIN `ctt_orden_compra` 
+                    ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
+                INNER JOIN `ctt_bien_servicio` 
+                    ON (`ctt_orden_compra_detalle`.`id_servicio` = `ctt_bien_servicio`.`id_b_s`)
+            WHERE (`ctt_orden_compra`.`id_adq` = $id_compra)";
+    } else {
+        $sql = "SELECT
+                `far_alm_pedido_detalle`.`id_ped_detalle` AS `id_detalle`
+                , `far_medicamentos`.`nom_medicamento` AS `bien_servicio`
+                , `far_alm_pedido_detalle`.`cantidad`
+                , `far_alm_pedido_detalle`.`valor` AS `val_unid`
+                , `far_alm_pedido_detalle`.`aprobado`
+                , `far_alm_pedido_detalle`.`id_medicamento` AS `id_bn_sv`
+            FROM
+                `far_alm_pedido_detalle`
+                INNER JOIN `far_medicamentos` 
+                    ON (`far_alm_pedido_detalle`.`id_medicamento` = `far_medicamentos`.`id_med`)
+            WHERE (`far_alm_pedido_detalle`.`id_pedido` = {$adquisicion['id_orden']})";
+    }
+    $rs = $cmd->query($sql);
+    $oferta = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$cod = $oferta['id_bn_sv'];
-echo $cod;
+$cod = [];
+if (!empty($oferta)) {
+    foreach ($oferta as $o) {
+        $cod[] = $o['id_bn_sv'];
+    }
+    $cod = implode(',', $cod);
+} else {
+    $cod = '0';
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -43,7 +70,7 @@ try {
             FROM
                 `ctt_clasificacion_bn_sv`
                 LEFT JOIN  `tb_codificacion_unspsc`
-                ON (`ctt_clasificacion_bn_sv`.`id_unspsc` = `tb_codificacion_unspsc`.`codigo`)
+                ON (`ctt_clasificacion_bn_sv`.`cod_unspsc` = `tb_codificacion_unspsc`.`codigo`)
             WHERE `ctt_clasificacion_bn_sv`.`id_b_s` IN($cod)";
     $rs = $cmd->query($sql);
     $codigo_servicio = $rs->fetch();
@@ -81,12 +108,13 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `ctt_escala_honorarios`.`id_pto_cargue`, `pto_cargue`.`cod_pptal`, `pto_cargue`.`nom_rubro`
+                `ctt_escala_honorarios`.`cod_pptal`  AS `id_pto_cargue`
+                , `pto_cargue`.`cod_pptal`, `pto_cargue`.`nom_rubro`
             FROM
                 `ctt_escala_honorarios`
                 INNER JOIN`pto_cargue`
-                ON (`ctt_escala_honorarios`.`id_pto_cargue` = `pto_cargue`.`cod_pptal`)
-            WHERE `ctt_escala_honorarios`.`id_tipo_b_s` = '$tipo_bn' AND `ctt_escala_honorarios`.`vigencia` = '$vigencia'";
+                ON (`ctt_escala_honorarios`.`cod_pptal` = `pto_cargue`.`cod_pptal`)
+            WHERE `ctt_escala_honorarios`.`id_tipo_b_s` = $tipo_bn AND `ctt_escala_honorarios`.`vigencia` = '$vigencia'";
     $rs = $cmd->query($sql);
     $cod_cargue = $rs->fetch();
     $cmd = null;

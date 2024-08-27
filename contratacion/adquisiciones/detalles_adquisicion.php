@@ -101,10 +101,16 @@ try {
                 , `ctt_adquisiciones`.`estado`
                 , `ctt_adquisiciones`.`objeto`
                 , `ctt_adquisiciones`.`id_cont_api`
+                , `ctt_adquisiciones`.`id_supervision`
+                , `ctt_adquisiciones`.`id_orden`
+                , `tb_tipo_bien_servicio`.`filtro_adq`
+                , `ctt_adquisiciones`.`id_tercero`
             FROM
                 `ctt_adquisiciones`
             INNER JOIN `ctt_modalidad` 
-                ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`) 
+                ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
+            INNER JOIN `tb_tipo_bien_servicio` 
+                ON (`ctt_adquisiciones`.`id_tipo_bn_sv` = `tb_tipo_bien_servicio`.`id_tipo_b_s`)
             WHERE `id_adquisicion` = $id_adq";
     $rs = $cmd->query($sql);
     $adquisicion = $rs->fetch();
@@ -124,7 +130,7 @@ try {
                     ON (`ctt_adquisiciones`.`id_tipo_bn_sv` = `tb_tipo_bien_servicio`.`id_tipo_b_s`)
                 INNER JOIN `tb_tipo_contratacion` 
                     ON (`tb_tipo_bien_servicio`.`id_tipo_cotrato` = `tb_tipo_contratacion`.`id_tipo`)
-            WHERE  `ctt_adquisiciones`.`id_adquisicion` = '$id_adq'";
+            WHERE  `ctt_adquisiciones`.`id_adquisicion` = $id_adq";
     $rs = $cmd->query($sql);
     $tipo_compra = $rs->fetch();
     $cmd = null;
@@ -134,32 +140,33 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `id_tercero_api`
-            FROM
-                `ctt_orden_compra`
-            WHERE (`id_adq` = $id_adq)";
-    $rs = $cmd->query($sql);
-    $seleccionada = $rs->fetch();
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                 `ctt_bien_servicio`.`bien_servicio`
-                , `ctt_orden_compra_detalle`.`cantidad`
-                , `ctt_orden_compra_detalle`.`val_unid`
-                , `ctt_orden_compra_detalle`.`id_detalle`
-            FROM
-                `ctt_orden_compra_detalle`
-                INNER JOIN `ctt_orden_compra` 
-                    ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
-                INNER JOIN `ctt_bien_servicio` 
-                    ON (`ctt_orden_compra_detalle`.`id_servicio` = `ctt_bien_servicio`.`id_b_s`)
-            WHERE (`ctt_orden_compra`.`id_adq` = $id_adq)";
+
+    if ($adquisicion['id_orden'] == '') {
+        $sql = "SELECT
+                    `ctt_bien_servicio`.`bien_servicio`
+                    , `ctt_orden_compra_detalle`.`cantidad`
+                    , `ctt_orden_compra_detalle`.`val_unid`
+                    , `ctt_orden_compra_detalle`.`id_detalle`
+                FROM
+                    `ctt_orden_compra_detalle`
+                    INNER JOIN `ctt_orden_compra` 
+                        ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
+                    INNER JOIN `ctt_bien_servicio` 
+                        ON (`ctt_orden_compra_detalle`.`id_servicio` = `ctt_bien_servicio`.`id_b_s`)
+                WHERE (`ctt_orden_compra`.`id_adq` = $id_adq)";
+    } else {
+        $sql = "SELECT
+                    `far_alm_pedido_detalle`.`id_ped_detalle` AS `id_detalle`
+                    , `far_medicamentos`.`nom_medicamento` AS `bien_servicio`
+                    , `far_alm_pedido_detalle`.`cantidad`
+                    , `far_alm_pedido_detalle`.`valor` AS `val_unid`
+                    , `far_alm_pedido_detalle`.`aprobado`
+                FROM
+                    `far_alm_pedido_detalle`
+                    INNER JOIN `far_medicamentos` 
+                        ON (`far_alm_pedido_detalle`.`id_medicamento` = `far_medicamentos`.`id_med`)
+                WHERE (`far_alm_pedido_detalle`.`id_pedido` = {$adquisicion['id_orden']})";
+    }
     $rs = $cmd->query($sql);
     $detalles_orden = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -261,6 +268,41 @@ function pesos($valor)
         return '-$' . number_format($valor * (-1), 2);
     }
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `id_tercero` = ? LIMIT 1";
+    $sql = $cmd->prepare($sql);
+    $sql->bindParam(1, $adquisicion['id_tercero'], PDO::PARAM_INT);
+    $sql->execute();
+    if ($sql->rowCount() > 0) {
+        $row = $sql->fetch(PDO::FETCH_ASSOC);
+        $id_tercero = $row['id_tercero_api'];
+    }
+    $id_t = [$id_tercero];
+    if (!empty($id_t)) {
+        $payload = json_encode($id_t);
+        $url = $api . 'terceros/datos/res/lista/terceros';
+        $ch = curl_init($url);
+        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        $terceros = json_decode($result, true);
+        $tercero = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
+        $cc_nit = number_format($terceros[0]['cc_nit'], 0, '', '.');
+    } else {
+        $tercero = '---';
+        $cc_nit = '---';
+    }
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+
 if (!empty($adquisicion)) {
     $idtbnsv = $adquisicion['id_tipo_bn_sv'];
     try {
@@ -298,8 +340,23 @@ if (!empty($adquisicion)) {
                 <main>
                     <div class="container-fluid p-2">
                         <?php
-                        if (PermisosUsuario($permisos, 5302, 1) || $id_rol == 1) {
-                            echo '<input type="hidden" id="peReg" value="1">';
+                        $boton = $guardar = $cerrar = '';
+                        if ((PermisosUsuario($permisos, 5302, 1) || $id_rol == 1) && $adquisicion['estado'] < 6) {
+                            $peRegValue = '0'; // Valor por defecto
+
+                            if ($adquisicion['filtro_adq'] == '0') {
+                                $peRegValue = '1';
+                            } elseif (in_array($adquisicion['filtro_adq'], ['1', '2'])) {
+                                if (empty($adquisicion['id_orden'])) {
+                                    $buttonText = $adquisicion['filtro_adq'] == '1' ? 'Orden Almacén' : 'Orden Activos Fijos';
+                                    $boton = '<button type="button" class="btn btn-primary btn-sm listOrdenes mr-1" text="' . $adquisicion['filtro_adq'] . '">' . $buttonText . '</button>';
+                                }
+                                if ($adquisicion['estado'] == 1) {
+                                    $guardar = '<button type="button" class="btn btn-success btn-sm mr-1" id="guardarOrden">Guardar</button>';
+                                    $cerrar = '<button type="button" class="btn btn-secondary btn-sm mr-1" id="cerrarOrden">Cerrar</button>';
+                                }
+                            }
+                            echo '<input type="hidden" id="peReg" value="' . $peRegValue . '">';
                         } else {
                             echo '<input type="hidden" id="peReg" value="0">';
                         }
@@ -369,95 +426,99 @@ if (!empty($adquisicion)) {
                                         </div>
                                     </div>
                                     <!--parte-->
-                                    <div class="card">
-                                        <div class="card-header card-header-detalles py-0 headings" id="headingBnSv">
-                                            <h5 class="mb-0">
-                                                <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapseBnSv" aria-expanded="true" aria-controls="collapseBnSv">
-                                                    <div class="form-row">
-                                                        <div class="div-icono">
-                                                            <span class="fas fa-swatchbook fa-lg" style="color: #EC7063;"></span>
+                                    <?php
+                                    $tipo_contrato = '0';
+                                    foreach ($bnsv as $bs) {
+                                        if ($bs['id_tipo'] == '1') {
+                                            $tipo_contrato = '1';
+                                        }
+                                    }
+                                    if (false) { ?>
+                                        <div class="card">
+                                            <div class="card-header card-header-detalles py-0 headings" id="headingBnSv">
+                                                <h5 class="mb-0">
+                                                    <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapseBnSv" aria-expanded="true" aria-controls="collapseBnSv">
+                                                        <div class="form-row">
+                                                            <div class="div-icono">
+                                                                <span class="fas fa-swatchbook fa-lg" style="color: #EC7063;"></span>
+                                                            </div>
+                                                            <div>
+                                                                <?php $j++;
+                                                                echo $j ?>. ORDEN DE BIEN O SERVICIOS
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <?php $j++;
-                                                            echo $j ?>. ORDEN DE BIEN O SERVICIOS
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </h5>
-                                        </div>
-                                        <div id="collapseBnSv" class="collapse" aria-labelledby="headingBnSv">
-                                            <div class="card-body">
-                                                <?php
-                                                $tipo_contrato = '0';
-                                                foreach ($bnsv as $bs) {
-                                                    if ($bs['id_tipo'] == '1') {
-                                                        $tipo_contrato = '1';
-                                                    }
-                                                }
-                                                ?>
-                                                <div id="divEstadoBnSv">
+                                                    </a>
+                                                </h5>
+                                            </div>
+                                            <div id="collapseBnSv" class="collapse" aria-labelledby="headingBnSv">
+                                                <div class="card-body">
                                                     <?php
-                                                    if ($adquisicion['estado'] == 1) {
                                                     ?>
-                                                        <form id="formDetallesAdq">
-                                                            <input type="hidden" name="idAdq" value="<?php echo $id_adq ?>">
-                                                            <table id="tableAdqBnSv" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Seleccionar</th>
-                                                                        <?php echo $tipo_contrato == '1' ? '<th>Pago</th>' : '' ?>
-                                                                        <th>Bien o Servicio</th>
-                                                                        <th>Cantidad</th>
-                                                                        <th>Valor Unitario</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <?php
-                                                                    foreach ($bnsv as $bs) {
-                                                                    ?>
+                                                    <div id="divEstadoBnSv">
+                                                        <?php
+                                                        if (true) {
+                                                        ?>
+                                                            <form id="formDetallesAdq">
+                                                                <input type="hidden" name="idAdq" value="<?php echo $id_adq ?>">
+                                                                <table id="tableAdqBnSv" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                                    <thead>
                                                                         <tr>
-                                                                            <td>
-                                                                                <div class="text-center listado">
-                                                                                    <input type="checkbox" name="check[]" value="<?php echo $bs['id_b_s'] ?>">
-                                                                                </div>
-                                                                            </td>
-                                                                            <?php if ($tipo_contrato == '1') { ?>
-                                                                                <td>
-                                                                                    <select class="form-control form-control-sm altura py-0" id="tipo_<?php echo $bs['id_b_s'] ?>">
-                                                                                        <option value="H">Horas</option>
-                                                                                        <option value="M">Mensual</option>
-                                                                                    </select>
-                                                                                </td>
-                                                                            <?php } ?>
-                                                                            <td class="text-left"><i><?php echo $bs['bien_servicio'] ?></i></td>
-                                                                            <td><input type="number" name="bnsv_<?php echo $bs['id_b_s'] ?>" id="bnsv_<?php echo $bs['id_b_s'] ?>" class="form-control altura cantidad"></td>
-                                                                            <td><input type="number" name="val_bnsv_<?php echo $bs['id_b_s'] ?>" id="val_bnsv_<?php echo $bs['id_b_s'] ?>" class="form-control altura" value="0"></td>
+                                                                            <th>Seleccionar</th>
+                                                                            <?php echo $tipo_contrato == '1' ? '<th>Pago</th>' : '' ?>
+                                                                            <th>Bien o Servicio</th>
+                                                                            <th>Cantidad</th>
+                                                                            <th>Valor Unitario</th>
                                                                         </tr>
-                                                                    <?php
-                                                                    }
-                                                                    ?>
-                                                                </tbody>
-                                                                <tfoot>
-                                                                    <tr>
-                                                                        <th>Seleccionar</th>
-                                                                        <?php echo $tipo_contrato == '1' ? '<th>Pago</th>' : '' ?>
-                                                                        <th>Bien o Servicio</th>
-                                                                        <th>Cantidad</th>
-                                                                        <th>Valor Unitario</th>
-                                                                    </tr>
-                                                                </tfoot>
-                                                            </table>
-                                                        </form>
-                                                    <?php
-                                                    } else {
-                                                        echo '<div class="p-3 mb-2 bg-success text-white">ORDEN AGREGADA CORRECTAMENTE</div>';
-                                                    }
-                                                    ?>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <?php
+                                                                        foreach ($bnsv as $bs) {
+                                                                        ?>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <div class="text-center listado">
+                                                                                        <input type="checkbox" name="check[]" value="<?php echo $bs['id_b_s'] ?>">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <?php if ($tipo_contrato == '1') { ?>
+                                                                                    <td>
+                                                                                        <select class="form-control form-control-sm altura py-0" id="tipo_<?php echo $bs['id_b_s'] ?>">
+                                                                                            <option value="H">Horas</option>
+                                                                                            <option value="M">Mensual</option>
+                                                                                        </select>
+                                                                                    </td>
+                                                                                <?php } ?>
+                                                                                <td class="text-left"><i><?php echo $bs['bien_servicio'] ?></i></td>
+                                                                                <td><input type="number" name="bnsv_<?php echo $bs['id_b_s'] ?>" id="bnsv_<?php echo $bs['id_b_s'] ?>" class="form-control altura cantidad"></td>
+                                                                                <td><input type="number" name="val_bnsv_<?php echo $bs['id_b_s'] ?>" id="val_bnsv_<?php echo $bs['id_b_s'] ?>" class="form-control altura" value="0"></td>
+                                                                            </tr>
+                                                                        <?php
+                                                                        }
+                                                                        ?>
+                                                                    </tbody>
+                                                                    <tfoot>
+                                                                        <tr>
+                                                                            <th>Seleccionar</th>
+                                                                            <?php echo $tipo_contrato == '1' ? '<th>Pago</th>' : '' ?>
+                                                                            <th>Bien o Servicio</th>
+                                                                            <th>Cantidad</th>
+                                                                            <th>Valor Unitario</th>
+                                                                        </tr>
+                                                                    </tfoot>
+                                                                </table>
+                                                            </form>
+                                                        <?php
+                                                        } else {
+                                                            echo '<div class="p-3 mb-2 bg-success text-white">ORDEN AGREGADA CORRECTAMENTE</div>';
+                                                        }
+                                                        ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    <?php } ?>
                                     <input type="hidden" id="tipo_contrato" value="<?php echo $tipo_contrato ?>">
+                                    <input type="hidden" id="tipo_servicio" value="<?php echo $idtbnsv ?>">
                                     <?php
                                     if ($tipo_contrato == '1' && $adquisicion['estado'] >= 1) { ?>
                                         <!--parte-->
@@ -596,7 +657,7 @@ if (!empty($adquisicion)) {
                                     }
                                     ?>
                                     <!--parte-->
-                                    <?php if ($adquisicion['estado'] >= 4) { ?>
+                                    <?php if ($adquisicion['estado'] >= 1) { ?>
                                         <div class="card">
                                             <div class="card-header card-header-detalles py-0 headings" id="headingCotRec">
                                                 <h5 class="mb-0">
@@ -617,60 +678,71 @@ if (!empty($adquisicion)) {
                                                 <div class="card-body">
                                                     <div id="accordion">
                                                         <?php
-                                                        if (!empty($seleccionada)) {
-                                                            $id_t = array('id_tercero' => $seleccionada['id_tercero_api']);
-                                                            $payload = json_encode($id_t);
-                                                            //API URL
-                                                            $url = $api . 'terceros/datos/res/lista/terceros';
-                                                            $ch = curl_init($url);
-                                                            //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                                                            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                                                            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-                                                            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                                                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                                            $result = curl_exec($ch);
-                                                            curl_close($ch);
-                                                            $terceros = json_decode($result, true);
-                                                            $tercero = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
-                                                            $cc_nit = number_format($terceros[0]['cc_nit'], 0, '', '.');
-                                                        } else {
-                                                            $tercero = '---';
-                                                        }
+                                                        echo '<div class="text-right mb-2">' . $boton . $guardar . $cerrar . '</div>';
                                                         ?>
-                                                        <table class="table table-striped table-bordered table-sm nowrap table-hover shadow tableCotRecibidas" style="width:100%">
-                                                            <thead>
-                                                                <tr class="text-center">
-                                                                    <th>TERCERO:</th>
-                                                                    <th colspan="4"><?php echo  $tercero; ?></th>
-                                                                    <th><?php echo  $cc_nit; ?></th>
-                                                                </tr>
-                                                                <tr class="text-center">
-                                                                    <th>#</th>
-                                                                    <th>Bien o Servicio</th>
-                                                                    <th>Cantidad</th>
-                                                                    <th>Val. Unidad</th>
-                                                                    <th>Total</th>
-                                                                    <th>Acciones</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody class="modificarCotizaciones">
-                                                                <?php
-                                                                foreach ($detalles_orden as $dc) {
-                                                                ?>
-                                                                    <tr>
-                                                                        <td><?php echo $dc['id_detalle'] ?></td>
-                                                                        <td><?php echo $dc['bien_servicio'] ?></td>
-                                                                        <td><?php echo $dc['cantidad'] ?></td>
-                                                                        <td class="text-right"><?php echo pesos($dc['val_unid']) ?></td>
-                                                                        <td class="text-right"><?php echo pesos($dc['val_unid'] * $dc['cantidad']) ?></td>
-                                                                        <td></td>
+                                                        <form id="formOrdenCompra">
+                                                            <?php
+                                                            echo $adquisicion['id_orden'] == '' ? '' : '<input type="hidden" name="id_orden" id="id_orden" value="' . $adquisicion['id_orden'] . '">';
+                                                            ?>
+                                                            <table class="table table-striped table-bordered table-sm nowrap table-hover shadow tableCotRecibidas" style="width:100%">
+                                                                <thead>
+                                                                    <tr class="text-center">
+                                                                        <th>TERCERO:</th>
+                                                                        <th colspan="4"><?php echo  $tercero; ?></th>
+                                                                        <th><?php echo  $cc_nit; ?></th>
                                                                     </tr>
-                                                                <?php
-                                                                }
-                                                                ?>
-                                                            </tbody>
-                                                        </table>
-
+                                                                    <tr class="text-center">
+                                                                        <th>#</th>
+                                                                        <th>Bien o Servicio</th>
+                                                                        <th><?php echo $adquisicion['id_orden'] > 0 ? 'Solicita/Ordena' : 'Cantidad'; ?></th>
+                                                                        <th>Val. Unidad</th>
+                                                                        <th>Total</th>
+                                                                        <th><?php echo $adquisicion['id_orden'] == '' ? 'Acciones' : '<input type="checkbox" id="selectAll" title="Desmarcar todos" checked>'; ?></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody class="modificarCotizaciones">
+                                                                    <?php
+                                                                    foreach ($detalles_orden as $dc) {
+                                                                        if ($adquisicion['id_orden'] > 0 && $adquisicion['estado'] < 5) {
+                                                                            $aprobado = $dc['aprobado'] > 0 ? $dc['aprobado'] : $dc['cantidad'];
+                                                                            $val_unid = '<input type="number" name="val_unid[' . $dc['id_detalle'] . ']" class="form-control form-control-sm text-right" value="' . $dc['val_unid'] . '">';
+                                                                            $cantidad = '<div class="input-group input-group-sm">
+                                                                                        <div class="input-group-prepend">
+                                                                                            <span class="input-group-text">' . $dc['cantidad'] . '</span>
+                                                                                        </div>
+                                                                                        <input type="number" class="form-control" name="cantidad[' . $dc['id_detalle'] . ']" value="' . $aprobado . '" max="' . $dc['cantidad'] . '">
+                                                                                    </div>';
+                                                                        } else {
+                                                                            $val_unid = pesos($dc['val_unid']);
+                                                                            $cantidad = isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad'];
+                                                                        }
+                                                                    ?>
+                                                                        <tr>
+                                                                            <td><?php echo $dc['id_detalle'] ?></td>
+                                                                            <td><?php echo $dc['bien_servicio'] ?></td>
+                                                                            <td><?php echo $cantidad ?></td>
+                                                                            <td class="text-right"><?php echo $val_unid ?></td>
+                                                                            <td class="text-right"><?php echo pesos($dc['val_unid'] * (isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad'])) ?></td>
+                                                                            <td class="text-center">
+                                                                                <?php
+                                                                                if ($adquisicion['id_orden'] == '') {
+                                                                                    if ($adquisicion['estado'] >= 1 && $adquisicion['estado'] < 6 && $adquisicion['id_orden'] == '') { ?>
+                                                                                        <button value="<?php echo $dc['id_detalle'] ?>" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></button>
+                                                                                        <button value="<?php echo $dc['id_detalle'] ?>" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></button>
+                                                                                <?php }
+                                                                                } else {
+                                                                                    if ($adquisicion['estado'] < 5) {
+                                                                                        echo '<input type="checkbox" class="aprobado" name="aprobado[' . $dc['id_detalle'] . ']" checked>';
+                                                                                    }
+                                                                                } ?>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php
+                                                                    }
+                                                                    ?>
+                                                                </tbody>
+                                                            </table>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </div>

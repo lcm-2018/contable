@@ -241,16 +241,18 @@ $dossml = $smmlv * 2;
 $descripcion = 'LIQUIDACIÓN DE VACACIONES';
 $tipo = 'VC';
 $mes = date('m');
+$id_user = $_SESSION['id_user'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "INSERT INTO `nom_nominas` (`mes`, `vigencia`, `descripcion`, `fec_reg`, `tipo`) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO `nom_nominas` (`mes`, `vigencia`, `descripcion`, `fec_reg`, `tipo`, `id_user_reg`) VALUES (?, ?, ?, ?, ?,?)";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $mes, PDO::PARAM_STR);
     $sql->bindParam(2, $vigencia, PDO::PARAM_STR);
     $sql->bindParam(3, $descripcion, PDO::PARAM_STR);
     $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
     $sql->bindParam(5, $tipo, PDO::PARAM_STR);
+    $sql->bindParam(6, $id_user, PDO::PARAM_INT);
     $sql->execute();
     if (!($cmd->lastInsertId() > 0)) {
         echo $sql->errorInfo()[2] . 'NOM';

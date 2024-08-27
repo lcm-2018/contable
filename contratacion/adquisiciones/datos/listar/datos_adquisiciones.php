@@ -108,6 +108,7 @@ if (!empty($ladquis)) {
             case 0:
                 $accion = '<a class="btn btn-outline-secondary btn-sm btn-circle shadow-gb disabled" title="Orden sin productos"><span class="fas fa-sign-out-alt fa-lg"></span></a>';
                 break;
+            /*
             case 1:
                 $accion = '<a class="btn btn-outline-secondary btn-sm btn-circle shadow-gb disabled" title="Orden sin productos"><span class="fas fa-sign-out-alt fa-lg"></span></a>';
                 break;
@@ -123,6 +124,7 @@ if (!empty($ladquis)) {
             case 7:
                 $accion = '<a value="' . $id_adq . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb envContrato" title="Enviar Contrato"><span class="fas fa-file-upload fa-lg"></span></a>';
                 break;
+            */
         }
         if ((PermisosUsuario($permisos, 5302, 4) || $id_rol == 1) && $la['estado'] <= 2) {
             $borrar = '<a value="' . $id_adq . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';

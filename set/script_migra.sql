@@ -875,4 +875,56 @@ FROM `docs_api`.`seg_cotiza_tercero`
 INNER JOIN `bd_cronhis`.`ctt_adquisiciones`
 	ON(`bd_cronhis`.`ctt_adquisiciones`.`id_adquisicion` = `docs_api`.`seg_cotiza_tercero`.`id_cot`)
 WHERE `seg_cotiza_tercero`.`nit` = '844001355'
-GROUP BY id_cot;
+GROUP BY `id_cot`;
+
+INSERT INTO `bd_cronhis`.`ctt_estudios_previos`
+	(`id_est_prev`,`id_compra`,`fec_ini_ejec`,`fec_fin_ejec`,`val_contrata`,`id_forma_pago`,`id_supervisor`,`necesidad`,`act_especificas`,`prod_entrega`
+	,`obligaciones`,`forma_pago`,`num_ds`,`requisitos`,`garantia`,`describe_valor`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`)
+SELECT
+	`id_est_prev`,`id_compra`,`fec_ini_ejec`,`fec_fin_ejec`,`val_contrata`,`id_forma_pago`,`id_supervisor`,`necesidad`,`act_especificas`,`prod_entrega`
+	,`seg_estudios_previos`.`obligaciones`,`forma_pago`,`num_ds`,`requisitos`,`garantia`,`describe_valor`,`seg_usuarios_sistema`.`id_usuario`
+	,`seg_estudios_previos`.`fec_reg`,`seg_usuarios_sistema`.`id_usuario` AS `user_act`,`seg_estudios_previos`.`fec_act`
+FROM `financiero`.`seg_estudios_previos`
+INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
+	ON(`bd_cronhis`.`seg_usuarios_sistema`.`id_user_fin` = `financiero`.`seg_estudios_previos`.`id_user_reg`)
+INNER JOIN `bd_cronhis`.`ctt_adquisiciones`
+	ON(`financiero`.`seg_estudios_previos`.`id_compra` = `bd_cronhis`.`ctt_adquisiciones`.`id_adquisicion`);
+
+INSERT INTO `bd_cronhis`.`ctt_contratos`
+	(`id_contrato_compra`,`id_compra`,`fec_ini`,`fec_fin`,`val_contrato`,`id_forma_pago`,`id_supervisor`,`id_secop`,`num_contrato`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`)
+SELECT
+	`id_contrato_compra`,`id_compra`,`fec_ini`,`fec_fin`,`seg_contrato_compra`.`val_contrato`,`id_forma_pago`,`id_supervisor`,`id_secop`,`num_contrato`
+	,`seg_usuarios_sistema`.`id_usuario`,`seg_contrato_compra`.`fec_reg`,`seg_usuarios_sistema`.`id_usuario` AS `user_act`,`seg_contrato_compra`.`fec_act`
+FROM `financiero`.`seg_contrato_compra`
+INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
+	ON(`financiero`.`seg_contrato_compra`.`id_user_reg` = `bd_cronhis`.`seg_usuarios_sistema`.`id_user_fin`)
+INNER JOIN `bd_cronhis`.`ctt_adquisiciones`
+	ON(`financiero`.`seg_contrato_compra`.`id_compra` = `bd_cronhis`.`ctt_adquisiciones`.`id_adquisicion`);
+
+UPDATE `financiero`.`seg_novedad_contrato_adi_pror` SET `id_adq` = NULL WHERE `id_adq` = 0;
+INSERT INTO `bd_cronhis`.`ctt_novedad_adicion_prorroga`
+	(`id_nov_con`,`id_tip_nov`,`id_adq`,`val_adicion`,`fec_adcion`,`id_cdp`,`fec_ini_prorroga`,`fec_fin_prorroga`,`observacion`,`id_user_reg`,`fec_reg`)
+SELECT
+	`id_nov_con`,`id_tip_nov`,`id_adq`,`val_adicion`,`fec_adcion`
+	,CASE
+		WHEN `cdp` = 0 THEN NULL
+		ELSE `cdp`
+	END AS `cdp`,`fec_ini_prorroga`,`fec_fin_prorroga`,`observacion`
+	,`seg_usuarios_sistema`.`id_usuario`,`seg_novedad_contrato_adi_pror`.`fec_reg`
+FROM `financiero`.`seg_novedad_contrato_adi_pror`
+INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
+	ON(`financiero`.`seg_novedad_contrato_adi_pror`.`id_user_reg` = `bd_cronhis`.`seg_usuarios_sistema`.`id_user_fin`)
+INNER JOIN `bd_cronhis`.`ctt_contratos`
+	ON (`financiero`.`seg_novedad_contrato_adi_pror`.`id_adq` = `bd_cronhis`.`ctt_contratos`.`id_contrato_compra`);
+
+INSERT INTO `bd_cronhis`.`ctt_novedad_cesion`
+	(`id_cesion`,`id_adq`,`id_tipo_nov`,`id_tercero`,`fec_cesion`,`observacion`,`id_user_reg`,`fec_reg`)
+SELECT
+	 `id_cesion`,`id_adq`,`id_tipo_nov`,`id_tercero`,`fec_cesion`,`observacion`,`seg_usuarios_sistema`.`id_usuario`,`seg_novedad_contrato_cesion`.`fec_reg`
+FROM `financiero`.`seg_novedad_contrato_cesion`
+INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
+	ON(`financiero`.`seg_novedad_contrato_cesion`.`id_user_reg` = `bd_cronhis`.`seg_usuarios_sistema`.`id_user_fin`)
+INNER JOIN `bd_cronhis`.`ctt_contratos`
+	ON (`financiero`.`seg_novedad_contrato_cesion`.`id_adq` = `bd_cronhis`.`ctt_contratos`.`id_contrato_compra`);
+
+

@@ -75,7 +75,7 @@
             dom: setdom,
             buttons: [{
                 action: function (e, dt, node, config) {
-                    $.post("datos/registrar/formadd_adquisicion.php", function (he) {
+                    $.post("datos/registrar/formadd_adquisicion.php", { id_adq: 0 }, function (he) {
                         $('#divTamModalForms').removeClass('modal-xl');
                         $('#divTamModalForms').removeClass('modal-sm');
                         $('#divTamModalForms').addClass('modal-lg');
@@ -116,64 +116,6 @@
         });
         $('#tableAdquisiciones').wrap('<div class="overflow" />');
         $('#tableLisTerCot').wrap('<div class="overflow" />');
-        //dataTable Adquisicion de bienes o servicios
-        $('#tableAdqBnSv').DataTable({
-            dom: "<'row'<'reg-orden col-md-6'B><'col-md-6'f>>" +
-                "<'row'<'col-sm-12'tr>>" +
-                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-            buttons: [{
-                text: 'CREAR ORDEN',
-                action: function () {
-                    let b = 1;
-                    $('input[type=checkbox]:checked').each(function () {
-                        let idcheck = $(this).val();
-                        let idCant = 'bnsv_' + idcheck;
-                        let idVAl = 'val_bnsv_' + idcheck;
-                        if ($('#' + idCant).val() === '' || parseInt($('#' + idCant).val()) <= 0) {
-                            showError(idCant);
-                            bordeError(idCant);
-                            b = 0
-                            return false;;
-                        }
-                        if ($('#' + idVAl).val() === '' || parseInt($('#' + idVAl).val()) <= 0) {
-                            showError(idVAl);
-                            bordeError(idVAl);
-                            b = 0
-                            return false;;
-                        }
-
-                    });
-                    if (b === 1) {
-                        let datos = $('#formDetallesAdq').serialize();
-                        $.ajax({
-                            type: 'POST',
-                            url: 'registrar/new_adquisicion_bn_sv.php',
-                            data: datos,
-                            success: function (r) {
-                                if (r === 0) {
-                                    $('#divModalError').modal('show');
-                                    $('#divMsgError').html("No se agregó ningún bien o servicio");
-                                } else if (r > 0) {
-                                    let id = 'tableAdquisiciones';
-                                    reloadtable(id);
-                                    $('#divModalForms').modal('hide');
-                                    $('#divModalDone').modal('show');
-                                    $('#divEstadoBnSv').html('<div class="p-3 mb-2 bg-success text-white">ORDEN AGREGADA CORRECTAMENTE</div>');
-                                    $('#divMsgDone').html('Se agregaron' + r + 'bien(es) o servicio(s) a la compra actual');
-                                } else {
-                                    $('#divModalError').modal('show');
-                                    $('#divMsgError').html(r);
-                                }
-                            }
-                        });
-                        return false;
-                    }
-                }
-            }],
-            language: setIdioma,
-            paginate: false,
-        });
-        $('#tableAdqBnSv').wrap('<div class="overflow" />');
         $('#tableUpAdqBnSv').DataTable({
             language: setIdioma,
             "lengthMenu": [
@@ -188,7 +130,7 @@
             dom: setdom,
             buttons: [{
                 action: function (e, dt, node, config) {
-                    $.post("datos/registrar/formadd_adquisicion.php", function (he) {
+                    $.post("datos/registrar/formadd_servicios.php", { id_adq: $('#id_compra').val(), tipo_servicio: $('#tipo_servicio').val() }, function (he) {
                         $('#divTamModalForms').removeClass('modal-xl');
                         $('#divTamModalForms').removeClass('modal-sm');
                         $('#divTamModalForms').addClass('modal-lg');
@@ -202,6 +144,10 @@
                 [10, 25, 50, -1],
                 [10, 25, 50, 'TODO'],
             ],
+            columnDefs: [{
+                class: 'text-wrap',
+                targets: [1]
+            }],
             "pageLength": -1
         });
         $('.tableCotRecibidas').wrap('<div class="overflow" />');
@@ -266,7 +212,11 @@
                 [10, 25, 50, -1],
                 [10, 25, 50, 'TODO'],
             ],
-            "pageLength": -1
+            "pageLength": -1,
+            columnDefs: [{
+                class: 'text-wrap',
+                targets: [6]
+            }],
         });
         $('#tableNovedadesContrato').wrap('<div class="overflow" />');
         $('#divForms').on('change', '#slcTipoBnSv', function () {
@@ -309,6 +259,34 @@
             orderCh();
         });
     });
+    $('#divForms').on('change', '#slcAreaSolicita', function () {
+        var id = $(this).val();
+        $.ajax({
+            type: 'POST',
+            url: 'datos/listar/tipo_bs_adq.php',
+            data: { id: id },
+            dataType: 'json',
+            success: function (r) {
+                if (r.status == 'ok') {
+                    $('#filtro').val(r.filtro);
+                    if (r.tipo == '0') {
+                        $('#slcTipoBnSv').val(0);
+                        $('#txtBuscarTipoBnSv').val('');
+                        $('#txtBuscarTipoBnSv').attr('disabled', false);
+                        $('#txtBuscarTipoBnSv').attr('readonly', false);
+                    } else {
+                        $('#txtBuscarTipoBnSv').attr('disabled', true);
+                        $('#txtBuscarTipoBnSv').attr('readonly', true);
+                        $('#slcTipoBnSv').val(r.id);
+                        $('#txtBuscarTipoBnSv').val(r.nombre);
+                    }
+                } else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r.msg);
+                }
+            }
+        });
+    });
     //Agregar adquisicion
     $('#divForms').on('click', '#btnAddAdquisicion', function () {
         if ($('#datFecAdq').val() === '') {
@@ -326,6 +304,9 @@
         } else if ($('#numTotalContrato').val() == '' || parseInt($('#numTotalContrato').val()) <= 0) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡El valor total del contrato debe ser mayor o igual a cero!');
+        } else if ($('#id_tercero').val() == '0') {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('¡Debe seleccionar un tercero!');
         } else if ($('#txtObjeto').val() === '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Objeto no puede ser Vacío!');
@@ -364,8 +345,14 @@
     });
     $('#modificarAdquisiciones').on('click', '.editar', function () {
         let id_up = $(this).attr('value');
-        $('<form action="actualizar/up_adq_compra.php" method="post"><input type="hidden" name="up_adq_compra" value="' + id_up + '" /></form>')
-            .appendTo('body').submit();
+        $.post("datos/registrar/formadd_adquisicion.php", { id_adq: id_up }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+
     });
     $('#tableAdqBnSv input[type=checkbox]').on('change', function () {
         if ($('#tipo_contrato').val() == '1') {
@@ -562,6 +549,16 @@
             }
         });
         return false;
+    });
+    $('.listOrdenes').on('click', function () {
+        let tipo = $(this).attr('text');
+        $.post("datos/listar/ordenes_almacen_activos.php", { tipo: tipo }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
     });
     //Slc tercero cotizacion
     $('#modificarAdquisiciones').on('click', '.enviar', function () {
@@ -1042,8 +1039,9 @@
         $(this).autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: window.urlin + "/almacen/datos/listar/datos_terceros.php",
+                    url: window.urlin + "/terceros/gestion/datos/listar/buscar_terceros.php",
                     dataType: "json",
+                    type: 'POST',
                     data: {
                         term: request.term
                     },
@@ -1057,6 +1055,32 @@
                 $('#id_tercero').val(ui.item.id);
             }
         });
+    });
+
+    $("#divModalForms").on('input', '#txtBuscarTipoBnSv', function () {
+        let area = $('#slcAreaSolicita').val();
+        if (Number(area) != 0) {
+            $(this).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "datos/listar/list_tipo_servicio.php",
+                        dataType: "json",
+                        type: 'POST',
+                        data: { term: request.term, area: area },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $('#slcTipoBnSv').val(ui.item.id);
+                }
+            });
+        } else {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe seleccionar un área solicitante');
+        }
     });
     $('#btnAddEstudioPrevio').on('click', function () {
         let id = $('#id_compra').val();
@@ -2079,22 +2103,104 @@
         let fila = $(this).parent().parent().parent().parent();
         fila.remove();
     });
-    /*
-    $('#divModalForms').on('change', '#slcTipoBnSv', function () {
-        let id = $(this).val();
-        $.ajax({
-            type: 'POST',
-            url: 'datos/listar/tipo_servicio.php',
-            dataType: 'json',
-            data: { id: id },
-            success: function (r) {
+    $('#guardarOrden').on('click', function () {
+        var next = true;
+        $('.is-invalid').removeClass('is-invalid');
 
-                if (r.msg.trim() === 'ok') {
-                    $('#obligacionesContratista').css('display', 'block');
-                } else {
-                    $('#obligacionesContratista').css('display', 'none');
+        $('.aprobado').each(function () {
+            var fila = $(this).closest('tr');
+
+            if (fila.find('input[type="checkbox"]').is(':checked')) {
+                fila.find('input[type="number"]').each(function () {
+                    var $input = $(this);
+                    var inputValue = Number($input.val());
+                    var maxValue = $input.attr('max') ? Number($input.attr('max')) : null;
+                    if (inputValue <= 0 || (maxValue !== null && inputValue > maxValue)) {
+                        $input.addClass('is-invalid');
+                        mjeError(inputValue <= 0 ? 'El valor debe ser mayor a cero' : `El valor no debe ser mayor a ${maxValue}`);
+                        next = false;
+                        return false;
+                    }
+                });
+                if (!next) {
+                    return false;
                 }
             }
         });
-    });*/
+        if (next) {
+            let data = $('#formOrdenCompra').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'actualizar/up_orden_compra.php',
+                data: data,
+                success: function (r) {
+                    if (r == 'ok') {
+                        location.reload();
+                        mje('Orden actualizada correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
+    $('#cerrarOrden').on('click', function () {
+        Swal.fire({
+            title: "¿Confirma cierre de orden?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var id_orden = $('#id_orden').val();
+                var id_adq = $('#id_compra').val();
+                $.ajax({
+                    type: 'POST',
+                    url: 'actualizar/up_cerrar_orden.php',
+                    data: { id_orden: id_orden, id_adq: id_adq },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            location.reload();
+                            mje('Orden cerrada correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+    });
 })(jQuery);
+
+function AsociarOrden(id_orden) {
+    Swal.fire({
+        title: "¿Confirma asignación de orden a adquisición?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00994C",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si!",
+        cancelButtonText: "NO",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var ruta = "actualizar/up_adq_orden_compra.php";
+            $.ajax({
+                type: "POST",
+                url: ruta,
+                data: { id_orden: id_orden, id_adq: $('#id_compra').val() },
+                success: function (r) {
+                    if (r == 'ok') {
+                        location.reload();
+                        mje("Orden asignada correctamente");
+                    } else {
+                        mjeError("Error: " + r);
+                    }
+                },
+            });
+        }
+    });
+
+};

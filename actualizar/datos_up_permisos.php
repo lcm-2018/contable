@@ -6,7 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../permisos.php';
-if ($_SESSION['id_user'] != 1) {
+if ($id_rol != 1) {
     exit('Usuario no autorizado');
 }
 $id = isset($_POST['id']) ? $_POST['id'] : exit('Acceso denegado');
