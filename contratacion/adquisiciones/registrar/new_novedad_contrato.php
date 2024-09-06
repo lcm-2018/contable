@@ -54,7 +54,7 @@ switch ($opcion) {
         break;
     case '2':
         $fec_cesion = $_POST['datFecCesion'];
-        $id_tercero = $_POST['slcTerceroCesion'];
+        $id_tercero = $_POST['id_tercero'];
         try {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);

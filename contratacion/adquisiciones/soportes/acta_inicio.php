@@ -95,17 +95,14 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `ctt_adquisiciones`.`id_adquisicion`
-                , `pto_documento`.`id_manu`
-                , `pto_documento`.`objeto`
-                , `pto_documento`.`fecha`
-                , `pto_documento_detalles`.`valor`
+                , `pto_cdp`.`id_manu`
+                , `pto_cdp`.`objeto`
+                , `pto_cdp`.`fecha`
             FROM
-                `pto_documento`
+                `pto_cdp`
                 INNER JOIN `ctt_adquisiciones` 
-                    ON (`pto_documento`.`id_doc` = `ctt_adquisiciones`.`id_cdp`)
-                INNER JOIN `pto_documento_detalles`
-                ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-            WHERE `ctt_adquisiciones`.`id_adquisicion` = '$id_compra' LIMIT 1";
+                    ON (`pto_cdp`.`id_pto_cdp` = `ctt_adquisiciones`.`id_cdp`)
+            WHERE `ctt_adquisiciones`.`id_adquisicion` = $id_compra LIMIT 1";
     $rs = $cmd->query($sql);
     $cdp = $rs->fetch();
     $cmd = null;
@@ -116,17 +113,16 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `pto_documento`.`id_manu`
-                , `pto_documento`.`fecha`
-                , `pto_documento`.`objeto`
-                , `pto_documento_detalles`.`valor`
+                `pto_crp`.`id_manu`
+                , `pto_crp`.`fecha`
+                , `pto_crp`.`objeto`
             FROM
                 `ctt_adquisiciones`
-                INNER JOIN `pto_documento` 
-                    ON (`ctt_adquisiciones`.`id_cdp` = `pto_documento`.`id_manu`)
-                INNER JOIN `pto_documento_detalles`
-                ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-            WHERE `ctt_adquisiciones`.`id_adquisicion` = '$id_compra' AND `pto_documento`.`id_tmvto` = 2 LIMIT 1";
+                INNER JOIN `pto_cdp` 
+                    ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
+                INNER JOIN `pto_crp`
+                    ON (`pto_cdp`.`id_pto_cdp` = `pto_crp`.`id_cdp`)             
+            WHERE `ctt_adquisiciones`.`id_adquisicion` = $id_compra LIMIT 1";
     $rs = $cmd->query($sql);
     $crp = $rs->fetch();
     $cmd = null;

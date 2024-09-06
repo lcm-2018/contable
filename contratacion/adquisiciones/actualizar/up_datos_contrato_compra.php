@@ -10,42 +10,75 @@ $fec_ini =  date('Y-m-d', strtotime($_POST['datFecIniEjec']));
 $fec_fin = date('Y-m-d', strtotime($_POST['datFecFinEjec']));
 $forma_pago = $_POST['slcFormPago'];
 $supervisor = $_POST['slcSupervisor'];
+$id_tercero = $_POST['id_tercero'];
+$id_compra = $_POST['id_compra'];
 $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+$change = 0;
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "UPDATE `ctt_contratos` SET `fec_ini` = ?, `fec_fin` = ?, `id_forma_pago` = ?, `id_supervisor` = ? WHERE `id_contrato_compra` = ?";
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `id_tercero` FROM `seg_terceros` WHERE `id_tercero_api` = ? LIMIT 1";
     $sql = $cmd->prepare($sql);
-    $sql->bindParam(1, $fec_ini, PDO::PARAM_STR);
-    $sql->bindParam(2, $fec_fin, PDO::PARAM_STR);
-    $sql->bindParam(3, $forma_pago, PDO::PARAM_INT);
-    $sql->bindParam(4, $supervisor, PDO::PARAM_INT);
-    $sql->bindParam(5, $id_cc, PDO::PARAM_INT);
+    $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);
     $sql->execute();
-    $cambio = $sql->rowCount();
-    if (!($sql->execute())) {
-        print_r($sql->errorInfo()[2]);
+    if ($sql->rowCount() > 0) {
+        $row = $sql->fetch(PDO::FETCH_ASSOC);
+        $id_tercero = $row['id_tercero'];
+        $sql = "UPDATE `ctt_adquisiciones` SET `id_tercero` = ? WHERE `id_adquisicion` = ?";
+        $sql = $cmd->prepare($sql);
+        $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);
+        $sql->bindParam(2, $id_compra, PDO::PARAM_INT);
+
+        if (!($sql->execute())) {
+            echo $sql->errorInfo()[2];
+            exit();
+        } else {
+            $change = 1;
+        }
+    } else {
+        echo 'Tercero no relacionado en base propia';
+        exit();
+    }
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql1 = "UPDATE `ctt_contratos` 
+            SET `fec_ini` = ?, `fec_fin` = ?, `id_forma_pago` = ?, `id_supervisor` = ? 
+            WHERE `id_contrato_compra` = ?";
+    $sql1 = $cmd->prepare($sql1);
+    $sql1->bindParam(1, $fec_ini, PDO::PARAM_STR);
+    $sql1->bindParam(2, $fec_fin, PDO::PARAM_STR);
+    $sql1->bindParam(3, $forma_pago, PDO::PARAM_INT);
+    $sql1->bindParam(4, $supervisor, PDO::PARAM_INT);
+    $sql1->bindParam(5, $id_cc, PDO::PARAM_INT);
+    if (!($sql1->execute())) {
+        echo $sql1->errorInfo()[2];
         exit();
     } else {
         try {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-            $sql = "DELETE FROM `ctt_garantias_compra` WHERE `id_contrato_compra` = '$id_cc'";
-            $sql = $cmd->prepare($sql);
-            $sql->bindParam(1, $id_cc, PDO::PARAM_INT);
-            $sql->execute();
+            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+            $query = "DELETE FROM `ctt_garantias_compra` WHERE `id_contrato_compra` = '$id_cc'";
+            $query = $cmd->prepare($query);
+            $query->bindParam(1, $id_cc, PDO::PARAM_INT);
+            $query->execute();
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
         }
-        $polizas = isset($_REQUEST['check']) ? $_REQUEST['check'] : '';
+        $polizas = isset($_POST['check']) ? $_POST['check'] : '';
         $cant = 0;
+        $cambio = 0;
         if ($polizas == '') {
             $cant = 1;
         } else {
             try {
                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                 $sql = "INSERT INTO `ctt_garantias_compra`(`id_contrato_compra`,`id_poliza`,`id_user_reg`,`fec_reg`) VALUES (?, ?, ?, ?)";
                 $sql = $cmd->prepare($sql);
                 $sql->bindParam(1, $id_cc, PDO::PARAM_INT);
@@ -59,7 +92,7 @@ try {
                         $cant++;
                         $cambio = 1;
                     } else {
-                        print_r($sql->errorInfo()[2]);
+                        echo $sql->errorInfo()[2];
                     }
                 }
                 $cmd = null;
@@ -67,9 +100,9 @@ try {
                 echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
             }
         }
-        if ($cambio > 0) {
+        if ($sql1->rowCount() > 0 || $cant > 0) {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             $sql = "UPDATE  `ctt_contratos` SET  `id_user_act` = ? , `fec_act` = ? WHERE `id_contrato_compra` = ?";
             $sql = $cmd->prepare($sql);
             $sql->bindParam(1, $iduser, PDO::PARAM_INT);
@@ -77,13 +110,16 @@ try {
             $sql->bindParam(3, $id_cc, PDO::PARAM_INT);
             $sql->execute();
             if ($sql->rowCount() > 0) {
-                echo '1';
+                $change = 1;
             } else {
-                print_r($sql->errorInfo()[2]);
+                echo $sql->errorInfo()[2];
             }
-        } else {
-            echo 'No se ha modificado ningún dato';
         }
+    }
+    if ($change == 1) {
+        echo '1';
+    } else {
+        echo 'No se ha realizado ningun cambio';
     }
     $cmd = null;
 } catch (PDOException $e) {

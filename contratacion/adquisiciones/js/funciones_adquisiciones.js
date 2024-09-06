@@ -304,9 +304,6 @@
         } else if ($('#numTotalContrato').val() == '' || parseInt($('#numTotalContrato').val()) <= 0) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡El valor total del contrato debe ser mayor o igual a cero!');
-        } else if ($('#id_tercero').val() == '0') {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('¡Debe seleccionar un tercero!');
         } else if ($('#txtObjeto').val() === '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Objeto no puede ser Vacío!');
@@ -960,11 +957,6 @@
             $('#txtObjeto').addClass('is-invalid');
             $('#divModalError').modal('show');
             $('#divMsgError').html('Objeto del contrato no puede ser vacío');
-        } else if ($('#id_tercero').val() == '0') {
-            $('#SeaTercer').focus();
-            $('#SeaTercer').addClass('is-invalid');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe seleccionar un tercero');
         } else if ($('#datFecIniEjec').val() == '') {
             $('#datFecIniEjec').focus();
             $('#datFecIniEjec').addClass('is-invalid');
@@ -1318,6 +1310,9 @@
         } else if ($('#txtCodIntern').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe ingresar un número  para el contrato');
+        } else if ($('#id_tercero').val() == '0') {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe seleccionar un tercero');
         } else if ($('#txtCodSecop').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe ingresar el código SECOP II para el contrato');
@@ -1343,7 +1338,7 @@
                     url: 'registrar/new_contrato_compra.php',
                     data: datos,
                     success: function (r) {
-                        if (r == 1) {
+                        if (r == '1') {
                             $('#divModalDone a').attr('data-dismiss', '');
                             $('#divModalDone a').attr('href', 'javascript:location.reload()');
                             $('#divModalDone').modal('show');
@@ -1376,6 +1371,9 @@
         } else if ($('#datFecFinEjec').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Fecha final no puede ser vacío');
+        } else if ($('#id_tercero').val() == '0') {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe seleccionar un tercero');
         } else {
             let fecini = new Date($('#datFecIniEjec').val());
             let fecfin = new Date($('#datFecFinEjec').val());
@@ -1386,7 +1384,7 @@
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Para Pago Anticipado debe selecionar Póliza de manejo de anticipo');
             } else {
-                let datos = $('#formUpContraCompra').serialize();
+                let datos = $('#formUpContraCompra').serialize() + "&id_compra=" + $('#id_compra').val();
                 $.ajax({
                     type: 'POST',
                     url: 'actualizar/up_datos_contrato_compra.php',
@@ -1449,6 +1447,35 @@
         let id = $('#id_compra').val();
         $('<form action="soportes/acta_inicio.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
     });
+    $('#btnCerrarContrato').on('click', function () {
+        var id_adq = $('#id_compra').val();
+        Swal.fire({
+            title: "¿Confirma cierre de Contrato?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'actualizar/up_cerrar_contrato.php',
+                    data: { id_adq: id_adq },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            location.reload();
+                            mje('Contrato cerrado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    /*
     $('#btnEnviarContrato').on('click', function () {
         let id = $('#id_compra').val();
         $.post("datos/registrar/form_subir_contrato.php", { id: id }, function (he) {
@@ -1458,7 +1485,7 @@
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
-    });
+    });*/
     $('#divForms').on('click', '#btnSubirContrato', function () {
         if ($('#fileContrato').val() == '') {
             $('#divModalError').modal('show');
@@ -1960,7 +1987,7 @@
                 if ($('#datFecCesion').val() == '') {
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Debe Ingresar Fecha cesión');
-                } else if ($('#slcTerceroCesion').val() == '0') {
+                } else if ($('#id_tercero').val() == '0') {
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Debe seleccionar un tercero cesionario nuevo');
                 } else {
@@ -2144,6 +2171,111 @@
             });
         }
     });
+    $('#divModalForms').on('click', '#btnGuardarOrden', function () {
+        var next = true;
+        var c = 0;
+        $('.is-invalid').removeClass('is-invalid');
+
+        $('.aprobado').each(function () {
+            var fila = $(this).closest('tr');
+
+            if (fila.find('input[type="checkbox"]').is(':checked')) {
+                fila.find('input[type="number"]').each(function () {
+                    var $input = $(this);
+                    var inputValue = Number($input.val());
+                    if (inputValue <= 0) {
+                        $input.addClass('is-invalid');
+                        mjeError('El valor debe ser mayor a cero');
+                        next = false;
+                        return false;
+                    }
+                });
+                if (!next) {
+                    return false;
+                }
+                c++;
+            }
+        });
+        if (next && c > 0) {
+            let data = $('#formDetallesAdq').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'actualizar/up_orden_servicio.php',
+                data: data,
+                success: function (r) {
+                    if (r == 'ok') {
+                        location.reload();
+                        mje('Orden guardada correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
+    $('.modificarCotizaciones').on('click', '.editar', function () {
+        let id = $(this).attr('value');
+        $.post("datos/actualizar/formup_detalle_orden.php", { id: id }, function (he) {
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+    $('.modificarCotizaciones').on('click', '.borrar', function () {
+        let id = $(this).attr('value');
+        Swal.fire({
+            title: "¿Confirma eliminar detalle de orden?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'eliminar/del_detalle_orden.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            location.reload();
+                            mje('Detalle eliminado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    $('#divModalForms').on('click', '#btnUpDetalleOrdnen', function () {
+        $('.is-invalid').removeClass('is-invalid');
+        if (Number($('#numCantidad').val()) <= 0) {
+            $('#numCantidad').addClass('is-invalid');
+            mjeError('La cantidad debe ser mayor a cero');
+        } else if (Number($('#numValUnid').val()) <= 0) {
+            $('#numValUnid').addClass('is-invalid');
+            mjeError('El valor unitario debe ser mayor a cero');
+        } else {
+            let data = $('#formUpDetalleOrden').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'actualizar/up_detalle_orden.php',
+                data: data,
+                success: function (r) {
+                    if (r == 'ok') {
+                        location.reload();
+                        mje('Detalle actualizado correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
     $('#cerrarOrden').on('click', function () {
         Swal.fire({
             title: "¿Confirma cierre de orden?",
@@ -2161,6 +2293,34 @@
                     type: 'POST',
                     url: 'actualizar/up_cerrar_orden.php',
                     data: { id_orden: id_orden, id_adq: id_adq },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            location.reload();
+                            mje('Orden cerrada correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    $('#cerrarOrdenServicio').on('click', function () {
+        Swal.fire({
+            title: "¿Confirma cierre de orden?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var id_adq = $('#id_compra').val();
+                $.ajax({
+                    type: 'POST',
+                    url: 'actualizar/up_cerrar_orden_sv.php',
+                    data: { id_adq: id_adq },
                     success: function (r) {
                         if (r == 'ok') {
                             location.reload();

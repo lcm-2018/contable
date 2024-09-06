@@ -30,11 +30,11 @@ try {
                 `ctt_adquisiciones`
             INNER JOIN `ctt_modalidad` 
                 ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
-            INNER JOIN `seg_terceros`
+            LEFT JOIN `seg_terceros`
                 ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
             INNER JOIN `tb_area_c` 
                 ON (`ctt_adquisiciones`.`id_area` = `tb_area_c`.`id_area`)
-            WHERE `id_adquisicion` = '$id_compra' LIMIT 1";
+            WHERE `id_adquisicion` = $id_compra LIMIT 1";
     $rs = $cmd->query($sql);
     $compra = $rs->fetch();
     $cmd = null;
@@ -45,14 +45,12 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `pto_documento_detalles`.`id_detalle` AS `id_cdp`
-                , `pto_documento`.`fecha` AS `fecha_cdp`
+                `pto_cdp`.`id_pto_cdp` AS `id_cdp`
+                , `pto_cdp`.`fecha` AS `fecha_cdp`
             FROM
                 `ctt_adquisiciones`
-            INNER JOIN `pto_documento_detalles` 
-                ON (`ctt_adquisiciones`.`id_cdp` = `pto_documento_detalles`.`id_detalle`)
-            INNER JOIN `pto_documento` 
-                ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`);)
+            INNER JOIN `pto_cdp` 
+                ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
             WHERE `ctt_adquisiciones`.`id_adquisicion` = '$id_compra'";
     $rs = $cmd->query($sql);
     $data_cdp = $rs->fetch();
@@ -66,12 +64,12 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `ctt_escala_honorarios`.`id_pto_cargue`, `pto_cargue`.`cod_pptal`, `pto_cargue`.`nom_rubro`
+                `ctt_escala_honorarios`.`cod_pptal`, `pto_cargue`.`cod_pptal`, `pto_cargue`.`nom_rubro`
             FROM
                 `ctt_escala_honorarios`
                 INNER JOIN`pto_cargue`
-                ON (`ctt_escala_honorarios`.`id_pto_cargue` = `pto_cargue`.`cod_pptal`)
-            WHERE `ctt_escala_honorarios`.`id_tipo_b_s` = '$tipo_bn' AND `ctt_escala_honorarios`.`vigencia` = '$vigencia'";
+                ON (`ctt_escala_honorarios`.`cod_pptal` = `pto_cargue`.`cod_pptal`)
+            WHERE `ctt_escala_honorarios`.`id_tipo_b_s` = $tipo_bn AND `ctt_escala_honorarios`.`vigencia` = '$vigencia'";
     $rs = $cmd->query($sql);
     $cod_cargue = $rs->fetch();
     $cmd = null;
@@ -128,14 +126,27 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$url = $api . 'terceros/datos/res/datos/id/' . $compra['id_tercero_api'];
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$tercer = json_decode($result, true);
+if ($compra['id_tercero_api'] > 0) {
+    $url = $api . 'terceros/datos/res/datos/id/' . $compra['id_tercero_api'];
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $result = curl_exec($ch);
+    curl_close($ch);
+    $tercer = json_decode($result, true);
+    $tercero = ltrim($tercer[0]['nombre1'] . ' ' . $tercer[0]['nombre2'] . ' ' . $tercer[0]['apellido1'] . ' ' . $tercer[0]['apellido2']);
+    $cedula = $tercer[0]['cc_nit'];
+    $dir_tercero = $tercer[0]['direccion'] ? 'XXXXX' : $tercer[0]['direccion'];
+    $tel_tercero = $tercer[0]['telefono'] ? 'XXXXX' : $tercer[0]['telefono'];
+    $id_ciudad = $tercer[0]['municipio'];
+} else {
+    $tercero = 'XXXXX';
+    $cedula = 'XXXXX';
+    $dir_tercero = 'XXXXX';
+    $tel_tercero = 'XXXXX';
+    $id_ciudad = 'XXXXX';
+}
 
 $actividades = explode('||', $estudio_prev['act_especificas']);
 $productos = explode('||', $estudio_prev['prod_entrega']);
@@ -224,14 +235,9 @@ $rubro = !empty($cod_cargue) ? $cod_cargue['nom_rubro'] : 'XXX';
 $cod_presupuesto = !empty($cod_cargue) ? $cod_cargue['id_pto_cargue'] : 'XXX';
 $cpd = !empty($data_cdp) ? $data_cdp['id_cdp'] : 'XXX';
 $fec_cdp = !empty($data_cdp) ? $data_cdp['fecha_cdp'] : 'XXX';
-$tercero = $tercer[0]['nombre1'] . ' ' . $tercer[0]['nombre2'] . ' ' . $tercer[0]['apellido1'] . ' ' . $tercer[0]['apellido2'];
-$cedula = $tercer[0]['cc_nit'];
 $supervisor = $supervisor_res[0]['apellido1'] . ' ' . $supervisor_res[0]['apellido2'] . ' ' . $supervisor_res[0]['nombre1'] . ' ' . $supervisor_res[0]['nombre2'];
 $supervisor = $id_ter_sup == '' ? 'XXXXX' : $supervisor;
 $solicitante = $compra['area']; //area solicitante
-$dir_tercero = $tercer[0]['direccion'] ? 'XXXXX' : $tercer[0]['direccion'];
-$tel_tercero = $tercer[0]['telefono'] ? 'XXXXX' : $tercer[0]['telefono'];
-$id_ciudad = $tercer[0]['municipio'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

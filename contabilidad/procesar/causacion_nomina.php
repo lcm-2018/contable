@@ -64,27 +64,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_empleado`.`id_empleado`
-                , `nom_empleado`.`tipo_cargo`
-                , `nom_horas_ex_trab`.`id_he`
-                , `nom_liq_horex`.`val_liq`
-            FROM
-                `nom_horas_ex_trab`
-                INNER JOIN `nom_empleado` 
-                    ON (`nom_horas_ex_trab`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                INNER JOIN `nom_liq_horex` 
-                    ON (`nom_liq_horex`.`id_he_lab` = `nom_horas_ex_trab`.`id_he_trab`)
-            WHERE (`nom_liq_horex`.`id_nomina` = $id_nomina)";
-    $rs = $cmd->query($sql);
-    $horas = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -203,16 +183,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_empleado` , `val_liq` FROM `nom_liq_salario` WHERE (`id_nomina` = $id_nomina)";
-    $rs = $cmd->query($sql);
-    $salario = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

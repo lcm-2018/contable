@@ -927,4 +927,40 @@ INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
 INNER JOIN `bd_cronhis`.`ctt_contratos`
 	ON (`financiero`.`seg_novedad_contrato_cesion`.`id_adq` = `bd_cronhis`.`ctt_contratos`.`id_contrato_compra`);
 
+INSERT INTO `bd_cronhis`.`nom_causacion`
+	(`id_causacion`,`centro_costo`,`id_tipo`,`cuenta`,`detalle`)
+SELECT
+	`id_causacion`,`centro_costo`,`id_tipo`, `id_pgcp` AS`cuenta`,`detalle`
+FROM `financiero`.`seg_causacion_nomina`
+LEFT JOIN `bd_cronhis`.`ctb_pgcp`
+	ON (`financiero`.`seg_causacion_nomina`.`cuenta` = `bd_cronhis`.`ctb_pgcp`.`cuenta`);
 
+INSERT INTO `bd_cronhis`.`nom_rel_rubro`
+	(`id_relacion`,`id_tipo`,`r_admin`,`r_operativo`,`id_vigencia`,`fec_reg`)
+SELECT
+	`t1`.`id_relacion`
+	, `t1`.`id_tipo`
+	, `t1`.`id_cargue` AS `r_admin`
+	, `t2`.`id_cargue` AS `r_operativo`
+	, CASE
+		WHEN `t1`.`vigencia` = 2023 THEN 7
+		WHEN `t1`.`vigencia` = 2024 THEN 8
+		ELSE NULL
+	END AS `vigencia`
+	, `t1`.`fec_reg`
+FROM
+	(SELECT
+		`id_relacion`,`id_tipo`,`id_cargue`,`vigencia`, `seg_rel_rubro_nomina`.`fec_reg`
+	FROM `financiero`.`seg_rel_rubro_nomina`
+	LEFT JOIN `bd_cronhis`.`pto_cargue`
+		ON(`bd_cronhis`.`pto_cargue`.`cod_pptal` = `financiero`.`seg_rel_rubro_nomina`.`r_admin` 
+		AND (`bd_cronhis`.`pto_cargue`.`id_pto` = 4 OR `bd_cronhis`.`pto_cargue`.`id_pto` = 5))) AS `t1`
+	LEFT JOIN 
+	(SELECT
+		`id_relacion`,`id_cargue`
+	FROM `financiero`.`seg_rel_rubro_nomina`
+	LEFT JOIN `bd_cronhis`.`pto_cargue`
+		ON(`bd_cronhis`.`pto_cargue`.`cod_pptal` = `financiero`.`seg_rel_rubro_nomina`.`r_operativo` 
+		AND (`bd_cronhis`.`pto_cargue`.`id_pto` = 4 OR `bd_cronhis`.`pto_cargue`.`id_pto` = 5))) AS `t2`
+	ON (`t1`.`id_relacion` = `t2`.`id_relacion`)
+ORDER BY `t1`.`id_relacion` ASC;

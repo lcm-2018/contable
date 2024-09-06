@@ -21,7 +21,7 @@ try {
                 `ctt_contratos`
             INNER JOIN `tb_forma_pago_compras` 
                 ON (`ctt_contratos`.`id_forma_pago` = `tb_forma_pago_compras`.`id_form_pago`)
-            WHERE `id_compra` = '$id_adq'";
+            WHERE `id_compra` = $id_adq";
     $rs = $cmd->query($sql);
     $contrato = $rs->fetch();
     $cmd = null;

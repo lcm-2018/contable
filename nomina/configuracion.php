@@ -187,6 +187,118 @@ $contador = 1;
                                         </div>
                                     </div>
                                 </div>
+                                <div class="card">
+                                    <div class="card-header card-header-detalles py-0 headings" id="headingcinco">
+                                        <h5 class="mb-0">
+                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configcinco" aria-expanded="true" aria-controls="collapsecinco">
+                                                <div class="form-row">
+                                                    <div class="div-icono">
+                                                        <span class="fas fa-user-tie fa-lg" style="color: #145a32;"></span>
+                                                    </div>
+                                                    <div>
+                                                        <?php echo $contador;
+                                                        $contador++ ?>. CARGOS.
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </h5>
+                                    </div>
+                                    <div id="configcinco" class="collapse" aria-labelledby="headingcinco">
+                                        <div class="card-body">
+                                            <table id="tableCargosNomina" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                <thead class="text-center">
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Código</th>
+                                                        <th>Cargo</th>
+                                                        <th>Grado</th>
+                                                        <th>Perfíl SIHO</th>
+                                                        <th>Nombramiento</th>
+                                                        <th>Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="modificaCargoNomina">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header card-header-detalles py-0 headings" id="headingseis">
+                                        <h5 class="mb-0">
+                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configseis" aria-expanded="true" aria-controls="collapseseis">
+                                                <div class="form-row">
+                                                    <div class="div-icono">
+                                                        <span class="fas fa-clipboard-list fa-lg" style="color: #dc7633;"></span>
+                                                    </div>
+                                                    <div>
+                                                        <?php echo $contador;
+                                                        $contador++ ?>. RUBROS PRESUPUESTALES.
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </h5>
+                                    </div>
+                                    <div id="configseis" class="collapse" aria-labelledby="headingseis">
+                                        <div class="card-body">
+                                            <table id="tableRubrosNomina" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                <thead class="text-center">
+                                                    <tr>
+                                                        <th rowspan="2">#</th>
+                                                        <th rowspan="2">Tipo</th>
+                                                        <th colspan="2">Rubro Administrativo</th>
+                                                        <th colspan="2">Rubro Operativo</th>
+                                                        <th rowspan="2">Acciones</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Código</th>
+                                                        <th>Nombre</th>
+                                                        <th>Código</th>
+                                                        <th>Nombre</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="modificaRubrosNomina">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header card-header-detalles py-0 headings" id="headingsiete">
+                                        <h5 class="mb-0">
+                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configsiete" aria-expanded="true" aria-controls="collapsesiete">
+                                                <div class="form-row">
+                                                    <div class="div-icono">
+                                                        <span class="fas fa-sort-amount-down-alt fa-lg" style="color: #e74c3c;"></span>
+                                                    </div>
+                                                    <div>
+                                                        <?php echo $contador;
+                                                        $contador++ ?>. CUENTAS CONTABLES.
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </h5>
+                                    </div>
+                                    <div id="configsiete" class="collapse" aria-labelledby="headingsiete">
+                                        <div class="card-body">
+                                            <table id="tableCtaCtbNomina" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                <thead class="text-center">
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Centro Costo</th>
+                                                        <th>Tipo</th>
+                                                        <th>Nombre</th>
+                                                        <th>Cuenta</th>
+                                                        <th>Nombre</th>
+                                                        <th>Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="modificaCtaCtbNomina">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

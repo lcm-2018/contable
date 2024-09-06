@@ -16,18 +16,34 @@ $tipo_servicio = $_POST['tipo_servicio'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT 
-                `id_b_s`, `tipo_compra`,`tb_tipo_contratacion`.`id_tipo`, `tipo_contrato`, `tipo_bn_sv`, `bien_servicio`
-            FROM
-                `tb_tipo_contratacion`
-            INNER JOIN `tb_tipo_compra` 
-                ON (`tb_tipo_contratacion`.`id_tipo_compra` = `tb_tipo_compra`.`id_tipo`)
-            INNER JOIN `tb_tipo_bien_servicio` 
-                ON (`tb_tipo_bien_servicio`.`id_tipo_cotrato` = `tb_tipo_contratacion`.`id_tipo`)
-            INNER JOIN `ctt_bien_servicio` 
-                ON (`ctt_bien_servicio`.`id_tipo_bn_sv` = `tb_tipo_bien_servicio`.`id_tipo_b_s`)
-            WHERE `id_tipo_b_s` = $tipo_servicio
-            ORDER BY `tipo_compra`,`tipo_contrato`, `tipo_bn_sv`, `bien_servicio`";
+    $sql = "SELECT * 
+            FROM 
+                (SELECT
+                    `ctt_bien_servicio`.`id_b_s`
+                    , `ctt_bien_servicio`.`bien_servicio`
+                    , `tb_tipo_bien_servicio`.`tipo_bn_sv`
+                    , `tb_tipo_contratacion`.`tipo_contrato`
+                    , `tb_tipo_compra`.`tipo_compra`
+                FROM
+                    `ctt_bien_servicio`
+                    INNER JOIN `tb_tipo_bien_servicio` 
+                        ON (`ctt_bien_servicio`.`id_tipo_bn_sv` = `tb_tipo_bien_servicio`.`id_tipo_b_s`)
+                    INNER JOIN `tb_tipo_contratacion` 
+                        ON (`tb_tipo_bien_servicio`.`id_tipo_cotrato` = `tb_tipo_contratacion`.`id_tipo`)
+                    INNER JOIN `tb_tipo_compra` 
+                        ON (`tb_tipo_contratacion`.`id_tipo_compra` = `tb_tipo_compra`.`id_tipo`)
+                WHERE (`ctt_bien_servicio`.`id_tipo_bn_sv` = $tipo_servicio)) AS `t1`
+                LEFT JOIN 
+                    (SELECT
+                        `ctt_orden_compra`.`id_adq`
+                        , `ctt_orden_compra_detalle`.`id_servicio`
+                    FROM
+                        `ctt_orden_compra_detalle`
+                    INNER JOIN `ctt_orden_compra` 
+                        ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
+                    WHERE (`ctt_orden_compra`.`id_adq` = $id_adq)) AS `t2`
+                    ON(`t1`.`id_b_s` = `t2`.`id_servicio`)
+            WHERE `t2`.`id_adq` IS NULL";
     $rs = $cmd->query($sql);
     $bnsv = $rs->fetchAll();
     $cmd = null;
@@ -106,7 +122,7 @@ try {
                 <table id="tableAdqBnSv" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Marca</th>
+                            <th><input type="checkbox" id="selectAll" title="Marcar todos"></th>
                             <th>Pago</th>
                             <th>Bien o Servicio</th>
                             <th>Cantidad</th>
@@ -120,7 +136,7 @@ try {
                             <tr>
                                 <td>
                                     <div class="text-center listado">
-                                        <input type="checkbox" name="check[]" value="<?php echo $bs['id_b_s'] ?>">
+                                        <input type="checkbox" name="check[<?php echo $bs['id_b_s'] ?>]" class="aprobado">
                                     </div>
                                 </td>
                                 <?php if (true) { ?>
@@ -132,8 +148,8 @@ try {
                                     </td>
                                 <?php } ?>
                                 <td class="text-left"><i><?php echo $bs['bien_servicio'] ?></i></td>
-                                <td><input type="number" name="bnsv_<?php echo $bs['id_b_s'] ?>" id="bnsv_<?php echo $bs['id_b_s'] ?>" class="form-control altura cantidad"></td>
-                                <td><input type="number" name="val_bnsv_<?php echo $bs['id_b_s'] ?>" id="val_bnsv_<?php echo $bs['id_b_s'] ?>" class="form-control altura" value="0"></td>
+                                <td><input type="number" name="bnsv[<?php echo $bs['id_b_s'] ?>]" class="form-control altura cantidad"></td>
+                                <td><input type="number" name="val_bnsv[<?php echo $bs['id_b_s'] ?>]" class="form-control altura" value="0"></td>
                             </tr>
                         <?php
                         }
@@ -142,7 +158,7 @@ try {
                 </table>
             </div>
             <div class="text-right pb-3 px-3">
-                <button class="btn btn-sm btn-success">Guardar</button>
+                <button class="btn btn-sm btn-success" id="btnGuardarOrden">Guardar</button>
                 <button class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
             </div>
         </form>

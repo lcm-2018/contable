@@ -11,14 +11,14 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `tb_datos_ips`.`nit`
-                , `tb_datos_ips`.`dig_ver`
-                , `tb_datos_ips`.`nombre`
+                `tb_datos_ips`.`nit_ips` AS `nit`
+                , `tb_datos_ips`.`dv` AS `dig_ver`
+                , `tb_datos_ips`.`razon_social_ips` AS `nombre`
                 , `tb_municipios`.`nom_municipio`
             FROM
             `tb_datos_ips`
             INNER JOIN `tb_municipios` 
-                ON (`tb_datos_ips`.`id_ciudad` = `tb_municipios`.`id_municipio`) LIMIT 1";
+                ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`) LIMIT 1";
     $rs = $cmd->query($sql);
     $compania = $rs->fetch();
     $cmd = null;

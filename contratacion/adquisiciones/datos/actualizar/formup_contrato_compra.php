@@ -10,18 +10,56 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `id_contrato_compra`
-                , `id_compra`
-                , `fec_fin`
-                , `fec_ini`
-                , `val_contrato`
-                , `id_forma_pago`
-                , `id_supervisor`
+                `ctt_contratos`.`id_contrato_compra`
+                , `ctt_contratos`.`id_compra`
+                , `ctt_contratos`.`fec_fin`
+                , `ctt_contratos`.`fec_ini`
+                , `ctt_contratos`.`val_contrato`
+                , `ctt_contratos`.`id_forma_pago`
+                , `ctt_contratos`.`id_supervisor`
+                , `ctt_adquisiciones`.`id_tercero`
             FROM
                 `ctt_contratos`
-            WHERE `id_contrato_compra` = '$id_cc'";
+            INNER JOIN `ctt_adquisiciones` 
+                ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
+            WHERE `id_contrato_compra` = $id_cc";
     $rs = $cmd->query($sql);
     $contrato = $rs->fetch();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `id_tercero` = ? LIMIT 1";
+    $sql = $cmd->prepare($sql);
+    $sql->bindParam(1, $contrato['id_tercero'], PDO::PARAM_INT);
+    $sql->execute();
+    $id_tercero = 0;
+    if ($sql->rowCount() > 0) {
+        $row = $sql->fetch(PDO::FETCH_ASSOC);
+        $id_tercero = $row['id_tercero_api'];
+    }
+    $id_t = [$id_tercero];
+    if (!empty($id_t) && $id_tercero > 0) {
+        $payload = json_encode($id_t);
+        $url = $api . 'terceros/datos/res/lista/terceros';
+        $ch = curl_init($url);
+        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        $terceros = json_decode($result, true);
+        $tercero = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
+        $cc_nit = $terceros[0]['cc_nit'];
+    } else {
+        $tercero = '---';
+        $cc_nit = '---';
+    }
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -109,7 +147,7 @@ try {
 <div class="px-0">
     <div class="shadow">
         <div class="card-header" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">REGISTRAR CONTRATO</h5>
+            <h5 style="color: white;">ACTUALIZAR CONTRATO</h5>
         </div>
         <form id="formUpContraCompra">
             <input type="hidden" name="id_cc" value="<?php echo $id_cc ?>">
@@ -130,10 +168,17 @@ try {
                 $meses = intval($diferencia->format('%m')) > 0 ? intval($diferencia->format('%m')) . ' mes(es) ' : '';
                 ?>
                 <div class="form-group col-md-4">
-                    <label for="numDuracionContrato" class="small">DURACIÓN DEL CONTRATO</label>
+                    <label for="divDuraContrato" class="small">DURACIÓN DEL CONTRATO</label>
                     <div id="divDuraContrato" class="form-control form-control-sm">
                         <?php echo $meses . $dias . ' día(s)' ?>
                     </div>
+                </div>
+            </div>
+            <div class="form-row px-4">
+                <div class="form-group col-md-12">
+                    <label for="SeaTercer" class="small">TERCERO</label>
+                    <input type="text" id="SeaTercer" class="form-control form-control-sm py-0 sm" placeholder="Buscar tercero" value="<?php echo $tercero . ' -> ' . $cc_nit ?>">
+                    <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $id_tercero ?>">
                 </div>
             </div>
             <div class="form-row px-4">

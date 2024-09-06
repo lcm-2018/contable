@@ -16,7 +16,7 @@ $vig = $_POST['datFecVigencia'];
 $area = $_POST['slcAreaSolicita'];
 $tbnsv = $_POST['slcTipoBnSv'];
 $obligaciones = '';
-$id_tercero = $_POST['id_tercero'];
+$id_tercero = NULL;
 $objeto = mb_strtoupper($_POST['txtObjeto']);
 $estado = '1';
 $iduser = $_SESSION['id_user'];
@@ -24,17 +24,6 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT `id_tercero` FROM `seg_terceros` WHERE `id_tercero_api` = ? LIMIT 1";
-    $sql = $cmd->prepare($sql);
-    $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);
-    $sql->execute();
-    if ($sql->rowCount() > 0) {
-        $row = $sql->fetch(PDO::FETCH_ASSOC);
-        $id_tercero = $row['id_tercero'];
-    } else {
-        echo 'Tercero no relacionado en base propia';
-        exit();
-    }
     if ($id_Adq == 0) {
         $sql = "INSERT INTO `ctt_adquisiciones` (`id_modalidad`, `id_empresa`, `id_sede`, `id_area`, `fecha_adquisicion`, `val_contrato`, `vigencia`, `id_tipo_bn_sv`, `obligaciones`, `objeto`, `estado`, `id_user_reg`, `fec_reg`, `id_tercero`) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

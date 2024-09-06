@@ -147,7 +147,7 @@ switch ($novedad) {
         break;
     case 4:
         $fec_cesion = $_POST['datFecCesion'];
-        $id_tercero = $_POST['slcTerceroCesion'];
+        $id_tercero = $_POST['id_tercero'];
         try {
             $sql = "UPDATE `ctt_novedad_cesion` SET
                         `id_tercero` = ?, `fec_cesion` = ?, `observacion` = ?
@@ -376,7 +376,7 @@ switch ($novedad) {
         break;
     case '4':
         $fec_cesion = $_POST['datFecCesion'];
-        $id_tercero = $_POST['slcTerceroCesion'];
+        $id_tercero = $_POST['id_tercero'];
         $id_contrato = $_POST['id_contrato'];
         $endp = 'cesion';
         $data = [

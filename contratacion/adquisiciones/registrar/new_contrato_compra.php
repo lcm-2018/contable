@@ -11,10 +11,37 @@ $fec_fin = date('Y-m-d', strtotime($_POST['datFecFinEjec']));
 $val_contrata = $_POST['numValContrata'];
 $forma_pago = $_POST['slcFormPago'];
 $supervisor = $_POST['slcSupervisor'];
+$id_tercero = $_POST['id_tercero'];
 $id_secop = $_POST['txtCodSecop'];
 $num_contrato = $_POST['txtCodIntern'];
 $id_user = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT `id_tercero` FROM `seg_terceros` WHERE `id_tercero_api` = ? LIMIT 1";
+    $sql = $cmd->prepare($sql);
+    $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);
+    $sql->execute();
+    if ($sql->rowCount() > 0) {
+        $row = $sql->fetch(PDO::FETCH_ASSOC);
+        $id_tercero = $row['id_tercero'];
+        $sql = "UPDATE `ctt_adquisiciones` SET `id_tercero` = ? WHERE `id_adquisicion` = ?";
+        $sql = $cmd->prepare($sql);
+        $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);
+        $sql->bindParam(2, $id_compra, PDO::PARAM_INT);
+        $sql->execute();
+        if (!($sql->rowCount() > 0)) {
+            echo $sql->errorInfo()[2];
+            exit();
+        }
+    } else {
+        echo 'Tercero no relacionado en base propia';
+        exit();
+    }
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -64,7 +91,7 @@ try {
         }
         if ($cant > 0) {
             try {
-                $estado = 9;
+                $estado = 7;
                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
                 $sql = "UPDATE `ctt_adquisiciones` SET `estado`= ?, `id_user_act` = ?, `fec_act` = ? WHERE `id_adquisicion` = ?";
@@ -77,7 +104,7 @@ try {
                 if (!($sql->rowCount() > 0)) {
                     echo $sql->errorInfo()[2];
                 } else {
-                    echo 1;
+                    echo '1';
                 }
                 $cmd = null;
             } catch (PDOException $e) {

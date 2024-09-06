@@ -130,10 +130,17 @@ try {
                 $meses = intval($diferencia->format('%m')) > 0 ? intval($diferencia->format('%m')) . ' mes(es) ' : '';
                 ?>
                 <div class="form-group col-md-4">
-                    <label for="numDuracionContrato" class="small">DURACIÓN DEL CONTRATO</label>
+                    <label for="divDuraContrato" class="small">DURACIÓN DEL CONTRATO</label>
                     <div id="divDuraContrato" class="form-control form-control-sm">
                         <?php echo $meses . $dias . ' día(s)' ?>
                     </div>
+                </div>
+            </div>
+            <div class="form-row px-4">
+                <div class="form-group col-md-12">
+                    <label for="SeaTercer" class="small">TERCERO</label>
+                    <input type="text" id="SeaTercer" class="form-control form-control-sm py-0 sm" placeholder="Buscar tercero" value="<?php echo '' ?>">
+                    <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo 0 ?>">
                 </div>
             </div>
             <div class="form-row px-4">
@@ -182,7 +189,7 @@ try {
                 </div>
             </div>
             <label for="slcSupervisor" class="small">PÓLIZAS</label>
-            <div class="form-row px-4">
+            <div class="form-row px-4" id="slcSupervisor">
 
                 <?php
                 $cant = 1;
@@ -211,7 +218,7 @@ try {
             </div>
             <div class="text-center pb-3">
                 <button class="btn btn-primary btn-sm" id="btnAddContratoCompra">Registrar</button>
-                <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal"> Cancelar</a>
+                <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>
             </div>
         </form>
     </div>

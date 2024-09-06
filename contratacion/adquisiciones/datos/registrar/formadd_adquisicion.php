@@ -116,7 +116,7 @@ if ($id_adq > 0) {
         curl_close($ch);
         $terceros = json_decode($result, true);
         if (!($terceros == '0' || $terceros == '')) {
-            $adquisicion['tercero'] = ltrim($terceros[0]['nombre1'] .' '. $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
+            $adquisicion['tercero'] = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
         }
     } else {
         $adquisicion['tercero'] = '';
@@ -185,13 +185,15 @@ if ($adquisicion['filtro'] == '1' || $adquisicion['filtro'] == '2') {
                     </select>
                 </div>
             </div>
-            <div class="form-row px-4">
-                <div class="form-group col-md-12">
-                    <label for="SeaTercer" class="small">TERCERO</label>
-                    <input type="text" id="SeaTercer" class="form-control form-control-sm py-0 sm" placeholder="Buscar tercero" value="<?php echo $adquisicion['tercero'] ?>">
-                    <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $adquisicion['id_tercero'] ?>">
+            <?php if (false) { ?>
+                <div class="form-row px-4">
+                    <div class="form-group col-md-12">
+                        <label for="SeaTercer" class="small">TERCERO</label>
+                        <input type="text" id="SeaTercer" class="form-control form-control-sm py-0 sm" placeholder="Buscar tercero" value="<?php echo $adquisicion['tercero'] ?>">
+                        <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $adquisicion['id_tercero'] ?>">
+                    </div>
                 </div>
-            </div>
+            <?php } ?>
             <div class="form-row px-4">
                 <div class="form-group col-md-12">
                     <label for="txtBuscarTipoBnSv" class="small">TIPO DE BIEN / SERVICIO</label>

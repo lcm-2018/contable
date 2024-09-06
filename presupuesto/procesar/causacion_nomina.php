@@ -64,27 +64,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_empleado`.`id_empleado`
-                , `nom_empleado`.`tipo_cargo`
-                , `nom_horas_ex_trab`.`id_he`
-                , `nom_liq_horex`.`val_liq`
-            FROM
-                `nom_horas_ex_trab`
-                INNER JOIN `nom_empleado` 
-                    ON (`nom_horas_ex_trab`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                INNER JOIN `nom_liq_horex` 
-                    ON (`nom_liq_horex`.`id_he_lab` = `nom_horas_ex_trab`.`id_he_trab`)
-            WHERE (`nom_liq_horex`.`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $horas = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -141,78 +121,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_empleado`.`id_empleado`
-                , `nom_empleado`.`tipo_cargo`
-                , `nom_liq_embargo`.`val_mes_embargo`
-            FROM
-                `nom_embargos`
-                INNER JOIN `nom_empleado` 
-                    ON (`nom_embargos`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                INNER JOIN `nom_liq_embargo` 
-                    ON (`nom_liq_embargo`.`id_embargo` = `nom_embargos`.`id_embargo`)
-            WHERE (`nom_liq_embargo`.`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $embargos = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_empleado`.`id_empleado`
-                , `nom_empleado`.`tipo_cargo`
-                , `nom_liq_libranza`.`val_mes_lib`
-                , `nom_liq_libranza`.`mes_lib`
-                , `nom_liq_libranza`.`anio_lib`
-            FROM
-                `nom_libranzas`
-                INNER JOIN `nom_empleado` 
-                    ON (`nom_libranzas`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                INNER JOIN `nom_liq_libranza` 
-                    ON (`nom_liq_libranza`.`id_libranza` = `nom_libranzas`.`id_libranza`)
-            WHERE (`nom_liq_libranza`.`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $libranzas = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_empleado`.`id_empleado`
-                , `nom_empleado`.`tipo_cargo`
-                , `nom_liq_sindicato_aportes`.`val_aporte`
-            FROM
-                `nom_cuota_sindical`
-                INNER JOIN `nom_empleado` 
-                    ON (`nom_cuota_sindical`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                INNER JOIN `nom_liq_sindicato_aportes` 
-                    ON (`nom_liq_sindicato_aportes`.`id_cuota_sindical` = `nom_cuota_sindical`.`id_cuota_sindical`)
-            WHERE (`nom_liq_sindicato_aportes`.`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $sindicato = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_empleado` , `val_liq` FROM `nom_liq_salario` WHERE (`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $salario = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -241,97 +150,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'ADMIN'";
-    $rs = $cmd->query($sql);
-    $cAdmin = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'URG'";
-    $rs = $cmd->query($sql);
-    $cUrg = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'PASIVO'";
-    $rs = $cmd->query($sql);
-    $cPasivo = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_empleado` , `val_ret` FROM `nom_retencion_fte` WHERE (`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $rfte = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `tes_cuentas`.`estado`
-                , `tes_cuentas`.`id_tes_cuenta`
-                , `ctb_pgcp`.`cuenta` AS `cta_contable`
-            FROM
-                `tes_cuentas`
-                INNER JOIN `ctb_pgcp` 
-                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-            WHERE (`tes_cuentas`.`estado` = 1)";
-    $rs = $cmd->query($sql);
-    $banco = $rs->fetch(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

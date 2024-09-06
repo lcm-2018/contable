@@ -37,7 +37,7 @@ try {
                 , `far_medicamentos`.`nom_medicamento` AS `bien_servicio`
                 , `far_alm_pedido_detalle`.`cantidad`
                 , `far_alm_pedido_detalle`.`valor` AS `val_unid`
-                , `far_alm_pedido_detalle`.`aprobado`
+                , `far_alm_pedido_detalle`.`aprobado` AS `val_estimado_unid`
                 , `far_alm_pedido_detalle`.`id_medicamento` AS `id_bn_sv`
             FROM
                 `far_alm_pedido_detalle`
@@ -73,7 +73,7 @@ try {
                 ON (`ctt_clasificacion_bn_sv`.`cod_unspsc` = `tb_codificacion_unspsc`.`codigo`)
             WHERE `ctt_clasificacion_bn_sv`.`id_b_s` IN($cod)";
     $rs = $cmd->query($sql);
-    $codigo_servicio = $rs->fetch();
+    $codigo_servicio = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -278,25 +278,38 @@ foreach ($garantias as $ga) {
 foreach ($valores as $va) {
     $describ_val[] = ['describ_val' => $va];
 }
-$unspsc = !empty($codigo_servicio) ? $codigo_servicio['codigo'] : 'XXX';
-$nombre = !empty($codigo_servicio) ? $codigo_servicio['descripcion'] : 'XXX';
-$listcod = [];
-if (!empty($codigo_servicio)) {
-    foreach ($codigo_servicio as $cod) {
-        $listcod[] = ['unspsc' => $codigo_servicio['codigo'], 'nombre' => $codigo_servicio['descripcion']];
-    }
-} else {
-    $listcod[] = ['unspsc' => 'XXX', 'nombre' => 'XXX'];
-}
+
 $segmento = !empty($codigo_servicio) ? substr($codigo_servicio['codigo'], 0, 2) : 'XXX';
 $familia = !empty($codigo_servicio) ? substr($codigo_servicio['codigo'], 0, 4) : 'XXX';
 $clase = !empty($codigo_servicio) ? substr($codigo_servicio['codigo'], 0, 6) : 'XXX';
-$rubro = !empty($cod_cargue) ? $cod_cargue['id_pto_cargue'] . '-' . $cod_cargue['nom_rubro'] : 'XXX';
+if (!empty($cod_cargue)) {
+    $rubro = $cod_cargue['id_pto_cargue'] . '-' . $cod_cargue['nom_rubro'];
+} else {
+    $rubro = 'XXX';
+    $cod_cargue['id_pto_cargue'] = 'XXX';
+    $cod_cargue['nom_rubro'] = 'XXX';
+}
 $plazo = $p_mes == '' ? $p_dia : $p_mes . $y . $p_dia;
-$servicio  =  mb_strtoupper($oferta['bien_servicio']);
-$service  =  mb_strtolower($oferta['bien_servicio']);
-$cant = $oferta['cantidad'];
-$valun = pesos($oferta['val_estimado_unid']);
+$listServ = [];
+if (!empty($oferta)) {
+    foreach ($oferta as $o) {
+        $key = array_search($o['id_bn_sv'], array_column($codigo_servicio, 'id_b_s'));
+        $cdg = $key !== false ? $codigo_servicio[$key]['codigo'] : 'XXX';
+        $listServ[] = [
+            'unspsc' => 'XXX',
+            'nombre' => $o['bien_servicio'],
+            'cantidad' => $o['cantidad'],
+            'val_unid' => pesos($o['val_estimado_unid'])
+        ];
+    }
+} else {
+    $listServ[] = [
+        'unspsc' => 'XXX',
+        'nombre' => 'XXX',
+        'cantidad' => 'XXX',
+        'val_unid' => 'XXX'
+    ];
+}
 if ($compra['id_area'] == '5') {
     $docx = 'plantilla_est_prev_salud.docx';
 } else {
@@ -316,7 +329,7 @@ $plantilla->cloneBlock('necesidades', 0, true, false, $necesidad);
 $plantilla->cloneRowAndSetValues('actividad', $actividad);
 $plantilla->cloneRowAndSetValues('producto', $producto);
 $plantilla->cloneRowAndSetValues('obligacion', $obligacion);
-$plantilla->cloneRowAndSetValues('unspsc', $listcod);
+$plantilla->cloneRowAndSetValues('unspsc', $listServ);
 $plantilla->cloneBlock('forma_pago', 0, true, false, $pago);
 $plantilla->setValue('rubro', $rubro);
 $plantilla->setValue('nombre_rubro', $cod_cargue['nom_rubro']);
@@ -327,10 +340,6 @@ $plantilla->setValue('objeto', $objeto);
 $plantilla->setValue('supervisor', $supervisor);
 $plantilla->setValue('val_letras', $val_letras);
 $plantilla->setValue('plazo', $plazo);
-$plantilla->setValue('service', $service);
-$plantilla->setValue('servicio', $servicio);
-$plantilla->setValue('cant', $cant);
-$plantilla->setValue('valun', $valun);
 
 $plantilla->saveAs('estudios_previos.docx');
 header("Content-Disposition: attachment; Filename=estudios_previos.docx");

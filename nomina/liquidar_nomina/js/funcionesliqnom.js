@@ -739,6 +739,129 @@
             "pageLength": -1
         });
         $('#tableTerceroNomina').wrap('<div class="overflow" />');
+        $('#tableCargosNomina').DataTable({
+            dom: setdom,
+            buttons: [{
+                action: function (e, dt, node, config) {
+                    $.post("liquidar_nomina/datos/registrar/formadd_cargo.php", { id_cargo: 0 }, function (he) {
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').removeClass('modal-sm');
+                        $('#divTamModalForms').addClass('modal-lg');
+                        $('#divModalForms').modal('show');
+                        $("#divForms").html(he);
+                    });
+                }
+            }],
+
+            language: setIdioma,
+            "ajax": {
+                url: 'liquidar_nomina/datos/listar/cargos_nomina.php',
+                type: 'POST',
+                dataType: 'json'
+            },
+            "columns": [
+                { 'data': 'id_cargo' },
+                { 'data': 'codigo' },
+                { 'data': 'cargo' },
+                { 'data': 'grado' },
+                { 'data': 'perfil_siho' },
+                { 'data': 'nombramiento' },
+                { 'data': 'acciones' },
+            ],
+            "order": [
+                [2, "asc"]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
+        });
+        $('#tableCargosNomina').wrap('<div class="overflow" />');
+        $('#tableRubrosNomina').DataTable({
+            dom: setdom,
+            buttons: [{
+                action: function (e, dt, node, config) {
+                    $.post("liquidar_nomina/datos/registrar/formadd_rubro.php", { id_relacion: 0 }, function (he) {
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').removeClass('modal-sm');
+                        $('#divTamModalForms').addClass('modal-lg');
+                        $('#divModalForms').modal('show');
+                        $("#divForms").html(he);
+                    });
+                }
+            }],
+
+            language: setIdioma,
+            "ajax": {
+                url: 'liquidar_nomina/datos/listar/rubros_nomina.php',
+                type: 'POST',
+                dataType: 'json'
+            },
+            "columns": [
+                { 'data': 'id_relacion' },
+                { 'data': 'nombre' },
+                { 'data': 'cod_admin' },
+                { 'data': 'nom_admin' },
+                { 'data': 'cod_opera' },
+                { 'data': 'nom_opera' },
+                { 'data': 'acciones' },
+            ],
+            "order": [
+                [1, "asc"]
+            ], columnDefs: [{
+                class: 'text-wrap',
+                targets: [1, 3, 5]
+            }],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
+        });
+        $('#tableRubrosNomina').wrap('<div class="overflow" />');
+        $('#tableCtaCtbNomina').DataTable({
+            dom: setdom,
+            buttons: [{
+                action: function (e, dt, node, config) {
+                    $.post("liquidar_nomina/datos/registrar/formadd_cuenta.php", { id_causacion: 0 }, function (he) {
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').removeClass('modal-sm');
+                        $('#divTamModalForms').addClass('modal-lg');
+                        $('#divModalForms').modal('show');
+                        $("#divForms").html(he);
+                    });
+                }
+            }],
+
+            language: setIdioma,
+            "ajax": {
+                url: 'liquidar_nomina/datos/listar/cuentas_nomina.php',
+                type: 'POST',
+                dataType: 'json'
+            },
+            "columns": [
+                { 'data': 'id_causacion' },
+                { 'data': 'ccosto' },
+                { 'data': 'tipo' },
+                { 'data': 'nom_tipo' },
+                { 'data': 'cuenta' },
+                { 'data': 'nom_cta' },
+                { 'data': 'acciones' },
+            ],
+            "order": [
+                [1, 2, 3, "asc"]
+            ], columnDefs: [{
+                class: 'text-wrap',
+                targets: [1, 3, 5]
+            }],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
+        });
+        $('#tableCtaCtbNomina').wrap('<div class="overflow" />');
         $('#tableVigencia').DataTable({
             dom: setdom,
             buttons: [{
@@ -1358,6 +1481,48 @@
             }
         });
     });
+    $('#divModalForms').on('click', '.buscaRubro', function () {
+        var fila = $(this).closest('.form-group');
+        $(this).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "liquidar_nomina/datos/listar/buscar_rubro.php",
+                    dataType: "json",
+                    type: 'POST',
+                    data: { term: request.term },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                fila.find('.id_rb').val(ui.item.id);
+                fila.find('.id_tp').val(ui.item.tipo);
+
+            }
+        });
+    });
+    $('#divModalForms').on('click', '#txtBuscaCuentaCtb', function () {
+        $(this).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "liquidar_nomina/datos/listar/buscar_cuenta.php",
+                    dataType: "json",
+                    type: 'POST',
+                    data: { term: request.term },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                $('#idCtaCtb').val(ui.item.id);
+                $('#tipoCta').val(ui.item.tipo);
+            }
+        });
+    });
     $('#divModalForms').on('click', '#btnRegTerceroNom', function () {
         $('.form-control').removeClass('is-invalid');
         if ($('#slcCategoria').val() == 0) {
@@ -1424,5 +1589,240 @@
                 }
             });
         }
+    });
+    $('#divModalForms').on('click', '#btnGuardaCargo', function () {
+        $('.form-control').removeClass('is-invalid');
+        if ($('#slcCodigo').val() == '0') {
+            $('#slcCodigo').focus();
+            $('#slcCodigo').addClass('is-invalid');
+            mjeError('Debe seleccionar un código');
+        } else if ($('#txtNomCargo').val() == '') {
+            $('#txtNomCargo').focus();
+            $('#txtNomCargo').addClass('is-invalid');
+            mjeError('Debe ingresar un nombre');
+        } else if (Number($('#numGrado').val()) <= 0) {
+            $('#slcGrado').focus();
+            $('#slcGrado').addClass('is-invalid');
+            mjeError('Grado debe ser mayor a cero');
+        } else if ($('#slcNombramiento').val() == '0') {
+            $('#slcNombramiento').focus();
+            $('#slcNombramiento').addClass('is-invalid');
+            mjeError('Debe seleccionar un nombramiento');
+        } else if ($('#txtPerfilSiho').val() == '') {
+            $('#txtPerfilSiho').focus();
+            $('#txtPerfilSiho').addClass('is-invalid');
+            mjeError('Debe ingresar un perfil');
+        } else {
+            var datos = $('#formGestCargoNom').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'liquidar_nomina/registrar/gestion_cargo.php',
+                data: datos,
+                success: function (r) {
+                    if (r == 'ok') {
+                        $('#divModalForms').modal('hide');
+                        let id = "tableCargosNomina";
+                        reloadtable(id);
+                        mje('Proceso realizado correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
+    $('#modificaCargoNomina').on('click', '.editar', function () {
+        var id_cargo = $(this).attr('value');
+        $.post("liquidar_nomina/datos/registrar/formadd_cargo.php", { id_cargo: id_cargo }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+    $('#modificaCargoNomina').on('click', '.eliminar', function () {
+        let id = $(this).attr('value');
+        Swal.fire({
+            title: "¿Confirma eliminar este registro?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'liquidar_nomina/eliminar/del_cargo.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            let table = 'tableCargosNomina';
+                            reloadtable(table);
+                            mje('Proceso realizado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    $('#divModalForms').on('click', '#btnGuardaRubroNom', function () {
+        $('.is-invalid').removeClass('is-invalid');
+        if ($('#slcTipo').val() == '0') {
+            $('#slcTipo').addClass('focus');
+            $('#slcTipo').addClass('is-invalid');
+            mjeError('Debe seleccionar un tipo de rubro');
+        } else if ($('#idRubroAdmin').val() == '0') {
+            $('#txtRubroAdmin').addClass('focus');
+            $('#txtRubroAdmin').addClass('is-invalid');
+            mjeError('Debe seleccionar un rubro válido');
+        } else if ($('#tp_dato_radm').val() != '1') {
+            $('#txtRubroAdmin').addClass('focus');
+            $('#txtRubroAdmin').addClass('is-invalid');
+            mjeError('El rubro seleccionado no es de tipo detalle');
+        } else if ($('#idRubroOpera').val() == '0') {
+            $('#txtRubroOpera').addClass('focus');
+            $('#txtRubroOpera').addClass('is-invalid');
+            mjeError('Debe seleccionar un rubro válido');
+        } else if ($('#tp_dato_rope').val() != '1') {
+            $('#txtRubroOpera').addClass('focus');
+            $('#txtRubroOpera').addClass('is-invalid');
+            mjeError('El rubro seleccionado no es de tipo detalle');
+        } else {
+            var data = $('#formGestRubroNom').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'liquidar_nomina/registrar/gestion_rubro.php',
+                data: data,
+                success: function (r) {
+                    if (r == 'ok') {
+                        $('#divModalForms').modal('hide');
+                        let id = "tableRubrosNomina";
+                        reloadtable(id);
+                        mje('Proceso realizado correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    }); $('#divModalForms').on('click', '#btnGuardaCuentaNom', function () {
+        $('.is-invalid').removeClass('is-invalid');
+        if ($('#slcTipo').val() == '0') {
+            $('#slcTipo').addClass('focus');
+            $('#slcTipo').addClass('is-invalid');
+            mjeError('Debe seleccionar un tipo de rubro');
+        } else if ($('#slcCentroCosto').val() == '0') {
+            $('#slcCentroCosto').addClass('focus');
+            $('#slcCentroCosto').addClass('is-invalid');
+            mjeError('Debe seleccionar un centro de costo');
+        } else if ($('#idCtaCtb').val() <= '0') {
+            $('#txtBuscaCuentaCtb').addClass('focus');
+            $('#txtBuscaCuentaCtb').addClass('is-invalid');
+            mjeError('Debe seleccionar una cuenta contable');
+        } else if ($('#tipoCta').val() == 'M') {
+            $('#txtBuscaCuentaCtb').addClass('focus');
+            $('#txtBuscaCuentaCtb').addClass('is-invalid');
+            mjeError('La cuenta seleccionada no es de tipo detalle');
+        } else {
+            var data = $('#formGestCtaNom').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'liquidar_nomina/registrar/gestion_cuenta.php',
+                data: data,
+                success: function (r) {
+                    if (r == 'ok') {
+                        $('#divModalForms').modal('hide');
+                        let id = "tableCtaCtbNomina";
+                        reloadtable(id);
+                        mje('Proceso realizado correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
+    $('#modificaRubrosNomina').on('click', '.editar', function () {
+        var id_relacion = $(this).attr('value');
+        $.post("liquidar_nomina/datos/registrar/formadd_rubro.php", { id_relacion: id_relacion }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+    $('#modificaCtaCtbNomina').on('click', '.editar', function () {
+        var id_causacion = $(this).attr('value');
+        $.post("liquidar_nomina/datos/registrar/formadd_cuenta.php", { id_causacion: id_causacion }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+    $('#modificaRubrosNomina').on('click', '.eliminar', function () {
+        let id = $(this).attr('value');
+        Swal.fire({
+            title: "¿Confirma eliminar este registro?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'liquidar_nomina/eliminar/del_rubro.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            let table = 'tableRubrosNomina';
+                            reloadtable(table);
+                            mje('Proceso realizado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    $('#modificaCtaCtbNomina').on('click', '.eliminar', function () {
+        let id = $(this).attr('value');
+        Swal.fire({
+            title: "¿Confirma eliminar este registro?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'liquidar_nomina/eliminar/del_cuenta.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            let table = 'tableCtaCtbNomina';
+                            reloadtable(table);
+                            mje('Proceso realizado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
     });
 })(jQuery);

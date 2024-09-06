@@ -52,15 +52,16 @@ try {
                 , `ctt_adquisiciones`.`objeto`
                 , `ctt_adquisiciones`.`id_tercero`
                 , `ctt_adquisiciones`.`estado`
-                , `ctt_adquisicion_detalles`.`id_bn_sv`
-                , `ctt_adquisicion_detalles`.`cantidad`
-                , `ctt_adquisicion_detalles`.`val_estimado_unid`
+                , `ctt_orden_compra_detalle`.`id_servicio` AS `id_bn_sv`
+                , `ctt_orden_compra_detalle`.`cantidad`
+                , `ctt_orden_compra_detalle`.`val_unid` AS `val_estimado_unid`
             FROM
-                `ctt_adquisicion_detalles`
-                INNER JOIN `ctt_adquisiciones` 
-                    ON (`ctt_adquisicion_detalles`.`id_adquisicion` = `ctt_adquisiciones`.`id_adquisicion`)
-            WHERE (`ctt_adquisiciones`.`id_adquisicion` = $id_aquisicion)";
-    $rs = $cmd->query($sql);
+                `ctt_orden_compra_detalle`
+            INNER JOIN `ctt_orden_compra` 
+                ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
+            INNER JOIN `ctt_adquisiciones`
+                ON (`ctt_orden_compra`.`id_adq` = `ctt_adquisiciones`.`id_adquisicion`)
+            WHERE (`ctt_orden_compra`.`id_adq` = $id_aquisicion)";
     $detalles = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
@@ -70,8 +71,10 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT 
-                `id_adquisicion`,`id_centro_costo`,`horas_mes` 
+                `id_adquisicion`,`id_area_cc` AS `id_centro_costo`,`horas_mes`, `id_sede`
             FROM `ctt_destino_contrato` 
+            INNER JOIN `far_centrocosto_area` 
+                ON (`ctt_destino_contrato`.`id_area_cc` = `far_centrocosto_area`.`id_area`)
             WHERE `id_adquisicion` = $id_aquisicion";
     $rs = $cmd->query($sql);
     $destino = $rs->fetchAll();
@@ -300,30 +303,20 @@ try {
                 $num = 1;
                 foreach ($destino as $des) {
                     $id_cc = $des['id_centro_costo'];
-                    try {
-                        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-                        $sql = "SELECT `id_sede` FROM `far_centrocosto_area` WHERE `id_sede` = $id_cc";
-                        $rs = $cmd->query($sql);
-                        $cencos = $rs->fetch();
-                        $cmd = null;
-                    } catch (PDOException $e) {
-                        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-                    }
-                    $id_sede = $cencos['id_sede'];
+                    $id_sede = $des['id_sede'];
                     try {
                         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                         $sql = "SELECT
-                                    `far_centrocosto_area`.`id_sede`
-                                    , `tb_centrocostos`.`descripcion`
+                                    `far_centrocosto_area`.`id_area` AS `id_sede`
+                                    , `tb_centrocostos`.`nom_centro` AS `descripcion`
                                 FROM
                                     `far_centrocosto_area`
                                     INNER JOIN `tb_sedes` 
                                         ON (`far_centrocosto_area`.`id_sede` = `tb_sedes`.`id_sede`)
                                     INNER JOIN `tb_centrocostos` 
                                         ON (`far_centrocosto_area`.`id_centrocosto` = `tb_centrocostos`.`id_centro`)
-                                WHERE `far_centrocosto_area`.`id_sede` = $id_sede";
+                                WHERE `far_centrocosto_area`.`id_sede` = $id_sede ORDER BY `descripcion` ASC";
                         $rs = $cmd->query($sql);
                         $centros = $rs->fetchAll();
                         $cmd = null;
@@ -338,7 +331,7 @@ try {
                                 <select name="slcSedeAC[]" class="form-control form-control-sm slcSedeAC">
                                     <?php
                                     foreach ($sedes as $s) {
-                                        $slc = $s['id_sede'] == $id_sede ? 'selected' : '';
+                                        $slc = $s['id_sede'] == $id_cc ? 'selected' : '';
                                         echo '<option value="' . $s['id_sede'] . '" ' . $slc . '>' . $s['nombre'] . '</option>';
                                     }
                                     ?>
@@ -404,13 +397,15 @@ try {
                 }
                 ?>
             </div>
-            <div class="form-row px-4 pt-2">
-                <div class="form-group col-md-12">
-                    <label for="ccnit" class="small">TERCERO</label>
-                    <input type="text" id="SeaTercer" class="form-control form-control-sm">
-                    <input type="hidden" id="id_tercero" name="id_tercero" value="0">
+            <?php if (false) { ?>
+                <div class="form-row px-4 pt-2">
+                    <div class="form-group col-md-12">
+                        <label for="ccnit" class="small">TERCERO</label>
+                        <input type="text" id="SeaTercer" class="form-control form-control-sm">
+                        <input type="hidden" id="id_tercero" name="id_tercero" value="0">
+                    </div>
                 </div>
-            </div>
+            <?php } ?>
             <div class="form-row px-4 pt-2">
                 <div class="form-group col-md-4">
                     <label for="datFecIniEjec" class="small">FECHA INICIAL</label>

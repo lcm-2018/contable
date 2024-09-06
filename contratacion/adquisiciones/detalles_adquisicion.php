@@ -275,12 +275,13 @@ try {
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $adquisicion['id_tercero'], PDO::PARAM_INT);
     $sql->execute();
+    $id_tercero = '';
     if ($sql->rowCount() > 0) {
         $row = $sql->fetch(PDO::FETCH_ASSOC);
         $id_tercero = $row['id_tercero_api'];
     }
     $id_t = [$id_tercero];
-    if (!empty($id_t)) {
+    if (!empty($id_t) && $id_t[0] != '') {
         $payload = json_encode($id_t);
         $url = $api . 'terceros/datos/res/lista/terceros';
         $ch = curl_init($url);
@@ -345,7 +346,10 @@ if (!empty($adquisicion)) {
                             $peRegValue = '0'; // Valor por defecto
 
                             if ($adquisicion['filtro_adq'] == '0') {
-                                $peRegValue = '1';
+                                if ($adquisicion['estado'] == 1) {
+                                    $peRegValue = '1';
+                                    $cerrar = '<button type="button" class="btn btn-secondary btn-sm mr-1" id="cerrarOrdenServicio">Cerrar</button>';
+                                }
                             } elseif (in_array($adquisicion['filtro_adq'], ['1', '2'])) {
                                 if (empty($adquisicion['id_orden'])) {
                                     $buttonText = $adquisicion['filtro_adq'] == '1' ? 'Orden Almacén' : 'Orden Activos Fijos';
@@ -864,25 +868,36 @@ if (!empty($adquisicion)) {
                                                                 if (PermisosUsuario($permisos, 5302, 2) || $id_rol == 1) {
                                                             ?>
                                                                     <button type="button" class="btn btn-success btn-sm" id='btnAddContrato' value="<?php echo $id_estudio ?>">INICIAR CONTRATACIÓN</button>
-                                                                    <?php
+                                                                <?php
                                                                 }
                                                             } else if ($adquisicion['estado'] >= 7) {
+                                                                if ($adquisicion['estado'] == 7) {
+                                                                ?>
+                                                                    <div class="text-right">
+                                                                        <a type="button" class="btn btn-secondary btn-sm mb-2" id="btnCerrarContrato">Cerrar</a>
+                                                                    </div>
+                                                                    <?php
+                                                                }
                                                                 include 'datos/listar/datos_contrato_compra.php';
                                                                 if ($adquisicion['estado'] == 7) {
                                                                     if ($tipo_compra['id_tipo_compra'] != '2') {
+                                                                        //btnFormatoCompraVenta
                                                                     ?>
-                                                                        <a type="button" class="btn btn-warning btn-sm" id="btnFormatoCompraVenta" style="color:white">DESCARGAR FORMATO COMPRAVENTA&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
-                                                                    <?php } else { ?>
-                                                                        <a type="button" class="btn btn-warning btn-sm" id="btnFormatoServicios" style="color:white">DESCARGAR FORMATO SERVICIOS&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
+                                                                        <button type="button" class="btn btn-warning btn-sm" id="xx" style="color:white" disabled>DESCARGAR FORMATO COMPRAVENTA&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></button>
+                                                                    <?php } else {
+                                                                        //btnFormatoServicios
+                                                                    ?>
+                                                                        <button type="button" class="btn btn-warning btn-sm" id="xxx" style="color:white" disabled>DESCARGAR FORMATO SERVICIOS&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></button>
                                                                     <?php } ?>
-                                                                    <a type="button" class="btn btn-success btn-sm" id="btnEnviarContrato" style="color:white">ENVIAR CONTRATO&nbsp&nbsp;<span class="fas fa-file-upload fa-lg"></span></a>
                                                             <?php }
                                                             }
                                                         }
                                                         if ($adquisicion['estado'] == 9) { ?>
                                                             <a type="button" class="btn btn-warning btn-sm" id="btnFormatoDesigSuper" style="color:white">DESCARGAR FORMATO DESIGNACIÓN DE SUPERVISIÓN&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
-                                                            <a type="button" class="btn btn-success btn-sm" id="btnEnviarActaSupervision" value="<?php echo $adquisicion['id_supervision'] ?>" style="color:white">ENVIAR SUPERVISIÓN&nbsp&nbsp;<span class="fas fa-file-upload fa-lg"></span></a>
+                                                            <?php if (false) { ?>
+                                                                <a type="button" class="btn btn-success btn-sm" id="btnEnviarActaSupervision" value="<?php echo $adquisicion['id_supervision'] ?>" style="color:white">ENVIAR SUPERVISIÓN&nbsp&nbsp;<span class="fas fa-file-upload fa-lg"></span></a>
                                                         <?php
+                                                            }
                                                         }
                                                         ?>
                                                     </div>
