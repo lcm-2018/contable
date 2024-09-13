@@ -10,6 +10,15 @@ include_once '../../../permisos.php';
 $id_ctb_doc = $_POST['id_doc'];
 $vigencia = $_SESSION['vigencia'];
 $id_vigencia = $_SESSION['id_vigencia'];
+$start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+$length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+$limit = "";
+if ($length != -1) {
+    $limit = "LIMIT $start, $length";
+}
+$col = $_POST['order'][0]['column'] + 1;
+$dir = $_POST['order'][0]['dir'];
+$where = $_POST['search']['value'] != '' ? "AND `tes_caja_const`.`nombre_caja` LIKE '%{$_POST['search']['value']}%' OR `tes_caja_const`.`fecha_ini` LIKE '%{$_POST['search']['value']}%' OR  `pto_actos_admin`.`nombre`" : '';
 $dato = null;
 function pesos($valor)
 {
@@ -34,9 +43,42 @@ try {
                 `tes_caja_const`
                 INNER JOIN `pto_actos_admin` 
                     ON (`tes_caja_const`.`id_tipo_acto` = `pto_actos_admin`.`id_acto`)
-            WHERE (`tes_caja_const`.`fecha_ini` BETWEEN '$vigencia-01-01' AND '$vigencia-12-31')";
+            WHERE (`tes_caja_const`.`fecha_ini` BETWEEN '$vigencia-01-01' AND '$vigencia-12-31' $where)
+            ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                COUNT(*) AS `total`
+            FROM
+                `tes_caja_const`
+                INNER JOIN `pto_actos_admin` 
+                    ON (`tes_caja_const`.`id_tipo_acto` = `pto_actos_admin`.`id_acto`)
+            WHERE (`tes_caja_const`.`fecha_ini` BETWEEN '$vigencia-01-01' AND '$vigencia-12-31')";
+    $rs = $cmd->query($sql);
+    $total = $rs->fetch();
+    $totalRecords = $total['total'];
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                COUNT(*) AS `total`
+            FROM
+                `tes_caja_const`
+                INNER JOIN `pto_actos_admin` 
+                    ON (`tes_caja_const`.`id_tipo_acto` = `pto_actos_admin`.`id_acto`)
+            WHERE (`tes_caja_const`.`fecha_ini` BETWEEN '$vigencia-01-01' AND '$vigencia-12-31' $where)";
+    $rs = $cmd->query($sql);
+    $total = $rs->fetch();
+    $totalRecordsFilter = $total['total'];
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -113,7 +155,11 @@ if (!empty($listado)) {
     $data = [];
 }
 $cmd = null;
-$datos = ['data' => $data];
+$datos = [
+    'data' => $data,
+    'recordsFiltered' => $totalRecordsFilter,
+    'recordsTotal' => $totalRecords,
+];
 
 
 echo json_encode($datos);

@@ -78,7 +78,7 @@
 		if (id_doc === "3") {
 			setdom = "<'row'<'col-md-6'l><'col-md-6'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
 		}
-		$("#tableMvtoContable").DataTable({
+		var tableMvtoCtb = $("#tableMvtoContable").DataTable({
 			dom: setdom,
 			buttons: [
 				{
@@ -95,6 +95,8 @@
 				},
 			],
 			language: setIdioma,
+			serverSide: true,
+			processing: true,
 			ajax: {
 				url: "datos/listar/datos_mvto_contabilidad.php",
 				data: function (d) {
@@ -103,8 +105,27 @@
 				type: "POST",
 				dataType: "json",
 			},
-			columns: [{ data: "numero" }, { data: "rp" }, { data: "fecha" }, { data: "tercero" }, { data: "valor" }, { data: "botones" }],
-			order: [[0, "desc"]],
+			columns: [
+				{ data: "numero" },
+				{ data: "rp" },
+				{ data: "fecha" },
+				{ data: "tercero" },
+				{ data: "valor" },
+				{ data: "botones" }],
+			columnDefs: [
+				{ class: 'text-wrap', targets: [3] },
+				{ orderable: false, targets: 5 }
+			],
+			order: [
+				[2, "desc"],
+			],
+		});
+		// Control del campo de búsqueda
+		$('#tableMvtoContable_filter input').unbind(); // Desvinculamos el evento por defecto
+		$('#tableMvtoContable_filter input').bind('keypress', function (e) {
+			if (e.keyCode == 13) { // Si se presiona Enter (código 13)
+				tableMvtoCtb.search(this.value).draw(); // Realiza la búsqueda y actualiza la tabla
+			}
 		});
 		$("#tableMvtoContable").wrap('<div class="overflow" />');
 		// dataTable de movimientos contables
@@ -501,24 +522,28 @@ document.addEventListener("keyup", (e) => {
 		});
 	}
 });
-$("#bTercero").autocomplete({
-	source: function (request, response) {
-		$.ajax({
-			url: window.urlin + "/presupuesto/datos/consultar/buscar_terceros.php",
-			type: "post",
-			dataType: "json",
-			data: {
-				term: request.term
-			},
-			success: function (data) {
-				response(data);
-			}
-		});
-	},
-	minLength: 2,
-	select: function (event, ui) {
-		$('#idTercero').val(ui.item.id);
-	}
+$("#tableMvtoContableDetalle").on("input", ".bTercero", function () {
+	var fila = $(this).closest("tr");
+	var idTercero = fila.find("input[name='idTercero']");
+	$(this).autocomplete({
+		source: function (request, response) {
+			$.ajax({
+				url: window.urlin + "/presupuesto/datos/consultar/buscar_terceros.php",
+				type: "post",
+				dataType: "json",
+				data: {
+					term: request.term
+				},
+				success: function (data) {
+					response(data);
+				}
+			});
+		},
+		minLength: 2,
+		select: function (event, ui) {
+			idTercero.val(ui.item.id);
+		}
+	});
 });
 //=================================== Registrar el documento y la tabla libaux el detalle del movimiento contable ============================
 
@@ -1969,8 +1994,7 @@ const eliminarRegistroDoc = (id) => {
 					console.log(response);
 					if (response[0].value == "ok") {
 						mje("Registro eliminado");
-						id = "tableMvtoContable";
-						reloadtable(id);
+						$('#tableMvtoContable').DataTable().ajax.reload();
 					} else {
 						mjeError("Error al eliminar");
 					}

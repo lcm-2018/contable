@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../permisos.php';
+include '../terceros.php';
 
 $id_doc = isset($_POST['id']) ? $_POST['id'] : exit('Acceso no disponible');
 
@@ -70,7 +71,6 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $band = !empty($facturas) ? true : false;
-$cmd = null;
 function pesos($valor)
 {
     return '$ ' . number_format($valor, 2, ',', '.');
@@ -192,16 +192,8 @@ $val_iva = $valores[1];
                             $j++;
                             // Consulto el valor del tercero de la api
                             $id_ter = $ce['id_terceroapi'];
-                            $url = $api . 'terceros/datos/res/datos/id/' . $id_ter;
-                            $ch = curl_init($url);
-                            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-                            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                            $res_api = curl_exec($ch);
-                            curl_close($ch);
-                            $dat_ter = json_decode($res_api, true);
-                            $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
-                            // fin api terceros
+                            $tercero = getTerceros($id_ter, $cmd);
+                            $tercero = $tercero[0]['nom_tercero'];
                             // Obtener el saldo del registro por obligar
 
                             if (true) {

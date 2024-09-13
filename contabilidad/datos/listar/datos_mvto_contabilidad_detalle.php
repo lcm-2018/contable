@@ -6,6 +6,8 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../terceros.php';
+
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
 
@@ -57,19 +59,9 @@ if (!empty($listappto)) {
             $id_t[] = $lp['id_tercero_api'];
         }
     }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res_api = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($res_api, true);
-    $terceros = $terceros == '0' || $terceros == '' ? [] : $terceros;
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
+
     foreach ($listappto as $lp) {
         $id = $lp['id_ctb_libaux'];
         $id_ctb = $lp['id_ctb_doc'];
@@ -80,8 +72,8 @@ if (!empty($listappto)) {
         $totCredito += $cred;
         $valorDebito =  number_format($deb, 2, '.', ',');
         $valorCredito =  number_format($cred, 2, '.', ',');
-        $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero'));
-        $tercero = $key !== false ? $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social'] : '';
+        $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+        $tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '';
         $borrar = $editar = $detalles = $registrar = null;
         if ($estado == 1) {
             $detalles = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';

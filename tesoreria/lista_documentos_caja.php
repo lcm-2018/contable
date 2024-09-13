@@ -7,6 +7,7 @@ if (!isset($_SESSION['user'])) {
 include '../conexion.php';
 include '../permisos.php';
 include '../financiero/consultas.php';
+include '../terceros.php';
 
 // Consulta tipo de presupuesto
 $id_doc_pag = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no disponible');
@@ -49,21 +50,11 @@ try {
 $id_manu = $datosDoc['id_manu'];
 if (!empty($datosDoc)) {
     $id_t = ['0' => $datosDoc['id_tercero']];
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res_api = curl_exec($ch);
-    curl_close($ch);
-    $dat_ter = json_decode($res_api, true);
-    $tercero = ltrim($dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social']);
+    $ids = implode(',', $id_t);
+    $dat_ter = getTerceros($ids, $cmd);
+    $tercero = ltrim($dat_ter[0]['nom_tercero']);
 } else {
-    $tercero = '';
+    $tercero = '---';
 }
 try {
     $sql = "SELECT

@@ -17,6 +17,7 @@ function pesos($valor)
 }
 include '../../conexion.php';
 include '../../financiero/consultas.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
@@ -58,9 +59,9 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$ccnit = $cdp['id_tercero'];
+$id_tercero_api = $cdp['id_tercero'];
 try {
-    $sql = "SELECT no_doc FROM seg_terceros WHERE id_tercero_api =$ccnit";
+    $sql = "SELECT no_doc FROM seg_terceros WHERE id_tercero_api =$id_tercero_api";
     $res = $cmd->query($sql);
     $nit = $res->fetch();
     $num_doc = $nit['no_doc'];
@@ -93,15 +94,8 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 // Consulta terceros en la api ********************************************* API
-$url = $api . 'terceros/datos/res/datos/id/' . $ccnit;
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$res_api = curl_exec($ch);
-curl_close($ch);
-$dat_ter = json_decode($res_api, true);
-$tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
+$dat_ter = getTerceros($id_tercero_api, $cmd);
+$tercero = $dat_ter[0]['nom_tercero'];
 // fin api terceros ******************************************************** 
 $enletras = numeroLetras($total);
 $fecha = date('Y-m-d', strtotime($cdp['fecha']));

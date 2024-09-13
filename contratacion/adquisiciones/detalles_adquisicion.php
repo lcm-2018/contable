@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include_once '../../conexion.php';
 include_once '../../permisos.php';
+include_once '../../terceros.php';
 $key = array_search('53', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
@@ -282,19 +283,10 @@ try {
     }
     $id_t = [$id_tercero];
     if (!empty($id_t) && $id_t[0] != '') {
-        $payload = json_encode($id_t);
-        $url = $api . 'terceros/datos/res/lista/terceros';
-        $ch = curl_init($url);
-        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        $terceros = json_decode($result, true);
-        $tercero = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
-        $cc_nit = number_format($terceros[0]['cc_nit'], 0, '', '.');
+        $ids = implode(',', $id_t);
+        $terceros = getTerceros($ids, $cmd);
+        $tercero = ltrim($terceros[0]['nom_tercero']);
+        $cc_nit = number_format($terceros[0]['nit_tercero'], 0, '', '.');
     } else {
         $tercero = '---';
         $cc_nit = '---';

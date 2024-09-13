@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../permisos.php';
+include '../terceros.php';
 $id_vigencia = $_SESSION['id_vigencia'];
 // Consulta tipo de presupuesto
 function pesos($valor)
@@ -75,7 +76,6 @@ try {
             GROUP BY `pto_crp`.`id_pto_crp`";
     $rs = $cmd->query($sql);
     $causados = $rs->fetchAll();
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -179,7 +179,11 @@ if ($id_r == 3) {
         },
         "order": [
             [0, "desc"]
-        ]
+        ],
+        columnDefs: [{
+            class: 'text-wrap',
+            targets: [4]
+        }],
     });
     $('#tableContrtacionCdp').wrap('<div class="overflow" />');
 </script>
@@ -208,25 +212,18 @@ if ($id_r == 3) {
                     if ($id_r == 1 || $id_r == 2) {
                         $id_t = [];
                         foreach ($listado as $rp) {
-                            $id_t[] = $rp['id_tercero_api'];
+                            if ($rp['id_tercero_api'] != '') {
+                                $id_t[] = $rp['id_tercero_api'];
+                            }
                         }
-                        $payload = json_encode($id_t);
-                        //API URL
-                        $url = $api . 'terceros/datos/res/lista/terceros';
-                        $ch = curl_init($url);
-                        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        $result = curl_exec($ch);
-                        curl_close($ch);
-                        $terceros = json_decode($result, true);
+                        $id_t = implode(',', $id_t);
+                        $terceros = getTerceros($id_t, $cmd);
+
                         foreach ($listado as $ce) {
                             $id_ter = $ce['id_tercero_api'];
                             $id_crp = $ce['id_pto_crp'];
-                            $key = array_search($id_ter, array_column($terceros, 'id_tercero'));
-                            $tercero = $key !== false ? ltrim($terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['razon_social']) : '---';
+                            $key = array_search($id_ter, array_column($terceros, 'id_tercero_api'));
+                            $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
                             // Obtener el saldo del registro por obligar valor del registro - el valor obligado efectivamente
                             $key = array_search($id_crp, array_column($liquidados, 'id_pto_crp'));
                             $valor_liquidado = $key !== false ? $liquidados[$key]['valor'] : 0;

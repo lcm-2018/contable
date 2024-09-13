@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../financiero/consultas.php';
+include '../terceros.php';
 
 $id_caja = isset($_POST['id_caja'])  ? $_POST['id_caja'] : exit('Acceso no permitido');
 $id_detalle = isset($_POST['id_detalle']) ? $_POST['id_detalle'] : 0;
@@ -41,18 +42,8 @@ if (!empty($responsables)) {
             $id_t[] = $r['id_terceros_api'];
         }
     }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
 }
 
 //detalle 
@@ -76,8 +67,8 @@ if (empty($detalle)) {
         'estado' => 1
     ];
 }
-$key = array_search($detalle['id_terceros_api'], array_column($terceros, 'id_tercero'));
-$nombre = $key !== false ? ltrim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']) : '';
+$key = array_search($detalle['id_terceros_api'], array_column($terceros, 'id_tercero_api'));
+$nombre = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
 ?>
 <script>
     $('#tableResponsableCaja').DataTable({
@@ -150,8 +141,8 @@ $nombre = $key !== false ? ltrim($terceros[$key]['nombre1'] . ' ' . $terceros[$k
                 <tbody>
                     <?php
                     foreach ($responsables as $r) {
-                        $key = array_search($r['id_terceros_api'], array_column($terceros, 'id_tercero'));
-                        $tercero = $key !== false ? ltrim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']) : '---';
+                        $key = array_search($r['id_terceros_api'], array_column($terceros, 'id_tercero_api'));
+                        $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
                         $editar = '<a class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  onclick="EditResponsableCaja(' . $r['id_caja_respon'] . ')"><span class="fas fa-pencil-alt fa-lg"></span></a>';
                         $estado =  $r['estado'];
                         if ($estado == 1) {

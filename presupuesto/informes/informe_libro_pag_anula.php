@@ -36,6 +36,7 @@ function pesos($valor)
 }
 include '../../conexion.php';
 include '../../financiero/consultas.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 //
@@ -141,18 +142,8 @@ FROM
                     $id_t[] = $ca['id_tercero_api'];
                 }
             }
-            $payload = json_encode($id_t);
-            //API URL
-            $url = $api . 'terceros/datos/res/lista/terceros';
-            $ch = curl_init($url);
-            //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $result = curl_exec($ch);
-            curl_close($ch);
-            $terceros = json_decode($result, true);
+            $ids = implode(',', $id_t);
+            $terceros = getTerceros($ids, $cmd);
             foreach ($causaciones as $rp) {
                 // Consulta de datos del cdp
                 try {
@@ -186,9 +177,9 @@ FROM
                 } else {
                     $id_tercero = $rp['id_tercero_api'];
                 }
-                $key = array_search($id_tercero, array_column($terceros, 'id_tercero'));
-                $tercero = $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['razon_social'];
-                $ccnit = $terceros[$key]['cc_nit'];
+                $key = array_search($id_tercero, array_column($terceros, 'id_tercero_api'));
+                $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
+                $ccnit = $key !== false ? number_format($terceros[$key]['nit_tercero'], 0, "", ".") : '---';
 
                 $fecha = date('Y-m-d', strtotime($rp['fecha']));
                 $fecha_cdp = date('Y-m-d', strtotime($datos_cdp['fecha']));

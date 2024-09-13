@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../terceros.php';
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
 
@@ -26,7 +27,7 @@ try {
     WHERE (`ctb_doc`.`vigencia` =$vigencia
     AND `pto_documento_detalles`.`estado` =0
     AND `pto_documento_detalles`.`tipo_mov` ='COP')
-    GROUP BY `pto_documento_detalles`.`id_ctb_doc`;";
+    GROUP BY `pto_documento_detalles`.`id_ctb_doc`";
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -34,22 +35,12 @@ try {
 }
 $id_t = [];
 foreach ($listado as $rp) {
-    if ($rp['id_tercero'] !== null) {
+    if ($rp['id_tercero'] != '') {
         $id_t[] = $rp['id_tercero'];
     }
 }
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
+$ids = implode(',', $id_t);
+$terceros = getTerceros($ids, $cmd);
 foreach ($listado as $ce) {
     $id_doc = $ce['id_ctb_doc'];
     $id_ter = $ce['id_tercero'];
@@ -64,9 +55,9 @@ foreach ($listado as $ce) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
     // Consulta terceros en la api
-    $key = array_search($ce['id_tercero'], array_column($terceros, 'id_tercero'));
-    $tercero = $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['razon_social'];
-    $ccnit = $terceros[$key]['cc_nit'];
+    $key = array_search($ce['id_tercero'], array_column($terceros, 'id_tercero_api'));
+    $tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '---';
+    $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
     // fin api terceros
     // Obtener el saldo del registro por obligar valor del registro - el valor obligado efectivamente
     try {

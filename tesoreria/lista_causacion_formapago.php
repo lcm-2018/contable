@@ -40,7 +40,14 @@ try {
 }
 // consultar id bancos de tb_bancos
 try {
-    $sql = "SELECT `id_banco`, `nom_banco` FROM `tb_bancos` ORDER BY `nom_banco` ASC";
+    $sql = "SELECT 
+                `tb_bancos`.`id_banco`, `tb_bancos`.`nom_banco`
+            FROM `tb_bancos` 
+            LEFT JOIN `tes_cuentas`
+                ON (`tb_bancos`.`id_banco` = `tes_cuentas`.`id_banco`)
+            WHERE `tes_cuentas`.`id_banco` IS NOT NULL
+            GROUP BY `tb_bancos`.`id_banco`
+            ORDER BY `nom_banco` ASC";
     $rs = $cmd->query($sql);
     $bancos = $rs->fetchAll();
 } catch (PDOException $e) {

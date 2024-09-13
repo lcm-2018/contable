@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../terceros.php';
 // Llega el id del presupuesto que se esta listando
 $id_pto_presupuestos = $_POST['id_ejec'];
 // Recuperar los parámetros start y length enviados por DataTables
@@ -88,18 +89,8 @@ if (!empty($listappto)) {
     foreach ($listappto as $rp) {
         $id_t[] = $rp['id_tercero_api'];
     }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
 
     foreach ($listappto as $lp) {
         $id_pto = $lp['id_pto_crp'];
@@ -107,13 +98,13 @@ if (!empty($listappto)) {
         // Sumar el valor del crp de la tabla id_pto_mtvo
         $valor_crp = $lp['debito'] - $lp['credito'];
         $valor_crp = number_format($valor_crp, 2, ',', '.');
-        $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero'));
+        $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
         if ($key !== false) {
-            $tercero = $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['razon_social'];
-            $ccnit = $terceros[$key]['cc_nit'];
+            $tercero = $terceros[$key]['nom_tercero'];
+            $ccnit = $terceros[$key]['nit_tercero'];
         } else {
-            $tercero = '';
-            $ccnit = '';
+            $tercero = '---';
+            $ccnit = '---';
         }
         // fin api terceros
         if ($lp['id_tercero_api'] == 0) {

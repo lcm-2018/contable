@@ -43,6 +43,7 @@ function pesos($valor)
 }
 include '../../conexion.php';
 include '../../financiero/consultas.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // Consulto las cuentas que han tenido movimeiento en el libro auxiliar
@@ -92,18 +93,8 @@ $id_t = [];
 foreach ($id_terceros as $ter) {
     $id_t[] = $ter['id_tercero'];
 }
-$payload = json_encode($id_t);
-// Consulta terceros en la api ********************************************* API
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
+$ids = implode(',', $id_t);
+$terceros = getTerceros($ids, $cmd);
 ?>
 <div class="contenedor bg-light" id="areaImprimir">
     <div class="px-2 " style="width:90% !important;margin: 0 auto;">
@@ -232,8 +223,9 @@ $terceros = json_decode($result, true);
                     } else {
                         $saldo = $saldo + $tp['credito'] - $tp['debito'];
                     }
-                    $key = array_search($tp['id_tercero'], array_column($terceros, 'id_tercero'));
-                    $nom_ter =  $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['razon_social'];
+                    $key = array_search($tp['id_tercero'], array_column($terceros, 'id_tercero_api'));
+                    $nom_ter =  $key !== false ? $terceros[$key]['nom_tercero'] : '---';
+                    $ced_ter =  $key !== false ? $terceros[$key]['nit_tercero'] : '---';
                     $fecha = date('Y-m-d', strtotime($tp['fecha']));
                     echo "<tr>
                     <td class='text-right'>" .  $fecha . "</td>
@@ -241,7 +233,7 @@ $terceros = json_decode($result, true);
                     <td class='text-right'>" . $tp['id_manu'] . "</td>
                     <td class='text-right'>" . $tp['forma_pago']  . "</td>
                     <td class='text'>" . $nom_ter . "</td>
-                    <td class='text'>" . $terceros[$key]['cc_nit'] . "</td>
+                    <td class='text'>" . $ced_ter . "</td>
                     <td class='text-right'>" . $tp['detalle'] . "</td>
                     <td class='text-right'>" . number_format($tp['debito'], 2, ".", ",")  . "</td>
                     <td class='text-right'>" . number_format($tp['credito'], 2, ".", ",")  . "</td>

@@ -1,15 +1,11 @@
 <?php
 session_start();
-if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+if (!isset($_SESSION['id_user'])) {
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
 $tipo_doc = isset($_POST['id_tipo_doc']) ? $_POST['id_tipo_doc'] : '0';
 $tipo = isset($_POST['var']) ? $_POST['var'] : '';
 try {
@@ -65,6 +61,9 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 ?>
+<!DOCTYPE html>
+<html lang="es">
+<?php include '../head.php'; ?>
 
 <body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ? 'sb-sidenav-toggled' : '' ?>">
 

@@ -6,9 +6,20 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../terceros.php';
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
 $id_vigencia = $_SESSION['id_vigencia'];
+$start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+$length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+$limit = "";
+if ($length != -1) {
+    $limit = "LIMIT $start, $length";
+}
+$col = $_POST['order'][0]['column'] + 1;
+$dir = $_POST['order'][0]['dir'];
+
+$where = $_POST['search']['value'] != '' ? "AND `ctb_doc`.`fecha` LIKE '%{$_POST['search']['value']}%' OR `tb_terceros`.`nom_tercero` LIKE '%{$_POST['search']['value']}%' OR  `pto_crp`.`id_manu` LIKE '%{$_POST['search']['value']}%' OR `ctb_doc`.`id_manu` LIKE '%{$_POST['search']['value']}%'" : '';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -20,6 +31,8 @@ try {
                 , `ctb_doc`.`fecha`
                 , `ctb_doc`.`detalle`
                 , `ctb_doc`.`id_tercero`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
                 , `ctb_doc`.`estado`
                 , `ctb_fuente`.`cod`
                 , `ctb_fuente`.`nombre`
@@ -33,10 +46,53 @@ try {
                     ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
                 LEFT JOIN `pto_crp` 
                     ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
-            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia)
-            GROUP BY `ctb_doc`.`id_ctb_doc`";
+                LEFT JOIN `tb_terceros` 
+                    ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where)
+            GROUP BY `ctb_doc`.`id_ctb_doc`
+            ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $listappto = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $sql = "SELECT
+                COUNT(*) AS `total`
+            FROM
+                `ctb_doc`
+                LEFT JOIN `ctb_fuente` 
+                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                LEFT JOIN `pto_cop_detalle` 
+                    ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN `pto_crp_detalle` 
+                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                LEFT JOIN `pto_crp` 
+                    ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                LEFT JOIN `tb_terceros` 
+                    ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia)";
+    $rs = $cmd->query($sql);
+    $total = $rs->fetch();
+    $totalRecords = $total['total'];
+    $sql = "SELECT
+                COUNT(*) AS `total`
+            FROM
+                `ctb_doc`
+                LEFT JOIN `ctb_fuente` 
+                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                LEFT JOIN `pto_cop_detalle` 
+                    ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN `pto_crp_detalle` 
+                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                LEFT JOIN `pto_crp` 
+                    ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                LEFT JOIN `tb_terceros` 
+                    ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where)";
+    $rs = $cmd->query($sql);
+    $total = $rs->fetch();
+    $totalRecordsFilter = $total['total'];
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -84,22 +140,12 @@ try {
 }
 $ids = [];
 foreach ($listappto as $lp) {
-    if ($lp['id_tercero'] !== null) {
+    if ($lp['id_tercero'] != '') {
         $ids[] = $lp['id_tercero'];
     }
 }
-$payload = json_encode($ids);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
+$ids = implode(',', $ids);
+$terceros = getTerceros($ids, $cmd);
 $data = [];
 if (!empty($listappto)) {
     foreach ($listappto as $lp) {
@@ -107,18 +153,7 @@ if (!empty($listappto)) {
         $id_ctb = $lp['id_ctb_doc'];
         $estado = $lp['estado'];
         $dato = null;
-        // Buscar el nombre del tercero
-        if ($lp['id_tercero'] !== null) {
-            $id_ter = $lp['id_tercero'];
-        } else {
-            $id_ter = 0;
-        }
-        $key = array_search($id_ter, array_column($terceros, 'id_tercero'));
-        if ($key !== false) {
-            $tercero = $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social'];
-        } else {
-            $tercero = '';
-        }
+        $tercero = $lp['nom_tercero'] != '' ? $lp['nom_tercero'] : '---';
         // consultar la diferencia en array diferencias
         $key = array_search($id_ctb, array_column($diferencias, 'id_ctb_doc'));
         if ($key  !== false) {
@@ -225,7 +260,12 @@ if (!empty($listappto)) {
     }
 }
 $cmd = null;
-$datos = ['data' => $data];
+$datos = [
+    "data" => $data,
+    "recordsTotal" => $totalRecords,
+    "recordsFiltered" => $totalRecordsFilter
+
+];
 
 
 echo json_encode($datos);

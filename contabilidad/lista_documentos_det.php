@@ -7,6 +7,7 @@ if (!isset($_SESSION['user'])) {
 include_once '../conexion.php';
 include_once '../permisos.php';
 include_once '../financiero/consultas.php';
+include_once '../terceros.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -107,25 +108,13 @@ $fecha = date('Y-m-d', strtotime($datosDoc['fecha']));
 // Consulta terceros en la api ********************************************* API
 if (!empty($datosDoc)) {
     if ($datosDoc['id_tercero'] > 0) {
-        $id_t = ['0' => $datosDoc['id_tercero']];
-        $payload = json_encode($id_t);
-        //API URL
-        $url = $api . 'terceros/datos/res/lista/terceros';
-        $ch = curl_init($url);
-        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $res_api = curl_exec($ch);
-        curl_close($ch);
-        $dat_ter = json_decode($res_api, true);
-        $tercero = ltrim($dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social']);
+        $terceros = getTerceros($datosDoc['id_tercero'], $cmd);
+        $tercero = ltrim($terceros[0]['nom_tercero']);
     } else {
         $tercero = '---';
     }
 } else {
-    $tercero = '';
+    $tercero = '---';
 }
 $ver = 'readonly';
 ?>
@@ -246,7 +235,7 @@ $ver = 'readonly';
                                                 <input type="hidden" name="id_codigoCta" id="id_codigoCta" class="form-control form-control-sm" value="0">
                                                 <input type="hidden" name="tipoDato" id="tipoDato" value="0">
                                             </td>
-                                            <td><input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm" required>
+                                            <td><input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm bTercero" required>
                                                 <input type="hidden" name="idTercero" id="idTercero" value="0">
                                             </td>
                                             <td>

@@ -12,6 +12,7 @@ function pesos($valor)
 }
 include '../../conexion.php';
 include '../../financiero/consultas.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
@@ -27,15 +28,15 @@ try {
                 , `seg_usuarios_sistema`.`apellido2`
                 , `seg_usuarios_sistema`.`apellido1`) AS `usuario`
                 , `pto_cdp`.`id_manu` AS `num_cdp`
-                , `seg_terceros`.`no_doc`
+                , `tb_terceros`.`nit_tercero` AS `no_doc`
             FROM
                 `pto_crp`
                 INNER JOIN `seg_usuarios_sistema` 
                     ON (`pto_crp`.`id_user_reg` = `seg_usuarios_sistema`.`id_usuario`)
                 INNER JOIN `pto_cdp`
                     ON (`pto_crp`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
-                INNER JOIN `seg_terceros` 
-                    ON (`pto_crp`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
+                LEFT JOIN `tb_terceros` 
+                    ON (`pto_crp`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
             WHERE (`pto_crp`.`id_pto_crp` = $id_crp)";
     $res = $cmd->query($sql);
     $crp = $res->fetch();
@@ -131,19 +132,9 @@ try {
 }
 // Consulta terceros en la api ********************************************* API
 $id_t[] = $crp['id_tercero_api'];
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$dat_ter = json_decode($result, true);
-$tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
+$ids = implode(',', $id_t);
+$dat_ter = getTerceros($ids, $cmd);
+$tercero = !empty($dat_ter) ? $dat_ter[0]['nom_tercero'] : '---';
 // fin api terceros ******************************************************** 
 $enletras = numeroLetras($total);
 $fecha = date('Y-m-d', strtotime($crp['fecha']));

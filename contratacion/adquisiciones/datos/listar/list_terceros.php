@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../../conexion.php';
 include '../../../../permisos.php';
+include '../../../../terceros.php';
 $id_cot = isset($_POST['id']) ? $_POST['id'] : exit('No permitido');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -19,7 +20,6 @@ try {
             WHERE `seg_terceros`.`estado` = 1";
     $rs = $cmd->query($sql);
     $terceros = $rs->fetchAll();
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
@@ -30,19 +30,10 @@ if (!empty($terceros)) {
             $id_t[] = $l['id_tercero_api'];
         }
     }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros_api = json_decode($result, true);
-    if ($terceros_api != '0') { ?>
+    $ids = implode(',', $id_t);
+    $terceros_api = getTerceros($ids, $cmd);
+    $cmd = null;
+    if (!empty($terceros_api)) { ?>
         <script>
             $('#tableLisTerCot').DataTable({
                 dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
@@ -97,10 +88,9 @@ if (!empty($terceros)) {
                                     <td>
                                         <div class="text-center list_ter_cot"><input type="checkbox" name="check[]" value="<?php echo $tc['id_tercero'] ?>"></div>
                                     </td>
-                                    <td><?php echo $tc['cc_nit'] ?></td>
+                                    <td><?php echo $tc['nit_tercero'] ?></td>
                                     <td><?php
-                                        $razsoc = $tc['razon_social'] != '' ? ' - ' . $tc['razon_social'] : '';
-                                        echo mb_strtoupper($tc['apellido1'] . ' ' . $tc['apellido2'] . ' ' . $tc['nombre1'] . ' ' . $tc['nombre2'] . $razsoc);
+                                        echo mb_strtoupper($tc['nom_tercero']);
                                         ?>
                                     </td>
                                 </tr>

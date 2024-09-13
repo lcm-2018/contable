@@ -34,7 +34,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT * FROM tb_paises";
+    $sql = "SELECT * FROM tb_paises ORDER BY nom_pais";
     $rs = $cmd->query($sql);
     $pais = $rs->fetchAll();
     $sql = "SELECT * FROM tb_departamentos ORDER BY nom_departamento";

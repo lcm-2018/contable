@@ -15,6 +15,7 @@ function pesos2($valor)
 
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../terceros.php';
 $key = array_search('51', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
@@ -106,30 +107,25 @@ try {
             WHERE (`seg_usuarios_sistema`.`id_usuario` = $id_user) LIMIT 1";
     $rs = $cmd->query($sql);
     $usuario = $rs->fetch(PDO::FETCH_ASSOC);
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 $id_t = [];
 $id_t[] = $id_contratista;
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
-$key = array_search($id_contratista, array_column($terceros, 'id_tercero'));
+$ids = implode(',', $id_t);
+$terceros = getTerceros($ids, $cmd);
+$cmd = null;
+$key = array_search($id_contratista, array_column($terceros, 'id_tercero_api'));
 if ($key !== false) {
-    $nombre = mb_strtoupper(trim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']));
-    $cedula = $terceros[$key]['cc_nit'];
-    $genero = $terceros[$key]['genero'];
-    $tipodoc = $terceros[$key]['tipo_doc'];
+    $nombre = trim($terceros[$key]['nom_tercero']);
+    $cedula = $terceros[$key]['nit_tercero'];
+    $genero = 'xxx';
+    $tipodoc = 'xxx';
+} else {
+    $nombre = '';
+    $cedula = '';
+    $genero = 'xxx';
+    $tipodoc = 'xxx';
 }
 $jefe = "CARMEN EMILIA GALVAN TAMAYO";
 $consecutivo = 100;

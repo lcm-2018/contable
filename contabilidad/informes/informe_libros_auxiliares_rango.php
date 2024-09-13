@@ -18,6 +18,7 @@ function pesos($valor)
 }
 
 include '../../conexion.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
@@ -75,16 +76,8 @@ foreach ($cuentas as $ter) {
 
 $terceros = [];
 if (count($id_t) > 0) {
-    $payload = json_encode($id_t);
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
 }
 
 $nom_informe = "LIBRO AUXILIAR";
@@ -124,9 +117,9 @@ $total_cre = 0;
         } else {
             $saldo = $saldo + $tp['credito'] - $tp['debito'];
         }
-        $key = array_search($tp['id_tercero_api'], array_column($terceros, 'id_tercero'));
-        $nom_ter = $key !== false ? ltrim($terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['razon_social']) : '---';
-        $cc_nit = $key !== false ? $terceros[$key]['cc_nit'] : '---';
+        $key = array_search($tp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+        $nom_ter = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
+        $cc_nit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
         $fecha = date('Y-m-d', strtotime($tp['fecha']));
         echo "<tr>
                 <td class='text-right'>" . $fecha . "</td>

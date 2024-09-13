@@ -25,7 +25,7 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $response['status'] = 'error';
 try {
-    $sql = "SELECT MAX(`num_doc`) AS `num_doc` FROM `ctb_factura` WHERE (`id_tipo_doc` = $id_tipo_doc)";
+    $sql = "SELECT MAX(`num_doc`) AS `num_doc` FROM `ctb_factura` WHERE (`id_tipo_doc` = $id_tipo_doc AND `num_doc` > 0)";
     $rs = $cmd->query($sql);
     $datos = $rs->fetch();
     $num_doc = !empty($datos) ? $datos['num_doc'] + 1 : 1;

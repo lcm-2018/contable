@@ -12,87 +12,6 @@ use PHPMailer\PHPMailer\Exception;
 require_once '../../../libs/PHPMailer/src/Exception.php';
 require_once '../../../libs/PHPMailer/src/PHPMailer.php';
 require_once '../../../libs/PHPMailer/src/SMTP.php';
-/*
-$empleados = [
-    "8201345" => "robertoramirez076@gmail.com",
-    "9654581" => "roldanperezj41@gmail.com",
-    "17388640" => "jdcpedroantoniodaza@hotmail.com",
-    "21202533" => "nataliacontreras4240@gmail.com",
-    "23790065" => "rosavargas0364@gmail.com",
-    "24228221" => "candelariapabon69@gmail.com",
-    "24228291" => "nebepe15@yahoo.es",
-    "24231359" => "morenoanadelia19@hotmail.com",
-    "33645761" => "lialgil@yahoo.es",
-    "39948824" => "socorrobarrera2275@hotmail.com",
-    "40328118" => "pscarol_hernandez83@hotmail.com",
-    "43796165" => "sorany2505@gmail.com",
-    "47426733" => "carmenalarcon1204@hotmail.com",
-    "50900069" => "noramendozab@hotmail.com",
-    "51696157" => "emma_sc5169@hotmail.com",
-    "74750661" => "beller.rivera2762@gmail.com  ",
-    "74752929" => "YOMAHECHA@HOTMAIL.COM",
-    "74754406" => "espinosaotalora@gmail.com",
-    "74755059" => "chaparro0527123@gmail.com",
-    "1006423713" => "gijany2010@hotmail.com",
-    "1006460651" => "nvelosa51@uan.edu.co",
-    "1006599186" => "DEISYJULIEX@GMAIL.COM",
-    "1052407777" => "laurita.x96@hotmail.com ",
-    "1116542865" => "vanesa1986@outlook.es",
-    "1116550309" => "andreadiaz1029@hotmail.com",
-    "1116552466" => "gisseld32@gmail.com",
-    "1121822830" => "leidyguzmanperez@gmail.com",
-    "1143406963" => "kmql@outlook.com",
-    "74859481" => "esanabriagomez@yahoo.com",
-    "1116553418" => "tatisvela1776@gmail.com",
-    "4295312" => "echeverria631@hotmail.com",
-    "47430618" => "mirirubi1972@gmail.com",
-    "1002603299" => "linarojas172003@gmail.com"
-];
-$cont = 1;
-
-foreach ($empleados as $key => $em) {
-    $consecutivo = $key;
-    $to = $em;
-    $mail = new PHPMailer(true);
-    $mail->isSMTP();
-    $mail->SMTPOptions = [
-        'ssl' => [
-            'verify_peer' => false,
-            'verify_peer_name' => false,
-            'allow_self_signed' => true
-        ]
-    ];                                           //Send using SMTP
-    $mail->Host       = 'mail.lcm.com.co';                     //Set the SMTP server to send through
-    $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-    $mail->Username   = 'mail@lcm.com.co';                     //SMTP username
-    $mail->Password   = 'Lcm2021*';                               //SMTP password
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-    $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
-
-    //Recipients
-    $mail->setFrom('mail@lcm.com.co', 'Info-LCM');
-    $mail->addAddress($to);     //Add a recipient
-    // $mail->addAddress('ellen@example.com');               //Name is optional
-    //$mail->addReplyTo('info@example.com', 'Information');
-    //$mail->addCC('cc@example.com');
-    //$mail->addBCC('bcc@example.com');
-
-    //Attachments
-    $mail->addAttachment($consecutivo . '.pdf');         //Add attachments
-    $mail->addAttachment($consecutivo . '.pdf', $consecutivo . '.dpf');    //Optional name
-
-    //Content
-    $mail->isHTML(true);                                  //Set email format to HTML
-    $mail->Subject = 'Documento soporte nomina electrónica ' . $consecutivo;
-    $mail->Body    = 'Se adjunta documento soporte de nomina electrónica correpondiente al mes de enero de 2023 del Hospital de Aguazul Juan Hernandi Urrego.';
-    $mail->AltBody = '';
-
-    $mail->send();
-    echo 'Message has been sent ' . $cont;
-    $cont++;
-}
-
-exit();*/
 
 $tipotercero = isset($_POST['slcTipoTercero']) ? $_POST['slcTipoTercero'] : exit('Acción no permitida');
 $fecInicio = date('Y-m-d', strtotime($_POST['datFecInicio']));
@@ -219,10 +138,10 @@ if ($res > 1 || $regAtTerc == 'SI') {
             if ($cmd->lastInsertId() > 0) {
                 echo '1';
             } else {
-                print_r($sql->errorInfo()[2]);
+                echo $sql->errorInfo()[2];
             }
         } else {
-            print_r($sql->errorInfo()[2]);
+            echo $sql->errorInfo()[2];
         }
         $cmd = null;
     } catch (PDOException $e) {

@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../../conexion.php';
 include '../../../../permisos.php';
+include '../../../../terceros.php';
 $key = array_search('53', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
@@ -98,25 +99,15 @@ if ($id_adq > 0) {
                 $row = $sql->fetch(PDO::FETCH_ASSOC);
                 $id_tercero = $row['id_tercero_api'];
             }
-            $cmd = null;
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
         }
         $id_t = [$id_tercero];
-        $payload = json_encode($id_t);
-        //API URL
-        $url = $api . 'terceros/datos/res/lista/terceros';
-        $ch = curl_init($url);
-        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        $terceros = json_decode($result, true);
-        if (!($terceros == '0' || $terceros == '')) {
-            $adquisicion['tercero'] = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
+        $ids = implode(',', $id_t);
+        $terceros = getTerceros($ids, $cmd);
+        $cmd = null;
+        if (!empty($terceros)) {
+            $adquisicion['tercero'] = ltrim($terceros[0]['nom_tercero']);
         }
     } else {
         $adquisicion['tercero'] = '';

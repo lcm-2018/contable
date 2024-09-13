@@ -1496,11 +1496,10 @@ function eliminarCrpp(id) {
                 .then((response) => {
                     if (response == "ok") {
                         // Reonlidar la tabla
-                        let id = "tableEjecPresupuestoCrp";
-                        reloadtable(id);
+                        $("#tableEjecPresupuestoCrp").DataTable().ajax.reload();
                         mje("Registro eliminado");
                     } else {
-                        mjeError("No se puede eliminar el registro");
+                        mjeError(response);
                     }
                 });
         }
@@ -1589,7 +1588,7 @@ document.addEventListener("keyup", (e) => {
         $("#rubroCod").autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: window.urlin+"/presupuesto/datos/consultar/consultaRubrosMod.php",
+                    url: window.urlin + "/presupuesto/datos/consultar/consultaRubrosMod.php",
                     type: "post",
                     dataType: "json",
                     data: {

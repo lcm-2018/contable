@@ -7,6 +7,7 @@ if (!isset($_SESSION['user'])) {
 $id_compra = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
 
 include '../../../conexion.php';
+include '../../../terceros.php';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -61,30 +62,13 @@ try {
             WHERE `id_compra` = '$id_compra'";
     $rs = $cmd->query($sql);
     $contrato = $rs->fetch();
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 $id_ter_sup = $contrato['id_supervisor'];
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `no_doc` FROM `seg_terceros` WHERE `id_tercero_api` = '$id_ter_sup'";
-    $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetch();
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/' . $terceros_sup['no_doc'];
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $supervisor_res = json_decode($result, true);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+$ids = $id_ter_sup;
+$terceros = getTerceros($ids, $cmd);
+$cmd = null;
 $contra = $contrato['id_contrato_compra'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -134,7 +118,7 @@ $dia_fin_l = $val_letras->format($dia_fin, 2);
 $mes_ini_l = $meses[$mes_ini];
 $mes_fin_l = $meses[$mes_fin];
 $forma_pago = $contrato['descripcion'];
-$supervisor = $supervisor_res[0]['apellido1'] . ' ' . $supervisor_res[0]['apellido2'] . ' ' . $supervisor_res[0]['nombre1'] . ' ' . $supervisor_res[0]['nombre2'];
+$supervisor = $supervisor_res[0]['nom_tercero'];
 $fec_inicio = $dia_ini_l . ' (' . $dia_ini . ') de ' . $mes_ini_l . ' de ' . $anio_ini;
 $fec_final = $dia_fin_l . ' (' . $dia_fin . ') de ' . $mes_fin_l . ' de ' . $anio_fin;
 //echo $fec_ini_contrato . ' hasta ' . $fec_fin_contrato; 

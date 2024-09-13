@@ -58,6 +58,7 @@ function pesos($valor)
 }
 include '../../conexion.php';
 include '../../financiero/consultas.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 /*
@@ -69,18 +70,9 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 */
-$ccnit = $_POST['id_tercero'];
+$id_t = [];
+$id_t[] = $_POST['id_tercero'];
 $prefijo = '';
-$url = $api . 'terceros/datos/res/datos/id/' . $ccnit;
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$res_api = curl_exec($ch);
-curl_close($ch);
-$dat_ter = json_decode($res_api, true);
-$tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
-$num_doc = $dat_ter[0]['cc_nit'];
 // consulta para motrar cuadro de retenciones
 try {
     $sql = "SELECT
@@ -101,11 +93,27 @@ try {
                 INNER JOIN `ctb_retencion_tipo` 
                     ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
             WHERE `ctb_doc`.`id_tercero` =$id_tercero AND  `ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_fin' AND `ctb_doc`.`tipo_doc` ='NCXP'  AND `ctb_retencion_tipo`.`id_retencion_tipo` IN ($campos)
-            GROUP BY `ctb_causa_retencion`.`tarifa`, `ctb_causa_retencion`.`id_terceroapi`;";
+            GROUP BY `ctb_causa_retencion`.`tarifa`, `ctb_causa_retencion`.`id_terceroapi`";
     $rs = $cmd->query($sql);
     $retenciones = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+foreach ($retenciones as $re) {
+    if ($re['id_terceroapi'] != '') {
+        $id_t[] = $re['id_terceroapi'];
+    }
+}
+$ccnit = implode(',', $id_t);
+$terceros = getTerceros($ccnit, $cmd);
+$key = array_search($_POST['id_tercero'], array_column($terceros, 'id_tercero_api'));
+
+if ($key !== false) {
+    $tercero = $terceros[$key]['nom_tercero'];
+    $num_doc = $terceros[$key]['nit_tercero'];
+} else {
+    $tercero = '---';
+    $num_doc = '---';
 }
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 
@@ -203,17 +211,8 @@ try {
                 <?php
                 $total_rete = 0;
                 foreach ($retenciones as $re) {
-                    // Consulto el valor del tercero de la api
-                    // Consulta terceros en la api ********************************************* API
-                    $url = $api . 'terceros/datos/res/datos/id/' . $re['id_terceroapi'];
-                    $ch = curl_init($url);
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    $res_api = curl_exec($ch);
-                    curl_close($ch);
-                    $dat_ter = json_decode($res_api, true);
-                    $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
+                    $key = array_search($re['id_terceroapi'], array_column($terceros, 'id_tercero_api'));
+                    $tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '---';
                     // fin api terceros **************************
                     if ($re['id_retencion_tipo'] == 6) {
                         $tercero = 'OTRAS RETENCIONES';

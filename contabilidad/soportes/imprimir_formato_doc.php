@@ -15,6 +15,7 @@ function pesos($valor)
 include '../../conexion.php';
 include '../../permisos.php';
 include '../../financiero/consultas.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id_t = [];
@@ -170,19 +171,8 @@ foreach ($retenciones as $ret) {
 }
 $terceros = [];
 if (!empty($id_t)) {
-    $id_t = array_unique($id_t);
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
 }
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 try {
@@ -331,11 +321,11 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                 $total_pto = 0;
                 if ($doc['tipo_doc'] == '5') {
                     foreach ($rubros as $rp) {
-                        $key = array_search($rp['id_tercero_api'], array_column($terceros, 'id_tercero'));
+                        $key = array_search($rp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
                         if ($rp['tipo_mov'] == 'COP') {
                             echo "<tr>
                     <td class='text-left' style='border: 1px solid black '>" . $rp['id_manu'] . "</td>
-                    <td class='text-left' style='border: 1px solid black '>" . $terceros[$key]['cc_nit'] . "</td>
+                    <td class='text-left' style='border: 1px solid black '>" . $terceros[$key]['nit_tercero'] . "</td>
                     <td class='text-left' style='border: 1px solid black '>" . $rp['rubro'] . "</td>
                     <td class='text-left' style='border: 1px solid black '>" . $rp['nom_rubro'] . "</td>
                     <td class='text-right' style='border: 1px solid black; text-align: right'>" . number_format($rp['valor'], 2, ",", ".")  . "</td>
@@ -432,15 +422,8 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                     foreach ($retenciones as $re) {
                         // Consulto el valor del tercero de la api
                         // Consulta terceros en la api ********************************************* API
-                        $url = $api . 'terceros/datos/res/datos/id/' . $re['id_terceroapi'];
-                        $ch = curl_init($url);
-                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        $res_api = curl_exec($ch);
-                        curl_close($ch);
-                        $dat_ter = json_decode($res_api, true);
-                        $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
+                        $key = array_search($re['id_terceroapi'], array_column($terceros, 'id_tercero_api'));
+                        $tercero = $terceros[$key]['nom_tercero'];
                         // fin api terceros **************************
                         echo "<tr>
                 <td style='text-align: left;border: 1px solid black'>" . $tercero . "</td>
@@ -488,9 +471,9 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                 $tot_cre = 0;
                 foreach ($movimiento as $mv) {
                     // Consulta terceros en la api ********************************************* API
-                    $key = array_search($mv['id_tercero'], array_column($terceros, 'id_tercero'));
-                    $ccnit = $terceros[$key]['cc_nit'];
-                    $nom_ter =  $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['razon_social'];
+                    $key = array_search($mv['id_tercero'], array_column($terceros, 'id_tercero_api'));
+                    $ccnit = $terceros[$key]['nit_tercero'];
+                    $nom_ter =  $terceros[$key]['nom_tercero'];
 
                     echo "<tr style='border: 1px solid black'>
                 <td class='text-left' style='border: 1px solid black'>" . $mv['cuenta'] . "</td>
@@ -596,8 +579,8 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
 <?php
 function NombreTercero($id_tercero, $terceros)
 {
-    $key = array_search($id_tercero, array_column($terceros, 'id_tercero'));
-    $data['nombre'] = $key !== false ? ltrim($terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['razon_social']) : '---';
-    $data['cc_nit'] = $key !== false ? number_format($terceros[$key]['cc_nit'], 0, '', '.') : '---';
+    $key = array_search($id_tercero, array_column($terceros, 'id_tercero_api'));
+    $data['nombre'] = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
+    $data['cc_nit'] = $key !== false ? number_format($terceros[$key]['nit_tercero'], 0, '', '.') : '---';
     return $data;
 }

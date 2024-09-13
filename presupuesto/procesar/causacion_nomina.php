@@ -154,7 +154,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_pto` FROM `pto_presupuestos` WHERE `id_tipo` = 2";
+    $sql = "SELECT `id_pto` FROM `pto_presupuestos` WHERE `id_tipo` = 2 AND `id_vigencia` = $id_vigencia";
     $rs = $cmd->query($sql);
     $pto = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;

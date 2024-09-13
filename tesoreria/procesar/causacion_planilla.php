@@ -1,7 +1,7 @@
 <?php
 session_start();
-if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+if (!isset($_SESSION['id_user'])) {
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
@@ -131,8 +131,8 @@ foreach ($patronales as $p) {
     $valores[$tipo]['arl'][$id_arl] = $p['aporte_rieslab'] + $valarl;
     $valores[$tipo]['afp'][$id_afp] = $p['aporte_pension_empresa'] + $valafp;
 }
-$administrativo = $valores['administrativo'];
-$operativo = $valores['operativo'];
+$administrativo = isset($valores['administrativo']) ? $valores['administrativo'] : [];
+$operativo = isset($valores['operativo']) ? $valores['operativo'] : [];
 $idsTercer = [];
 foreach ($patronales as $p) {
     $id_eps = $p['id_eps'];
@@ -259,6 +259,20 @@ if ($nomina['tipo'] == 'N') {
     $cual = 'MENSUAL';
 } else if ($nomina['tipo'] == 'PS') {
     $cual = 'DE PRESTACIONES SOCIALES';
+} else if ($nomina['tipo'] == 'VC') {
+    $cual = 'DE VACACIONES';
+} else if ($nomina['tipo'] == 'PV') {
+    $cual = 'DE PRIMA DE SERVICIOS';
+} else if ($nomina['tipo'] == 'RA') {
+    $cual = 'DE RETROACTIVO';
+} else if ($nomina['tipo'] == 'CE') {
+    $cual = 'DE CESANTIAS';
+} else if ($nomina['tipo'] == 'IC') {
+    $cual = 'DE INTERESES DE CESANTIAS';
+} else if ($nomina['tipo'] == 'VS') {
+    $cual = 'DE VACACIONES';
+} else {
+    $cual = 'OTRAS';
 }
 $nom_mes = isset($meses[$nomina['mes']]) ? 'MES DE ' . mb_strtoupper($meses[$nomina['mes']]) : '';
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
@@ -357,7 +371,7 @@ try {
         $valor = 0;
         switch ($tipo) {
             case 11:
-                $valor = $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
+                $valor = isset($administrativo['comfam']) && $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
                 $rubro = $rb['r_admin'];
                 $id_tercero = $id_api_comfam;
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
@@ -369,7 +383,7 @@ try {
                 }
                 $rubro = $rb['r_operativo'];
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                $valor = $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
+                $valor = isset($operativo['comfam']) && $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
                 if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
@@ -474,7 +488,7 @@ try {
                 }
                 break;
             case 15:
-                $valor = $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
+                $valor = isset($administrativo['icbf']) && $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
                 $rubro = $rb['r_admin'];
                 $id_tercero = $id_api_icbf;
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
@@ -486,7 +500,7 @@ try {
                 }
                 $rubro = $rb['r_operativo'];
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                $valor = $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
+                $valor = isset($operativo['icbf']) && $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
                 if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
@@ -495,7 +509,7 @@ try {
                 }
                 break;
             case 16:
-                $valor = $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
+                $valor = isset($administrativo['sena']) && $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
                 $rubro = $rb['r_admin'];
                 $id_tercero = $id_api_sena;
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
@@ -507,7 +521,7 @@ try {
                 }
                 $rubro = $rb['r_operativo'];
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                $valor = $operativo['sena'] > 0 ? $operativo['sena'] : 0;
+                $valor = isset($operativo['sena']) && $operativo['sena'] > 0 ? $operativo['sena'] : 0;
                 if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {

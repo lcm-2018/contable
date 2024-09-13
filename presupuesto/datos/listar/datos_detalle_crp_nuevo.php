@@ -14,13 +14,21 @@ function pesos($valor)
 $id_cdp = $_POST['id_cdp'];
 $id_crp = $_POST['id_crp'];
 $where = '';
-if ($id_crp > 0) {
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+if ($id_crp > '0') {
     $where = "AND `pto_crp_detalle`.`id_pto_crp` = $id_crp";
+    try {
+        $sql = "SELECT `id_cdp` FROM `pto_crp` WHERE (`id_pto_crp` = $id_crp)";
+        $rs = $cmd->query($sql);
+        $id_cdp = $rs->fetch();
+        $id_cdp = !empty($id_cdp) ? $id_cdp['id_cdp'] : 0;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
 }
 
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `pto_cdp_detalle`.`id_pto_cdp_det`
                 , `pto_cdp_detalle`.`id_rubro`
@@ -53,6 +61,7 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT `estado` FROM `pto_crp` WHERE (`id_pto_crp` = $id_crp)";
+    $rs = $cmd->query($sql);
     $estado = $rs->fetch();
     $estado = !empty($estado) ? $estado['estado'] : 1;
 } catch (PDOException $e) {

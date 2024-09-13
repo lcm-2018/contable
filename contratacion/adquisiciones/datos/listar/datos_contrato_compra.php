@@ -5,6 +5,7 @@ if (!isset($_SESSION['user'])) {
 }
 include_once '../../conexion.php';
 include_once '../../permisos.php';
+include_once '../../terceros.php';
 $vigencia = $_SESSION['vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -24,30 +25,12 @@ try {
             WHERE `id_compra` = $id_adq";
     $rs = $cmd->query($sql);
     $contrato = $rs->fetch();
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 $id_ter_sup = $contrato['id_supervisor'];
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `no_doc` FROM `seg_terceros` WHERE `id_tercero_api` = '$id_ter_sup'";
-    $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetch();
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/' . $terceros_sup['no_doc'];
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $supervisor = json_decode($result, true);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+$supervisor = getTerceros($id_ter_sup, $cmd);
+$cmd = null;
 $contrata = isset($contrato) ? $contrato['id_contrato_compra'] : 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -112,10 +95,10 @@ try {
                     ?>
                 </td>
                 <td class="centro-vertical">
-                    <?php echo $supervisor[0]['cc_nit'] ?>
+                    <?php echo $supervisor[0]['nit_tercero'] ?>
                     <input type="hidden" id="id_sup_desig" value="<?php echo $contrato['id_supervisor'] ?>">
                 </td>
-                <td class="centro-vertical"><?php echo $supervisor[0]['apellido1'] . ' ' . $supervisor[0]['apellido2'] . ' ' . $supervisor[0]['nombre1'] . ' ' . $supervisor[0]['nombre2'] ?></td>
+                <td class="centro-vertical"><?php echo $supervisor[0]['nom_tercero'] ?></td>
                 <td class="centro-vertical" id="modificarContraCompra">
                     <?php
                     $editar = $borrar = $superv = null;

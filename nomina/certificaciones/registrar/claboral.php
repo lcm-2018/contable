@@ -15,6 +15,7 @@ function pesos2($valor)
 
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../terceros.php';
 $key = array_search('51', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
@@ -100,31 +101,26 @@ try {
     $id_supervisor = $datos[0]['id_supervisor'];
     $id_t[] = $id_contratista;
     $id_t[] = $id_supervisor;
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
-$key = array_search($id_contratista, array_column($terceros, 'id_tercero'));
+$ids = implode(',', $id_t);
+$terceros = getTerceros($ids, $cmd);
+$cmd = null;
+$key = array_search($id_contratista, array_column($terceros, 'id_tercero_api'));
 if ($key !== false) {
-    $nombre = trim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']);
-    $cedula = $terceros[$key]['cc_nit'];
-    $genero = $terceros[$key]['genero'];
-    $tipodoc = $terceros[$key]['tipo_doc'];
+    $nombre = trim($terceros[$key]['nom_tercero']);
+    $cedula = $terceros[$key]['nit_tercero'];
+    $genero = '';
+    $tipodoc = '';
+} else {
+    $nombre = '';
+    $cedula = '';
+    $genero = '';
+    $tipodoc = '';
 }
-$key = array_search($id_supervisor, array_column($terceros, 'id_tercero'));
-$jefe = $key !== false ? trim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']) : '';
+$key = array_search($id_supervisor, array_column($terceros, 'id_tercero_api'));
+$jefe = $key !== false ? trim($terceros[$key]['nom_tercero']) : 'XXXXXXXXXX';
 $consecutivo = 100;
 $area = $datos[0]['area'];
 if ($cant_contratos > 1) {

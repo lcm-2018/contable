@@ -6,6 +6,8 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../permisos.php';
+include '../terceros.php';
+
 // Consulta tipo de presupuesto
 $vigencia = $_SESSION['vigencia'];
 $id_vigencia = $_SESSION['id_vigencia'];
@@ -65,18 +67,8 @@ foreach ($listado as $rp) {
         $id_t[] = $rp['id_tercero'];
     }
 }
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
+$ids = implode(',', $id_t);
+$terceros = getTerceros($ids, $cmd);
 ?>
 <script>
     $('#tableObligacionesPago').DataTable({
@@ -139,9 +131,9 @@ $terceros = json_decode($result, true);
 
                         // Consulta terceros en la api
 
-                        $key = array_search($ce['id_tercero'], array_column($terceros, 'id_tercero'));
-                        $tercero = $key !== false ? ltrim($terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['razon_social']) : '';
-                        $ccnit = $key !== false ? $terceros[$key]['cc_nit'] : '';
+                        $key = array_search($ce['id_tercero'], array_column($terceros, 'id_tercero_api'));
+                        $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '';
+                        $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '';
 
                         // fin api terceros
 
