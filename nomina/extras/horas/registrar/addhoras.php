@@ -40,7 +40,7 @@ try {
         if ($cantHE !== '99') {
             $sql->execute();
             if (!($cmd->lastInsertId() > 0)) {
-                print_r($sql->errorInfo()[2]);
+                echo $sql->errorInfo()[2];
             } else {
                 $t++;
             }

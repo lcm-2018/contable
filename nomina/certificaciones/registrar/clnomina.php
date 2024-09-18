@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 function pesos($valor)
@@ -46,7 +46,7 @@ try {
                 , `nom_cargo_empleado`.`descripcion_carg`
                 , `nom_cargo_empleado`.`codigo`
                 , `nom_tipo_contrato`.`descripcion` as `nombramiento`
-                ,  `seg_terceros`.`id_tercero_api`
+                , `tb_terceros`.`id_tercero_api`
             FROM
                 `nom_empleado`
                 INNER JOIN `tb_tipos_documento` 
@@ -57,8 +57,8 @@ try {
                     ON (`nom_empleado`.`city_exp` = `tb_municipios`.`id_municipio`)
                 INNER JOIN `nom_tipo_contrato` 
                     ON (`nom_empleado`.`tipo_contrato` = `nom_tipo_contrato`.`id_tip_contrato`)
-                LEFT JOIN `seg_terceros` 
-                    ON (`seg_terceros`.`no_doc` = `nom_empleado`.`no_documento`)
+                LEFT JOIN `tb_terceros` 
+                    ON (`tb_terceros`.`nit_tercero` = `nom_empleado`.`no_documento`)
             WHERE `nom_empleado`.`no_documento` IN ($empleado)";
     $rs = $cmd->query($sql);
     $list_empdo = $rs->fetchAll();

@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -263,9 +263,12 @@ try {
                                     if ($res > 1 || $regAtTerc = 'SI') {
                                         try {
                                             $estado = 1;
+                                            $nombre = trim($nomb1 . ' ' . $nomb2 . ' ' . $ape1 . ' ' . $ape2);
                                             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                                             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                                            $sql = "INSERT INTO seg_terceros(tipo_doc, id_tercero_api, no_doc, estado, fec_inicio, id_user_reg, fec_reg) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                                            $sql = "INSERT INTO `tb_terceros`
+                                                        (`tipo_doc`, `id_tercero_api`, `nit_tercero`, `estado`, `fec_inicio`, `id_user_reg`, `fec_reg`, `nom_tercero`) 
+                                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                                             $sql = $cmd->prepare($sql);
                                             $sql->bindParam(1, $tipodoc, PDO::PARAM_INT);
                                             $sql->bindParam(2, $id_ter_api, PDO::PARAM_INT);
@@ -274,23 +277,29 @@ try {
                                             $sql->bindParam(5, $fecha, PDO::PARAM_STR);
                                             $sql->bindParam(6, $idus, PDO::PARAM_INT);
                                             $sql->bindValue(7, $date->format('Y-m-d H:i:s'));
+                                            $sql->bindParam(8, $nombre, PDO::PARAM_STR);
                                             $sql->execute();
                                             if ($cmd->lastInsertId() > 0) {
+                                                $cmd = null;
+                                                $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                                                $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
                                                 $tipo_tercero = 1;
-                                                $sql = "INSERT INTO `tb_rel_tercero` (`id_tercero_api`, `id_tipo_tercero`, `id_user_reg`, `fec_reg`) VALUES (?, ?, ?, ?)";
-                                                $sql = $cmd->prepare($sql);
-                                                $sql->bindParam(1, $id_ter_api, PDO::PARAM_INT);
-                                                $sql->bindParam(2, $tipo_tercero, PDO::PARAM_STR);
-                                                $sql->bindParam(3, $idus, PDO::PARAM_INT);
-                                                $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
-                                                $sql->execute();
+                                                $query = "INSERT INTO `tb_rel_tercero` 
+                                                                (`id_tercero_api`, `id_tipo_tercero`, `id_user_reg`, `fec_reg`) 
+                                                        VALUES (?, ?, ?, ?)";
+                                                $query = $cmd->prepare($query);
+                                                $query->bindParam(1, $id_ter_api, PDO::PARAM_INT);
+                                                $query->bindParam(2, $tipo_tercero, PDO::PARAM_STR);
+                                                $query->bindParam(3, $idus, PDO::PARAM_INT);
+                                                $query->bindValue(4, $date->format('Y-m-d H:i:s'));
+                                                $query->execute();
                                                 if ($cmd->lastInsertId() > 0) {
                                                     echo '1';
                                                 } else {
-                                                    print_r($sql->errorInfo()[2]);
+                                                    echo $query->errorInfo()[2];
                                                 }
                                             } else {
-                                                print_r($sql->errorInfo()[2]);
+                                                echo $sql->errorInfo()[2];
                                             }
                                             $cmd = null;
                                         } catch (PDOException $e) {
@@ -300,26 +309,26 @@ try {
                                         echo 'No se pudo Registrar';
                                     }
                                 } else {
-                                    print_r($sql->errorInfo()[2]);
+                                    echo $sql->errorInfo()[2];
                                 }
                                 $cmd = null;
                             } catch (PDOException $e) {
                                 echo  $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
                             }
                         } else {
-                            print_r($sql->errorInfo()[2]);
+                            echo $sql->errorInfo()[2];
                         }
                     } else {
-                        print_r($sql->errorInfo()[2]);
+                        echo $sql->errorInfo()[2];
                     }
                 } else {
-                    print_r($sql->errorInfo()[2]);
+                    echo $sql->errorInfo()[2];
                 }
             } else {
-                print_r($sql->errorInfo()[2]);
+                echo $sql->errorInfo()[2];
             }
         } else {
-            print_r($sql->errorInfo()[2]);
+            echo $sql->errorInfo()[2];
         }
     }
     $cmd = null;

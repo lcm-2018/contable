@@ -69,6 +69,7 @@ if ($id_adq > 0) {
                     , `ctt_adquisiciones`.`id_tipo_bn_sv`
                     , `ctt_adquisiciones`.`objeto`
                     , `ctt_adquisiciones`.`id_tercero`
+                    , `tb_terceros`.`nom_tercero` AS `tercero`
                     , `tb_area_c`.`filtro_adq` AS `filtro`
                 FROM
                     `ctt_adquisiciones`
@@ -80,38 +81,14 @@ if ($id_adq > 0) {
                         ON (`tb_tipo_contratacion`.`id_tipo_compra` = `tb_tipo_compra`.`id_tipo`)
                     INNER JOIN `tb_area_c` 
                         ON (`ctt_adquisiciones`.`id_area` = `tb_area_c`.`id_area`)
+                    LEFT JOIN `tb_terceros` 
+                        ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
                 WHERE (`ctt_adquisiciones`.`id_adquisicion` = $id_adq)";
         $rs = $cmd->query($sql);
         $adquisicion = $rs->fetch(PDO::FETCH_ASSOC);
         $cmd = null;
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-    }
-    if ($adquisicion['id_tercero'] > 0) {
-        try {
-            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-            $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `id_tercero` = ? LIMIT 1";
-            $sql = $cmd->prepare($sql);
-            $sql->bindParam(1, $adquisicion['id_tercero'], PDO::PARAM_INT);
-            $sql->execute();
-            if ($sql->rowCount() > 0) {
-                $row = $sql->fetch(PDO::FETCH_ASSOC);
-                $id_tercero = $row['id_tercero_api'];
-            }
-        } catch (PDOException $e) {
-            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-        }
-        $id_t = [$id_tercero];
-        $ids = implode(',', $id_t);
-        $terceros = getTerceros($ids, $cmd);
-        $cmd = null;
-        if (!empty($terceros)) {
-            $adquisicion['tercero'] = ltrim($terceros[0]['nom_tercero']);
-        }
-    } else {
-        $adquisicion['tercero'] = '';
-        $adquisicion['id_tercero'] = 0;
     }
 } else {
     $adquisicion = [

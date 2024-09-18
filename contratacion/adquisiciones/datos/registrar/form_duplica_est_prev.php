@@ -176,27 +176,19 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`
+                `tb_terceros`.`id_tercero`
                 , `tb_rel_tercero`.`id_tercero_api`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
             FROM
                 `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-            WHERE `seg_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
+                INNER JOIN `tb_terceros` 
+                    ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            WHERE `tb_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
     $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetchAll();
+    $supervisor = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-if (!empty($terceros_sup)) {
-    $id_t = [];
-    foreach ($terceros_sup as $l) {
-        $id_t[] = $l['id_tercero_api'];
-    }
-    $ids = implode(',', $id_t);
-    $supervisor = getTerceros($ids, $cmd);
-} else {
-    $supervisor = [];
 }
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

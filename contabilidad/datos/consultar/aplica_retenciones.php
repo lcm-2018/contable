@@ -17,7 +17,7 @@ $sql = "SELECT
             `valor_base`, `valor_tope`, `tarifa`, `id_rango`
         FROM 
             `ctb_retencion_rango` 
-        WHERE `id_retencion` = $id_retencion AND `valor_base` <=$valor_base AND (`valor_tope` = 0 OR `valor_tope` >= $valor_base)";
+        WHERE `id_retencion` = $id_retencion AND `valor_base` <= $valor_base AND (`valor_tope` = 0 OR `valor_tope` >= $valor_base)";
 $res = $conexion->query($sql);
 $rango = $res->fetch_assoc();
 // Consulto el tercero de acuerdo al tipo de retencion

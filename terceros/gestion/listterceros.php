@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 function pesos($valor)
@@ -59,8 +59,7 @@ $vigencia = $_SESSION['vigencia'];
                                     <thead>
                                         <tr>
                                             <th>No. Doc.</th>
-                                            <th>Nombre</th>
-                                            <th>Razón Social</th>
+                                            <th>Nombre / Razón Social</th>
                                             <th>Tipo</th>
                                             <th>Ciudad</th>
                                             <th>Dirección</th>
@@ -76,8 +75,7 @@ $vigencia = $_SESSION['vigencia'];
                                     <tfoot>
                                         <tr>
                                             <th>No. Doc.</th>
-                                            <th>Nombre</th>
-                                            <th>Razón Social</th>
+                                            <th>Nombre / Razón Social</th>
                                             <th>Tipo</th>
                                             <th>Ciudad</th>
                                             <th>Dirección</th>

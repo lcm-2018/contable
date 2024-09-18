@@ -62,29 +62,19 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`, `seg_terceros`.`no_doc`, `tb_rel_tercero`.`id_tercero_api`
+                `tb_terceros`.`id_tercero_api`
+                , `tb_terceros`.`nom_tercero`
             FROM
                 `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-            WHERE `seg_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
+                INNER JOIN `tb_terceros` 
+                    ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            WHERE `tb_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
     $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetchAll();
+    $supervisor = $rs->fetchAll();
+    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-if (!empty($terceros_sup)) {
-    $ids = [];
-    foreach ($terceros_sup as $ts) {
-        if ($ts['id_tercero_api'] != '') {
-            $ids[] = $ts['id_tercero_api'];
-        }
-    }
-    $supervisor = getTerceros(implode(',', $ids), $cmd);
-} else {
-    echo "No se ha registrado ningun tercero" . '<br><br><a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal"> Cancelar</a>';
-}
-$cmd = null;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

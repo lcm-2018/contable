@@ -11,10 +11,10 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `id_actividad`, `codigo_ciiu`, `descripcion`
+                `id_actividad`, `cod_actividad`, `descripcion`
             FROM
-                `seg_actividades_economicas`
-            WHERE `descripcion` LIKE '%$busco%' OR `codigo_ciiu` LIKE '%$busco%'";
+                `tb_actividades_economicas`
+            WHERE `descripcion` LIKE '%$busco%' OR `cod_actividad` LIKE '%$busco%'";
     $rs = $cmd->query($sql);
     $resps = $rs->fetchAll();
     $cmd = null;
@@ -24,7 +24,7 @@ try {
 foreach ($resps as $rs) {
     $data[] = [
         'id' => $rs['id_actividad'],
-        'label' => $rs['codigo_ciiu'] . ' - ' . $rs['descripcion'],
+        'label' => $rs['cod_actividad'] . ' - ' . $rs['descripcion'],
     ];
 }
 

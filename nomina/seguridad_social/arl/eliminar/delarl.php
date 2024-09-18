@@ -18,7 +18,7 @@ try {
     if ($sql->rowCount() > 0) {
         echo $res = '1';
     } else {
-        print_r($sql->errorInfo()[2]);
+        echo $sql->errorInfo()[2];
     }
     $cmd = null;
 } catch (PDOException $e) {

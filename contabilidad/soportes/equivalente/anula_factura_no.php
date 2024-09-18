@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 $id_facno = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida');

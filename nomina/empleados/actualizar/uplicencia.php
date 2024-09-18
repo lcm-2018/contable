@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -29,7 +29,7 @@ try {
         $updata = 0;
     }
     if (!($sql->execute())) {
-        print_r($sql->errorInfo()[2]);
+        echo $sql->errorInfo()[2];
         exit();
     }
     if ($updata > 0) {
@@ -43,7 +43,7 @@ try {
         if ($sql->rowCount() > 0) {
             echo '1';
         } else {
-            print_r($sql->errorInfo()[2]);
+            echo $sql->errorInfo()[2];
         }
     } else {
         echo 'No se ingresó ningún dato nuevo.';

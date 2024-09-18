@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 function pesos($valor)
@@ -73,7 +73,7 @@ try {
                 , `ctt_contratos`.`val_contrato`
                 , `ctt_contratos`.`num_contrato`
                 , `ctt_adquisiciones`.`objeto`
-                , `seg_terceros`.`id_tercero_api`
+                , `ctt_adquisiciones`.`id_tercero` AS `id_tercero_api`
                 , `ctt_contratos`.`id_supervisor`
                 , `tb_area_c`.`area`
                 , `tb_tipo_contratacion`.`tipo_contrato`
@@ -91,8 +91,6 @@ try {
                     ON (`tb_tipo_bien_servicio`.`id_tipo_cotrato` = `tb_tipo_contratacion`.`id_tipo`)
                 INNER JOIN `ctt_estudios_previos` 
                     ON (`ctt_estudios_previos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
-                INNER JOIN `seg_terceros` 
-                    ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
             WHERE (`ctt_contratos`.`id_contrato_compra` IN ($contratos))";
     $rs = $cmd->query($sql);
     $datos = $rs->fetchAll(PDO::FETCH_ASSOC);
@@ -201,7 +199,7 @@ $tabla = [];
 , `ctt_contratos`.`val_contrato`
 , `ctt_contratos`.`num_contrato`
 , `ctt_adquisiciones`.`objeto`
-, `seg_terceros`.`id_tercero_api`
+, `ctt_adquisiciones`.`id_tercero_api`
 , `ctt_contratos`.`id_supervisor`
 , `tb_area_c`.`area`
 , `tb_tipo_contratacion`.`tipo_contrato`

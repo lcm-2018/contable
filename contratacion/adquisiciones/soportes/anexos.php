@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $id_compra = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
@@ -24,17 +24,17 @@ try {
                 , `ctt_adquisiciones`.`id_modalidad`
                 , `ctt_modalidad`.`modalidad`
                 , `ctt_adquisiciones`.`objeto`
-                , `seg_terceros`.`id_tercero_api`
+                , `tb_terceros`.`id_tercero_api`
                 , `tb_area_c`.`id_area`
                 , `tb_area_c`.`area`
             FROM
                 `ctt_adquisiciones`
             INNER JOIN `ctt_modalidad` 
                 ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
-            LEFT JOIN `seg_terceros`
-                ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
             INNER JOIN `tb_area_c` 
                 ON (`ctt_adquisiciones`.`id_area` = `tb_area_c`.`id_area`)
+            LEFT JOIN `tb_terceros`
+                ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_adquisicion` = $id_compra LIMIT 1";
     $rs = $cmd->query($sql);
     $compra = $rs->fetch();

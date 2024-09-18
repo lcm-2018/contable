@@ -55,16 +55,14 @@ try {
                 , `ctt_adquisiciones`.`estado`
                 , `ctt_adquisiciones`.`fecha_adquisicion`
                 , `ctt_adquisiciones`.`objeto`
-                , `seg_terceros`.`id_tercero_api`
+                , `tb_terceros`.`id_tercero_api`
                 , `tb_terceros`.`nom_tercero`
             FROM
                 `ctt_adquisiciones`
             INNER JOIN `ctt_modalidad` 
                 ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
-            LEFT JOIN `seg_terceros`
-                ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
             LEFT JOIN `tb_terceros`
-                ON (`seg_terceros`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+                ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE `vigencia` = '$vigencia'" . $usuario;
     $rs = $cmd->query($sql);
     $ladquis = $rs->fetchAll();

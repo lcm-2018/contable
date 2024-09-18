@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../../conexion.php';
@@ -9,18 +9,9 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`
-                , `seg_terceros`.`id_tercero_api`
-                , `seg_terceros`.`tipo_doc`
-                , `seg_terceros`.`no_doc`
-                , `seg_terceros`.`estado`
-                , `tb_tipo_tercero`.`descripcion`
+                `id_tercero_api`, `nit_tercero`, `nom_tercero`
             FROM
-                `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-                INNER JOIN `tb_tipo_tercero` 
-                    ON (`tb_rel_tercero`.`id_tipo_tercero` = `tb_tipo_tercero`.`id_tipo`)";
+                `tb_terceros`";
     $rs = $cmd->query($sql);
     $terEmpr = $rs->fetchAll();
     $cmd = null;
@@ -46,7 +37,7 @@ $datos = json_decode($result, true);
 $head = '';
 if (!empty($datos)) {
     foreach ($datos[0] as $key => $value) {
-        $head .= '<th>' . utf8_decode($key) . '</th>';
+        $head .= '<th>' . mb_convert_encoding($key, 'UTF-8', 'ISO-8859-1') . '</th>';
     }
 } else {
     echo 'No hay datos para mostrar';
@@ -56,7 +47,7 @@ $tbody = '';
 foreach ($datos as $d) {
     $tbody .= '<tr>';
     foreach ($d as $key => $value) {
-        $tbody .= '<td>' . utf8_decode($value) . '</td>';
+        $tbody .= '<td>' . mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1') . '</td>';
     }
     $tbody .= '</tr>';
 }

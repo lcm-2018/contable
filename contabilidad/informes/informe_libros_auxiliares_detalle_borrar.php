@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 ?>
@@ -82,7 +82,7 @@ try {
     $sql = "SELECT DISTINCT
                 `id_tercero_api`
             FROM
-                `seg_terceros`";
+                `tb_terceros`";
     $res = $cmd->query($sql);
     $id_terceros = $res->fetchAll();
 } catch (PDOException $e) {

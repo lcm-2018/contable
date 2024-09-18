@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
@@ -302,10 +302,10 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `no_doc` = " . $_SESSION['nit_emp'];
+    $sql = "SELECT `id_tercero_api` FROM `tb_terceros` WHERE `nit_tercero` = " . $_SESSION['nit_emp'];
     $rs = $cmd->query($sql);
     $tercero = $rs->fetch();
-    $id_ter_api = !empty($tercero) ? $tercero['id_tercero_api'] : 0;
+    $id_ter_api = !empty($tercero) ? $tercero['id_tercero_api'] : NULL;
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();

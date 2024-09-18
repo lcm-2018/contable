@@ -19,10 +19,14 @@ try {
                 , `ctt_contratos`.`id_forma_pago`
                 , `ctt_contratos`.`id_supervisor`
                 , `ctt_adquisiciones`.`id_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
             FROM
                 `ctt_contratos`
             INNER JOIN `ctt_adquisiciones` 
                 ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
+            LEFT JOIN `tb_terceros` 
+                ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_contrato_compra` = $id_cc";
     $rs = $cmd->query($sql);
     $contrato = $rs->fetch();
@@ -30,32 +34,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `id_tercero` = ? LIMIT 1";
-    $sql = $cmd->prepare($sql);
-    $sql->bindParam(1, $contrato['id_tercero'], PDO::PARAM_INT);
-    $sql->execute();
-    $id_tercero = 0;
-    if ($sql->rowCount() > 0) {
-        $row = $sql->fetch(PDO::FETCH_ASSOC);
-        $id_tercero = $row['id_tercero_api'];
-    }
-    $id_t = [$id_tercero];
-    if (!empty($id_t) && $id_tercero > 0) {
-        $ids = implode(',', $id_t);
-        $terceros = getTerceros($ids, $cmd);
-        $tercero = ltrim($terceros[0]['nom_tercero']);
-        $cc_nit = $terceros[0]['nit_tercero'];
-    } else {
-        $tercero = '---';
-        $cc_nit = '---';
-    }
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+$id_tercero = isset($contrato) ? $contrato['id_tercero'] : 0;
 $id_contra = isset($contrato) ? $contrato['id_contrato_compra'] : 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -91,28 +70,19 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`, `seg_terceros`.`no_doc`, `tb_rel_tercero`.`id_tercero_api`
+                `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`id_tercero_api`
             FROM
-                `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-            WHERE `seg_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
+                `tb_terceros`
+                INNER JOIN  `tb_rel_tercero`
+                    ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            WHERE `tb_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
     $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetchAll();
+    $supervisor = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-if (!empty($terceros_sup)) {
-    $ced = [];
-    foreach ($terceros_sup as $tE) {
-        $ced[] = $tE['id_tercero_api'];
-    }
-    $ids = implode(',', $ced);
-    $supervisor = getTerceros($ids, $cmd);
-    $cmd = null;
-} else {
-    echo "No se ha registrado ningun tercero" . '<br><br><a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal"> Cancelar</a>';
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -162,7 +132,7 @@ try {
             <div class="form-row px-4">
                 <div class="form-group col-md-12">
                     <label for="SeaTercer" class="small">TERCERO</label>
-                    <input type="text" id="SeaTercer" class="form-control form-control-sm py-0 sm" placeholder="Buscar tercero" value="<?php echo $tercero . ' -> ' . $cc_nit ?>">
+                    <input type="text" id="SeaTercer" class="form-control form-control-sm py-0 sm" placeholder="Buscar tercero" value="<?php echo $contrato['nom_tercero'] . ' -> ' . $contrato['nit_tercero'] ?>">
                     <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $id_tercero ?>">
                 </div>
             </div>

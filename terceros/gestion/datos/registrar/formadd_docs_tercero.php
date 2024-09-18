@@ -10,7 +10,7 @@ $idT = $_POST['idt'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT * FROM seg_tipo_docs_tercero";
+    $sql = "SELECT * FROM tb_tipo_docs_tercero";
     $rs = $cmd->query($sql);
     $tipo_docs = $rs->fetchAll();
     $cmd = null;

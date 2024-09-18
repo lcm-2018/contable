@@ -83,7 +83,7 @@
     $(document).ready(function () {
         let id_t = $('#id_tercero').val();
         //dataTable Terceros
-        $('#tableTerceros').DataTable({
+        tbListTerceros = $('#tableTerceros').DataTable({
             dom: setdom,
             buttons: [{
                 action: function (e, dt, node, config) {
@@ -91,15 +91,17 @@
                 }
             }],
             language: setIdioma,
-            "ajax": {
+            serverSide: true,
+            processing: true,
+            ajax: {
                 url: 'datos/listar/datos_terceros.php',
                 type: 'POST',
                 dataType: 'json',
             },
-            "columns": [
+            columns: [
                 { 'data': 'cc_nit' },
                 { 'data': 'nombre_tercero' },
-                { 'data': 'razon_social' },
+                //{ 'data': 'razon_social' },
                 { 'data': 'tipo' },
                 { 'data': 'municipio' },
                 { 'data': 'direccion' },
@@ -108,16 +110,32 @@
                 { 'data': 'estado' },
                 { 'data': 'botones' },
             ],
-            "order": [
-                [0, "asc"]
-            ]
+            columnDefs: [
+                { class: 'text-wrap', targets: [1, 4] },
+                { orderable: false, targets: 8 }
+            ],
+            order: [[0, "desc"]],
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
         });
         $('#tableTerceros').wrap('<div class="overflow" />');
+        $('#tableTerceros_filter input').unbind(); // Desvinculamos el evento por defecto
+        $('#tableTerceros_filter input').bind('keypress', function (e) {
+            if (e.keyCode == 13) { // Si se presiona Enter (código 13)
+                tbListTerceros.search(this.value).draw(); // Realiza la búsqueda y actualiza la tabla
+            }
+        });
         //dataTable Resposabilidad Economica
         let idt = $('#id_tercero').val();
         $('#tableRespEcon').DataTable({
             dom: setdom,
             buttons: [{
+                attr: {
+                    id: 'btnRegistrarRespEcon', // Asignas un id
+                },
                 action: function (e, dt, node, config) {
                     //Registar Responsabilidad Economica desde Detalles
                     $.post("datos/registrar/formadd_resp_economica.php", { idt: idt }, function (he) {
@@ -142,9 +160,15 @@
                 { 'data': 'descripcion' },
                 { 'data': 'estado' },
             ],
-            "order": [
-                [0, "asc"]
-            ]
+            columnDefs: [
+                { class: 'text-wrap', targets: [1] },
+            ],
+            order: [[0, "desc"]],
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
         });
         $('#tableRespEcon').wrap('<div class="overflow" />');
         //dataTable Actividad Economica
@@ -175,8 +199,14 @@
                 { 'data': 'fec_inicio' },
                 { 'data': 'estado' },
             ],
-            "order": [
-                [0, "asc"]
+            columnDefs: [
+                { class: 'text-wrap', targets: [1] },
+            ],
+            order: [[0, "desc"]],
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
             ],
 
         });
@@ -206,47 +236,47 @@
     });
     //Nuevo tercero
     $('#btnNewTercero').on('click', function () {
-        let id;
+        $('.is-invalid').removeClass('is-invalid');
         if ($('#slcTipoTercero').val() === '0') {
-            id = 'slcTipoTercero';
-            bordeError(id);
-            showError(id);
+            $('#slcTipoTercero').addClass('is-invalid');
+            $('#slcTipoTercero').focus();
+            mjeError('Error', 'Diligenciar, campo obligatorio');
         } else if ($('#datFecInicio').val() === '') {
-            id = 'datFecInicio';
-            bordeError(id);
-            showError(id);
+            $('#datFecInicio').addClass('is-invalid');
+            $('#datFecInicio').focus();
+            mjeError('Error', 'Diligenciar, campo obligatorio');
         } else if ($('#slcGenero').val() === '0') {
-            id = 'slcGenero';
-            bordeError(id);
-            showError(id);
+            $('#slcGenero').addClass('is-invalid');
+            $('#slcGenero').focus();
+            mjeError('Error', 'Diligenciar, campo obligatorio');
         } else if ($('#slcTipoDocEmp').val() === '0') {
-            id = 'slcTipoDocEmp';
-            bordeError(id);
-            showError(id);
+            $('#slcTipoDocEmp').addClass('is-invalid');
+            $('#slcTipoDocEmp').focus();
+            mjeError('Error', 'Diligenciar, campo obligatorio');
         } else if ($('#txtCCempleado').val() === '' || parseInt($('#txtCCempleado').val()) < 1) {
-            id = 'txtCCempleado';
-            bordeError(id);
-            showError(id);
+            $('#txtCCempleado').addClass('is-invalid');
+            $('#txtCCempleado').focus();
+            mjeError('Error', 'Diligenciar, campo obligatorio');
         } else if ($('#slcPaisEmp').val() === '0') {
-            id = 'slcPaisEmp';
-            bordeError(id);
-            showError(id);
+            $('#slcPaisEmp').addClass('is-invalid');
+            $('#slcPaisEmp').focus();
+            mjeError('Error', 'Diligenciar, campo obligatorio');
         } else if ($('#slcDptoEmp').val() === '0') {
-            id = 'slcDptoEmp';
-            bordeError(id);
-            showError(id);
+            $('#slcDptoEmp').addClass('is-invalid');
+            $('#slcDptoEmp').focus();
+            mjeError('Error', 'Diligenciar, campo obligatorio');
         } else if ($('#slcMunicipioEmp').val() === '0') {
-            id = 'slcMunicipioEmp';
-            bordeError(id);
-            showError(id);
+            $('#slcMunicipioEmp').addClass('is-invalid');
+            $('#slcMunicipioEmp').focus();
+            mjeError('Error', 'Diligenciar, campo obligatorio');
         } else if ($('#mailEmp').val() === '') {
-            id = 'mailEmp';
-            bordeError(id);
-            showError(id);
+            $('#mailEmp').addClass('is-invalid');
+            $('#mailEmp').focus();
+            mjeError('Error', 'Diligenciar, campo obligatorio');
         } else if ($('#txtTelEmp').val() === '') {
-            id = 'txtTelEmp';
-            bordeError(id);
-            showError(id);
+            $('#txtTelEmp').addClass('is-invalid');
+            $('#txtTelEmp').focus();
+            mjeError('Error', 'Diligenciar, campo obligatorio');
         } else {
             let datos = $('#formNuevoTercero').serialize();
             let pasT = hex_sha512($('#txtCCempleado').val());
@@ -256,12 +286,13 @@
                 url: 'newtercero.php',
                 data: datos,
                 success: function (r) {
-                    if (r === '1') {
-                        $('#divModalDone').modal('show');
-                        $('#divMsgDone').html('Agregado Correctamente');
+                    if (r == 'ok') {
+                        mje('Nuevo Tercero', 'Tercero registrado correctamente');
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
                     } else {
-                        $('#divModalError').modal('show');
-                        $('#divMsgError').html(r);
+                        mjeError('Error', r);
                     }
                 }
             });
@@ -326,31 +357,32 @@
     });
     //Actualizar datos tercero
     $('#divForms').on('click', '#btnUpTercero', function () {
-        let id;
+        var msg = 'Diligenciar, campo obligatorio';
+        $('.is-invalid').removeClass('is-invalid');
         if ($('#datFecInicio').val() === '') {
-            id = 'datFecInicio';
-            bordeError(id);
-            showError(id);
+            $('#datFecInicio').addClass('is-invalid');
+            $('#datFecInicio').focus();
+            mjeError('Error', msg);
         } else if ($('#datFecNacimiento').val() === '') {
-            id = 'datFecNacimiento';
-            bordeError(id);
-            showError(id);
+            $('#datFecNacimiento').addClass('is-invalid');
+            $('#datFecNacimiento').focus();
+            mjeError('Error', msg);
         } else if ($('#txtCCempleado').val() === '' || parseInt($('#txtCCempleado').val()) < 1) {
-            id = 'txtCCempleado';
-            bordeError(id);
-            showError(id);
+            $('#txtCCempleado').addClass('is-invalid');
+            $('#txtCCempleado').focus();
+            mjeError('Error', msg);
         } else if ($('#slcMunicipioEmp').val() === '0') {
-            id = 'slcMunicipioEmp';
-            bordeError(id);
-            showError(id);
+            $('#slcMunicipioEmp').addClass('is-invalid');
+            $('#slcMunicipioEmp').focus();
+            mjeError('Error', msg);
         } else if ($('#mailEmp').val() === '') {
-            id = 'mailEmp';
-            bordeError(id);
-            showError(id);
+            $('#mailEmp').addClass('is-invalid');
+            $('#mailEmp').focus();
+            mjeError('Error', msg);
         } else if ($('#txtTelEmp').val() === '') {
-            id = 'txtTelEmp';
-            bordeError(id);
-            showError(id);
+            $('#txtTelEmp').addClass('is-invalid');
+            $('#txtTelEmp').focus();
+            mjeError('Error', msg);
         } else {
             let datos = $('#formActualizaTercero').serialize();
             $.ajax({
@@ -358,22 +390,12 @@
                 url: 'actualizar/up_datos_tercero.php',
                 data: datos,
                 success: function (r) {
-                    switch (r) {
-                        case '00':
-                            $('#divModalError').modal('show');
-                            $('#divMsgError').html('No se ingresó datos nuevos');
-                            break;
-                        case '1':
-                            id = 'tableTerceros';
-                            reloadtable(id);
-                            $('#divModalForms').modal('hide');
-                            $('#divModalDone').modal('show');
-                            $('#divMsgDone').html('Datos Actualizados Correctamente');
-                            break;
-                        default:
-                            $('#divModalError').modal('show');
-                            $('#divMsgError').html(r);
-                            break;
+                    if (r == 'ok') {
+                        $('#divModalForms').modal('hide');
+                        $('#tableTerceros').DataTable().ajax.reload();
+                        mje('Actualizado', 'Datos actualizados correctamente');
+                    } else {
+                        mjeError('Error', r);
                     }
                 }
             });
@@ -411,6 +433,8 @@
     $('#modificarTerceros').on('click', '.responsabilidad', function () {
         let idt = $(this).attr('value');
         $.post("datos/registrar/formadd_resp_economica.php", { idt: idt }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl')
+            $('#divTamModalForms').addClass('modal-sm')
             $('#divTamModalForms').addClass('modal-lg')
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
@@ -419,7 +443,10 @@
     });
     //Agregar Responsabilidad Economica
     $('#divForms').on('click', '#btnAddRespEcon', function () {
+        $('.is-invalid').removeClass('is-invalid');
         if ($('#slcRespEcon').val() === '0') {
+            $('#buscarRespEcono').addClass('is-invalid');
+            $('#buscarRespEcono').focus();
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Debe seleccionar una Resposabilidad Económica!');
         } else {

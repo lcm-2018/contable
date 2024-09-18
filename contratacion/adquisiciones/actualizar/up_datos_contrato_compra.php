@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -19,27 +19,16 @@ $change = 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero` FROM `seg_terceros` WHERE `id_tercero_api` = ? LIMIT 1";
+
+    $sql = "UPDATE `ctt_adquisiciones` SET `id_tercero` = ? WHERE `id_adquisicion` = ?";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);
-    $sql->execute();
-    if ($sql->rowCount() > 0) {
-        $row = $sql->fetch(PDO::FETCH_ASSOC);
-        $id_tercero = $row['id_tercero'];
-        $sql = "UPDATE `ctt_adquisiciones` SET `id_tercero` = ? WHERE `id_adquisicion` = ?";
-        $sql = $cmd->prepare($sql);
-        $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);
-        $sql->bindParam(2, $id_compra, PDO::PARAM_INT);
-
-        if (!($sql->execute())) {
-            echo $sql->errorInfo()[2];
-            exit();
-        } else {
-            $change = 1;
-        }
-    } else {
-        echo 'Tercero no relacionado en base propia';
+    $sql->bindParam(2, $id_compra, PDO::PARAM_INT);
+    if (!($sql->execute())) {
+        echo $sql->errorInfo()[2];
         exit();
+    } else {
+        $change = 1;
     }
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();

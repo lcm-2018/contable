@@ -11,11 +11,6 @@ $id_cot = $data[0];
 $cc_nit = $data[1];
 try {
     $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT `id_tercero` FROM `seg_terceros` WHERE `no_doc` = '$cc_nit' LIMIT 1";
-    $rs = $cmd->query($sql);
-    $id_tercero = $rs->fetch();
     $cmd = null;
     if (isset($id_tercero)) {
         $id_ter = $id_tercero['id_tercero'];
@@ -34,7 +29,7 @@ try {
             $sql->bindParam(5, $id_cot, PDO::PARAM_INT);
             $sql->execute();
             if (!($sql->rowCount() > 0)) {
-                print_r($sql->errorInfo()[2]);
+                echo $sql->errorInfo()[2];
             } else {
                 echo 1;
             }

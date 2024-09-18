@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $id_compra = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
@@ -21,17 +21,19 @@ try {
                 , `ctt_modalidad`.`modalidad`
                 , `ctt_adquisiciones`.`objeto`
                 , `ctt_adquisiciones`.`id_supervision`
-                , `seg_terceros`.`id_tercero_api`
+                , `tb_terceros`.`id_tercero_api`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
                 , `tb_area_c`.`id_area`
                 , `tb_area_c`.`area`
             FROM
                 `ctt_adquisiciones`
             INNER JOIN `ctt_modalidad` 
                 ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
-            INNER JOIN `seg_terceros`
-                ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
             INNER JOIN `tb_area_c` 
                 ON (`ctt_adquisiciones`.`id_area` = `tb_area_c`.`id_area`)
+            LEFT JOIN `tb_terceros`
+                ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_adquisicion` = '$id_compra' LIMIT 1";
     $rs = $cmd->query($sql);
     $compra = $rs->fetch();
@@ -77,12 +79,17 @@ try {
                 , `ctt_contratos`.`val_contrato`
                 , `tb_forma_pago_compras`.`descripcion`
                 , `ctt_contratos`.`id_supervisor`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`,`id_tercero_api`
+                ,  `tb_terceros`.`nit_tercero`
                 , `id_secop`
                 ,`num_contrato`
             FROM
                 `ctt_contratos`
             INNER JOIN `tb_forma_pago_compras` 
                 ON (`ctt_contratos`.`id_forma_pago` = `tb_forma_pago_compras`.`id_form_pago`)
+            LEFT JOIN `tb_terceros` 
+                ON (`ctt_contratos`.`id_supervisor` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_compra` = '$id_compra'";
     $rs = $cmd->query($sql);
     $contrato = $rs->fetch();
@@ -128,27 +135,7 @@ try {
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-$id_ter_sup = $contrato['id_supervisor'];
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `no_doc` FROM `seg_terceros` WHERE `id_tercero_api` = '$id_ter_sup'";
-    $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetch();
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/' . $terceros_sup['no_doc'];
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $supervisor_res = json_decode($result, true);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 $url = $api . 'terceros/datos/res/datos/id/' . $compra['id_tercero_api'];
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -183,7 +170,7 @@ $genero = $tercer[0]['genero'] == 'F' ? 'a' : 'o';
 $solicitante = $compra['area'];
 $objeto = $compra['objeto'];
 $vigencia = $_SESSION['vigencia'];
-$supervisor = $supervisor_res[0]['nombre1'] . ' ' . $supervisor_res[0]['nombre2'] . ' ' . $supervisor_res[0]['apellido1'] . ' ' . $supervisor_res[0]['apellido2'];
+$supervisor = $compra['nom_tercero'];
 $tercero = $tercer[0]['nombre1'] . ' ' . $tercer[0]['nombre2'] . ' ' . $tercer[0]['apellido1'] . ' ' . $tercer[0]['apellido2'];
 $cedula_ter = $tercer[0]['cc_nit'];
 $meses = ['', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];

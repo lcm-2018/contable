@@ -13,13 +13,13 @@ try {
                 `ctt_contratos`.`id_contrato_compra`
                 , `ctt_contratos`.`id_compra`
                 , `ctt_contratos`.`val_contrato`
-                , `seg_terceros`.`no_doc`
+                , `tb_terceros`.`no_doc`
             FROM
                 `ctt_contratos`
             INNER JOIN `ctt_adquisiciones` 
                 ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
-            INNER JOIN `seg_terceros` 
-                ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
+            INNER JOIN `tb_terceros` 
+                ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE `ctt_contratos`.`id_compra`= '$id_c' LIMIT 1";
     $rs = $cmd->query($sql);
     $ids = $rs->fetch();

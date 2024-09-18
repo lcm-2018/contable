@@ -2,7 +2,7 @@
 session_start();
 date_default_timezone_set('America/Bogota');
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $vigencia = $_SESSION['vigencia'];

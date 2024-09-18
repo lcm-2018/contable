@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $idsop = isset($_POST['idsoporte']) ? $_POST['idsoporte'] : exit('Acción no permitida');

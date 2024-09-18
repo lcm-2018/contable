@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 ?>
@@ -28,7 +28,7 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 try {
-    $sql = "SELECT id_manu FROM pto_documento WHERE id_pto_doc =$cdp[id_auto] AND tipo_doc='CDP'";
+    $sql = "SELECT id_manu FROM pto_documento WHERE id_pto_doc = {$cdp['id_auto']} AND tipo_doc='CDP'";
     $res = $cmd->query($sql);
     $cdp_auto = $res->fetch();
 } catch (PDOException $e) {
@@ -61,10 +61,10 @@ try {
 }
 $id_tercero_api = $cdp['id_tercero'];
 try {
-    $sql = "SELECT no_doc FROM seg_terceros WHERE id_tercero_api =$id_tercero_api";
+    $sql = "SELECT `nit_tercero` FROM `tb_terceros` WHERE `id_tercero_api` = $id_tercero_api";
     $res = $cmd->query($sql);
     $nit = $res->fetch();
-    $num_doc = $nit['no_doc'];
+    $num_doc = $nit['nit_tercero'];
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }

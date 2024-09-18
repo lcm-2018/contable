@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -33,21 +33,17 @@ try {
 }
 // Consulto los id de terceros creado en la tabla ctb_doc
 try {
-    $sql = "SELECT DISTINCT
+    $sql = "SELECT
                 `id_tercero_api`
+                , `nom_tercero`
+                , `nit_tercero`
             FROM
-                `seg_terceros`";
+                `tb_terceros`";
     $res = $cmd->query($sql);
-    $id_terceros = $res->fetchAll();
+    $terceros = $res->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$id_t = [];
-foreach ($id_terceros as $ter) {
-    $id_t[] = $ter['id_tercero_api'];
-}
-$ids = implode(',', $id_t);
-$terceros = getTerceros($ids, $cmd);
 ?>
 <script>
     $('#tableContrtacionCdp').DataTable({
@@ -102,20 +98,7 @@ $terceros = getTerceros($ids, $cmd);
                 <tbody>
                     <?php
                     foreach ($solicitudes as $ce) {
-                        // Consulto el tercero_api en la tabal seg_teceros
-                        try {
-                            $sql = "SELECT
-                                        `id_tercero_api`
-                                    FROM
-                                        `seg_terceros`
-                                    WHERE `id_tercero` ={$ce['id_tercero']};";
-                            $res = $cmd->query($sql);
-                            $ccnit = $res->fetch();
-                            $id_tercero = $ccnit['id_tercero_api'];
-                        } catch (PDOException $e) {
-                            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-                        }
-                        // Consulto el api de terceros para obtener los datos
+                        $id_tercero = $ce['id_tercero'];
                         $key = array_search($id_tercero, array_column($terceros, 'id_tercero_api'));
                         $tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '---';
                         $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';

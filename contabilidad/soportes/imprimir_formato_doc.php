@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(3600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $vigencia = $_SESSION['vigencia'];

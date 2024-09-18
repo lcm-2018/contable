@@ -270,30 +270,32 @@ SELECT
 FROM `financiero`.`seg_soporte_ne`;
 
 INSERT INTO `bd_cronhis`.`tb_terceros`
-	(`nom_tercero`,`nit_tercero`,`dir_tercero`,`tel_tercero`,`id_municipio`,`email`,`id_tercero_api`)
+	(`nom_tercero`,`nit_tercero`,`dir_tercero`,`tel_tercero`,`id_municipio`,`email`,`id_tercero_api`,`estado`,`tipo_doc`,`fec_inicio`)
 SELECT
     TRIM(
         CONCAT_WS(
             ' ',
-            TRIM(`tb_terceros_api`.`nombre1`),
-            TRIM(`tb_terceros_api`.`nombre2`),
-            TRIM(`tb_terceros_api`.`apellido1`),
-            TRIM(`tb_terceros_api`.`apellido2`),
-            TRIM(`tb_terceros_api`.`razon_social`)
+            TRIM(`docs_api`.`seg_terceros`.`nombre1`),
+            TRIM(`docs_api`.`seg_terceros`.`nombre2`),
+            TRIM(`docs_api`.`seg_terceros`.`apellido1`),
+            TRIM(`docs_api`.`seg_terceros`.`apellido2`),
+            TRIM(`docs_api`.`seg_terceros`.`razon_social`)
         )
     ) AS `nombre` 
-    , `financiero`.`tb_terceros_api`.`cc_nit`
-    , `financiero`.`tb_terceros_api`.`direccion`
-    , `financiero`.`tb_terceros_api`.`telefono`
-    , `financiero`.`tb_terceros_api`.`municipio`
-    , `financiero`.`tb_terceros_api`.`correo`
-    , `financiero`.`tb_terceros_api`.`id_tercero`
+    , `docs_api`.`seg_terceros`.`cc_nit`
+    , `docs_api`.`seg_terceros`.`direccion`
+    , `docs_api`.`seg_terceros`.`telefono`
+    , `docs_api`.`seg_terceros`.`municipio`
+    , `docs_api`.`seg_terceros`.`correo`
+    , `docs_api`.`seg_terceros`.`id_tercero`
+    , `financiero`.`seg_terceros`.`estado`
+    , `financiero`.`seg_terceros`.`tipo_doc`
+	, `financiero`.`seg_terceros`.`fec_inicio`
 FROM
     `financiero`.`seg_terceros`
-    INNER JOIN `financiero`.`tb_terceros_api` 
-        ON (`seg_terceros`.`id_tercero_api` = `tb_terceros_api`.`id_tercero`);
-
-		
+    INNER JOIN `docs_api`.`seg_terceros` 
+        ON (`financiero`.`seg_terceros`.`id_tercero_api` = `docs_api`.`seg_terceros`.`id_tercero`);
+	
 INSERT INTO `bd_cronhis`.`seg_terceros`
 	(`id_tercero`,`id_tercero_api`,`tipo_doc`,`no_doc`,`estado`,`fec_inicio`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`)
 SELECT
@@ -798,12 +800,14 @@ SELECT
 		ELSE `seg_adquisiciones`.`id_cdp`
 	END AS `id_cdp`
 	,`fecha_adquisicion`,`val_contrato`,`vigencia`,`id_tipo_bn_sv`
-	,`obligaciones`,`seg_adquisiciones`.`objeto`,`id_tercero`,`entregas`,`seg_adquisiciones`.`estado`,`id_cont_api`,`id_supervision`,`seg_usuarios_sistema`.`id_usuario`,`seg_adquisiciones`.`fec_reg`,`seg_usuarios_sistema`.`id_usuario` AS `act`,`seg_adquisiciones`.`fec_act`
+	,`obligaciones`,`seg_adquisiciones`.`objeto`,`seg_terceros`.`id_tercero`,`entregas`,`seg_adquisiciones`.`estado`,`id_cont_api`,`id_supervision`,`seg_usuarios_sistema`.`id_usuario`,`seg_adquisiciones`.`fec_reg`,`seg_usuarios_sistema`.`id_usuario` AS `act`,`seg_adquisiciones`.`fec_act`
 FROM `financiero`.`seg_adquisiciones`
 INNER JOIN `bd_cronhis`.`tb_tipo_bien_servicio`
 	ON(`bd_cronhis`.`tb_tipo_bien_servicio`.`id_tipo_b_s` = `financiero`.`seg_adquisiciones`.`id_tipo_bn_sv`)
 INNER JOIN `bd_cronhis`.`seg_usuarios_sistema`
 	ON (`financiero`.`seg_adquisiciones`.`id_user_reg` = `bd_cronhis`.`seg_usuarios_sistema`.`id_user_fin`)
+INNER JOIN `financiero`.`seg_terceros`
+	ON(`financiero`.`seg_terceros`.`id_tercero` = `financiero`.`seg_adquisiciones`.`id_tercero`)
 LEFT JOIN `bd_cronhis`.`pto_cdp`
 	ON(`financiero`.`seg_adquisiciones`.`id_cdp` = `bd_cronhis`.`pto_cdp`.`id_pto_cdp`);
 

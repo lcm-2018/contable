@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 ?>
@@ -42,7 +42,7 @@ include '../../financiero/consultas.php';
 include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-// consulto la tabla seg_terceros para obtener el id_tercero_api
+// consulto la tabla tb_terceros para obtener el id_tercero_api
 try {
     $sql = "SELECT
     `ctb_retenciones`.`id_retencion`

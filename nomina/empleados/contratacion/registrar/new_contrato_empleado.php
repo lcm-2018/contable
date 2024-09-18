@@ -58,7 +58,7 @@ function newContratoEmpleado()
         if ($cmd->lastInsertId() > 0) {
             echo '1';
         } else {
-            print_r($sql->errorInfo()[2]);
+            echo $sql->errorInfo()[2];
         }
         $cmd = null;
     } catch (PDOException $e) {

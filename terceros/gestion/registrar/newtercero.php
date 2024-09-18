@@ -1,7 +1,7 @@
 <?php
 session_start();
 /*if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header('Location: ../../../index.php');
     exit();
 }*/
 include '../../../conexion.php';
@@ -115,30 +115,43 @@ if ($terceros != '0') {
 }
 if ($res > 1 || $regAtTerc == 'SI') {
     try {
+        $estado = 1;
+        $nombre = trim($nomb1 . ' ' . $nomb2 . ' ' . $ape1 . ' ' . $ape2 . ' ' . $razonsoc);
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "INSERT INTO seg_terceros(`tipo_doc`, `id_tercero_api`, `no_doc`, `estado`, `fec_inicio`, `id_user_reg`, `fec_reg`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO `tb_terceros`
+                    (`tipo_doc`,`nom_tercero`,`nit_tercero`,`dir_tercero`,`tel_tercero`,`id_municipio`,`email`,`id_usr_crea`,`id_tercero_api`,`estado`,`fec_inicio`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
-        $sql->bindParam(1, $tipodoc, PDO::PARAM_INT);
-        $sql->bindParam(2, $id_ter_api, PDO::PARAM_INT);
+        $sql->bindParam(1, $tipodoc, PDO::PARAM_STR);
+        $sql->bindParam(2, $nombre, PDO::PARAM_STR);
         $sql->bindParam(3, $cc_nit, PDO::PARAM_STR);
-        $sql->bindParam(4, $estado, PDO::PARAM_STR);
-        $sql->bindParam(5, $fecInicio, PDO::PARAM_STR);
-        $sql->bindParam(6, $iduser, PDO::PARAM_INT);
-        $sql->bindValue(7, $date->format('Y-m-d H:i:s'));
+        $sql->bindParam(4, $dir, PDO::PARAM_STR);
+        $sql->bindParam(5, $tel, PDO::PARAM_STR);
+        $sql->bindParam(6, $municip, PDO::PARAM_INT);
+        $sql->bindParam(7, $mail, PDO::PARAM_STR);
+        $sql->bindParam(8, $iduser, PDO::PARAM_INT);
+        $sql->bindParam(9, $id_ter_api, PDO::PARAM_INT);
+        $sql->bindParam(10, $estado, PDO::PARAM_INT);
+        $sql->bindParam(11, $fecInicio, PDO::PARAM_STR);
         $sql->execute();
         if ($cmd->lastInsertId() > 0) {
-            $sql = "INSERT INTO `tb_rel_tercero` (`id_tercero_api`, `id_tipo_tercero`, `id_user_reg`, `fec_reg`) VALUES (?, ?, ?, ?)";
-            $sql = $cmd->prepare($sql);
-            $sql->bindParam(1, $id_ter_api, PDO::PARAM_INT);
-            $sql->bindParam(2, $tipotercero, PDO::PARAM_STR);
-            $sql->bindParam(3, $iduser, PDO::PARAM_INT);
-            $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
-            $sql->execute();
+            $cmd = NULL;
+            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+            $query = "INSERT INTO `tb_rel_tercero`
+                        (`id_tercero_api`,`id_tipo_tercero`,`id_user_reg`,`fec_reg`)
+                    VALUES(?, ?, ?, ?)";
+            $query = $cmd->prepare($query);
+            $query->bindParam(1, $id_ter_api, PDO::PARAM_INT);
+            $query->bindParam(2, $tipotercero, PDO::PARAM_STR);
+            $query->bindParam(3, $iduser, PDO::PARAM_INT);
+            $query->bindValue(4, $date->format('Y-m-d H:i:s'));
+            $query->execute();
             if ($cmd->lastInsertId() > 0) {
-                echo '1';
+                echo 'ok';
             } else {
-                echo $sql->errorInfo()[2];
+                echo $query->errorInfo()[2] . '-.-';
             }
         } else {
             echo $sql->errorInfo()[2];
