@@ -270,7 +270,7 @@ SELECT
 FROM `financiero`.`seg_soporte_ne`;
 
 INSERT INTO `bd_cronhis`.`tb_terceros`
-	(`nom_tercero`,`nit_tercero`,`dir_tercero`,`tel_tercero`,`id_municipio`,`email`,`id_tercero_api`,`estado`,`tipo_doc`,`fec_inicio`)
+	(`nom_tercero`,`nit_tercero`,`dir_tercero`,`tel_tercero`,`id_municipio`,`email`,`id_tercero_api`,`estado`,`tipo_doc`,`fec_inicio`,`genero`)
 SELECT
     TRIM(
         CONCAT_WS(
@@ -291,17 +291,18 @@ SELECT
     , `financiero`.`seg_terceros`.`estado`
     , `financiero`.`seg_terceros`.`tipo_doc`
 	, `financiero`.`seg_terceros`.`fec_inicio`
+	, `docs_api`.`seg_terceros`.`genero`
 FROM
     `financiero`.`seg_terceros`
     INNER JOIN `docs_api`.`seg_terceros` 
         ON (`financiero`.`seg_terceros`.`id_tercero_api` = `docs_api`.`seg_terceros`.`id_tercero`);
-	
+/*	
 INSERT INTO `bd_cronhis`.`seg_terceros`
 	(`id_tercero`,`id_tercero_api`,`tipo_doc`,`no_doc`,`estado`,`fec_inicio`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`)
 SELECT
 	`id_tercero`,`id_tercero_api`,`tipo_doc`,`no_doc`,`estado`,`fec_inicio`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`
 FROM `financiero`.`seg_terceros`;
-
+*/
 INSERT INTO `bd_cronhis`.`tb_tipo_tercero`
             (`id_tipo`,`descripcion`)
 SELECT 

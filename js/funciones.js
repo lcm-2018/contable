@@ -330,16 +330,61 @@ if (esta === -1) {
         });
     });
     //Modal cierre de periodos 
-    $('#hrefCierre').on('click', function () {
-        $.post(window.urlin + "/actualizar/datos_up_permisos.php", function (he) {
+    function cierrePeriodo() {
+        $.post(window.urlin + "/actualizar/form_cierre_periodo.php", function (he) {
             $('#divTamModalPermisos').removeClass('modal-xl');
             $('#divTamModalPermisos').removeClass('modal-sm');
             $('#divTamModalPermisos').addClass('modal-lg');
             $('#divModalPermisos').modal('show');
             $("#divTablePermisos").html(he);
         });
+    }
+    function GestionDocs() {
+        $.post(window.urlin + "/actualizar/form_gestion_docs.php", function (he) {
+            $('#divTamModalPermisos').removeClass('modal-xl');
+            $('#divTamModalPermisos').removeClass('modal-sm');
+            $('#divTamModalPermisos').addClass('modal-lg');
+            $('#divModalPermisos').modal('show');
+            $("#divTablePermisos").html(he);
+        });
+    }
+    $('#hrefCierre').on('click', function () {
+        cierrePeriodo();
     });
 
+    $("#divTablePermisos").on('click', '.cerrar', function () {
+        var id = $(this).attr('text');
+        Swal.fire({
+            title: "¿Confirma cerrar periodo?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var ruta = window.urlin + '/actualizar/cierre_periodo.php';
+                $.ajax({
+                    type: 'POST',
+                    url: ruta,
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            cierrePeriodo();
+                            mje("Registro exitoso");
+                        } else {
+                            mjeError("Error: " + r);
+                        }
+                    }
+                });
+            }
+        });
+        return false;
+    });
+    $('#hrefGestionDocs').on('click', function () {
+        window.location = window.urlin + '/documentos/maestro.php';
+    });
     $("#divTablePermisos").on('click', '#dataTablePermiso span', function () {
         let caden = $(this).attr('value');
         let cad = caden.split("|");

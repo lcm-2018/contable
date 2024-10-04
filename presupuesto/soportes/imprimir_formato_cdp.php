@@ -23,6 +23,7 @@ try {
                 , `pto_cdp`.`fecha`
                 , `pto_cdp`.`num_solicitud`
                 , `pto_cdp`.`fecha_reg` AS `fec_reg`
+                , `pto_cdp`.`estado`
                 , CONCAT_WS(`seg_usuarios_sistema`.`nombre1`
                 , `seg_usuarios_sistema`.`nombre2`
                 , `seg_usuarios_sistema`.`apellido1`
@@ -49,7 +50,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-
+$anulado = $cdp['estado'] == '0' ? '<span class="badge badge-danger">ANULADO</span>' : '';
 try {
     $sql = "SELECT
                 `pto_cdp_detalle`.`id_pto_cdp`
@@ -128,7 +129,7 @@ try {
     if (empty($responsable)) {
         $responsable['nombre'] = 'XXXXX XXXXX XXXX';
         $responsable['cargo'] = 'XXXXXXXX';
-        $responsable['descripcion'] = 'xxxxxxxxxx';
+        $responsable['descripcion'] = 'XXXXXXXX';
     }
     $nom_respon = mb_strtoupper($responsable['nombre'], 'UTF-8');
     $cargo_respon = $responsable['cargo'];
@@ -165,6 +166,9 @@ $fecha = date('Y-m-d', strtotime($cdp['fecha']));
         <div class="row px-2" style="text-align: center">
             <div class="col-12">
                 <div class="col lead"><label><strong>CERTIFICADO DE DISPONIBILIDAD PRESUPUESTAL No: <?php echo $cdp['id_manu']; ?></strong></label></div>
+                <div class="col lead">
+                    <h3><?php echo $anulado ?></h3>
+                </div>
             </div>
         </div>
 

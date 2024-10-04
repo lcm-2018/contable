@@ -553,6 +553,11 @@
             $("#dateFecha").addClass('is-invalid');
             $("#divModalError").modal("show");
             $("#divMsgError").html("¡La fecha no puede estar vacio!");
+        } else if ($("#dateFecha").val() <= $('#fec_cierre').val()) {
+            $("#dateFecha").focus();
+            $("#dateFecha").addClass('is-invalid');
+            $("#divModalError").modal("show");
+            $("#divMsgError").html("Fecha debe ser mayor a la fecha de cierre del presupuesto:<br> <b>" + $('#fec_cierre').val()) + "</b>";
         } else if ($("#id_manu").val() === "") {
             $("#id_manu").focus();
             $("#id_manu").addClass('is-invalid');
@@ -2654,9 +2659,9 @@ const registrarLiquidacionDetalleCrp = async (id) => {
 
 //================================================ ANULACION DE DOCUMENTO =============================================
 // Funcion para anular documento
-const anulacionCrp = (id) => {
-    let url = "form_fecha_anulacion.php";
-    $.post(url, { id: id }, function (he) {
+const anulacionPto = (button) => {
+    var data = button.getAttribute("text");
+    $.post("form_anula.php", { data: data }, function (he) {
         $("#divTamModalForms").removeClass("modal-sm");
         $("#divTamModalForms").removeClass("modal-xl");
         $("#divTamModalForms").addClass("modal-lg");
@@ -2688,6 +2693,47 @@ const generarInformeConsulta = (id) => {
 };
 
 // Enviar datos para anulacion
+function changeEstadoAnulacion() {
+    $('.is-invalid').removeClass('is-invalid');
+    if ('fecha' == '') {
+        $('#fecha').focus();
+        $('#fecha').addClass('is-invalid');
+        mjeError('La fecha no puede estar vacia', '');
+    } else if ($('#objeto').val() == '') {
+        $('#objeto').focus();
+        $('#objeto').addClass('is-invalid');
+        mjeError('El Motivo de anulación no puede estar vacio', '');
+    } else {
+        var datos = $("#formAnulaDoc").serialize();
+        Swal.fire({
+            title: "¿Confirma anulación de documento?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: "datos/registrar/registrar_anulacion_doc.php",
+                    data: datos,
+                    success: function (r) {
+                        if (r === "ok") {
+                            $('#divModalForms').modal('hide');
+                            $('#tableEjecPresupuesto').DataTable().ajax.reload();
+                            mje('Proceso realizado correctamente');
+                        } else {
+                            mjeError('Error:', r);
+                        }
+                    },
+                });
+            }
+        });
+    }
+};
+/*
 const changeEstadoAnulacion = async () => {
     let formEnvio = new FormData(formAnulacionCrpp);
     for (var pair of formEnvio.entries()) {
@@ -2729,7 +2775,7 @@ const changeEstadoAnulacion = async () => {
         console.error(error);
     }
 };
-
+*/
 // ================================================   FIN LIQUIDAR SALDO DE CDP =====================================
 
 const cargarReportePresupuesto = (id) => {

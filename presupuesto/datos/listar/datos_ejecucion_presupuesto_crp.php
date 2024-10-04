@@ -6,7 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
-include '../../../terceros.php';
+include '../../../financiero/consultas.php';
 // Llega el id del presupuesto que se esta listando
 $id_pto_presupuestos = $_POST['id_ejec'];
 // Recuperar los parámetros start y length enviados por DataTables
@@ -19,15 +19,18 @@ if (!empty($search_value)) {
 } else {
     $buscar = '';
 }
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `pto_crp`.`id_pto_crp`
                 , `pto_crp`.`id_pto`
                 , `pto_crp`.`fecha`
                 , `pto_crp`.`id_manu`
                 , `pto_crp`.`id_tercero_api`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
                 , `pto_crp`.`objeto`
                 , `pto_crp`.`num_contrato`
                 , `pto_crp`.`estado`
@@ -53,7 +56,9 @@ try {
                     LEFT JOIN `pto_cop_detalle`
                         ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
                 GROUP BY `pto_crp_detalle`.`id_pto_crp`) AS `detalle`
-            ON (`pto_crp`.`id_pto_crp` = `detalle`.`id_pto_crp`)
+                ON (`pto_crp`.`id_pto_crp` = `detalle`.`id_pto_crp`)
+            LEFT JOIN `tb_terceros`
+                ON (`pto_crp`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
             WHERE (`id_pto` = $id_pto_presupuestos)
             ORDER BY `id_manu` DESC 
             LIMIT $start, $length";
@@ -73,40 +78,15 @@ try {
 }
 
 // consultar la fecha de cierre del periodo del módulo de presupuesto 
-try {
-    $sql = "SELECT `fecha_cierre` FROM `tb_fin_periodos` WHERE `id_modulo` = 4";
-    $rs = $cmd->query($sql);
-    $fecha_cierre = $rs->fetch();
-    $fecha_cierre = $fecha_cierre['fecha_cierre'];
-    $fecha_cierre = date('Y-m-d', strtotime($fecha_cierre));
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-
-
 if (!empty($listappto)) {
-    $id_t = [];
-    foreach ($listappto as $rp) {
-        $id_t[] = $rp['id_tercero_api'];
-    }
-    $ids = implode(',', $id_t);
-    $terceros = getTerceros($ids, $cmd);
-
     foreach ($listappto as $lp) {
         $id_pto = $lp['id_pto_crp'];
-        $dato = null;
+        $anular = $dato = $borrar = $imprimir = $detalles = null;
         // Sumar el valor del crp de la tabla id_pto_mtvo
         $valor_crp = $lp['debito'] - $lp['credito'];
         $valor_crp = number_format($valor_crp, 2, ',', '.');
-        $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
-        if ($key !== false) {
-            $tercero = $terceros[$key]['nom_tercero'];
-            $ccnit = $terceros[$key]['nit_tercero'];
-        } else {
-            $tercero = '---';
-            $ccnit = '---';
-        }
-        // fin api terceros
+        $tercero  = $lp['nom_tercero'];
+        $ccnit = $lp['nit_tercero'];
         if ($lp['id_tercero_api'] == 0) {
             $tercero = 'NOMINA DE EMPLEADOS';
         }
@@ -120,8 +100,9 @@ if (!empty($listappto)) {
 
         $id_cdp = $lp['id_cdp'];
         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
-            $editar = '<a value="' . $id_pto . '" onclick="CargarListadoCrpp(' . $id_pto . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
-            $detalles = '<a value="' . $id_pto . '" onclick="imprimirFormatoCrp(' . $id_pto . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-print fa-lg" ></span></a>';
+            $editar = '<a value="' . $id_pto . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+            $detalles = '<a value="' . $id_pto . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" onclick="CargarListadoCrpp(' . $id_pto . ')" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
+            $imprimir = '<a value="' . $id_pto . '" onclick="imprimirFormatoCrp(' . $id_pto . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-print fa-lg" ></span></a>';
             $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
             ...
             </button>
@@ -130,33 +111,17 @@ if (!empty($listappto)) {
             ' . $anular . '
             <a value="' . $id_pto . '" class="dropdown-item sombra " href="#">Ver historial</a>
             </div>';
-        } else {
-            $editar = null;
-            $detalles = null;
         }
         if (PermisosUsuario($permisos, 5401, 4) || $id_rol == 1) {
             $borrar = '<a value="' . $id_pto . '" onclick="eliminarCrpp(' . $id_pto . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Registrar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-        } else {
-            $borrar = null;
         }
-
-        if ($lp['id_cop'] != '') {
-            $borrar = null;
-            $editar = null;
-            $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-            ...
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a value="' . $id_pto . '" class="dropdown-item sombra " href="#">Ver historial</a>
-            </div>';
-        }
-        // si estado es 5 quiere decir que el crp esta anulado
+        // si estado es 0 quiere decir que el crp esta anulado
         if ($lp['estado'] == 0) {
             $borrar = null;
             $editar = null;
+            $anular = null;
             $detalles = null;
-            $acciones = null;
-            $dato = 'Anulado';
+            $dato = '<span class="badge badge-pill badge-secondary">Anulado</span>';
         }
         if ($lp['estado'] >= 2) {
             $borrar = null;
@@ -170,7 +135,7 @@ if (!empty($listappto)) {
             'ccnit' => $ccnit,
             'tercero' => $tercero,
             'valor' =>  '<div class="text-right">' . $valor_crp . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $borrar . $detalles . $acciones . $dato . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . '</div>',
 
         ];
     }

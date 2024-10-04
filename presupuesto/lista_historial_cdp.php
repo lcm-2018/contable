@@ -7,22 +7,23 @@ if (!isset($_SESSION['user'])) {
 include '../conexion.php';
 include '../permisos.php';
 include '../financiero/consultas.php';
+
 $_post = json_decode(file_get_contents('php://input'), true);
 $cdp = $_post['id'];
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
     $sql = "SELECT
-    `pto_documento`.`id_manu` 
-    , `pto_documento`.`fecha`
-    , `pto_documento_detalles`.`rubro`
-    , `pto_documento_detalles`.`valor`
-    , `pto_documento_detalles`.`id_documento`
-    FROM
-    `pto_documento_detalles`
-    INNER JOIN `pto_documento` 
-        ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
-     WHERE (`pto_documento_detalles`.`id_documento` ='$cdp');";
+                `pto_documento`.`id_manu` 
+                , `pto_documento`.`fecha`
+                , `pto_documento_detalles`.`rubro`
+                , `pto_documento_detalles`.`valor`
+                , `pto_documento_detalles`.`id_documento`
+            FROM
+                `pto_documento_detalles`
+            INNER JOIN `pto_documento` 
+                ON (`pto_documento_detalles`.`id_documento` = `pto_documento`.`id_doc`)
+            WHERE (`pto_documento_detalles`.`id_documento` ='$cdp');";
     $res = $cmd->query($sql);
     $cdps = $res->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {

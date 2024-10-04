@@ -111,7 +111,7 @@
                 { 'data': 'botones' },
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [1, 4] },
+                { class: 'text-wrap', targets: [1, 2, 4] },
                 { orderable: false, targets: 8 }
             ],
             order: [[0, "desc"]],

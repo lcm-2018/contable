@@ -1,14 +1,22 @@
 <?php
 // Función para consuiltar fecha de cierre por modulo
-function fechaCierre($vigencia, $modulo, $cx)
+function ultimoDiaMes($mes, $anio)
 {
-    $vigencia = $_SESSION['vigencia'];
+    return date("d", mktime(0, 0, 0, $mes + 1, 0, $anio));
+}
+function fechaCierre($vigencia, $modulo, $cmd)
+{
+    $date = new DateTime('now', new DateTimeZone('America/Bogota'));
     try {
-        $sql = "SELECT fecha_cierre FROM tb_fin_periodos WHERE id_modulo = $modulo AND vigencia = $vigencia";
-        $rs = $cx->query($sql);
+        $sql = "SELECT MAX(`mes`) AS `mes`  FROM `tb_fin_periodos` WHERE `id_modulo` = '$modulo' AND `vigencia` = '$vigencia'";
+        $rs = $cmd->query($sql);
         $cierre = $rs->fetch();
-        $fecha_cierre = empty($cierre) ? date('Y-m-d') : date('Y-m-d', strtotime($cierre['fecha_cierre']));
-        $cx = null;
+        if (empty($cierre)) {
+            $fecha_cierre = $date->format('Y-m-d');
+        } else {
+            $fecha_cierre = date('Y-m-d', strtotime($vigencia . '-' . $cierre['mes'] . '-' . ultimoDiaMes($cierre['mes'], $vigencia)));
+        }
+        $cmd = null;
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
