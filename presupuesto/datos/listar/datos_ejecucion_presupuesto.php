@@ -56,7 +56,7 @@ try {
                     ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
                     INNER JOIN `pto_cdp_detalle` 
                     ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                WHERE (`pto_crp`.`estado` >0)
+                WHERE (`pto_crp`.`estado` > 0)
                 GROUP BY `pto_cdp_detalle`.`id_pto_cdp`) AS `crp`
                 ON (`pto_cdp`.`id_pto_cdp` = `crp`.`id_pto_cdp`)
             WHERE `pto_cdp`.`id_pto` = $id_pto_presupuestos

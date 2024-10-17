@@ -2695,6 +2695,7 @@ const generarInformeConsulta = (id) => {
 // Enviar datos para anulacion
 function changeEstadoAnulacion() {
     $('.is-invalid').removeClass('is-invalid');
+    var tipo = $('#tipo').val();
     if ('fecha' == '') {
         $('#fecha').focus();
         $('#fecha').addClass('is-invalid');
@@ -2721,8 +2722,12 @@ function changeEstadoAnulacion() {
                     data: datos,
                     success: function (r) {
                         if (r === "ok") {
+                            var tabla = "tableEjecPresupuesto";
+                            if (tipo == 'crp') {
+                                tabla = "tableEjecPresupuestoCrp";
+                            }
                             $('#divModalForms').modal('hide');
-                            $('#tableEjecPresupuesto').DataTable().ajax.reload();
+                            $('#' + tabla).DataTable().ajax.reload();
                             mje('Proceso realizado correctamente');
                         } else {
                             mjeError('Error:', r);

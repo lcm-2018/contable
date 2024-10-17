@@ -23,10 +23,15 @@ try {
                 , `pto_crp`.`id_tercero_api`
                 , `pto_crp`.`num_contrato`
                 , `pto_crp`.`fecha_reg`
+                , `pto_crp`.`estado`
                 , CONCAT_WS(' ', `seg_usuarios_sistema`.`nombre2`
                 , `seg_usuarios_sistema`.`nombre1`
                 , `seg_usuarios_sistema`.`apellido2`
                 , `seg_usuarios_sistema`.`apellido1`) AS `usuario`
+                , CONCAT_WS(' ', `seg_usuarios_sistema_1`.`nombre1`
+                , `seg_usuarios_sistema_1`.`nombre2`
+                , `seg_usuarios_sistema_1`.`apellido1`
+                , `seg_usuarios_sistema_1`.`apellido2`) AS `usuario_act`
                 , `pto_cdp`.`id_manu` AS `num_cdp`
                 , `tb_terceros`.`nit_tercero` AS `no_doc`
             FROM
@@ -37,12 +42,15 @@ try {
                     ON (`pto_crp`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
                 LEFT JOIN `tb_terceros` 
                     ON (`pto_crp`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+                LEFT JOIN `seg_usuarios_sistema` AS `seg_usuarios_sistema_1`
+                    ON (`pto_cdp`.`id_user_act` = `seg_usuarios_sistema_1`.`id_usuario`)
             WHERE (`pto_crp`.`id_pto_crp` = $id_crp)";
     $res = $cmd->query($sql);
     $crp = $res->fetch();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$anulado = $crp['estado'] == '0' ? 'ANULADO' : '';
 // Valor total del cdp
 try {
     $sql = "SELECT
@@ -106,27 +114,41 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$enletras = numeroLetras($total);
+$fecha = date('Y-m-d', strtotime($crp['fecha']));
 // Consulto responsable del documento
 try {
-    /*
     $sql = "SELECT
-                `fin_respon_doc`.`nombre`
+                `fin_maestro_doc`.`control_doc`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`genero`
                 , `fin_respon_doc`.`cargo`
-                , `fin_respon_doc`.`descripcion`
+                , `fin_respon_doc`.`tipo_control`
+                , `fin_tipo_control`.`descripcion` AS `nom_control`
+                , `fin_respon_doc`.`fecha_ini`
+                , `fin_respon_doc`.`fecha_fin`
             FROM
                 `fin_respon_doc`
-            INNER JOIN `fin_maestro_doc` 
-                ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
-            WHERE (`fin_maestro_doc`.`tipo_doc` ='CDP' AND `fin_respon_doc`.`estado` = 1);";
+                INNER JOIN `fin_maestro_doc` 
+                    ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
+                INNER JOIN `tb_terceros` 
+                    ON (`fin_respon_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                INNER JOIN `fin_tipo_control` 
+                    ON (`fin_respon_doc`.`tipo_control` = `fin_tipo_control`.`id_tipo`)
+            WHERE (`fin_maestro_doc`.`id_modulo` = 54 AND `fin_maestro_doc`.`id_doc_fte` = 22 
+                AND `fin_respon_doc`.`fecha_fin` >= '$fecha' 
+                AND `fin_respon_doc`.`fecha_ini` <= '$fecha'
+                AND `fin_respon_doc`.`estado` = 1
+                AND `fin_maestro_doc`.`estado` = 1)";
     $res = $cmd->query($sql);
-    $responsable = $res->fetch();*/
-    $responsable['nombre'] = 'XXXXX XXXXX XXXX';
-    $responsable['cargo'] = 'XXXXXXXX';
-    $responsable['descripcion'] = 'xxxxxxxxxx';
-
-    $nom_respon = mb_strtoupper($responsable['nombre'], 'UTF-8');
-    $cargo_respon = $responsable['cargo'];
-    $descrip_respon = $responsable['descripcion'];
+    $responsables = $res->fetchAll();
+    $key = array_search('4', array_column($responsables, 'tipo_control'));
+    $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+    $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
+    $gen_respon = $key !== false ? $responsables[$key]['genero'] : '';
+    $control = $key !== false ? $responsables[$key]['control_doc'] : '';
+    $control = $control == '' || $control == '0' ? false : true;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -136,14 +158,52 @@ $ids = implode(',', $id_t);
 $dat_ter = getTerceros($ids, $cmd);
 $tercero = !empty($dat_ter) ? $dat_ter[0]['nom_tercero'] : '---';
 // fin api terceros ******************************************************** 
-$enletras = numeroLetras($total);
-$fecha = date('Y-m-d', strtotime($crp['fecha']));
+$id_crp = $crp['estado'] == '0' ? 0 : $id_crp;
 ?>
 <div class="text-right pt-3">
     <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecCrp('areaImprimir', <?php echo $id_crp ?>);"> Imprimir</a>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>
 <div class="contenedor bg-light" id="areaImprimir">
+    <style>
+        /* Estilos para la pantalla */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            /* Se añade rotación */
+            font-size: 100px;
+            color: rgba(255, 0, 0, 0.2);
+            /* Cambia la opacidad para que sea tenue */
+            z-index: 1000;
+            pointer-events: none;
+            /* Para que no interfiera con el contenido */
+            white-space: nowrap;
+            /* Evita que el texto se divida en varias líneas */
+        }
+
+        /* Estilos específicos para la impresión */
+        @media print {
+
+            body {
+                position: relative;
+            }
+
+            .watermark {
+                position: fixed;
+                /* Cambiar a 'fixed' para impresión */
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 100px;
+                color: rgba(255, 0, 0, 0.2);
+                /* Asegura que el color y opacidad se mantengan */
+                z-index: -1;
+                /* Colocar detrás del contenido impreso */
+            }
+        }
+    </style>
     <div class="px-2 " style="width:90% !important;margin: 0 auto;">
         </br>
         </br>
@@ -156,12 +216,8 @@ $fecha = date('Y-m-d', strtotime($crp['fecha']));
                 </td>
             </tr>
         </table>
-
-
         </br>
         </br>
-
-
         <div class="row px-2" style="text-align: center">
             <div class="col-12">
                 <div class="col lead"><label><strong>REGISTRO PRESUPUESTAL No: <?php echo $crp['id_manu']; ?></strong></label></div>
@@ -172,7 +228,7 @@ $fecha = date('Y-m-d', strtotime($crp['fecha']));
         <div class="row">
             <div class="col-12">
                 <div class="text-justify">
-                    <p>El suscrito <?php echo $cargo_respon; ?> de la entidad <strong><?php echo $empresa['nombre']; ?></strong>, CERTIFICA que se realizó registro presupuestal de para respaldar un compromiso de acuerdo al siguiente detalle:</p>
+                    <p><?= $gen_respon == 'M' ? 'El' : 'La'; ?> suscrit<?= $gen_respon == 'M' ? 'o' : 'a'; ?> <?php echo $cargo_respon; ?> de la entidad <strong><?php echo $empresa['nombre']; ?></strong>, CERTIFICA que se realizó registro presupuestal de para respaldar un compromiso de acuerdo al siguiente detalle:</p>
                 </div>
             </div>
         </div>
@@ -206,6 +262,9 @@ $fecha = date('Y-m-d', strtotime($crp['fecha']));
                 <td class='text-left'><?php echo $crp['num_contrato'];  ?></td>
             </tr>
         </table>
+        <div class="watermark">
+            <h3><?php echo $anulado ?></h3>
+        </div>
         </br>
         <div class="row">
             <div class="col-12">
@@ -244,21 +303,49 @@ $fecha = date('Y-m-d', strtotime($crp['fecha']));
                     <div>___________________________________</div>
                     <div><?php echo $nom_respon; ?> </div>
                     <div><?php echo $cargo_respon; ?> </div>
-                    <div><?php echo $descrip_respon; ?> </div>
                 </div>
             </div>
         </div> </br>
-        <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
-            <tr>
-                <td class='text-left' style="width:33%">
-                    <strong>Elaboró:</strong>
-                    <div><?php echo $crp['usuario']; ?></div>
-                </td>
-                <td style="text-align:center" style="width:33%">
-                </td>
-                <td class='text-center' style="width:33%"><label class="small"></label></td>
-            </tr>
-        </table>
+        <?php
+        if ($control) {
+        ?>
+            <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
+                <tr style="text-align:left">
+                    <td style="width:33%">
+                        <strong>Elaboró:</strong>
+                    </td>
+                    <td style="width:33%">
+                        <strong>Revisó:</strong>
+                    </td>
+                    <td style="width:33%">
+                        <strong>Aprobó:</strong>
+                    </td>
+                </tr>
+                <tr style="text-align:center">
+                    <td>
+                        <?= trim($crp['usuario_act']) == '' ? $crp['usuario'] : $crp['usuario_act'] ?>
+                    </td>
+                    <td>
+                        <?php
+                        $key = array_search('2', array_column($responsables, 'tipo_control'));
+                        $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                        $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                        echo $nombre . '<br> ' . $cargo;
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                        $key = array_search('2', array_column($responsables, 'tipo_control'));
+                        $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                        $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                        echo $nombre . '<br> ' . $cargo;
+                        ?>
+                    </td>
+                </tr>
+            </table>
+        <?php
+        }
+        ?>
 
     </div>
 

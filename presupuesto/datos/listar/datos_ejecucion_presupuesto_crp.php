@@ -76,6 +76,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$cmd = null;
 
 // consultar la fecha de cierre del periodo del módulo de presupuesto 
 if (!empty($listappto)) {
@@ -92,10 +93,9 @@ if (!empty($listappto)) {
         }
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
         // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
-        if ($fecha <= $fecha_cierre) {
-            $anular = null;
-        } else {
-            $anular = '<a value="' . $id_pto . '" class="dropdown-item sombra " href="#" onclick="anulacionCrp(' . $id_pto . ');">Anulación</a>';
+        $info = base64_encode($id_pto . '|crp');
+        if (!($fecha <= $fecha_cierre) && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1)) {
+            $anular = '<button text="' . $info . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Anular" onclick="anulacionPto(this);"><span class="fas fa-ban fa-lg"></span></button>';
         }
 
         $id_cdp = $lp['id_cdp'];
@@ -135,15 +135,13 @@ if (!empty($listappto)) {
             'ccnit' => $ccnit,
             'tercero' => $tercero,
             'valor' =>  '<div class="text-right">' . $valor_crp . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . '</div>',
+            'botones' => '<div class="text-center">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . '</div>',
 
         ];
     }
 } else {
     $data = [];
 }
-$cmd = null;
-$cmd = null;
 $datos = [
     'data' => $data,
     'recordsFiltered' => $totalRecords,

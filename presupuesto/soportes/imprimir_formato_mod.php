@@ -23,23 +23,30 @@ try {
                 , `pto_mod`.`fecha`
                 , `pto_mod`.`id_tipo_mod` AS `tipo_doc`
                 , `pto_mod`.`objeto`
+                , `pto_mod`.`estado`
                 , `pto_tipo_mvto`.`nombre` AS `tipo`
                 , `pto_mod`.`id_tipo_acto`
                 , `pto_actos_admin`. `nombre` AS `acto`
                 , `pto_mod`.`fecha_reg` AS `fec_reg`
                 , CONCAT_WS(' ',`seg_usuarios_sistema`.`nombre1`, `seg_usuarios_sistema`.`nombre2`
                 , `seg_usuarios_sistema`.`apellido1`, `seg_usuarios_sistema`.`apellido2`) AS `usuario`
+                , CONCAT_WS(' ', `seg_usuarios_sistema_1`.`nombre1`
+                , `seg_usuarios_sistema_1`.`nombre2`
+                , `seg_usuarios_sistema_1`.`apellido1`
+                , `seg_usuarios_sistema_1`.`apellido2`) AS `usuario_act`
             FROM
                 `pto_mod`
                 INNER JOIN `pto_tipo_mvto` ON (`pto_mod`.`id_tipo_mod` = `pto_tipo_mvto`.`id_tmvto`)
                 INNER JOIN `pto_actos_admin` ON (`pto_mod`.`id_tipo_acto` = `pto_actos_admin`.`id_acto`)
-                INNER JOIN `seg_usuarios_sistema` ON (`pto_mod`.`id_user_reg` = `seg_usuarios_sistema`.`id_usuario`)
+                LEFT JOIN `seg_usuarios_sistema` ON (`pto_mod`.`id_user_reg` = `seg_usuarios_sistema`.`id_usuario`)
+                LEFT JOIN `seg_usuarios_sistema` AS `seg_usuarios_sistema_1` ON (`pto_mod`.`id_user_act` = `seg_usuarios_sistema_1`.`id_usuario`)
             WHERE (`pto_mod`.`id_pto_mod` = $dto)";
     $res = $cmd->query($sql);
     $cdp = $res->fetch();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$anulado = $cdp['estado'] == '0' ? 'ANULADO' : '';
 // Valor total del cdp
 try {
     $sql = "SELECT
@@ -88,31 +95,43 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 // Consulto responsable del documento
+$enletras = numeroLetras($total);
+$fecha = date('Y-m-d', strtotime($cdp['fecha']));
 try {
-    /*
     $sql = "SELECT
-                `fin_respon_doc`.`nombre`
+                `fin_maestro_doc`.`control_doc`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`genero`
                 , `fin_respon_doc`.`cargo`
-                , `fin_respon_doc`.`descripcion`
+                , `fin_respon_doc`.`tipo_control`
+                , `fin_tipo_control`.`descripcion` AS `nom_control`
+                , `fin_respon_doc`.`fecha_ini`
+                , `fin_respon_doc`.`fecha_fin`
             FROM
                 `fin_respon_doc`
-            INNER JOIN `fin_maestro_doc` 
-                ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
-            WHERE (`fin_maestro_doc`.`tipo_doc` ='CDP' AND `fin_respon_doc`.`estado` = 1);";
+                INNER JOIN `fin_maestro_doc` 
+                    ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
+                INNER JOIN `tb_terceros` 
+                    ON (`fin_respon_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                INNER JOIN `fin_tipo_control` 
+                    ON (`fin_respon_doc`.`tipo_control` = `fin_tipo_control`.`id_tipo`)
+            WHERE (`fin_maestro_doc`.`id_modulo` = 54 AND `fin_maestro_doc`.`id_doc_fte` = 23 
+                AND `fin_respon_doc`.`fecha_fin` >= '$fecha' 
+                AND `fin_respon_doc`.`fecha_ini` <= '$fecha'
+                AND `fin_respon_doc`.`estado` = 1
+                AND `fin_maestro_doc`.`estado` = 1)";
     $res = $cmd->query($sql);
-    $responsable = $res->fetch();*/
-    $responsable['nombre'] = 'XXXXX XXXXX XXXX';
-    $responsable['cargo'] = 'XXXXXXXX';
-    $responsable['descripcion'] = 'xxxxxxxxxx';
-
-    $nom_respon = mb_strtoupper($responsable['nombre'], 'UTF-8');
-    $cargo_respon = $responsable['cargo'];
-    $descrip_respon = $responsable['descripcion'];
+    $responsables = $res->fetchAll();
+    $key = array_search('4', array_column($responsables, 'tipo_control'));
+    $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+    $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
+    $gen_respon = $key !== false ? $responsables[$key]['genero'] : '';
+    $control = $key !== false ? $responsables[$key]['control_doc'] : '';
+    $control = $control == '' || $control == '0' ? false : true;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$enletras = numeroLetras($total);
-$fecha = date('Y-m-d', strtotime($cdp['fecha']));
 ?>
 <div class="text-right pt-3">
     <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecCdp('areaImprimir');"> Imprimir</a>
@@ -140,7 +159,7 @@ $fecha = date('Y-m-d', strtotime($cdp['fecha']));
 
         <div class="row px-2" style="text-align: center">
             <div class="col-12">
-                <div class="col-lg"><label>EL SUSCRITO <?php echo strtoupper($cargo_respon); ?></label></div>
+                <div class="col-lg"><label><?= $gen_respon == 'M' ? 'EL' : 'LA'; ?> SUSCRIT<?= $gen_respon == 'M' ? 'O' : 'A'; ?> <?php echo strtoupper($cargo_respon); ?></label></div>
             </div>
         </div>
         </br>
@@ -157,6 +176,9 @@ $fecha = date('Y-m-d', strtotime($cdp['fecha']));
                     <p>Que, en el presupuesto de la entidad <strong><?php echo $empresa['nombre']; ?></strong>, aprobado para la vigencia fiscal <?php echo $vigencia; ?>, se realizó una modificación presupuestal de acuerdo al siguiente detalle:</p>
                 </div>
             </div>
+        </div>
+        <div class="col lead">
+            <h3><?php echo $anulado ?></h3>
         </div>
         <table class="table-bordered bg-light" style="width:100% !important;">
             <tr>
@@ -247,24 +269,53 @@ $fecha = date('Y-m-d', strtotime($cdp['fecha']));
             <div class="col-12">
                 <div style="text-align: center">
                     <div>___________________________________</div>
-                    <div><?php echo $nom_respon; ?> </div>
-                    <div><?php echo $cargo_respon; ?> </div>
-                    <div><?php echo $descrip_respon; ?> </div>
+                    <div><?= $nom_respon; ?> </div>
+                    <div><?= $cargo_respon; ?> </div>
                 </div>
             </div>
         </div>
-        </br> </br> </br>
-        <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
-            <tr>
-                <td class='text-left' style="width:33%">
-                    <strong>Preparó:</strong>
-                    <div><?php echo $cdp['usuario']; ?></div>
-                </td>
-                <td style="text-align:center" style="width:33%">
-                </td>
-                <td class='text-center' style="width:33%"><label class="small"></label></td>
-            </tr>
-        </table>
+        </br>
+        </br>
+        <?php
+        if ($control) {
+        ?>
+            <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
+                <tr style="text-align:left">
+                    <td style="width:33%">
+                        <strong>Elaboró:</strong>
+                    </td>
+                    <td style="width:33%">
+                        <strong>Revisó:</strong>
+                    </td>
+                    <td style="width:33%">
+                        <strong>Aprobó:</strong>
+                    </td>
+                </tr>
+                <tr style="text-align:center">
+                    <td>
+                        <?= trim($cdp['usuario_act']) == '' ? $cdp['usuario'] : $cdp['usuario_act'] ?>
+                    </td>
+                    <td>
+                        <?php
+                        $key = array_search('2', array_column($responsables, 'tipo_control'));
+                        $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                        $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                        echo $nombre . '<br> ' . $cargo;
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                        $key = array_search('2', array_column($responsables, 'tipo_control'));
+                        $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                        $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                        echo $nombre . '<br> ' . $cargo;
+                        ?>
+                    </td>
+                </tr>
+            </table>
+        <?php
+        }
+        ?>
 
     </div>
 

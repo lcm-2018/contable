@@ -7,6 +7,7 @@ if (!isset($_SESSION['user'])) {
 include_once '../../../conexion.php';
 include_once '../../../permisos.php';
 include_once '../../../terceros.php';
+include_once '../../../financiero/consultas.php';
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
 $vigencia = $_SESSION['vigencia'];
@@ -21,9 +22,11 @@ $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 $dato = null;
 $where = $_POST['search']['value'] != '' ? "AND `ctb_doc`.`fecha` LIKE '%{$_POST['search']['value']}%' OR `ctb_doc`.`id_manu` LIKE '%{$_POST['search']['value']}%' OR  `tb_terceros`.`nom_tercero` LIKE '%{$_POST['search']['value']}%' OR `tb_terceros`.`nit_tercero` LIKE '%{$_POST['search']['value']}%'" : '';
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+$fecha_cierre = fechaCierre($vigencia, 56, $cmd);
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
     $sql = "SELECT
                 `ctb_doc`.`id_ctb_doc`
                 , `ctb_doc`.`id_manu`
@@ -96,15 +99,6 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 // consultar la fecha de cierre del periodo del módulo de presupuesto 
-try {
-    $sql = "SELECT `fecha_cierre` FROM `tb_fin_periodos` WHERE `id_modulo`= 6";
-    $rs = $cmd->query($sql);
-    $fecha_cierre = $rs->fetch();
-    $fecha_cierre = $fecha_cierre['fecha_cierre'];
-    $fecha_cierre = date('Y-m-d', strtotime($fecha_cierre));
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
 if (!empty($listappto)) {
 
     $ids = [];

@@ -43,7 +43,7 @@ $url = $_SESSION['urlin'];
                     <a class="dropdown-item sombra" href="<?php echo $url ?>/usuarios/listperfiles.php">Perfiles</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item sombra" href="#" id="hrefCierre">Cierre de periodo</a>
-                    <a class="dropdown-item sombra" href="#" id="hrefGestionDocs">Gestión Docs</a>
+                    <a class="dropdown-item sombra" href="#" id="hrefGestionDocs">Gestión Documentos</a>
 
                 <?php }
                 ?>

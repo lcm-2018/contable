@@ -48,11 +48,10 @@ if ($id_rol != 1) {
                                             <th>ID</th>
                                             <th>Módulo</th>
                                             <th>Documento</th>
+                                            <th>Versión</th>
                                             <th>Fecha</th>
-                                            <th>Responsable</th>
                                             <th>Control</th>
-                                            <th>Inicia</th>
-                                            <th>Termina</th>
+                                            <th>Estado</th>
                                             <th>Acción</th>
                                         </tr>
                                     </thead>
