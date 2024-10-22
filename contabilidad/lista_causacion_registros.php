@@ -32,6 +32,7 @@ try {
                 , `pto_crp`.`objeto`
                 , `pto_crp`.`id_cdp`
                 , `ctt_contratos`.`num_contrato`
+                , `ctt_contratos`.`id_contrato_compra`
             FROM
                 `pto_crp`
                 LEFT JOIN `ctt_adquisiciones` 
@@ -76,6 +77,20 @@ try {
             GROUP BY `pto_crp`.`id_pto_crp`";
     $rs = $cmd->query($sql);
     $causados = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $sql = "SELECT
+                `pto_crp`.`id_pto_crp`
+                , `ctt_novedad_adicion_prorroga`.`id_adq`
+            FROM
+                `ctt_novedad_adicion_prorroga`
+                INNER JOIN `pto_crp` 
+                    ON (`ctt_novedad_adicion_prorroga`.`id_cdp` = `pto_crp`.`id_cdp`)
+            WHERE (`pto_crp`.`estado` = 2 AND `pto_crp`.`id_pto` = {$listappto['id_pto']})";
+    $rs = $cmd->query($sql);
+    $adiciones = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -222,6 +237,24 @@ if ($id_r == 3) {
                         foreach ($listado as $ce) {
                             $id_ter = $ce['id_tercero_api'];
                             $id_crp = $ce['id_pto_crp'];
+                            $id_ctt = $ce['id_contrato_compra'];
+                            $filtro = [];
+                            $sum_lq = 0;
+                            $sum_cs = 0;
+                            $filtro = array_filter($adiciones, function ($adiciones) use ($id_ctt) {
+                                return $adiciones["id_adq"] == $id_ctt;
+                            });
+                            if (!empty($filtro)) {
+                                foreach ($filtro as $f) {
+                                    //por cada adicion se debe buscar el id_crp_pto en $liquidados y $causados para determinar el valor que falta por causar
+                                    $key = array_search($f['id_pto_crp'], array_column($liquidados, 'id_pto_crp'));
+                                    $valor_liquidado = $key !== false ? $liquidados[$key]['valor'] : 0;
+                                    $key = array_search($f['id_pto_crp'], array_column($causados, 'id_pto_crp'));
+                                    $valor_causado = $key !== false ? $causados[$key]['valor'] : 0;
+                                    $sum_lq += $valor_liquidado;
+                                    $sum_cs += $valor_causado;
+                                }
+                            }
                             $key = array_search($id_ter, array_column($terceros, 'id_tercero_api'));
                             $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
                             // Obtener el saldo del registro por obligar valor del registro - el valor obligado efectivamente
@@ -229,7 +262,7 @@ if ($id_r == 3) {
                             $valor_liquidado = $key !== false ? $liquidados[$key]['valor'] : 0;
                             $key = array_search($id_crp, array_column($causados, 'id_pto_crp'));
                             $valor_causado = $key !== false ? $causados[$key]['valor'] : 0;
-                            $saldo_rp = $valor_liquidado - $valor_causado;
+                            $saldo_rp = $valor_liquidado + $sum_lq - $sum_cs - $valor_causado;
                             if ($ce['num_contrato'] != '') {
                                 $numeroc = $ce['num_contrato'];
                                 if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {

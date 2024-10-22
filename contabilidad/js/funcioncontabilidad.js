@@ -1989,14 +1989,14 @@ const eliminarRegistroDoc = (id) => {
 				method: "POST",
 				body: JSON.stringify({ id: id }),
 			})
-				.then((response) => response.json())
+				.then((response) => response.text())
 				.then((response) => {
 					console.log(response);
-					if (response[0].value == "ok") {
+					if (response == "ok") {
 						mje("Registro eliminado");
 						$('#tableMvtoContable').DataTable().ajax.reload();
 					} else {
-						mjeError("Error al eliminar");
+						mjeError("Error al eliminar: " + response);
 					}
 				})
 				.catch((error) => {
@@ -2008,8 +2008,9 @@ const eliminarRegistroDoc = (id) => {
 
 /*=================================   IMPRESION DE PFORMATOS =====================================*/
 const imprimirFormatoDoc = (id) => {
+	let tipo = $("#id_ctb_doc").val();
 	let url = "soportes/imprimir_formato_doc.php";
-	$.post(url, { id: id }, function (he) {
+	$.post(url, { id: id, tipo: tipo }, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-xl");
 		$("#divTamModalForms").addClass("modal-lg");

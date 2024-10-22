@@ -49,7 +49,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapsemodTipoRte" aria-expanded="true" aria-controls="collapsemodTipoRte">
                                                 <div class="form-row">
                                                     <div class="div-icono">
-                                                        <span class="fas fa-file-contract fa-lg" style="color: #2ECC71;"></span>
+                                                        <span class="fas fa-hand-holding-usd fa-lg" style="color: #2ECC71;"></span>
                                                     </div>
                                                     <div>
                                                         1. TIPO DE RETENCIÓN
@@ -83,7 +83,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapseRetenciones" aria-expanded="true" aria-controls="collapseRetenciones">
                                                 <div class="form-row">
                                                     <div class="div-icono">
-                                                        <span class="fas fa-file-signature fa-lg" style="color: #E74C3C;"></span>
+                                                        <span class="fas fa-money-bill-wave fa-lg" style="color: #E74C3C;"></span>
                                                     </div>
                                                     <div>
                                                         2. RETENCIONES
@@ -106,6 +106,43 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                                     </tr>
                                                 </thead>
                                                 <tbody id="modificarRetencioness">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- parte-->
+                                <div class="card">
+                                    <div class="card-header card-header-detalles py-0 headings" id="RangoRet">
+                                        <h5 class="mb-0">
+                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapseRangoRet" aria-expanded="true" aria-controls="collapseRangoRet">
+                                                <div class="form-row">
+                                                    <div class="div-icono">
+                                                        <span class="fas fa-stream fa-lg" style="color: #3498db;"></span>
+                                                    </div>
+                                                    <div>
+                                                        3. RANGO RETENCIONES
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </h5>
+                                    </div>
+                                    <div id="collapseRangoRet" class="collapse" aria-labelledby="RangoRet">
+                                        <div class="card-body">
+                                            <table id="tableRangoRet" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Tipo Retención</th>
+                                                        <th>Retención</th>
+                                                        <th>Base</th>
+                                                        <th>Tope</th>
+                                                        <th>Tarifa</th>
+                                                        <th>Estado</th>
+                                                        <th>Acción</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="modificarRangoRet">
                                                 </tbody>
                                             </table>
                                         </div>

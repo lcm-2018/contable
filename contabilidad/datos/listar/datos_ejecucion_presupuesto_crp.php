@@ -24,7 +24,7 @@ try {
                 `pto_documento`
                 INNER JOIN `z_terceros` 
                     ON (`pto_documento`.`id_tercero` = `z_terceros`.`num_id`)
-            WHERE (`pto_documento`.`id_pto_presupuestos` ='$id_pto_presupuestos'
+            WHERE (`pto_documento`.`id_pto_presupuestos` =$id_pto_presupuestos
                 AND `pto_documento`.`tipo_doc` ='CRP');
             ";
     $rs = $cmd->query($sql);

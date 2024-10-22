@@ -7,6 +7,7 @@ if (!isset($_SESSION['user'])) {
 }
 $vigencia = $_SESSION['vigencia'];
 $dto = $_POST['id'];
+$tipo_doc = $_POST['tipo'];
 $prefijo = '';
 function pesos($valor)
 {
@@ -21,7 +22,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id_t = [];
 try {
     $sql = "SELECT 
-                `detalle`,`fecha`,`id_manu`,`id_tercero`,`fecha_reg`, `id_tipo_doc` AS `tipo_doc` 
+                `detalle`,`fecha`,`id_manu`,`id_tercero`,`fecha_reg`, `id_tipo_doc` AS `tipo_doc`, `estado`
             FROM `ctb_doc` 
             WHERE `id_ctb_doc` = $dto";
     $res = $cmd->query($sql);
@@ -29,6 +30,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$anulado = $doc['estado'] == '0' ? 'ANULADO' : '';
 $id_t[] = $doc['id_tercero'] > 0 ? $doc['id_tercero'] : 0;
 $id_tercero_gen = $doc['id_tercero'];
 $num_doc = '';
@@ -183,34 +185,49 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 // consulto el tipo de control del documento
-try {
-    $sql = "SELECT 
-                `control_doc` , `nombre` , `id_proceso`
-            FROM
-                `fin_maestro_doc`";
-    $res = $cmd->query($sql);
-    $control = $res->fetch();
-    $num_control = $control['control_doc'];
-    $nombre_doc = $control['nombre'];
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-// consulto el tipo de control del documento
-try {
-    $sql = "SELECT
-                `fin_respon_doc`.`cargo`
-                , `fin_respon_doc`.`tipo_control`
-            FROM
-                `fin_maestro_doc`
-                LEFT JOIN `fin_respon_doc` 
-                    ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)";
-    $res = $cmd->query($sql);
-    $firmas = $res->fetchAll();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
 $fecha = date('Y-m-d', strtotime($doc['fecha']));
 $hora = date('H:i:s', strtotime($doc['fecha_reg']));
+
+try {
+    $sql = "SELECT
+                `fin_maestro_doc`.`control_doc`
+                , `fin_maestro_doc`.`id_doc_fte`
+                , `ctb_fuente`.`nombre`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`genero`
+                , `fin_respon_doc`.`cargo`
+                , `fin_respon_doc`.`tipo_control`
+                , `fin_tipo_control`.`descripcion` AS `nom_control`
+                , `fin_respon_doc`.`fecha_ini`
+                , `fin_respon_doc`.`fecha_fin`
+            FROM
+                `fin_respon_doc`
+                INNER JOIN `fin_maestro_doc` 
+                    ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
+                INNER JOIN `ctb_fuente` 
+                    ON (`ctb_fuente`.`id_doc_fuente` = `fin_maestro_doc`.`id_doc_fte`)
+                INNER JOIN `tb_terceros` 
+                    ON (`fin_respon_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                INNER JOIN `fin_tipo_control` 
+                    ON (`fin_respon_doc`.`tipo_control` = `fin_tipo_control`.`id_tipo`)
+            WHERE (`fin_maestro_doc`.`id_modulo` = 55 AND `fin_maestro_doc`.`id_doc_fte` = $tipo_doc 
+                AND `fin_respon_doc`.`fecha_fin` >= '$fecha' 
+                AND `fin_respon_doc`.`fecha_ini` <= '$fecha'
+                AND `fin_respon_doc`.`estado` = 1
+                AND `fin_maestro_doc`.`estado` = 1)";
+    $res = $cmd->query($sql);
+    $responsables = $res->fetchAll();
+    $key = array_search('4', array_column($responsables, 'tipo_control'));
+    $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+    $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
+    $gen_respon = $key !== false ? $responsables[$key]['genero'] : '';
+    $control = $key !== false ? $responsables[$key]['control_doc'] : '';
+    $control = $control == '' || $control == '0' ? false : true;
+    $nombre_doc = $key !== false ? $responsables[$key]['nombre'] : '';
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 // fechas para factua
 $fecha_fact = isset($factura['fecha_fact']) ? date('Y-m-d', strtotime($factura['fecha_fact'])) : '';
 $fecha_ven = isset($factura['fecha_ven']) ? date('Y-m-d', strtotime($factura['fecha_ven'])) : '';
@@ -225,6 +242,45 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>
 <div class="contenedor bg-light" id="areaImprimir">
+    <style>
+        /* Estilos para la pantalla */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            /* Se añade rotación */
+            font-size: 100px;
+            color: rgba(255, 0, 0, 0.2);
+            /* Cambia la opacidad para que sea tenue */
+            z-index: 1000;
+            pointer-events: none;
+            /* Para que no interfiera con el contenido */
+            white-space: nowrap;
+            /* Evita que el texto se divida en varias líneas */
+        }
+
+        /* Estilos específicos para la impresión */
+        @media print {
+
+            body {
+                position: relative;
+            }
+
+            .watermark {
+                position: fixed;
+                /* Cambiar a 'fixed' para impresión */
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 100px;
+                color: rgba(255, 0, 0, 0.2);
+                /* Asegura que el color y opacidad se mantengan */
+                z-index: -1;
+                /* Colocar detrás del contenido impreso */
+            }
+        }
+    </style>
     <div class="px-2 " style="width:90% !important;margin: 0 auto;">
 
         </br>
@@ -286,6 +342,9 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                 <td class='text-left'><label><?php echo $enletras . "  $" . number_format($total, 2, ",", "."); ?></label></td>
             </tr>
         </table>
+        <div class="watermark">
+            <h3><?php echo $anulado ?></h3>
+        </div>
 
         <?php if ($doc['tipo_doc'] == '3' || $doc['tipo_doc'] == '5') { ?>
             </br>
@@ -530,48 +589,57 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
         </table>
         </br>
         </br>
-        <?php if ($num_control == 1) { ?>
-
-            <table class="table-bordered bg-light firmas" style="width:100% !important;" rowspan="8">
-                <tr>
-                    <td style="text-align: center;height: 70px;">
-                        <div>__________________________</div>
-                        <div>Elaboró</div>
-                        <div>&nbsp;</div>
+        <div class="row">
+            <div class="col-12">
+                <div style="text-align: center">
+                    <div>___________________________________</div>
+                    <div><?= $nom_respon; ?> </div>
+                    <div><?= $cargo_respon; ?> </div>
+                </div>
+            </div>
+        </div>
+        </br>
+        </br>
+        <?php
+        if ($control) {
+        ?>
+            <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
+                <tr style="text-align:left">
+                    <td style="width:33%">
+                        <strong>Elaboró:</strong>
                     </td>
-                    <td style="text-align: center;">
-                        <div>__________________________</div>
-                        <div>Revisó contabilidad</div>
-                        <div>&nbsp;</div>
+                    <td style="width:33%">
+                        <strong>Revisó:</strong>
+                    </td>
+                    <td style="width:33%">
+                        <strong>Aprobó:</strong>
                     </td>
                 </tr>
-                <tr>
-                    <td style="text-align: center;">
-                        <div>__________________________</div>
-                        <div>Jefe financiero</div>
-                        <div>Aprobó</div>
+                <tr style="text-align:center">
+                    <td>
+                        <?= trim($cdp['usuario_act']) == '' ? $cdp['usuario'] : $cdp['usuario_act'] ?>
                     </td>
-                    <td style="text-align: center;height: 70px;">
-                        <div>__________________________</div>
-                        <div>Ordenador del pago</div>
-                        <div></div>
+                    <td>
+                        <?php
+                        $key = array_search('2', array_column($responsables, 'tipo_control'));
+                        $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                        $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                        echo $nombre . '<br> ' . $cargo;
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                        $key = array_search('2', array_column($responsables, 'tipo_control'));
+                        $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                        $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                        echo $nombre . '<br> ' . $cargo;
+                        ?>
                     </td>
                 </tr>
             </table>
-        <?php } else { ?>
-            <table class="table-bordered bg-light firmas" style="width:100% !important;" rowspan="8">
-                <tr>
-                    <?php foreach ($firmas as $mv) {
-                        echo '
-                    <td style="text-align: center;height: 70px;">
-                        <div>__________________________</div>
-                        <div>' . $mv['cargo'] . '</div>
-                    </td>';
-                    }
-                    ?>
-                </tr>
-            </table>
-        <?php } ?>
+        <?php
+        }
+        ?>
         </br> </br> </br>
     </div>
 

@@ -37,7 +37,7 @@ try {
                 , `detalle`.`debito`
                 , `detalle`.`credito`
                 , `detalle`.`id_cdp`
-                , `detalle`.`id_cop`
+                , `cop`.`saldo`
             FROM
                 `pto_crp`
             LEFT JOIN 
@@ -46,17 +46,27 @@ try {
                     , SUM(`pto_crp_detalle`.`valor`) AS `debito`
                     , SUM(`pto_crp_detalle`.`valor_liberado`) AS `credito`
                     , `pto_cdp`.`id_manu` AS `id_cdp`
-                    , `pto_cop_detalle`.`id_pto_crp_det` AS `id_cop`
                 FROM
                     `pto_crp_detalle`
                     LEFT JOIN `pto_cdp_detalle` 
                         ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                     LEFT JOIN `pto_cdp` 
                         ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)  
-                    LEFT JOIN `pto_cop_detalle`
-                        ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
                 GROUP BY `pto_crp_detalle`.`id_pto_crp`) AS `detalle`
                 ON (`pto_crp`.`id_pto_crp` = `detalle`.`id_pto_crp`)
+            LEFT JOIN 
+                (SELECT
+                    SUM(`pto_cop_detalle`.`valor`) - SUM(`pto_cop_detalle`.`valor_liberado`) AS `saldo`
+                    , `pto_crp_detalle`.`id_pto_crp`
+                FROM
+                    `pto_cop_detalle`
+                    INNER JOIN `pto_crp_detalle` 
+                        ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                    INNER JOIN `ctb_doc` 
+                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                WHERE (`ctb_doc`.`estado` > 0)
+                GROUP BY `pto_crp_detalle`.`id_pto_crp`) AS `cop`
+                ON (`pto_crp`.`id_pto_crp` = `cop`.`id_pto_crp`)
             LEFT JOIN `tb_terceros`
                 ON (`pto_crp`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
             WHERE (`id_pto` = $id_pto_presupuestos)
@@ -97,7 +107,9 @@ if (!empty($listappto)) {
         if (!($fecha <= $fecha_cierre) && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1)) {
             $anular = '<button text="' . $info . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Anular" onclick="anulacionPto(this);"><span class="fas fa-ban fa-lg"></span></button>';
         }
-
+        if ($lp['saldo'] > 0) {
+            $anular = null;
+        }
         $id_cdp = $lp['id_cdp'];
         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id_pto . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';

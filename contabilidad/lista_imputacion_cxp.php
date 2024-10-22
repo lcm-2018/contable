@@ -33,14 +33,13 @@ try {
                 INNER JOIN `pto_cargue` 
                     ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN 
-            (SELECT
-                `id_pto_crp_det`
-                , IFNULL(SUM(`valor`),0) AS `valor`
-                , IFNULL(SUM(`valor_liberado`),0) AS `valor_liberado`
-            FROM
-                `pto_cop_detalle`
-            WHERE (`id_ctb_doc` = $id_doc) 
-            GROUP BY `id_pto_crp_det`) AS `t1`  
+                    (SELECT
+                        `id_pto_crp_det`
+                        , IFNULL(SUM(`valor`),0) AS `valor`
+                        , IFNULL(SUM(`valor_liberado`),0) AS `valor_liberado`
+                    FROM
+                        `pto_cop_detalle`
+                    GROUP BY `id_pto_crp_det`) AS `t1`  
                     ON (`t1`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
             WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
@@ -104,7 +103,7 @@ try {
                             <?php if ($band) { ?>
                                 <span for="valor" class="small">Valor RP</span>
                             <?php } ?>
-                            <div class="form-control form-control-sm text-left <?php echo $bg_color ?>"><?php echo number_format($max,2) ?></div>
+                            <div class="form-control form-control-sm text-left <?php echo $bg_color ?>"><?php echo number_format($max, 2) ?></div>
                         </div>
                         <div class="form-group col-md-2">
                             <?php if ($band) { ?>

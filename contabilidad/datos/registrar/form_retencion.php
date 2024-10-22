@@ -90,7 +90,7 @@ if (empty($datos)) {
             </div>
             <div class="form-row px-4">
                 <div class="form-group col-md-12">
-                    <label for="txtNombreRte" class="small">Cuenta</label>
+                    <label for="codigoCta" class="small">Cuenta</label>
                     <input type="text" class="form-control form-control-sm" id="codigoCta" value="<?= $datos['cuenta']; ?>">
                     <input type="hidden" name="id_codigoCta" id="id_codigoCta" value="<?= $datos['id_pgcp']; ?>">
                     <input type="hidden" name="tipoDato" id="tipoDato" value="<?= $datos['tipo_dato']; ?>">

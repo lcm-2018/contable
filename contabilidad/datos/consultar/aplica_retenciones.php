@@ -21,18 +21,10 @@ $sql = "SELECT
 $res = $conexion->query($sql);
 $rango = $res->fetch_assoc();
 // Consulto el tercero de acuerdo al tipo de retencion
-$sql = "SELECT
-            `seg_terceros`.`id_tercero_api`
-        FROM
-            `ctb_retenciones`
-            INNER JOIN `ctb_retencion_tipo` 
-                ON (`ctb_retenciones`.`id_retencion` = `ctb_retencion_tipo`.`id_retencion_tipo`)
-            INNER JOIN `seg_terceros` 
-                ON (`ctb_retencion_tipo`.`id_tercero` = `seg_terceros`.`id_tercero`)
-        WHERE (`ctb_retenciones`.`id_retencion` = $id_retencion_tipo)";
+$sql = "SELECT `id_tercero` FROM `ctb_retencion_tipo` WHERE `id_retencion_tipo` = $id_retencion_tipo";
 $res = $conexion->query($sql);
 $tercero = $res->fetch_assoc();
-$terceroapi = isset($tercero['id_tercero_api']) ? $tercero['id_tercero_api'] : 0;
+$terceroapi = !empty($tercero) ? $tercero['id_tercero'] : 0;
 if ($id_retencion_tipo  == 1) {
     $descuento = $valor_base * $rango['tarifa'];
 }

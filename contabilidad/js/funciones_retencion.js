@@ -18,6 +18,15 @@
             $("#divForms").html(he);
         });
     }
+    FormGestionRetRango = function (id) {
+        $.post("datos/registrar/form_retencion_rango.php", { id: id }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    }
     $(document).ready(function () {
         $('#tableTipoRetencion').DataTable({
             dom: setdom,
@@ -80,6 +89,39 @@
             ],
         });
         $('#tableRetenciones').wrap('<div class="overflow" />');
+        $('#tableRangoRet').DataTable({
+            dom: setdom,
+            language: setIdioma,
+            buttons: [{
+                //Registar modalidad de contratación
+                action: function (e, dt, node, config) {
+                    FormGestionRetRango(0);
+                }
+            }],
+            ajax: {
+                url: 'datos/listar/datos_retenciones_rango.php',
+                type: 'POST',
+                dataType: 'json',
+            },
+            columns: [
+                { 'data': 'id' },
+                { 'data': 'tipo' },
+                { 'data': 'retencion' },
+                { 'data': 'base' },
+                { 'data': 'tope' },
+                { 'data': 'tarifa' },
+                { 'data': 'estado' },
+                { 'data': 'botones' },
+            ],
+            order: [
+                [0, "asc"]
+            ],
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+        });
+        $('#tableRangoRet').wrap('<div class="overflow" />');
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
     });
     $('#divModalForms').on('click', '#btnGuardaTpRte', function () {
@@ -146,6 +188,42 @@
             });
         }
     });
+    $('#divModalForms').on('click', '#btnGuardaRango', function () {
+        $('.is-invalid').removeClass('is-invalid');
+        if ($('#id_retencion').val() == '0') {
+            $('#buscaRetencion').addClass('is-invalid');
+            $('#buscaRetencion').focus();
+            mjeError('Seleccione la retención');
+        } else if (Number($('#valor_base').val()) < 0) {
+            $('#valor_base').addClass('is-invalid');
+            $('#valor_base').focus();
+            mjeError('El valor base no puede ser menor a cero');
+        } else if (Number($('#valor_tope').val()) < 0) {
+            $('#valor_tope').addClass('is-invalid');
+            $('#valor_tope').focus();
+            mjeError('El valor tope no puede ser menor a cero');
+        } else if (Number($('#tarifa').val()) < 0) {
+            $('#tarifa').addClass('is-invalid');
+            $('#tarifa').focus();
+            mjeError('La tarifa no puede ser menor a cero');
+        } else {
+            var data = $('#formGestRango').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'datos/registrar/registrar_rango.php',
+                data: data,
+                success: function (r) {
+                    if (r == 'ok') {
+                        $('#divModalForms').modal('hide');
+                        $('#tableRangoRet').DataTable().ajax.reload();
+                        mje('Rango guardado correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
     $('#modificarTipoRetencion').on('click', '.editar', function () {
         var id = $(this).attr('text');
         FormGestionTpRte(id);
@@ -153,6 +231,10 @@
     $('#modificarRetencioness').on('click', '.editar', function () {
         var id = $(this).attr('text');
         FormGestionRetencion(id);
+    });
+    $('#modificarRangoRet').on('click', '.editar', function () {
+        var id = $(this).attr('text');
+        FormGestionRetRango(id);
     });
     $('#modificarTipoRetencion').on('click', '.estado', function () {
         var data = $(this).attr('text');
@@ -178,6 +260,20 @@
             success: function (r) {
                 if (r == 'ok') {
                     $('#tableRetenciones').DataTable().ajax.reload();
+                } else {
+                    mjeError(r);
+                }
+            }
+        });
+    }); $('#modificarRangoRet').on('click', '.estado', function () {
+        var data = $(this).attr('text');
+        $.ajax({
+            type: 'POST',
+            url: 'datos/registrar/cambia_estado_rango.php',
+            data: { data: data },
+            success: function (r) {
+                if (r == 'ok') {
+                    $('#tableRangoRet').DataTable().ajax.reload();
                 } else {
                     mjeError(r);
                 }
@@ -237,6 +333,53 @@
                         }
                     }
                 });
+            }
+        });
+    });
+    $('#tableRangoRet').on('click', '.borrar', function () {
+        var id = $(this).attr('text');
+        Swal.fire({
+            title: "¿Confirma que desea eliminar el registro?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'datos/eliminar/eliminar_rango.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            $('#tableRangoRet').DataTable().ajax.reload();
+                            mje('Registro eliminado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    $('#divModalForms').on('input', '#buscaRetencion', function () {
+        $(this).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "datos/consultar/busca_retenciones.php",
+                    dataType: "json",
+                    type: 'POST',
+                    data: { term: request.term },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                $("#id_retencion").val(ui.item.id);
             }
         });
     });

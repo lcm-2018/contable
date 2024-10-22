@@ -37,6 +37,40 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `ctt_adquisiciones`.`id_cdp`
+                , `ctt_adquisiciones`.`id_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
+            FROM
+                `ctt_adquisiciones`
+                INNER JOIN `tb_terceros` 
+                    ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE (`ctt_adquisiciones`.`id_cdp` = $id_cdp)
+            UNION ALL
+            SELECT
+                `ctt_novedad_adicion_prorroga`.`id_cdp`
+                , `ctt_adquisiciones`.`id_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
+            FROM
+                `ctt_contratos`
+                INNER JOIN `ctt_novedad_adicion_prorroga` 
+                    ON (`ctt_contratos`.`id_contrato_compra` = `ctt_novedad_adicion_prorroga`.`id_adq`)
+                INNER JOIN `ctt_adquisiciones` 
+                    ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
+                INNER JOIN `tb_terceros` 
+                    ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE (`ctt_novedad_adicion_prorroga`.`id_cdp` = $id_cdp)";
+    $rs = $cmd->query($sql);
+    $ctt = $rs->fetch();
+    $id_ter = !empty($ctt) ? $ctt['id_tercero'] : 0;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT `id_pto`,`fecha`, `id_manu`,`objeto`, `id_tercero_api`, `num_contrato` FROM `pto_crp` WHERE `id_pto_crp` = $id_crp";
     $rs = $cmd->query($sql);
     $datosCRP = $rs->fetch();
@@ -59,18 +93,23 @@ $id_t = [$datosCRP['id_tercero_api']];
 $ids = implode(',', $id_t);
 $terceros = getTerceros($ids, $cmd);
 $cmd = null;
-if ($datosCRP['id_tercero_api'] == 0) {
-    $tercero = '---';
-    $ccnit = '---';
+//$terceros = array_merge($terceros, getTerceros($id_ter, $cmd));
+if ($id_ter == 0) {
+    if ($datosCRP['id_tercero_api'] == 0) {
+        $tercero = '---';
+        $ccnit = '---';
+    } else {
+        $key = array_search($datosCRP['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+        $tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '---';
+        $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
+    }
 } else {
-    $key = array_search($datosCRP['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
-    $tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '---';
-    $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
+    $tercero = $ctt['nom_tercero'];
+    $ccnit = $ctt['nit_tercero'];
+    $datosCRP['id_tercero_api'] = $id_ter;
 }
-
 $fecha_cierre =  date("Y-m-d", strtotime($datosCRP['fecha']));
 $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
-
 ?>
 
 <body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ? 'sb-sidenav-toggled' : ''; ?>">

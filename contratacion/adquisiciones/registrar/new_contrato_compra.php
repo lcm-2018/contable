@@ -23,8 +23,7 @@ try {
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);
     $sql->bindParam(2, $id_compra, PDO::PARAM_INT);
-    $sql->execute();
-    if (!($sql->rowCount() > 0)) {
+    if (!($sql->execute())) {
         echo $sql->errorInfo()[2];
         exit();
     }
