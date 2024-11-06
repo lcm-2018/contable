@@ -545,6 +545,27 @@ $("#tableMvtoContableDetalle").on("input", ".bTercero", function () {
 		}
 	});
 });
+$('#areaReporte').on('click', '#bTercero', function () {
+	$(this).autocomplete({
+		source: function (request, response) {
+			$.ajax({
+				url: window.urlin + "/presupuesto/datos/consultar/buscar_terceros.php",
+				type: "post",
+				dataType: "json",
+				data: {
+					term: request.term
+				},
+				success: function (data) {
+					response(data);
+				}
+			});
+		},
+		minLength: 2,
+		select: function (event, ui) {
+			$('#id_tercero').val(ui.item.id);
+		}
+	});
+});
 //=================================== Registrar el documento y la tabla libaux el detalle del movimiento contable ============================
 
 //
@@ -2661,6 +2682,9 @@ const generarInformeCtb = (boton) => {
 	var fecha_final = $("#fecha_fin").length ? $("#fecha_fin").val() : 0;
 	var cta_inicial = 0;
 	var cta_final = 0;
+	var id_tercero = 0;
+	var tp_doc = 0;
+	var xtercero = 0;
 	var band = false;
 	if ($("#codigoctaini").length) {
 		if ($("#id_codigoctaini").val() == '0' || $("#id_codigoctafin").val() == '0') {
@@ -2671,6 +2695,13 @@ const generarInformeCtb = (boton) => {
 			cta_final = $("#id_codigoctafin").val();
 		}
 	}
+	if ($("#slcTpDoc").length) {
+		tp_doc = $("#slcTpDoc").val();
+		id_tercero = $("#id_tercero").val();
+	}
+	if ($("#xTercero").length) {
+		xtercero = $("#xTercero").is(":checked") ? 1 : 0;
+	}
 	if (band) {
 		return false;
 	}
@@ -2680,6 +2711,9 @@ const generarInformeCtb = (boton) => {
 		fecha_final: fecha_final,
 		cta_inicial: cta_inicial,
 		cta_final: cta_final,
+		id_tercero: id_tercero,
+		tp_doc: tp_doc,
+		xtercero: xtercero,
 	}
 
 	var ruta = window.urlin + "/contabilidad/informes/";

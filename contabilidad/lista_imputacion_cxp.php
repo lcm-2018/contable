@@ -41,7 +41,73 @@ try {
                         `pto_cop_detalle`
                     GROUP BY `id_pto_crp_det`) AS `t1`  
                     ON (`t1`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
-            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
+            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)
+            UNION ALL 
+            SELECT
+                $id_doc AS `id_ctb_doc`
+                , `val_crp`.`id_tercero_api`
+                , IFNULL(`val_crp`.`debito`,0) - IFNULL(`val_crp`.`credito`,0) AS `valor_crp` 
+                , `rubros`.`id_rubro`
+                , `rubros`.`cod_pptal`
+                , `rubros`.`nom_rubro`
+                , IFNULL(`val_cop`.`debito`,0) - IFNULL(`val_cop`.`credito`,0) AS `valor_crp`
+                , `val_crp`.`id_pto_crp_det`
+            FROM 
+                (SELECT
+                    `pto_cargue`.`cod_pptal`
+                    , `pto_cargue`.`id_cargue` AS `id_rubro`
+                    , `pto_cargue`.`nom_rubro`
+                    , `pto_cdp_detalle`.`id_pto_cdp_det`
+                    , `pto_cdp_detalle`.`id_pto_cdp`
+                FROM
+                    `pto_cdp_detalle`
+                    INNER JOIN `pto_cargue` 
+                        ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                WHERE (`pto_cdp_detalle`.`id_pto_cdp` IN 
+                    (SELECT
+                        `id_cdp`
+                    FROM
+                        `ctt_novedad_adicion_prorroga`
+                    WHERE (`id_adq` = 
+                        (SELECT
+                            `ctt_contratos`.`id_contrato_compra`
+                        FROM
+                            `ctb_doc`
+                        INNER JOIN `pto_crp` 
+                            ON (`ctb_doc`.`id_crp` = `pto_crp`.`id_pto_crp`)
+                        INNER JOIN `ctt_adquisiciones` 
+                            ON (`pto_crp`.`id_cdp` = `ctt_adquisiciones`.`id_cdp`)
+                        INNER JOIN `ctt_contratos` 
+                            ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
+                        WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)))))) AS `rubros`
+            LEFT JOIN 
+                (SELECT
+                    `pto_crp`.`id_pto_crp`
+                    , `pto_crp`.`id_cdp`
+                    , `pto_crp_detalle`.`id_pto_cdp_det`
+                    , `pto_crp_detalle`.`id_pto_crp_det`
+                    , `pto_crp_detalle`.`id_tercero_api`
+                    , SUM(`pto_crp_detalle`.`valor`) AS `debito`
+                    , SUM(`pto_crp_detalle`.`valor_liberado`) AS `credito`
+                FROM
+                    `pto_crp_detalle`
+                INNER JOIN `pto_crp` 
+                    ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                WHERE (`pto_crp`.`estado` = 2)
+                GROUP BY `pto_crp`.`id_cdp`, `pto_crp_detalle`.`id_pto_cdp_det`) AS `val_crp`
+                ON(`val_crp`.`id_cdp` = `rubros`.`id_pto_cdp` AND `val_crp`.`id_pto_cdp_det` = `rubros`.`id_pto_cdp_det`)
+            LEFT JOIN 
+                (SELECT
+                    `pto_crp_detalle`.`id_pto_crp`
+                    , `pto_cop_detalle`.`id_pto_crp_det`
+                    , SUM(`pto_cop_detalle`.`valor`) AS `debito`
+                    , SUM(`pto_cop_detalle`.`valor_liberado`) AS `credito`
+                FROM
+                    `pto_cop_detalle`
+                INNER JOIN `pto_crp_detalle` 
+                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                GROUP BY `pto_crp_detalle`.`id_pto_crp`, `pto_cop_detalle`.`id_pto_crp_det`) AS `val_cop`
+                ON(`val_cop`.`id_pto_crp` = `val_crp`.`id_pto_crp`)";
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();
 } catch (PDOException $e) {

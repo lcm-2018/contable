@@ -28,7 +28,7 @@ $sql = "SELECT
         `ctb_retenciones`
         INNER JOIN `ctb_retencion_tipo` 
             ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
-        WHERE (`ctb_retencion_tipo`.`id_retencion_tipo` =6);";
+        WHERE (`ctb_retencion_tipo`.`id_retencion_tipo` = 6)";
 $rs = $cmd->query($sql);
 $otras = $rs->fetchAll();
 ?>
@@ -44,11 +44,15 @@ $otras = $rs->fetchAll();
                         <div class="col-md-2"><span class="small">Fecha de inicial:</span></div>
                         <div class="col-md-4"><input type="date" name="fecha_ini" id="fecha_ini" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_min; ?>"></div>
                     </div>
-
                     <div class="row mb-1">
                         <div class="col-3"></div>
                         <div class="col-md-2 small">Fecha de corte:</div>
                         <div class="col-md-4"><input type="date" name="fecha_fin" id="fecha_fin" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_actual; ?>"></div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-3"></div>
+                        <div class="col-md-2 small">Por tercero: </div>
+                        <div class="col-md-4"><input type="checkbox" name="xTercero" id="xTercero"></div>
                     </div>
                     <div class="row">
                         <div class="col-12">
