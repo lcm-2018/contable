@@ -1,4 +1,5 @@
 <?php
+// ya no se usa, se ecporta directamente desde la datatable
 session_start();
 if (!isset($_SESSION['user'])) {
     header("Location: ../../../index.php");

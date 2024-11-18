@@ -614,8 +614,8 @@ $rol = $_SESSION['rol'];
                                                 </a>
                                             <?php }
                                             if (PermisosUsuario($permisos, 5507, 0) || $id_rol == 1) {
-                                                ?>
-                                                    <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/php/cuentas_fac/index.php">
+                                            ?>
+                                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/php/cuentas_fac/index.php">
                                                     <div class="div-icono">
                                                         <i class="fas fas fa-clipboard-check fa-sm" style="color: black;"></i>
                                                     </div>
@@ -1183,66 +1183,66 @@ $rol = $_SESSION['rol'];
                             </div>
                         </nav>
                     </div>
-                <?php
+                    <?php
                 }
                 /* MODULO DE ACTIVOS FIJOS ANTERIOR */
-
-                $key = array_search('57', array_column($perm_modulos, 'id_modulo'));
-                if (false !== $key) {
-                ?>
-                    <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapseActFijos" aria-expanded="false" aria-controls="collapsePages2">
-                        <div class="form-row">
-                            <div class="div-icono">
-                                <span class="fas fa-laptop-house fa-lg" style="color: #D2B4DE"></span>
+                if (false) {
+                    $key = array_search('57', array_column($perm_modulos, 'id_modulo'));
+                    if (false !== $key) {
+                    ?>
+                        <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapseActFijos" aria-expanded="false" aria-controls="collapsePages2">
+                            <div class="form-row">
+                                <div class="div-icono">
+                                    <span class="fas fa-laptop-house fa-lg" style="color: #D2B4DE"></span>
+                                </div>
+                                <div>
+                                    Activos Fijos
+                                </div>
                             </div>
-                            <div>
-                                Activos Fijos
-                            </div>
-                        </div>
-                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-caret-down"></i></div>
-                    </a>
-                    <div class="collapse" id="collapseActFijos" aria-labelledby="headingTwo" data-parent="#sidenavAccordion">
-                        <nav class="sb-sidenav-menu-nested nav accordion shadow-nav-lat" id="sidenavAccordionPages">
-                            <?php if (PermisosUsuario($permisos, 5701, 0) || $id_rol == 1) { ?>
-                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos_anterior/entradas_activos_fijos.php">
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-caret-down"></i></div>
+                        </a>
+                        <div class="collapse" id="collapseActFijos" aria-labelledby="headingTwo" data-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav accordion shadow-nav-lat" id="sidenavAccordionPages">
+                                <?php if (PermisosUsuario($permisos, 5701, 0) || $id_rol == 1) { ?>
+                                    <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos_anterior/entradas_activos_fijos.php">
+                                        <div class="form-row">
+                                            <div class="div-icono">
+                                                <i class="fas fa-people-carry fa-sm" style="color: #85C1E9;"></i>
+                                            </div>
+                                            <div>
+                                                Entradas
+                                            </div>
+                                        </div>
+                                    </a>
+                                <?php } ?>
+                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos_anterior/componentes_acfijos.php">
                                     <div class="form-row">
                                         <div class="div-icono">
-                                            <i class="fas fa-people-carry fa-sm" style="color: #85C1E9;"></i>
+                                            <span class="fas fa-pencil-ruler fa-sm" style="color: #F1C40F;"></span>
                                         </div>
                                         <div>
-                                            Entradas
+                                            Gestión
                                         </div>
                                     </div>
                                 </a>
-                            <?php } ?>
-                            <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos_anterior/componentes_acfijos.php">
-                                <div class="form-row">
-                                    <div class="div-icono">
-                                        <span class="fas fa-pencil-ruler fa-sm" style="color: #F1C40F;"></span>
+                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos_anterior/mantenimiento_acfijos.php">
+                                    <div class="form-row">
+                                        <div class="div-icono">
+                                            <span class="fas fa-tools fa-sm" style="color: #EB984E;"></span>
+                                        </div>
+                                        <div>
+                                            Mantenimiento
+                                        </div>
                                     </div>
-                                    <div>
-                                        Gestión
-                                    </div>
-                                </div>
-                            </a>
-                            <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos_anterior/mantenimiento_acfijos.php">
-                                <div class="form-row">
-                                    <div class="div-icono">
-                                        <span class="fas fa-tools fa-sm" style="color: #EB984E;"></span>
-                                    </div>
-                                    <div>
-                                        Mantenimiento
-                                    </div>
-                                </div>
-                            </a>
-                        </nav>
-                    </div>
-                <?php
+                                </a>
+                            </nav>
+                        </div>
+                    <?php
+                    }
                 }
-
                 //$key = array_search('9', array_column($perm_modulos, 'id_modulo'));
                 if (false) {
-                ?>
+                    ?>
                     <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapseCostos" aria-expanded="false" aria-controls="collapsePages2">
                         <div class="form-row">
                             <div class="div-icono">

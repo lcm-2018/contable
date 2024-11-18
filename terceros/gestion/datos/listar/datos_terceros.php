@@ -37,6 +37,7 @@ try {
             GROUP BY
                 `tb_terceros`.`id_tercero_api`
             ORDER BY $col $dir $limit";
+    //echo $sql;
     $rs = $cmd->query($sql);
     $terEmpr = $rs->fetchAll();
     $cmd = null;
@@ -74,7 +75,9 @@ try {
 }
 $id_t = [];
 foreach ($terEmpr as $l) {
-    $id_t[] = $l['id_tercero_api'];
+    if ($l['id_tercero_api'] != '') {
+        $id_t[] = $l['id_tercero_api'];
+    }
 }
 $data = [];
 if (!empty($id_t)) {

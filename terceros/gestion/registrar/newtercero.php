@@ -1,5 +1,8 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 /*if (!isset($_SESSION['user'])) {
     header('Location: ../../../index.php');
     exit();
@@ -32,7 +35,7 @@ $pais = $_POST['slcPaisEmp'];
 $dpto = $_POST['slcDptoEmp'];
 $municip = $_POST['slcMunicipioEmp'];
 $dir = $_POST['txtDireccion'];
-$mail = $_POST['mailEmp'];
+$mail_persona = $_POST['mailEmp'];
 $tel = $_POST['txtTelEmp'];
 $estado = '1';
 $iduser = $_SESSION['id_user'];
@@ -74,7 +77,7 @@ if ($terceros != '0') {
         "slcDptoEmp" => $dpto,
         "slcMunicipioEmp" => $municip,
         "txtDireccion" => $dir,
-        "mailEmp" => $mail,
+        "mailEmp" => $mail_persona,
         "txtTelEmp" => $tel,
         "id_user" => $iduser,
         "nit_emp" => $nit_crea,
@@ -89,28 +92,34 @@ if ($terceros != '0') {
     $res = json_decode($result, true);
     $id_ter_api = $res;
     if ($id_ter_api > 0) {
-        $mail = new PHPMailer(true);
-        $mail->isSMTP();
-        $mail->SMTPOptions = [
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            ]
-        ];
-        $mail->Host       = 'mail.lcm.com.co';
-        $mail->SMTPAuth   = true;
-        $mail->Username   = 'mail@lcm.com.co';
-        $mail->Password   = 'Lcm2021*';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port       = 465;
-        $mail->setFrom('mail@lcm.com.co', 'Info-LCM');
-        $mail->addAddress($data['mailEmp']);
-        $mail->isHTML(true);
-        $mail->Subject = 'Registro de tercero';
-        $mail->Body    = 'Usted ha sido registrado como tercero, por favor ingrese al sistema para validar su información con los siguientes datos: <br> Usuario: ' . $cc_nit . '<br> Contraseña: Corresponde al mismo numero de identificación del tercero.<br> <a href="http://200.7.102.155/suite_terceros/index.php">Ingresar</a>';
-        $mail->AltBody = '';
-        $mail->send();
+        try {
+            $mail = new PHPMailer(true);
+            $mail->SMTPDebug = 0;  // Desactiva la depuración para evitar errores en pantalla
+            $mail->isSMTP();
+            $mail->SMTPOptions = [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true
+                ]
+            ];
+            $mail->Host       = 'mail.lcm.com.co';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'mail@lcm.com.co';
+            $mail->Password   = 'Lcm2021*';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = 465;
+            $mail->setFrom('mail@lcm.com.co', 'Info-LCM');
+            $mail->addAddress($data['mailEmp']);
+            $mail->isHTML(true);
+            $mail->Subject = 'Registro de tercero';
+            $mail->Body    = 'Usted ha sido registrado como tercero, por favor ingrese al sistema para validar su información con los siguientes datos: <br> Usuario: ' . $cc_nit . '<br> Contraseña: Corresponde al mismo numero de identificación del tercero.<br> <a href="http://200.7.102.155/suite_terceros/index.php">Ingresar</a>';
+            $mail->AltBody = '';
+
+            $mail->send();
+        } catch (Exception $e) {
+            // No hacer nada en caso de error para que el flujo continúe sin interrupciones
+        }
     }
 }
 if ($res > 1 || $regAtTerc == 'SI') {
@@ -129,7 +138,7 @@ if ($res > 1 || $regAtTerc == 'SI') {
         $sql->bindParam(4, $dir, PDO::PARAM_STR);
         $sql->bindParam(5, $tel, PDO::PARAM_STR);
         $sql->bindParam(6, $municip, PDO::PARAM_INT);
-        $sql->bindParam(7, $mail, PDO::PARAM_STR);
+        $sql->bindParam(7, $mail_persona, PDO::PARAM_STR);
         $sql->bindParam(8, $iduser, PDO::PARAM_INT);
         $sql->bindParam(9, $id_ter_api, PDO::PARAM_INT);
         $sql->bindParam(10, $estado, PDO::PARAM_INT);

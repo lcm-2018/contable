@@ -86,10 +86,10 @@ try {
     } else {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "INSERT INTO nom_empleado(tipo_empleado, subtipo_empleado, alto_riesgo_pension, tipo_contrato, tipo_doc
-                                        , no_documento, nombre1, nombre2, apellido1, apellido2, fech_inicio, salario_integral, correo
-                                        , telefono, cargo, pais, departamento, municipio, direccion, id_banco, tipo_cta, cuenta_bancaria
-                                        , estado, genero, fec_reg, sede_emp, tipo_cargo, `pais_exp`,`dpto_exp`,`city_exp`,`fec_exp`,`pais_nac`
+        $sql = "INSERT INTO `nom_empleado`(`tipo_empleado`, `subtipo_empleado`, `alto_riesgo_pension`, `tipo_contrato`, `tipo_doc`
+                                        , `no_documento`, `nombre1`, `nombre2`, `apellido1`, `apellido2`, `fech_inicio`, `salario_integral`, `correo`
+                                        , `telefono`, `cargo`, `pais`, `departamento`, `municipio`, `direccion`, `id_banco`, `tipo_cta`, `cuenta_bancaria`
+                                        , `estado`, `genero`, `fec_reg`, `sede_emp`, `tipo_cargo`, `pais_exp`,`dpto_exp`,`city_exp`,`fec_exp`,`pais_nac`
                                         ,`dpto_nac`,`city_nac`,`fec_nac`)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
@@ -191,7 +191,9 @@ try {
                         }
                         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                        $sql = "INSERT INTO nom_salarios_basico (id_empleado, vigencia, salario_basico, fec_reg) VALUES (?, ?, ?, ?)";
+                        $sql = "INSERT INTO `nom_salarios_basico` 
+                                    (`id_empleado`, `vigencia`, `salario_basico`, `fec_reg`) 
+                                VALUES (?, ?, ?, ?)";
                         $sql = $cmd->prepare($sql);
                         $sql->bindParam(1, $idinsert, PDO::PARAM_INT);
                         $sql->bindParam(2, $vigencia, PDO::PARAM_STR);
@@ -202,7 +204,9 @@ try {
                             try {
                                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                                $sql = "INSERT INTO nom_contratos_empleados (id_empleado, fec_inicio, vigencia, id_user_reg, fec_reg) VALUES (?, ?, ?, ?, ?)";
+                                $sql = "INSERT INTO `nom_contratos_empleados` 
+                                            (`id_empleado`, `fec_inicio`, `vigencia`, `id_user_reg`, `fec_reg`) 
+                                        VALUES (?, ?, ?, ?, ?)";
                                 $sql = $cmd->prepare($sql);
                                 $sql->bindParam(1, $idinsert, PDO::PARAM_INT);
                                 $sql->bindParam(2, $fecha, PDO::PARAM_STR);
@@ -267,7 +271,7 @@ try {
                                             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                                             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
                                             $sql = "INSERT INTO `tb_terceros`
-                                                        (`tipo_doc`, `id_tercero_api`, `nit_tercero`, `estado`, `fec_inicio`, `id_user_reg`, `fec_reg`, `nom_tercero`) 
+                                                        (`tipo_doc`, `id_tercero_api`, `nit_tercero`, `estado`, `fec_inicio`, `id_usr_crea`, `genero`, `nom_tercero`) 
                                                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                                             $sql = $cmd->prepare($sql);
                                             $sql->bindParam(1, $tipodoc, PDO::PARAM_INT);
@@ -276,7 +280,7 @@ try {
                                             $sql->bindParam(4, $estado, PDO::PARAM_STR);
                                             $sql->bindParam(5, $fecha, PDO::PARAM_STR);
                                             $sql->bindParam(6, $idus, PDO::PARAM_INT);
-                                            $sql->bindValue(7, $date->format('Y-m-d H:i:s'));
+                                            $sql->bindValue(7, $genero, PDO::PARAM_STR);
                                             $sql->bindParam(8, $nombre, PDO::PARAM_STR);
                                             $sql->execute();
                                             if ($cmd->lastInsertId() > 0) {

@@ -1,6 +1,9 @@
 <?php
 
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
     header('Location: ../../index.php');
     exit();
@@ -19,8 +22,8 @@ $er .= '
   <table class="table table-striped table-bordered table-sm">
   <thead>
     <tr>
-      <th scope="col">Documento</th>
-      <th scope="col">Nombre</th>
+      <th scope="col">No. Doc.</th>
+      <th scope="col">Empleado</th>
       <th scope="col">Estado</th>
     </tr>
   </thead>
@@ -336,7 +339,7 @@ try {
                     `nom_liq_bsp`
                 INNER JOIN `nom_nominas`
                     ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$anio')
                 GROUP BY `nom_liq_bsp`.`id_empleado`
                 UNION ALL
                 SELECT
@@ -345,7 +348,7 @@ try {
                     `nom_liq_bsp`
                 INNER JOIN `nom_nominas` 
                     ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$anio')
                 GROUP BY `nom_liq_bsp`.`id_empleado`)
             GROUP BY `id_empleado`";
     $res = $cmd->query($sql);
@@ -540,12 +543,12 @@ if (isset($_POST['check'])) {
     foreach ($list_liquidar as $i) {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $sql = "SELECT
-                    `seg_liq_salario`.`id_sal_liq`
+                    `nom_liq_salario`.`id_sal_liq`
                 FROM
-                    `seg_liq_salario`
-                    INNER JOIN `seg_nominas` 
-                        ON (`seg_liq_salario`.`id_nomina` = `seg_nominas`.`id_nomina`)
-                WHERE (`seg_nominas`.`mes` = '$mes' AND `seg_nominas`.`vigencia` = '$anio' AND `seg_nominas`.`tipo` = 'N' AND `seg_liq_salario`.`id_empleado` = $i)";
+                    `nom_liq_salario`
+                    INNER JOIN `nom_nominas` 
+                        ON (`nom_liq_salario`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE (`nom_nominas`.`mes` = '$mes' AND `nom_nominas`.`vigencia` = '$anio' AND `nom_nominas`.`tipo` = 'N' AND `nom_liq_salario`.`id_empleado` = $i)";
         $rs = $cmd->query($sql);
         $nomliq = $rs->fetch();
         $cmd = null;
@@ -1678,10 +1681,10 @@ if (isset($_POST['check'])) {
                 $cc = $emple[$key]['no_documento'];
                 $nomempleado = $emple[$key]['nombre'];
             }
-            $er .= '<tr>'
+            $er .= '<tr class="text-left">'
                 . '<td>' . $cc . '</td>'
                 . '<td>' . mb_strtoupper($nomempleado) . '</td>'
-                . '<td>Mes liquidado</td>'
+                . '<td class="text-center"><i class="fas fa-check-circle text-success"></i></td>'
                 . '</tr>';
             $mesliq++;
         }

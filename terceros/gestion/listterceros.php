@@ -46,8 +46,11 @@ $vigencia = $_SESSION['vigencia'];
                                 }
                                 ?>
                                 <div class="col-md-2 text-right">
+                                    <button class="btn btn-warning btn-sm" id="btnActualizaRepositorio" title="Actualizar repositorio de terceros">
+                                        <span class="mr-2"></span><i class="fas fa-user-edit fa-lg"></i>
+                                    </button>
                                     <!-- botón para descargar excel -->
-                                    <button class="btn btn-success btn-sm" id="btnReporteTerceros" title="Descargar Informe de Terceros">
+                                    <button class="btn btn-info btn-sm" id="btnReporteTerceros" title="Descargar Informe de Terceros">
                                         <i class="fas fa-file-excel fa-lg"></i>
                                     </button>
                                 </div>

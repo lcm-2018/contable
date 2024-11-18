@@ -627,4 +627,19 @@
     $('#btnReporteTerceros').on('click', function () {
         $('<form action="informes/reporte_terceros.php" method="post"></form>').appendTo('body').submit();
     });
+    $('#btnActualizaRepositorio').on('click', function () {
+        $('#btnActualizaRepositorio').attr('disabled', true);
+        //buscar span para poner una animacion de carga
+        $('#btnActualizaRepositorio span').addClass('spinner-border spinner-border-sm');
+        $.ajax({
+            type: 'POST',
+            url: 'registrar/newmasivo.php',
+            success: function (r) {
+                $('#tableTerceros').DataTable().ajax.reload();
+                $('#btnActualizaRepositorio').attr('disabled', false);
+                $('#btnActualizaRepositorio span').removeClass('spinner-border spinner-border-sm');
+                mje(r);
+            }
+        });
+    });
 })(jQuery);

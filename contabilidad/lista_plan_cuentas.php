@@ -6,6 +6,18 @@ if (!isset($_SESSION['user'])) {
 }
 include '../conexion.php';
 include '../permisos.php';
+
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT COUNT(*) AS `cantiad` FROM `ctb_libaux`";
+    $rs = $cmd->query($sql);
+    $registros = $rs->fetch();
+    $registros = $registros['cantiad'];
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -42,15 +54,19 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                         </div>
                         <div class="card-body" id="divCuerpoPag">
                             <div>
-                                <div clas="row">
-                                    <div class="center-block">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend px-1">
-                                            </div>
-                                        </div>
+                                <div>
+                                    <div class="text-right mb-2">
+                                        <?php
+                                        if ($registros == 0) {
+                                            if (PermisosUsuario($permisos, 5504, 2) || $id_rol == 1) {
+                                        ?>
+                                                <button class="btn btn-outline-success btn-sm" id="cargaExcelPuc" title="Cargar plande cuentas con archico Excel"><i class="far fa-file-excel fa-lg"></i></button>
+                                                <button class="btn btn-outline-primary btn-sm" id="formatoExcelPuc" title="Descargar formato cargue de plan de cuentas"><i class="fas fa-download fa-lg"></i></button>
+                                        <?php
+                                            }
+                                        } ?>
                                     </div>
                                 </div>
-                                <br>
                                 <table id="tablePlanCuentas" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
                                     <thead>
                                         <tr>
@@ -89,14 +105,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             <?php include '../footer.php' ?>
         </div>
         <!-- Modal formulario-->
-        <div class="modal fade" id="divModalForms" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-            <div id="divTamModalForms" class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-body text-center" id="divForms">
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php include '../modales.php' ?>
     </div>
     <?php include '../scripts.php' ?>
 

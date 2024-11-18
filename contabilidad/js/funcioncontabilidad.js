@@ -256,6 +256,69 @@
 		// Fin documentos fuente
 		//Fin dataTable
 	});
+	$('#cargaExcelPuc').on('click', function () {
+		$.post("datos/registrar/form_cargar_puc.php", function (he) {
+			$('#divTamModalForms').removeClass('modal-xl');
+			$('#divTamModalForms').removeClass('modal-lg');
+			$('#divTamModalForms').removeClass('modal-sm');
+			$('#divModalForms').modal('show');
+			$("#divForms").html(he);
+		});
+	});
+	$('#divModalForms').on('click', '#btnAddPucExcel', function () {
+		if ($('#file').val() === '') {
+			$('#divModalError').modal('show');
+			$('#divMsgError').html('¡Debe elegir un archivo!');
+		} else {
+			let archivo = $('#file').val();
+			let ext = archivo.substring(archivo.lastIndexOf(".")).toLowerCase();
+			if (!(ext === '.xlsx' || ext === '.xls')) {
+				$('#divModalError').modal('show');
+				$('#divMsgError').html('¡Solo se permite documentos .xlsx!');
+				return false;
+			} else if ($('#file')[0].files[0].size > 2097152) {
+				$('#divModalError').modal('show');
+				$('#divMsgError').html('¡Documento debe tener un tamaño menor a 2Mb!');
+				return false;
+			}
+			var btns = '<button class="btn btn-primary btn-sm" id="btnConfirCargaPuc">Aceptar</button><button type="button" class="btn btn-secondary  btn-sm"  data-dismiss="modal">Cancelar</button>'
+			$("#divModalConfDel").modal("show");
+			$("#divMsgConfdel").html('Esta acción eliminará el cargue del plan de cuentas.<br> Confirmar.');
+			$("#divBtnsModalDel").html(btns);
+			$('#divModalConfDel').on('click', '#btnConfirCargaPuc', function () {
+				$("#divModalConfDel").modal("hide");
+				let datos = new FormData();
+				datos.append('file', $('#file')[0].files[0]);
+				datos.append('idPto', $('#idPtoEstado').val());
+				$('#btnAddPtoExcel').attr('disabled', true);
+				$('#btnAddPtoExcel').html('<i class="fas fa-spinner fa-pulse"></i> Cargando...');
+				$.ajax({
+					type: 'POST',
+					url: 'datos/registrar/cargar_puc_excel.php',
+					contentType: false,
+					data: datos,
+					processData: false,
+					cache: false,
+					success: function (r) {
+						$('#btnAddPtoExcel').attr('disabled', false);
+						$('#btnAddPtoExcel').html('Subir');
+						if (r == 'ok') {
+							reloadtable('tablePlanCuentas');
+							$('#divModalForms').modal('hide');
+							$('#divModalDone').modal('show');
+							$('#divMsgDone').html('Plan de cuentas Cargado Correctamente');
+						} else {
+							$('#divModalForms').modal('hide');
+							$('#divModalError').modal('show');
+							$('#divMsgError').html(r);
+						}
+					}
+				});
+			});
+			return false;
+		}
+		return false;
+	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
 /*var recargartable = function (nom) {

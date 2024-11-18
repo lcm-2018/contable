@@ -7,6 +7,8 @@ if (!isset($_SESSION['user'])) {
 $id_compra = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
 
 include '../../../conexion.php';
+require_once '../../../vendor/autoload.php';
+
 function pesos($valor)
 {
     return '$ ' . number_format($valor, 0, ',', '.');
@@ -159,7 +161,6 @@ if (empty($supervision)) {
 }
 $contra = $contrato['id_contrato_compra'];
 
-require_once '../../../vendor/autoload.php';
 
 use PhpOffice\PhpWord\TemplateProcessor;
 

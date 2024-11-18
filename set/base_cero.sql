@@ -1,6 +1,6 @@
 SET FOREIGN_KEY_CHECKS = 0;
-DELETE FROM `seg_terceros`;
-ALTER TABLE `seg_terceros` AUTO_INCREMENT = 1;
+DELETE FROM `tb_terceros`;
+ALTER TABLE `tb_terceros` AUTO_INCREMENT = 1;
 DELETE FROM `tb_tipo_tercero`;
 ALTER TABLE `tb_tipo_tercero` AUTO_INCREMENT = 1;
 DELETE FROM `seg_garantias_compra`;

@@ -595,7 +595,10 @@ if (esta === -1) {
         $('<form action="' + window.urlin + '/formatos/download_formato.php" method="post"><input type="hidden" name="nom_file" value="' + name + '" /></form>').appendTo('body').submit();
     };
     $('#formatoExcelPto').on('click', function () {
-        DownoadFile('cargue_pto.xlsx')
+        DownoadFile('cargue_pto.xlsx');
+    });
+    $('#formatoExcelPuc').on('click', function () {
+        DownoadFile('cargue_puc.xlsx');
     });
     $('.tesoreria').on('click', function () {
         let id = $(this).attr('text');
