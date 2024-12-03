@@ -8,6 +8,7 @@ include '../conexion.php';
 include '../permisos.php';
 include '../terceros.php';
 $id_vigencia = $_SESSION['id_vigencia'];
+unset($_SESSION['id_doc']);
 // Consulta tipo de presupuesto
 function pesos($valor)
 {
@@ -31,7 +32,7 @@ try {
                 , `pto_crp`.`fecha`
                 , `pto_crp`.`objeto`
                 , `pto_crp`.`id_cdp`
-                , `ctt_contratos`.`num_contrato`
+                , `pto_crp`.`num_contrato`
                 , `ctt_contratos`.`id_contrato_compra`
             FROM
                 `pto_crp`

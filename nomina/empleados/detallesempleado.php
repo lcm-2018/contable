@@ -81,6 +81,21 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT  
+                `id_empleado`, `vigencia`, `salario_basico`, `fec_reg`
+            FROM
+                `nom_salarios_basico` 
+            WHERE `id_empleado` = $id
+            ORDER BY `id_salario` DESC";
+    $rs = $cmd->query($sql);
+    $salemp = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 include '../../permisos.php';
 $contador = 1;
 ?>
@@ -284,7 +299,7 @@ if ($_SESSION['navarlat'] == '1') {
                                             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo">
                                                 <div class="card-body">
                                                     <?php
-                                                   if ((PermisosUsuario($permisos, 5101, 2) || $id_rol == 1)) {
+                                                    if ((PermisosUsuario($permisos, 5101, 2) || $id_rol == 1)) {
                                                         echo '<input type="hidden" id="peReg" value="1">';
                                                     } else {
                                                         echo '<input type="hidden" id="peReg" value="0">';
@@ -374,6 +389,40 @@ if ($_SESSION['navarlat'] == '1') {
                                                         </tr>
                                                     </thead>
                                                     <tbody id="modificarAfps">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- parte-->
+                                    <div class="card">
+                                        <div class="card-header card-header-detalles py-0 headings" id="historyCCosto">
+                                            <h5 class="mb-0">
+                                                <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapseCcosto" aria-expanded="false" aria-controls="collapseCcosto">
+                                                    <div class="form-row">
+                                                        <div class="div-icono">
+                                                            <span class="fas fa-landmark fa-lg" style="color: #3498db;"></span>
+                                                        </div>
+                                                        <div>
+                                                            <?php echo $contador;
+                                                            $contador++ ?>. CENTROS DE COSTO
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </h5>
+                                        </div>
+                                        <div id="collapseCcosto" class="collapse" aria-labelledby="historyCCosto">
+                                            <div class="card-body">
+                                                <table id="tableCCostoEmp" class="table table-striped table-bordered table-sm display nowrap table-hover shadow" style="width:100%">
+                                                    <thead>
+                                                        <tr class="text-center">
+                                                            <th>ID</th>
+                                                            <th>Nombre</th>
+                                                            <th>Fecha</th>
+                                                            <th>Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="modificarCCostoEmp">
                                                     </tbody>
                                                 </table>
                                             </div>

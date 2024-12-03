@@ -57,12 +57,16 @@ try {
                 , `ctt_adquisiciones`.`objeto`
                 , `tb_terceros`.`id_tercero_api`
                 , `tb_terceros`.`nom_tercero`
+                , `pto_cdp`.`id_pto_cdp`
+                , `pto_cdp`.`estado` AS `status`
             FROM
                 `ctt_adquisiciones`
             INNER JOIN `ctt_modalidad` 
                 ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
             LEFT JOIN `tb_terceros`
                 ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            LEFT JOIN `pto_cdp`
+                ON (`pto_cdp`.`id_pto_cdp` = `ctt_adquisiciones`.`id_cdp`)
             WHERE `vigencia` = '$vigencia'" . $usuario;
     $rs = $cmd->query($sql);
     $ladquis = $rs->fetchAll();
@@ -77,7 +81,7 @@ if (!empty($ladquis)) {
         $detalles = null;
         $anular = null;
         $duplicar = null;
-        if ($la['estado'] <= '5' && (PermisosUsuario($permisos, 5302, 3) || $id_rol == 1)) {
+        if ($la['estado'] <= '6' && (PermisosUsuario($permisos, 5302, 3) || $id_rol == 1) && ($la['status'] == '0' || $la['id_pto_cdp'] == '')) {
             $anular = '<a value="' . $id_adq . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb anular" title="Anular"><span class="fas fa-ban fa-lg"></span></a>';
         }
         if (PermisosUsuario($permisos, 5302, 3) || $id_rol == 1) {

@@ -62,6 +62,9 @@ try {
     $sql = "SELECT `id_sede`, `nom_sede` as `nombre` FROM `tb_sedes`";
     $rs = $cmd->query($sql);
     $sedes = $rs->fetchAll();
+    $sql = "SELECT `id_centro`, `nom_centro` FROM `tb_centrocostos` WHERE  `id_centro` > 0 ORDER BY `nom_centro` ASC";
+    $rs = $cmd->query($sql);
+    $ccostos = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -403,6 +406,19 @@ $error = "Debe diligenciar este campo";
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row px-4">
+                                        <div class="form-group col-md-2">
+                                            <label for="slcCCostoEmp" class="small">Centro Costo</label>
+                                            <select id="slcCCostoEmp" name="slcCCostoEmp" class="form-control form-control-sm py-0 sm" aria-label="Default select example">
+                                                <option selected value="0">--Selecionar cargo--</option>
+                                                <?php
+                                                foreach ($ccostos as $cc) {
+                                                    echo '<option value="' . $cc['id_centro'] . '">' . $cc['nom_centro'] . '</option>';
+                                                }
+                                                ?>
+                                            </select>
                                         </div>
                                     </div>
                                     <input type="number" id="numEstadoEmp" value="1" name="numEstadoEmp" hidden>

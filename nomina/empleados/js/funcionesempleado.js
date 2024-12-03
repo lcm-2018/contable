@@ -451,6 +451,12 @@
             $("#divMsgError").html('Campo obligatorio');
             $("#" + par).addClass('border-danger');
             $("#" + par).focus();
+        } else if ($("#slcCCostoEmp").val() === '0') {
+            par = 'slcCCostoEmp';
+            $("#divModalError").modal('show');
+            $("#divMsgError").html('Campo obligatorio');
+            $("#" + par).addClass('border-danger');
+            $("#" + par).focus();
         } else {
             if (ced == "") {
                 $('#divModalError').modal('show');
@@ -719,6 +725,34 @@
         }
         return false;
     });
+    $("#divModalForms").on('click', '#btnAddCCostoEmp', function () {
+        var tp = $(this).attr('text');
+        if ($("#slcCcostoEmpl").val() === "0") {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html("Debe elegir un centro de costo");
+        } else {
+            let novccosto = $("#formNovCCosto").serialize();
+            var url = tp === '1' ? 'registrar/newnovccosto.php' : 'actualizar/upnovccosto.php';
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: novccosto,
+                success: function (r) {
+                    if (r == 'ok') {
+                        let id = 'tableCCostoEmp';
+                        $("#divModalForms").modal('hide');
+                        reloadtable(id);
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html("Novedad realizada correctamente");
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r);
+                    }
+                }
+            });
+        }
+        return false;
+    });
     //UP novedad ARL
     $('#modificarArls').on('click', '.editar', function () {
         let id = $(this).attr('value');
@@ -728,6 +762,45 @@
             $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
+        });
+    });
+    $('#modificarCCostoEmp').on('click', '.editar', function () {
+        let id_cc = $(this).attr('value');
+        $.post("datos/actualizar/up_nov_ccosto.php", { id_cc: id_cc }, function (he) {
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+    $('#modificarCCostoEmp').on('click', '.borrar', function () {
+        let id = $(this).attr('value');
+        Swal.fire({
+            title: "¿Confirma eliminar el centro de costo?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'eliminar/delnovccosto.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            let id = 'tableCCostoEmp';
+                            reloadtable(id);
+                            mje("Novedad eliminada correctamente");
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
         });
     });
     //Actualizar novedad ARL
@@ -2924,6 +2997,42 @@
             "pageLength": -1
         });
         $('#tableArl').wrap('<div class="overflow" />');
+        $('#tableCCostoEmp').DataTable({
+            dom: setdom,
+            buttons: [{
+                action: function (e, dt, node, config) {
+                    $.post("datos/registrar/form_add_ccosto.php", { id: id }, function (he) {
+                        $('#divTamModalForms').removeClass('modal-sm');
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').removeClass('modal-lg');
+                        $('#divModalForms').modal('show');
+                        $("#divForms").html(he);
+                    });
+                }
+            }],
+            language: setIdioma,
+            "ajax": {
+                url: 'datos/listar/datos_ccosto.php',
+                type: 'POST',
+                data: { id: id },
+                dataType: 'json',
+            },
+            "columns": [
+                { 'data': "id" },
+                { 'data': "nombre" },
+                { 'data': "fecha" },
+                { 'data': "botones" },
+            ],
+            "order": [
+                [0, "asc"]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
+        });
+        $('#tableCCostoEmp').wrap('<div class="overflow" />');
         //dataTable AFP
         $('#tableAfp').DataTable({
             dom: setdom,

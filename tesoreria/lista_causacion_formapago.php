@@ -176,7 +176,6 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                     <div class="col-md-2">
                         <label for="numDoc" class="small">VALOR</label>
                         <div class="btn-group"><input type="text" name="valor_pag" id="valor_pag" class="form-control form-control-sm" max="<?php echo $valor_pagar; ?>" value="<?php echo $valor_pagar; ?>" required style="text-align: right;" onkeyup="valorMiles(id)" ondblclick="valorMovTeroreria('');">
-                            <button type="submit" class="btn btn-primary btn-sm" id="">+</button>
                         </div>
                     </div>
                 </div>
@@ -235,4 +234,3 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
 
 
     </div>
-    <?php

@@ -8,6 +8,7 @@ include '../conexion.php';
 include '../permisos.php';
 $tipo_doc = isset($_POST['id_tipo_doc']) ? $_POST['id_tipo_doc'] : '0';
 $tipo = isset($_POST['var']) ? $_POST['var'] : '';
+unset($_SESSION['id_doc']);
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

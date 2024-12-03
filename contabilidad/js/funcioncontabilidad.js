@@ -708,12 +708,19 @@ function GestMvtoDetalle(elemento) {
 			.then((response) => response.text())
 			.then((response) => {
 				if (response == "ok") {
+					if ($('#tipodato').length && $('#tipodato').val() == '1') {
+						var id = idTercero.value;
+						var trc = bTercero.value;
+					} else {
+						var id = '0';
+						var trc = '';
+					}
 					if (opc == '0') {
 						$('#codigoCta').val('');
 						$('#id_codigoCta').val('0');
 						$('#tipoDato').val('0');
-						$('#bTercero').val('');
-						$('#idTercero').val('');
+						$('#bTercero').val(trc);
+						$('#idTercero').val(id);
 						$('#valorDebito').val('0');
 						$('#valorCredito').val('0');
 						$('#tipoDato').val('');
@@ -2902,4 +2909,23 @@ function obtenerNumeroSemana(fecha) {
 	}
 
 	return 1 + Math.ceil((primerJueves - fechaAuxiliar) / 604800000);
+}
+function CausaAuCentroCostos() {
+	var id_crp = $('#id_crpp').val();
+	var id_doc = $('#id_ctb_doc').val();
+	var valor = parseFloat($('#valFactura').text().replace(/[\$,]/g, ''));
+	$.ajax({
+		url: 'datos/registrar/registrar_mvto_costos_auto.php',
+		type: 'POST',
+		data: { id_crp: id_crp, id_doc: id_doc, valor: valor },
+		dataType: 'json',
+		success: function (r) {
+			if (r.status == 'ok') {
+				mje('Proceso realizado correctamente');
+				$('#valCentroCosto').html(r.acumulado);
+			} else {
+				mjeError(r.msg);
+			}
+		}
+	});
 }

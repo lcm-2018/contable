@@ -6,11 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 $id_causacion = isset($_POST['id_causacion']) ? $_POST['id_causacion'] : exit("Acción no permitida");
 include '../../../../conexion.php';
-$centros = [
-    '0' => ['id' => 'ADMIN', 'nombre' => 'ADMINISTRATIVO'],
-    '1' => ['id' => 'URG', 'nombre' => 'URGENCIAS'],
-    '2' => ['id' => 'PASIVO', 'nombre' => 'PASIVOS'],
-];
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -19,6 +15,19 @@ try {
             FROM `nom_tipo_rubro` ORDER BY `nombre` ASC";
     $rs = $cmd->query($sql);
     $tipo = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT `id_centro` AS `id`, `nom_centro` AS `nombre` 
+            FROM `tb_centrocostos` 
+            WHERE `id_centro` > 0
+            ORDER BY `nom_centro` ASC";
+    $rs = $cmd->query($sql);
+    $centros = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();

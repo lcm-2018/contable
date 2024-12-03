@@ -157,19 +157,19 @@ try {
                             <?php if ($band) { ?>
                                 <span class="small">Código presupuestal</span>
                             <?php } ?>
-                            <div class="form-control form-control-sm text-left <?php echo $bg_color ?>"><?php echo $l['cod_pptal'] ?></div>
+                            <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>"readonly><?php echo $l['cod_pptal'] ?></div>
                         </div>
                         <div class="form-group col-md-5">
                             <?php if ($band) { ?>
                                 <span class="small">Rubro</span>
                             <?php } ?>
-                            <div class="form-control form-control-sm text-left <?php echo $bg_color ?>"><?php echo $l['nom_rubro'] ?></div>
+                            <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>"readonly><?php echo $l['nom_rubro'] ?></div>
                         </div>
                         <div class="form-group col-md-2">
                             <?php if ($band) { ?>
                                 <span for="valor" class="small">Valor RP</span>
                             <?php } ?>
-                            <div class="form-control form-control-sm text-left <?php echo $bg_color ?>"><?php echo number_format($max, 2) ?></div>
+                            <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>"readonly><?php echo number_format($max, 2) ?></div>
                         </div>
                         <div class="form-group col-md-2">
                             <?php if ($band) { ?>

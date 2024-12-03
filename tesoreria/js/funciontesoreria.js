@@ -2169,11 +2169,11 @@ const guardarCuentaBanco = () => {
 		$("#banco").focus();
 		mjeError("Debe seleccionar un banco");
 	} else
-		/*if ($("#cuentas").val() == "0") {
+		if ($("#cuentas").val() == "0") {
 			$("#cuentas").addClass("is-invalid");
 			$("#cuentas").focus();
 			mjeError("Debe seleccionar una cuenta");
-		} else */
+		} else
 		if ($("#tipo_cuenta").val() == "0") {
 			$("#tipo_cuenta").addClass("is-invalid");
 			$("#tipo_cuenta").focus();

@@ -90,8 +90,11 @@ try {
                 , IFNULL(`reduccion`.`valor`,0) AS `val_reduccion` 
                 , IFNULL(`recaudo`.`valor`,0) AS `val_recaudo`
                 , IFNULL(`reconocimiento`.`valor`,0) AS `val_reconocimiento`
+                , `pto_presupuestos`.`id_tipo`
                 $valores_mes
             FROM `pto_cargue`
+                INNER JOIN `pto_presupuestos`
+                    ON (`pto_cargue`.`id_pto` = `pto_presupuestos`.`id_pto`)
                 LEFT JOIN
                     (SELECT
                         `pto_mod_detalle`.`id_cargue`
@@ -143,7 +146,8 @@ try {
                     WHERE (`pto_rad`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_rad`.`estado` = 2)
                     GROUP BY `pto_rad_detalle`.`id_rubro`) AS `reconocimiento`
                     ON(`reconocimiento`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                    $join_mes";
+                    $join_mes
+                WHERE (`pto_presupuestos`.`id_tipo` = 1)";
     $res = $cmd->query($sql);
     $rubros = $res->fetchAll();
 } catch (PDOException $e) {

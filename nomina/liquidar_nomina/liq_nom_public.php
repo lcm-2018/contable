@@ -1073,11 +1073,13 @@ if (isset($_POST['check'])) {
             //liquidar Incapacida
             $valincap = '0';
             $days = '0';
+            $tot_dias_inc = 0;
             if (!empty($incapacidades)) {
                 foreach ($incapacidades as $inc) {
                     $emple_inc = $inc['id_empleado'];
                     if ($emple_inc == $i) {
                         $days = $inc['can_dias'];
+                        $tot_dias_inc = $tot_dias_inc + $days;
                         $idinc = $inc['id_incapacidad'];
                         $tipoinc = $inc['id_tipo']; //1 comun,  3 laboral
                         $categoria = $inc['categoria']; //1 inicial, 2 prorroga
@@ -1161,6 +1163,10 @@ if (isset($_POST['check'])) {
                 $cmd = null;
             } catch (Exception $ex) {
                 echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+            }
+            $val_real_inc = $valincap;
+            if ($tot_dias_inc > 0 && $salbase == $smmlv) {
+                $valincap = ($salbase / 30) * $tot_dias_inc;
             }
             $devtotal = $devhe + $valincap + (($salbase / 30) * $diaslab) + $gasrep + $bsp_salarial + $vallcluto;
             if ($sal_integ == 1) {
@@ -1453,6 +1459,7 @@ if (isset($_POST['check'])) {
                     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
                 }
             }
+            $valincap = $val_real_inc;
             $base_descuentos = $devhe + (($salbase / 30) * $diaslab) + $auxt + $auxali + $vallic + $vallcluto + $valincap + $bsp_salarial + $vacacionsalario + $primavacnsalario + $bonrecreacionsalario + $gasrep + $valindem;
             //liquidar Embargos
             if (true) {

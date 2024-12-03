@@ -43,7 +43,7 @@ if (esta === -1) {
 
     $("#btnLogin").click(function () {
         let user = $("#txtUser").val();
-        let pass = $("#passuser").val();
+        let clave = $("#passuser").val();
         if (user === "") {
             $('#divModalError').modal('show');
             $('#divErrorLogin').html("Debe ingresar Usuario");
@@ -51,12 +51,13 @@ if (esta === -1) {
             $('#divModalError').modal('show');
             $('#divErrorLogin').html("Debe ingresar Contraseña");
         } else {
-            pass = hex_sha512(pass);
+            var pass = hex_sha512(clave);
+            var passwd = hex_sha512(clave.toLowerCase());
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
                 url: 'validarLogin.php',
-                data: { user: user, pass: pass }
+                data: { user: user, pass: pass, passwd: passwd }
             }).done(function (res) {
                 switch (res.mensaje) {
                     case 0:

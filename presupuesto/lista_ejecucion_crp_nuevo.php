@@ -38,14 +38,30 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
+            `objeto`
+            FROM `pto_cdp`
+            WHERE `id_pto_cdp` = $id_cdp";
+    $rs = $cmd->query($sql);
+    $objeto = $rs->fetch();
+    $objeto = !empty($objeto) ? $objeto['objeto'] : '';
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
                 `ctt_adquisiciones`.`id_cdp`
                 , `ctt_adquisiciones`.`id_tercero`
                 , `tb_terceros`.`nit_tercero`
                 , `tb_terceros`.`nom_tercero`
+                , `ctt_contratos`.`num_contrato`
             FROM
                 `ctt_adquisiciones`
                 INNER JOIN `tb_terceros` 
                     ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                LEFT JOIN `ctt_contratos` 
+                    ON (`ctt_adquisiciones`.`id_adquisicion` = `ctt_contratos`.`id_compra`)
             WHERE (`ctt_adquisiciones`.`id_cdp` = $id_cdp)
             UNION ALL
             SELECT
@@ -53,6 +69,7 @@ try {
                 , `ctt_adquisiciones`.`id_tercero`
                 , `tb_terceros`.`nit_tercero`
                 , `tb_terceros`.`nom_tercero`
+                , `ctt_contratos`.`num_contrato`
             FROM
                 `ctt_contratos`
                 INNER JOIN `ctt_novedad_adicion_prorroga` 
@@ -65,6 +82,7 @@ try {
     $rs = $cmd->query($sql);
     $ctt = $rs->fetch();
     $id_ter = !empty($ctt) ? $ctt['id_tercero'] : 0;
+    $num_contrato = !empty($ctt) ? $ctt['num_contrato'] : '';
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -78,8 +96,8 @@ try {
         $datosCRP['id_pto'] = '';
         $datosCRP['fecha'] = date('Y-m-d');
         $datosCRP['id_manu'] = $id_manu;
-        $datosCRP['objeto'] = '';
-        $datosCRP['num_contrato'] = '';
+        $datosCRP['objeto'] = $objeto;
+        $datosCRP['num_contrato'] = $num_contrato;
         $datosCRP['id_tercero_api'] = 0;
     } else {
         $automatico = 'readonly';
@@ -202,7 +220,7 @@ $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
                                 echo '<button class="btn btn-info btn-sm" id="registrarMovDetalle" text="' . $text . '">' . $opcion . '</button>';
                             } ?>
                             <a value="" type="button" class="btn btn-primary btn-sm" onclick="imprimirFormatoCrp(<?php echo $id_crp ?>)" style="width: 5rem;"> <span class="fas fa-print "></span></a>
-                            <a onclick="cambiaListado(1)" class="btn btn-danger btn-sm" style="width: 7rem;" href="#"> VOLVER</a>
+                            <a onclick="cambiaListado(2)" class="btn btn-danger btn-sm" style="width: 7rem;" href="#"> VOLVER</a>
                         </div>
                         <input type="hidden" name="id_pto_save" id="id_pto_save" value="">
 

@@ -274,11 +274,12 @@
         //dataTable detalle CDP
         let id_ejec2 = $("#id_pto_cdp").val();
         let id_cdp_eac = $("#id_cdp").val();
+        let id_adq_eac = $("#id_adq").length ? $("#id_adq").val() : 0;
         $("#tableEjecCdp").DataTable({
             language: setIdioma,
             ajax: {
                 url: "datos/listar/datos_detalle_cdp.php",
-                data: { id_pto: id_ejec2, id_cdp: id_cdp_eac },
+                data: { id_pto: id_ejec2, id_cdp: id_cdp_eac, id_adq: id_adq_eac },
                 type: "POST",
                 dataType: "json",
             },
@@ -1685,7 +1686,7 @@ function RegDetalleCDPs(boton) {
             var data = new FormData();
             data.append('id_pto', $("#id_pto_presupuestos").val());
             data.append('dateFecha', $("#fecha").val());
-            data.append('numSolicitud', '');
+            data.append('numSolicitud', $("#solicitud").val());
             data.append('txtObjeto', $("#objeto").val());
             data.append('id_adq', $("#id_adq").val());
             data.append('id_otro', $("#id_otro").val());
@@ -1720,10 +1721,9 @@ function RegDetalleCDPs(boton) {
             .then((response) => response.json())
             .then((response) => {
                 if (response.status == "ok") {
-                    let id = "tableEjecCdp";
                     mje("Proceso realizado correctamente");
                     if (opcion == 0) {
-                        reloadtable(id);
+                        $('#tableEjecCdp').DataTable().ajax.reload();
                     } else {
                         let id_pto_mod = opcion.split("|")[0];
                         let id_cdp = opcion.split("|")[1];
@@ -1762,6 +1762,36 @@ $('#modificarEjecCdp').on('click', '.editar', function () {
             }
         },
     });
+});
+$('#modificarEjecCdp').on('click', '.borrar', function () {
+    var id = $(this).attr('value');
+    Swal.fire({
+        title: "¿Está seguro de eliminar el registro actual?",
+        text: "No podrá revertir esta acción",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si, eliminar",
+        cancelButtonText: "Cancelar",
+    }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                type: "POST",
+                url: "datos/eliminar/del_eliminar_cdp_detalle.php",
+                data: { id: id },
+                success: function (res) {
+                    if (res == 'ok') {
+                        mje("Registro eliminado correctamente");
+                        $('#tableEjecCdp').DataTable().ajax.reload();
+                    } else {
+                        mjeError(res, "Error");
+                    }
+                },
+            });
+        }
+    });
+
 });
 
 function valorDif() {
@@ -1942,8 +1972,12 @@ function eliminarCdp(id) {
                 .then((response) => response.text())
                 .then((response) => {
                     if (response == "ok") {
-                        let tabla = "tableEjecPresupuesto";
-                        reloadtable(tabla);
+                        mje("Registro eliminado correctamente");
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        mjeError("No se puede eliminar el registro:" + response);
                     }
                 });
         }

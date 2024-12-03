@@ -7,7 +7,7 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 
 $tipo = isset($_POST['tipo']) ? $_POST['tipo'] : exit('Acceso denegado');
-
+$id_vigencia = $_SESSION['id_vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -18,6 +18,24 @@ try {
     }
     $rs = $cmd->query($sql);
     $datos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    exit();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT
+                `pto_cargue`.`cod_pptal`
+                , `pto_cargue`.`id_cargue`
+            FROM
+                `pto_cargue`
+                INNER JOIN `pto_presupuestos` 
+                    ON (`pto_cargue`.`id_pto` = `pto_presupuestos`.`id_pto`)
+            WHERE (`pto_presupuestos`.`id_vigencia` = $id_vigencia)";
+    $rs = $cmd->query($sql);
+    $rubros = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -112,7 +130,8 @@ if (file_exists($file_dest)) {
                     }
 
                     $id_tipo_s = $data[0];
-                    $cod_pptal = $data[4];
+                    $key = array_search($data[4], array_column($rubros, 'cod_pptal'));
+                    $cod_pptal = $key !== false ? $rubros[$key]['id_cargue'] : NULL;
                     $val_mes = $data[5] == '' ? null : $data[5];
                     $val_hora = $data[6] == '' ? null : $data[6];
                     $vigencia = $data[7];

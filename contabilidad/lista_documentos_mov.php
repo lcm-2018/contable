@@ -157,7 +157,8 @@ $cmd = null;
                                                         </button>
                                                      </div>';
                                                 }
-                                                if ($tipo_doc == '1') {
+                                                
+                                                if (false && $tipo_doc == '1') {
                                                     echo '<div class="input-group-prepend px-1">
                                                         <button type="button" class="btn btn-primary" onclick ="CargaObligaCrp(2)">
                                                           Nota <span class="badge badge-light"><?php echo $tipo_doc; ?></span>
