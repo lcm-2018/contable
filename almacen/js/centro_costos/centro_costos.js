@@ -37,13 +37,13 @@
             columns: [
                 { 'data': 'id_centro' }, //Index=0              
                 { 'data': 'nom_centro' },
-                { 'data': 'es_clinico' },
                 { 'data': 'cuenta' },
+                { 'data': 'es_clinico' },
                 { 'data': 'usr_respon' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [1, 3] },
+                { class: 'text-wrap', targets: [1, 2] },
                 { orderable: false, targets: 5 }
             ],
             order: [
@@ -161,6 +161,20 @@
         });
     });
 
+    //Imprimir registros
+    $('#btn_imprime_filtro').on('click', function() {
+        reloadtable('tb_centro_costos');
+        $.post("imp_centrocostos.php", {
+            nombre: $('#txt_nombre_filtro').val()
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
+
     /* ---------------------------------------------------
     CUENTAS CONTABLES
     -----------------------------------------------------*/
@@ -273,24 +287,5 @@
         });
     });
 
-
-
-
-
-
-
-    //Imprimir registros
-    $('#btn_imprime_filtro').on('click', function() {
-        reloadtable('tb_centro_costos');
-        $.post("imp_centrocostos.php", {
-            nombre: $('#txt_nombre_filtro').val()
-        }, function(he) {
-            $('#divTamModalImp').removeClass('modal-sm');
-            $('#divTamModalImp').removeClass('modal-lg');
-            $('#divTamModalImp').addClass('modal-xl');
-            $('#divModalImp').modal('show');
-            $("#divImp").html(he);
-        });
-    });
 
 })(jQuery);

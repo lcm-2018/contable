@@ -51,7 +51,7 @@ try {
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
-    //Consulta los datos para listarlos en la tabla
+    //Consulta los datos para listarlos en la tabla 
     $sql = "SELECT far_medicamentos.id_med,far_medicamentos.cod_medicamento,
                 far_medicamentos.nom_medicamento,
 	            SUM(far_medicamento_lote.existencia) as existencia,

@@ -27,11 +27,12 @@ try {
             $cod_subgrupo = $_POST['txt_cod_subgrupo'];
             $nom_subgrupo = $_POST['txt_nom_subgrupo'];
             $id_grupo = $_POST['sl_grp_subgrupo'] ? $_POST['sl_grp_subgrupo'] : 0;
+            $lote_xdef = $_POST['sl_lotexdef'] ? $_POST['sl_lotexdef'] : 0;
             $estado = $_POST['sl_estado'];
 
             if ($id == -1) {
-                $sql = "INSERT INTO far_subgrupos(cod_subgrupo,nom_subgrupo,id_grupo,estado,id_usr_crea,fec_crea) 
-                        VALUES($cod_subgrupo,'$nom_subgrupo',$id_grupo,$estado,$id_usr_ope,'$fecha_ope')";
+                $sql = "INSERT INTO far_subgrupos(cod_subgrupo,nom_subgrupo,id_grupo,lote_xdef,estado,id_usr_crea,fec_crea) 
+                        VALUES($cod_subgrupo,'$nom_subgrupo',$id_grupo,$lote_xdef,$estado,$id_usr_ope,'$fecha_ope')";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -45,7 +46,7 @@ try {
                 }
             } else {
                 $sql = "UPDATE far_subgrupos 
-                        SET cod_subgrupo=$cod_subgrupo,nom_subgrupo='$nom_subgrupo',id_grupo=$id_grupo,estado=$estado 
+                        SET cod_subgrupo=$cod_subgrupo,nom_subgrupo='$nom_subgrupo',id_grupo=$id_grupo,lote_xdef=$lote_xdef,estado=$estado 
                         WHERE id_subgrupo=" . $id;
                 $rs = $cmd->query($sql);
 

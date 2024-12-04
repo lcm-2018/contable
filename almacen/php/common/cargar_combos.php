@@ -194,11 +194,11 @@ function tipo_ingreso($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,es_int_ext FROM far_orden_ingreso_tipo";
+        $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,es_int_ext,orden_compra FROM far_orden_ingreso_tipo";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
-            $dtad = 'data-intext="' . $obj['es_int_ext'] . '"';
+            $dtad = 'data-intext="' . $obj['es_int_ext'] . '"' . 'data-ordcom="' . $obj['orden_compra'] . '"';
             if ($obj['id_tipo_ingreso']  == $id) {
                 echo '<option value="' . $obj['id_tipo_ingreso'] . '"' . $dtad . ' selected="selected">' . $obj['nom_tipo_ingreso'] . '</option>';
             } else {

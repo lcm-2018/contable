@@ -11,11 +11,11 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT tb_centrocostos_cta.*,
+$sql = "SELECT far_subgrupos_cta.*,
             CONCAT_WS(' - ',ctb_pgcp.cuenta,ctb_pgcp.nombre) AS cuenta
-        FROM tb_centrocostos_cta
-        INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=tb_centrocostos_cta.id_cuenta)
-        WHERE tb_centrocostos_cta.id_cec_cta=" . $id . " LIMIT 1";
+        FROM far_subgrupos_cta
+        INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=far_subgrupos_cta.id_cuenta)
+        WHERE far_subgrupos_cta.id_subgrupo_cta=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 
@@ -34,13 +34,13 @@ if (empty($obj)) {
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h7 style="color: white;">REGISRTAR CUENTA DE UN CENTRO DE COSTO</h7>
+            <h7 style="color: white;">REGISRTAR CUENTA DE UN SUBGRUPO</h7>
         </div>
         <div class="px-2">
 
             <!--Formulario de registro de Cuenta-->
-            <form id="frm_reg_centrocostos_cta">
-                <input type="hidden" id="id_ceccta" name="id_ceccta" value="<?php echo $id ?>">
+            <form id="frm_reg_subgrupos_cta">
+                <input type="hidden" id="id_subgrupocta" name="id_subgrupocta" value="<?php echo $id ?>">
                 <div class=" form-row">
                     <div class="form-group col-md-7">
                         <label for="txt_cta_con" class="small">Cuenta Contable</label>

@@ -84,7 +84,7 @@
         $('#tb_ingresos').wrap('<div class="overflow"/>');
     });
 
-    //Buascar registros de Ingresos
+    //Buscar registros de Ingresos
     $('#btn_buscar_filtro').on("click", function() {
         $('.is-invalid').removeClass('is-invalid');
         reloadtable('tb_ingresos');
@@ -93,6 +93,15 @@
     $('.filtro').keypress(function(e) {
         if (e.keyCode == 13) {
             reloadtable('tb_ingresos');
+        }
+    });
+
+    // Activar campos para Orden de Compra    
+    $('#divForms').on("change", "#sl_tip_ing", function() {
+        if ($(this).find('option:selected').attr('data-ordcom') == 1) {
+            $('#divPedido').show();
+        } else {
+            $('#divPedido').hide();
         }
     });
 

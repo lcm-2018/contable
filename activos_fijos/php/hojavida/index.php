@@ -110,9 +110,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </tr>
                                 </thead>
                             </table>
-                            <table class="table-bordered table-sm col-md-4">
+                            <table class="table-bordered table-sm col-md-5">
                                 <tr>
                                     <td>Activo</td>
+                                    <td style="background-color:yellow">Para mantenimiento</td>
                                     <td style="background-color:red">En mantenimiento</td>
                                     <td style="background-color:green">Inactivo</td>
                                     <td style="background-color:gray">Dado de baja</td>

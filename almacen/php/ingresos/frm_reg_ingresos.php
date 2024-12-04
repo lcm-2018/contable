@@ -14,9 +14,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT far_orden_ingreso.*,
             far_bodegas.nombre AS nom_bodega,
-            CASE far_orden_ingreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
+            CASE far_orden_ingreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado,
+            CONCAT(far_alm_pedido.detalle,'(',far_alm_pedido.fec_pedido,')') AS des_pedido,
+            far_orden_ingreso_tipo.orden_compra
         FROM far_orden_ingreso 
         INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_ingreso.id_bodega)
+        INNER JOIN far_orden_ingreso_tipo ON (far_orden_ingreso_tipo.id_tipo_ingreso=far_orden_ingreso.id_tipo_ingreso)
+        LEFT JOIN far_alm_pedido ON (far_alm_pedido.id_pedido=far_orden_ingreso.id_pedido)
         WHERE id_ingreso=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
@@ -105,6 +109,18 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             <?php terceros($cmd, '', $obj['id_provedor']) ?>
                         </select>
                     </div>
+                </div>  
+                <div class="form-row" id="divPedido" <?php echo $obj['orden_compra'] == 1 ? '' : 'style="display: none;"' ?>>
+                    <div class="form-group col-md-1">
+                        <label for="" class="small">Id. Pedido</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_id_pedido" name="txt_id_pedido" class="small" value="<?php echo $obj['id_pedido'] ?>" readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="txt_det_ped" class="small">Pedido para Orden de Coampra</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_des_pedido" name="txt_des_pedido" class="small" value="<?php echo $obj['des_pedido'] ?>" readonly="readonly">
+                    </div>
+                </div>    
+                <div class="form-row">     
                     <div class="form-group col-md-12">
                         <label for="txt_det_ing" class="small">Detalle</label>                   
                         <textarea class="form-control" id="txt_det_ing" name="txt_det_ing" rows="2"><?php echo $obj['detalle'] ?></textarea>
