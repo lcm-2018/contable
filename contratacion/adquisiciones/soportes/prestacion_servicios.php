@@ -1,12 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $id_compra = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
 
 include '../../../conexion.php';
+include '../../../terceros.php';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -81,7 +82,6 @@ try {
             WHERE `ctt_garantias_compra`.`id_contrato_compra` = '$contra'";
     $rs = $cmd->query($sql);
     $garantias = $rs->fetchAll();
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
@@ -92,16 +92,9 @@ foreach ($garantias as $g) {
     $num++;
 }
 $id_ter = $contrato['id_supervisor'];
-//API URL
-$url = $api . 'terceros/datos/res/datos/id/' . $id_ter;
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$res_api = curl_exec($ch);
-curl_close($ch);
-$dat_ter = json_decode($res_api, true);
-$supervisa = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['razon_social'];
+$terceros = getTerceros($id_ter, $cmd);
+$cmd = null;
+$supervisa = $terceros[0]['nom_tercero'];
 require_once '../../../vendor/autoload.php';
 
 use PhpOffice\PhpWord\TemplateProcessor;

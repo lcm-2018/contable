@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 $ruta = isset($_POST['ruta']) ? $_POST['ruta'] : exit('Acción no permitida');

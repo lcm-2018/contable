@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -572,14 +572,14 @@ function PromedioHoras($feci, $fecf, $id)
                         SUM(`liquidado`) AS `total`
                     FROM 
                         (SELECT
-                            SUM(`seg_liq_horex`.`val_liq`) AS `liquidado`
-                            , `seg_liq_horex`.`id_nomina`
+                            SUM(`nom_liq_horex`.`val_liq`) AS `liquidado`
+                            , `nom_liq_horex`.`id_nomina`
                         FROM
-                            `seg_liq_horex`
-                            INNER JOIN `seg_horas_ex_trab` 
-                                ON (`seg_liq_horex`.`id_he_lab` = `seg_horas_ex_trab`.`id_he_trab`)
-                        WHERE (`seg_horas_ex_trab`.`id_empleado` = $id AND `seg_liq_horex`.`id_nomina` IN ($ids))
-                    GROUP BY `seg_liq_horex`.`id_nomina`) AS `t2`";
+                            `nom_liq_horex`
+                            INNER JOIN `nom_horas_ex_trab` 
+                                ON (`nom_liq_horex`.`id_he_lab` = `nom_horas_ex_trab`.`id_he_trab`)
+                        WHERE (`nom_horas_ex_trab`.`id_empleado` = $id AND `nom_liq_horex`.`id_nomina` IN ($ids))
+                    GROUP BY `nom_liq_horex`.`id_nomina`) AS `t2`";
             $rs = $cmd->query($sql);
             $valor = $rs->fetch();
             if (!empty($valor)) {

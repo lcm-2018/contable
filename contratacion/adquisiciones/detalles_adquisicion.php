@@ -1,11 +1,12 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include_once '../../conexion.php';
 include_once '../../permisos.php';
+include_once '../../terceros.php';
 $key = array_search('53', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
@@ -105,12 +106,16 @@ try {
                 , `ctt_adquisiciones`.`id_orden`
                 , `tb_tipo_bien_servicio`.`filtro_adq`
                 , `ctt_adquisiciones`.`id_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
             FROM
                 `ctt_adquisiciones`
             INNER JOIN `ctt_modalidad` 
                 ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
             INNER JOIN `tb_tipo_bien_servicio` 
                 ON (`ctt_adquisiciones`.`id_tipo_bn_sv` = `tb_tipo_bien_servicio`.`id_tipo_b_s`)
+            LEFT JOIN `tb_terceros` 
+                ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_adquisicion` = $id_adq";
     $rs = $cmd->query($sql);
     $adquisicion = $rs->fetch();
@@ -268,42 +273,6 @@ function pesos($valor)
         return '-$' . number_format($valor * (-1), 2);
     }
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `id_tercero` = ? LIMIT 1";
-    $sql = $cmd->prepare($sql);
-    $sql->bindParam(1, $adquisicion['id_tercero'], PDO::PARAM_INT);
-    $sql->execute();
-    $id_tercero = '';
-    if ($sql->rowCount() > 0) {
-        $row = $sql->fetch(PDO::FETCH_ASSOC);
-        $id_tercero = $row['id_tercero_api'];
-    }
-    $id_t = [$id_tercero];
-    if (!empty($id_t) && $id_t[0] != '') {
-        $payload = json_encode($id_t);
-        $url = $api . 'terceros/datos/res/lista/terceros';
-        $ch = curl_init($url);
-        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        $terceros = json_decode($result, true);
-        $tercero = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
-        $cc_nit = number_format($terceros[0]['cc_nit'], 0, '', '.');
-    } else {
-        $tercero = '---';
-        $cc_nit = '---';
-    }
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-
 if (!empty($adquisicion)) {
     $idtbnsv = $adquisicion['id_tipo_bn_sv'];
     try {
@@ -692,8 +661,8 @@ if (!empty($adquisicion)) {
                                                                 <thead>
                                                                     <tr class="text-center">
                                                                         <th>TERCERO:</th>
-                                                                        <th colspan="4"><?php echo  $tercero; ?></th>
-                                                                        <th><?php echo  $cc_nit; ?></th>
+                                                                        <th colspan="4"><?php echo  $adquisicion['nom_tercero']; ?></th>
+                                                                        <th><?php echo  $adquisicion['nit_tercero']; ?></th>
                                                                     </tr>
                                                                     <tr class="text-center">
                                                                         <th>#</th>

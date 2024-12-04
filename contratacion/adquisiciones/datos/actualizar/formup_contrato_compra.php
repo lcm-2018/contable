@@ -1,10 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
+include '../../../../terceros.php';
 $id_cc = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida ');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -18,10 +19,14 @@ try {
                 , `ctt_contratos`.`id_forma_pago`
                 , `ctt_contratos`.`id_supervisor`
                 , `ctt_adquisiciones`.`id_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
             FROM
                 `ctt_contratos`
             INNER JOIN `ctt_adquisiciones` 
                 ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
+            LEFT JOIN `tb_terceros` 
+                ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_contrato_compra` = $id_cc";
     $rs = $cmd->query($sql);
     $contrato = $rs->fetch();
@@ -29,41 +34,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `id_tercero` = ? LIMIT 1";
-    $sql = $cmd->prepare($sql);
-    $sql->bindParam(1, $contrato['id_tercero'], PDO::PARAM_INT);
-    $sql->execute();
-    $id_tercero = 0;
-    if ($sql->rowCount() > 0) {
-        $row = $sql->fetch(PDO::FETCH_ASSOC);
-        $id_tercero = $row['id_tercero_api'];
-    }
-    $id_t = [$id_tercero];
-    if (!empty($id_t) && $id_tercero > 0) {
-        $payload = json_encode($id_t);
-        $url = $api . 'terceros/datos/res/lista/terceros';
-        $ch = curl_init($url);
-        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        $terceros = json_decode($result, true);
-        $tercero = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
-        $cc_nit = $terceros[0]['cc_nit'];
-    } else {
-        $tercero = '---';
-        $cc_nit = '---';
-    }
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+$id_tercero = isset($contrato) ? $contrato['id_tercero'] : 0;
 $id_contra = isset($contrato) ? $contrato['id_contrato_compra'] : 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -99,35 +70,19 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`, `seg_terceros`.`no_doc`
+                `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`id_tercero_api`
             FROM
-                `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-            WHERE `seg_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
+                `tb_terceros`
+                INNER JOIN  `tb_rel_tercero`
+                    ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            WHERE `tb_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
     $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetchAll();
-    $cmd = null;
+    $supervisor = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-if (!empty($terceros_sup)) {
-    $ced = '0';
-    foreach ($terceros_sup as $tE) {
-        $ced .= ',' . $tE['no_doc'];
-    }
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/' . $ced;
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $supervisor = json_decode($result, true);
-} else {
-    echo "No se ha registrado ningun tercero" . '<br><br><a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal"> Cancelar</a>';
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -177,7 +132,7 @@ try {
             <div class="form-row px-4">
                 <div class="form-group col-md-12">
                     <label for="SeaTercer" class="small">TERCERO</label>
-                    <input type="text" id="SeaTercer" class="form-control form-control-sm py-0 sm" placeholder="Buscar tercero" value="<?php echo $tercero . ' -> ' . $cc_nit ?>">
+                    <input type="text" id="SeaTercer" class="form-control form-control-sm py-0 sm" placeholder="Buscar tercero" value="<?php echo $contrato['nom_tercero'] . ' -> ' . $contrato['nit_tercero'] ?>">
                     <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $id_tercero ?>">
                 </div>
             </div>
@@ -206,10 +161,10 @@ try {
                         <?php
                         foreach ($supervisor as $s) {
                             $selecionada = '';
-                            if ($s['id_tercero'] == $contrato['id_supervisor']) {
+                            if ($s['id_tercero_api'] == $contrato['id_supervisor']) {
                                 $selecionada = 'selected';
                             }
-                            echo '<option ' . $selecionada . ' value="' . $s['id_tercero'] . '">' . $s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . '</option>';
+                            echo '<option ' . $selecionada . ' value="' . $s['id_tercero_api'] . '">' . $s['nom_tercero'] . '</option>';
                         }
                         ?>
                     </select>

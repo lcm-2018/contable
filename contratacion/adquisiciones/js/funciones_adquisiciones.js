@@ -1660,14 +1660,18 @@
     $('.novedadC').on('click', function () {
         let opcion = $(this).attr('value');
         let id = $('#id_contrato_compra').val();
-        $.post("datos/registrar/formadd_novedad_contrato.php", { opcion: opcion, id: id }, function (he) {
-            $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-xl');
-            $('#divTamModalForms').addClass('modal-lg');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
-        });
-        return false;
+        if (Number(id) > 0) {
+            $.post("datos/registrar/formadd_novedad_contrato.php", { opcion: opcion, id: id }, function (he) {
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').removeClass('modal-xl');
+                $('#divTamModalForms').addClass('modal-lg');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            });
+            return false;
+        } else {
+            mjeError('El proceso actual no tiene contrato');
+        }
     });
     $('#modificarAdquisiciones').on('click', '.duplicar', function () {
         let id = $(this).attr('value');

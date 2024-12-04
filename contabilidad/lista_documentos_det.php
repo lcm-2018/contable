@@ -1,12 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include_once '../conexion.php';
 include_once '../permisos.php';
 include_once '../financiero/consultas.php';
+include_once '../terceros.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -54,33 +55,40 @@ if ($id_doc == 0) {
     }
 
     try {
-        $estado = 1;
-        $id_tercero = $datosCrp['id_tercero_api'];
-        $detalle = $datosCrp['objeto'];
-        $iduser = $_SESSION['id_user'];
-        $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-        $fecha = $date->format('Y-m-d');
-        $fecha2 = $date->format('Y-m-d H:i:s');
-        $query = "INSERT INTO `ctb_doc`
+        if (isset($_SESSION['id_doc'])) {
+            // Usar el ID almacenado en la sesión
+            $id_doc = $_SESSION['id_doc'];
+        } else {
+            $estado = 1;
+            $id_tercero = $datosCrp['id_tercero_api'];
+            $detalle = $datosCrp['objeto'];
+            $iduser = $_SESSION['id_user'];
+            $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+            $fecha = $date->format('Y-m-d');
+            $fecha2 = $date->format('Y-m-d H:i:s');
+            $query = "INSERT INTO `ctb_doc`
                         (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`, `id_crp`)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
-        $query->bindParam(2, $tipo_dato, PDO::PARAM_INT);
-        $query->bindParam(3, $id_manu, PDO::PARAM_INT);
-        $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
-        $query->bindParam(5, $fecha, PDO::PARAM_STR);
-        $query->bindParam(6, $detalle, PDO::PARAM_STR);
-        $query->bindParam(7, $estado, PDO::PARAM_INT);
-        $query->bindParam(8, $iduser, PDO::PARAM_INT);
-        $query->bindParam(9, $fecha2);
-        $query->bindParam(10, $id_crp, PDO::PARAM_INT);
-        $query->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $id_doc = $cmd->lastInsertId();
-        } else {
-            echo $query->errorInfo()[2];
-            exit();
+            $query = $cmd->prepare($query);
+            $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
+            $query->bindParam(2, $tipo_dato, PDO::PARAM_INT);
+            $query->bindParam(3, $id_manu, PDO::PARAM_INT);
+            $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
+            $query->bindParam(5, $fecha, PDO::PARAM_STR);
+            $query->bindParam(6, $detalle, PDO::PARAM_STR);
+            $query->bindParam(7, $estado, PDO::PARAM_INT);
+            $query->bindParam(8, $iduser, PDO::PARAM_INT);
+            $query->bindParam(9, $fecha2);
+            $query->bindParam(10, $id_crp, PDO::PARAM_INT);
+            $query->execute();
+            $ultimoInsert = $cmd->lastInsertId();
+            if ($ultimoInsert > 0) {
+                $_SESSION['id_doc'] = $ultimoInsert; // Guardar el ID en la sesión
+                $id_doc = $ultimoInsert;
+            } else {
+                echo $query->errorInfo()[2];
+                exit();
+            }
         }
     } catch (PDOException $e) {
         echo $e->getMessage();
@@ -107,25 +115,13 @@ $fecha = date('Y-m-d', strtotime($datosDoc['fecha']));
 // Consulta terceros en la api ********************************************* API
 if (!empty($datosDoc)) {
     if ($datosDoc['id_tercero'] > 0) {
-        $id_t = ['0' => $datosDoc['id_tercero']];
-        $payload = json_encode($id_t);
-        //API URL
-        $url = $api . 'terceros/datos/res/lista/terceros';
-        $ch = curl_init($url);
-        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $res_api = curl_exec($ch);
-        curl_close($ch);
-        $dat_ter = json_decode($res_api, true);
-        $tercero = ltrim($dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social']);
+        $terceros = getTerceros($datosDoc['id_tercero'], $cmd);
+        $tercero = ltrim($terceros[0]['nom_tercero']);
     } else {
         $tercero = '---';
     }
 } else {
-    $tercero = '';
+    $tercero = '---';
 }
 $ver = 'readonly';
 ?>
@@ -209,8 +205,15 @@ $ver = 'readonly';
                                                 <div class="input-group-prepend col-2 pr-0">
                                                     <button class="btn btn-outline-warning btn-block text-left" type="button" onclick="CentroCostoCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-kaaba fa-lg mr-2"></i></i>Centro Costo</button>
                                                 </div>
-                                                <div class="form-control col-4" readonly id="valCentroCosto"><?php echo pesos($datosDoc['val_ccosto']); ?></div>
+                                                <div class="col-4 input-group input-group-sm p-0">
+                                                    <div class="form-control" readonly id="valCentroCosto"><?php echo pesos($datosDoc['val_ccosto']); ?></div>
+                                                    <div class="input-group-append" title="Asignar centros de costo automaticamente">
+                                                        <button class="btn btn-outline-warning" type="button" onclick="CausaAuCentroCostos(id)"><i class="fas fa-eject fa-lg"></i></button>
+                                                    </div>
+                                                </div>
                                             </div>
+
+
                                             <div class="input-group input-group-sm">
                                                 <div class="input-group-prepend col-2 pr-0">
                                                     <button class="btn btn-outline-info btn-block text-left" type="button" onclick="DesctosCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-donate fa-lg mr-2"></i>Descuentos</button>
@@ -246,8 +249,18 @@ $ver = 'readonly';
                                                 <input type="hidden" name="id_codigoCta" id="id_codigoCta" class="form-control form-control-sm" value="0">
                                                 <input type="hidden" name="tipoDato" id="tipoDato" value="0">
                                             </td>
-                                            <td><input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm" required>
-                                                <input type="hidden" name="idTercero" id="idTercero" value="0">
+                                            <td>
+                                                <?php
+                                                if ($tipo_dato == '1') {
+                                                    $trc = $tercero;
+                                                    $idter = $datosDoc['id_tercero'];
+                                                } else {
+                                                    $trc = '';
+                                                    $idter = 0;
+                                                }
+                                                ?>
+                                                <input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm bTercero" required value="<?= $trc; ?>">
+                                                <input type="hidden" name="idTercero" id="idTercero" value="<?= $idter; ?>">
                                             </td>
                                             <td>
                                                 <input type="text" name="valorDebito" id="valorDebito" class="form-control form-control-sm text-right" value="0" required onkeyup="valorMiles(id)" onchange="llenarCero(id)">

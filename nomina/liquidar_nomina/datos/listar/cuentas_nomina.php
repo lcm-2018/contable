@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -16,12 +16,7 @@ try {
                 `nom_causacion`.`id_causacion`
                 , `ctb_pgcp`.`cuenta`
                 , `ctb_pgcp`.`nombre` AS `nom_cta`
-                , CASE
-                    WHEN `nom_causacion`.`centro_costo` = 'ADMIN' THEN 'ADMINISTRATIVO'
-                    WHEN `nom_causacion`.`centro_costo` = 'URG' THEN 'URGENCIAS'
-                    WHEN `nom_causacion`.`centro_costo` = 'PASIVO' THEN 'PASIVOS'
-                    ELSE `nom_causacion`.`centro_costo`
-                END AS `centro_costo`
+                , `tb_centrocostos`.`nom_centro` AS `centro_costo`
                 , `nom_causacion`.`id_tipo`
                 , `nom_tipo_rubro`.`nombre`
             FROM
@@ -29,7 +24,9 @@ try {
                 LEFT JOIN `nom_tipo_rubro` 
                     ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
                 LEFT JOIN `ctb_pgcp` 
-                    ON (`nom_causacion`.`cuenta` = `ctb_pgcp`.`id_pgcp`)";
+                    ON (`nom_causacion`.`cuenta` = `ctb_pgcp`.`id_pgcp`)
+                LEFT JOIN `tb_centrocostos` 
+                    ON (`tb_centrocostos`.`id_centro` = `nom_causacion`.`centro_costo`)";
     $rs = $cmd->query($sql);
     $cuentas = $rs->fetchAll();
     $cmd = null;

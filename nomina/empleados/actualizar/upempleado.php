@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -104,7 +104,7 @@ try {
         $updatemp = 0;
     }
     if (!($sql->execute())) {
-        print_r($sql->errorInfo()[2]);
+        echo $sql->errorInfo()[2];
         exit();
     }
     if (isset($_POST['id_salario'])) {
@@ -135,7 +135,7 @@ try {
         $sql->bindParam(3, $sal, PDO::PARAM_STR);
         $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
         if (!($sql->execute())) {
-            print_r($sql->errorInfo()[2]);
+            echo $sql->errorInfo()[2];
             exit();
         } else {
             $upsalemp = 1;

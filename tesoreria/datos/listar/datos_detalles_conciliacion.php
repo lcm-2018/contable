@@ -1,11 +1,12 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../terceros.php';
 // Div de acciones de la lista
 $id_cuenta = isset($_POST['id_cuenta']) ? $_POST['id_cuenta'] : exit('Acceso no disponible');
 try {
@@ -36,7 +37,6 @@ try {
             WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_cuenta AND `ctb_doc`.`estado` = 2)";
     $rs = $cmd->query($sql);
     $lista = $rs->fetchAll();
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -48,24 +48,14 @@ if (!empty($lista)) {
             $id_t[] = $lp['id_tercero_api'];
         }
     }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
-
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
+    $cmd = null;
     foreach ($lista as $lp) {
         $chk = $lp['conciliado'] > 0 ? 'checked' : '';
         $check = '<input ' . $chk . ' type="checkbox" name="check[]" onclick="GuardaDetalleConciliacion(this)" text="' . $lp['id_ctb_libaux'] . '">';
-        $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero'));
-        $nombre = $key !== false ? ltrim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']) : '---';
+        $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+        $nombre = $key !== false ? ltrim($terceros[$key]['nom_tercero'] . ' -> ' . $terceros[$key]['nit_tercero']) : '---';
         $estado = $lp['conciliado'] > 0 ? 'Conciliado' : 'Pendiente';
         $data[] = [
 

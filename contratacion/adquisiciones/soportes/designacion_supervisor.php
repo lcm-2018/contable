@@ -1,12 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $id_compra = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
 
 include '../../../conexion.php';
+include '../../../terceros.php';
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -38,34 +39,17 @@ try {
                 , `ctt_contratos`.`fec_fin`
                 , `tb_forma_pago_compras`.`descripcion`
                 , `ctt_contratos`.`id_supervisor`
+                ,`tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
             FROM
                 `ctt_contratos`
             INNER JOIN `tb_forma_pago_compras` 
                 ON (`ctt_contratos`.`id_forma_pago` = `tb_forma_pago_compras`.`id_form_pago`)
+            LEFT JOIN `tb_terceros` 
+                ON (`ctt_contratos`.`id_supervisor` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_compra` = '$id_compra'";
     $rs = $cmd->query($sql);
     $contrato = $rs->fetch();
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-$id_ter_sup = $contrato['id_supervisor'];
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `no_doc` FROM `seg_terceros` WHERE `id_tercero_api` = '$id_ter_sup'";
-    $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetch();
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/' . $terceros_sup['no_doc'];
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $supervisor_res = json_decode($result, true);
-
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -116,7 +100,7 @@ use PhpOffice\PhpWord\TemplateProcessor;
 $objeto = $compra['objeto'];
 $vigencia = $_SESSION['vigencia'];
 $memorando = $supervision['memorando'];
-$supervisor = $supervisor_res[0]['apellido1'] . ' ' . $supervisor_res[0]['apellido2'] . ' ' . $supervisor_res[0]['nombre1'] . ' ' . $supervisor_res[0]['nombre2'];
+$supervisor = $contrato['nom_tercero'];
 $meses = ['', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 $fec_designa = explode('-', $supervision['fec_designacion']);
 $fecha = mb_strtolower($fec_designa[2] . ' de ' . $meses[$fec_designa[1]] . ' de ' . $fec_designa[0]);

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 
@@ -18,14 +18,14 @@ try {
                 , `nom_empleado`.`apellido1`
                 , `nom_empleado`.`apellido2`) AS `nombre`
                 , SUM(`nom_liq_dias_lab`.`cant_dias`) AS `dias_lab`
-                , `seg_terceros`.`id_tercero_api`
+                , `tb_terceros`.`id_tercero_api`
                 , `nom_liq_dias_lab`.`anio`
             FROM
                 `nom_liq_dias_lab`
                 INNER JOIN `nom_empleado` 
                     ON (`nom_liq_dias_lab`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                INNER JOIN `seg_terceros` 
-                ON (`seg_terceros`.`no_doc` = `nom_empleado`.`no_documento`)
+                LEFT JOIN `tb_terceros` 
+                    ON (`tb_terceros`.`nit_tercero` = `nom_empleado`.`no_documento`)
             WHERE `nom_liq_dias_lab`.`anio` = '$vigencia' AND `nom_liq_dias_lab`.`cant_dias` > 0
             GROUP BY `nom_empleado`.`id_empleado`
             ORDER BY `nom_empleado`.`no_documento`";

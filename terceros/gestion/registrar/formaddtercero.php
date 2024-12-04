@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header('Location: ../../../index.php');
     exit();
 }
 include '../../../conexion.php';
@@ -34,7 +34,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT * FROM tb_paises";
+    $sql = "SELECT * FROM tb_paises ORDER BY nom_pais";
     $rs = $cmd->query($sql);
     $pais = $rs->fetchAll();
     $sql = "SELECT * FROM tb_departamentos ORDER BY nom_departamento";
@@ -44,7 +44,6 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$error = "Debe diligenciar este campo";
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -91,16 +90,10 @@ $error = "Debe diligenciar este campo";
                                                         }
                                                         ?>
                                                     </select>
-                                                    <div id="eslcTipoTercero" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                                 <div class="form-group col-md-2">
                                                     <label for="datFecInicio" class="small">Fecha de inicio</label>
                                                     <input type="date" class="form-control form-control-sm" id="datFecInicio" name="datFecInicio">
-                                                    <div id="edatFecInicio" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                                 <div class="form-group col-md-2">
                                                     <label for="slcGenero" class="small">Género</label>
@@ -110,16 +103,10 @@ $error = "Debe diligenciar este campo";
                                                         <option value="F">FEMENINO</option>
                                                         <option value="NA">NO APLICA</option>
                                                     </select>
-                                                    <div id="eslcGenero" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                                 <div class="form-group col-md-2">
                                                     <label for="datFecNacimiento" class="small">Fecha de Nacimiento</label>
                                                     <input type="date" class="form-control form-control-sm" id="datFecNacimiento" name="datFecNacimiento">
-                                                    <div id="edatFecNacimiento" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                                 <div class="form-group col-md-2">
                                                     <label for="slcTipoDocEmp" class="small">Tipo de documento</label>
@@ -131,16 +118,10 @@ $error = "Debe diligenciar este campo";
                                                         }
                                                         ?>
                                                     </select>
-                                                    <div id="eslcTipoDocEmp" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                                 <div class="form-group col-md-2">
                                                     <label for="txtCCempleado" class="small">Identificación</label>
                                                     <input type="number" class="form-control form-control-sm" id="txtCCempleado" name="txtCCempleado" min="1" placeholder="C.C., NIT, etc.">
-                                                    <div id="etxtCCempleado" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="form-row px-4">
@@ -176,9 +157,6 @@ $error = "Debe diligenciar este campo";
                                                         }
                                                         ?>
                                                     </select>
-                                                    <div id="eslcPaisEmp" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                                 <div class="form-group col-md-3">
                                                     <label for="slcDptoEmp" class="small">Departamento</label>
@@ -190,41 +168,26 @@ $error = "Debe diligenciar este campo";
                                                         }
                                                         ?>
                                                     </select>
-                                                    <div id="eslcDptoEmp" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                                 <div class="form-group col-md-3">
                                                     <label for="slcMunicipioEmp" class="small">Municipio</label>
                                                     <select id="slcMunicipioEmp" name="slcMunicipioEmp" class="form-control form-control-sm py-0 sm" aria-label="Default select example" placeholder="elegir mes">
                                                         <option selected value="0">Debe elegir departamento</option>
                                                     </select>
-                                                    <div id="eslcMunicipioEmp" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                                 <div class="form-group col-md-3">
                                                     <label for="txtDireccion" class="small">Dirección</label>
                                                     <input type="text" class="form-control form-control-sm" id="txtDireccion" name="txtDireccion" placeholder="Residencial">
-                                                    <div id="etxtDireccion" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="form-row px-4">
                                                 <div class="form-group col-md-3">
                                                     <label for="mailEmp" class="small">Correo</label>
                                                     <input type="email" class="form-control form-control-sm" id="mailEmp" name="mailEmp" placeholder="Correo electrónico">
-                                                    <div id="emailEmp" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                                 <div class="form-group col-md-2">
                                                     <label for="txtTelEmp" class="small">Contacto</label>
                                                     <input type="text" class="form-control form-control-sm" id="txtTelEmp" name="txtTelEmp" placeholder="Teléfono/celular">
-                                                    <div id="etxtTelEmp" class="invalid-tooltip">
-                                                        <?php echo $error ?>
-                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="text-center pb-3">
@@ -241,9 +204,6 @@ $error = "Debe diligenciar este campo";
                                                 <label for="txtBuscarTercero" class="small">Buscar Tercero</label>
                                                 <input type="text" class="form-control form-control-sm" id="txtBuscarTercero">
                                                 <input type="hidden" id="txtIdTercero" name="txtIdTercero" value="0">
-                                                <div id="etxtBuscarTercero" class="invalid-tooltip">
-                                                    <?php echo $error ?>
-                                                </div>
                                             </div>
                                             <div class="form-group col-md-3">
                                                 <label for="slcTipoTerce" class="small">Tipo de tercero</label>
@@ -255,9 +215,6 @@ $error = "Debe diligenciar este campo";
                                                     }
                                                     ?>
                                                 </select>
-                                                <div id="eslcTipoTerce" class="invalid-tooltip">
-                                                    <?php echo $error ?>
-                                                </div>
                                             </div>
                                         </div>
                                         <div class="text-center pb-2">

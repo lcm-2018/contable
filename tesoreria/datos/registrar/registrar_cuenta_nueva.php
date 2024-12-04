@@ -1,15 +1,18 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $id_tes_cuenta = isset($_POST['id_tes_cuenta']) ? $_POST['id_tes_cuenta'] : 0;
 $banco = $_POST['banco'];
-$cuentas = $_POST['id_cuenta'] > 0 ? $_POST['id_cuenta'] : NULL;
+
 $tipo_cuenta = $_POST['tipo_cuenta'];
 $numero = $_POST['numero'];
-$nombre = $_POST['cuentas'];
+$cta = $_POST['cuentas'];
+$data = explode('|', base64_decode($cta));
+$nombre = $data[1];
+$cuentas = $data[0];
 $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha2 = $date->format('Y-m-d H:i:s');

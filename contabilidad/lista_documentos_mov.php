@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -58,12 +58,49 @@ try {
             WHERE (`nom_nominas`.`planilla` = 3 AND `nom_nomina_pto_ctb_tes`.`tipo` = 'PL')";
     $rs = $cmd->query($sql);
     $nominas = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $total = count($nominas);
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-
+$rp = [];
+foreach ($nominas as $nm) {
+    if ($nm['crp'] != '') {
+        $rp[] = $nm['crp'];
+    }
+}
+$rp = implode(',', $rp);
+if (!empty($nominas)) {
+    try {
+        $sql = "SELECT 
+                        `pto_crp`.`id_pto_crp`
+                        , `t1`.`valor`
+                        , `pto_crp`.`id_manu`
+                        , `pto_crp`.`fecha`
+                        , `pto_crp`.`objeto`
+                    FROM 
+                        (SELECT
+                            `id_pto_crp`
+                            , SUM(`valor`) AS `valor`
+                        FROM
+                            `pto_crp_detalle`
+                        WHERE `id_pto_crp` IN ($rp) GROUP BY `id_pto_crp`) AS `t1`
+                    INNER JOIN `pto_crp`
+                        ON(`pto_crp`.`id_pto_crp` = `t1`.`id_pto_crp`)";
+        $rs = $cmd->query($sql);
+        $valores = $rs->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+}
+$total = 0;
+if (isset($valores)) {
+    foreach ($valores as $vl) {
+        $key = array_search($vl['id_pto_crp'], array_column($nominas, 'crp'));
+        if ($key !== false && $nominas[$key]['estado'] == 3) {
+            $total++;
+        }
+    }
+}
+$cmd = null;
 ?>
 
 <body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] === '1') {
@@ -120,7 +157,8 @@ try {
                                                         </button>
                                                      </div>';
                                                 }
-                                                if ($tipo_doc == '1') {
+                                                
+                                                if (false && $tipo_doc == '1') {
                                                     echo '<div class="input-group-prepend px-1">
                                                         <button type="button" class="btn btn-primary" onclick ="CargaObligaCrp(2)">
                                                           Nota <span class="badge badge-light"><?php echo $tipo_doc; ?></span>

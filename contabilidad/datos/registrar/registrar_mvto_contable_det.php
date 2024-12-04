@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 //Array ( [numDoc] => 2 [tipodato] => 18 [id_crpp] => 0 [fecha] => 2024-04-04 [tercero] => GOMEZ BARRERA EDWIN LEONARDO [id_tercero] => 2097 [objeto] => [detalle] => ooooo [id_ctb_doc] => 21 [tableMvtoContableDetalle_length] => 10 [codigoCta] => 11050201 - CAJA MENOR [id_codigoCta] => 7 [tipoDato] => D [bTercero] => GOMEZ BARRERA EDWIN LEONARDO || 1057608892 [idTercero] => 2097 [valorDebito] => 2,000,000.00 [valorCredito] => 0 );

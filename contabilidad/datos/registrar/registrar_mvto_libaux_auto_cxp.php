@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 $_post = json_decode(file_get_contents('php://input'), true);
@@ -109,22 +109,22 @@ try {
     $rs = $cmd->query($query);
     $ctas_credito = $rs->fetchAll();
     // Consulto en la tabla de costos cuantos registros tiene asociados
-    $sq2 = "SELECT
-                `ctb_causa_costos`.`valor`
-                , `ctt_adquisiciones`.`id_tipo_bn_sv`
-            FROM
-                `ctb_causa_costos`
-                INNER JOIN `pto_cop_detalle` 
-                    ON (`ctb_causa_costos`.`id_ctb_doc` = `pto_cop_detalle`.`id_ctb_doc`)
-                INNER JOIN `pto_crp_detalle` 
-                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
-                INNER JOIN `pto_cdp_detalle` 
-                    ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                INNER JOIN `pto_cdp` 
-                    ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                INNER JOIN `ctt_adquisiciones` 
-                    ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
-            WHERE (`ctb_causa_costos`.`id_ctb_doc` = $id_doc)";
+    $sq2 = "SELECT 
+                `id_tipo_bn_sv`, SUM(`valor`) AS `valor`
+            FROM 
+                (SELECT
+                    `ctt_adquisiciones`.`id_tipo_bn_sv`
+                    , `ctb_causa_costos`.`valor`
+                FROM
+                    `ctb_doc`
+                    INNER JOIN `pto_crp` 
+                        ON (`ctb_doc`.`id_crp` = `pto_crp`.`id_pto_crp`)
+                    INNER JOIN `ctt_adquisiciones` 
+                        ON (`pto_crp`.`id_cdp` = `ctt_adquisiciones`.`id_cdp`)
+                    INNER JOIN `ctb_causa_costos` 
+                        ON (`ctb_causa_costos`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)) AS `taxu`
+            GROUP BY `taxu`.`id_tipo_bn_sv`";
     $rs = $cmd->query($sq2);
     $datoscostos = $rs->fetchAll();
 

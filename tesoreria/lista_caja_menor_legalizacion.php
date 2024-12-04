@@ -1,12 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
 include '../financiero/consultas.php';
+include '../terceros.php';
 
 $id_doc = $_POST['id_doc'] ?? '';
 $id_cop = $_POST['id_cop'] ?? '';
@@ -39,18 +40,8 @@ if (!empty($facturador)) {
     foreach ($facturador as $fact) {
         $id_t[] = $fact['id_tercero_api'];
     }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
 }
 // consultar los conceptos asociados al recuado del arqueo
 try {
@@ -130,9 +121,9 @@ $valor_pagar = 0;
                             <select name="id_facturador" id="id_facturador" class="form-control form-control-sm" required onchange="calcularCopagos2(this)">
                                 <option value="0">--Seleccione--</option>
                                 <?php foreach ($facturador as $fact) {
-                                    $key = array_search($fact['id_tercero_api'], array_column($terceros, 'id_tercero'));
-                                    $nombre = $key !== false ? ltrim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']) : '---';
-                                    $cc = $key !== false ? $terceros[$key]['cc_nit'] : '';
+                                    $key = array_search($fact['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+                                    $nombre = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
+                                    $cc = $key !== false ? $terceros[$key]['cc_nit'] : '---';
                                     echo '<option value="' . $fact['id_tercero_api'] . '">' . $nombre . ' -> ' . $cc . '</option>';
                                 }
                                 ?>

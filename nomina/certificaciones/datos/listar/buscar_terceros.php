@@ -1,68 +1,43 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
 include '../../../../permisos.php';
+include '../../../../terceros.php';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`
-                , `seg_terceros`.`id_tercero_api`
-                , `seg_terceros`.`tipo_doc`
-                , `seg_terceros`.`no_doc`
-                , `seg_terceros`.`estado`
-                , `tb_tipo_tercero`.`descripcion`
+                `id_tercero_api`, `nit_tercero`, `nom_tercero`
             FROM
-                `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-                INNER JOIN `tb_tipo_tercero` 
-                    ON (`tb_rel_tercero`.`id_tipo_tercero` = `tb_tipo_tercero`.`id_tipo`)";
+                `tb_terceros`";
     $rs = $cmd->query($sql);
     $terEmpr = $rs->fetchAll();
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$id_t = [];
-foreach ($terEmpr as $l) {
-    $id_t[] = $l['id_tercero_api'];
-}
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
 $data = [];
 $buscar = mb_strtoupper($_POST['term']);
 if ($buscar == '%%') {
     foreach ($terceros as $s) {
-        $nom_tercero = trim(mb_strtoupper($s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . ' ' . $s['razon_social']), " \t\n\r\0\x0B");
+        $nom_tercero = trim(mb_strtoupper($s['nom_tercero']), " \t\n\r\0\x0B");
         $data[] = [
-            'id' => $s['cc_nit'],
+            'id' => $s['nit_tercero'],
             'label' => $nom_tercero,
         ];
     }
 } else {
     foreach ($terceros as $s) {
-        $nom_tercero = trim(mb_strtoupper($s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . ' ' . $s['razon_social']), " \t\n\r\0\x0B");
-        $doc = $s['cc_nit'];
+        $nom_tercero = trim(mb_strtoupper($s['nom_tercero']), " \t\n\r\0\x0B");
+        $doc = $s['nit_tercero'];
         $pos = strpos($nom_tercero, $buscar);
         $pos_doc = strpos($doc, $buscar);
         if ($pos !== false || $pos_doc !== false) {
             $data[] = [
-                'id' => $s['cc_nit'],
+                'id' => $s['nit_tercero'],
                 'label' => $nom_tercero,
             ];
         }

@@ -1,8 +1,11 @@
 <?php
 
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
@@ -19,8 +22,8 @@ $er .= '
   <table class="table table-striped table-bordered table-sm">
   <thead>
     <tr>
-      <th scope="col">Documento</th>
-      <th scope="col">Nombre</th>
+      <th scope="col">No. Doc.</th>
+      <th scope="col">Empleado</th>
       <th scope="col">Estado</th>
     </tr>
   </thead>
@@ -336,7 +339,7 @@ try {
                     `nom_liq_bsp`
                 INNER JOIN `nom_nominas`
                     ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$anio')
                 GROUP BY `nom_liq_bsp`.`id_empleado`
                 UNION ALL
                 SELECT
@@ -345,7 +348,7 @@ try {
                     `nom_liq_bsp`
                 INNER JOIN `nom_nominas` 
                     ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$anio')
                 GROUP BY `nom_liq_bsp`.`id_empleado`)
             GROUP BY `id_empleado`";
     $res = $cmd->query($sql);
@@ -540,12 +543,12 @@ if (isset($_POST['check'])) {
     foreach ($list_liquidar as $i) {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $sql = "SELECT
-                    `seg_liq_salario`.`id_sal_liq`
+                    `nom_liq_salario`.`id_sal_liq`
                 FROM
-                    `seg_liq_salario`
-                    INNER JOIN `seg_nominas` 
-                        ON (`seg_liq_salario`.`id_nomina` = `seg_nominas`.`id_nomina`)
-                WHERE (`seg_nominas`.`mes` = '$mes' AND `seg_nominas`.`vigencia` = '$anio' AND `seg_nominas`.`tipo` = 'N' AND `seg_liq_salario`.`id_empleado` = $i)";
+                    `nom_liq_salario`
+                    INNER JOIN `nom_nominas` 
+                        ON (`nom_liq_salario`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE (`nom_nominas`.`mes` = '$mes' AND `nom_nominas`.`vigencia` = '$anio' AND `nom_nominas`.`tipo` = 'N' AND `nom_liq_salario`.`id_empleado` = $i)";
         $rs = $cmd->query($sql);
         $nomliq = $rs->fetch();
         $cmd = null;
@@ -1070,11 +1073,13 @@ if (isset($_POST['check'])) {
             //liquidar Incapacida
             $valincap = '0';
             $days = '0';
+            $tot_dias_inc = 0;
             if (!empty($incapacidades)) {
                 foreach ($incapacidades as $inc) {
                     $emple_inc = $inc['id_empleado'];
                     if ($emple_inc == $i) {
                         $days = $inc['can_dias'];
+                        $tot_dias_inc = $tot_dias_inc + $days;
                         $idinc = $inc['id_incapacidad'];
                         $tipoinc = $inc['id_tipo']; //1 comun,  3 laboral
                         $categoria = $inc['categoria']; //1 inicial, 2 prorroga
@@ -1158,6 +1163,10 @@ if (isset($_POST['check'])) {
                 $cmd = null;
             } catch (Exception $ex) {
                 echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+            }
+            $val_real_inc = $valincap;
+            if ($tot_dias_inc > 0 && $salbase == $smmlv) {
+                $valincap = ($salbase / 30) * $tot_dias_inc;
             }
             $devtotal = $devhe + $valincap + (($salbase / 30) * $diaslab) + $gasrep + $bsp_salarial + $vallcluto;
             if ($sal_integ == 1) {
@@ -1450,6 +1459,7 @@ if (isset($_POST['check'])) {
                     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
                 }
             }
+            $valincap = $val_real_inc;
             $base_descuentos = $devhe + (($salbase / 30) * $diaslab) + $auxt + $auxali + $vallic + $vallcluto + $valincap + $bsp_salarial + $vacacionsalario + $primavacnsalario + $bonrecreacionsalario + $gasrep + $valindem;
             //liquidar Embargos
             if (true) {
@@ -1678,10 +1688,10 @@ if (isset($_POST['check'])) {
                 $cc = $emple[$key]['no_documento'];
                 $nomempleado = $emple[$key]['nombre'];
             }
-            $er .= '<tr>'
+            $er .= '<tr class="text-left">'
                 . '<td>' . $cc . '</td>'
                 . '<td>' . mb_strtoupper($nomempleado) . '</td>'
-                . '<td>Mes liquidado</td>'
+                . '<td class="text-center"><i class="fas fa-check-circle text-success"></i></td>'
                 . '</tr>';
             $mesliq++;
         }

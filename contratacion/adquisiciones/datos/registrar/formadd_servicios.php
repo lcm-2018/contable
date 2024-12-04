@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -147,7 +147,7 @@ try {
                                         </select>
                                     </td>
                                 <?php } ?>
-                                <td class="text-left"><i><?php echo $bs['bien_servicio'] ?></i></td>
+                                <td class="text-left text-wrap"><i><?php echo $bs['bien_servicio'] ?></i></td>
                                 <td><input type="number" name="bnsv[<?php echo $bs['id_b_s'] ?>]" class="form-control altura cantidad"></td>
                                 <td><input type="number" name="val_bnsv[<?php echo $bs['id_b_s'] ?>]" class="form-control altura" value="0"></td>
                             </tr>

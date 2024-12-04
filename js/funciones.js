@@ -43,7 +43,7 @@ if (esta === -1) {
 
     $("#btnLogin").click(function () {
         let user = $("#txtUser").val();
-        let pass = $("#passuser").val();
+        let clave = $("#passuser").val();
         if (user === "") {
             $('#divModalError').modal('show');
             $('#divErrorLogin').html("Debe ingresar Usuario");
@@ -51,12 +51,13 @@ if (esta === -1) {
             $('#divModalError').modal('show');
             $('#divErrorLogin').html("Debe ingresar Contraseña");
         } else {
-            pass = hex_sha512(pass);
+            var pass = hex_sha512(clave);
+            var passwd = hex_sha512(clave.toLowerCase());
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
                 url: 'validarLogin.php',
-                data: { user: user, pass: pass }
+                data: { user: user, pass: pass, passwd: passwd }
             }).done(function (res) {
                 switch (res.mensaje) {
                     case 0:
@@ -330,16 +331,61 @@ if (esta === -1) {
         });
     });
     //Modal cierre de periodos 
-    $('#hrefCierre').on('click', function () {
-        $.post(window.urlin + "/actualizar/datos_up_permisos.php", function (he) {
+    function cierrePeriodo() {
+        $.post(window.urlin + "/actualizar/form_cierre_periodo.php", function (he) {
             $('#divTamModalPermisos').removeClass('modal-xl');
             $('#divTamModalPermisos').removeClass('modal-sm');
             $('#divTamModalPermisos').addClass('modal-lg');
             $('#divModalPermisos').modal('show');
             $("#divTablePermisos").html(he);
         });
+    }
+    function GestionDocs() {
+        $.post(window.urlin + "/actualizar/form_gestion_docs.php", function (he) {
+            $('#divTamModalPermisos').removeClass('modal-xl');
+            $('#divTamModalPermisos').removeClass('modal-sm');
+            $('#divTamModalPermisos').addClass('modal-lg');
+            $('#divModalPermisos').modal('show');
+            $("#divTablePermisos").html(he);
+        });
+    }
+    $('#hrefCierre').on('click', function () {
+        cierrePeriodo();
     });
 
+    $("#divTablePermisos").on('click', '.cerrar', function () {
+        var id = $(this).attr('text');
+        Swal.fire({
+            title: "¿Confirma cerrar periodo?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var ruta = window.urlin + '/actualizar/cierre_periodo.php';
+                $.ajax({
+                    type: 'POST',
+                    url: ruta,
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            cierrePeriodo();
+                            mje("Registro exitoso");
+                        } else {
+                            mjeError("Error: " + r);
+                        }
+                    }
+                });
+            }
+        });
+        return false;
+    });
+    $('#hrefGestionDocs').on('click', function () {
+        window.location = window.urlin + '/documentos/maestro.php';
+    });
     $("#divTablePermisos").on('click', '#dataTablePermiso span', function () {
         let caden = $(this).attr('value');
         let cad = caden.split("|");
@@ -550,7 +596,10 @@ if (esta === -1) {
         $('<form action="' + window.urlin + '/formatos/download_formato.php" method="post"><input type="hidden" name="nom_file" value="' + name + '" /></form>').appendTo('body').submit();
     };
     $('#formatoExcelPto').on('click', function () {
-        DownoadFile('cargue_pto.xlsx')
+        DownoadFile('cargue_pto.xlsx');
+    });
+    $('#formatoExcelPuc').on('click', function () {
+        DownoadFile('cargue_puc.xlsx');
     });
     $('.tesoreria').on('click', function () {
         let id = $(this).attr('text');

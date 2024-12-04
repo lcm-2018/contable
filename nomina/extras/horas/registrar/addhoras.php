@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -40,7 +40,7 @@ try {
         if ($cantHE !== '99') {
             $sql->execute();
             if (!($cmd->lastInsertId() > 0)) {
-                print_r($sql->errorInfo()[2]);
+                echo $sql->errorInfo()[2];
             } else {
                 $t++;
             }

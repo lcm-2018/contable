@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -29,7 +29,7 @@ try {
         $r = 0;
     }
     if (!($sql->execute())) {
-        print_r($sql->errorInfo()[2]);
+        echo $sql->errorInfo()[2];
         exit();
     }
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

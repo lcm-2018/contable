@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include_once '../conexion.php';
@@ -40,7 +40,14 @@ try {
 }
 // consultar id bancos de tb_bancos
 try {
-    $sql = "SELECT `id_banco`, `nom_banco` FROM `tb_bancos` ORDER BY `nom_banco` ASC";
+    $sql = "SELECT 
+                `tb_bancos`.`id_banco`, `tb_bancos`.`nom_banco`
+            FROM `tb_bancos` 
+            LEFT JOIN `tes_cuentas`
+                ON (`tb_bancos`.`id_banco` = `tes_cuentas`.`id_banco`)
+            WHERE `tes_cuentas`.`id_banco` IS NOT NULL
+            GROUP BY `tb_bancos`.`id_banco`
+            ORDER BY `nom_banco` ASC";
     $rs = $cmd->query($sql);
     $bancos = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -169,7 +176,6 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                     <div class="col-md-2">
                         <label for="numDoc" class="small">VALOR</label>
                         <div class="btn-group"><input type="text" name="valor_pag" id="valor_pag" class="form-control form-control-sm" max="<?php echo $valor_pagar; ?>" value="<?php echo $valor_pagar; ?>" required style="text-align: right;" onkeyup="valorMiles(id)" ondblclick="valorMovTeroreria('');">
-                            <button type="submit" class="btn btn-primary btn-sm" id="">+</button>
                         </div>
                     </div>
                 </div>
@@ -228,4 +234,3 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
 
 
     </div>
-    <?php

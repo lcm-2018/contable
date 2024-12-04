@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 ?>
@@ -39,6 +39,7 @@ function pesos($valor)
 }
 include '../../conexion.php';
 include '../../financiero/consultas.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // consulto la tabla seg_terceros para obtener el id_tercero_api
@@ -120,16 +121,15 @@ FROM
 }
 // buscar datos del tercero
 // Consulta terceros en la api ********************************************* API
-$url = $api . 'terceros/datos/res/datos/id/' . $tercero['id_tercero_api'];
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$res_api = curl_exec($ch);
-curl_close($ch);
-$dat_ter = json_decode($res_api, true);
-$tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
-$ccnit = $dat_ter[0]['cc_nit'];
+$ids = $tercero['id_tercero_api'];
+$terceros = getTerceros($ids, $cmd);
+if (!empty($terceros)) {
+    $tercero = $terceros[0]['terceros'];
+    $ccnit = $terceros[0]['cc_nit'];
+} else {
+    $tercero = '---';
+    $ccnit = '---';
+}
 ?>
 <div class="contenedor bg-light" id="areaImprimir">
     <div class="px-2 " style="width:90% !important;margin: 0 auto;">

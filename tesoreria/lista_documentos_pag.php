@@ -1,13 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
 include '../financiero/consultas.php';
-
+include '../terceros.php';
 // Consulta tipo de presupuesto
 $id_doc_pag = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no disponible');
 $id_cop = isset($_POST['id_cop']) ? $_POST['id_cop'] : 0;
@@ -20,6 +20,7 @@ $id_vigencia = $_SESSION['id_vigencia'];
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 if ($id_doc_pag == 0) {
+
     try {
         $sql = "SELECT
                     `id_tercero`, `fecha`, `detalle`
@@ -44,43 +45,49 @@ if ($id_doc_pag == 0) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
     try {
-        $estado = 1;
-        $id_tercero = $datosCop['id_tercero'];
-        $detalle = $datosCop['detalle'];
-        $iduser = $_SESSION['id_user'];
-        $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-        $fecha = $date->format('Y-m-d');
-        $fecha2 = $date->format('Y-m-d H:i:s');
-        $query = "INSERT INTO `ctb_doc`
+        if (isset($_SESSION['id_doc'])) {
+            // Usar el ID almacenado en la sesión
+            $id_doc_pag = $_SESSION['id_doc'];
+        } else {
+            $estado = 1;
+            $id_tercero = $datosCop['id_tercero'];
+            $detalle = $datosCop['detalle'];
+            $iduser = $_SESSION['id_user'];
+            $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+            $fecha = $date->format('Y-m-d');
+            $fecha2 = $date->format('Y-m-d H:i:s');
+            $query = "INSERT INTO `ctb_doc`
                         (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
-        $query->bindParam(2, $tipo_dato, PDO::PARAM_INT);
-        $query->bindParam(3, $id_manu, PDO::PARAM_INT);
-        $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
-        $query->bindParam(5, $fecha, PDO::PARAM_STR);
-        $query->bindParam(6, $detalle, PDO::PARAM_STR);
-        $query->bindParam(7, $estado, PDO::PARAM_INT);
-        $query->bindParam(8, $iduser, PDO::PARAM_INT);
-        $query->bindParam(9, $fecha2);
-        $query->execute();
-        if ($cmd->lastInsertId() > 0) {
+            $query = $cmd->prepare($query);
+            $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
+            $query->bindParam(2, $tipo_dato, PDO::PARAM_INT);
+            $query->bindParam(3, $id_manu, PDO::PARAM_INT);
+            $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
+            $query->bindParam(5, $fecha, PDO::PARAM_STR);
+            $query->bindParam(6, $detalle, PDO::PARAM_STR);
+            $query->bindParam(7, $estado, PDO::PARAM_INT);
+            $query->bindParam(8, $iduser, PDO::PARAM_INT);
+            $query->bindParam(9, $fecha2);
+            $query->execute();
             $id_doc_pag = $cmd->lastInsertId();
-            $sql = "INSERT INTO `tes_rel_pag_cop`
-                        (`id_doc_cop`,`id_doc_pag`)
-                    VALUES (?, ?)";
-            $sql = $cmd->prepare($sql);
-            $sql->bindParam(1, $id_cop, PDO::PARAM_INT);
-            $sql->bindParam(2, $id_doc_pag, PDO::PARAM_INT);
-            $sql->execute();
-            if (!($sql->rowCount() > 0)) {
-                echo $sql->errorInfo()[2];
+            if ($id_doc_pag > 0) {
+                $_SESSION['id_doc'] = $id_doc_pag;
+                $sql = "INSERT INTO `tes_rel_pag_cop`
+                            (`id_doc_cop`,`id_doc_pag`)
+                        VALUES (?, ?)";
+                $sql = $cmd->prepare($sql);
+                $sql->bindParam(1, $id_cop, PDO::PARAM_INT);
+                $sql->bindParam(2, $id_doc_pag, PDO::PARAM_INT);
+                $sql->execute();
+                if (!($sql->rowCount() > 0)) {
+                    echo $sql->errorInfo()[2];
+                    exit();
+                }
+            } else {
+                echo $query->errorInfo()[2];
                 exit();
             }
-        } else {
-            echo $query->errorInfo()[2];
-            exit();
         }
     } catch (PDOException $e) {
         echo $e->getMessage();
@@ -178,21 +185,11 @@ $id_cop = $datosDoc['id_doc_cop'] > 0 ? $datosDoc['id_doc_cop'] : 0;
 $id_ref = $datosDoc['id_ref'];
 if (!empty($datosDoc)) {
     $id_t = ['0' => $datosDoc['id_tercero']];
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res_api = curl_exec($ch);
-    curl_close($ch);
-    $dat_ter = json_decode($res_api, true);
-    $tercero = ltrim($dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social']);
+    $ids = implode(',', $id_t);
+    $dat_ter = getTerceros($ids, $cmd);
+    $tercero = ltrim($dat_ter[0]['nom_tercero']);
 } else {
-    $tercero = '';
+    $tercero = '---';
 }
 $ver = 'readonly';
 ?>
@@ -200,6 +197,7 @@ $ver = 'readonly';
 <html lang="es">
 
 <?php include '../head.php'; ?>
+
 <body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ?  'sb-sidenav-toggled' : '' ?>">
     <?php include '../navsuperior.php' ?>
     <div id="layoutSidenav">
@@ -418,7 +416,7 @@ $ver = 'readonly';
                                                 <input type="hidden" name="id_codigoCta" id="id_codigoCta" class="form-control form-control-sm" value="0">
                                                 <input type="hidden" name="tipoDato" id="tipoDato" value="0">
                                             </td>
-                                            <td><input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm" required>
+                                            <td><input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm bTercero" required>
                                                 <input type="hidden" name="idTercero" id="idTercero" value="0">
                                             </td>
                                             <td>

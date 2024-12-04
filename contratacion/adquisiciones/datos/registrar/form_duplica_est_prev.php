@@ -1,12 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
-$id_aquisicion = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida ');
 include '../../../../permisos.php';
+include '../../../../terceros.php';
+$id_aquisicion = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida ');
 $key = array_search('53', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
@@ -175,38 +176,19 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`
+                `tb_terceros`.`id_tercero`
                 , `tb_rel_tercero`.`id_tercero_api`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
             FROM
                 `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-            WHERE `seg_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
+                INNER JOIN `tb_terceros` 
+                    ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            WHERE `tb_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
     $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetchAll();
-    $cmd = null;
+    $supervisor = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-if (!empty($terceros_sup)) {
-    $id_t = [];
-    foreach ($terceros_sup as $l) {
-        $id_t[] = $l['id_tercero_api'];
-    }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $supervisor = json_decode($result, true);
-} else {
-    $supervisor = [];
 }
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -438,8 +420,8 @@ try {
                         <option value="A">PENDIENTE</option>
                         <?php
                         foreach ($supervisor as $s) {
-                            $slc = $s['id_tercero'] == $estudios['id_supervisor'] ? 'selected' : '';
-                            echo '<option value="' . $s['id_tercero'] . '">' . $s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . '</option>';
+                            $slc = $s['id_tercero_api'] == $estudios['id_supervisor'] ? 'selected' : '';
+                            echo '<option value="' . $s['id_tercero_api'] . '">' . $s['nom_tercero'] . '</option>';
                         }
                         ?>
                     </select>

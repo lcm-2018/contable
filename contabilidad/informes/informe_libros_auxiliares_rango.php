@@ -3,7 +3,7 @@ session_start();
 set_time_limit(5600);
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -18,6 +18,7 @@ function pesos($valor)
 }
 
 include '../../conexion.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
@@ -30,6 +31,15 @@ try {
 }
 $cta_inicial = $cta[0]['cuenta'];
 $cta_final = $cta[0]['cuenta'];
+$where = '';
+if (isset($_POST['id_tercero']) && $_POST['id_tercero'] > 0) {
+    $id_tercero = $_POST['id_tercero'];
+    $where .= " AND `ctb_libaux`.`id_tercero_api` = $id_tercero";
+}
+if (isset($_POST['tp_doc']) && $_POST['tp_doc'] > 0) {
+    $id_documento = $_POST['tp_doc'];
+    $where .= " AND `ctb_doc`.`id_tipo_doc` = $id_documento";
+}
 try {
 
     // Consultar cuentas con movimiento
@@ -44,7 +54,9 @@ try {
                 `ctb_fuente`.`nombre` AS `nom_tipo_doc`,
                 `ctb_doc`.`id_manu`,
                 `ctb_doc`.`detalle`,
-                `tes_forma_pago`.`forma_pago`
+                `tes_forma_pago`.`forma_pago`,
+                `tb_terceros`.`nom_tercero`,
+                `tb_terceros`.`nit_tercero`
             FROM 
                 `ctb_libaux`
             INNER JOIN `ctb_doc` 
@@ -57,34 +69,17 @@ try {
                 ON `tes_detalle_pago`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`
             LEFT JOIN `tes_forma_pago` 
                 ON `tes_detalle_pago`.`id_forma_pago` = `tes_forma_pago`.`id_forma_pago`
-            WHERE `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2 AND (`ctb_pgcp`.`cuenta` LIKE '$cta_inicial%' OR `ctb_pgcp`.`cuenta` LIKE '$cta_final%')
+            LEFT JOIN `tb_terceros` 
+                ON `tb_terceros`.`id_tercero_api` = `ctb_libaux`.`id_tercero_api`
+            WHERE `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2 
+                AND (`ctb_pgcp`.`cuenta` LIKE '$cta_inicial%' OR `ctb_pgcp`.`cuenta` LIKE '$cta_final%')
+                $where
             ORDER BY `ctb_pgcp`.`fecha`, `ctb_pgcp`.`cuenta` ASC";
     $res = $cmd->query($sql);
     $cuentas = $res->fetchAll();
 } catch (PDOException $e) {
     echo 'Error: ' . $e->getMessage();
     exit();
-}
-
-$id_t = [];
-foreach ($cuentas as $ter) {
-    if (!empty($ter['id_tercero_api'])) {
-        $id_t[] = $ter['id_tercero_api'];
-    }
-}
-
-$terceros = [];
-if (count($id_t) > 0) {
-    $payload = json_encode($id_t);
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
 }
 
 $nom_informe = "LIBRO AUXILIAR";
@@ -124,18 +119,17 @@ $total_cre = 0;
         } else {
             $saldo = $saldo + $tp['credito'] - $tp['debito'];
         }
-        $key = array_search($tp['id_tercero_api'], array_column($terceros, 'id_tercero'));
-        $nom_ter = $key !== false ? ltrim($terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['razon_social']) : '---';
-        $cc_nit = $key !== false ? $terceros[$key]['cc_nit'] : '---';
+        $nom_ter = $tp['nom_tercero'] != '' ? $tp['nom_tercero'] : '---';
+        $cc_nit = $tp['nit_tercero'] != '' ? $tp['nit_tercero'] : '---';
         $fecha = date('Y-m-d', strtotime($tp['fecha']));
         echo "<tr>
-                <td class='text-right'>" . $fecha . "</td>
-                <td class='text-right'>" . $tp['cod_tipo_doc'] . "</td>
-                <td class='text-right'>" . $tp['id_manu'] . "</td>
-                <td class='text-right'>" . $tp['forma_pago'] . "</td>
-                <td class='text'>" . $nom_ter . "</td>
-                <td class='text'>" . $cc_nit . "</td>
-                <td class='text-right'>" . $tp['detalle'] . "</td>
+                <td class='text-left' style='white-space: nowrap;'>" . $fecha . "</td>
+                <td class='text-left'>" . $tp['cod_tipo_doc'] . "</td>
+                <td class='text-left'>" . $tp['id_manu'] . "</td>
+                <td class='text-left'>" . $tp['forma_pago'] . "</td>
+                <td class='text-left'>" . $nom_ter . "</td>
+                <td class='text-right'>" . $cc_nit . "</td>
+                <td class='text-left'>" . $tp['detalle'] . "</td>
                 <td class='text-right'>" . number_format($tp['debito'], 2, ".", ",") . "</td>
                 <td class='text-right'>" . number_format($tp['credito'], 2, ".", ",") . "</td>
                 <td class='text-right'>" . number_format($saldo, 2, ".", ",") . "</td>

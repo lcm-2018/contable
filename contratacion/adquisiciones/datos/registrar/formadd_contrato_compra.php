@@ -1,10 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
+include '../../../../terceros.php';
 $id_cc = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida ');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -61,34 +62,18 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`, `seg_terceros`.`no_doc`
+                `tb_terceros`.`id_tercero_api`
+                , `tb_terceros`.`nom_tercero`
             FROM
                 `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-            WHERE `seg_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
+                INNER JOIN `tb_terceros` 
+                    ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            WHERE `tb_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
     $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetchAll();
+    $supervisor = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-if (!empty($terceros_sup)) {
-    $ced = '0';
-    foreach ($terceros_sup as $tE) {
-        $ced .= ',' . $tE['no_doc'];
-    }
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/' . $ced;
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $supervisor = json_decode($result, true);
-} else {
-    echo "No se ha registrado ningun tercero" . '<br><br><a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal"> Cancelar</a>';
 }
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -179,10 +164,10 @@ try {
                         <?php
                         foreach ($supervisor as $s) {
                             $selecionada = '';
-                            if ($s['id_tercero'] == $estudio_prev['id_supervisor']) {
+                            if ($s['id_tercero_api'] == $estudio_prev['id_supervisor']) {
                                 $selecionada = 'selected';
                             }
-                            echo '<option ' . $selecionada . ' value="' . $s['id_tercero'] . '">' . $s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . '</option>';
+                            echo '<option ' . $selecionada . ' value="' . $s['id_tercero_api'] . '">' . $s['nom_tercero'] . '</option>';
                         }
                         ?>
                     </select>

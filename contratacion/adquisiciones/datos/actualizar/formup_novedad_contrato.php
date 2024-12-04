@@ -1,10 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
+include '../../../../terceros.php';
 $data = isset($_POST['datos']) ? explode('|', $_POST['datos']) : exit('Acción no permitida ');
 $id_novedad = $data[0];
 $opcion = $data[1];
@@ -127,28 +128,14 @@ switch ($opcion) {
                     WHERE (`id_cesion` = $id_novedad)";
             $rs = $cmd->query($sql);
             $detalles_novedad = $rs->fetch();
-            $cmd = null;
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
         }
         $id_t[] = $detalles_novedad['id_tercero'];
-        $payload = json_encode($id_t);
-        //API URL
-        $url = $api . 'terceros/datos/res/lista/terceros';
-        $ch = curl_init($url);
-        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        $terceros_api = json_decode($result, true);
-        if (isset($terceros_api[0])) {
-            $tercero = ltrim($terceros_api[0]['nombre1'] . ' ' . $terceros_api[0]['nombre2'] . ' ' . $terceros_api[0]['apellido1'] . ' ' . $terceros_api[0]['apellido2'] . ' ' . $terceros_api[0]['razon_social'] . ' -> ' . $terceros_api[0]['cc_nit']);
-        } else {
-            $tercero = '';
-        }
+        $ids = implode(',', $id_t);
+        $terceros_api = getTerceros($ids, $cmd);
+        $cmd = null;
+        $tercero = isset($terceros_api[0]) ? ltrim($terceros_api[0]['nom_tercero'] . ' -> ' . $terceros_api[0]['nit_tercero']) : '';
     ?>
         <div class="px-0">
             <div class="shadow">

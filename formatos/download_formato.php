@@ -4,9 +4,14 @@ if (!file_exists($archivo)) {
     echo "El fichero $archivo no existe";
     exit;
 }
-header('Content-Disposition: attachment;filename=' . $archivo);
-header('Content-Type: application/vnd.ms-excel');
+if (ob_get_length()) ob_end_clean();
+
+header('Content-Disposition: attachment; filename="' . basename($archivo) . '"');
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 header('Content-Length: ' . filesize($archivo));
-header('Cache-Control: max-age=0');
+header('Cache-Control: no-cache, must-revalidate');
+header('Expires: 0');
+
+// Envía el archivo
 readfile($archivo);
 exit;

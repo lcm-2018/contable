@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -48,7 +48,7 @@ if (isset($_FILES['fileSup'])) {
             $sql->bindParam(4, $id_compra, PDO::PARAM_INT);
             $sql->execute();
             if (!($sql->rowCount() > 0)) {
-                print_r($sql->errorInfo()[2]);
+                echo $sql->errorInfo()[2];
             } else {
                 echo 1;
             }

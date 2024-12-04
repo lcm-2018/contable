@@ -14,7 +14,7 @@ try {
                 INNER JOIN `tb_bancos` 
                     ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
             WHERE (`tes_cuentas`.`id_banco` ={$_post['id']} AND `tes_cuentas`.`estado` = 1)
-            ORDER BY `tes_cuentas`.`nombre` ASC;";
+            ORDER BY `tes_cuentas`.`nombre` ASC";
     $rs = $cmd->query($sql);
     $retenciones = $rs->fetchAll();
     $cmd = null;

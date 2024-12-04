@@ -12,8 +12,8 @@ try {
                 , `tes_cuentas`.`id_tes_cuenta`
                 , `tes_cuentas`.`id_banco`
             FROM
-                `tes_cuentas`
-                INNER JOIN `ctb_pgcp` 
+                `ctb_pgcp`
+                LEFT JOIN `tes_cuentas` 
                     ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
             WHERE `tes_cuentas`.`id_tes_cuenta` IS NULL AND `ctb_pgcp`.`tipo_dato` = 'D' AND(`ctb_pgcp`.`cuenta` LIKE '1132%' OR `ctb_pgcp`.`cuenta` LIKE '1110%')";
     $rs = $cmd->query($sql);
@@ -26,7 +26,8 @@ $response = '
 <select class="form-control form-control-sm py-0 sm" id="cuentas" name="cuentas"  required>
 <option value="0">-- Seleccionar --</option>';
 foreach ($retenciones as $ret) {
-    $response .= '<option value="' . $ret['id_pgcp'] . '">' . $ret['cuenta'] . ' | ' . $ret['nombre'] .  '</option>';
+    $value = base64_encode($ret['id_pgcp'] . '|' . $ret['nombre']);
+    $response .= '<option value="' . $value . '">' . $ret['cuenta'] . ' | ' . $ret['nombre'] .  '</option>';
 }
 $response .= "</select>";
 echo $response;

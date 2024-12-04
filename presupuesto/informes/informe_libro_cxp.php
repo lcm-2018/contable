@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
@@ -13,6 +13,7 @@ function pesos($valor)
 }
 include '../../conexion.php';
 include '../../financiero/consultas.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 //
@@ -103,19 +104,8 @@ FROM
                 $id_t[] = $ca['id_tercero'];
             }
         }
-        $payload = json_encode($id_t);
-        //API URL
-        //API URL
-        $url = $api . 'terceros/datos/res/lista/terceros';
-        $ch = curl_init($url);
-        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        $terceros = json_decode($result, true);
+        $ids = implode(',', $id_t);
+        $terceros = getTerceros($ids, $cmd);
         foreach ($cdp as $rp) {
             $fecha = date('Y-m-d', strtotime($rp['fecha']));
 
@@ -141,9 +131,9 @@ FROM
                 $tercero = '';
                 $cc_nit = '';
             } else {
-                $key = array_search($crp['id_tercero'], array_column($terceros, 'id_tercero'));
-                $tercero = $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social'];
-                $cc_nit = $terceros[$key]['cc_nit'];
+                $key = array_search($crp['id_tercero'], array_column($terceros, 'id_tercero_api'));
+                $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
+                $cc_nit = $key !== false ? number_format($terceros[$key]['nit_tercero'], 0, "", ".") : '---';
             }
             // Consulto el valor causado
             /*

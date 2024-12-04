@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 function pesos($valor)
@@ -15,6 +15,7 @@ function pesos2($valor)
 
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../terceros.php';
 $key = array_search('51', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
@@ -72,7 +73,7 @@ try {
                 , `ctt_contratos`.`val_contrato`
                 , `ctt_contratos`.`num_contrato`
                 , `ctt_adquisiciones`.`objeto`
-                , `seg_terceros`.`id_tercero_api`
+                , `ctt_adquisiciones`.`id_tercero` AS `id_tercero_api`
                 , `ctt_contratos`.`id_supervisor`
                 , `tb_area_c`.`area`
                 , `tb_tipo_contratacion`.`tipo_contrato`
@@ -90,8 +91,6 @@ try {
                     ON (`tb_tipo_bien_servicio`.`id_tipo_cotrato` = `tb_tipo_contratacion`.`id_tipo`)
                 INNER JOIN `ctt_estudios_previos` 
                     ON (`ctt_estudios_previos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
-                INNER JOIN `seg_terceros` 
-                    ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
             WHERE (`ctt_contratos`.`id_contrato_compra` IN ($contratos))";
     $rs = $cmd->query($sql);
     $datos = $rs->fetchAll(PDO::FETCH_ASSOC);
@@ -100,31 +99,26 @@ try {
     $id_supervisor = $datos[0]['id_supervisor'];
     $id_t[] = $id_contratista;
     $id_t[] = $id_supervisor;
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
-$key = array_search($id_contratista, array_column($terceros, 'id_tercero'));
+$ids = implode(',', $id_t);
+$terceros = getTerceros($ids, $cmd);
+$cmd = null;
+$key = array_search($id_contratista, array_column($terceros, 'id_tercero_api'));
 if ($key !== false) {
-    $nombre = trim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']);
-    $cedula = $terceros[$key]['cc_nit'];
-    $genero = $terceros[$key]['genero'];
-    $tipodoc = $terceros[$key]['tipo_doc'];
+    $nombre = trim($terceros[$key]['nom_tercero']);
+    $cedula = $terceros[$key]['nit_tercero'];
+    $genero = '';
+    $tipodoc = '';
+} else {
+    $nombre = '';
+    $cedula = '';
+    $genero = '';
+    $tipodoc = '';
 }
-$key = array_search($id_supervisor, array_column($terceros, 'id_tercero'));
-$jefe = $key !== false ? trim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']) : '';
+$key = array_search($id_supervisor, array_column($terceros, 'id_tercero_api'));
+$jefe = $key !== false ? trim($terceros[$key]['nom_tercero']) : 'XXXXXXXXXX';
 $consecutivo = 100;
 $area = $datos[0]['area'];
 if ($cant_contratos > 1) {
@@ -205,7 +199,7 @@ $tabla = [];
 , `ctt_contratos`.`val_contrato`
 , `ctt_contratos`.`num_contrato`
 , `ctt_adquisiciones`.`objeto`
-, `seg_terceros`.`id_tercero_api`
+, `ctt_adquisiciones`.`id_tercero_api`
 , `ctt_contratos`.`id_supervisor`
 , `tb_area_c`.`area`
 , `tb_tipo_contratacion`.`tipo_contrato`

@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
@@ -158,8 +158,11 @@ try {
                 , IFNULL(`registrado`.`valor`,0) AS `val_registrado` 
                 , IFNULL(`causado`.`valor`,0) AS `val_causado` 
                 , IFNULL(`pagado`.`valor`,0) AS `val_pagado`
+                , `pto_presupuestos`.`id_tipo`
                 $valores_mes
             FROM `pto_cargue`
+                INNER JOIN `pto_presupuestos`
+                    ON (`pto_cargue`.`id_pto` = `pto_presupuestos`.`id_pto`)
                 LEFT JOIN
                     (SELECT
                         `pto_mod_detalle`.`id_cargue`
@@ -270,7 +273,8 @@ try {
                     WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte')
                     GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `pagado`
                     ON(`pagado`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                    $join_mes";
+                    $join_mes
+                   WHERE (`pto_presupuestos`.`id_tipo` = 2)";
     $res = $cmd->query($sql);
     $rubros = $res->fetchAll();
 } catch (PDOException $e) {

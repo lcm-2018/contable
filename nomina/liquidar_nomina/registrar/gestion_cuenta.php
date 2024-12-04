@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -21,7 +21,7 @@ if ($id_causacion == '0') {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT `id_causacion` FROM `nom_causacion` WHERE `centro_costo` = '$c_costo' AND `id_tipo` = $id_tipo $condicion";
+    $sql = "SELECT `id_causacion` FROM `nom_causacion` WHERE `centro_costo` = $c_costo AND `id_tipo` = $id_tipo $condicion";
     $rs = $cmd->query($sql);
     $valida = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -41,7 +41,7 @@ try {
                     (`centro_costo`,`id_tipo`,`cuenta`,`detalle`,`id_user_reg`,`fec_reg`)
                 VALUES(?, ?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
-        $sql->bindParam(1, $c_costo, PDO::PARAM_STR);
+        $sql->bindParam(1, $c_costo, PDO::PARAM_INT);
         $sql->bindParam(2, $id_tipo, PDO::PARAM_INT);
         $sql->bindParam(3, $id_cuenta, PDO::PARAM_INT);
         $sql->bindParam(4, $detalle, PDO::PARAM_STR);

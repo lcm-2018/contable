@@ -1,4 +1,8 @@
 (function ($) {
+    function hideModalEspera() {
+        $('#divModalEspera').modal('hide');
+        $('.modal-backdrop').remove();
+    }
     $("#btnLiqNom").click(function () {
         let mes = $("#slcMesLiqNom").val();
         if (mes == '00') {
@@ -18,16 +22,16 @@
             url: url,
             data: dliqnom,
             success: function (r) {
-                if (r === '0') {
-                    $('#divModalError').modal('show');
-                    $('#btnDetallesLiq').attr('href', 'detalles_nomina.php?mes=' + mes);
-                } else {
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html(r);
-                }
                 setTimeout(function () {
-                    $('#divModalEspera').modal('hide');
-                }, 300);
+                    hideModalEspera();
+                    if (r === '0') {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html("No hay mas empleados para liquidar en este mes");
+                    } else {
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html(r);
+                    }
+                }, 500);
             }
         });
         return false;
@@ -75,16 +79,17 @@
                 url: url,
                 data: datas,
                 success: function (r) {
-                    $('.modal-backdrop').remove();
-                    $('#divModalEspera').fadeOut(0);
-                    if (r.trim() === 'ok') {
-                        $('#divModalDone').modal('show');
-                        $('#divMsgDone').html("Proceso realizado con éxito");
-                        setTimeout(function () { }, 1000);
-                    } else {
-                        $('#divModalError').modal('show');
-                        $('#divMsgError').html(r);
-                    }
+                    setTimeout(function () {
+                        hideModalEspera();
+                        if (r.trim() === 'ok') {
+                            $('#divModalDone').modal('show');
+                            $('#divMsgDone').html("Proceso realizado con éxito");
+                            setTimeout(function () { }, 1000);
+                        } else {
+                            $('#divModalError').modal('show');
+                            $('#divMsgError').html(r);
+                        }
+                    }, 500);
                 }
             });
         }
@@ -109,16 +114,17 @@
                 url: url,
                 data: datas,
                 success: function (r) {
-                    $('.modal-backdrop').remove();
-                    $('#divModalEspera').fadeOut(0);
-                    if (r.trim() === 'ok') {
-                        $('#divModalDone').modal('show');
-                        $('#divMsgDone').html("Proceso realizado con éxito");
-                        setTimeout(function () { }, 1000);
-                    } else {
-                        $('#divModalError').modal('show');
-                        $('#divMsgError').html(r);
-                    }
+                    setTimeout(function () {
+                        hideModalEspera();
+                        if (r.trim() === 'ok') {
+                            $('#divModalDone').modal('show');
+                            $('#divMsgDone').html("Proceso realizado con éxito");
+                            setTimeout(function () { }, 1000);
+                        } else {
+                            $('#divModalError').modal('show');
+                            $('#divMsgError').html(r);
+                        }
+                    }, 500);
                 }
             });
         }
@@ -152,16 +158,16 @@
             dataType: 'json',
             data: { fec: fec, mesne: mesne },
             success: function (r) {
-                if (r.msg == '1') {
-                    $('#divModalConfDel').modal('show');
-                    $('#divMsgConfdel').html("PROCESADO:<br>" + r.procesados + "<br><br>SIN PROCESAR Y/O ERRORES:" + r.incorrec + "<br>" + r.error);
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgDone').html(r);
-                }
                 setTimeout(function () {
-                    $('#divModalEspera').modal('hide');
-                }, 300);
+                    hideModalEspera();
+                    if (r.msg == '1') {
+                        $('#divModalConfDel').modal('show');
+                        $('#divMsgConfdel').html("PROCESADO:<br>" + r.procesados + "<br><br>SIN PROCESAR Y/O ERRORES:" + r.incorrec + "<br>" + r.error);
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgDone').html(r);
+                    }
+                }, 500);
             }
         });
         return false;
@@ -1085,16 +1091,17 @@
             url: '../liq_nom_public_retroactivo.php',
             data: datos,
             success: function (r) {
-                $('.modal-backdrop').remove();
-                $('#divModalEspera').fadeOut(0);
-                if (r.trim() === 'ok') {
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html("Nomina liquidadada correctamente");
-                    setTimeout(function () { $('#divModalEspera').modal('hide'); }, 1000);
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r);
-                }
+                setTimeout(function () {
+                    hideModalEspera();
+                    if (r.trim() === 'ok') {
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html("Nomina liquidadada correctamente");
+                        setTimeout(function () { $('#divModalEspera').modal('hide'); }, 1000);
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r);
+                    }
+                }, 500);
             }
         });
         return false;
@@ -1162,16 +1169,17 @@
             url: 'procesar/definitiva.php',
             data: { id: id },
             success: function (r) {
-                $('.modal-backdrop').remove();
-                $('#divModalEspera').fadeOut(0);
-                if (r.trim() === 'ok') {
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html("Nomina definitiva");
-                    setTimeout(function () { location.reload() }, 1000);
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r);
-                }
+                setTimeout(function () {
+                    hideModalEspera();
+                    if (r.trim() === 'ok') {
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html("Nomina definitiva");
+                        setTimeout(function () { location.reload() }, 1000);
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r);
+                    }
+                }, 500);
             }
         });
     });
@@ -1190,16 +1198,17 @@
             url: 'procesar/causacion_planilla.php',
             data: { id: id, mes: mes },
             success: function (r) {
-                $('.modal-backdrop').remove();
-                $('#divModalEspera').fadeOut(0);
-                if (r.trim() === 'ok') {
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html("Nomina definitiva tramitada correctamente");
-                    setTimeout(function () { location.reload() }, 1000);
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r);
-                }
+                setTimeout(function () {
+                    hideModalEspera();
+                    if (r.trim() === 'ok') {
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html("Nomina definitiva tramitada correctamente");
+                        setTimeout(function () { location.reload() }, 1000);
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r);
+                    }
+                }, 500);
             }
         });
     });
@@ -1218,16 +1227,17 @@
             url: 'procesar/causacion_nomina.php',
             data: { id: id, mes: mes },
             success: function (r) {
-                $('.modal-backdrop').remove();
-                $('#divModalEspera').fadeOut(0);
-                if (r.trim() === 'ok') {
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html("Nomina definitiva tramitada correctamente");
-                    setTimeout(function () { location.reload() }, 1000);
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r);
-                }
+                setTimeout(function () {
+                    hideModalEspera();
+                    if (r.trim() === 'ok') {
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html("Nomina definitiva tramitada correctamente");
+                        setTimeout(function () { location.reload() }, 1000);
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r);
+                    }
+                }, 500);
             }
         });
     });
@@ -1574,18 +1584,19 @@
                 url: 'liq_vacaciones_public.php',
                 data: datos,
                 success: function (r) {
-                    $('.modal-backdrop').remove();
-                    $('#divModalEspera').fadeOut(0);
-                    if (r === 'ok') {
-                        $('#divModalExito a').attr('data-dismiss', '');
-                        $('#divModalExito a').attr('href', 'javascript:location.reload()');
-                        $('#divModalDone').modal('show');
-                        $('#divMsgDone').html("Liquidación de vacaciones registrada correctamente");
-                        setTimeout(function () { }, 1000);
-                    } else {
-                        $('#divModalError').modal('show');
-                        $('#divMsgError').html(r);
-                    }
+                    setTimeout(function () {
+                        hideModalEspera();
+                        if (r === 'ok') {
+                            $('#divModalExito a').attr('data-dismiss', '');
+                            $('#divModalExito a').attr('href', 'javascript:location.reload()');
+                            $('#divModalDone').modal('show');
+                            $('#divMsgDone').html("Liquidación de vacaciones registrada correctamente");
+                            setTimeout(function () { }, 1000);
+                        } else {
+                            $('#divModalError').modal('show');
+                            $('#divMsgError').html(r);
+                        }
+                    }, 500);
                 }
             });
         }

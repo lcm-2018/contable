@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -19,7 +19,7 @@ try {
        echo '1';
     }
     else{
-        print_r($sql->errorInfo()[2]);
+        echo $sql->errorInfo()[2];
     }
     $cmd = null;
 } catch (PDOException $e) {

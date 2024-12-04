@@ -1,12 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
 include '../financiero/consultas.php';
+include '../terceros.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -36,6 +37,58 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+            `objeto`
+            FROM `pto_cdp`
+            WHERE `id_pto_cdp` = $id_cdp";
+    $rs = $cmd->query($sql);
+    $objeto = $rs->fetch();
+    $objeto = !empty($objeto) ? $objeto['objeto'] : '';
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `ctt_adquisiciones`.`id_cdp`
+                , `ctt_adquisiciones`.`id_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
+                , `ctt_contratos`.`num_contrato`
+            FROM
+                `ctt_adquisiciones`
+                INNER JOIN `tb_terceros` 
+                    ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                LEFT JOIN `ctt_contratos` 
+                    ON (`ctt_adquisiciones`.`id_adquisicion` = `ctt_contratos`.`id_compra`)
+            WHERE (`ctt_adquisiciones`.`id_cdp` = $id_cdp)
+            UNION ALL
+            SELECT
+                `ctt_novedad_adicion_prorroga`.`id_cdp`
+                , `ctt_adquisiciones`.`id_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
+                , `ctt_contratos`.`num_contrato`
+            FROM
+                `ctt_contratos`
+                INNER JOIN `ctt_novedad_adicion_prorroga` 
+                    ON (`ctt_contratos`.`id_contrato_compra` = `ctt_novedad_adicion_prorroga`.`id_adq`)
+                INNER JOIN `ctt_adquisiciones` 
+                    ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
+                INNER JOIN `tb_terceros` 
+                    ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE (`ctt_novedad_adicion_prorroga`.`id_cdp` = $id_cdp)";
+    $rs = $cmd->query($sql);
+    $ctt = $rs->fetch();
+    $id_ter = !empty($ctt) ? $ctt['id_tercero'] : 0;
+    $num_contrato = !empty($ctt) ? $ctt['num_contrato'] : '';
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT `id_pto`,`fecha`, `id_manu`,`objeto`, `id_tercero_api`, `num_contrato` FROM `pto_crp` WHERE `id_pto_crp` = $id_crp";
     $rs = $cmd->query($sql);
     $datosCRP = $rs->fetch();
@@ -43,8 +96,8 @@ try {
         $datosCRP['id_pto'] = '';
         $datosCRP['fecha'] = date('Y-m-d');
         $datosCRP['id_manu'] = $id_manu;
-        $datosCRP['objeto'] = '';
-        $datosCRP['num_contrato'] = '';
+        $datosCRP['objeto'] = $objeto;
+        $datosCRP['num_contrato'] = $num_contrato;
         $datosCRP['id_tercero_api'] = 0;
     } else {
         $automatico = 'readonly';
@@ -54,30 +107,27 @@ try {
 }
 // Consulto si el Cdp esta relacionado en el campo cdp de la tabla ctt_novedad_adicion_prorroga
 $id_t = [$datosCRP['id_tercero_api']];
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
-if ($datosCRP['id_tercero_api'] == 0) {
-    $tercero = '';
-    $ccnit = '';
-} else {
-    $key = array_search($datosCRP['id_tercero_api'], array_column($terceros, 'id_tercero'));
-    $tercero = $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['razon_social'];
-    $ccnit = $terceros[$key]['cc_nit'];
-}
 
+$ids = implode(',', $id_t);
+$terceros = getTerceros($ids, $cmd);
+$cmd = null;
+//$terceros = array_merge($terceros, getTerceros($id_ter, $cmd));
+if ($id_ter == 0) {
+    if ($datosCRP['id_tercero_api'] == 0) {
+        $tercero = '---';
+        $ccnit = '---';
+    } else {
+        $key = array_search($datosCRP['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+        $tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '---';
+        $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
+    }
+} else {
+    $tercero = $ctt['nom_tercero'];
+    $ccnit = $ctt['nit_tercero'];
+    $datosCRP['id_tercero_api'] = $id_ter;
+}
 $fecha_cierre =  date("Y-m-d", strtotime($datosCRP['fecha']));
 $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
-
 ?>
 
 <body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ? 'sb-sidenav-toggled' : ''; ?>">
@@ -170,7 +220,7 @@ $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
                                 echo '<button class="btn btn-info btn-sm" id="registrarMovDetalle" text="' . $text . '">' . $opcion . '</button>';
                             } ?>
                             <a value="" type="button" class="btn btn-primary btn-sm" onclick="imprimirFormatoCrp(<?php echo $id_crp ?>)" style="width: 5rem;"> <span class="fas fa-print "></span></a>
-                            <a onclick="cambiaListado(1)" class="btn btn-danger btn-sm" style="width: 7rem;" href="#"> VOLVER</a>
+                            <a onclick="cambiaListado(2)" class="btn btn-danger btn-sm" style="width: 7rem;" href="#"> VOLVER</a>
                         </div>
                         <input type="hidden" name="id_pto_save" id="id_pto_save" value="">
 

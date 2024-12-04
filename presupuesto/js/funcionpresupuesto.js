@@ -274,11 +274,12 @@
         //dataTable detalle CDP
         let id_ejec2 = $("#id_pto_cdp").val();
         let id_cdp_eac = $("#id_cdp").val();
+        let id_adq_eac = $("#id_adq").length ? $("#id_adq").val() : 0;
         $("#tableEjecCdp").DataTable({
             language: setIdioma,
             ajax: {
                 url: "datos/listar/datos_detalle_cdp.php",
-                data: { id_pto: id_ejec2, id_cdp: id_cdp_eac },
+                data: { id_pto: id_ejec2, id_cdp: id_cdp_eac, id_adq: id_adq_eac },
                 type: "POST",
                 dataType: "json",
             },
@@ -553,6 +554,11 @@
             $("#dateFecha").addClass('is-invalid');
             $("#divModalError").modal("show");
             $("#divMsgError").html("¡La fecha no puede estar vacio!");
+        } else if ($("#dateFecha").val() <= $('#fec_cierre').val()) {
+            $("#dateFecha").focus();
+            $("#dateFecha").addClass('is-invalid');
+            $("#divModalError").modal("show");
+            $("#divMsgError").html("Fecha debe ser mayor a la fecha de cierre del presupuesto:<br> <b>" + $('#fec_cierre').val()) + "</b>";
         } else if ($("#id_manu").val() === "") {
             $("#id_manu").focus();
             $("#id_manu").addClass('is-invalid');
@@ -1496,11 +1502,10 @@ function eliminarCrpp(id) {
                 .then((response) => {
                     if (response == "ok") {
                         // Reonlidar la tabla
-                        let id = "tableEjecPresupuestoCrp";
-                        reloadtable(id);
+                        $("#tableEjecPresupuestoCrp").DataTable().ajax.reload();
                         mje("Registro eliminado");
                     } else {
-                        mjeError("No se puede eliminar el registro");
+                        mjeError(response);
                     }
                 });
         }
@@ -1589,7 +1594,7 @@ document.addEventListener("keyup", (e) => {
         $("#rubroCod").autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: window.urlin+"/presupuesto/datos/consultar/consultaRubrosMod.php",
+                    url: window.urlin + "/presupuesto/datos/consultar/consultaRubrosMod.php",
                     type: "post",
                     dataType: "json",
                     data: {
@@ -1681,7 +1686,7 @@ function RegDetalleCDPs(boton) {
             var data = new FormData();
             data.append('id_pto', $("#id_pto_presupuestos").val());
             data.append('dateFecha', $("#fecha").val());
-            data.append('numSolicitud', '');
+            data.append('numSolicitud', $("#solicitud").val());
             data.append('txtObjeto', $("#objeto").val());
             data.append('id_adq', $("#id_adq").val());
             data.append('id_otro', $("#id_otro").val());
@@ -1716,10 +1721,9 @@ function RegDetalleCDPs(boton) {
             .then((response) => response.json())
             .then((response) => {
                 if (response.status == "ok") {
-                    let id = "tableEjecCdp";
                     mje("Proceso realizado correctamente");
                     if (opcion == 0) {
-                        reloadtable(id);
+                        $('#tableEjecCdp').DataTable().ajax.reload();
                     } else {
                         let id_pto_mod = opcion.split("|")[0];
                         let id_cdp = opcion.split("|")[1];
@@ -1758,6 +1762,36 @@ $('#modificarEjecCdp').on('click', '.editar', function () {
             }
         },
     });
+});
+$('#modificarEjecCdp').on('click', '.borrar', function () {
+    var id = $(this).attr('value');
+    Swal.fire({
+        title: "¿Está seguro de eliminar el registro actual?",
+        text: "No podrá revertir esta acción",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si, eliminar",
+        cancelButtonText: "Cancelar",
+    }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                type: "POST",
+                url: "datos/eliminar/del_eliminar_cdp_detalle.php",
+                data: { id: id },
+                success: function (res) {
+                    if (res == 'ok') {
+                        mje("Registro eliminado correctamente");
+                        $('#tableEjecCdp').DataTable().ajax.reload();
+                    } else {
+                        mjeError(res, "Error");
+                    }
+                },
+            });
+        }
+    });
+
 });
 
 function valorDif() {
@@ -1938,8 +1972,12 @@ function eliminarCdp(id) {
                 .then((response) => response.text())
                 .then((response) => {
                     if (response == "ok") {
-                        let tabla = "tableEjecPresupuesto";
-                        reloadtable(tabla);
+                        mje("Registro eliminado correctamente");
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        mjeError("No se puede eliminar el registro:" + response);
                     }
                 });
         }
@@ -2655,9 +2693,9 @@ const registrarLiquidacionDetalleCrp = async (id) => {
 
 //================================================ ANULACION DE DOCUMENTO =============================================
 // Funcion para anular documento
-const anulacionCrp = (id) => {
-    let url = "form_fecha_anulacion.php";
-    $.post(url, { id: id }, function (he) {
+const anulacionPto = (button) => {
+    var data = button.getAttribute("text");
+    $.post("form_anula.php", { data: data }, function (he) {
         $("#divTamModalForms").removeClass("modal-sm");
         $("#divTamModalForms").removeClass("modal-xl");
         $("#divTamModalForms").addClass("modal-lg");
@@ -2689,6 +2727,52 @@ const generarInformeConsulta = (id) => {
 };
 
 // Enviar datos para anulacion
+function changeEstadoAnulacion() {
+    $('.is-invalid').removeClass('is-invalid');
+    var tipo = $('#tipo').val();
+    if ('fecha' == '') {
+        $('#fecha').focus();
+        $('#fecha').addClass('is-invalid');
+        mjeError('La fecha no puede estar vacia', '');
+    } else if ($('#objeto').val() == '') {
+        $('#objeto').focus();
+        $('#objeto').addClass('is-invalid');
+        mjeError('El Motivo de anulación no puede estar vacio', '');
+    } else {
+        var datos = $("#formAnulaDoc").serialize();
+        Swal.fire({
+            title: "¿Confirma anulación de documento?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: "datos/registrar/registrar_anulacion_doc.php",
+                    data: datos,
+                    success: function (r) {
+                        if (r === "ok") {
+                            var tabla = "tableEjecPresupuesto";
+                            if (tipo == 'crp') {
+                                tabla = "tableEjecPresupuestoCrp";
+                            }
+                            $('#divModalForms').modal('hide');
+                            $('#' + tabla).DataTable().ajax.reload();
+                            mje('Proceso realizado correctamente');
+                        } else {
+                            mjeError('Error:', r);
+                        }
+                    },
+                });
+            }
+        });
+    }
+};
+/*
 const changeEstadoAnulacion = async () => {
     let formEnvio = new FormData(formAnulacionCrpp);
     for (var pair of formEnvio.entries()) {
@@ -2730,7 +2814,7 @@ const changeEstadoAnulacion = async () => {
         console.error(error);
     }
 };
-
+*/
 // ================================================   FIN LIQUIDAR SALDO DE CDP =====================================
 
 const cargarReportePresupuesto = (id) => {

@@ -106,8 +106,9 @@ var tabla;
 		let id_doc = $("#id_ctb_tipo").val();
 		let id_var = $("#var_tip").val();
 		// obtener el value de id_ctb_tipo
+		var tbMvtoTes;
 		if (id_doc == 13) {
-			$("#tableMvtoTesoreriaPagos").DataTable({
+			tbMvtoTes = $("#tableMvtoTesoreriaPagos").DataTable({
 				dom: setdom,
 				buttons: [
 					{
@@ -118,6 +119,8 @@ var tabla;
 					},
 				],
 				language: setIdioma,
+				serverSide: true,
+				processing: true,
 				ajax: {
 					url: "datos/listar/datos_mvto_caja.php",
 					data: function (d) {
@@ -140,10 +143,14 @@ var tabla;
 					{ data: "botones" },
 
 				],
+				columnDefs: [
+					{ class: 'text-wrap', targets: [3] },
+					{ orderable: false, targets: 10 }
+				],
 				order: [[0, "desc"]],
 			});
 		} else {
-			$("#tableMvtoTesoreriaPagos").DataTable({
+			tbMvtoTes = $("#tableMvtoTesoreriaPagos").DataTable({
 				dom: setdom,
 				buttons: [
 					{
@@ -154,6 +161,8 @@ var tabla;
 					},
 				],
 				language: setIdioma,
+				serverSide: true,
+				processing: true,
 				ajax: {
 					url: "datos/listar/datos_mvto_tesoreria.php",
 					data: function (d) {
@@ -162,10 +171,27 @@ var tabla;
 					type: "POST",
 					dataType: "json",
 				},
-				columns: [{ data: "numero" }, { data: "fecha" }, { data: "ccnit" }, { data: "tercero" }, { data: "valor" }, { data: "botones" }],
+				columns: [
+					{ data: "numero" },
+					{ data: "fecha" },
+					{ data: "ccnit" },
+					{ data: "tercero" },
+					{ data: "valor" },
+					{ data: "botones" }
+				],
+				columnDefs: [
+					{ class: 'text-wrap', targets: [3] },
+					{ orderable: false, targets: 5 }
+				],
 				order: [[0, "desc"]],
 			});
 		}
+		$('#tableMvtoTesoreriaPagos_filter input').unbind(); // Desvinculamos el evento por defecto
+		$('#tableMvtoTesoreriaPagos_filter input').bind('keypress', function (e) {
+			if (e.keyCode == 13) { // Si se presiona Enter (código 13)
+				tbMvtoTes.search(this.value).draw(); // Realiza la búsqueda y actualiza la tabla
+			}
+		});
 		$("#tableMvtoTesoreriaPagos").wrap('<div class="overflow" />');
 		// dataTable de movimientos contables
 
@@ -1015,6 +1041,29 @@ $("#modificartableMvtoContableDetallePag").on('click', '.modificar', function ()
 				mjeError(res.msg, "Error en la consulta");
 			}
 		},
+	});
+});
+$("#tableMvtoContableDetallePag").on("input", ".bTercero", function () {
+	var fila = $(this).closest("tr");
+	var idTercero = fila.find("input[name='idTercero']");
+	$(this).autocomplete({
+		source: function (request, response) {
+			$.ajax({
+				url: window.urlin + "/presupuesto/datos/consultar/buscar_terceros.php",
+				type: "post",
+				dataType: "json",
+				data: {
+					term: request.term
+				},
+				success: function (data) {
+					response(data);
+				}
+			});
+		},
+		minLength: 2,
+		select: function (event, ui) {
+			idTercero.val(ui.item.id);
+		}
 	});
 });
 // Eliminar documento contable ctb_doc
@@ -2120,11 +2169,11 @@ const guardarCuentaBanco = () => {
 		$("#banco").focus();
 		mjeError("Debe seleccionar un banco");
 	} else
-		/*if ($("#cuentas").val() == "0") {
+		if ($("#cuentas").val() == "0") {
 			$("#cuentas").addClass("is-invalid");
 			$("#cuentas").focus();
 			mjeError("Debe seleccionar una cuenta");
-		} else */
+		} else
 		if ($("#tipo_cuenta").val() == "0") {
 			$("#tipo_cuenta").addClass("is-invalid");
 			$("#tipo_cuenta").focus();

@@ -4,6 +4,7 @@ include 'conexion.php';
 $res = array();
 $usuario = $_POST['user'];
 $contrasena = ($_POST['pass']);
+$passlow = $_POST['passwd'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -18,7 +19,7 @@ try {
             WHERE `login` = '$usuario'";
     $rs = $cmd->query($sql);
     $obj = $rs->fetch();
-    if ($obj['login'] === $usuario && $obj['clave'] === $contrasena) {
+    if ($obj['login'] === $usuario && ($obj['clave'] === $contrasena || $obj['clave'] === $passlow)) {
         $_SESSION['id_user'] = $obj['id_usuario'];
         $_SESSION['user'] = $obj['nombre'];
         $_SESSION['login'] = $obj['login'];

@@ -1,15 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
 $id_ctb_doc = $_POST['id_doc'] ?? '';
 // Consulta tipo de presupuesto
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

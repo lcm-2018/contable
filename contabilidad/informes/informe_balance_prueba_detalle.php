@@ -11,6 +11,10 @@ $vigencia = $_SESSION['vigencia'];
 $fecha_inicial = $_POST['fecha_inicial'];
 $fecha_corte = $_POST['fecha_final'];
 $inicio = $_SESSION['vigencia'] . '-01-01';
+$where = '';
+if ($_POST['xtercero'] == 1) {
+    $where = ", `t1`.`id_tercero_api`";
+}
 // contar los caracteres de $cuenta_ini
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -19,13 +23,17 @@ try {
                 `ctb_pgcp`.`cuenta`
                 , `ctb_pgcp`.`nombre`
                 , `ctb_pgcp`.`tipo_dato` AS `tipo`
+                , `t1`.`id_tercero_api`
                 , SUM(`t1`.`debitoi`) AS `debitoi`
                 , SUM(`t1`.`creditoi`) AS `creditoi`
                 , SUM(`t1`.`debito`) AS `debito`
                 , SUM(`t1`.`credito`) AS `credito`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
             FROM
                 (SELECT
                     `ctb_libaux`.`id_cuenta`
+                    , `ctb_libaux`.`id_tercero_api`
                     , SUM(`ctb_libaux`.`debito`) AS `debitoi`
                     , SUM(`ctb_libaux`.`credito`) AS `creditoi`
                     , 0 AS `debito`
@@ -40,10 +48,11 @@ try {
                     AND ((SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('1', '2', '3') AND `ctb_doc`.`fecha` < '$fecha_inicial')
                         OR
                     (SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('4', '5', '6') AND `ctb_doc`.`fecha` < '$fecha_inicial' AND `ctb_doc`.`fecha` > '$inicio'))
-                GROUP BY `ctb_libaux`.`id_cuenta`
+                GROUP BY `ctb_libaux`.`id_cuenta`, `ctb_libaux`.`id_tercero_api`
                 UNION ALL 
                 SELECT
                     `ctb_libaux`.`id_cuenta`
+                    , `ctb_libaux`.`id_tercero_api`
                     , 0 AS `debitoi`
                     , 0 AS `creditoi`
                     , SUM(`ctb_libaux`.`debito`) AS `debito`
@@ -55,10 +64,12 @@ try {
                     INNER JOIN `ctb_pgcp` 
                         ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
                 WHERE (`ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2)
-                GROUP BY `ctb_libaux`.`id_cuenta`) AS `t1`
+                GROUP BY `ctb_libaux`.`id_cuenta`, `ctb_libaux`.`id_tercero_api`) AS `t1`
                 INNER JOIN `ctb_pgcp`
                     ON `t1`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`
-            GROUP BY `t1`.`id_cuenta`
+                LEFT JOIN `tb_terceros`
+                    ON (`t1`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            GROUP BY `t1`.`id_cuenta` $where
         ORDER BY `ctb_pgcp`.`cuenta` ASC";
     $res = $cmd->query($sql);
     $datos = $res->fetchAll();
@@ -76,9 +87,11 @@ $acum = [];
 foreach ($datos as $dato) {
     $cuenta = $dato['cuenta'];
     foreach ($cuentas as $c) {
+        $idTer = $_POST['xtercero'] == 1 && $c['tipo_dato'] == 'D' ? '-' . $dato['id_tercero_api'] : '';
         if (($c['tipo_dato'] == 'M' && strpos($cuenta, $c['cuenta']) === 0) || ($c['tipo_dato'] != 'M' && $cuenta == $c['cuenta'])) {
+            $cta = $c['cuenta'] . $idTer;
             if (!isset($acum[$c['cuenta']])) {
-                $acum[$c['cuenta']] = [
+                $acum[$cta] = [
                     'cuenta' => $c['cuenta'],
                     'nombre' => $c['nombre'],
                     'debitoi' => 0,
@@ -88,18 +101,23 @@ foreach ($datos as $dato) {
                     'tipo' => $c['tipo_dato']
                 ];
             }
-            $acum[$c['cuenta']]['debitoi'] += $dato['debitoi'];
-            $acum[$c['cuenta']]['creditoi'] += $dato['creditoi'];
-            $acum[$c['cuenta']]['debito'] += $dato['debito'];
-            $acum[$c['cuenta']]['credito'] += $dato['credito'];
+            $acum[$cta]['debitoi'] += $dato['debitoi'];
+            $acum[$cta]['creditoi'] += $dato['creditoi'];
+            $acum[$cta]['debito'] += $dato['debito'];
+            $acum[$cta]['credito'] += $dato['credito'];
+            if ($_POST['xtercero'] == 1 && (substr($c['cuenta'], 0, 1) === "2" || substr($c['cuenta'], 0, 2) === "13") && $c['tipo_dato'] == 'D') {
+                $acum[$cta]['id_tercero_api'] = $dato['id_tercero_api'];
+                $acum[$cta]['nom_tercero'] = $dato['nom_tercero'];
+                $acum[$cta]['nit_tercero'] = $dato['nit_tercero'];
+            }
         }
     }
 }
-
 $nom_informe = "LIBRO MAYOR Y BALANCE";
 include_once '../../financiero/encabezado_empresa.php';
 
 ?>
+<br>
 <table style="width:100% !important; border-collapse: collapse;" border="1">
     <thead>
         <tr>
@@ -113,13 +131,17 @@ include_once '../../financiero/encabezado_empresa.php';
 <table class="table-hover" style="width:100% !important; border-collapse: collapse;" border="1">
     <thead>
         <tr class="centrar">
-            <td>Cuenta</td>
-            <td>Nombre</td>
-            <td>Tipo</td>
-            <td>Inicial</td>
-            <td>Debito</td>
-            <td>Credito</td>
-            <td>Saldo Final</td>
+            <th>Cuenta</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <?php if ($_POST['xtercero'] == 1) { ?>
+                <th>Tercero</th>
+                <th>Nit</th>
+            <?php } ?>
+            <th>Inicial</th>
+            <th>Debito</th>
+            <th>Credito</th>
+            <th>Saldo Final</th>
         </tr>
     </thead>
     <tbody id="tbBalancePrueba">
@@ -142,10 +164,18 @@ include_once '../../financiero/encabezado_empresa.php';
                     $saldo = $saldo_ini + $tp['credito'] - $tp['debito'];
                 }
 
+                if ($_POST['xtercero'] == 1) {
+                    $tercero = isset($tp['nom_tercero']) ? $tp['nom_tercero'] : '';
+                    $nit = isset($tp['nit_tercero']) ? $tp['nit_tercero'] : '';
+                    $dter = "<td class='text'>" . $tercero . "</td>
+                    <td class='text'>" . $nit . "</td>";
+                } else {
+                    $dter = "";
+                }
                 echo "<tr>
                     <td class='text'>" . $tp['cuenta'] . "</td>
-                    <td class='text'>" . $tp['nombre'] . "</td>
-                    <td class='text-center'>" . $tp['tipo'] . "</td>
+                    <td class='text'>" . mb_convert_encoding($tp['nombre'], 'UTF-8') . "</td>
+                    <td class='text-center'>" . $tp['tipo'] . "</td>" . $dter . "
                     <td class='text-right'>" . $saldo_ini . "</td>
                     <td class='text-right'>" . $tp['debito'] . "</td>
                     <td class='text-right'>" . $tp['credito'] . "</td>

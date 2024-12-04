@@ -1,14 +1,18 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
+include '../../../financiero/consultas.php';
 $id_pto = isset($_POST['id_pto']) ? $_POST['id_pto'] : exit('Acceso no disponible');
+
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 MAX(`id_manu`) AS `id_manu` 
             FROM
@@ -17,14 +21,11 @@ try {
     $rs = $cmd->query($sql);
     $consecutivo = $rs->fetch();
     $id_manu = !empty($consecutivo) ? $consecutivo['id_manu'] + 1 : 1;
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT * FROM `pto_tipo` ORDER BY `nombre` ASC";
     $rs = $cmd->query($sql);
     $modalidad = $rs->fetchAll();
@@ -40,6 +41,7 @@ try {
         </div>
         <form id="formAddCDP">
             <input type="hidden" name="id_pto" value="<?php echo $id_pto ?>">
+            <input type="hidden" id="fec_cierre" value="<?php echo $fecha_cierre ?>">
             <div class="form-row px-4 pt-2">
                 <div class="form-group col-md-4">
                     <label for="id_manu" class="small">CONSECUTIVO CDP</label>

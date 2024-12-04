@@ -1,10 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
+include '../../../terceros.php';
 $id_ctb_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no permitido');
 $id_documento = isset($_POST['id_detalle']) ? $_POST['id_detalle'] : 0;
 $id_vigencia = $_SESSION['id_vigencia'];
@@ -36,7 +37,6 @@ try {
             WHERE (`id_ctb_doc` = $id_documento)";
     $rs = $cmd->query($sql);
     $datos = $rs->fetch();
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -53,23 +53,15 @@ if (empty($datos)) {
     $tercero = '';
 } else {
     if ($datos['id_tercero'] > 0) {
-        $payload = json_encode(array(0 => $datos['id_tercero']));
-        //API URL
-        $url = $api . 'terceros/datos/res/lista/terceros';
-        $ch = curl_init($url);
-        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        $terceros = json_decode($result, true);
-        $tercero = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
+        $payload = array(0 => $datos['id_tercero']);
+        $ids = implode(',', $payload);
+        $terceros = getTerceros($ids, $cmd);
+        $tercero = ltrim($terceros[0]['nom_tercero']);
     } else {
-        $tercero = '';
+        $tercero = '---';
     }
 }
+$cmd = null;
 ?>
 <div class="px-0">
     <div class="shadow">

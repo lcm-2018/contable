@@ -1,10 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $data = isset($_POST['factura_des']) ? explode('|', $_POST['factura_des']) : exit('Acceso no disponible');
+
 $tipo_rete = $_POST['tipo_rete'];
 $id_doc = $_POST['id_docr'];
 $id_rete = $_POST['id_rete'];
@@ -52,7 +53,7 @@ if ($id_detalle == 0) {
             if ($id_rete_sobre > 0) {
                 $base = explode('_', $_POST['id_rete_sede']);
                 $base = $base[1];
-                $sql = "SELECT `id_rango` FROM `ctb_retencion_rango` WHERE `id_retencion` = 45 LIMIT 1 ";
+                $sql = "SELECT `id_rango` FROM `ctb_retencion_rango` WHERE `id_retencion` = $id_rete LIMIT 1";
                 $rs = $cmd->query($sql);
                 $rango = $rs->fetch();
                 $id_rango = !empty($rango['id_rango']) ? $rango['id_rango'] : 0;

@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $id_compra = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
@@ -14,6 +14,7 @@ function pesos($valor)
 }
 $vigencia = $_SESSION['vigencia'];
 include '../../../conexion.php';
+include '../../../terceros.php';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -23,17 +24,17 @@ try {
                 , `ctt_adquisiciones`.`id_modalidad`
                 , `ctt_modalidad`.`modalidad`
                 , `ctt_adquisiciones`.`objeto`
-                , `seg_terceros`.`id_tercero_api`
+                , `tb_terceros`.`id_tercero_api`
                 , `tb_area_c`.`id_area`
                 , `tb_area_c`.`area`
             FROM
                 `ctt_adquisiciones`
             INNER JOIN `ctt_modalidad` 
                 ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
-            LEFT JOIN `seg_terceros`
-                ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
             INNER JOIN `tb_area_c` 
                 ON (`ctt_adquisiciones`.`id_area` = `tb_area_c`.`id_area`)
+            LEFT JOIN `tb_terceros`
+                ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_adquisicion` = $id_compra LIMIT 1";
     $rs = $cmd->query($sql);
     $compra = $rs->fetch();
@@ -102,44 +103,21 @@ try {
             WHERE `id_compra` = '$id_compra'";
     $rs = $cmd->query($sql);
     $estudio_prev = $rs->fetch();
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$id_ter_sup = $estudio_prev['id_supervisor'];
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `no_doc` FROM `seg_terceros` WHERE `id_tercero_api` = '$id_ter_sup'";
-    $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetch();
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/' . $terceros_sup['no_doc'];
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $supervisor_res = json_decode($result, true);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+$id_t[] = $estudio_prev['id_supervisor'];
+$id_t[] = $compra['id_tercero_api'];
+$ids = implode(',', $id_t);
+$terceros = getTerceros($ids, $cmd);
+$cmd = null;
 if ($compra['id_tercero_api'] > 0) {
-    $url = $api . 'terceros/datos/res/datos/id/' . $compra['id_tercero_api'];
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $tercer = json_decode($result, true);
-    $tercero = ltrim($tercer[0]['nombre1'] . ' ' . $tercer[0]['nombre2'] . ' ' . $tercer[0]['apellido1'] . ' ' . $tercer[0]['apellido2']);
-    $cedula = $tercer[0]['cc_nit'];
-    $dir_tercero = $tercer[0]['direccion'] ? 'XXXXX' : $tercer[0]['direccion'];
-    $tel_tercero = $tercer[0]['telefono'] ? 'XXXXX' : $tercer[0]['telefono'];
-    $id_ciudad = $tercer[0]['municipio'];
+    $key = array_search($compra['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+    $tercero = ltrim($terceros[$key]['nom_tercero']);
+    $cedula = $terceros[$key]['nit_tercero'];
+    $dir_tercero = $terceros[$key]['direccion'] ? 'XXXXX' : $tercer[0]['direccion'];
+    $tel_tercero = $terceros[$key]['telefono'] ? 'XXXXX' : $tercer[0]['telefono'];
+    $id_ciudad = $terceros[$key]['municipio'];
 } else {
     $tercero = 'XXXXX';
     $cedula = 'XXXXX';
@@ -235,7 +213,8 @@ $rubro = !empty($cod_cargue) ? $cod_cargue['nom_rubro'] : 'XXX';
 $cod_presupuesto = !empty($cod_cargue) ? $cod_cargue['id_pto_cargue'] : 'XXX';
 $cpd = !empty($data_cdp) ? $data_cdp['id_cdp'] : 'XXX';
 $fec_cdp = !empty($data_cdp) ? $data_cdp['fecha_cdp'] : 'XXX';
-$supervisor = $supervisor_res[0]['apellido1'] . ' ' . $supervisor_res[0]['apellido2'] . ' ' . $supervisor_res[0]['nombre1'] . ' ' . $supervisor_res[0]['nombre2'];
+$key = array_search($id_ter_sup, array_column($terceros, 'id_tercero_api'));
+$supervisor = $terceros[$key]['nom_tercero'];
 $supervisor = $id_ter_sup == '' ? 'XXXXX' : $supervisor;
 $solicitante = $compra['area']; //area solicitante
 try {

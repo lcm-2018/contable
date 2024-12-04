@@ -2,7 +2,7 @@
 session_start();
 date_default_timezone_set('America/Bogota');
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
@@ -14,6 +14,7 @@ function pesos($valor)
 }
 include '../../conexion.php';
 include '../../financiero/consultas.php';
+
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
@@ -28,6 +29,8 @@ try {
                 , `ctb_fuente`.`cod`
                 , `ctb_fuente`.`nombre`
                 , `ctb_doc`.`id_tercero`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
                 , `ctb_doc`.`fecha_reg`
                 , CONCAT_WS(' ', `seg_usuarios_sistema`.`nombre1`
                 , `seg_usuarios_sistema`.`nombre2`
@@ -39,6 +42,8 @@ try {
                     ON (`ctb_doc`.`id_user_reg` = `seg_usuarios_sistema`.`id_usuario`)
                 INNER JOIN `ctb_fuente` 
                     ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                LEFT JOIN `tb_terceros` 
+                    ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
     $res = $cmd->query($sql);
     $documento = $res->fetch();
@@ -46,28 +51,8 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $nom_doc = $documento['nombre'];
-$ccnit = $documento['id_tercero'];
-if ($ccnit == '') {
-    $tercero = 'NOMINA EMPLEADOS';
-} else {
-
-    // Consulta terceros en la api ********************************************* API
-    $ids[] = $ccnit;
-    $payload = json_encode($ids);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
-    $tercero = isset($terceros[0]) ? ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']) : '---';
-    $num_doc = isset($terceros[0]) ? $terceros[0]['cc_nit'] : '--';
-}
+$tercero = $documento['nom_tercero'];
+$num_doc = $documento['nit_tercero'];
 // Valor total del registro
 try {
     $sql = "SELECT `id_ctb_doc` , SUM(`debito`) AS `valor` FROM `ctb_libaux` WHERE (`id_ctb_doc` = $id_doc)";
@@ -146,11 +131,14 @@ try {
                 , `ctb_libaux`.`debito`
                 , `ctb_libaux`.`credito`
                 , `ctb_libaux`.`id_tercero_api` AS `id_tercero`
-
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
             FROM
                 `ctb_libaux`
                 INNER JOIN `ctb_pgcp` 
                     ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                LEFT JOIN `tb_terceros` 
+                    ON (`ctb_libaux`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
             WHERE (`ctb_libaux`.`id_ctb_doc` = $id_doc)
             ORDER BY `ctb_pgcp`.`cuenta` DESC";
     $res = $cmd->query($sql);
@@ -239,23 +227,6 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $id_forma = 0;
-$id_t = [];
-foreach ($movimiento as $mv) {
-    $id_t[] = $mv['id_tercero'];
-}
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
-$terceros = isset($terceros[0]) ? $terceros : [];
 ?>
 <div class="text-right pt-3">
     <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>
@@ -512,7 +483,7 @@ $terceros = isset($terceros[0]) ? $terceros : [];
         </div>
         <table class="table-bordered bg-light" style="width:100% !important; border-collapse: collapse;">
             <?php
-            if ($ccnit != null) {
+            if (true) {
             ?>
                 <tr>
                     <td style="text-align: left;border: 1px solid black">Cuenta</td>
@@ -525,11 +496,7 @@ $terceros = isset($terceros[0]) ? $terceros : [];
                 $tot_deb = 0;
                 $tot_cre = 0;
                 foreach ($movimiento as $mv) {
-                    // Consulta terceros en la api ********************************************* API
-                    $key = array_search($mv['id_tercero'], array_column($terceros, 'id_tercero'));
-                    $ccnit = $key !== false ? $terceros[$key]['cc_nit'] : '--';
-                    // fin api tercer
-
+                    $ccnit = $mv['nit_tercero'];
                     echo "<tr style='border: 1px solid black'>
                     <td class='text-left' style='border: 1px solid black'>" . $mv['cuenta'] . "</td>
                     <td class='text-left' style='border: 1px solid black'>" . $mv['nombre'] . "</td>
@@ -560,8 +527,6 @@ $terceros = isset($terceros[0]) ? $terceros : [];
                 $tot_cre = 0;
 
                 foreach ($movimiento as $mv) {
-                    // Consulta terceros en la api ********************************************* API
-                    // fin api tercer
 
                     echo "<tr style='border: 1px solid black'>
                 <td class='text-left' style='border: 1px solid black'>" . $mv['cuenta'] . "</td>

@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
