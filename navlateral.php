@@ -1185,9 +1185,8 @@ $rol = $_SESSION['rol'];
                     </div>
                     <?php
                 }
-<<<<<<< HEAD
+
                 
-=======
                 /* MODULO DE ACTIVOS FIJOS ANTERIOR */
                 if (false) {
                     $key = array_search('57', array_column($perm_modulos, 'id_modulo'));
@@ -1243,7 +1242,7 @@ $rol = $_SESSION['rol'];
                     <?php
                     }
                 }
->>>>>>> 2c8c6b694d4b35885a0a93beaf139483afd8640f
+
                 //$key = array_search('9', array_column($perm_modulos, 'id_modulo'));
                 if (false) {
                     ?>

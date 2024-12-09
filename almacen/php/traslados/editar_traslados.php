@@ -135,7 +135,7 @@ try {
                     $fec_movimiento = date('Y-m-d');
 
                     /*Crear los lotes en la bodega destino si no existen*/
-                    $sql = 'SELECT id_tra_detalle,id_lote_origen  FROM far_traslado_detalle WHERE id_traslado=' . $id;
+                    $sql = 'SELECT id_tra_detalle,id_lote_origen FROM far_traslado_detalle WHERE id_traslado=' . $id;
                     $rs = $cmd->query($sql);
                     $objs_detalles = $rs->fetchAll();
 
@@ -187,7 +187,7 @@ try {
                     if ($error == 0) {
 
                         /*Generar movimientos kardex*/
-                        $sql = 'SELECT id_tra_detalle,id_lote_origen,id_lote_destino,cantidad  FROM far_traslado_detalle WHERE id_traslado=' . $id;
+                        $sql = 'SELECT id_tra_detalle,id_lote_origen,id_lote_destino,cantidad FROM far_traslado_detalle WHERE id_traslado=' . $id;
                         $rs = $cmd->query($sql);
                         $objs_detalle = $rs->fetchAll();
                         
@@ -235,12 +235,13 @@ try {
 
                             $valor_promedio_lote_kdx = $val_promedio_lote;
                             $existencia_lote_kdx = $existencia_lote + $cantidad;
+                            
                             if ($existencia_lote_kdx > 0) {
                                 $valor_promedio_lote_kdx = ($val_promedio_lote * $existencia_lote + $cantidad * $val_promedio_med) / $existencia_lote_kdx;
                             }
 
                             $sql = "INSERT INTO far_kardex(id_lote,fec_movimiento,id_ingreso_tra,id_sede,id_bodega,id_ing_tra_detalle,detalle,can_ingreso,val_ingreso,existencia_lote,val_promedio_lote,id_med,existencia,val_promedio,estado) 
-                                    VALUES($id_lote_destino,'$fec_movimiento',$id,$id_sede_destino,$id_bodega_destino,$id_detalle,'$detalle',$cantidad,$val_promedio_med,$existencia_lote_kdx ,$valor_promedio_lote_kdx,$id_medicamento,$existencia_med_kdx,$val_promedio_med,1)";
+                                    VALUES($id_lote_destino,'$fec_movimiento',$id,$id_sede_destino,$id_bodega_destino,$id_detalle,'$detalle',$cantidad,$val_promedio_med,$existencia_lote_kdx ,$valor_promedio_lote_kdx,$id_medicamento,$existencia_med,$val_promedio_med,1)";
                             $rs4 = $cmd->query($sql);
 
                             $sql = "UPDATE far_medicamento_lote SET existencia=$existencia_lote_kdx,val_promedio=$valor_promedio_lote_kdx WHERE id_lote=" . $id_lote_destino;

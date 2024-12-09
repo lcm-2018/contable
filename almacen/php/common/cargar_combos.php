@@ -82,7 +82,7 @@ function sedes_usuario($cmd, $titulo = '', $id = 0)
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
-            if ($obj['id_sede']  == $id) {
+            if ($obj['id_sede']  == $id || count($objs) == 1) {
                 echo '<option value="' . $obj['id_sede'] . '" selected="selected">' . $obj['nom_sede'] . '</option>';
             } else {
                 echo '<option value="' . $obj['id_sede'] . '">' . $obj['nom_sede'] . '</option>';
@@ -115,7 +115,7 @@ function bodegas_usuario($cmd, $titulo = '', $idsede = 0, $id = 0)
             $rs = $cmd->query($sql);
             $objs = $rs->fetchAll();
             foreach ($objs as $obj) {
-                if ($obj['id_bodega']  == $id) {
+                if ($obj['id_bodega']  == $id  || count($objs) == 1) {
                     echo '<option value="' . $obj['id_bodega'] . '" selected="selected">' . $obj['nombre'] . '</option>';
                 } else {
                     echo '<option value="' . $obj['id_bodega'] . '">' . $obj['nombre'] . '</option>';
@@ -332,6 +332,48 @@ function subgrupo_articulo($cmd, $titulo = '', $id = 0)
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
 }
+
+function lotes_articulo($cmd, $id_bodega, $id_articulo, $id_lote, $id = 0)
+{
+    try {        
+        echo '<option value=""></option>';
+        $sql = "SELECT far_medicamento_lote.id_lote,IF(fec_vencimiento='3000-01-01',lote,CONCAT(lote,'[',fec_vencimiento,']')) AS nom_lote,
+                    far_medicamentos.nom_medicamento AS nom_articulo,
+                    far_medicamento_lote.id_presentacion,far_presentacion_comercial.nom_presentacion,
+                    IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl
+                FROM far_medicamento_lote
+                INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
+                INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
+                WHERE far_medicamento_lote.id_med=$id_articulo AND far_medicamento_lote.id_bodega=$id_bodega AND far_medicamento_lote.estado=1 AND far_medicamentos.estado=1";
+        if($id_lote != -1){
+            $sql = "SELECT far_medicamento_lote.id_lote,IF(fec_vencimiento='3000-01-01',lote,CONCAT(lote,'[',fec_vencimiento,']')) AS nom_lote,
+                    far_medicamentos.nom_medicamento AS nom_articulo,
+                    far_medicamento_lote.id_presentacion,far_presentacion_comercial.nom_presentacion,
+                    IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl
+                FROM far_medicamento_lote
+                INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
+                INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
+                WHERE far_medicamento_lote.id_lote=$id_lote";
+        }
+        $rs = $cmd->query($sql);
+        $objs = $rs->fetchAll();        
+        foreach ($objs as $obj) {
+            $dtad = $dtad = 'data-nom_articulo="' . $obj['nom_articulo'] . '"' . 
+                    'data-id_presentacion="' . $obj['id_presentacion'] . '"' .
+                    'data-nom_presentacion="' . $obj['nom_presentacion'] . '"' .
+                    'data-cantidad_umpl="' . $obj['cantidad_umpl'] . '"';
+            if ($obj['id_lote']  == $id) {                
+                echo '<option value="' . $obj['id_lote'] . '"' . $dtad . ' selected="selected">' . $obj['nom_lote'] . '</option>';
+            } else {
+                echo '<option value="' . $obj['id_lote'] . '"' . $dtad . '>' . $obj['nom_lote'] . '</option>';
+            }
+        }
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
 
 function estados_registros($titulo = '',$estado = 2)
 {

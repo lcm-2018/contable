@@ -35,7 +35,7 @@ if (empty($obj)) {
     endfor;
     //Inicializa variable por defecto
     $obj['id_sede_origen'] = 0;
-    $obj['id_sede_destino'] = 0;
+    $obj['id_sede_destino'] = sede_unica_usuario($cmd)['id_sede'];
     $obj['estado'] = 1;
     $obj['nom_estado'] = 'PENDIENTE';
     $obj['val_total'] = 0;
