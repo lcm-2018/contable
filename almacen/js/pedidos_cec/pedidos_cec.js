@@ -31,10 +31,13 @@
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
+                    data.id_cencos = $('#sl_cen_costo_filtro').val();
                     data.id_pedido = $('#txt_id_pedido_filtro').val();
                     data.num_pedido = $('#txt_num_pedido_filtro').val();
                     data.fec_ini = $('#txt_fecini_filtro').val();
                     data.fec_fin = $('#txt_fecfin_filtro').val();
+                    data.id_sede = $('#sl_sede_filtro').val();
+                    data.id_bodega = $('#sl_bodega_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
                 }
             },
@@ -44,6 +47,7 @@
                 { 'data': 'fec_pedido' },
                 { 'data': 'hor_pedido' },
                 { 'data': 'detalle' },
+                { 'data': 'nom_centro' },
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_bodega' },
                 { 'data': 'val_total' },
@@ -52,18 +56,14 @@
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4, 5, 6] },
-                { type: "numeric-comma", targets: 7 },
-                { visible: false, targets: 8 },
-                { orderable: false, targets: 10 }
+                { class: 'text-wrap', targets: [4, 5, 6, 7] },
+                { type: "numeric-comma", targets: 8 },
+                { visible: false, targets: 9 },
+                { orderable: false, targets: 11 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 1) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
-                } else if (data.estado == 2) {
-                    $($(row).find("td")[0]).css("background-color", "cyan");
-                } else if (data.estado == 3) {
-                    $($(row).find("td")[0]).css("background-color", "teal");
                 } else if (data.estado == 0) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
@@ -79,6 +79,16 @@
 
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
         $('#tb_pedidos').wrap('<div class="overflow"/>');
+    });
+
+    //Filtrar las Bodegas acorde a la Sede y Usuario de sistema
+    $('#sl_sede_filtro').on("change", function() {
+        $('#sl_bodega_filtro').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), titulo: '--Bodega Proveedor--' }, function() {});
+    });
+    $('#sl_sede_filtro').trigger('change');
+
+    $('#divForms').on("change", "#sl_sede_prov", function() {
+        $('#sl_bodega_prov').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val() }, function() {});
     });
 
     //Buscar registros de Pedido
@@ -107,8 +117,10 @@
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
 
-        var error = verifica_vacio_2($('#id_txt_nom_bod'), $('#txt_nom_bod'));
-        error += verifica_vacio($('#txt_det_ped'));
+        var error = verifica_vacio($('#sl_dependencia'));
+        error += verifica_vacio($('#sl_sede_prov'));
+        error += verifica_vacio($('#sl_bodega_prov'));
+        error += verifica_vacio($('#txt_det_pedido'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
@@ -127,7 +139,7 @@
                     $('#id_pedido').val(r.id);
                     $('#txt_ide').val(r.id);
 
-                    $('#btn_confirmar').prop('disabled', false);
+                    $('#btn_cerrar').prop('disabled', false);
                     $('#btn_imprimir').prop('disabled', false);
 
                     $('#divModalDone').modal('show');
@@ -170,49 +182,12 @@
         });
     });
 
-    //Confirmar un registro Pedido
-    $('#divForms').on("click", "#btn_confirmar", function() {
-        let id = $(this).attr('value');
-        confirmar_proceso('pedidos_confirmar', id);
-    });
-    $('#divModalConfDel').on("click", "#pedidos_confirmar", function() {
-        var id = $(this).attr('value');
-        $.ajax({
-            type: 'POST',
-            url: 'editar_pedidos.php',
-            dataType: 'json',
-            data: { id: $('#id_pedido').val(), oper: 'conf' }
-        }).done(function(r) {
-            $('#divModalConfDel').modal('hide');
-            if (r.mensaje == 'ok') {
-                let pag = $('#tb_pedidos').DataTable().page.info().page;
-                reloadtable('tb_pedidos', pag);
-
-                $('#txt_num_ped').val(r.num_pedido);
-                $('#txt_est_ped').val('CONFIRMADO');
-
-                $('#btn_guardar').prop('disabled', true);
-                $('#btn_confirmar').prop('disabled', true);
-                $('#btn_cerrar').prop('disabled', true);
-                $('#btn_anular').prop('disabled', false);
-
-                $('#divModalDone').modal('show');
-                $('#divMsgDone').html("Proceso realizado con éxito");
-            } else {
-                $('#divModalError').modal('show');
-                $('#divMsgError').html(r.mensaje);
-            }
-        }).always(function() {}).fail(function() {
-            alert('Ocurrió un error');
-        });
-    });
-
     //Cerrar un registro Pedido
     $('#divForms').on("click", "#btn_cerrar", function() {
         let id = $(this).attr('value');
-        confirmar_proceso('pedidos_cerrar', id);
+        confirmar_proceso('pedidos_close', id);
     });
-    $('#divModalConfDel').on("click", "#pedidos_cerrar", function() {
+    $('#divModalConfDel').on("click", "#pedidos_close", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
@@ -225,13 +200,12 @@
                 let pag = $('#tb_pedidos').DataTable().page.info().page;
                 reloadtable('tb_pedidos', pag);
 
-                $('#txt_num_ped').val(r.num_pedido);
-                $('#txt_est_ped').val('CONFIRMADO');
+                $('#txt_num_pedido').val(r.num_pedido);
+                $('#txt_est_pedido').val('CERRADO');
 
                 $('#btn_guardar').prop('disabled', true);
-                $('#btn_confirmar').prop('disabled', true);
                 $('#btn_cerrar').prop('disabled', true);
-                $('#btn_anular').prop('disabled', true);
+                $('#btn_anular').prop('disabled', false);
 
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
@@ -262,10 +236,9 @@
                 let pag = $('#tb_pedidos').DataTable().page.info().page;
                 reloadtable('tb_pedidos', pag);
 
-                $('#txt_est_ped').val('ANULADO');
+                $('#txt_est_pedido').val('ANULADO');
 
                 $('#btn_guardar').prop('disabled', true);
-                $('#btn_confirmar').prop('disabled', true);
                 $('#btn_cerrar').prop('disabled', true);
                 $('#btn_anular').prop('disabled', true);
 
@@ -283,12 +256,13 @@
     /* ---------------------------------------------------
     DETALLES
     -----------------------------------------------------*/
-    $('#divModalBus').on('dblclick', '#tb_articulos_activos tr', function() {
+    $('#divModalBus').on('dblclick', '#tb_articulos_bodega tr', function() {
         let id_med = $(this).find('td:eq(0)').text();
         $.post("frm_reg_pedidos_detalles.php", { id_med: id_med }, function(he) {
             $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
+
         });
     });
 
@@ -384,6 +358,9 @@
             $('#divMsgError').html('Debe especificar un rango de fechas');
         } else {
             $.post("imp_pedidos.php", {
+                id_cencos: $('#sl_cen_costo_filtro').val(),
+                id_sede: $('#sl_sede_filtro').val(),
+                id_bodega: $('#sl_bodega_filtro').val(),
                 id_pedido: $('#txt_id_pedido_filtro').val(),
                 num_pedido: $('#txt_num_pedido_filtro').val(),
                 fec_ini: $('#txt_fecini_filtro').val(),

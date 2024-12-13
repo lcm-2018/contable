@@ -113,11 +113,11 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th rowspan="2">No. Traslado</th>
                                         <th rowspan="2">Fecha Traslado</th>
                                         <th rowspan="2">Hora Traslado</th>
-                                        <th rowspan="2">Detalle</th>
+                                        <th rowspan="2">Detalle</th>                                        
                                         <th colspan="2">Unidad Origen</th>
-                                        <th colspan="2">Unidad Destino</th>
+                                        <th colspan="2">Unidad Destino</th>                                        
                                         <th rowspan="2">Vr. Total</th>
-                                        <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Id.Estado</th>
                                         <th rowspan="2">Estado</th>
                                         <th rowspan="2">Acciones</th>
                                     </tr>

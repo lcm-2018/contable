@@ -8,10 +8,17 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../common/funciones_generales.php';
 
+$idusr = $_SESSION['id_user'];
+$idrol = $_SESSION['rol'];
+
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$where = "WHERE far_traslado.id_traslado<>0";
+$where = "WHERE 1";
+if($idrol !=1){
+    $where .= " AND far_traslado.id_bodega_origen IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
+}
+
 if (isset($_POST['id_sedori']) && $_POST['id_sedori']) {
     $where .= " AND far_traslado.id_sede_origen='" . $_POST['id_sedori'] . "'";
 }

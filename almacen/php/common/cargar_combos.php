@@ -148,6 +148,36 @@ function centros_costo($cmd, $titulo = '', $id = 0)
     }
 }
 
+function centros_costo_usuario($cmd, $titulo = '', $id = 0)
+{
+    try {
+        $idusr = $_SESSION['id_user'];
+        $idrol = $_SESSION['rol'];
+        echo '<option value="">' . $titulo . '</option>';
+        $sql = "SELECT COUNT(*) AS bodegas FROM seg_bodegas_usuario WHERE id_usuario=$idusr";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();        
+        if ($idrol == 1 || $obj['bodegas']>0) {
+            $sql = "SELECT id_centro,nom_centro FROM tb_centrocostos WHERE id_centro<>0";
+        } else {
+            $sql = "SELECT id_centro,nom_centro FROM tb_centrocostos 
+                    WHERE id_centro IN (SELECT id_centrocosto FROM seg_usuarios_sistema WHERE id_usuario=$idusr AND id_centrocosto<>0)";
+        }
+        $rs = $cmd->query($sql);
+        $objs = $rs->fetchAll();
+        foreach ($objs as $obj) {
+            if ($obj['id_centro']  == $id || count($objs) == 1) {
+                echo '<option value="' . $obj['id_centro'] . '" selected="selected">' . $obj['nom_centro'] . '</option>';
+            } else {
+                echo '<option value="' . $obj['id_centro'] . '">' . $obj['nom_centro'] . '</option>';
+            }
+        }
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
 function tipo_egreso($cmd, $titulo = '', $id = 0)
 {
     try {

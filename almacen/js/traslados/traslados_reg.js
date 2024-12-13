@@ -46,7 +46,22 @@
                 [10, 25, 50, -1],
                 [10, 25, 50, 'TODO'],
             ],
+        }).on('draw', function() {
+            let table = $('#tb_traslados_detalles').DataTable();
+            let rows = table.rows({ filter: 'applied' }).count();
+            if (rows > 0) {
+                $('#sl_sede_origen').prop('disabled', true);
+                $('#sl_bodega_origen').prop('disabled', true);
+                $('#sl_sede_destino').prop('disabled', true);
+                $('#sl_bodega_destino').prop('disabled', true);
+            } else {
+                $('#sl_sede_origen').prop('disabled', false);
+                $('#sl_bodega_origen').prop('disabled', false);
+                $('#sl_sede_destino').prop('disabled', false);
+                $('#sl_bodega_destino').prop('disabled', false);
+            }
         });
+
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
         $('#tb_traslado_detalles').wrap('<div class="overflow"/>');
     });

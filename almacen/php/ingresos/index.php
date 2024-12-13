@@ -111,12 +111,12 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>No. Factura</th>
                                         <th>Fecha Factura</th>
                                         <th>Detalle</th>
-                                        <th>Tercero</th>
                                         <th>Tipo Ingreso</th>
-                                        <th>Vr. Total</th>
+                                        <th>Tercero</th>                                                                                
                                         <th>Sede</th>
                                         <th>Bodega</th>
-                                        <th>Estado</th>
+                                        <th>Vr. Total</th>
+                                        <th>Id.Estado</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>

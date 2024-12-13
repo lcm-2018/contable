@@ -155,10 +155,6 @@
                         $('#id_traslado').val(r.id);
                         $('#txt_ide').val(r.id);
 
-                        $('#sl_sede_origen').prop('disabled', true);
-                        $('#sl_bodega_origen').prop('disabled', true);
-                        $('#sl_sede_destino').prop('disabled', true);
-                        $('#sl_bodega_destino').prop('disabled', true);
                         $('#btn_cerrar').prop('disabled', false);
                         $('#btn_imprimir').prop('disabled', false);
 

@@ -22,7 +22,7 @@ try {
     if ((PermisosUsuario($permisos, 5006, 2) && $oper == 'add' && $_POST['id_ingreso'] == -1) ||
         (PermisosUsuario($permisos, 5006, 3) && $oper == 'add' && $_POST['id_ingreso'] != -1) ||
         (PermisosUsuario($permisos, 5006, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5006, 2) && PermisosUsuario($permisos, 5006, 3) && $oper == 'close') ||
+        (PermisosUsuario($permisos, 5006, 3) && $oper == 'close') ||
         (PermisosUsuario($permisos, 5006, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
 
@@ -37,7 +37,7 @@ try {
             $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;            
             $detalle = $_POST['txt_det_ing'];
 
-            //Verifica el tipo de orden de Ingreso
+            //Verifica si los datos estas activos o bloqueados en el formulario
             if (isset($_POST['sl_tip_ing'])){
                 $id_tiping = $_POST['sl_tip_ing'];
                 $id_pedido = $_POST['txt_id_pedido'];    

@@ -8,10 +8,17 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../common/funciones_generales.php';
 
+$idusr = $_SESSION['id_user'];
+$idrol = $_SESSION['rol'];
+
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$where = "WHERE far_orden_egreso.id_egreso<>0";
+$where = "WHERE far_orden_egreso.id_tipo_egreso NOT IN (1,2) AND far_orden_egreso.id_ingreso IS NULL";
+if($idrol !=1){
+    $where .= " AND far_orden_egreso.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
+}
+
 if (isset($_POST['id_sede']) && $_POST['id_sede']) {
     $where .= " AND far_orden_egreso.id_sede='" . $_POST['id_sede'] . "'";
 }
@@ -50,7 +57,7 @@ try {
                     INNER JOIN tb_terceros ON (tb_terceros.id_tercero=far_orden_egreso.id_cliente)
                     INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_orden_egreso.id_centrocosto)
                     INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_orden_egreso.id_sede)
-                    INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_egreso.id_bodega)$where ORDER BY far_orden_egreso.id_egreso DESC";
+                    INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_egreso.id_bodega) $where ORDER BY far_orden_egreso.id_egreso DESC";
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
 } catch (PDOException $e) {
@@ -95,12 +102,12 @@ try {
                 <th>Fecha Egreso</th>
                 <th>Hora Egreso</th>
                 <th>Detalle</th>
-                <th>Tercero</th>
-                <th>Centro Costo</th>
                 <th>Tipo Egreso</th>
-                <th>Vr. Total</th>
+                <th>Tercero</th>
+                <th>Centro Costo</th>                                
                 <th>Sede</th>
                 <th>Bodega</th>
+                <th>Vr. Total</th>
                 <th>Estado</th>
             </tr>    
         </thead>
@@ -114,12 +121,12 @@ try {
                         <td>' . $obj['fec_egreso'] . '</td>
                         <td>' . $obj['hor_egreso'] . '</td>                  
                         <td style="text-align:left">' . $obj['detalle'] . '</td>                      
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_tipo_egreso']) . '</td>                           
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>   
-                        <td style="text-align:left">' . mb_strtoupper($obj['nom_centro']) . '</td> 
-                        <td>' . mb_strtoupper($obj['nom_tipo_egreso']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']). '</td>                             
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_centro']) . '</td>                                                 
                         <td>' . mb_strtoupper($obj['nom_sede']) . '</td>   
                         <td>' . mb_strtoupper($obj['nom_bodega']) . '</td>   
+                        <td>' . formato_valor($obj['val_total']). '</td>                             
                         <td>' . $obj['nom_estado']. '</td></tr>';
             }
             echo $tabla;

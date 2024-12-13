@@ -845,7 +845,7 @@ $rol = $_SESSION['rol'];
                                     <?php if (PermisosUsuario($permisos, 5002, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/articulos/index.php?var=3">
                                             <div class="div-icono">
-                                                <i class="fa fa-barcode fa-sm" style="color: #E74C3C;"></i>
+                                                <i class="far fa-list-alt" style="color: #E74C3C;"></i>
                                             </div>
                                             <div>
                                                 Articulos
@@ -871,7 +871,7 @@ $rol = $_SESSION['rol'];
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos_alm/index.php">
                                             <div class="form-row">
                                                 <div class="div-icono">
-                                                    <i class="fa fa-database fa-sm" style="color: #E74C3C;"></i>
+                                                    <i class="fas fa-kaaba" style="color: #E74C3C;"></i>
                                                 </div>
                                                 <div>
                                                     Almacen
@@ -883,10 +883,22 @@ $rol = $_SESSION['rol'];
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos_bod/index.php">
                                             <div class="form-row">
                                                 <div class="div-icono">
-                                                    <i class="fa fa-th-large fa-sm" style="color: #E74C3C;"></i>
+                                                    <i class="fas fa-coins" style="color: #E74C3C;"></i>
                                                 </div>
                                                 <div>
                                                     Bodega
+                                                </div>
+                                            </div>
+                                        </a>
+                                    <?php } ?>
+                                    <?php if (PermisosUsuario($permisos, 5004, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos_cec/index.php">
+                                            <div class="form-row">
+                                                <div class="div-icono">
+                                                    <i class="fa fa-th-large fa-sm" style="color: #E74C3C;"></i>
+                                                </div>
+                                                <div>
+                                                    Dependencia
                                                 </div>
                                             </div>
                                         </a>
@@ -1070,7 +1082,7 @@ $rol = $_SESSION['rol'];
                                     <?php if (PermisosUsuario($permisos, 5707, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/marcas/index.php?var=3">
                                             <div class="div-icono">
-                                                <i class="fas fa-border-none" style="color: #E74C3C;"></i>
+                                                <i class="fab fa-staylinked" style="color: #E74C3C;"></i>
                                             </div>
                                             <div>
                                                 Marcas
@@ -1082,7 +1094,7 @@ $rol = $_SESSION['rol'];
                                     <?php if (PermisosUsuario($permisos, 5701, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/articulos/index.php?var=3">
                                             <div class="div-icono">
-                                                <i class="fa fa-tags fa-sm" style="color: #E74C3C;"></i>
+                                                <i class="far fa-list-alt" style="color: #E74C3C;"></i>
                                             </div>
                                             <div>
                                                 Articulos
@@ -1147,7 +1159,7 @@ $rol = $_SESSION['rol'];
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/hojavida/index.php?var=3">
                                             <div class="form-row">
                                                 <div class="div-icono">
-                                                    <i class="fa fa-pencil-square-o fa-sm" style="color: #E74C3C;"></i>
+                                                    <i class="fa fa-newspaper-o" style="color: #E74C3C;"></i>
                                                 </div>
                                                 <div>
                                                     Hoja de Vida
@@ -1159,7 +1171,7 @@ $rol = $_SESSION['rol'];
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/ingresos/index.php?var=3">
                                             <div class="form-row">
                                                 <div class="div-icono">
-                                                    <i class="far fa-clipboard" style="color: #E74C3C;"></i>
+                                                    <i class="fa fa-calendar-check-o" style="color: #E74C3C;"></i>
                                                 </div>
                                                 <div>
                                                     Registros

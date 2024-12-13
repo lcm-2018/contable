@@ -1,10 +1,10 @@
 (function($) {
     $(document).ready(function() {
-        $('#tb_egresos_detalles').DataTable({
+        $('#tb_pedidos_detalles').DataTable({
             dom: setdom,
             buttons: [{
                 action: function(e, dt, node, config) {
-                    $.post("../common/buscar_lotes_frm.php", { id_sede: $('#sl_sede_egr').val(), id_bodega: $('#sl_bodega_egr').val() }, function(he) {
+                    $.post("../common/buscar_articulos_frm.php", { id_sede: $('#sl_sede_prov').val(), id_bodega: $('#sl_bodega_prov').val() }, function(he) {
                         $('#divTamModalBus').removeClass('modal-lg');
                         $('#divTamModalBus').removeClass('modal-sm');
                         $('#divTamModalBus').addClass('modal-xl');
@@ -17,19 +17,17 @@
             processing: true,
             serverSide: true,
             ajax: {
-                url: 'listar_egresos_detalles.php',
+                url: 'listar_pedidos_detalles.php',
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
-                    data.id_egreso = $('#id_egreso').val();
+                    data.id_pedido = $('#id_pedido').val();
                 }
             },
             columns: [
-                { 'data': 'id_egr_detalle' }, //Index=0
+                { 'data': 'id_ped_detalle' }, //Index=0
                 { 'data': 'cod_medicamento' },
                 { 'data': 'nom_medicamento' },
-                { 'data': 'lote' },
-                { 'data': 'fec_vencimiento' },
                 { 'data': 'cantidad' },
                 { 'data': 'valor' },
                 { 'data': 'val_total' },
@@ -37,7 +35,7 @@
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: 2 },
-                { orderable: false, targets: 8 }
+                { orderable: false, targets: 6 }
             ],
             order: [
                 [0, "desc"]
@@ -47,18 +45,18 @@
                 [10, 25, 50, 'TODO'],
             ],
         }).on('draw', function() {
-            let table = $('#tb_egresos_detalles').DataTable();
+            let table = $('#tb_pedidos_detalles').DataTable();
             let rows = table.rows({ filter: 'applied' }).count();
             if (rows > 0) {
-                $('#sl_sede_egr').prop('disabled', true);
-                $('#sl_bodega_egr').prop('disabled', true);
+                $('#sl_sede_prov').prop('disabled', true);
+                $('#sl_bodega_prov').prop('disabled', true);
             } else {
-                $('#sl_sede_egr').prop('disabled', false);
-                $('#sl_bodega_egr').prop('disabled', false);
+                $('#sl_sede_prov').prop('disabled', false);
+                $('#sl_bodega_prov').prop('disabled', false);
             }
         });
 
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
-        $('#tb_egreso_detalles').wrap('<div class="overflow"/>');
+        $('#tb_pedidos_detalles').wrap('<div class="overflow"/>');
     });
 })(jQuery);

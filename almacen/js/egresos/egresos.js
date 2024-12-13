@@ -49,20 +49,20 @@
                 { 'data': 'fec_egreso' },
                 { 'data': 'hor_egreso' },
                 { 'data': 'detalle' },
+                { 'data': 'nom_tipo_egreso' },
                 { 'data': 'nom_tercero' },
                 { 'data': 'nom_centro' },
-                { 'data': 'nom_tipo_egreso' },
-                { 'data': 'val_total' },
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_bodega' },
-                { 'data': 'nom_estado' },
+                { 'data': 'val_total' },
                 { 'data': 'estado' },
+                { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4, 5, 6] },
-                { type: "numeric-comma", targets: 8 },
-                { visible: false, targets: 12 },
+                { class: 'text-wrap', targets: [4, 6, 7, 8, 9] },
+                { type: "numeric-comma", targets: 10 },
+                { visible: false, targets: 11 },
                 { orderable: false, targets: 13 }
             ],
             rowCallback: function(row, data) {
@@ -148,8 +148,6 @@
                     $('#id_egreso').val(r.id);
                     $('#txt_ide').val(r.id);
 
-                    $('#sl_sede_egr').prop('disabled', true);
-                    $('#sl_bodega_egr').prop('disabled', true);
                     $('#btn_cerrar').prop('disabled', false);
                     $('#btn_imprimir').prop('disabled', false);
 

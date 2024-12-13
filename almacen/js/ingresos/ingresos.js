@@ -49,18 +49,18 @@
                 { 'data': 'num_factura' },
                 { 'data': 'fec_factura' },
                 { 'data': 'detalle' },
-                { 'data': 'nom_tercero' },
                 { 'data': 'nom_tipo_ingreso' },
-                { 'data': 'val_total' },
+                { 'data': 'nom_tercero' },
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_bodega' },
+                { 'data': 'val_total' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [6, 7] },
-                { type: "numeric-comma", targets: 9 },
+                { class: 'text-wrap', targets: [6, 8, 9, 10] },
+                { type: "numeric-comma", targets: 11 },
                 { visible: false, targets: 12 },
                 { orderable: false, targets: 14 }
             ],
@@ -154,8 +154,6 @@
         $('.is-invalid').removeClass('is-invalid');
 
         var error = verifica_vacio_2($('#id_txt_nom_bod'), $('#txt_nom_bod'));
-        error += verifica_vacio($('#txt_fec_ing'));
-        error += verifica_vacio($('#txt_hor_ing'));
         error += verifica_vacio($('#txt_num_fac'));
         error += verifica_vacio($('#txt_fec_fac'));
         error += verifica_vacio($('#sl_tip_ing'));

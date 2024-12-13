@@ -120,13 +120,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Fecha Egreso</th>
                                         <th>Hora Egreso</th>
                                         <th>Detalle</th>
-                                        <th>Tercero</th>
-                                        <th>Centro Costo</th>
                                         <th>Tipo Egreso</th>
-                                        <th>Vr. Total</th>
+                                        <th>Tercero</th>
+                                        <th>Centro Costo</th>                                                                                
                                         <th>Sede</th>
                                         <th>Bodega</th>
-                                        <th>Estado</th>
+                                        <th>Vr. Total</th>
+                                        <th>Id.Estado</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>

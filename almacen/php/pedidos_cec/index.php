@@ -40,7 +40,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <div class="row">
                                 <div class="col-md-11">
                                     <i class="fas fa-list-ul fa-lg" style="color:#1D80F7"></i>
-                                    PEDIDOS DE BODEGA
+                                    PEDIDOS DE DEPENDENCIA
                                 </div>
                             </div>
                         </div>
@@ -50,13 +50,18 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
                             <!--Opciones de filtros -->
                             <div class="form-row">
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_sedsol_filtro">
-                                        <?php sedes_usuario($cmd, '--Sede Solicitante--') ?>
+                                <div class="form-group col-md-2">                        
+                                    <select class="form-control form-control-sm" id="sl_cen_costo_filtro" name="sl_cen_costo_filtro">
+                                        <?php centros_costo_usuario($cmd, '--Dependencia--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_bodsol_filtro">
+                                    <select class="form-control form-control-sm" id="sl_sede_filtro">
+                                        <?php sedes_usuario($cmd, '--Sede Proveedor--') ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_bodega_filtro">
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
@@ -75,15 +80,6 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         </div>
                                     </div>
                                 </div> 
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_sedpro_filtro">
-                                        <?php sedes($cmd, '--Sede Proveedor--') ?>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_bodpro_filtro">
-                                    </select>
-                                </div>                              
                                 <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estados_movimientos('--Estado--') ?>
@@ -101,7 +97,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
                             <!--Lista de registros en la tabla-->
                             <?php
-                            if (PermisosUsuario($permisos, 5003, 2) || $id_rol == 1) {
+                            if (PermisosUsuario($permisos, 5004, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';
                             } else {
                                 echo '<input type="hidden" id="peReg" value="0">';
@@ -110,24 +106,19 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <table id="tb_pedidos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>                               
                                     <tr class="text-center centro-vertical">
-                                        <th rowspan="2">Id</th>
-                                        <th rowspan="2">No. Pedido</th>
-                                        <th rowspan="2">Fecha Pedido</th>
-                                        <th rowspan="2">Hora Pedido</th>
-                                        <th rowspan="2">Detalle</th>                                        
-                                        <th colspan="2">Unidad DE donde se solicita</th>
-                                        <th colspan="2">Unidad Proveedora A donde se solicita</th>                                       
-                                        <th rowspan="2">Valor Total</th>
-                                        <th rowspan="2">Id.Estado</th>
-                                        <th rowspan="2">Estado</th>
-                                        <th rowspan="2">Acciones</th>
+                                        <th>Id</th>
+                                        <th>No. Pedido</th>
+                                        <th>Fecha Pedido</th>
+                                        <th>Hora Pedido</th>
+                                        <th>Detalle</th>                                        
+                                        <th>Dependencia</th>
+                                        <th>Sede Proveedor</th>
+                                        <th>Bodega Proveedor</th>                                        
+                                        <th>Valor Total</th>
+                                        <th>Id.Estado</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
                                     </tr>
-                                    <tr class="text-center centro-vertical">
-                                        <th>Sede</th>
-                                        <th>Bodega</th>
-                                        <th>Sede</th>
-                                        <th>Bodega</th>
-                                    </tr>    
                                 </thead>
                             </table>
                             <table class="table-bordered table-sm col-md-2">
@@ -146,7 +137,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
         <?php include '../../../modales.php' ?>
     </div>
     <?php include '../../../scripts.php' ?>
-    <script type="text/javascript" src="../../js/pedidos_bod/pedidos_bod.js?v=<?php echo date('YmdHis') ?>"></script>
+    <script type="text/javascript" src="../../js/pedidos_cec/pedidos_cec.js?v=<?php echo date('YmdHis') ?>"></script>
 </body>
 
 </html>

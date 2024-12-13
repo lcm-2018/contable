@@ -89,7 +89,7 @@ $nom_bodega = isset($obj['nombre']) ? $obj['nombre'] : '';
                 serverSide: true,
                 searching: false,
                 ajax: {
-                    url: 'buscar_articulos_lista.php',
+                    url: '../common/buscar_articulos_lista.php',
                     type: 'POST',
                     dataType: 'json',
                     data: function(data) {

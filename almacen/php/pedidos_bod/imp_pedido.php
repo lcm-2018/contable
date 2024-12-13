@@ -161,7 +161,7 @@ try {
             </td>
             <td style="vertical-align: top">
                 <div>-------------------------------------------------</div>
-                <div>Entregado Por</div>
+                <div>Aceptado Por</div>
             </td>
         </tr>        
     </table>

@@ -91,11 +91,11 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>No. Pedido</th>
                                         <th>Fecha Pedido</th>
                                         <th>Hora Pedido</th>                                        
-                                        <th>Detalle</th>
-                                        <th>Vr. Total</th>
+                                        <th>Detalle</th>                                        
                                         <th>Sede</th>
                                         <th>Bodega</th>
-                                        <th>Estado</th>
+                                        <th>Vr. Total</th>
+                                        <th>Id.Estado</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>

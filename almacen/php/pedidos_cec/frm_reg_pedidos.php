@@ -12,15 +12,13 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT far_pedido.*,                    
-            ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
-            sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
-            CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
-        FROM far_pedido             
-        INNER JOIN tb_sedes AS ss ON (ss.id_sede = far_pedido.id_sede_destino)
-        INNER JOIN far_bodegas AS bs ON (bs.id_bodega = far_pedido.id_bodega_destino)           
-        INNER JOIN tb_sedes AS sp ON (sp.id_sede = far_pedido.id_sede_origen)
-        INNER JOIN far_bodegas AS bp ON (bp.id_bodega = far_pedido.id_bodega_origen)
+$sql = "SELECT far_cec_pedido.*,                    
+		    tb_centrocostos.nom_centro,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,            
+            CASE far_cec_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
+        FROM far_cec_pedido
+        INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro = far_cec_pedido.id_sede)      
+        INNER JOIN tb_sedes ON (tb_sedes.id_sede = far_cec_pedido.id_sede)
+        INNER JOIN far_bodegas ON (far_bodegas.id_bodega = far_cec_pedido.id_bodega)
         WHERE id_pedido=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
@@ -33,8 +31,7 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     //Inicializa variable por defecto
-    $obj['id_sede_origen'] = 0;
-    $obj['id_sede_destino'] = sede_unica_usuario($cmd)['id_sede'];
+    $obj['id_sede'] = 0;
     $obj['estado'] = 1;
     $obj['nom_estado'] = 'PENDIENTE';
     $obj['val_total'] = 0;
@@ -53,7 +50,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">REGISTRAR PEDIDO DE BODDEGA</h5>
+            <h5 style="color: white;">REGISTRAR PEDIDO DE DEPENDENCIA</h5>
         </div>
         <div class="px-2">
             <!--Formulario de registro de Pedido-->
@@ -82,28 +79,22 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     </div>
                 </div>    
                 <div class="form-row">
-                    <div class="form-group col-md-3">
-                        <label for="sl_sede_solicitante" class="small">Sede DE donde se Solicita</label>
-                        <select class="form-control form-control-sm" id="sl_sede_solicitante" name="sl_sede_solicitante">
-                            <?php sedes_usuario($cmd, '', $obj['id_sede_destino']) ?>   
+                    <div class="form-group col-md-4">
+                        <label for="sl_dependencia" class="small">Dependencia que solicita</label>
+                        <select class="form-control form-control-sm" id="sl_dependencia" name="sl_dependencia">
+                            <?php centros_costo_usuario($cmd, '', $obj['id_cencosto']) ?>   
                         </select>
                     </div>
-                    <div class="form-group col-md-3">
-                        <label for="sl_bodega_solicitante" class="small">Bodega DE donde se Solicita</label>
-                        <select class="form-control form-control-sm" id="sl_bodega_solicitante" name="sl_bodega_solicitante">
-                            <?php bodegas_usuario($cmd, '', $obj['id_sede_destino'], $obj['id_bodega_destino']) ?>   
+                    <div class="form-group col-md-4">
+                        <label for="sl_sede_prov" class="small">Sede Proveedor</label>
+                        <select class="form-control form-control-sm" id="sl_sede_prov" name="sl_sede_prov">
+                            <?php sedes($cmd, '', $obj['id_sede']) ?>   
                         </select>
                     </div>
-                    <div class="form-group col-md-3">
-                        <label for="sl_sede_proveedor" class="small">Sede Proveedora A donde se solicita</label>
-                        <select class="form-control form-control-sm" id="sl_sede_proveedor" name="sl_sede_proveedor">
-                            <?php sedes($cmd, '', $obj['id_sede_origen']) ?>   
-                        </select>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <label for="sl_bodega_proveedor" class="small">Bodega Proveedora A donde se solicita</label>
-                        <select class="form-control form-control-sm" id="sl_bodega_proveedor" name="sl_bodega_proveedor"> 
-                            <?php bodegas_sede($cmd, '', $obj['id_sede_origen'], $obj['id_bodega_origen']) ?>   
+                    <div class="form-group col-md-4">
+                        <label for="sl_bodega_prov" class="small">Bodega Proveedor</label>
+                        <select class="form-control form-control-sm" id="sl_bodega_prov" name="sl_bodega_prov"> 
+                            <?php bodegas_sede($cmd, '', $obj['id_sede'], $obj['id_bodega']) ?>   
                         </select>
                     </div> 
                     <div class="form-group col-md-12">
@@ -146,4 +137,4 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
     </div>
 </div>
 
-<script type="text/javascript" src="../../js/pedidos_bod/pedidos_bod_reg.js?v=<?php echo date('YmdHis') ?>"></script>
+<script type="text/javascript" src="../../js/pedidos_cec/pedidos_cec_reg.js?v=<?php echo date('YmdHis') ?>"></script>
