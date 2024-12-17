@@ -49,18 +49,18 @@
                 { 'data': 'num_factura' },
                 { 'data': 'fec_factura' },
                 { 'data': 'detalle' },
-                { 'data': 'nom_tercero' },
                 { 'data': 'nom_tipo_ingreso' },
-                { 'data': 'val_total' },
+                { 'data': 'nom_tercero' },
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_bodega' },
+                { 'data': 'val_total' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [6, 7] },
-                { type: "numeric-comma", targets: 9 },
+                { class: 'text-wrap', targets: [6, 8, 9, 10] },
+                { type: "numeric-comma", targets: 11 },
                 { visible: false, targets: 12 },
                 { orderable: false, targets: 14 }
             ],
@@ -84,7 +84,7 @@
         $('#tb_ingresos').wrap('<div class="overflow"/>');
     });
 
-    //Buascar registros de Ingresos
+    //Buscar registros de Ingresos
     $('#btn_buscar_filtro').on("click", function() {
         $('.is-invalid').removeClass('is-invalid');
         reloadtable('tb_ingresos');
@@ -94,6 +94,49 @@
         if (e.keyCode == 13) {
             reloadtable('tb_ingresos');
         }
+    });
+
+    // Activar campos para Orden de Compra y seleccionar el pedido de orden de compra
+    $('#divForms').on("change", "#sl_tip_ing", function() {
+        if ($(this).find('option:selected').attr('data-ordcom') == 1) {
+            $('#divPedido').show();
+        } else {
+            $('#divPedido').hide();
+        }
+        if ($('#divPedido').is(':visible') && $('#txt_id_pedido').val() == "") {
+            let id_sede = $('#id_txt_sede').val(),
+                id_bodega = $('#id_txt_nom_bod').val();
+
+            $.post("buscar_pedidos_frm.php", { id_sede: id_sede, id_bodega: id_bodega }, function(he) {
+                $('#divTamModalBus').removeClass('modal-sm');
+                $('#divTamModalBus').removeClass('modal-xl');
+                $('#divTamModalBus').addClass('modal-lg');
+                $('#divModalBus').modal('show');
+                $("#divFormsBus").html(he);
+            });
+        }
+    });
+
+    $('#divForms').on("dblclick", "#txt_id_pedido", function() {
+        if ($('#divPedido').is(':visible')) {
+            let id_sede = $('#id_txt_sede').val(),
+                id_bodega = $('#id_txt_nom_bod').val();
+
+            $.post("buscar_pedidos_frm.php", { id_sede: id_sede, id_bodega: id_bodega }, function(he) {
+                $('#divTamModalBus').removeClass('modal-sm');
+                $('#divTamModalBus').removeClass('modal-xl');
+                $('#divTamModalBus').addClass('modal-lg');
+                $('#divModalBus').modal('show');
+                $("#divFormsBus").html(he);
+            });
+        }
+    });
+
+    $('#divModalBus').on('dblclick', '#tb_pedidos_ing tr', function() {
+        let data = $('#tb_pedidos_ing').DataTable().row(this).data();
+        $('#txt_id_pedido').val(data.id_pedido);
+        $('#txt_des_pedido').val(data.detalle + '(' + data.fec_pedido + ')');
+        $('#divModalBus').modal('hide');
     });
 
     //Editar un registro Orden Ingreso
@@ -111,14 +154,15 @@
         $('.is-invalid').removeClass('is-invalid');
 
         var error = verifica_vacio_2($('#id_txt_nom_bod'), $('#txt_nom_bod'));
-        error += verifica_vacio($('#txt_fec_ing'));
-        error += verifica_vacio($('#txt_hor_ing'));
         error += verifica_vacio($('#txt_num_fac'));
         error += verifica_vacio($('#txt_fec_fac'));
         error += verifica_vacio($('#sl_tip_ing'));
 
         if ($('#sl_tip_ing').find('option:selected').attr('data-intext') == 2) {
             error += verifica_vacio($('#sl_tercero'));
+        }
+        if ($('#sl_tip_ing').find('option:selected').attr('data-ordcom') == 1) {
+            error += verifica_vacio($('#txt_id_pedido'));
         }
 
         error += verifica_vacio($('#txt_det_ing'));
@@ -254,13 +298,45 @@
     DETALLES
     -----------------------------------------------------*/
     $('#divModalBus').on('dblclick', '#tb_lotes_articulos tr', function() {
-        let id_lote = $(this).find('td:eq(0)').text();
-        $.post("frm_reg_ingresos_detalles.php", { id_lote: id_lote }, function(he) {
+        let data = $('#tb_lotes_articulos').DataTable().row(this).data();
+        $.post("frm_reg_ingresos_detalles.php", { id_lote: data.id_lote }, function(he) {
             $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
-
         });
+
+        $('#divModalReg').on('shown.bs.modal', function() {
+            if ($('#sl_lote_art option').length == 2 && $('#id_detalle').val() == -1) {
+                $('#sl_lote_art').prop('selectedIndex', $('#sl_lote_art option').length - 1);
+                $('#sl_lote_art').trigger('change');
+            }
+        });
+    });
+
+    $('#divModalBus').on('dblclick', '#tb_articulos_pedido tr', function() {
+        let id_sede = $('#id_txt_sede').val(),
+            id_bodega = $('#id_txt_nom_bod').val();
+        let data = $('#tb_articulos_pedido').DataTable().row(this).data();
+        $.post("frm_reg_ingresos_detalles.php", { id_articulo: data.id_med, cantidad: data.cantidad_pen, id_sede: id_sede, id_bodega: id_bodega }, function(he) {
+            $('#divTamModalReg').addClass('modal-lg');
+            $('#divModalReg').modal('show');
+            $("#divFormsReg").html(he);
+        });
+
+        $('#divModalReg').on('shown.bs.modal', function() {
+            if ($('#sl_lote_art option').length == 2 && $('#id_detalle').val() == -1) {
+                $('#sl_lote_art').prop('selectedIndex', $('#sl_lote_art option').length - 1);
+                $('#sl_lote_art').trigger('change');
+            }
+        });
+    });
+
+    $('#divModalReg').on("change", "#sl_lote_art", function() {
+        let lote = $(this).find('option:selected');
+        $('#txt_nom_art').val(lote.attr('data-nom_articulo'));
+        $('#txt_pre_lot').val(lote.attr('data-nom_presentacion'));
+        $('#id_txt_pre_lot').val(lote.attr('data-id_presentacion'));
+        $('#txt_can_lot').val(lote.attr('data-cantidad_umpl'));
     });
 
     $('#divForms').on('click', '#tb_ingresos_detalles .btn_editar', function() {
@@ -302,8 +378,8 @@
     //Guardar registro Detalle
     $('#divFormsReg').on("click", "#btn_guardar_detalle", function() {
         $('.is-invalid').removeClass('is-invalid');
-
-        var error = verifica_vacio($('#txt_can_ing'));
+        var error = verifica_vacio($('#sl_lote_art'));
+        error -= verifica_vacio($('#txt_can_ing'));
         error += verifica_vacio($('#txt_val_uni'));
         error += verifica_vacio($('#txt_val_cos'));
 

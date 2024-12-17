@@ -39,14 +39,14 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_subgrupos.id_subgrupo,far_subgrupos.cod_subgrupo,far_subgrupos.nom_subgrupo,far_grupos.nom_grupo,
+                IF(far_subgrupos.lote_xdef=1,'SI','NO') AS lote_xdef,                
                 IF(far_subgrupos.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_subgrupos
             INNER JOIN far_grupos ON (far_grupos.id_grupo=far_subgrupos.id_grupo)
             $where ORDER BY $col $dir $limit";
-
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
-    $cmd = null;
+    
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
@@ -67,16 +67,29 @@ if (!empty($objs)) {
         if (PermisosUsuario($permisos, 5001, 4) || $id_rol == 1) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
+
+        $sql = "SELECT CONCAT_WS(' - ',ctb_pgcp.cuenta,ctb_pgcp.nombre) AS cuenta
+                FROM far_subgrupos_cta    
+                INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=far_subgrupos_cta.id_cuenta)            
+                WHERE far_subgrupos_cta.estado=1 AND far_subgrupos_cta.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND far_subgrupos_cta.id_subgrupo=$id
+                ORDER BY far_subgrupos_cta.fecha_vigencia DESC LIMIT 1";
+        $rs = $cmd->query($sql);
+        $objs_cta = $rs->fetch();
+        $cuenta = isset($objs_cta['cuenta']) ? $objs_cta['cuenta'] : '';
+
         $data[] = [
             "id_subgrupo" => $id,
             "cod_subgrupo" => $obj['cod_subgrupo'],
             "nom_subgrupo" => mb_strtoupper($obj['nom_subgrupo']),
+            "cuenta" => $cuenta,
             "nom_grupo" => mb_strtoupper($obj['nom_grupo']),
+            "lote_xdef" => $obj['lote_xdef'],
             "estado" => $obj['estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }
 }
+$cmd = null;
 $datos = [
     "data" => $data,
     "recordsTotal" => $totalRecords,

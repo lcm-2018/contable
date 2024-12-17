@@ -27,13 +27,12 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     
     //Consulta la Cuanta Vigente
-    $sql = "SELECT MAX(tb_centrocostos_cta.id_cec_cta) AS id
-	        FROM tb_centrocostos_cta
-	        WHERE tb_centrocostos_cta.estado=1 AND tb_centrocostos_cta.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d')
-		        AND tb_centrocostos_cta.id_cencos=" . $_POST['id_cencos'];
+    $sql = "SELECT id_cec_cta AS id FROM tb_centrocostos_cta
+	        WHERE estado=1 AND fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND id_cencos=" . $_POST['id_cencos'] . " 
+            ORDER BY fecha_vigencia DESC LIMIT 1";
     $rs = $cmd->query($sql);
     $cuenta = $rs->fetch();
-    $id_vig = $cuenta['id'] ? $cuenta['id'] : 0;
+    $id_vig = isset($cuenta['id']) ? $cuenta['id'] : 0;
 
     //Consulta el total de registros de la tabla
     $sql = "SELECT COUNT(*) AS total FROM tb_centrocostos_cta WHERE id_cencos=" . $_POST['id_cencos'];

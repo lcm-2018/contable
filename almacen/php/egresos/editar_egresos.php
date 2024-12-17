@@ -22,20 +22,30 @@ try {
     if ((PermisosUsuario($permisos, 5007, 2) && $oper == 'add' && $_POST['id_egreso'] == -1) ||
         (PermisosUsuario($permisos, 5007, 3) && $oper == 'add' && $_POST['id_egreso'] != -1) ||
         (PermisosUsuario($permisos, 5007, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5007, 2) && PermisosUsuario($permisos, 5006, 3) && $oper == 'close') ||
+        (PermisosUsuario($permisos, 5007, 3) && $oper == 'close') ||
         (PermisosUsuario($permisos, 5007, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
 
         if ($oper == 'add') {
-            $id = $_POST['id_egreso'];
-            $id_bodega = isset($_POST['sl_bodega_egr']) ? $_POST['sl_bodega_egr'] : 0;
-            $id_sede = isset($_POST['sl_sede_egr']) ? $_POST['sl_sede_egr'] : 0;
+            $id = $_POST['id_egreso'];            
             $fec_egr = $_POST['txt_fec_egr'];
             $hor_egr = $_POST['txt_hor_egr'];
             $id_tipegr = $_POST['sl_tip_egr'];
             $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;
             $id_cencosto = $_POST['sl_centrocosto'] ? $_POST['sl_centrocosto'] : 0;
             $detalle = $_POST['txt_det_egr'];
+
+            //Verifica si los datos estas activos o bloqueados en el formulario
+            if (isset($_POST['sl_sede_egr'])){
+                $id_sede = $_POST['sl_sede_egr'];
+                $id_bodega = $_POST['sl_bodega_egr'];                
+            }else{
+                $sql = "SELECT id_sede,id_bodega FROM far_orden_egreso WHERE id_egreso=" . $id;
+                $rs = $cmd->query($sql);
+                $obj_egreso = $rs->fetch();
+                $id_sede = $obj_egreso['id_sede'];    
+                $id_bodega = $obj_egreso['id_bodega'];                
+            }
 
             if ($id == -1) {
                 $sql = "INSERT INTO far_orden_egreso(fec_egreso,hor_egreso,id_tipo_egreso,
@@ -60,7 +70,7 @@ try {
 
                 if ($obj_egreso['estado'] == 1) {
                     $sql = "UPDATE far_orden_egreso 
-                        SET id_tipo_egreso=$id_tipegr,id_cliente=$id_tercero,id_centrocosto=$id_cencosto,detalle='$detalle'
+                        SET id_tipo_egreso=$id_tipegr,id_cliente=$id_tercero,id_centrocosto=$id_cencosto,detalle='$detalle',id_sede=$id_sede,id_bodega=$id_bodega
                         WHERE id_egreso=" . $id;
                     $rs = $cmd->query($sql);
 

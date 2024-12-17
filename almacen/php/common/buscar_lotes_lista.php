@@ -5,7 +5,7 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
-include '../common/funciones_generales.php';
+include 'funciones_generales.php';
 
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10;

@@ -44,16 +44,16 @@
                 { 'data': 'fec_pedido' },
                 { 'data': 'hor_pedido' },
                 { 'data': 'detalle' },
-                { 'data': 'val_total' },
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_bodega' },
+                { 'data': 'val_total' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4] },
-                { type: "numeric-comma", targets: 5 },
+                { class: 'text-wrap', targets: [4, 5, 6] },
+                { type: "numeric-comma", targets: 7 },
                 { visible: false, targets: 8 },
                 { orderable: false, targets: 10 }
             ],
@@ -107,7 +107,8 @@
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
 
-        var error = verifica_vacio($('#txt_det_ped'));
+        var error = verifica_vacio_2($('#id_txt_nom_bod'), $('#txt_nom_bod'));
+        error += verifica_vacio($('#txt_det_ped'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');

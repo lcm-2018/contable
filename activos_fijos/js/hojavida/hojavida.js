@@ -62,10 +62,12 @@
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 2) {
-                    $($(row).find("td")[0]).css("background-color", "red");
+                    $($(row).find("td")[0]).css("background-color", "yellow");
                 } else if (data.estado == 3) {
-                    $($(row).find("td")[0]).css("background-color", "green");
+                    $($(row).find("td")[0]).css("background-color", "red");
                 } else if (data.estado == 4) {
+                    $($(row).find("td")[0]).css("background-color", "green");
+                } else if (data.estado == 5) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
             },

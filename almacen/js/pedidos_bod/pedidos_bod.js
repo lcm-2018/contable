@@ -154,10 +154,6 @@
                         $('#id_pedido').val(r.id);
                         $('#txt_ide').val(r.id);
 
-                        $('#sl_sede_solicitante').prop('disabled', true);
-                        $('#sl_bodega_solicitante').prop('disabled', true);
-                        $('#sl_sede_proveedor').prop('disabled', true);
-                        $('#sl_bodega_proveedor').prop('disabled', true);
                         $('#btn_cerrar').prop('disabled', false);
                         $('#btn_imprimir').prop('disabled', false);
 

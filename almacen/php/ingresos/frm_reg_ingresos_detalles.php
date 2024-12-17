@@ -11,10 +11,16 @@ include '../common/funciones_generales.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
+$id_sede = isset($_POST['id_sede']) ? $_POST['id_sede'] : -1;
+$id_bodega = isset($_POST['id_bodega']) && $_POST['id_bodega'] ? $_POST['id_bodega'] : -1;
+
 $id_lote = isset($_POST['id_lote']) ? $_POST['id_lote'] : -1;
+$id_articulo = isset($_POST['id_articulo']) ? $_POST['id_articulo'] : -1;
+$cantidad = isset($_POST['cantidad']) ? $_POST['cantidad'] : 0;
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
+
 $sql = "SELECT far_orden_ingreso_detalle.*,
-            far_medicamento_lote.lote,far_medicamentos.nom_medicamento AS nom_articulo,
+            far_medicamentos.id_med,far_medicamentos.nom_medicamento AS nom_articulo,
             far_presentacion_comercial.nom_presentacion,IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl
         FROM far_orden_ingreso_detalle
         INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote=far_orden_ingreso_detalle.id_lote)
@@ -32,14 +38,10 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     $obj['iva'] = 0;
-
-    $lote = datos_lote($cmd, $id_lote);
-    $obj['id_lote'] = $lote['id_lote'];
-    $obj['lote'] = $lote['lote'];
-    $obj['nom_articulo'] = $lote['nom_articulo'];
-    $obj['id_presentacion'] = $lote['id_presentacion'];
-    $obj['nom_presentacion'] = $lote['nom_presentacion'];
-    $obj['cantidad_umpl'] = $lote['cantidad_umpl'];
+    $obj['cantidad'] = (int)$cantidad;
+} else {
+    $id_lote = $obj['id_lote'];
+    $id_articulo = $obj['id_med'];;
 }
 ?>
 
@@ -59,9 +61,10 @@ if (empty($obj)) {
                         <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="txt_nom_lot" class="small">Lote</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_nom_lot" class="small" value="<?php echo $obj['lote'] ?>" readonly="readonly">
-                        <input type="hidden" id="id_txt_nom_lot" name="id_txt_nom_lot" value="<?php echo $obj['id_lote'] ?>">
+                        <label for="sl_lote_art" class="small">Lote</label>
+                        <select class="form-control form-control-sm" id="sl_lote_art" name="sl_lote_art">
+                            <?php lotes_articulo($cmd, $id_bodega, $id_articulo, $id_lote, $obj['id_lote']) ?>
+                        </select>
                     </div>
                     <div class="form-group col-md-10">
                         <label for="txt_pre_lot" class="small">Unidad de Medida de Presentación del Lote</label>
@@ -70,10 +73,10 @@ if (empty($obj)) {
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_can_lot" class="small">Cant. X UMPL</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_can_lot" value="<?php echo $obj['cantidad_umpl'] ?>" readonly="readonly">
+                        <input type="text" class="form-control form-control-sm" id="txt_can_lot" name="txt_can_lot" value="<?php echo $obj['cantidad_umpl'] ?>" readonly="readonly">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="txt_can_ing" class="small">Cantidadd</label>
+                        <label for="txt_can_ing" class="small">Cantidad</label>
                         <input type="number" class="form-control form-control-sm numberint" id="txt_can_ing" name="txt_can_ing" required value="<?php echo $obj['cantidad'] ?>">
                     </div>
                     <div class="form-group col-md-3">

@@ -5,7 +5,7 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
-include '../common/funciones_generales.php';
+include 'funciones_generales.php';
 
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
@@ -51,7 +51,7 @@ try {
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
-    //Consulta los datos para listarlos en la tabla
+    //Consulta los datos para listarlos en la tabla 
     $sql = "SELECT far_medicamentos.id_med,far_medicamentos.cod_medicamento,
                 far_medicamentos.nom_medicamento,
 	            SUM(far_medicamento_lote.existencia) as existencia,

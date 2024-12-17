@@ -97,6 +97,29 @@ function datos_articulo($cmd, $id_med){
     }
 }
 
+//SEDE UNICA DE UN USUARIO
+function sede_unica_usuario($cmd){
+    try {
+        $idusr = $_SESSION['id_user'];
+        $res = array();
+        $sql = "SELECT COUNT(*) AS count FROM seg_sedes_usuario WHERE id_usuario=$idusr";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();
+        if ($obj['count'] == 1) {
+            $sql = "SELECT id_sede FROM seg_sedes_usuario WHERE id_usuario=$idusr";
+            $rs = $cmd->query($sql);
+            $obj = $rs->fetch();
+            $res = array('id_sede' => $obj['id_sede']);
+        } else {
+            $res = array('id_sede' => '0');
+        }
+        $cmd = null;
+        return $res;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
 //BITACORA DE MENSAJES A UN ARCHIVO DE ACCIONES REALIZADAS
 function bitacora($accion, $opcion, $detalle, $id_usuario, $login) {
     $fecha = date('Y-m-d h:i:s A');

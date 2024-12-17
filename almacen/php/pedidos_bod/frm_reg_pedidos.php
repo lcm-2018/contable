@@ -25,7 +25,6 @@ $sql = "SELECT far_pedido.*,
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 
-$editar = 'disabled="disabled"';
 if (empty($obj)) {
     $n = $rs->columnCount();
     for ($i = 0; $i < $n; $i++) :
@@ -35,7 +34,7 @@ if (empty($obj)) {
     endfor;
     //Inicializa variable por defecto
     $obj['id_sede_origen'] = 0;
-    $obj['id_sede_destino'] = 0;
+    $obj['id_sede_destino'] = sede_unica_usuario($cmd)['id_sede'];
     $obj['estado'] = 1;
     $obj['nom_estado'] = 'PENDIENTE';
     $obj['val_total'] = 0;
@@ -43,7 +42,6 @@ if (empty($obj)) {
     $fecha = fecha_hora_servidor();
     $obj['fec_pedido'] = $fecha['fecha'];
     $obj['hor_pedido'] = $fecha['hora'];
-    $editar = '';
 }
 $guardar = in_array($obj['estado'],[1]) ? '' : 'disabled="disabled"';
 $cerrar = in_array($obj['estado'],[1]) && $id != -1 ? '' : 'disabled="disabled"';
@@ -55,7 +53,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">REGISTRAR PEDIDO</h5>
+            <h5 style="color: white;">REGISTRAR PEDIDO DE BODDEGA</h5>
         </div>
         <div class="px-2">
             <!--Formulario de registro de Pedido-->
@@ -86,25 +84,25 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                 <div class="form-row">
                     <div class="form-group col-md-3">
                         <label for="sl_sede_solicitante" class="small">Sede DE donde se Solicita</label>
-                        <select class="form-control form-control-sm" id="sl_sede_solicitante" name="sl_sede_solicitante" <?php echo $editar ?>>
+                        <select class="form-control form-control-sm" id="sl_sede_solicitante" name="sl_sede_solicitante">
                             <?php sedes_usuario($cmd, '', $obj['id_sede_destino']) ?>   
                         </select>
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_bodega_solicitante" class="small">Bodega DE donde se Solicita</label>
-                        <select class="form-control form-control-sm" id="sl_bodega_solicitante" name="sl_bodega_solicitante" <?php echo $editar ?>>
+                        <select class="form-control form-control-sm" id="sl_bodega_solicitante" name="sl_bodega_solicitante">
                             <?php bodegas_usuario($cmd, '', $obj['id_sede_destino'], $obj['id_bodega_destino']) ?>   
                         </select>
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_sede_proveedor" class="small">Sede Proveedora A donde se solicita</label>
-                        <select class="form-control form-control-sm" id="sl_sede_proveedor" name="sl_sede_proveedor" <?php echo $editar ?>>
+                        <select class="form-control form-control-sm" id="sl_sede_proveedor" name="sl_sede_proveedor">
                             <?php sedes($cmd, '', $obj['id_sede_origen']) ?>   
                         </select>
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_bodega_proveedor" class="small">Bodega Proveedora A donde se solicita</label>
-                        <select class="form-control form-control-sm" id="sl_bodega_proveedor" name="sl_bodega_proveedor" <?php echo $editar ?>> 
+                        <select class="form-control form-control-sm" id="sl_bodega_proveedor" name="sl_bodega_proveedor"> 
                             <?php bodegas_sede($cmd, '', $obj['id_sede_origen'], $obj['id_bodega_origen']) ?>   
                         </select>
                     </div> 

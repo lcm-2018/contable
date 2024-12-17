@@ -11,7 +11,8 @@ include '../common/funciones_generales.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$where = "WHERE far_orden_ingreso.id_ingreso<>0";
+$where = "WHERE 1";
+
 if (isset($_POST['id_ing']) && $_POST['id_ing']) {
     $where .= " AND far_orden_ingreso.id_ingreso='" . $_POST['id_ing'] . "'";
 }
@@ -90,11 +91,11 @@ try {
                 <th>No. Factura</th>
                 <th>Fecha Factura</th>
                 <th>Detalle</th>
-                <th>Tercero</th>
                 <th>Tipo Ingreso</th>
-                <th>Vr. Total</th>
+                <th>Tercero</th>                                
                 <th>Sede</th>
                 <th>Bodega</th>
+                <th>Vr. Total</th>
                 <th>Estado</th>
             </tr>    
         </thead>
@@ -110,11 +111,11 @@ try {
                         <td>' . $obj['num_factura'] . '</td>
                         <td>' . $obj['fec_factura'] . '</td> 
                         <td style="text-align:left">' . $obj['detalle']. '</td>   
-                        <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_tipo_ingreso']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']). '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_tipo_ingreso']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>                                                   
                         <td>' . mb_strtoupper($obj['nom_sede']) . '</td>   
                         <td>' . mb_strtoupper($obj['nom_bodega']) . '</td>   
+                        <td>' . formato_valor($obj['val_total']). '</td>   
                         <td>' . $obj['nom_estado']. '</td></tr>';
             }
             echo $tabla;

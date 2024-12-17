@@ -21,7 +21,7 @@ try {
     if ((PermisosUsuario($permisos, 5003, 2) && $oper == 'add' && $_POST['id_pedido'] == -1) ||
         (PermisosUsuario($permisos, 5003, 3) && $oper == 'add' && $_POST['id_pedido'] != -1) ||
         (PermisosUsuario($permisos, 5003, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5003, 2) && PermisosUsuario($permisos, 5003, 3) && $oper == 'close') ||
+        (PermisosUsuario($permisos, 5003, 3) && $oper == 'close') ||
         (PermisosUsuario($permisos, 5003, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
 
@@ -29,11 +29,23 @@ try {
             $id = $_POST['id_pedido'];
             $fec_pedido = $_POST['txt_fec_pedido'];
             $hor_pedido = $_POST['txt_hor_pedido'];
-            $id_sede_origen = isset($_POST['sl_sede_proveedor']) ? $_POST['sl_sede_proveedor'] : 0;
-            $id_bodega_origen = isset($_POST['sl_bodega_proveedor']) ? $_POST['sl_bodega_proveedor'] : 0;
-            $id_sede_destino = isset($_POST['sl_sede_solicitante']) ? $_POST['sl_sede_solicitante'] : 0;
-            $id_bodega_destino = isset($_POST['sl_bodega_solicitante']) ? $_POST['sl_bodega_solicitante'] : 0;
             $detalle = $_POST['txt_det_pedido']; //detalle pedido
+
+            //Verifica si los datos estas activos o bloqueados en el formulario
+            if (isset($_POST['sl_sede_proveedor'])){
+                $id_sede_origen = $_POST['sl_sede_proveedor'];
+                $id_bodega_origen = $_POST['sl_bodega_proveedor'];
+                $id_sede_destino = $_POST['sl_sede_solicitante'];
+                $id_bodega_destino = $_POST['sl_bodega_solicitante'];
+            }else{
+                $sql = "SELECT id_sede_origen,id_bodega_origen,id_sede_destino,id_bodega_destino FROM far_pedido WHERE id_pedido=" . $id;
+                $rs = $cmd->query($sql);
+                $obj_pedido = $rs->fetch();
+                $id_sede_origen = $obj_pedido['id_sede_origen'];    
+                $id_bodega_origen = $obj_pedido['id_bodega_origen'];                
+                $id_sede_destino = $obj_pedido['id_sede_destino'];    
+                $id_bodega_destino = $obj_pedido['id_bodega_destino'];                
+            }
 
             if ($id == -1) {
                 if($id_bodega_origen != $id_bodega_destino){
@@ -61,7 +73,8 @@ try {
                 $obj_pedido = $rs->fetch();
 
                 if ($obj_pedido['estado'] == 1) {
-                    $sql = "UPDATE far_pedido SET detalle='$detalle' WHERE id_pedido=" . $id;
+                    $sql = "UPDATE far_pedido SET detalle='$detalle',id_sede_origen=$id_sede_origen,id_bodega_origen=$id_bodega_origen,id_sede_destino=$id_sede_destino,id_bodega_destino=$id_bodega_destino
+                            WHERE id_pedido=" . $id;
                     $rs = $cmd->query($sql);
 
                     if ($rs) {

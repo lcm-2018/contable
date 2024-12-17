@@ -23,6 +23,7 @@ $where_usr = " WHERE far_orden_egreso.id_tipo_egreso NOT IN (1,2) AND far_orden_
 if($idrol !=1){
     $where_usr .= " AND far_orden_egreso.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
+
 $where = "";
 if (isset($_POST['id_sede']) && $_POST['id_sede']) {
     $where .= " AND far_orden_egreso.id_sede='" . $_POST['id_sede'] . "'";
@@ -108,14 +109,14 @@ if (!empty($objs)) {
             "fec_egreso" => $obj['fec_egreso'],
             "hor_egreso" => $obj['hor_egreso'],
             "detalle" => $obj['detalle'],
-            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),
-            "nom_centro" => mb_strtoupper($obj['nom_centro']),
             "nom_tipo_egreso" => mb_strtoupper($obj['nom_tipo_egreso']),
-            "val_total" => formato_valor($obj['val_total']),
+            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),
+            "nom_centro" => mb_strtoupper($obj['nom_centro']),                        
             "nom_sede" => mb_strtoupper($obj['nom_sede']),
             "nom_bodega" => mb_strtoupper($obj['nom_bodega']),
-            "nom_estado" => $obj['nom_estado'],
+            "val_total" => formato_valor($obj['val_total']),
             "estado" => $obj['estado'],
+            "nom_estado" => $obj['nom_estado'],            
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }

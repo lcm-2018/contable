@@ -68,8 +68,8 @@ try {
                 CASE HV.tipo_activo WHEN 1 THEN 'PROPIEDAD, PLANTA Y EQUIPO' WHEN 2 THEN 'PROPIDAD PARA LA VENTA' 
                                     WHEN 3 THEN 'PROPIEDAD DE INVERSION' END AS tipo_activo,
                 HV.estado,
-                CASE HV.estado WHEN 1 THEN 'ACTIVO' WHEN 2 THEN 'EN MANTENIMIENTO' 
-                                    WHEN 3 THEN 'INACTIVO' WHEN 4 THEN 'DADO DE BAJA' END AS nom_estado
+                CASE HV.estado WHEN 1 THEN 'ACTIVO' WHEN 2 THEN 'PARA MANTENIMIENTO' WHEN 3 THEN 'EN MANTENIMIENTO'
+                                    WHEN 4 THEN 'INACTIVO' WHEN 5 THEN 'DADO DE BAJA' END AS nom_estado
             FROM acf_hojavida HV
             INNER JOIN far_medicamentos FM On (FM.id_med = HV.id_articulo)
             INNER JOIN acf_marca M ON (M.id = HV.id_marca)

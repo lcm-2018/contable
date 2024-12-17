@@ -138,6 +138,7 @@
                 if (r.mensaje == 'ok') {
                     let pag = ($('#id_articulo').val() == -1) ? 0 : $('#tb_articulos').DataTable().page.info().page;
                     reloadtable('tb_articulos', pag);
+                    reloadtable('tb_articulos_lotes');
                     $('#id_articulo').val(r.id);
 
                     $('#btn_imprimir').prop('disabled', false);

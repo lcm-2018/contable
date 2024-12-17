@@ -44,7 +44,22 @@
                 [10, 25, 50, -1],
                 [10, 25, 50, 'TODO'],
             ],
+        }).on('draw', function() {
+            let table = $('#tb_pedidos_detalles').DataTable();
+            let rows = table.rows({ filter: 'applied' }).count();
+            if (rows > 0) {
+                $('#sl_sede_solicitante').prop('disabled', true);
+                $('#sl_bodega_solicitante').prop('disabled', true);
+                $('#sl_sede_proveedor').prop('disabled', true);
+                $('#sl_bodega_proveedor').prop('disabled', true);
+            } else {
+                $('#sl_sede_solicitante').prop('disabled', false);
+                $('#sl_bodega_solicitante').prop('disabled', false);
+                $('#sl_sede_proveedor').prop('disabled', false);
+                $('#sl_bodega_proveedor').prop('disabled', false);
+            }
         });
+
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
         $('#tb_pedidos_detalles').wrap('<div class="overflow"/>');
     });

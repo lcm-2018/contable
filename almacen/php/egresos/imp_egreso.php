@@ -172,7 +172,7 @@ try {
             </td>
             <td style="vertical-align: top">
                 <div>-------------------------------------------------</div>
-                <div>Entregado Por</div>
+                <div>Recibido Por</div>
             </td>
         </tr>        
     </table>

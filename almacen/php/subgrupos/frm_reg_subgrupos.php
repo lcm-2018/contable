@@ -23,6 +23,7 @@ if(empty($obj)){
         $obj[$name]=NULL;
     endfor;    
     //Inicializa variable por defecto
+    $obj['lote_xdef'] = 1;
     $obj['estado'] = 1;
 }
 
@@ -36,7 +37,7 @@ if(empty($obj)){
             <form id="frm_reg_subgrupos">
                 <input type="hidden" id="id_subgrupo" name="id_subgrupo" value="<?php echo $id ?>">
                 <div class=" form-row">
-                    <div class="form-group col-md-2">
+                    <div class="form-group col-md-1">
                         <label for="txt_cod_subgrupo" class="small">Código</label>
                         <input type="text" class="form-control form-control-sm number" id="txt_cod_subgrupo" name="txt_cod_subgrupo" required value="<?php echo $obj['cod_subgrupo'] ?>">
                     </div>
@@ -44,10 +45,16 @@ if(empty($obj)){
                         <label for="txt_nom_subgrupo" class="small">Nombre</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_subgrupo" name="txt_nom_subgrupo" required value="<?php echo $obj['nom_subgrupo'] ?>">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label for="sl_grp_subgrupo" class="small">Grupo</label>
                         <select class="form-control form-control-sm" id="sl_grp_subgrupo" name="sl_grp_subgrupo" required>
                             <?php grupo_articulo($cmd,'',$obj['id_grupo']) ?>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="sl_lotexdef" class="small">Lote x Defecto</label>
+                        <select class="form-control form-control-sm" id="sl_lotexdef" name="sl_lotexdef">
+                            <?php estados_sino('',$obj['lote_xdef']) ?>
                         </select>
                     </div>
                     <div class="form-group col-md-2">
@@ -57,6 +64,20 @@ if(empty($obj)){
                         </select>
                     </div>
                 </div>
+
+                <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                    <thead>
+                        <tr class="text-center centro-vertical">
+                            <th>Id</th>
+                            <th>Cuenta Contable</th>
+                            <th>Fecha Inicio de Vigencia</th>
+                            <th>Cuenta Vigente</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                </table>
+
             </form>
         </div>
     </div>
@@ -65,3 +86,5 @@ if(empty($obj)){
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>
+
+<script type="text/javascript" src="../../js/subgrupos/subgrupos_reg.js?v=<?php echo date('YmdHis') ?>"></script>

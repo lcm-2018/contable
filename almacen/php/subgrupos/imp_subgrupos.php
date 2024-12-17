@@ -20,7 +20,8 @@ try {
     $sql = "SELECT far_subgrupos.id_subgrupo,far_subgrupos.cod_subgrupo,far_subgrupos.nom_subgrupo,far_grupos.nom_grupo,
                 IF(far_subgrupos.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_subgrupos
-            INNER JOIN far_grupos ON (far_grupos.id_grupo=far_subgrupos.id_grupo) $where ORDER BY far_subgrupos.id_subgrupo DESC";
+            INNER JOIN far_grupos ON (far_grupos.id_grupo=far_subgrupos.id_grupo)
+            $where ORDER BY far_subgrupos.id_subgrupo DESC";
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
 } catch (PDOException $e) {
@@ -62,7 +63,8 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>Id</th>
                 <th>Código</th>
-                <th>Nombre</th>
+                <th>Nombre</th>                
+                <th>Cuenta Contable Vigente</th>
                 <th>Grupo</th>
                 <th>Estado</th>
             </tr>
@@ -71,10 +73,21 @@ try {
             <?php
             $tabla = '';
             foreach ($objs as $obj) {
+
+                $sql = "SELECT CONCAT_WS(' - ',ctb_pgcp.cuenta,ctb_pgcp.nombre) AS cuenta
+                        FROM far_subgrupos_cta    
+                        INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=far_subgrupos_cta.id_cuenta)            
+                        WHERE far_subgrupos_cta.estado=1 AND far_subgrupos_cta.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND far_subgrupos_cta.id_subgrupo=" . $obj['id_subgrupo'] . "
+                        ORDER BY far_subgrupos_cta.fecha_vigencia DESC LIMIT 1";
+                $rs = $cmd->query($sql);
+                $objs_cta = $rs->fetch();
+                $cuenta = isset($objs_cta['cuenta']) ? $objs_cta['cuenta'] : '';
+                        
                 $tabla .=  '<tr class="resaltar" style="text-align:center"> 
                         <td>' . $obj['id_subgrupo'] . '</td>
                         <td>' . $obj['cod_subgrupo'] . '</td>
                         <td style="text-align:left">' . $obj['nom_subgrupo'] . '</td>
+                        <td style="text-align:left">' . $cuenta .'</td>
                         <td>' . $obj['nom_grupo'] . '</td>
                         <td>' . $obj['estado'] . '</td></tr>';
             }

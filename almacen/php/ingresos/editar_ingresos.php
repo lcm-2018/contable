@@ -22,7 +22,7 @@ try {
     if ((PermisosUsuario($permisos, 5006, 2) && $oper == 'add' && $_POST['id_ingreso'] == -1) ||
         (PermisosUsuario($permisos, 5006, 3) && $oper == 'add' && $_POST['id_ingreso'] != -1) ||
         (PermisosUsuario($permisos, 5006, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5006, 2) && PermisosUsuario($permisos, 5006, 3) && $oper == 'close') ||
+        (PermisosUsuario($permisos, 5006, 3) && $oper == 'close') ||
         (PermisosUsuario($permisos, 5006, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
 
@@ -33,16 +33,31 @@ try {
             $fec_ing = $_POST['txt_fec_ing'];
             $hor_ing = $_POST['txt_hor_ing'];
             $num_fac = $_POST['txt_num_fac'];
-            $fec_fac = $_POST['txt_fec_fac'];
-            $id_tiping = $_POST['sl_tip_ing'];
-            $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;
+            $fec_fac = $_POST['txt_fec_fac'];            
+            $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;            
             $detalle = $_POST['txt_det_ing'];
 
+            //Verifica si los datos estas activos o bloqueados en el formulario
+            if (isset($_POST['sl_tip_ing'])){
+                $id_tiping = $_POST['sl_tip_ing'];
+                $id_pedido = $_POST['txt_id_pedido'];    
+            }else{
+                $sql = "SELECT id_tipo_ingreso,id_pedido FROM far_orden_ingreso WHERE id_ingreso=" . $id;
+                $rs = $cmd->query($sql);
+                $obj_ingreso = $rs->fetch();
+                $id_tiping = $obj_ingreso['id_tipo_ingreso'];
+                $id_pedido = $obj_ingreso['id_pedido'];    
+            }
+            $sql = "SELECT orden_compra FROM far_orden_ingreso_tipo WHERE id_tipo_ingreso=" . $id_tiping;
+            $rs = $cmd->query($sql);
+            $obj_tiping = $rs->fetch();
+            $id_pedido = $obj_tiping['orden_compra'] == 1 ? $id_pedido : 'NULL';
+            
             if ($id == -1) {
                 $sql = "INSERT INTO far_orden_ingreso(fec_ingreso,hor_ingreso,num_factura,fec_factura,id_tipo_ingreso,
-                        id_provedor,id_centrocosto,detalle,val_total,id_sede,id_sedetraslado,id_bodega,id_usr_crea,fec_creacion,estado)
+                        id_provedor,id_centrocosto,detalle,val_total,id_sede,id_sedetraslado,id_bodega,id_pedido,id_usr_crea,fec_creacion,estado)
                     VALUES('$fec_ing','$hor_ing','$num_fac','$fec_fac',$id_tiping,
-                        $id_tercero,0,'$detalle',0,$id_sede,$id_sede,$id_bodega,$id_usr_ope,'$fecha_ope',1)";
+                        $id_tercero,0,'$detalle',0,$id_sede,$id_sede,$id_bodega,$id_pedido,$id_usr_ope,'$fecha_ope',1)";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -61,8 +76,8 @@ try {
 
                 if ($obj_ingreso['estado'] == 1) {
                     $sql = "UPDATE far_orden_ingreso 
-                        SET num_factura='$num_fac',fec_factura='$fec_fac',id_tipo_ingreso=$id_tiping,id_provedor=$id_tercero,detalle='$detalle'
-                        WHERE id_ingreso=" . $id;
+                            SET num_factura='$num_fac',fec_factura='$fec_fac',id_tipo_ingreso=$id_tiping,id_provedor=$id_tercero,detalle='$detalle',id_pedido=$id_pedido
+                            WHERE id_ingreso=" . $id;                           
                     $rs = $cmd->query($sql);
 
                     if ($rs) {

@@ -40,7 +40,7 @@ if (empty($obj)) {
 
             <!--Formulario de registro de Cuenta-->
             <form id="frm_reg_centrocostos_cta">
-                <input type="hidden" id="id_cum" name="id_ceccta" value="<?php echo $id ?>">
+                <input type="hidden" id="id_ceccta" name="id_ceccta" value="<?php echo $id ?>">
                 <div class=" form-row">
                     <div class="form-group col-md-7">
                         <label for="txt_cta_con" class="small">Cuenta Contable</label>
