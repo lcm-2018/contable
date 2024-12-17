@@ -277,13 +277,13 @@ foreach ($datos as $d) {
     $key = array_search($id_empleado, array_column($salario, 'id_empleado'));
     $salbase = $key !== false ? $salario[$key]['salario_basico'] : 0;
     if ($salbase <= $dossml) {
-        $auxt = $auxiliotranporte / 30;
+        $auxt = $auxiliotranporte;
     } else {
         $auxt = 0;
     }
 
     if ($salbase <= $basealim) {
-        $auxali = $auxalim / 30;
+        $auxali = $auxalim;
     } else {
         $auxali = 0;
     }

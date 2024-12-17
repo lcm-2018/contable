@@ -22,7 +22,7 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $response = '
-<select class="form-control form-control-sm py-0 sm" id="cuentas" name="cuentas"  required>
+<select class="form-control form-control-sm py-0 sm" id="cuentas" name="cuentas"  onchange="SaldoCuenta(value)">
 <option value="0">-- Seleccionar --</option>';
 foreach ($retenciones as $ret) {
     $response .= '<option value="' . $ret['id_tes_cuenta'] . '">' . $ret['nombre'] .  '</option>';

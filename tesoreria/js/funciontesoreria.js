@@ -1519,6 +1519,10 @@ var GuardaFormaPago = function () {
 		$('#valor_pag').addClass('is-invalid');
 		$('#valor_pag').focus();
 		mjeError('El valor debe ser mayor a cero');
+	} else if (Number($('#numSaldoDips').val()) <= 0) {
+		$('#divSaldoDisp').addClass('is-invalid');
+		$('#divSaldoDisp').focus();
+		mjeError('El saldo disponible debe ser mayor a cero');
 	} else {
 		var datos = $('#formAddFormaPago').serialize();
 		var url = "datos/registrar/registrar_mvto_registrar_forma_pago.php";
@@ -2174,33 +2178,33 @@ const guardarCuentaBanco = () => {
 			$("#cuentas").focus();
 			mjeError("Debe seleccionar una cuenta");
 		} else
-		if ($("#tipo_cuenta").val() == "0") {
-			$("#tipo_cuenta").addClass("is-invalid");
-			$("#tipo_cuenta").focus();
-			mjeError("Debe seleccionar un tipo de cuenta");
-		} else if ($("#numero").val() == "") {
-			$("#numero").addClass("is-invalid'");
-			$("#numero").focus();
-			mjeError("Debe digitar un número de cuenta");
-		} else {
-			var data = $('#formGestionCuenta').serialize();
-			$.ajax({
-				type: 'POST',
-				dataType: 'json',
-				url: "datos/registrar/registrar_cuenta_nueva.php",
-				data: data,
-				success: function (r) {
-					if (r.status == 'ok') {
-						$("#tableCuentasBanco").DataTable().ajax.reload();
-						mje("Proceso realizado con  éxito.");
-						$("#divModalForms").modal("hide");
-					} else {
-						mjeError('Error:', r.msg);
-					}
+			if ($("#tipo_cuenta").val() == "0") {
+				$("#tipo_cuenta").addClass("is-invalid");
+				$("#tipo_cuenta").focus();
+				mjeError("Debe seleccionar un tipo de cuenta");
+			} else if ($("#numero").val() == "") {
+				$("#numero").addClass("is-invalid'");
+				$("#numero").focus();
+				mjeError("Debe digitar un número de cuenta");
+			} else {
+				var data = $('#formGestionCuenta').serialize();
+				$.ajax({
+					type: 'POST',
+					dataType: 'json',
+					url: "datos/registrar/registrar_cuenta_nueva.php",
+					data: data,
+					success: function (r) {
+						if (r.status == 'ok') {
+							$("#tableCuentasBanco").DataTable().ajax.reload();
+							mje("Proceso realizado con  éxito.");
+							$("#divModalForms").modal("hide");
+						} else {
+							mjeError('Error:', r.msg);
+						}
 
-				}
-			});
-		}
+					}
+				});
+			}
 };
 
 // Abre formulario para edición de datos de cuenta bancaria
@@ -2542,4 +2546,26 @@ function GuardaDetalleConciliacion(check) {
 	}
 
 
+}
+
+function SaldoCuenta(id) {
+	$.ajax({
+		type: 'POST',
+		dataType: 'json',
+		url: "datos/consultar/consulta_saldo_cuenta.php",
+		data: { id: id },
+		success: function (r) {
+			if (r.status == 'ok') {
+				var saldo = r.saldo;
+				// poner signo de pesos y separador de miles
+				$('#divSaldoDisp').html(pesos(saldo));
+				$('#numSaldoDips').val(saldo);
+			} else {
+				$('#divSaldoDisp').html(pesos(saldo));
+				$('#numSaldoDips').val(saldo);
+				mjeError('Error:', r.msg);
+			}
+
+		}
+	});
 }

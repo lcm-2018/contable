@@ -1380,119 +1380,119 @@
         });
         return false;
     };
-    $('#datFecInicioInc').on('input', function () {
+    $('#datFecInicioInc').on('blur', function () {
         let t = 'Inc';
         let e = 'Fin';
         let u = '';
         validafec(t, e, u);
     });
-    $('#datFecFinInc').on('input', function () {
+    $('#datFecFinInc').on('blur', function () {
         let t = 'Inc';
         let e = 'Inicio';
         let u = '';
         validafec(t, e, u);
     });
-    $('#datFecInicioVacs').on('input', function () {
+    $('#datFecInicioVacs').on('blur', function () {
         let t = 'Vacs';
         let e = 'Fin';
         let u = '';
         validafec(t, e, u);
     });
-    $('#datFecFinVacs').on('input', function () {
+    $('#datFecFinVacs').on('blur', function () {
         let t = 'Vacs';
         let e = 'Inicio';
         let u = '';
         validafec(t, e, u);
     });
-    $('#datFecInicioLics').on('input', function () {
+    $('#datFecInicioLics').on('blur', function () {
         let t = 'Lics';
         let e = 'Fin';
         let u = '';
         validafec(t, e, u);
     });
-    $('#datFecFinLics').on('input', function () {
+    $('#datFecFinLics').on('blur', function () {
         let t = 'Lics';
         let e = 'Inicio';
         let u = '';
         validafec(t, e, u);
     });
     //Embargo
-    $('#divModalForms').on('input', '#datFecFinEmb', function () {
+    $('#divModalForms').on('blur', '#datFecFinEmb', function () {
         let t = 'Emb';
         let e = 'Inicio';
         let u = '';
         validafec(t, e, u);
     });
-    $('#divModalForms').on('input', '#datFecInicioEmb', function () {
+    $('#divModalForms').on('blur', '#datFecInicioEmb', function () {
         let t = 'Emb';
         let e = 'Fin';
         let u = '';
         validafec(t, e, u);
     });
-    $('#divModalForms').on('input', '#datUpFecInicioEmb', function () {
+    $('#divModalForms').on('blur', '#datUpFecInicioEmb', function () {
         let t = 'Emb';
         let e = 'Fin';
         let u = 'Up';
         validafec(t, e, u);
     });
-    $('#divModalForms').on('input', '#datUpFecFinEmb', function () {
+    $('#divModalForms').on('blur', '#datUpFecFinEmb', function () {
         let t = 'Emb';
         let e = 'Inicio';
         let u = 'Up';
         validafec(t, e, u);
     });
     //libranza
-    $('#divModalForms').on('input', '#datFecFinLib', function () {
+    $('#divModalForms').on('blur', '#datFecFinLib', function () {
         let t = 'Lib';
         let e = 'Inicio';
         let u = '';
         validafec(t, e, u);
     });
-    $('#divModalForms').on('input', '#datFecInicioLib', function () {
+    $('#divModalForms').on('blur', '#datFecInicioLib', function () {
         let t = 'Lib';
         let e = 'Fin';
         let u = '';
         validafec(t, e, u);
     });
-    $('#divModalForms').on('input', '#datUpFecFinLib', function () {
+    $('#divModalForms').on('blur', '#datUpFecFinLib', function () {
         let t = 'Lib';
         let e = 'Inicio';
         let u = 'Up';
         validafec(t, e, u);
     });
-    $('#divModalForms').on('input', '#datUpFecInicioLib', function () {
+    $('#divModalForms').on('blur', '#datUpFecInicioLib', function () {
         let t = 'Lib';
         let e = 'Fin';
         let u = 'Up';
         validafec(t, e, u);
     });
     //Sindicato
-    $('#datFecFinSind').on('input', function () {
+    $('#datFecFinSind').on('blur', function () {
         let t = 'Sind';
         let e = 'Inicio';
         let u = '';
         validafec(t, e, u);
     });
-    $('#datFecInicioSind').on('input', function () {
+    $('#datFecInicioSind').on('blur', function () {
         let t = 'Sind';
         let e = 'Fin';
         let u = '';
         validafec(t, e, u);
     });
-    $('#divUpNovSindicato').on('input', '#datUpFecFinSind', function () {
+    $('#divUpNovSindicato').on('blur', '#datUpFecFinSind', function () {
         let t = 'Sind';
         let e = 'Inicio';
         let u = 'Up';
         validafec(t, e, u);
     });
-    $('#divUpNovSindicato').on('input', '#datUpFecInicioSind', function () {
+    $('#divUpNovSindicato').on('blur', '#datUpFecInicioSind', function () {
         let t = 'Sind';
         let e = 'Fin';
         let u = 'Up';
         validafec(t, e, u);
     });
     //Incapacidad
-    $('#divModalForms').on('input', '#datFecFinIncap', function () {
+    $('#divModalForms').on('blur', '#datFecFinIncap', function () {
         let inincap = $('#datFecInicioIncap').val();
         let finincap = $('#datFecFinIncap').val();
         let u = '';
@@ -1504,7 +1504,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datFecInicioIncap', function () {
+    $('#divModalForms').on('blur', '#datFecInicioIncap', function () {
         let inincap = $('#datFecInicioIncap').val();
         let finincap = $('#datFecFinIncap').val();
         let u = '';
@@ -1516,7 +1516,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datUpFecFinIncap', function () {
+    $('#divModalForms').on('blur', '#datUpFecFinIncap', function () {
         let inincap = $('#datUpFecInicioIncap').val();
         let finincap = $('#datUpFecFinIncap').val();
         let u = 'Up';
@@ -1528,7 +1528,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datUpFecInicioIncap', function () {
+    $('#divModalForms').on('blur', '#datUpFecInicioIncap', function () {
         let inincap = $('#datUpFecInicioIncap').val();
         let finincap = $('#datUpFecFinIncap').val();
         let u = 'Up';
@@ -1541,7 +1541,7 @@
         }
     });
     //Vacaciones
-    $('#divModalForms').on('input', '#datFecFinVac', function () {
+    $('#divModalForms').on('blur', '#datFecFinVac', function () {
         let inincap = $('#datFecInicioVac').val();
         let finincap = $('#datFecFinVac').val();
         let u = '';
@@ -1553,7 +1553,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datFecInicioVac', function () {
+    $('#divModalForms').on('blur', '#datFecInicioVac', function () {
         let inincap = $('#datFecInicioVac').val();
         let finincap = $('#datFecFinVac').val();
         let u = '';
@@ -1565,7 +1565,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datUpFecFinVac', function () {
+    $('#divModalForms').on('blur', '#datUpFecFinVac', function () {
         let inincap = $('#datUpFecInicioVac').val();
         let finincap = $('#datUpFecFinVac').val();
         let u = 'Up';
@@ -1577,7 +1577,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datUpFecInicioVac', function () {
+    $('#divModalForms').on('blur', '#datUpFecInicioVac', function () {
         let inincap = $('#datUpFecInicioVac').val();
         let finincap = $('#datUpFecFinVac').val();
         let u = 'Up';
@@ -1590,7 +1590,7 @@
         }
     });
     //Licencias
-    $('#divModalForms').on('input', '#datFecFinLic', function () {
+    $('#divModalForms').on('blur', '#datFecFinLic', function () {
         let inincap = $('#datFecInicioLic').val();
         let finincap = $('#datFecFinLic').val();
         let u = '';
@@ -1602,7 +1602,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datFecInicioLic', function () {
+    $('#divModalForms').on('blur', '#datFecInicioLic', function () {
         let inincap = $('#datFecInicioLic').val();
         let finincap = $('#datFecFinLic').val();
         let u = '';
@@ -1614,7 +1614,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datUpFecFinLic', function () {
+    $('#divModalForms').on('blur', '#datUpFecFinLic', function () {
         let inincap = $('#datUpFecInicioLic').val();
         let finincap = $('#datUpFecFinLic').val();
         let u = 'Up';
@@ -1626,7 +1626,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datUpFecInicioLic', function () {
+    $('#divModalForms').on('blur', '#datUpFecInicioLic', function () {
         let inincap = $('#datUpFecInicioLic').val();
         let finincap = $('#datUpFecFinLic').val();
         let u = 'Up';
@@ -1639,7 +1639,7 @@
         }
     });
     //licencia X Luto
-    $('#divModalForms').on('input', '#datFecFinLicLuto', function () {
+    $('#divModalForms').on('blur', '#datFecFinLicLuto', function () {
         let inincap = $('#datFecInicioLicLuto').val();
         let finincap = $('#datFecFinLicLuto').val();
         let u = '';
@@ -1651,7 +1651,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datFecInicioLicLuto', function () {
+    $('#divModalForms').on('blur', '#datFecInicioLicLuto', function () {
         let inincap = $('#datFecInicioLicLuto').val();
         let finincap = $('#datFecFinLicLuto').val();
         let u = '';
@@ -1664,7 +1664,7 @@
         }
     });
     //licencia no remunerada
-    $('#divModalForms').on('input', '#datFecFinLicNR', function () {
+    $('#divModalForms').on('blur', '#datFecFinLicNR', function () {
         let inincap = $('#datFecInicioLicNR').val();
         let finincap = $('#datFecFinLicNR').val();
         let u = '';
@@ -1676,7 +1676,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datFecInicioLicNR', function () {
+    $('#divModalForms').on('blur', '#datFecInicioLicNR', function () {
         let inincap = $('#datFecInicioLicNR').val();
         let finincap = $('#datFecFinLicNR').val();
         let u = '';
@@ -1688,7 +1688,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datUpFecFinLicNR', function () {
+    $('#divModalForms').on('blur', '#datUpFecFinLicNR', function () {
         let inincap = $('#datUpFecInicioLicNR').val();
         let finincap = $('#datUpFecFinLicNR').val();
         let u = 'Up';
@@ -1700,7 +1700,7 @@
             caldiasincap(inincap, finincap, u, t);
         }
     });
-    $('#divModalForms').on('input', '#datUpFecInicioLicNR', function () {
+    $('#divModalForms').on('blur', '#datUpFecInicioLicNR', function () {
         let inincap = $('#datUpFecInicioLicNR').val();
         let finincap = $('#datUpFecFinLicNR').val();
         let u = 'Up';
@@ -3480,8 +3480,10 @@
             "columns": [
                 { 'data': 'id_dcto' },
                 { 'data': 'fecha' },
+                { 'data': 'tipo' },
                 { 'data': 'concepto' },
                 { 'data': 'valor' },
+                { 'data': 'estado' },
                 { 'data': 'botones' },
             ],
             "order": [
@@ -3652,38 +3654,42 @@
         });
     });
     $('#divModalForms').on('click', '#btnAddOtroDcto', function () {
-        $('.form-control').removeClass('border-danger');
+        var opcion = $(this).attr('text');
+        $('.form-control').removeClass('is-invalid');
         if ($('#datFecDcto').val() == '') {
-            $('#datFecDcto').addClass('border-danger');
+            $('#datFecDcto').addClass('is-invalid');
             $('#datFecDcto').focus();
-            $('#divModalError').modal('show');
-            $('#divMsgError').html("Debe ingresar una fecha válida");
-        } else if ($('#numValDcto').val() == '' || Number($('#numValDcto').val()) == 0) {
-            $('#numValDcto').addClass('border-danger');
+            mjeError("Debe ingresar una fecha válida");
+        } else if ($('#sclTipoDcto').val() == '0') {
+            $('#sclTipoDcto').addClass('is-invalid');
+            $('#sclTipoDcto').focus();
+            mjeError("Debe seleccionar un tipo de descuento");
+        } else if (Number($('#numValDcto').val()) <= 0) {
+            $('#numValDcto').addClass('is-invalid');
             $('#numValDcto').focus();
-            $('#divModalError').modal('show');
-            $('#divMsgError').html("Debe ingresar el valor a descontar");
-        } else if ($('#txtConDcto').val() == '') {
-            $('#txtConDcto').addClass('border-danger');
-            $('#txtConDcto').focus();
-            $('#divModalError').modal('show');
-            $('#divMsgError').html("Debe ingresar el concepto de descuento");
+            mjeError("Debe ingresar el valor a descontar");
+        } else if (Number($('#numValDcto').val()) <= 0) {
+            $('#numValDcto').addClass('is-invalid');
+            $('#numValDcto').focus();
+            mjeError("Debe ingresar el valor a descontar");
         } else {
             var datos = $('#formAddOtroDcto').serialize() + '&idEmpl=' + $('#idEmpNovEps').val();
+            if (opcion == '1') {
+                var url = 'registrar/newdescuento.php';
+            } else {
+                var url = 'actualizar/updescuento.php'
+            }
             $.ajax({
                 type: 'POST',
-                url: 'registrar/newdescuento.php',
+                url: url,
                 data: datos,
                 success: function (r) {
                     if (r.trim() === 'ok') {
-                        let id = 'tableOtroDcto';
-                        reloadtable(id);
                         $('#divModalForms').modal('hide');
-                        $('#divModalDone').modal('show');
-                        $('#divMsgDone').html("Descuento registrado correctamente");
+                        $('#tableOtroDcto').DataTable().ajax.reload();
+                        mje("Proceso realizado correctamente");
                     } else {
-                        $('#divModalError').modal('show');
-                        $('#divMsgError').html(r);
+                        mjeError(r);
                     }
                 }
             });
@@ -3696,7 +3702,7 @@
         $.post('datos/actualizar/up_descuento.php', { id: id }, function (he) {
             $('#divTamModalForms').removeClass('modal-xl');
             $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').addClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-lg');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
@@ -3786,6 +3792,26 @@
         });
         return false;
     });
+    $("#modificaOtroDcto").on('click', '.estado', function () {
+        var id = $(this).attr('value');
+        var est = $(this).attr('estado');
+        $.ajax({
+            type: 'POST',
+            url: 'actualizar/upestado_dcto.php',
+            data: { id: id, est: est },
+            success: function (r) {
+                if (r.trim() === 'ok') {
+                    $('#tableOtroDcto').DataTable().ajax.reload();
+                }
+                else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r);
+                }
+            }
+        });
+        return false;
+    });
+
     $('#modificarEmbargos').on('click', '.estado', function () {
         var id = $(this).attr('value');
         var est = $(this).attr('estado');

@@ -31,7 +31,7 @@ try {
                 LEFT JOIN 
                     (SELECT
                         `id_pto_cop_det`
-                        , IFNULL(`valor`,0) - IFNULL(`valor_liberado`,0) AS `val_pag`
+                        , SUM(IFNULL(`valor`,0) - IFNULL(`valor_liberado`,0)) AS `val_pag`
                     FROM
                         `pto_pag_detalle`
                         INNER JOIN `ctb_doc` 

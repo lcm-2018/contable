@@ -1278,22 +1278,27 @@ $rol = $_SESSION['rol'];
                             </a>
                         </nav>
                     </div>
-                <?php
+                    <?php
                 }
-                //$key = array_search('10', array_column($perm_modulos, 'id_modulo'));
-                if (false) {
-                ?>
-                    <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/consultas/listado.php">
-                        <div class="form-row">
-                            <div class="div-icono">
-                                <i class="fas fa-user-secret fa-lg" style="color: #1ABC9C;"></i>
+                $key = array_search('59', array_column($perm_modulos, 'id_modulo'));
+                if ($key !== false) {
+                    if (PermisosUsuario($permisos, 5904, 0) || $id_rol == 1) {
+                    ?>
+                        <a class="nav-link sombra" href="#" onclick="document.getElementById('postForm').submit();">
+                            <div class="form-row">
+                                <div class="div-icono">
+                                    <i class="fas fa-user-secret fa-lg" style="color: #1ABC9C;"></i>
+                                </div>
+                                <div>
+                                    Consultas
+                                </div>
                             </div>
-                            <div>
-                                Consultas
-                            </div>
-                        </div>
-                    </a>
+                        </a>
+                        <form id="postForm" action="<?php echo $_SESSION['urlin'] ?>/consultas/listado.php" method="POST" style="display: none;">
+                            <input type="hidden" name="id_consulta" value="5901">
+                        </form>
                 <?php
+                    }
                 }
                 ?>
             </div>

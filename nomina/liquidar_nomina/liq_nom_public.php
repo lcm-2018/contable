@@ -416,6 +416,20 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `id_dcto`, `id_empleado`, `valor`
+            FROM
+                `nom_otros_descuentos`
+            WHERE (`estado` = 1 AND  (`fecha_fin` >= '$fec_f' OR `fecha_fin` IS NULL))";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 
 $dossml = $smmlv * 2;
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
@@ -1660,8 +1674,42 @@ if (isset($_POST['check'])) {
             } catch (PDOException $e) {
                 echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
             }
+            //Descuentos
+            $otros_dctos = 0;
+            $filtro = [];
+            $key_dcto = array_search($i, array_column($descuentos, 'id_empleado'));
+            if (false !== $key_dcto) {
+                $filtro = array_filter($descuentos, function ($var) use ($i) {
+                    return ($var['id_empleado'] == $i);
+                });
+            }
+            if (!empty($filtro)) {
+                foreach ($filtro as $dcto) {
+                    try {
+                        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                        $sql = "INSERT INTO `nom_liq_descuento`
+                                    (`id_dcto`,`valor`,`id_nomina`,`id_user_reg`,`fec_reg`)
+                                VALUES (?, ?, ?, ?, ?)";
+                        $sql = $cmd->prepare($sql);
+                        $sql->bindParam(1, $dcto['id_dcto'], PDO::PARAM_INT);
+                        $sql->bindParam(2, $dcto['valor'], PDO::PARAM_STR);
+                        $sql->bindParam(3, $id_nomina, PDO::PARAM_INT);
+                        $sql->bindParam(4, $id_user, PDO::PARAM_INT);
+                        $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
+                        $sql->execute();
+                        if (!($cmd->lastInsertId() > 0)) {
+                            echo $sql->errorInfo()[2] . 'DCTO';
+                        } else {
+                            $otros_dctos += $dcto['valor'];
+                        }
+                    } catch (PDOException $e) {
+                        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                    }
+                }
+            }
             //neto a pagar
-            $salarioneto = $devhe + (($salbase / 30) * $diaslab) + $auxt + $auxali + $vallic + $vallcluto + $valincap + $bsp_salarial + $vacacionsalario + $primavacnsalario + $bonrecreacionsalario + $gasrep + $valindem - $saludempleado - $pensionempleado - $solidpension - $valcuotsind - $descEmbargo - $dctolib - $retencion;
+            $salarioneto = $devhe + (($salbase / 30) * $diaslab) + $auxt + $auxali + $vallic + $vallcluto + $valincap + $bsp_salarial + $vacacionsalario + $primavacnsalario + $bonrecreacionsalario + $gasrep + $valindem - $saludempleado - $pensionempleado - $solidpension - $valcuotsind - $descEmbargo - $dctolib - $retencion - $otros_dctos;
             $salarioneto = $salarioneto < 0 ? 0 : $salarioneto;
             $fpag = '1';
             $mpag = $_POST['slcMetPag' . $i];
