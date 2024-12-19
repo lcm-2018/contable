@@ -26,10 +26,19 @@ try {
                 , `nom_liq_dlab_auxt`.`aux_alim`
                 , `nom_liq_dlab_auxt`.`g_representa`
                 , `nom_liq_dlab_auxt`.`horas_ext`
+                , `ccostos`.`id_ccosto`
             FROM
                 `nom_liq_dlab_auxt`
                 INNER JOIN `nom_empleado` 
                     ON (`nom_liq_dlab_auxt`.`id_empleado` = `nom_empleado`.`id_empleado`)
+                LEFT JOIN 
+                    (SELECT
+                        MAX(`id_ccosto`) AS `id_ccosto`
+                        , `id_empleado`
+                    FROM
+                        `nom_ccosto_empleado`
+                    GROUP BY `id_empleado`) AS `ccostos`
+                    ON (`nom_liq_dlab_auxt`.`id_empleado` = `ccostos`.`id_empleado`)
             WHERE (`nom_liq_dlab_auxt`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $sueldoBasico = $rs->fetchAll(PDO::FETCH_ASSOC);
@@ -46,7 +55,7 @@ $cedulas = implode(',', $ced);
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api`, `nit_tercero` FROM `tb_terceros` WHERE (`nit_tercero` IN ($cedulas))";
+    $sql = "SELECT `id_tercero_api`, `nit_tercero` AS `no_doc` FROM `tb_terceros` WHERE (`nit_tercero` IN ($cedulas))";
     $rs = $cmd->query($sql);
     $idApi = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -254,53 +263,14 @@ try {
                 , `nom_tipo_rubro`.`nombre`
                 , `nom_causacion`.`cuenta`
                 , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
+                , `tb_centrocostos`.`es_pasivo`
+                FROM
+                    `nom_causacion`
                 INNER JOIN `nom_tipo_rubro` 
                     ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'ADMIN'";
-    $rs = $cmd->query($sql);
-    $cAdmin = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'URG'";
-    $rs = $cmd->query($sql);
-    $cUrg = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'PASIVO'";
+                INNER JOIN `tb_centrocostos`
+                    ON (`nom_causacion`.`centro_costo` = `tb_centrocostos`.`id_centro`)
+                WHERE (`tb_centrocostos`.`es_pasivo` = 1)";
     $rs = $cmd->query($sql);
     $cPasivo = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -456,6 +426,26 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `nom_liq_descuento`.`valor`
+                , `nom_tipo_descuentos`.`id_cuenta`
+                , `nom_otros_descuentos`.`id_empleado`
+            FROM
+                `nom_liq_descuento`
+                INNER JOIN `nom_otros_descuentos` 
+                    ON (`nom_liq_descuento`.`id_dcto` = `nom_otros_descuentos`.`id_dcto`)
+                INNER JOIN `nom_tipo_descuentos` 
+                    ON (`nom_otros_descuentos`.`id_tipo_dcto` = `nom_tipo_descuentos`.`id_tipo`)
+            WHERE (`nom_liq_descuento`.`id_nomina` = $id_nomina)";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 $meses = array(
     '00' => '',
     '01' => 'Enero',
@@ -567,8 +557,8 @@ foreach ($sueldoBasico as $sb) {
     $id_sede = $sb['sede_emp'];
     $tipoCargo = $sb['tipo_cargo'];
     $doc_empleado = $sb['no_documento'];
-    $keyt = array_search($doc_empleado, array_column($idApi, 'nit_tercero'));
-    $id_tercero = $keyt !== false ? $idApi[$keyt]['id_tercero_api'] : NULL;
+    $keyt = array_search($doc_empleado, array_column($idApi, 'no_doc'));
+    $id_ter_api = $keyt !== false ? $idApi[$keyt]['id_tercero_api'] : NULL;
     $restar = 0;
     $rest = 0;
     //administrativos
@@ -587,7 +577,7 @@ foreach ($sueldoBasico as $sb) {
         $query->bindParam(2, $id_det, PDO::PARAM_INT);
         $query->bindParam(3, $valor, PDO::PARAM_STR);
         $query->bindParam(4, $liberado, PDO::PARAM_STR);
-        $query->bindParam(5, $id_tercero, PDO::PARAM_INT);
+        $query->bindParam(5, $id_ter_api, PDO::PARAM_INT);
         foreach ($rubros as $rb) {
             $tipo = $rb['id_tipo'];
             if ($tipoCargo == '1') {
@@ -598,7 +588,7 @@ foreach ($sueldoBasico as $sb) {
             $valor = 0;
             $id_det = NULL;
             foreach ($ids_detalle as $detalle) {
-                if ($detalle['id_rubro'] == $rubro && $detalle['id_tercero_api'] == $id_tercero) {
+                if ($detalle['id_rubro'] == $rubro && $detalle['id_tercero_api'] == $id_ter_api) {
                     $id_det = $detalle['id_pto_cop_det'];
                     break;
                 }
@@ -714,6 +704,14 @@ foreach ($sueldoBasico as $sb) {
         $query->bindParam(5, $credito, PDO::PARAM_STR);
         $query->bindParam(6, $iduser, PDO::PARAM_INT);
         $query->bindParam(7, $fecha2);
+
+        $key_dcto = array_search($id_empleado, array_column($descuentos, 'id_empleado'));
+        $dcto = [];
+        if ($key_dcto !== false) {
+            $dcto = array_filter($descuentos, function ($descuentos) use ($id_empleado) {
+                return $descuentos["id_empleado"] == $id_empleado;
+            });
+        }
         foreach ($cPasivo as $cp) {
             $credito = 0;
             $tipo = $cp['id_tipo'];
@@ -741,13 +739,19 @@ foreach ($sueldoBasico as $sb) {
                             }
                         }
                     }
+                    $val_dcto = 0;
+                    if (!empty($dcto)) {
+                        foreach ($dcto as $d) {
+                            $val_dcto += $d['valor'];
+                        }
+                    }
                     $key = array_search($id_empleado, array_column($rfte, 'id_empleado'));
                     $valRteFte = $key !== false ? $rfte[$key]['val_ret'] : 0;
                     $ssape = isset($segSocial[$keyss]['aporte_pension_emp']) ? $segSocial[$keyss]['aporte_pension_emp'] : 0;
                     $ssaspe = isset($segSocial[$keyss]['aporte_solidaridad_pensional']) ? $segSocial[$keyss]['aporte_solidaridad_pensional'] : 0;
                     $ssase = isset($segSocial[$keyss]['aporte_salud_emp']) ? $segSocial[$keyss]['aporte_salud_emp'] : 0;
                     $sstot = $ssape + $ssaspe + $ssase;
-                    $valor = $basico + $extras + $repre + $auxtras + $auxalim - ($sstot + $valSind + $valLib + $valEmb + $valRteFte);
+                    $valor = $basico + $extras + $repre + $auxtras + $auxalim - ($sstot + $valSind + $valLib + $valEmb + $valRteFte + $val_dcto);
                     if ($valor < 0) {
                         $rest = $valor * -1;
                         $valor = 0;

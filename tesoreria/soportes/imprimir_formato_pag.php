@@ -207,22 +207,37 @@ $hora = date('H:i:s', strtotime($documento['fecha_reg']));
 // fechas para factua
 // Consulto responsable del documento
 try {
-    /*
     $sql = "SELECT
-    `fin_respon_doc`.`nombre`
-    , `fin_respon_doc`.`cargo`
-    , `fin_respon_doc`.`descripcion`
-    FROM
-    `fin_respon_doc`
-    INNER JOIN `fin_maestro_doc` 
-        ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
-    WHERE (`fin_respon_doc`.`id_maestro_doc` =5
-    AND `fin_respon_doc`.`estado` =1);";
+                `fin_maestro_doc`.`control_doc`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`genero`
+                , `fin_respon_doc`.`cargo`
+                , `fin_respon_doc`.`tipo_control`
+                , `fin_tipo_control`.`descripcion` AS `nom_control`
+                , `fin_respon_doc`.`fecha_ini`
+                , `fin_respon_doc`.`fecha_fin`
+            FROM
+                `fin_respon_doc`
+                INNER JOIN `fin_maestro_doc` 
+                    ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
+                INNER JOIN `tb_terceros` 
+                    ON (`fin_respon_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                INNER JOIN `fin_tipo_control` 
+                    ON (`fin_respon_doc`.`tipo_control` = `fin_tipo_control`.`id_tipo`)
+            WHERE (`fin_maestro_doc`.`id_modulo` = 56 AND `fin_maestro_doc`.`id_doc_fte` = 4 
+                AND `fin_respon_doc`.`fecha_fin` >= '$fecha' 
+                AND `fin_respon_doc`.`fecha_ini` <= '$fecha'
+                AND `fin_respon_doc`.`estado` = 1
+                AND `fin_maestro_doc`.`estado` = 1)";
     $res = $cmd->query($sql);
-    $responsable = $res->fetch();*/
-    $nom_respon = mb_strtoupper('XXXXXXXXXXXX', 'UTF-8');
-    $cargo_respon = 'XXXXX';
-    $descrip_respon = 'XXXXX';
+    $responsables = $res->fetchAll();
+    $key = array_search('4', array_column($responsables, 'tipo_control'));
+    $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+    $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
+    $gen_respon = $key !== false ? $responsables[$key]['genero'] : '';
+    $control = $key !== false ? $responsables[$key]['control_doc'] : '';
+    $control = $control == '' || $control == '0' ? false : true;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -558,7 +573,6 @@ $id_forma = 0;
                         <div>___________________________________</div>
                         <div><?php echo $nom_respon; ?> </div>
                         <div><?php echo $cargo_respon; ?> </div>
-                        <div><?php echo $descrip_respon; ?> </div>
                     </div>
                 </div>
                 <div class="col-6">
@@ -577,7 +591,6 @@ $id_forma = 0;
                         <div>___________________________________</div>
                         <div><?php echo $nom_respon; ?> </div>
                         <div><?php echo $cargo_respon; ?> </div>
-                        <div><?php echo $descrip_respon; ?> </div>
                     </div>
                 </div>
             </div>
@@ -585,17 +598,46 @@ $id_forma = 0;
         }
         ?>
         </br> </br> </br>
-        <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
-            <tr>
-                <td class='text-left' style="width:33%">
-                    <strong>Elaboró:</strong>
-                    <div><?php echo $documento['usuario']; ?></div>
-                </td>
-                <td style="text-align:center" style="width:33%">
-                </td>
-                <td class='text-center' style="width:33%"><label class="small"></label></td>
-            </tr>
-        </table>
+        <?php
+        if ($control) {
+        ?>
+            <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
+                <tr style="text-align:left">
+                    <td style="width:33%">
+                        <strong>Elaboró:</strong>
+                    </td>
+                    <td style="width:33%">
+                        <strong>Revisó:</strong>
+                    </td>
+                    <td style="width:33%">
+                        <strong>Aprobó:</strong>
+                    </td>
+                </tr>
+                <tr style="text-align:center">
+                    <td>
+                        <?= trim($documento['usuario']) ?>
+                    </td>
+                    <td>
+                        <?php
+                        $key = array_search('2', array_column($responsables, 'tipo_control'));
+                        $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                        $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                        echo $nombre . '<br> ' . $cargo;
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                        $key = array_search('2', array_column($responsables, 'tipo_control'));
+                        $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                        $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                        echo $nombre . '<br> ' . $cargo;
+                        ?>
+                    </td>
+                </tr>
+            </table>
+        <?php
+        }
+        ?>
         </br> </br>
     </div>
 
