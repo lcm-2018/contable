@@ -4,9 +4,7 @@
             dom: setdom,
             buttons: [{
                 action: function(e, dt, node, config) {
-                    $.post("frm_reg_documento.php", {
-                        id_hv: $('#id_hv').val()
-                    }, function(he) {
+                    $.post("frm_reg_documento.php", { id_hv: $('#id_hv').val() }, function(he) {
                         $('#divTamModalReg').removeClass('modal-xl');
                         $('#divTamModalReg').removeClass('modal-sm');
                         $('#divTamModalReg').addClass('modal-lg');

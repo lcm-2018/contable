@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 
@@ -48,12 +48,12 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                         <div class="card-body" id="divCuerpoPag">
 
                             <!--Opciones de filtros -->
-                            <div class="form-row">
-                                <div class="form-group col-md-2">
-                                    <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
-                                </div>
+                            <div class="form-row">                                
                                 <div class="form-group col-md-1">
                                     <input type="text" class="filtro form-control form-control-sm" id="txt_placa_filtro" placeholder="Placa">
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
                                 </div>
                                 <div class="form-group col-md-1">
                                     <input type="text" class="filtro form-control form-control-sm" id="txt_serial_filtro" placeholder="Serial">
@@ -69,7 +69,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
+                                    <select class="filtro form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estado_activo('--Estado--') ?>
                                     </select>
                                 </div>
@@ -95,15 +95,16 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <thead>
                                     <tr class="text-center centro-vertical">
                                         <th>Id</th>
+                                        <th>Placa</th>                                        
                                         <th>Cod. Articulo</th>
-                                        <th>Articulo</th>
-                                        <th>Placa</th>
+                                        <th>Articulo</th>                                        
                                         <th>No. Serial</th>
                                         <th>Marca</th>
                                         <th>Valor</th>
                                         <th>Tipo Activo</th>
                                         <th>Sede</th>
                                         <th>Area</th>
+                                        <th>Responsable</th>
                                         <th>Estado</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
@@ -114,7 +115,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <tr>
                                     <td>Activo</td>
                                     <td style="background-color:yellow">Para mantenimiento</td>
-                                    <td style="background-color:red">En mantenimiento</td>
+                                    <td style="background-color:DodgerBlue">En mantenimiento</td>
                                     <td style="background-color:green">Inactivo</td>
                                     <td style="background-color:gray">Dado de baja</td>
                                 </tr>

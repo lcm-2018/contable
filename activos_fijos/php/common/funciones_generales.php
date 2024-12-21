@@ -41,7 +41,7 @@ function datos_articulo($cmd, $id_med){
                         'valor_ultima_compra' => $obj['valor']
                     );
         } else {
-            $res = array('id_med' => '', 'nom_articulo' => '', 'val_promedio' => '');
+            $res = array('id_med' => '', 'cod_articulo' => '', 'nom_articulo' => '', 'existencia' => '', 'val_promedio' => '');
         }
         $cmd = null;
         return $res;
@@ -49,6 +49,35 @@ function datos_articulo($cmd, $id_med){
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
 }
+
+//FUNCION QUE RETORNAR LOS DATOS DE UN ACTIVO FIJO
+function datos_activo_fijo($cmd, $id_acf){
+    try {
+        $res = array();
+        $sql = "SELECT acf_hojavida.id_activo_fijo,acf_hojavida.placa,
+                    far_medicamentos.cod_medicamento,
+                    far_medicamentos.nom_medicamento
+                FROM acf_hojavida
+                INNER JOIN far_medicamentos ON (far_medicamentos.id_med=acf_hojavida.id_articulo)
+                WHERE acf_hojavida.id_activo_fijo=$id_acf";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();
+        if (isset($obj['id_activo_fijo'])) {
+            $res = array('id_activo_fijo' => $obj['id_activo_fijo'],
+                        'placa' => $obj['placa'],
+                        'cod_articulo' => $obj['cod_medicamento'],
+                        'nom_articulo' => $obj['nom_medicamento']
+                    );
+        } else {
+            $res = array('id_activo_fijo' => '', 'placa' => '', 'cod_articulo' => '', 'nom_articulo' => '');
+        }
+        $cmd = null;
+        return $res;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
 
 //BITACORA DE MENSAJES A UN ARCHIVO DE ACCIONES REALIZADAS
 function bitacora($accion, $opcion, $detalle, $id_usuario, $login) {
@@ -127,15 +156,18 @@ function area_principal($cmd){
     try {
  
         $res = array();
-        $sql = "SELECT id_area,nom_area,id_centrocosto FROM far_centrocosto_area where id_area = 1;";
-
+        $sql = "SELECT far_centrocosto_area.id_area,far_centrocosto_area.nom_area,far_centrocosto_area.id_responsable,
+                    CONCAT_WS(' ',usr.apellido1,usr.apellido2,usr.nombre1,usr.nombre2) AS nom_responsable
+                FROM far_centrocosto_area 
+                INNER JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_centrocosto_area.id_responsable)
+                WHERE id_area = 1";
         $rs = $cmd->query($sql);
         $obj = $rs->fetch();
   
         if (isset($obj['id_area'])) {
-            $res = array('id_area' => $obj['id_area'], 'nom_area' => $obj['nom_area']);
+            $res = array('id_area' => $obj['id_area'], 'nom_area' => $obj['nom_area'], 'id_responsable' => $obj['id_responsable'], 'nom_responsable' => $obj['nom_responsable']);
         } else {
-            $res = array('id_area' => '', 'nom_area' => 'No Existe Area Principal', 'id_area' => '');    
+            $res = array('id_area' => '', 'nom_area' => 'No Existe Area Principal', 'id_responsable' => '', 'nom_responsable' => '');    
         }
   
         $cmd = null;

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header('Location: ../../index.php');
+    echo '<script>window.location.replace("../../index.php");</script>';
     exit();
 }
 
@@ -92,9 +92,9 @@ try {
                 <th>Fecha Factura</th>
                 <th>Detalle</th>
                 <th>Tercero</th>
-                <th>Tipo Ingreso</th>
-                <th>Vr. Total</th>
+                <th>Tipo Ingreso</th>                
                 <th>Sede</th>
+                <th>Vr. Total</th>
                 <th>Estado</th>
             </tr>    
         </thead>
@@ -111,9 +111,9 @@ try {
                         <td>' . $obj['fec_factura'] . '</td> 
                         <td style="text-align:left">' . $obj['detalle']. '</td>   
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_tipo_ingreso']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']). '</td>   
+                        <td>' . mb_strtoupper($obj['nom_tipo_ingreso']) . '</td>                           
                         <td>' . mb_strtoupper($obj['nom_sede']) . '</td>   
+                        <td>' . formato_valor($obj['val_total']). '</td>   
                         <td>' . $obj['nom_estado']. '</td></tr>';
             }
             echo $tabla;

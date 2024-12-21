@@ -117,7 +117,7 @@
         }
     });
 
-    $('#divForms').on("dblclick", "#txt_id_pedido", function() {
+    $('#divForms').on("dblclick", "#txt_des_pedido", function() {
         if ($('#divPedido').is(':visible')) {
             let id_sede = $('#id_txt_sede').val(),
                 id_bodega = $('#id_txt_nom_bod').val();
@@ -392,7 +392,7 @@
                 type: 'POST',
                 url: 'editar_ingresos_detalles.php',
                 dataType: 'json',
-                data: data + "&id_ingreso=" + $('#id_ingreso').val() + '&oper=add'
+                data: data + "&id_ingreso=" + $('#id_ingreso').val() + "&id_pedido=" + $('#txt_id_pedido').val() + '&oper=add'
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
                     let pag = ($('#id_detalle').val() == -1) ? 0 : $('#tb_ingresos_detalles').DataTable().page.info().page;

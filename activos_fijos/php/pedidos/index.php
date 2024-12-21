@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 
@@ -62,7 +62,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
                                 </div>                                
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
+                                    <select class="filtro form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estados_pedidos('--Estado--') ?>
                                     </select>
                                 </div>
@@ -92,10 +92,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>No. Pedido</th>
                                         <th>Fecha Pedido</th>
                                         <th>Hora Pedido</th>                                        
-                                        <th>Detalle</th>
-                                        <th>Vr. Total</th>
+                                        <th>Detalle</th>                                        
                                         <th>Sede</th>
-                                        <th>Estado</th>
+                                        <th>Vr. Total</th>
+                                        <th>Id.Estado</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>

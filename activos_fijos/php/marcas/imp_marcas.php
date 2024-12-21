@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header('Location: ../../index.php');
+    echo '<script>window.location.replace("../../index.php");</script>';
     exit();
 }
 
@@ -17,8 +17,7 @@ if (isset($_POST['nombre']) && $_POST['nombre']) {
 }
 
 try {
-    $sql = "SELECT id,descripcion
-            FROM acf_marca $where ORDER BY id DESC";
+    $sql = "SELECT id,descripcion FROM acf_marca $where ORDER BY id DESC";
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
 } catch (PDOException $e) {

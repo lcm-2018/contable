@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -34,16 +34,16 @@ $obj = $rs->fetch();
             <!--Formulario de registro de Ordenes de Ingreso-->
             <form id="frm_reg_componentes">
                 <input type="hidden" id="id_hv" name="id_hv" value="<?php echo $id_hv ?>">
-                <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <label class="small">Articulo</label>
-                        <input type="text" class="form-control form-control-sm" id="nom_articulo_componente" value="<?php echo $obj['nom_articulo'] ?> " readonly="readonly">
-                    </div>
-                    <div class="form-group col-md-4">
+                <div class="form-row">                    
+                    <div class="form-group col-md-3">
                         <label class="small">Placa</label>
                         <input type="text" class="form-control form-control-sm" id="placa_componente" value="<?php echo $obj['placa'] ?>" readonly="readonly">
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-7">
+                        <label class="small">Articulo</label>
+                        <input type="text" class="form-control form-control-sm" id="nom_articulo_componente" value="<?php echo $obj['nom_articulo'] ?> " readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-2">
                         <label class="small">No. Serial</label>
                         <input type="text" class="form-control form-control-sm" id="serial_componente" value="<?php echo $obj['num_serial'] ?>" readonly="readonly">
                     </div>

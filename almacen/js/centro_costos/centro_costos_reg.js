@@ -5,9 +5,9 @@
             buttons: [{
                 action: function(e, dt, node, config) {
                     $.post("frm_reg_centrocostos_cta.php", { id_cencos: $('#id_centrocosto').val() }, function(he) {
-                        $('#divTamModalReg').removeClass('modal-xl');
+                        $('#divTamModalReg').removeClass('modal-lg');
                         $('#divTamModalReg').removeClass('modal-sm');
-                        $('#divTamModalReg').addClass('modal-lg');
+                        $('#divTamModalReg').addClass('modal-xl');
                         $('#divModalReg').modal('show');
                         $("#divFormsReg").html(he);
                     });

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -13,8 +13,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_med = isset($_POST['id_med']) ? $_POST['id_med'] : -1;
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT far_alm_pedido_detalle.*,
-            far_medicamentos.nom_medicamento AS nom_articulo
+
+$sql = "SELECT far_alm_pedido_detalle.*,far_medicamentos.nom_medicamento AS nom_articulo
         FROM far_alm_pedido_detalle
         INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_alm_pedido_detalle.id_medicamento)
         WHERE far_alm_pedido_detalle.id_ped_detalle=" . $id . " LIMIT 1";

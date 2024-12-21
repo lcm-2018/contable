@@ -70,6 +70,7 @@ $id_bodega = isset($_POST['id_bodega']) && $_POST['id_bodega'] ? $_POST['id_bode
                 processing: true,
                 serverSide: true,
                 searching: false,
+                autoWidth: false,
                 ajax: {
                     url: 'buscar_pedidos_lista.php',
                     type: 'POST',
@@ -88,10 +89,10 @@ $id_bodega = isset($_POST['id_bodega']) && $_POST['id_bodega'] ? $_POST['id_bode
                     { 'data': 'fec_pedido' },                    
                     { 'data': 'detalle'  }
                 ],
-                columnDefs: [{
-                    targets: [2],
-                    class: 'text-wrap'
-                }],
+                columnDefs: [
+                    { class: 'text-wrap', targets: [3] },
+                    { width: '5%', targets: [0,1,2] }
+                ],
                 order: [
                     [0, "desc"]
                 ],

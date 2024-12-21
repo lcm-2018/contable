@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -83,9 +83,9 @@ if (!empty($objs)) {
             "num_pedido" => $obj['num_pedido'],
             "fec_pedido" => $obj['fec_pedido'],
             "hor_pedido" => $obj['hor_pedido'],
-            "detalle" => $obj['detalle'],
-            "val_total" => formato_valor($obj['val_total']),
+            "detalle" => $obj['detalle'],            
             "nom_sede" => mb_strtoupper($obj['nom_sede']),
+            "val_total" => formato_valor($obj['val_total']),
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',

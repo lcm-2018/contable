@@ -112,12 +112,12 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                 </div>  
                 <div class="form-row" id="divPedido" <?php echo $obj['orden_compra'] == 1 ? '' : 'style="display: none;"' ?>>
                     <div class="form-group col-md-1">
-                        <label for="" class="small">Id. Pedido</label>
+                        <label for="txt_id_pedido" class="small">Id. Pedido</label>
                         <input type="text" class="form-control form-control-sm" id="txt_id_pedido" name="txt_id_pedido" class="small" value="<?php echo $obj['id_pedido'] ?>" readonly="readonly">
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="txt_det_ped" class="small">Pedido para Orden de Coampra</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_des_pedido" name="txt_des_pedido" class="small" value="<?php echo $obj['des_pedido'] ?>" readonly="readonly">
+                        <label for="txt_des_pedido" class="small">Pedido para Orden de Coampra</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_des_pedido" name="txt_des_pedido" class="small" value="<?php echo $obj['des_pedido'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Pedido">
                     </div>
                 </div>    
                 <div class="form-row">     

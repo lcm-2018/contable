@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header('Location: ../../index.php');
+    echo '<script>window.location.replace("../../index.php");</script>';
     exit();
 }
 $data = isset($_POST['xls']) ? $_POST['xls'] : exit('Acción no permitida');

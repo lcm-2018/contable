@@ -69,6 +69,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                 processing: true,
                 serverSide: true,
                 searching: false,
+                autoWidth: false,
                 ajax: {
                     url: 'buscar_articulos_act_lista.php',
                     type: 'POST',
@@ -86,10 +87,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     { 'data': 'existencia'  },
                     { 'data': 'val_promedio' },
                 ],
-                columnDefs: [{
-                    targets: [2],
-                    class: 'text-wrap'
-                }],
+                columnDefs: [
+                    { class: 'text-wrap', targets: [2] },
+                    { width: '5%', targets: [0,1,3,4] }
+                ],
                 order: [
                     [0, "desc"]
                 ],

@@ -29,7 +29,6 @@ if (empty($obj)) {
     //Inicializa variable por defecto
     $obj['id_centrocosto'] = 0;
     $obj['id_tipo_area'] = 0;
-    $obj['id_responsable'] = 0;
     $obj['id_sede'] = 0;
 }
 

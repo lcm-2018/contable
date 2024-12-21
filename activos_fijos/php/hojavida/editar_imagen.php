@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -35,7 +35,18 @@ try {
                 if ($imagen && file_exists($ruta . $imagen)) {
                     unlink($ruta . $imagen);                    
                 }
-                $res['nombre_imagen'] = '';
+
+                $sql = "UPDATE acf_hojavida SET imagen=:imagen WHERE id_activo_fijo=:id_hv";
+                $sql = $cmd->prepare($sql);
+                $sql->bindValue(':imagen', '');
+                $sql->bindValue(':id_hv', $id_hv, PDO::PARAM_INT);
+                $updated = $sql->execute();
+                
+                if ($updated) {
+                    $res['nombre_imagen'] = '';
+                } else {
+                    $res['mensaje'] = $sql->errorInfo()[2];
+                }                
             }    
 
             if ($_POST['act_imagen'] == 1 && $res['mensaje'] == 'ok'){
@@ -53,7 +64,6 @@ try {
                     $sql->bindValue(':id_usr_actualiza', $id_usr_crea, PDO::PARAM_INT);
                     $sql->bindValue(':fec_actualiza', $fecha_crea);
                     $sql->bindValue(':id_hv', $id_hv, PDO::PARAM_INT);
-
                     $updated = $sql->execute();
 
                     if ($updated) {

@@ -100,8 +100,8 @@ try {
             <td>Sede</td>
             <td>Bodega</td>
             <td>Tipo de Ingreso</td>
-            <td>No. Factura</td>
-            <td>Fecha Factura</td>
+            <td>No. Acta y/o Remisión</td>
+            <td>Fecha Acta y/o Remisión</td>
             <td>Proveedor</td>
         </tr>
         <tr>

@@ -4,7 +4,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -23,19 +23,19 @@ $dir = $_POST['order'][0]['dir'];
 $where = " WHERE 1";
 
 if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND FM.nom_medicamento='" . $_POST['nombre'] . "'";
+    $where .= " AND FM.nom_medicamento LIKE '%" . $_POST['nombre'] . "%'";
 }
 if (isset($_POST['placa']) && $_POST['placa']) {
-    $where .= " AND HV.placa='" . $_POST['placa'] . "'";
+    $where .= " AND HV.placa LIKE '" . $_POST['placa'] . "%'";
 }
 if (isset($_POST['num_serial']) && $_POST['num_serial']) {
-    $where .= " AND HV.num_serial='" . $_POST['num_serial'] . "'";
+    $where .= " AND HV.num_serial LIKE '" . $_POST['num_serial'] . "%'";
 }
 if (isset($_POST['marca']) && $_POST['marca']) {
-    $where .= " AND M.id=" . $_POST['marca'] . "";
+    $where .= " AND HV.id_marca=" . $_POST['marca'];
 }
 if (isset($_POST['tipoactivo']) && $_POST['tipoactivo']) {
-    $where .= " AND tipo_activo=" . $_POST['tipoactivo'];
+    $where .= " AND HV.tipo_activo=" . $_POST['tipoactivo'];
 }
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND HV.estado=" . $_POST['estado'];
@@ -53,8 +53,8 @@ try {
 
     //Consulta el total de registros aplicando el filtro
     $sql = "SELECT COUNT(*) AS total FROM acf_hojavida HV
-            INNER JOIN far_medicamentos FM On (FM.id_med = HV.id_articulo)
-            INNER JOIN acf_marca M ON (M.id = HV.id_marca) $where";
+            INNER JOIN far_medicamentos AS FM On (FM.id_med = HV.id_articulo)
+            INNER JOIN acf_marca AS MA ON (MA.id = HV.id_marca) $where";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
@@ -63,8 +63,9 @@ try {
     $sql = "SELECT HV.id_activo_fijo,
                 FM.cod_medicamento cod_articulo,FM.nom_medicamento nom_articulo,
                 HV.placa,HV.num_serial,
-                M.descripcion marca,HV.valor,
-                S.nom_sede,AR.nom_area,
+                MA.descripcion marca,HV.valor,
+                SE.nom_sede,AR.nom_area,
+                CONCAT_WS(' ',US.apellido1,US.apellido2,US.nombre1,US.nombre2) AS nom_responsable,
                 CASE HV.tipo_activo WHEN 1 THEN 'PROPIEDAD, PLANTA Y EQUIPO' WHEN 2 THEN 'PROPIDAD PARA LA VENTA' 
                                     WHEN 3 THEN 'PROPIEDAD DE INVERSION' END AS tipo_activo,
                 HV.estado,
@@ -72,9 +73,10 @@ try {
                                     WHEN 4 THEN 'INACTIVO' WHEN 5 THEN 'DADO DE BAJA' END AS nom_estado
             FROM acf_hojavida HV
             INNER JOIN far_medicamentos FM On (FM.id_med = HV.id_articulo)
-            INNER JOIN acf_marca M ON (M.id = HV.id_marca)
-            INNER JOIN tb_sedes S ON (S.id_sede=HV.id_sede)
-            INNER JOIN far_centrocosto_area AR ON (AR.id_area=HV.id_area)
+            INNER JOIN acf_marca MA ON (MA.id = HV.id_marca)
+            LEFT JOIN tb_sedes SE ON (SE.id_sede=HV.id_sede)
+            LEFT JOIN far_centrocosto_area AR ON (AR.id_area=HV.id_area)
+            LEFT JOIN seg_usuarios_sistema AS US ON (US.id_usuario=HV.id_responsable)
             $where ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -98,28 +100,29 @@ if (!empty($objs)) {
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }        
         if (PermisosUsuario($permisos, 5704, 3) || $id_rol == 1) {
-            $imagen =  '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_imagen" title="Imagen"><span class="fas fa-file-image-o fa-lg"></span></a>';
+            $imagen =  '<a value="' . $id . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_imagen" title="Imagen"><span class="fas fa-file-image-o fa-lg"></span></a>';
         }
         if (PermisosUsuario($permisos, 5704, 3) || $id_rol == 1) {
-            $componente =  '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_componente" title="Componente"><span class="fas fa-laptop fa-lg"></span></a>';
+            $componente =  '<a value="' . $id . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_componente" title="Componentes"><span class="fas fa-laptop fa-lg"></span></a>';
         }
         if (PermisosUsuario($permisos, 5704, 3) || $id_rol == 1) {
-            $archivos =  '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_archivos" title="Archivos"><span class="fas fa-paperclip fa-lg"></span></a>';
+            $archivos =  '<a value="' . $id . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_archivos" title="Archivos Anexos"><span class="fas fa-paperclip fa-lg"></span></a>';
         }
         if (PermisosUsuario($permisos, 5704, 4) || $id_rol == 1) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
         $data[] = [
             "id" => $id,
+            "placa" => $obj['placa'],            
             "cod_articulo" => $obj['cod_articulo'],
-            "nom_articulo" => $obj['nom_articulo'],
-            "placa" => $obj['placa'],
+            "nom_articulo" => $obj['nom_articulo'],            
             "num_serial" => $obj['num_serial'],
             "marca" => $obj['marca'],
             "valor" => $obj['valor'],
             "tipo_activo" => $obj['tipo_activo'],
             "nom_sede" => $obj['nom_sede'],
             "nom_area" => $obj['nom_area'],
+            "nom_responsable" => $obj['nom_responsable'],
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $imagen . $componente . $archivos . $eliminar . '</div>',

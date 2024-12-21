@@ -20,6 +20,26 @@ function sedes($cmd, $titulo = '', $id = 0)
     }
 }
 
+function usuarios($cmd, $titulo = '', $id = 0)
+{
+    try {
+        echo '<option value="">' . $titulo . '</option>';
+        $sql = "SELECT id_usuario,CONCAT_WS(' ',apellido1,apellido2,nombre1,nombre2) AS nom_usuario FROM seg_usuarios_sistema  WHERE id_usuario<>0";
+        $rs = $cmd->query($sql);
+        $objs = $rs->fetchAll();
+        foreach ($objs as $obj) {
+            if ($obj['id_usuario']  == $id) {
+                echo '<option value="' . $obj['id_usuario'] . '" selected="selected">' . $obj['nom_usuario'] . '</option>';
+            } else {
+                echo '<option value="' . $obj['id_usuario'] . '">' . $obj['nom_usuario'] . '</option>';
+            }
+        }
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
 function sedes_usuario($cmd, $titulo = '', $id = 0)
 {
     try {
@@ -91,11 +111,11 @@ function tipo_ingreso($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,es_int_ext FROM far_orden_ingreso_tipo";
+        $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,es_int_ext,orden_compra FROM far_orden_ingreso_tipo";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
-            $dtad = 'data-intext="' . $obj['es_int_ext'] . '"';
+            $dtad = 'data-intext="' . $obj['es_int_ext'] . '"' . 'data-ordcom="' . $obj['orden_compra'] . '"';
             if ($obj['id_tipo_ingreso']  == $id) {
                 echo '<option value="' . $obj['id_tipo_ingreso'] . '"' . $dtad . ' selected="selected">' . $obj['nom_tipo_ingreso'] . '</option>';
             } else {
@@ -128,7 +148,7 @@ function marcas($cmd, $titulo = '', $id = 0)
     }
 }
 
-function estados_movimientos($titulo = '', $estado = 3)
+function estados_movimientos($titulo = '', $estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';
@@ -137,6 +157,56 @@ function estados_movimientos($titulo = '', $estado = 3)
     echo '<option value="2"' . $selected . '>CERRADO</option>';
     $selected = ($estado == 0) ? 'selected="selected"' : '';
     echo '<option value="0"' . $selected . '>ANULADO</option>';
+}
+
+function estados_mantenimiento($titulo = '', $estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>PENDIENTE</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>APROBADO</option>';
+    $selected = ($estado == 3) ? 'selected="selected"' : '';
+    echo '<option value="3"' . $selected . '>EN EJECUCION</option>';
+    $selected = ($estado == 4) ? 'selected="selected"' : '';
+    echo '<option value="4"' . $selected . '>CERRADO</option>';
+    $selected = ($estado == 0) ? 'selected="selected"' : '';
+    echo '<option value="0"' . $selected . '>ANULADO</option>';
+}
+
+function estado_general_activo($titulo = '', $estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>BUENO</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>REGULAR</option>';
+    $selected = ($estado == 3) ? 'selected="selected"' : '';
+    echo '<option value="3"' . $selected . '>MALO</option>';
+    $selected = ($estado == 4) ? 'selected="selected"' : '';
+    echo '<option value="4"' . $selected . '>SIN SERVICO</option>';
+}
+
+function estados_detalle_mantenimiento($titulo = '', $estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>PENDIENTE</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>EN MANTENIMIENTO</option>';
+    $selected = ($estado == 3) ? 'selected="selected"' : '';
+    echo '<option value="3"' . $selected . '>FINALIZADO</option>';
+}
+
+function tipos_mantenimiento($titulo = '', $estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>PREVENTIVO</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>CORRECTIVO INTERNO</option>';
+    $selected = ($estado == 3) ? 'selected="selected"' : '';
+    echo '<option value="3"' . $selected . '>CORRECTIVO EXTERNO</option>';
 }
 
 function estados_pedidos($titulo = '', $estado = -1)
@@ -147,27 +217,29 @@ function estados_pedidos($titulo = '', $estado = -1)
     $selected = ($estado == 2) ? 'selected="selected"' : '';
     echo '<option value="2"' . $selected . '>CONFIRMADO</option>';
     $selected = ($estado == 3) ? 'selected="selected"' : '';
-    echo '<option value="2"' . $selected . '>ACEPTADO</option>';
+    echo '<option value="3"' . $selected . '>ACEPTADO</option>';
     $selected = ($estado == 4) ? 'selected="selected"' : '';
-    echo '<option value="2"' . $selected . '>CERRADO</option>';
+    echo '<option value="4"' . $selected . '>CERRADO</option>';
     $selected = ($estado == 0) ? 'selected="selected"' : '';
     echo '<option value="0"' . $selected . '>ANULADO</option>';
 }
 
-function estado_general_activo($titulo = '', $estado = 3)
+function estado_activo($titulo = '', $estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';
-    echo '<option value="1"' . $selected . '>BUENO</option>';
+    echo '<option value="1"' . $selected . '>ACTIVO</option>';
     $selected = ($estado == 2) ? 'selected="selected"' : '';
-    echo '<option value="2"' . $selected . '>REGULAR</option>';
+    echo '<option value="2"' . $selected . '>PARA MANTENIMIENTO</option>';
     $selected = ($estado == 3) ? 'selected="selected"' : '';
-    echo '<option value="3"' . $selected . '>MALO</option>';
+    echo '<option value="3"' . $selected . '>EN MANTENIMIENTO</option>';
     $selected = ($estado == 4) ? 'selected="selected"' : '';
-    echo '<option value="4"' . $selected . '>FUERA DE SERVICO</option>';
+    echo '<option value="4"' . $selected . '>INACTIVO</option>';
+    $selected = ($estado == 5) ? 'selected="selected"' : '';
+    echo '<option value="5"' . $selected . '>DADO DE BAJA</option>';
 }
 
-function tipo_documento_activo($titulo = '', $estado = 3)
+function tipo_documento_activo($titulo = '', $estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';
@@ -179,23 +251,7 @@ function tipo_documento_activo($titulo = '', $estado = 3)
 
 }
 
-function estado_activo($titulo = '', $estado = 0)
-{
-    echo '<option value="">' . $titulo . '</option>';
-    $selected = ($estado == 1) ? 'selected="selected"' : '';
-    echo '<option value="1"' . $selected . '>ACTIVO</option>';
-    $selected = ($estado == 2) ? 'selected="selected"' : '';
-    echo '<option value="2"' . $selected . '>PARA MANTENIMIENTO</option>';    
-    $selected = ($estado == 3) ? 'selected="selected"' : '';
-    echo '<option value="3"' . $selected . '>EN MANTENIMIENTO</option>';
-    $selected = ($estado == 4) ? 'selected="selected"' : '';
-    echo '<option value="4"' . $selected . '>INACTIVO</option>';
-    $selected = ($estado == 5) ? 'selected="selected"' : '';
-    echo '<option value="5"' . $selected . '>DADO DE BAJA</option>';
-
-}
-
-function riesgos($titulo = '', $riesgo = 0)
+function riesgos($titulo = '', $riesgo = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($riesgo == 1) ? 'selected="selected"' : '';
@@ -207,7 +263,7 @@ function riesgos($titulo = '', $riesgo = 0)
 
 }
 
-function usos($titulo = '', $uso = 0)
+function usos($titulo = '', $uso = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($uso == 1) ? 'selected="selected"' : '';
@@ -219,7 +275,7 @@ function usos($titulo = '', $uso = 0)
 
 }
 
-function calif4725($titulo = '', $calif = 0)
+function calif4725($titulo = '', $calif = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($calif == 1) ? 'selected="selected"' : '';
@@ -241,7 +297,7 @@ function iva($valor = 0)
     echo '<option value="19"' . $selected . '>19</option>';
 }
 
-function tipos_activo($titulo = '', $valor = 0)
+function tipos_activo($titulo = '', $valor = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($valor == 1) ? 'selected="selected"' : '';
@@ -250,33 +306,6 @@ function tipos_activo($titulo = '', $valor = 0)
     echo '<option value="2"' . $selected . '>PROPIEDAD PARA LA VENTA</option>';
     $selected = ($valor == 3) ? 'selected="selected"' : '';
     echo '<option value="3"' . $selected . '>PROPIEDAD DE INVERSION</option>';
-}
-
-
-function articulos_ActivosFijos($cmd, $titulo = '', $id = 0)
-{
-    try {
-        echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT FM.id_med,
-                    FM.cod_medicamento,
-                    FM.nom_medicamento
-                FROM far_medicamentos FM 
-                INNER JOIN far_subgrupos SG ON SG.id_subgrupo = FM.id_subgrupo 
-                INNER JOIN far_grupos G ON G.id_grupo = SG.id_grupo
-                WHERE FM.estado=1 AND G.id_grupo IN (3,4,5)";
-        $rs = $cmd->query($sql);
-        $objs = $rs->fetchAll();
-        foreach ($objs as $obj) {
-            if ($obj['id_med']  == $id) {
-                echo '<option value="' . $obj['id_med'] . '" selected="selected">' . $obj['nom_medicamento'] . '</option>';
-            } else {
-                echo '<option value="' . $obj['id_med'] . '">' . $obj['nom_medicamento'] . '</option>';
-            }
-        }
-        $cmd = null;
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-    }
 }
 
 function subgrupo_articulo($cmd, $titulo = '', $id = 0)
@@ -299,7 +328,7 @@ function subgrupo_articulo($cmd, $titulo = '', $id = 0)
     }
 }
 
-function estados_registros($titulo = '',$estado = 2)
+function estados_registros($titulo = '',$estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';
@@ -308,7 +337,7 @@ function estados_registros($titulo = '',$estado = 2)
     echo '<option value="0"' . $selected . '>INACTIVO</option>';
 }
 
-function estados_sino($titulo = '',$estado = 2)
+function estados_sino($titulo = '',$estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';

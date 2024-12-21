@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -46,7 +46,7 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_medicamentos.id_med,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-                    IF(acf_orden_ingreso_detalle.valor IS NULL,0,acf_orden_ingreso_detalle.valor) AS valor
+                    acf_orden_ingreso_detalle.valor,e.existencia
             FROM far_medicamentos
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)
             LEFT JOIN (SELECT acf_orden_ingreso_detalle.id_articulo,MAX(acf_orden_ingreso_detalle.id_ing_detalle) AS id 
@@ -54,7 +54,10 @@ try {
                         INNER JOIN acf_orden_ingreso ON (acf_orden_ingreso.id_ingreso=acf_orden_ingreso_detalle.id_ingreso)
                         WHERE acf_orden_ingreso.estado=2
                         GROUP BY acf_orden_ingreso_detalle.id_articulo) AS v ON (v.id_articulo=far_medicamentos.id_med)
-            LEFT JOIN acf_orden_ingreso_detalle ON (acf_orden_ingreso_detalle.id_ing_detalle=v.id)"            
+            LEFT JOIN acf_orden_ingreso_detalle ON (acf_orden_ingreso_detalle.id_ing_detalle=v.id)
+            LEFT JOIN (SELECT id_articulo, COUNT(*) AS existencia FROM acf_hojavida
+                       WHERE estado IN (1,2,3,4)
+                       GROUP BY id_articulo) AS e ON (e.id_articulo=far_medicamentos.id_med)"            
             . $where . " ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -71,7 +74,8 @@ if (!empty($objs)) {
             "id_med" => $obj['id_med'],
             "cod_medicamento" => $obj['cod_medicamento'],
             "nom_medicamento" => $obj['nom_medicamento'],
-            "valor" => $obj['valor']
+            "existencia" => $obj['existencia'],
+            "valor" => formato_valor($obj['valor'])
         ];
     }
 }

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -29,8 +29,6 @@ if (empty($obj)) {
     //Inicializa variable por defecto
     $obj['estado'] = 1;
 }
-$imprimir = $id != -1 ? '' : 'disabled="disabled"';
-
 ?>
 
 <div class="px-0">
@@ -83,7 +81,6 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
     </div>
     <div class="text-center pt-3">    
         <button type="button" class="btn btn-primary btn-sm" id="btn_guardar">Guardar</button>
-        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir" <?php echo $imprimir ?>>Imprimir</button>
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>

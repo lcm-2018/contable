@@ -65,10 +65,10 @@
             let rows = table.rows({ filter: 'applied' }).count();
             if (rows > 0) {
                 $('#sl_tip_ing').prop('disabled', true);
-                $('#txt_id_pedido').prop('disabled', true);
+                $('#txt_des_pedido').prop('disabled', true);
             } else {
                 $('#sl_tip_ing').prop('disabled', false);
-                $('#txt_id_pedido').prop('disabled', false);
+                $('#txt_des_pedido').prop('disabled', false);
             }
         });
 

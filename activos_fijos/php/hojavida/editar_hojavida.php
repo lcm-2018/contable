@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -28,14 +28,14 @@ try {
         
             if ($id_hv == -1) {                
                 $sql = "INSERT INTO acf_hojavida (
-                    placa,num_serial,id_marca,valor,tipo_activo,id_articulo,modelo,id_sede,id_area,id_proveedor,lote,fecha_fabricacion,
+                    placa,num_serial,id_marca,valor,tipo_activo,id_articulo,modelo,id_sede,id_area,id_responsable,id_proveedor,lote,fecha_fabricacion,
                     reg_invima,fabricante,lugar_origen,representante,dir_representante,tel_representante,recom_fabricante,
                     id_tipo_ingreso,fecha_adquisicion,fecha_instalacion,periodo_garantia,vida_util,calif_4725,calibracion,
                     vol_min,vol_max,frec_min,frec_max,pot_min,pot_max,cor_min,cor_max,temp_min,temp_max,riesgo,uso,
                     cb_diagnostico,cb_prevencion,cb_rehabilitacion,cb_analisis_lab,cb_trat_mant,estado_general,
                     causa_est_general,fecha_fuera_servicio,id_usr_crea,fec_creacion,id_usr_actualiza,fec_actualiza,estado
                 ) VALUES (
-                    :placa,:num_serial,:id_marca,:valor,:tipo_activo,:id_articulo,:modelo,:id_sede,:id_area,:id_proveedor,:lote,:fecha_fabricacion,
+                    :placa,:num_serial,:id_marca,:valor,:tipo_activo,:id_articulo,:modelo,:id_sede,:id_area,:id_responsable,:id_proveedor,:lote,:fecha_fabricacion,
                     :reg_invima,:fabricante,:lugar_origen,:representante,:dir_representante,:tel_representante,:recom_fabricante,
                     :id_tipo_ingreso,:fecha_adquisicion,:fecha_instalacion,:periodo_garantia,:vida_util,:calif_4725,:calibracion,
                     :vol_min,:vol_max,:frec_min,:frec_max,:pot_min,:pot_max,:cor_min,:cor_max,:temp_min,:temp_max,:riesgo,:uso,
@@ -54,6 +54,7 @@ try {
                     ':modelo' => $_POST['modelo'],
                     ':id_sede' => $_POST['id_sede'],
                     ':id_area' => $_POST['id_area'],
+                    ':id_responsable' => $_POST['id_responsable'],
                     ':id_proveedor' => $_POST['id_proveedor'] ? $_POST['id_proveedor'] : 0,
                     ':lote' => $_POST['lote'],
                     ':fecha_fabricacion' => $_POST['fecha_fabricacion'] ? date('Y-m-d', strtotime($_POST['fecha_fabricacion'])) : null,

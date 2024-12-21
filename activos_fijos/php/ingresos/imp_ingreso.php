@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header('Location: ../../index.php');
+    echo '<script>window.location.replace("../../index.php");</script>';
     exit();
 }
 
@@ -96,9 +96,9 @@ try {
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td>Sede</td>
-            <td>Tipo de Ingreso</td>
-            <td>No. Factura</td>
-            <td>Fecha Factura</td>
+            <td>Tipo de Ingreso</td>            
+            <td>No. Acta y/o Remisión</td>
+            <td>Fecha Acta y/o Remisión</td>
             <td colspan="2">Proveedor</td>
         </tr>
         <tr>

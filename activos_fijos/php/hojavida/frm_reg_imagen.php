@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -12,11 +12,13 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id_hv']) ? $_POST['id_hv'] : -1;
-$sql = "SELECT imagen
-        FROM acf_hojavida
-        WHERE id_activo_fijo=" . $id . " LIMIT 1";
+$sql = "SELECT HV.imagen,HV.placa,HV.num_serial,FM.nom_medicamento nom_articulo
+        FROM acf_hojavida AS HV
+        INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
+        WHERE HV.id_activo_fijo=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
+
 ?>
   
 <div class="px-0">
@@ -28,6 +30,18 @@ $obj = $rs->fetch();
             <form id="frm_reg_hojavida" enctype="multipart/formdata">
                 <input type="hidden" id="id_hv" name="id_hv" value="<?php echo $id ?>">
                 <div class=" form-row">
+                    <div class="form-group col-md-3">
+                        <label class="small">Placa</label>
+                        <input type="text" class="form-control form-control-sm" id="placa_componente" value="<?php echo $obj['placa'] ?>" readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="small">Articulo</label>
+                        <input type="text" class="form-control form-control-sm" id="nom_articulo_componente" value="<?php echo $obj['nom_articulo'] ?> " readonly="readonly">
+                    </div>                    
+                    <div class="form-group col-md-3">
+                        <label class="small">No. Serial</label>
+                        <input type="text" class="form-control form-control-sm" id="serial_componente" value="<?php echo $obj['num_serial'] ?>" readonly="readonly">
+                    </div>
                     <div class="form-group col-md-12">
                         <label class="small text-left">Archivo Imagen</label>
                         <div class="input-group mb-3">                             
@@ -40,7 +54,7 @@ $obj = $rs->fetch();
                         <div class="input-group mb-3">                             
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input form-control-sm" id="uploadImageAcf" accept=".jpg,.jpeg,.png">
-                                <label class="custom-file-label" for="customFile">Seleccionar archivo</label>
+                                <label class="custom-file-label" for="customFile" id="imagen_sel">Seleccionar archivo</label>
                             </div>
                         </div>
                     </div>

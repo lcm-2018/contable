@@ -106,6 +106,7 @@
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
         var error = verifica_vacio($('#txt_nom_area'));
+        error += verifica_vacio_2($('#id_txt_responsable'), $('#txt_responsable'));
         error += verifica_vacio($('#sl_centrocosto'));
         error += verifica_vacio($('#sl_sede'));
 

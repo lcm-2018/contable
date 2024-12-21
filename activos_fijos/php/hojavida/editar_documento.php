@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -20,7 +20,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
     if ((PermisosUsuario($permisos, 5704, 3) && $oper == 'add' || $id_rol == 1)) {
-
+    
         $id_hv = $_POST['id_hv'];
 
         if ($id_hv > 0) {

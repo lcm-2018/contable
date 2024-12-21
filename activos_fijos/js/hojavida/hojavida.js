@@ -31,8 +31,8 @@
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
-                    data.nombre = $('#txt_nombre_filtro').val();
                     data.placa = $('#txt_placa_filtro').val();
+                    data.nombre = $('#txt_nombre_filtro').val();
                     data.num_serial = $('#txt_serial_filtro').val();
                     data.marca = $('#sl_marcas_filtro').val();
                     data.tipoactivo = $('#sl_tipoactivo_filtro').val();
@@ -41,30 +41,31 @@
             },
             columns: [
                 { 'data': 'id' }, //Index=0
+                { 'data': 'placa' },
                 { 'data': 'cod_articulo' },
                 { 'data': 'nom_articulo' },
-                { 'data': 'placa' },
                 { 'data': 'num_serial' },
                 { 'data': 'marca' },
                 { 'data': 'valor' },
                 { 'data': 'tipo_activo' },
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_area' },
+                { 'data': 'nom_responsable' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [2, 5] },
-                { type: "numeric-comma", targets: 7 },
-                { visible: false, targets: 10 },
-                { orderable: false, targets: 12 }
+                { class: 'text-wrap', targets: [3, 5] },
+                { type: "numeric-comma", targets: 6 },
+                { visible: false, targets: 11 },
+                { orderable: false, targets: 13 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 2) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
                 } else if (data.estado == 3) {
-                    $($(row).find("td")[0]).css("background-color", "red");
+                    $($(row).find("td")[0]).css("background-color", "DodgerBlue");
                 } else if (data.estado == 4) {
                     $($(row).find("td")[0]).css("background-color", "green");
                 } else if (data.estado == 5) {
@@ -106,18 +107,29 @@
         });
     });
 
+    $('#divForms').on("dblclick", "#nom_articulo", function() {
+        $.post("../common/buscar_articulos_act_frm.php", function(he) {
+            $('#divTamModalBus').removeClass('modal-sm');
+            $('#divTamModalBus').removeClass('modal-xl');
+            $('#divTamModalBus').addClass('modal-lg');
+            $('#divModalBus').modal('show');
+            $("#divFormsBus").html(he);
+        });
+    });
+
     //Guardar hoja de vida
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
 
         var error = verifica_vacio_2($('#id_sede'), $('#nom_sede'));
         error += verifica_vacio_2($('#id_area'), $('#nom_area'));
-        error += verifica_vacio($('#id_articulo'));
+        error += verifica_vacio_2($('#id_articulo'), $('#nom_articulo'));
         error += verifica_vacio($('#placa'));
         error += verifica_vacio($('#num_serial'));
         error += verifica_vacio($('#id_marca'));
         error += verifica_vacio($('#id_proveedor'));
         error += verifica_vacio($('#valor'));
+        error += verifica_vacio($('#estado_general'));
         error += verifica_vacio($('#estado'));
 
         if (error >= 1) {
@@ -258,11 +270,29 @@
     // Borrar imagen
     $('#divForms').on("click", "#btn_borrar_imagen", function() {
         $('#imagen').val('');
+        $('#uploadDocAcf').val('');
+        $('#imagen_sel').text('Seleccionar archivo');
     });
 
     /* -----------------------------------------------------
     REGISTRAR COMPONENTES
     -------------------------------------------------------- */
+
+    $('#divModalBus').on('dblclick', '#tb_articulos_activos tr', function() {
+        let data = $('#tb_articulos_activos').DataTable().row(this).data();
+        if ($("#acf_reg_hojavida").is(":visible")) {
+            $('#id_articulo').val(data.id_med);
+            $('#nom_articulo').val(data.nom_medicamento);
+            $('#divModalBus').modal('hide');
+
+        } else if ($("#frm_reg_componentes").is(":visible")) {
+            $.post("frm_reg_componente.php", { id_med: data.id_med }, function(he) {
+                $('#divTamModalReg').addClass('modal-lg');
+                $('#divModalReg').modal('show');
+                $("#divFormsReg").html(he);
+            });
+        }
+    });
 
     $('#tb_hojavida').on('click', '.btn_componente', function() {
         let id = $(this).attr('value');
@@ -287,10 +317,9 @@
     $('#divModalReg').on("click", "#btn_guardar_componente", function() {
         $('.is-invalid').removeClass('is-invalid');
 
-        var error = verifica_vacio($('#id_articulo'));
-        error += verifica_vacio($('#num_serial'));
-        error += verifica_vacio($('#id_marca'));
-        error += verifica_vacio($('#modelo'));
+        var error = verifica_vacio($('#txt_num_serial'));
+        error += verifica_vacio($('#sl_marca'));
+        error += verifica_vacio($('#txt_modelo'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');

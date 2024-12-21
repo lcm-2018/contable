@@ -77,6 +77,7 @@ $id_pedido = isset($_POST['id_pedido']) && $_POST['id_pedido'] ? $_POST['id_pedi
                 processing: true,
                 serverSide: true,
                 searching: false,
+                autoWidth: false,
                 ajax: {
                     url: 'buscar_articulos_pedido_lista.php',
                     type: 'POST',
@@ -98,10 +99,10 @@ $id_pedido = isset($_POST['id_pedido']) && $_POST['id_pedido'] ? $_POST['id_pedi
                     { 'data': 'cantidad_ing' },
                     { 'data': 'cantidad_pen' }
                 ],
-                columnDefs: [{
-                    targets: [2],
-                    class: 'text-wrap'
-                }],
+                columnDefs: [
+                    { class: 'text-wrap', targets: [2] },
+                    { width: '5%', targets: [0,1,3,4,5] }
+                ],
                 order: [
                     [0, "desc"]
                 ],

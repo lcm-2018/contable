@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -13,11 +13,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id_hv']) ? $_POST['id_hv'] : -1;
 $sql = "SELECT HV.*,
-            SD.nom_sede,
-            AR.nom_area
+            SED.nom_sede,ARE.nom_area,ART.nom_medicamento AS nom_articulo,
+            CONCAT_WS(' ',USR.apellido1,USR.apellido2,USR.nombre1,USR.nombre2) AS nom_responsable
         FROM acf_hojavida HV
-        LEFT JOIN tb_sedes SD ON (SD.id_sede=HV.id_sede)
-        LEFT JOIN far_centrocosto_area AR ON (AR.id_area=HV.id_area)
+        INNER JOIN far_medicamentos AS ART  ON (ART.id_med=HV.id_articulo)
+        LEFT JOIN tb_sedes AS SED ON (SED.id_sede=HV.id_sede)
+        LEFT JOIN far_centrocosto_area AS ARE ON (ARE.id_area=HV.id_area)
+        LEFT JOIN seg_usuarios_sistema AS USR ON (USR.id_usuario=HV.id_responsable)
         WHERE HV.id_activo_fijo=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
@@ -34,17 +36,21 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     //Inicializa variable por defecto
+    $obj['estado_general'] = 1;
     $obj['estado'] = 1;
 
     $bodega = sede_principal($cmd);
     $obj['id_sede'] = $bodega['id_sede'];
     $obj['nom_sede'] = $bodega['nom_sede'];
-
+    
     $area = area_principal($cmd);
     $obj['id_area'] = $area['id_area'];
     $obj['nom_area'] = $area['nom_area'];
+    $obj['id_responsable'] = $area['id_responsable'];
+    $obj['nom_responsable'] = $area['nom_responsable'];
 }
 $imprimir = $id != -1 ? '' : 'disabled="disabled"';
+$editar = $id != -1 ? '' : 'disabled="disabled"';
 
 ?>
 
@@ -67,16 +73,20 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <input type="text" class="form-control form-control-sm" id="nom_area" class="small" value="<?php echo $obj['nom_area'] ?>" readonly="readonly">
                         <input type="hidden" id="id_area" name="id_area" value="<?php echo $obj['id_area'] ?>">
                     </div>
-                    <div class="form-group col-md-6">
-                        <label for="id_articulo" class="small">Artículo</label>
-                        <select class="form-control form-control-sm" id="id_articulo" name="id_articulo">
-                        <?php articulos_ActivosFijos($cmd, '', $obj['id_articulo']) ?>
-                        </select>
-                    </div>                    
+                    <div class="form-group col-md-3">
+                        <label for="id_responsable" class="small">Responsable</label>
+                        <input type="text" class="form-control form-control-sm" id="nom_responsable" class="small" value="<?php echo $obj['nom_responsable'] ?>" readonly="readonly">
+                        <input type="hidden" id="id_responsable" name="id_responsable" value="<?php echo $obj['id_responsable'] ?>">
+                    </div>
                     <div class="form-group col-md-3">
                         <label for="placa" class="small">Placa</label>
                         <input type="text" class="form-control form-control-sm" id="placa" name="placa" value="<?php echo $obj['placa'] ?>">
                     </div>
+                    <div class="form-group col-md-6">
+                        <label for="nom_articulo" class="small">Articulo</label>
+                        <input type="text" class="form-control form-control-sm" id="nom_articulo" name="nom_articulo" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly" title="Doble Click para Seleccionar el Articulo">
+                        <input type="hidden" id="id_articulo" name="id_articulo" value="<?php echo $obj['id_articulo'] ?>">
+                    </div>                    
                     <div class="form-group col-md-3">
                         <label for="num_serial" class="small">No. Serial</label>
                         <input type="text" class="form-control form-control-sm" id="num_serial" name="num_serial" value="<?php echo $obj['num_serial'] ?>">
@@ -279,8 +289,5 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
     </div>  
 </div>
 
-<script>
-    // Aquí puedes agregar cualquier script adicional necesario para el funcionamiento del formulario
-</script>
 
 

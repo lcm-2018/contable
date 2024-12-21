@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -32,13 +32,12 @@ try {
                     $sql = $cmd->prepare($sql);
 
                     $sql->bindParam(':id_activo_fijo', $id_hv, PDO::PARAM_INT);
-                    $sql->bindParam(':id_articulo', $_POST['id_articulo'], PDO::PARAM_INT);
-                    $sql->bindParam(':num_serial', $_POST['num_serial'], PDO::PARAM_STR);
-                    $sql->bindParam(':id_marca', $_POST['id_marca'], PDO::PARAM_INT);
-                    $sql->bindParam(':modelo', $_POST['modelo'], PDO::PARAM_STR);
+                    $sql->bindParam(':id_articulo', $_POST['id_txt_nom_art'], PDO::PARAM_INT);
+                    $sql->bindParam(':num_serial', $_POST['txt_num_serial'], PDO::PARAM_STR);
+                    $sql->bindParam(':id_marca', $_POST['sl_marca'], PDO::PARAM_INT);
+                    $sql->bindParam(':modelo', $_POST['txt_modelo'], PDO::PARAM_STR);
                     $sql->bindParam(':id_usr_crea', $id_usr_crea, PDO::PARAM_INT);
                     $sql->bindParam(':fec_creacion', $fecha_crea, PDO::PARAM_STR);
-
                     $inserted = $sql->execute();
 
                     if ($inserted) {
@@ -55,10 +54,10 @@ try {
                             WHERE id_componente=:id_componente";        
                     $sql = $cmd->prepare($sql);
                     
-                    $sql->bindParam(':id_articulo', $_POST['id_articulo'], PDO::PARAM_INT);
-                    $sql->bindParam(':num_serial', $_POST['num_serial'], PDO::PARAM_STR);
-                    $sql->bindParam(':id_marca', $_POST['id_marca'], PDO::PARAM_INT);
-                    $sql->bindParam(':modelo', $_POST['modelo'], PDO::PARAM_STR);
+                    $sql->bindParam(':id_articulo', $_POST['id_txt_nom_art'], PDO::PARAM_INT);
+                    $sql->bindParam(':num_serial', $_POST['txt_num_serial'], PDO::PARAM_STR);
+                    $sql->bindParam(':id_marca', $_POST['sl_marca'], PDO::PARAM_INT);
+                    $sql->bindParam(':modelo', $_POST['txt_modelo'], PDO::PARAM_STR);
                     $sql->bindParam(':id_componente', $id, PDO::PARAM_INT);
 
                     $updated = $sql->execute();
@@ -78,7 +77,6 @@ try {
                 $rs = $cmd->query($sql);
                 if ($rs) {
                     $res['mensaje'] = 'ok';
-                    $res['mensaje1'] = 'ok1';
                 } else {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }

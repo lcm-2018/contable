@@ -88,6 +88,7 @@ $nom_bodega = isset($obj['nombre']) ? $obj['nombre'] : '';
                 processing: true,
                 serverSide: true,
                 searching: false,
+                autoWidth: false,
                 ajax: {
                     url: '../common/buscar_articulos_lista.php',
                     type: 'POST',
@@ -109,10 +110,10 @@ $nom_bodega = isset($obj['nombre']) ? $obj['nombre'] : '';
                     { 'data': 'val_promedio' },
                     { 'data': 'lotes' },
                 ],
-                columnDefs: [{
-                    targets: [2],
-                    class: 'text-wrap'
-                }],
+                columnDefs: [
+                    { class: 'text-wrap', targets: [2,5] },
+                    { width: '5%', targets: [0,1,3,4] }
+                ],
                 order: [
                     [0, "desc"]
                 ],

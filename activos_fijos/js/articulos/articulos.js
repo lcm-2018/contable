@@ -45,7 +45,7 @@
                 { 'data': 'top_min' },
                 { 'data': 'top_max' },
                 { 'data': 'existencia' },
-                { 'data': 'val_promedio' },
+                { 'data': 'valor' },
                 { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
@@ -185,19 +185,6 @@
             nombre: $('#txt_nombre_filtro').val(),
             subgrupo: $('#sl_subgrupo_filtro').val(),
             estado: $('#sl_estado_filtro').val()
-        }, function(he) {
-            $('#divTamModalImp').removeClass('modal-sm');
-            $('#divTamModalImp').removeClass('modal-lg');
-            $('#divTamModalImp').addClass('modal-xl');
-            $('#divModalImp').modal('show');
-            $("#divImp").html(he);
-        });
-    });
-
-    //Imprimit un Articulo
-    $('#divForms').on("click", "#btn_imprimir", function() {
-        $.post("imp_articulo.php", {
-            id: $('#id_articulo').val()
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

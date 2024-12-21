@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -21,7 +21,7 @@ try {
     if ((PermisosUsuario($permisos, 5703, 2) && $oper == 'add' && $_POST['id_ingreso'] == -1) ||
         (PermisosUsuario($permisos, 5703, 3) && $oper == 'add' && $_POST['id_ingreso'] != -1) ||
         (PermisosUsuario($permisos, 5703, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5703, 2) && PermisosUsuario($permisos, 5703, 3) && $oper == 'close') ||
+        (PermisosUsuario($permisos, 5703, 3) && $oper == 'close') ||
         (PermisosUsuario($permisos, 5703, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
 
@@ -140,12 +140,17 @@ try {
                     $sql = 'UPDATE tb_datos_ips SET num_ingresoactual=num_ingresoactual+1';
                     $rs2 = $cmd->query($sql);
 
+                    //Traer el area y responsable de almacen
+                    $area = area_principal($cmd);
+                    $id_area = $area['id_area'];
+                    $id_responsable = $area['id_responsable'];
+
                     //Crear la hojas de vida de los activos fijos
-                    $sql = "INSERT INTO acf_hojavida(id_ingreso,id_articulo,placa,num_serial,id_marca,valor,tipo_activo,id_proveedor,id_tipo_ingreso,id_sede,id_area,id_usr_crea,fec_creacion,estado) 
+                    $sql = "INSERT INTO acf_hojavida(id_ingreso,id_articulo,placa,num_serial,id_marca,valor,tipo_activo,id_proveedor,id_tipo_ingreso,id_sede,id_area,id_responsable,id_usr_crea,fec_creacion,estado_general,estado) 
                             SELECT $id,acf_orden_ingreso_acfs.id_articulo,
                                 acf_orden_ingreso_acfs.placa,acf_orden_ingreso_acfs.num_serial,acf_orden_ingreso_acfs.id_marca,
                                 acf_orden_ingreso_acfs.valor,acf_orden_ingreso_acfs.tipo_activo,acf_orden_ingreso.id_provedor,
-                                acf_orden_ingreso.id_tipo_ingreso,acf_orden_ingreso.id_sede,1,$id_usr_ope,'$fecha_ope',1
+                                acf_orden_ingreso.id_tipo_ingreso,acf_orden_ingreso.id_sede,$id_area,$id_responsable,$id_usr_ope,'$fecha_ope',1,1
                             FROM acf_orden_ingreso_acfs
                             INNER JOIN acf_orden_ingreso_detalle ON (acf_orden_ingreso_detalle.id_ing_detalle=acf_orden_ingreso_acfs.id_ing_detalle)
                             INNER JOIN acf_orden_ingreso ON (acf_orden_ingreso.id_ingreso=acf_orden_ingreso_detalle.id_ingreso)
@@ -159,8 +164,8 @@ try {
                         $cmd->commit();
                         $res['mensaje'] = 'ok';
                     } else {
-                        $res['mensaje'] = 'Error de Ejecución de Proceso';
                         $cmd->rollBack();
+                        $res['mensaje'] = 'Error de Ejecución de Proceso';                        
                     }
                 } else {
                     $res['mensaje'] = 'Debe registar los datos básicos de los Articulos: ' . $articulos_pen;                

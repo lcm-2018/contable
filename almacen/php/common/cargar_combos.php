@@ -260,9 +260,9 @@ function estados_pedidos($titulo = '', $estado = -1)
     $selected = ($estado == 2) ? 'selected="selected"' : '';
     echo '<option value="2"' . $selected . '>CONFIRMADO</option>';
     $selected = ($estado == 3) ? 'selected="selected"' : '';
-    echo '<option value="2"' . $selected . '>ACEPTADO</option>';
+    echo '<option value="3"' . $selected . '>ACEPTADO</option>';
     $selected = ($estado == 4) ? 'selected="selected"' : '';
-    echo '<option value="2"' . $selected . '>CERRADO</option>';
+    echo '<option value="4"' . $selected . '>CERRADO</option>';
     $selected = ($estado == 0) ? 'selected="selected"' : '';
     echo '<option value="0"' . $selected . '>ANULADO</option>';
 }
@@ -405,7 +405,7 @@ function lotes_articulo($cmd, $id_bodega, $id_articulo, $id_lote, $id = 0)
 }
 
 
-function estados_registros($titulo = '',$estado = 2)
+function estados_registros($titulo = '',$estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';
@@ -414,7 +414,7 @@ function estados_registros($titulo = '',$estado = 2)
     echo '<option value="0"' . $selected . '>INACTIVO</option>';
 }
 
-function estados_sino($titulo = '',$estado = 2)
+function estados_sino($titulo = '',$estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';

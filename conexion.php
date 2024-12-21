@@ -10,3 +10,4 @@ $_SESSION['urlin'] = "/contable";
 
 $ruta_firmas = '/proyecto/hc/img/firmas/';
 
+

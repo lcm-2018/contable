@@ -44,15 +44,15 @@
                 { 'data': 'fec_pedido' },
                 { 'data': 'hor_pedido' },
                 { 'data': 'detalle' },
-                { 'data': 'val_total' },
                 { 'data': 'nom_sede' },
+                { 'data': 'val_total' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4] },
-                { type: "numeric-comma", targets: 5 },
+                { class: 'text-wrap', targets: 4 },
+                { type: "numeric-comma", targets: 6 },
                 { visible: false, targets: 7 },
                 { orderable: false, targets: 9 }
             ],

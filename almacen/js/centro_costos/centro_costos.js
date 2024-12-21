@@ -183,7 +183,9 @@
     $('#divForms').on('click', '#tb_cuentas .btn_editar', function() {
         let id = $(this).attr('value');
         $.post("frm_reg_centrocostos_cta.php", { id: id }, function(he) {
-            $('#divTamModalReg').addClass('modal-lg');
+            $('#divTamModalReg').removeClass('modal-lg');
+            $('#divTamModalReg').removeClass('modal-sm');
+            $('#divTamModalReg').addClass('modal-xl');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
         });

@@ -93,7 +93,7 @@ try {
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td>Sede</td>
-            <td>Sede</td>
+            <td>Bodega</td>
             <td colspan="4">Detalle</td>
         </tr>
         <tr>

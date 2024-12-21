@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../../../index.php");
+    echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
 include '../../../conexion.php';
@@ -21,10 +21,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             <!--Formulario de busqueda de articulos-->
             <form id="frm_buscar_articulos">
                 <div class="form-row">
-                    <div class="form-group col-md-2">
+                    <div class="form-group col-md-3">
                         <input type="text" class="filtro_art form-control form-control-sm" id="txt_codigo_art_fil" placeholder="Codigo">
                     </div>
-                    <div class="form-group col-md-2">
+                    <div class="form-group col-md-3">
                         <input type="text" class="filtro_art form-control form-control-sm" id="txt_nombre_art_fil" placeholder="Nombre">
                     </div>                                        
                     <div class="form-group col-md-1">
@@ -41,6 +41,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <th>Id</th>
                             <th>Código</th>
                             <th>Artículo</th> 
+                            <th>Existencia</th> 
                             <th>Vr. Última Compra</th>                                                       
                         </tr>
                     </thead>
@@ -62,6 +63,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                 processing: true,
                 serverSide: true,
                 searching: false,
+                autoWidth: false,
                 ajax: {
                     url: '../common/buscar_articulos_act_lista.php',
                     type: 'POST',
@@ -75,12 +77,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     { 'data': 'id_med' }, //Index=0
                     { 'data': 'cod_medicamento' },
                     { 'data': 'nom_medicamento' },
-                    { 'data': 'valor' },                                        
+                    { 'data': 'existencia' },
+                    { 'data': 'valor' }
                 ],
-                columnDefs: [{
-                    targets: [2],
-                    class: 'text-wrap'
-                }],
+                columnDefs: [
+                    { class: 'text-wrap', targets: [2] },
+                    { width: '5%', targets: [0,1,3,4] }
+                ],
                 order: [
                     [0, "desc"]
                 ],

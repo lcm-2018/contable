@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header('Location: ../../index.php');
+    echo '<script>window.location.replace("../../index.php");</script>';
     exit();
 }
 
@@ -106,7 +106,7 @@ try {
                 <th>Código</th>
                 <th>Descripción</th>
                 <th>Cantidad</th>
-                <th>Valor Promedio</th>
+                <th>Valor Última Compra</th>
                 <th>Valor Total</th>
             </tr>
         </thead>

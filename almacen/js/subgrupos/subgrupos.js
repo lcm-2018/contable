@@ -77,6 +77,8 @@
     $('#tb_subgrupos').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');
         $.post("frm_reg_subgrupos.php", { id: id }, function(he) {
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
@@ -170,7 +172,9 @@
     $('#divForms').on('click', '#tb_cuentas .btn_editar', function() {
         let id = $(this).attr('value');
         $.post("frm_reg_subgrupos_cta.php", { id: id }, function(he) {
-            $('#divTamModalReg').addClass('modal-lg');
+            $('#divTamModalReg').removeClass('modal-lg');
+            $('#divTamModalReg').removeClass('modal-sm');
+            $('#divTamModalReg').addClass('modal-xl');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
         });

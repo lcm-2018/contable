@@ -42,12 +42,12 @@ if (empty($obj)) {
             <form id="frm_reg_subgrupos_cta">
                 <input type="hidden" id="id_subgrupocta" name="id_subgrupocta" value="<?php echo $id ?>">
                 <div class=" form-row">
-                    <div class="form-group col-md-7">
+                    <div class="form-group col-md-8">
                         <label for="txt_cta_con" class="small">Cuenta Contable</label>
                         <input type="text" class="form-control form-control-sm" id="txt_cta_con" value="<?php echo $obj['cuenta'] ?>">
                         <input type="hidden" id="id_txt_cta_con" name="id_txt_cta_con" value="<?php echo $obj['id_cuenta'] ?>">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label for="txt_fec_vig" class="small">Fecha Inicio de Vigencia</label>
                         <input type="date" class="form-control form-control-sm" id="txt_fec_vig" name="txt_fec_vig" value="<?php echo $obj['fecha_vigencia'] ?>">
                     </div> 

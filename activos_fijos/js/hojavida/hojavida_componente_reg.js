@@ -4,14 +4,12 @@
             dom: setdom,
             buttons: [{
                 action: function(e, dt, node, config) {
-                    $.post("frm_reg_componente.php", {
-                        id_hv: $('#id_hv').val()
-                    }, function(he) {
-                        $('#divTamModalReg').removeClass('modal-xl');
-                        $('#divTamModalReg').removeClass('modal-sm');
-                        $('#divTamModalReg').addClass('modal-lg');
-                        $('#divModalReg').modal('show');
-                        $("#divFormsReg").html(he);
+                    $.post("../common/buscar_articulos_act_frm.php", function(he) {
+                        $('#divTamModalBus').removeClass('modal-xl');
+                        $('#divTamModalBus').removeClass('modal-sm');
+                        $('#divTamModalBus').addClass('modal-lg');
+                        $('#divModalBus').modal('show');
+                        $("#divFormsBus").html(he);
                     });
                 }
             }],
