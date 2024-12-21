@@ -852,8 +852,10 @@ if ($_SESSION['navarlat'] == '1') {
                                                                         <tr>
                                                                             <th>ID</th>
                                                                             <th>Fecha</th>
+                                                                            <th>Tipo</th>
                                                                             <th>Concepto</th>
                                                                             <th>Valor</th>
+                                                                            <th>Estado</th>
                                                                             <th>Acciones</th>
                                                                         </tr>
                                                                     </thead>

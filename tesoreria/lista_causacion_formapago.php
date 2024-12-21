@@ -179,6 +179,13 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                         </div>
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="col-md-3 form-group">
+                        <label for="banco" class="small">SALDO</label>
+                        <div id="divSaldoDisp" class="form-control form-control-sm text-right" readonly></div>
+                        <input type="hidden" name="numSaldoDips" id="numSaldoDips" value="0">
+                    </div>
+                </div>
             </form>
             <table id="tableCausacionPagos" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 100%;">
                 <thead>

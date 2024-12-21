@@ -614,3 +614,17 @@ function elegirmes(id) {
         document.forms[0].submit();
     }
 }
+
+function pesos(value) {
+    // Convertir a número
+    let number = parseFloat(value);
+    if (isNaN(number)) number = 0;
+
+    // Usar Intl.NumberFormat para formatear como moneda
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP', // Moneda en pesos colombianos
+        minimumFractionDigits: 2, // Mínimo 2 decimales
+        maximumFractionDigits: 2  // Máximo 2 decimales
+    }).format(number);
+}

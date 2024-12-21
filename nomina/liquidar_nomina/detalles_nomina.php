@@ -442,6 +442,24 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `nom_otros_descuentos`.`id_empleado`
+                , SUM(`nom_liq_descuento`.`valor`) AS `valor`
+            FROM
+                `nom_liq_descuento`
+                INNER JOIN `nom_otros_descuentos` 
+                    ON (`nom_liq_descuento`.`id_dcto` = `nom_otros_descuentos`.`id_dcto`)
+            WHERE (`nom_liq_descuento`.`id_nomina` = $id_nomina)
+            GROUP BY `nom_otros_descuentos`.`id_empleado`";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 
 ?>
 <!DOCTYPE html>
@@ -467,7 +485,7 @@ try {
                                 <div class="row">
                                     <div class="col-md-6">
                                         <i class="fas fa-users fa-lg" style="color:#1D80F7"></i>
-                                        LISTA DE EMPLEADOS NOMINA LIQUIDADA <b> <?php echo isset($nombmes['nom_mes'])? $nombmes['nom_mes']: 'OTRA' ?></b>
+                                        LISTA DE EMPLEADOS NOMINA LIQUIDADA <b> <?php echo isset($nombmes['nom_mes']) ? $nombmes['nom_mes'] : 'OTRA' ?></b>
 
                                         <input type="text" id="fecLiqNomElec" value="<?php echo date('Y-m-d', strtotime($saln[0]['fec_reg'])) ?>" hidden>
                                     </div>
@@ -547,7 +565,7 @@ try {
                                                 <th colspan="3" class="text-center centro-vertical">Parafiscales</th>
                                                 <th colspan="4" class="text-center centro-vertical">Apropiaciones</th>
                                                 <th colspan="6" class="text-center centro-vertical">Seguridad Social</th>
-                                                <th colspan="4" class="text-center centro-vertical">Deducciones</th>
+                                                <th colspan="5" class="text-center centro-vertical">Deducciones</th>
                                                 <th rowspan="2" class="text-center centro-vertical">DEDUCIDO</th>
                                                 <th rowspan="2" class="text-center centro-vertical">NETO</th>
                                                 <th rowspan="2" class="text-center centro-vertical">ACCIÓN</th>
@@ -580,6 +598,7 @@ try {
                                                 <th>Embargo</th>
                                                 <th>Sindicato</th>
                                                 <th>Ret. Fte.</th>
+                                                <th>Otros</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -904,7 +923,14 @@ try {
                                                         </td>
                                                         <td class="text-right">
                                                             <?php
-                                                            $deducido = $g + $i + $j + $k + $l + $m + $n;
+                                                            $key_dcto = array_search($id, array_column($descuentos, 'id_empleado'));
+                                                            $nda =  false !== $key_dcto ? $descuentos[$key_dcto]['valor'] : 0;
+                                                            echo pesos($nda);
+                                                            ?>
+                                                        </td>
+                                                        <td class="text-right">
+                                                            <?php
+                                                            $deducido = $g + $i + $j + $k + $l + $m + $n + $nda;
                                                             echo pesos($deducido);
                                                             ?>
                                                         </td>

@@ -5,7 +5,7 @@ if (!isset($_SESSION['user'])) {
 }
 include_once '../../conexion.php';
 include_once '../../permisos.php';
-include_once '../../terceros.php';
+
 $vigencia = $_SESSION['vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -18,19 +18,20 @@ try {
                 , `ctt_estudios_previos`.`val_contrata`
                 , `tb_forma_pago_compras`.`descripcion`
                 , `ctt_estudios_previos`.`id_supervisor`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
             FROM
                 `ctt_estudios_previos`
             INNER JOIN `tb_forma_pago_compras` 
                 ON (`ctt_estudios_previos`.`id_forma_pago` = `tb_forma_pago_compras`.`id_form_pago`)
+            LEFT JOIN `tb_terceros`
+                ON (`ctt_estudios_previos`.`id_supervisor` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_compra` = '$id_adq'";
     $rs = $cmd->query($sql);
     $estudio_prev = $rs->fetch();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$id_ter_sup = $estudio_prev['id_supervisor'] > 0 ? $estudio_prev['id_supervisor'] : 0;
-$supervisor = getTerceros($id_ter_sup, $cmd);
-$cmd = null;
 $est_prev = isset($estudio_prev) ? $estudio_prev['id_est_prev'] : 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -84,8 +85,8 @@ try {
                     }
                     ?>
                 </td>
-                <td class="centro-vertical"><?php echo $id_ter_sup == '' ? 'PENDIENTE' : $supervisor[0]['nit_tercero'] ?></td>
-                <td class="centro-vertical"><?php echo mb_strtoupper($supervisor[0]['nom_tercero']) ?></td>
+                <td class="centro-vertical text-right"><?= number_format($estudio_prev['nit_tercero'], 0, ',', '.') ?></td>
+                <td class="centro-vertical"><?= mb_strtoupper($estudio_prev['nom_tercero']) ?></td>
                 <td class="centro-vertical" id="modificarEstPrev">
                     <?php
                     $editar = $borrar = null;

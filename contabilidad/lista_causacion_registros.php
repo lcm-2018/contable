@@ -278,6 +278,7 @@ if ($id_r == 3) {
                                     $editar = null;
                                     $detalles = null;
                                 }
+                                $fecha = date('Y-m-d', strtotime($ce['fecha']));
                                 if ($saldo_rp > 0) {
                     ?>
                                     <tr>

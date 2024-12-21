@@ -41,16 +41,16 @@ try {
                         ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 WHERE `id_ctb_doc` = $id_cop
                 GROUP BY `pto_cop_detalle`.`id_pto_crp_det`) AS `t1`
-                        LEFT JOIN
-                            (SELECT
-                                `pto_cop_detalle`.`id_pto_crp_det`
-                                , SUM(IFNULL(`pto_pag_detalle`.`valor`,0) - IFNULL(`pto_pag_detalle`.`valor_liberado`,0)) AS `val_pag`
-                            FROM
-                                `pto_pag_detalle`
-                                INNER JOIN `pto_cop_detalle` 
-                                    ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
-                            GROUP BY `pto_cop_detalle`.`id_pto_crp_det`) AS `t2`
-                        ON (`t1`.`id_pto_crp_det` = `t2`.`id_pto_crp_det`)";
+            LEFT JOIN
+                (SELECT
+                    `pto_cop_detalle`.`id_pto_crp_det`
+                    , SUM(IFNULL(`pto_pag_detalle`.`valor`,0) - IFNULL(`pto_pag_detalle`.`valor_liberado`,0)) AS `val_pag`
+                FROM
+                    `pto_pag_detalle`
+                    INNER JOIN `pto_cop_detalle` 
+                        ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                GROUP BY `pto_cop_detalle`.`id_pto_crp_det`) AS `t2`
+                ON (`t1`.`id_pto_crp_det` = `t2`.`id_pto_crp_det`)";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll();
     $tercero = !empty($rubros) ? $rubros[0]['id_tercero_api'] : 0;
@@ -117,10 +117,12 @@ try {
                         foreach ($rubros as $ce) {
                             $editar = $detalles = null;
                             $id_doc = 0;
+                            $valor = 0;
                             $id_det_cop = $ce['id_pto_cop_det'];
-                            $pagado = $ce['val_pag'];
-                            $obligado = $ce['valor'];
+                            $pagado = $ce['val_pag'] > 0 ? $ce['val_pag'] : 0;
+                            $obligado = $ce['val_cop'];
                             $valor =  $obligado - $pagado;
+                            $valor_mil = number_format($valor, 2, '.', ',');
                             if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
                                 $editar = '<a value="' . $id_doc . '"  class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-print fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
@@ -140,7 +142,7 @@ try {
                                 <td class="text-right"><?php echo '$ ' . number_format($ce['valor'], 2, '.', ','); ?></td>
                                 <td class="text-right"><?php echo '$ ' . number_format($ce['val_cop'], 2, '.', ','); ?></td>
                                 <td class="text-right">
-                                    <input type="text" name="detalle[<?php echo $id_det_cop; ?>]" id="detalle_<?php echo $id_det_cop; ?>" class="form-control form-control-sm detalle-pag" value="<?php echo $ce['val_cop']; ?>" style="text-align: right;" required onkeyup="valorMiles(id)" max="<?php echo $ce['val_cop']; ?>">
+                                    <input type="text" name="detalle[<?php echo $id_det_cop; ?>]" id="detalle_<?php echo $id_det_cop; ?>" class="form-control form-control-sm detalle-pag" value="<?php echo $valor_mil; ?>" style="text-align: right;" required onkeyup="valorMiles(id)" max="<?php echo $valor; ?>">
                                 </td>
                                 <td class="text-center"> <?php echo $editar  .  $acciones; ?></td>
                             </tr>

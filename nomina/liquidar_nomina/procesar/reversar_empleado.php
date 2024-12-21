@@ -66,6 +66,30 @@ if (!empty($idIndemVac)) {
         $ids[] = $iv['id_indemnizacion'] != '' ? $iv['id_indemnizacion'] : 0;
     }
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT
+                `nom_otros_descuentos`.`id_dcto`
+            FROM
+                `nom_liq_descuento`
+                INNER JOIN `nom_otros_descuentos` 
+                    ON (`nom_liq_descuento`.`id_dcto` = `nom_otros_descuentos`.`id_dcto`)
+            WHERE (`nom_otros_descuentos`.`id_empleado` = $id_empleado
+                AND `nom_liq_descuento`.`id_nomina` = $id_nomina)";
+    $rs = $cmd->query($sql);
+    $idOtrosDctos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$ids_dcto = [];
+if (!empty($idOtrosDctos)) {
+    foreach ($idOtrosDctos as $iod) {
+        $ids_dcto[] = $iod['id_dcto'] != '' ? $iod['id_dcto'] : 0;
+    }
+}
+$idOtrosDctos = !empty($ids_dcto) ? implode(',', $ids_dcto) : 0;
 $id_inom = 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -455,6 +479,12 @@ try {
         $dels++;
     }
     $sql = "DELETE FROM `nom_liq_cesantias` WHERE `id_nomina` = $id_nomina AND `id_empleado`= $id_empleado";
+    $sql = $cmd->prepare($sql);
+    $sql->execute();
+    if ($sql->rowCount() > 0) {
+        $dels++;
+    }
+    $sql = "DELETE FROM `nom_liq_descuento` WHERE `id_nomina` = $id_nomina AND `id_dcto` IN ($idOtrosDctos)";
     $sql = $cmd->prepare($sql);
     $sql->execute();
     if ($sql->rowCount() > 0) {

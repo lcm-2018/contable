@@ -44,7 +44,7 @@ try {
     $sql = "SELECT * FROM tb_tipos_documento";
     $rs = $cmd->query($sql);
     $tipodoc = $rs->fetchAll();
-    $sql = "SELECT * FROM nom_cargo_empleado ORDER BY descripcion_carg";
+    $sql = "SELECT * FROM `nom_cargo_empleado` ORDER BY `descripcion_carg`,`grado` ASC";
     $rs = $cmd->query($sql);
     $cargo = $rs->fetchAll();
     $sql = "SELECT * FROM tb_paises";
@@ -350,7 +350,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar cargo--</option>
                                                 <?php
                                                 foreach ($cargo as $c) {
-                                                    echo '<option value="' . $c['id_cargo'] . '">' . $c['descripcion_carg'] . '</option>';
+                                                    echo '<option value="' . $c['id_cargo'] . '">' . $c['descripcion_carg'] . ' -> Grado ' . $c['grado'] . '</option>';
                                                 }
                                                 ?>
                                             </select>

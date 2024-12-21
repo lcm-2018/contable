@@ -431,6 +431,25 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `nom_otros_descuentos`.`id_empleado`
+                , SUM(`nom_liq_descuento`.`valor`) AS `valor`
+            FROM
+                `nom_liq_descuento`
+                INNER JOIN `nom_otros_descuentos` 
+                    ON (`nom_liq_descuento`.`id_dcto` = `nom_otros_descuentos`.`id_dcto`)
+            WHERE (`nom_liq_descuento`.`id_nomina` = $id_nomina)
+            GROUP BY `nom_otros_descuentos`.`id_empleado`";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 $meses = array(
     '01' => 'Enero',
     '02' => 'Febrero',
@@ -541,7 +560,7 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                         <th style="border: 1px solid black; " rowspan="2" class="text-center centro-vertical">I. Ces.</th>
                         <th style="border: 1px solid black; " rowspan="2" class="text-center centro-vertical">Compen.</th>
                         <th style="border: 1px solid black; " colspan="3" class="text-center centro-vertical">Seguridad Social</th>
-                        <th style="border: 1px solid black; " colspan="4" class="text-center centro-vertical">Deducciones</th>
+                        <th style="border: 1px solid black; " colspan="5" class="text-center centro-vertical">Deducciones</th>
                         <th style="border: 1px solid black; " rowspan="2" class="text-center centro-vertical">NETO</th>
                     </tr>
                     <tr style="color: black;font-size:9px">
@@ -561,12 +580,13 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                         <th style=" border: 1px solid black; ">Libranza</th>
                         <th style=" border: 1px solid black; ">Embargo</th>
                         <th style=" border: 1px solid black; ">Sindicato</th>
-                        <th style=" border: 1px solid black; ">Ret. Fte.</th>
+                        <th style=" border: 1px solid black; ">Ret.Fte.</th>
+                        <th style=" border: 1px solid black; ">Otros</th>
                     </tr>
                 </thead>
                 <tbody style=" font-size:9px">
                     <?php
-                    $tot_incap = $tot_lic = $tot_vac = $tot_indem = $tot_pordias = $tot_auxtra = $tot_auxalim = $tot_he = $tot_bsps = $tot_prima_vac = $tot_grpre = $tot_bon_recrea = $tot_prim_serv = $tot_prim_nav = $tot_ces = $tot_ices = $tot_comp = $tot_aport_salud = $tot_aport_pension = $tot_aport_solidaridad = $tot_lib = $tot_emb = $tot_sind = $tot_ret = $tot_saln = 0;
+                    $tot_incap = $tot_lic = $tot_vac = $tot_indem = $tot_pordias = $tot_auxtra = $tot_auxalim = $tot_he = $tot_bsps = $tot_prima_vac = $tot_grpre = $tot_bon_recrea = $tot_prim_serv = $tot_prim_nav = $tot_ces = $tot_ices = $tot_comp = $tot_aport_salud = $tot_aport_pension = $tot_aport_solidaridad = $tot_lib = $tot_emb = $tot_sind = $tot_ret = $tot_saln = $tot_otros = 0;
                     foreach ($obj as $o) {
                         $id = $o["id_empleado"];
                         $keysaln = array_search($id, array_column($saln, 'id_empleado'));
@@ -903,7 +923,19 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                                 </td>
                                 <td style="border: 1px solid black;" class="text-right">
                                     <?php
-                                    $deducido = $g + $i + $j + $k + $l + $m + $n;
+                                    $nda = 0;
+                                    $key_dcto = array_search($id, array_column($descuentos, 'id_empleado'));
+                                    if (false !== $key_dcto) {
+                                        echo pesos($descuentos[$key_dcto]['valor']);
+                                        $nda = $descuentos[$key_dcto]['valor'];
+                                        $tot_otros += $nda;
+                                    } else {
+                                        echo '$0.00';
+                                    } ?>
+                                </td>
+                                <td style="border: 1px solid black;" class="text-right">
+                                    <?php
+                                    $deducido = $g + $i + $j + $k + $l + $m + $n + $nda;
                                     $devengado = $valluto + $a + $b + $c + $d1 + $d + $e + $e1 + $f + $c3 + $c4 + $cgrp + $c5 + $ps + $pn + $ces + $ices + $comp;
                                     $netop = $devengado - $deducido;
                                     $tot_saln += $netop;
@@ -941,6 +973,7 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                         <td style="border: 1px solid black;" class="text-right"><?php echo pesos($tot_emb) ?></td>
                         <td style="border: 1px solid black;" class="text-right"><?php echo pesos($tot_sind) ?></td>
                         <td style="border: 1px solid black;" class="text-right"><?php echo pesos($tot_ret) ?></td>
+                        <td style="border: 1px solid black;" class="text-right"><?php echo pesos($tot_otros) ?></td>
                         <td style="border: 1px solid black;" class="text-right"><?php echo pesos($tot_saln) ?></td>
                     </tr>
                     <tr>

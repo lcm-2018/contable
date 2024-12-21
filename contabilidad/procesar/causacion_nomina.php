@@ -36,7 +36,7 @@ try {
                     FROM
                         `nom_ccosto_empleado`
                     GROUP BY `id_empleado`) AS `ccostos`
-                    ON (`nom_liq_dlab_auxt`.`id_empleado` = `ccostos`.`id_empleado`
+                    ON (`nom_liq_dlab_auxt`.`id_empleado` = `ccostos`.`id_empleado`)
             WHERE (`nom_liq_dlab_auxt`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $sueldoBasico = $rs->fetchAll(PDO::FETCH_ASSOC);
@@ -393,6 +393,26 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `nom_liq_descuento`.`valor`
+                , `nom_tipo_descuentos`.`id_cuenta`
+                , `nom_otros_descuentos`.`id_empleado`
+            FROM
+                `nom_liq_descuento`
+                INNER JOIN `nom_otros_descuentos` 
+                    ON (`nom_liq_descuento`.`id_dcto` = `nom_otros_descuentos`.`id_dcto`)
+                INNER JOIN `nom_tipo_descuentos` 
+                    ON (`nom_otros_descuentos`.`id_tipo_dcto` = `nom_tipo_descuentos`.`id_tipo`)
+            WHERE (`nom_liq_descuento`.`id_nomina` = $id_nomina)";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 $meses = array(
     '00' => '',
     '01' => 'Enero',
@@ -497,7 +517,7 @@ foreach ($sueldoBasico as $sb) {
     $auxalim = $sb['aux_alim'];
     $id_sede = $sb['sede_emp'];
     $tipoCargo = $sb['tipo_cargo'];
-    $ccosto = $sb['id_ccosto'];
+    $ccosto = $sb['id_ccosto'] == '' ? 21 : $sb['id_ccosto'];
     $doc_empleado = $sb['no_documento'];
     $keyt = array_search($doc_empleado, array_column($idApi, 'no_doc'));
     $id_ter_api = $keyt !== false ? $idApi[$keyt]['id_tercero_api'] : NULL;
@@ -735,8 +755,15 @@ foreach ($sueldoBasico as $sb) {
 
         $cPasivo = [];
         $cPasivo = array_filter($cuentas_causacion, function ($cuentas_causacion) use ($ccosto) {
-            return $cuentas_causacion["centro_costo"] == $ccosto && $cuentas_causacion["es_pasivo"] == 1;
+            return $cuentas_causacion["es_pasivo"] == 1;
         });
+        $key_dcto = array_search($id_empleado, array_column($descuentos, 'id_empleado'));
+        $dcto = [];
+        if ($key_dcto !== false) {
+            $dcto = array_filter($descuentos, function ($descuentos) use ($id_empleado) {
+                return $descuentos["id_empleado"] == $id_empleado;
+            });
+        }
         foreach ($cPasivo as $cp) {
             $valor = 0;
             $tipo = $cp['id_tipo'];
@@ -766,7 +793,13 @@ foreach ($sueldoBasico as $sb) {
                     }
                     $key = array_search($id_empleado, array_column($rfte, 'id_empleado'));
                     $valRteFte = $key !== false ? $rfte[$key]['val_ret'] : 0;
-                    $credito = $basico + $extras + $repre + $auxtras + $auxalim - ($segSocial[$keyss]['aporte_pension_emp'] + $segSocial[$keyss]['aporte_solidaridad_pensional'] + $segSocial[$keyss]['aporte_salud_emp'] + $valSind + $valLib + $valEmb + $valRteFte);
+                    $val_dcto = 0;
+                    if (!empty($dcto)) {
+                        foreach ($dcto as $d) {
+                            $val_dcto += $d['valor'];
+                        }
+                    }
+                    $credito = $basico + $extras + $repre + $auxtras + $auxalim - ($segSocial[$keyss]['aporte_pension_emp'] + $segSocial[$keyss]['aporte_solidaridad_pensional'] + $segSocial[$keyss]['aporte_salud_emp'] + $valSind + $valLib + $valEmb + $valRteFte + $val_dcto);
                     if ($credito < 0) {
                         $restar = $credito * -1;
                         $credito = 0;
@@ -893,6 +926,22 @@ foreach ($sueldoBasico as $sb) {
                         }
                         $credito -= $restar;
                     }
+                    break;
+                case 33:
+                    if (!empty($dcto)) {
+                        foreach ($dcto as $dc) {
+                            $credito = $dc['valor'];
+                            $cuenta = $dc['id_cuenta'];
+                            if ($credito > 0 && $cuenta != '') {
+                                $query->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $query->errorInfo()[2];
+                                    exit();
+                                }
+                            }
+                        }
+                    }
+                    $credito = 0;
                     break;
                 default:
                     $credito = 0;
