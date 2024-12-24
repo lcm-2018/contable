@@ -301,9 +301,6 @@
         } else if ($('#slcAreaSolicita').val() === '0') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Debe seleccionar el área solicitante!');
-        } else if ($('#numTotalContrato').val() == '' || parseInt($('#numTotalContrato').val()) <= 0) {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('¡El valor total del contrato debe ser mayor o igual a cero!');
         } else if ($('#txtObjeto').val() === '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Objeto no puede ser Vacío!');
@@ -1067,6 +1064,7 @@
                 minLength: 2,
                 select: function (event, ui) {
                     $('#slcTipoBnSv').val(ui.item.id);
+                    $('#txtObjeto').val(ui.item.objeto);
                 }
             });
         } else {
@@ -1078,8 +1076,8 @@
         let id = $('#id_compra').val();
         $.post("datos/registrar/formadd_estudio_previo.php", { id: id }, function (he) {
             $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-xl');
-            $('#divTamModalForms').addClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
@@ -1147,8 +1145,8 @@
         let id = $(this).attr('value');
         $.post("datos/actualizar/formup_estudio_previo.php", { id: id }, function (he) {
             $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-xl');
-            $('#divTamModalForms').addClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
@@ -2320,20 +2318,31 @@
             cancelButtonText: "NO",
         }).then((result) => {
             if (result.isConfirmed) {
-                var id_adq = $('#id_compra').val();
-                $.ajax({
-                    type: 'POST',
-                    url: 'actualizar/up_cerrar_orden_sv.php',
-                    data: { id_adq: id_adq },
-                    success: function (r) {
-                        if (r == 'ok') {
-                            location.reload();
-                            mje('Orden cerrada correctamente');
-                        } else {
-                            mjeError(r);
+                //sumar todas las inputs de clase sumTotal para saber si es mayor a cero
+                let suma = 0;
+                if ($('.sumTotal').length) {
+                    $('.sumTotal').each(function () {
+                        suma += Number($(this).val());
+                    });
+                }
+                if (suma > 0) {
+                    var id_adq = $('#id_compra').val();
+                    $.ajax({
+                        type: 'POST',
+                        url: 'actualizar/up_cerrar_orden_sv.php',
+                        data: { id_adq: id_adq, suma: suma },
+                        success: function (r) {
+                            if (r == 'ok') {
+                                location.reload();
+                                mje('Orden cerrada correctamente');
+                            } else {
+                                mjeError(r);
+                            }
                         }
-                    }
-                });
+                    });
+                } else {
+                    mjeError('Debe ingresar al menos un detalle de orden');
+                }
             }
         });
     });

@@ -10,7 +10,7 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT 
-                `id_tipo_b_s`, `tipo_compra`, `tipo_contrato`, `tipo_bn_sv`
+                `id_tipo_b_s`, `tipo_compra`, `tipo_contrato`, `tipo_bn_sv`, `objeto_definido`
             FROM
                 `tb_tipo_bien_servicio`
             INNER JOIN `tb_tipo_contratacion` 
@@ -33,12 +33,14 @@ if (!empty($tipo_servicio)) {
         $data[] = [
             'id' => $ts['id_tipo_b_s'],
             'label' => $tipo,
+            'objeto' => $ts['objeto_definido'],
         ];
     }
 } else {
     $data[] = [
         'id' => '0',
         'label' => 'No hay coincidencias...',
+        'objeto' => '',
     ];
 }
 echo json_encode($data);

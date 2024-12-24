@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 $id_adq = isset($_POST['id_adq']) ? $_POST['id_adq'] : exit('Accion no permitida');
+$valor = $_POST['suma'];
 $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 
@@ -14,12 +15,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 try {
     $estado = 5;
-    $query = "UPDATE `ctt_adquisiciones` SET `estado` = ?, `id_user_act` = ?, `fec_act` = ? WHERE `id_adquisicion` = ?";
+    $query = "UPDATE `ctt_adquisiciones` SET `estado` = ?, `id_user_act` = ?, `fec_act` = ?, `val_contrato` = ? WHERE `id_adquisicion` = ?";
     $query = $cmd->prepare($query);
     $query->bindParam(1, $estado, PDO::PARAM_INT);
     $query->bindParam(2, $iduser, PDO::PARAM_INT);
     $query->bindValue(3, $date->format('Y-m-d H:i:s'));
-    $query->bindParam(4, $id_adq, PDO::PARAM_INT);
+    $query->bindParam(4, $valor, PDO::PARAM_STR);
+    $query->bindParam(5, $id_adq, PDO::PARAM_INT);
     $query->execute();
     if ($query->rowCount() > 0) {
         echo 'ok';

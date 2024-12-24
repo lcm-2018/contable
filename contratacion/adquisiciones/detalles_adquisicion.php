@@ -695,7 +695,10 @@ if (!empty($adquisicion)) {
                                                                             <td><?php echo $dc['bien_servicio'] ?></td>
                                                                             <td><?php echo $cantidad ?></td>
                                                                             <td class="text-right"><?php echo $val_unid ?></td>
-                                                                            <td class="text-right"><?php echo pesos($dc['val_unid'] * (isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad'])) ?></td>
+                                                                            <td class="text-right">
+                                                                                <?php echo pesos($dc['val_unid'] * (isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad'])) ?>
+                                                                                <input type="hidden" name="total[]" class="sumTotal" value="<?php echo $dc['val_unid'] * (isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad']) ?>">
+                                                                            </td>
                                                                             <td class="text-center">
                                                                                 <?php
                                                                                 if ($adquisicion['id_orden'] == '') {

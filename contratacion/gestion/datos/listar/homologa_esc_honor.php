@@ -41,7 +41,7 @@ header('Content-Disposition: attachment; filename=homologacion_escala_honorarios
 $output = fopen('php://output', 'w');
 
 // Output column headers
-fputcsv($output, ['id_tipo_servicio', 'tipo_compra', 'tipo_contrato', 'tipo_servicio', 'codigo_presupuestal', 'valor_Mensual', 'valor_Horas', 'Vigencia'], ';');
+fputcsv($output, ['id_tipo_servicio', 'tipo_compra', 'tipo_contrato', 'tipo_servicio', 'codigo_presupuestal', 'Vigencia'], ';');
 
 foreach ($tipo as $fila) {
     fputcsv($output, [
@@ -50,8 +50,6 @@ foreach ($tipo as $fila) {
         mb_convert_encoding($fila['tipo_contrato'], 'ISO-8859-1', 'UTF-8'),
         mb_convert_encoding($fila['tipo_bn_sv'], 'ISO-8859-1', 'UTF-8'),
         $fila['cod_pptal'],
-        $fila['val_honorarios'],
-        $fila['val_hora'],
         $fila['vigencia']
     ], ';');
 }

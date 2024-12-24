@@ -119,12 +119,12 @@ if ($adquisicion['filtro'] == '1' || $adquisicion['filtro'] == '2') {
             <input type="hidden" name="id_adquisicion" value="<?php echo $adquisicion['id_adquisicion'] ?>">
             <input type="hidden" name="filtro" id="filtro" value="<?php echo $adquisicion['filtro'] ?>">
             <div class="form-row px-4 pt-2">
-                <div class="form-group col-md-3">
+                <div class="form-group col-md-4">
                     <label for="datFecAdq" class="small">FECHA ADQUISICIÓN</label>
                     <input type="date" name="datFecAdq" id="datFecAdq" class="form-control form-control-sm" value="<?php echo $adquisicion['fecha_adquisicion'] ?>">
                 </div>
                 <input type="hidden" name="datFecVigencia" value="<?php echo $_SESSION['vigencia'] ?>">
-                <div class="form-group col-md-3">
+                <div class="form-group col-md-4">
                     <label for="slcModalidad" class="small">MODALIDAD CONTRATACIÓN</label>
                     <select id="slcModalidad" name="slcModalidad" class="form-control form-control-sm py-0 sm" aria-label="Default select example">
                         <option value="0" <?php echo $adquisicion['id_modalidad'] == 0 ? 'selected' : '' ?>>-- Seleccionar --</option>
@@ -136,11 +136,8 @@ if ($adquisicion['filtro'] == '1' || $adquisicion['filtro'] == '2') {
                         ?>
                     </select>
                 </div>
-                <div class="form-group col-md-3">
-                    <label for="numTotalContrato" class="small">VALOR ESTIMADO</label>
-                    <input type="number" name="numTotalContrato" id="numTotalContrato" class="form-control form-control-sm" value="<?php echo $adquisicion['val_contrato'] ?>">
-                </div>
-                <div class="form-group col-md-3">
+                <input type="hidden" name="numTotalContrato" id="numTotalContrato" class="form-control form-control-sm" value="0">
+                <div class="form-group col-md-4">
                     <label for="slcAreaSolicita" class="small">ÁREA SOLICITANTE</label>
                     <select id="slcAreaSolicita" name="slcAreaSolicita" class="form-control form-control-sm py-0 sm" aria-label="Default select example">
                         <option value="0" <?php echo $adquisicion['id_area'] == 0 ? 'selected' : '' ?>>-- Seleccionar --</option>

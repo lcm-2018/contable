@@ -660,4 +660,16 @@
             return false;
         });
     });
+    $('#divModalForms').on('focus', '.val_bnsv', function () {
+        var elemento = $(this);
+        var id = elemento.attr('text');
+        $.ajax({
+            type: 'POST',
+            url: 'datos/listar/valor_servicio.php',
+            data: { id: id },
+            success: function (r) {
+                elemento.val(r);
+            }
+        });
+    });
 })(jQuery);

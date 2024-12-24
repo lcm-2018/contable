@@ -149,7 +149,7 @@ try {
                                 <?php } ?>
                                 <td class="text-left text-wrap"><i><?php echo $bs['bien_servicio'] ?></i></td>
                                 <td><input type="number" name="bnsv[<?php echo $bs['id_b_s'] ?>]" class="form-control altura cantidad"></td>
-                                <td><input type="number" name="val_bnsv[<?php echo $bs['id_b_s'] ?>]" class="form-control altura" value="0"></td>
+                                <td><input type="number" name="val_bnsv[<?php echo $bs['id_b_s'] ?>]" class="form-control altura val_bnsv" value="0" text="<?php echo $bs['id_b_s'] ?>"></td>
                             </tr>
                         <?php
                         }

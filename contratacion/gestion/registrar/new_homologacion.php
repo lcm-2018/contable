@@ -12,7 +12,7 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     if ($tipo == '1') {
-        $sql = "SELECT `id_clasificaicion`, `id_b_s` FROM `ctt_clasificacion_bn_sv`";
+        $sql = "SELECT `id_clasificaicion`, `id_b_s`, `vigencia` FROM `ctt_clasificacion_bn_sv`";
     } else {
         $sql = "SELECT `id_escala`, `id_tipo_b_s`, `vigencia` FROM `ctt_escala_honorarios`";
     }
@@ -71,28 +71,37 @@ if (file_exists($file_dest)) {
             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
             if ($tipo == '1') {
-                $sql = "INSERT INTO `ctt_clasificacion_bn_sv` (`id_b_s`, `cod_unspsc`, `cod_cuipo`, `cod_siho`) VALUES (?, ?, ?, ?)";
-                $query = "UPDATE `ctt_clasificacion_bn_sv` SET `cod_unspsc` = ?, `cod_cuipo` = ?, `cod_siho` = ? WHERE `id_clasificaicion` = ?";
+                $sql = "INSERT INTO `ctt_clasificacion_bn_sv` 
+                            (`id_b_s`, `honorarios`, `horas`, `cod_unspsc`, `cod_cuipo`, `cod_siho`, `vigencia`) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
+                $query = "UPDATE `ctt_clasificacion_bn_sv` 
+                            SET `honorarios`= ?, `horas` = ?, `cod_unspsc` = ?, `cod_cuipo` = ?, `cod_siho` = ? 
+                        WHERE `id_clasificaicion` = ?";
                 $sql = $cmd->prepare($sql);
                 $query = $cmd->prepare($query);
 
                 while (($data = fgetcsv($handle, 0, ';')) !== FALSE) { // Especificar el delimitador, por ejemplo, ';'
-                    if (count($data) < 6) {
+                    if (count($data) < 10) {
                         echo 'Fila con datos insuficientes: ' . implode(';', $data) . '<br>';
                         continue; // Salta a la siguiente fila si los datos son insuficientes
                     }
-
                     $id_servicio = $data[0];
-                    $cod_unspsc = $data[3];
-                    $cod_cuipo = $data[4];
-                    $cod_siho = $data[5];
+                    $honorarios = $data[4] > 0 ? $data[4] : NULL;
+                    $horas = $data[5] > 0 ? $data[5] : NULL;
+                    $cod_unspsc = $data[6] != '' ? $data[6] : NULL;
+                    $cod_cuipo = $data[7] != '' ? $data[7] : NULL;
+                    $cod_siho = $data[8] != '' ? $data[8] : NULL;
+                    $vigencia = $data[9] > 0 ? $data[9] : NULL;
 
-                    $key = array_search($id_servicio, array_column($datos, 'id_b_s'));
+                    $key = buscarIdServicio($datos, $id_servicio, $vigencia);
                     if ($key === false) {
                         $sql->bindParam(1, $id_servicio, PDO::PARAM_INT);
-                        $sql->bindParam(2, $cod_unspsc, PDO::PARAM_STR);
-                        $sql->bindParam(3, $cod_cuipo, PDO::PARAM_STR);
-                        $sql->bindParam(4, $cod_siho, PDO::PARAM_STR);
+                        $sql->bindParam(2, $honorarios, PDO::PARAM_STR);
+                        $sql->bindParam(3, $horas, PDO::PARAM_INT);
+                        $sql->bindParam(4, $cod_unspsc, PDO::PARAM_STR);
+                        $sql->bindParam(5, $cod_cuipo, PDO::PARAM_STR);
+                        $sql->bindParam(6, $cod_siho, PDO::PARAM_STR);
+                        $sql->bindParam(7, $vigencia, PDO::PARAM_INT);
                         $sql->execute();
                         if ($cmd->lastInsertId() > 0) {
                             $t++;
@@ -100,11 +109,13 @@ if (file_exists($file_dest)) {
                             echo $sql->errorInfo()[2];
                         }
                     } else {
-                        $id_clas = $datos[$key]['id_clasificaicion'];
-                        $query->bindParam(1, $cod_unspsc, PDO::PARAM_STR);
-                        $query->bindParam(2, $cod_cuipo, PDO::PARAM_STR);
-                        $query->bindParam(3, $cod_siho, PDO::PARAM_STR);
-                        $query->bindParam(4, $id_clas, PDO::PARAM_INT);
+                        $id_clas = $key;
+                        $query->bindParam(1, $honorarios, PDO::PARAM_STR);
+                        $query->bindParam(2, $horas, PDO::PARAM_INT);
+                        $query->bindParam(3, $cod_unspsc, PDO::PARAM_STR);
+                        $query->bindParam(4, $cod_cuipo, PDO::PARAM_STR);
+                        $query->bindParam(5, $cod_siho, PDO::PARAM_STR);
+                        $query->bindParam(6, $id_clas, PDO::PARAM_INT);
                         $query->execute();
                         if ($query->rowCount() > 0) {
                             $t++;
@@ -114,17 +125,13 @@ if (file_exists($file_dest)) {
                     }
                 }
             } else {
-                $sql = "INSERT INTO `ctt_escala_honorarios`
-                            (`id_tipo_b_s`,`cod_pptal`,`val_honorarios`,`val_hora`,`vigencia`)
-                        VALUES (?, ?, ?, ?, ?)";
-                $query = "UPDATE `ctt_escala_honorarios`
-                            SET `cod_pptal` = ?, `val_honorarios` = ?, `val_hora` = ?, `vigencia` = ?
-                        WHERE `id_escala` = ?";
+                $sql = "INSERT INTO `ctt_escala_honorarios` (`id_tipo_b_s`,`cod_pptal`,`vigencia`) VALUES (?, ?, ?)";
+                $query = "UPDATE `ctt_escala_honorarios` SET `cod_pptal` = ?, `vigencia` = ? WHERE `id_escala` = ?";
                 $sql = $cmd->prepare($sql);
                 $query = $cmd->prepare($query);
 
                 while (($data = fgetcsv($handle, 0, ';')) !== FALSE) { // Especificar el delimitador, por ejemplo, ';'
-                    if (count($data) < 8) {
+                    if (count($data) < 6) {
                         echo 'Fila con datos insuficientes: ' . implode(';', $data) . '<br>';
                         continue; // Salta a la siguiente fila si los datos son insuficientes
                     }
@@ -132,17 +139,13 @@ if (file_exists($file_dest)) {
                     $id_tipo_s = $data[0];
                     $key = array_search($data[4], array_column($rubros, 'cod_pptal'));
                     $cod_pptal = $key !== false ? $rubros[$key]['id_cargue'] : NULL;
-                    $val_mes = $data[5] == '' ? null : $data[5];
-                    $val_hora = $data[6] == '' ? null : $data[6];
-                    $vigencia = $data[7];
+                    $vigencia = $data[5];
 
                     $id_escala = buscarIdTipoBS($datos, $id_tipo_s, $vigencia);
                     if ($id_escala === false) {
                         $sql->bindParam(1, $id_tipo_s, PDO::PARAM_INT);
                         $sql->bindParam(2, $cod_pptal, PDO::PARAM_STR);
-                        $sql->bindParam(3, $val_mes, PDO::PARAM_STR);
-                        $sql->bindParam(4, $val_hora, PDO::PARAM_STR);
-                        $sql->bindParam(5, $vigencia, PDO::PARAM_STR);
+                        $sql->bindParam(3, $vigencia, PDO::PARAM_STR);
                         $sql->execute();
                         if ($cmd->lastInsertId() > 0) {
                             $t++;
@@ -151,10 +154,8 @@ if (file_exists($file_dest)) {
                         }
                     } else {
                         $query->bindParam(1, $cod_pptal, PDO::PARAM_STR);
-                        $query->bindParam(2, $val_mes, PDO::PARAM_STR);
-                        $query->bindParam(3, $val_hora, PDO::PARAM_STR);
-                        $query->bindParam(4, $vigencia, PDO::PARAM_STR);
-                        $query->bindParam(5, $id_escala, PDO::PARAM_INT);
+                        $query->bindParam(2, $vigencia, PDO::PARAM_STR);
+                        $query->bindParam(3, $id_escala, PDO::PARAM_INT);
                         $query->execute();
                         if ($query->rowCount() > 0) {
                             $t++;
@@ -186,6 +187,16 @@ function buscarIdTipoBS($datos, $id_tipo_s, $vigencia)
     foreach ($datos as $dato) {
         if ($dato['id_tipo_b_s'] == $id_tipo_s && $dato['vigencia'] == $vigencia) {
             return $dato['id_escala'];
+        }
+    }
+    return false;
+}
+
+function buscarIdServicio($datos, $id_servicio, $id_vigencia)
+{
+    foreach ($datos as $dato) {
+        if ($dato['id_b_s'] == $id_servicio && $dato['vigencia'] == $id_vigencia) {
+            return $dato['id_clasificaicion'];
         }
     }
     return false;
