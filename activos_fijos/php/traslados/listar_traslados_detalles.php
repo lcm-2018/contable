@@ -28,31 +28,31 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM acf_mantenimiento_detalle WHERE id_mantenimiento=" . $_POST['id_mantenimiento'];
+    $sql = "SELECT COUNT(*) AS total FROM acf_traslado_detalle WHERE id_traslado=" . $_POST['id_traslado'];
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
     $sql = "SELECT COUNT(*) AS total 
-            FROM acf_mantenimiento_detalle MD
-            INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = MD.id_activo_fijo)
+            FROM acf_traslado_detalle TD
+            INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = TD.id_activo_fijo)
             INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
-            WHERE MD.id_mantenimiento=" . $_POST['id_mantenimiento'] . $where; 
+            WHERE TD.id_traslado=" . $_POST['id_traslado'] . $where; 
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT MD.id_mant_detalle,
+    $sql = "SELECT TD.id_traslado_detalle,
                 HV.placa,FM.nom_medicamento AS nom_articulo,                
-                CA.nom_area,MD.observacion_mant,
+                CA.nom_area,TD.observacion,
                 CASE HV.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
-            FROM acf_mantenimiento_detalle MD
-            INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = MD.id_activo_fijo)
+            FROM acf_traslado_detalle TD
+            INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = TD.id_activo_fijo)
             INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
             INNER JOIN far_centrocosto_area AS CA ON (CA.id_area=HV.id_area)
-            WHERE MD.id_mantenimiento=" . $_POST['id_mantenimiento'] . $where . " ORDER BY $col $dir $limit";
+            WHERE TD.id_traslado=" . $_POST['id_traslado'] . $where . " ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;
@@ -65,21 +65,21 @@ $eliminar = NULL;
 $data = [];
 if (!empty($objs)) {
     foreach ($objs as $obj) {
-        $id = $obj['id_mant_detalle'];
+        $id = $obj['id_traslado_detalle'];
         //Permite crear botones en la cuadricula si tiene permisos de 1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir
-        if (PermisosUsuario($permisos, 5705, 3) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5708, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }        
-        if (PermisosUsuario($permisos, 5705, 4) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5708, 4) || $id_rol == 1) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
         $data[] = [
-            "id_mant_detalle" => $id,
+            "id_traslado_detalle" => $id,
             "placa" => $obj['placa'],
             "nom_articulo" => $obj['nom_articulo'],
             "estado_general" => $obj['estado_general'],
             "nom_area" => $obj['nom_area'],
-            "observacion_mant" => $obj['observacion_mant'],            
+            "observacion" => $obj['observacion'],            
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }    
@@ -91,5 +91,3 @@ $datos = [
 ];
 
 echo json_encode($datos);
-
-   

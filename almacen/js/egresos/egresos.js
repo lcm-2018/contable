@@ -295,7 +295,7 @@
                 type: 'POST',
                 url: 'editar_egresos_detalles.php',
                 dataType: 'json',
-                data: data + "&id_egreso=" + $('#id_egreso').val() + '&oper=add'
+                data: data + "&id_egreso=" + $('#id_egreso').val() + "&id_bodega=" + $('#sl_bodega_egr').val() + '&oper=add'
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
                     let pag = ($('#id_detalle').val() == -1) ? 0 : $('#tb_egresos_detalles').DataTable().page.info().page;

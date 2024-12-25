@@ -20,8 +20,10 @@ $dir = $_POST['order'][0]['dir'];
 $where_gen = " WHERE 1<>1";
 if ($_POST['proceso'] == "mant"){           //mant-Proceso de mantenimiento
     $where_gen = " WHERE HV.estado IN (1)";
+
 } else if ($_POST['proceso'] == "tras"){   //tras-Proceso de traslado
-    $where_gen = " WHERE HV.estado IN (1,2,3)";
+    $where_gen = " WHERE HV.estado IN (1,2,3) AND HV.id_area=" . $_POST['id_area'];
+
 } else if ($_POST['proceso'] == "baja"){   //baja-Proceso de dar de baja
     $where_gen = " WHERE HV.estado IN (4)";
 }
@@ -61,6 +63,8 @@ try {
                 HV.num_serial,MA.descripcion AS nom_marca,HV.valor,
                 SE.nom_sede,AR.nom_area,
                 CONCAT_WS(' ',US.apellido1,US.apellido2,US.nombre1,US.nombre2) AS nom_responsable,
+                CASE HV.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO'
+                            WHEN 4 THEN 'SIN SERVICIO' END AS nom_estado_general,
                 CASE HV.estado WHEN 1 THEN 'ACTIVO' WHEN 2 THEN 'PARA MANTENIMIENTO' WHEN 3 THEN 'EN MANTENIMIENTO'
                             WHEN 4 THEN 'INACTIVO' WHEN 5 THEN 'DADO DE BAJA' END AS nom_estado
             FROM acf_hojavida HV
@@ -91,6 +95,7 @@ if (!empty($objs)) {
             "nom_sede" => $obj['nom_sede'],
             "nom_area" => $obj['nom_area'],
             "nom_responsable" => $obj['nom_responsable'],
+            "nom_estado_general" => $obj['nom_estado_general'],
             "nom_estado" => $obj['nom_estado']
         ];
     }

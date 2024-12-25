@@ -13,14 +13,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT far_pedido.*,                    
-            ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
-            sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
             CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
-        FROM far_pedido             
-        INNER JOIN tb_sedes AS ss ON (ss.id_sede = far_pedido.id_sede_destino)
-        INNER JOIN far_bodegas AS bs ON (bs.id_bodega = far_pedido.id_bodega_destino)           
-        INNER JOIN tb_sedes AS sp ON (sp.id_sede = far_pedido.id_sede_origen)
-        INNER JOIN far_bodegas AS bp ON (bp.id_bodega = far_pedido.id_bodega_origen)
+        FROM far_pedido                     
         WHERE id_pedido=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
@@ -61,7 +55,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                 <input type="hidden" id="id_pedido" name="id_pedido" value="<?php echo $id ?>">
                 <div class="form-row">
                     <div class="form-group col-md-1">
-                        <label for="txt_fec_ing" class="small">Id.</label>
+                        <label for="txt_ide" class="small">Id.</label>
                         <input type="text" class="form-control form-control-sm" id="txt_ide" name="txt_ide" class="small" value="<?php echo ($id==-1?'':$id) ?>" readonly="readonly">
                     </div>
                     <div class="form-group col-md-2">

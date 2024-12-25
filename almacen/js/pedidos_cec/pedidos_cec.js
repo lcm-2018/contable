@@ -290,7 +290,7 @@
                 type: 'POST',
                 url: 'editar_pedidos_detalles.php',
                 dataType: 'json',
-                data: data + "&id_pedido=" + $('#id_pedido').val() + '&oper=add'
+                data: data + "&id_pedido=" + $('#id_pedido').val() + "&id_bodega=" + $('#sl_bodega_prov').val() + '&oper=add'
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
                     let pag = ($('#id_detalle').val() == -1) ? 0 : $('#tb_pedidos_detalles').DataTable().page.info().page;

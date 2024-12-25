@@ -1,7 +1,7 @@
 <?php
 $bd_driver = "mysql";
 $bd_servidor = "localhost";
-$bd_base = "bd_cronhis";
+$bd_base = "bd_cronhis_af";
 $api =  "localhost/api/";
 $charset = "charset=utf8";
 $bd_usuario = "root";

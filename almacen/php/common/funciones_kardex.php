@@ -244,7 +244,7 @@ function verificar_kardex($cmd, $id_ingreso, $tipo)
             //Evaluar si la existencia se vuelve negativa
             if ($existencia_lote < 0) {
                 if ($anular == 'ok') {
-                    $anular = 'Imposible anular el movimiento, los siguientes medicamentos generan existencias negativas.';
+                    $anular = 'Imposible anular el movimiento, los siguientes Articulos generan existencias negativas.';
                     $anular .= '<br/><br/><label style="color:red">' . $med['lote'] . '</label> : ' . $med['nom_medicamento'];
                 } else {
                     $anular .= '<br/><label style="color:red">' . $med['lote'] . '</label> : ' . $med['nom_medicamento'];

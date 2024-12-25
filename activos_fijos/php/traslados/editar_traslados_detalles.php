@@ -18,34 +18,33 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-    if ((PermisosUsuario($permisos, 5003, 2) && $oper == 'add' && $_POST['id_detalle'] == -1) ||
-        (PermisosUsuario($permisos, 5003, 3) && $oper == 'add' && $_POST['id_detalle'] != -1) ||
-        (PermisosUsuario($permisos, 5003, 4) && $oper == 'del') || $id_rol == 1) {
+    if ((PermisosUsuario($permisos, 5708, 2) && $oper == 'add' && $_POST['id_detalle'] == -1) ||
+        (PermisosUsuario($permisos, 5708, 3) && $oper == 'add' && $_POST['id_detalle'] != -1) ||
+        (PermisosUsuario($permisos, 5708, 4) && $oper == 'del') || $id_rol == 1) {
 
-        $id_pedido = $_POST['id_pedido'];
-        $id_bodega = isset($_POST['id_bodega']) ? $_POST['id_bodega'] : -1;
+        $id_traslado = $_POST['id_traslado'];
+        $id_area = isset($_POST['id_area']) ? $_POST['id_area'] : -1;
 
-        if ($id_pedido > 0) {
+        if ($id_traslado > 0) {
 
-            $sql = "SELECT estado,id_bodega_origen FROM far_pedido WHERE id_pedido=" . $id_pedido;
+            $sql = "SELECT estado,id_area_origen FROM acf_traslado WHERE id_traslado=" . $id_traslado;
             $rs = $cmd->query($sql);
-            $obj_pedido = $rs->fetch();            
+            $obj_traslado = $rs->fetch();            
           
-            if ($obj_pedido['estado'] == 1) {
+            if ($obj_traslado['estado'] == 1) {
                 if ($oper == 'add') {
-                    if ($obj_pedido['id_bodega_origen'] == $id_bodega) {
-                        $id = $_POST['id_detalle'];        
-                        $id_med = $_POST['id_txt_nom_med'];                  
-                        $cantidad = $_POST['txt_can_ped'] ? $_POST['txt_can_ped'] : 1;                    
-                        $valor = $_POST['txt_val_pro'] ? $_POST['txt_val_pro'] : 0;
+                    if ($obj_traslado['id_area_origen'] == $id_area) {
+                        $id = $_POST['id_detalle'];
+                        $id_activo_fijo = $_POST['id_txt_actfij'];
+                        $observacion = $_POST['txt_observacion'];
                     
                         if ($id == -1) {   
-                            $sql = "SELECT COUNT(*) AS count FROM far_pedido_detalle WHERE id_pedido=$id_pedido AND id_medicamento=" . $id_med;
+                            $sql = "SELECT COUNT(*) AS count FROM acf_traslado_detalle WHERE id_traslado=$id_traslado AND id_activo_fijo=" . $id_activo_fijo;
                             $rs = $cmd->query($sql);
                             $obj = $rs->fetch();
                             if ($obj['count'] == 0) {
-                                $sql = "INSERT INTO far_pedido_detalle(id_pedido,id_medicamento,cantidad,valor)
-                                        VALUES($id_pedido,$id_med ,$cantidad,$valor)";
+                                $sql = "INSERT INTO acf_traslado_detalle(id_traslado,id_activo_fijo,observacion)
+                                        VALUES($id_traslado,$id_activo_fijo,'$observacion')";
                                 $rs = $cmd->query($sql);
 
                                 if ($rs) {
@@ -58,10 +57,10 @@ try {
                                     $res['mensaje'] = $cmd->errorInfo()[2];
                                 }
                             } else {
-                                $res['mensaje'] = 'El Artículo ya existe en los detalles del Pedido';    
+                                $res['mensaje'] = 'El Activo Fijo ya existe en los detalles del traslado';    
                             }    
                         } else {
-                            $sql = "UPDATE far_pedido_detalle SET cantidad=$cantidad WHERE id_ped_detalle=" . $id;
+                            $sql = "UPDATE acf_traslado_detalle SET observacion='$observacion' WHERE id_traslado_detalle=" . $id;
                             $rs = $cmd->query($sql);
                             if ($rs) {
                                 $res['mensaje'] = 'ok';
@@ -71,13 +70,13 @@ try {
                             }
                         }
                     }else{
-                        $res['mensaje'] = 'Primero debe guardar el Pedido para adicionar detalles';  
+                        $res['mensaje'] = 'Primero debe guardar el Traslado para adicionar detalles';  
                     }     
                 }
 
                 if ($oper == 'del') {
                     $id = $_POST['id'];
-                    $sql = "DELETE FROM far_pedido_detalle WHERE id_ped_detalle=" . $id;
+                    $sql = "DELETE FROM acf_traslado_detalle WHERE id_traslado_detalle=" . $id;
                     $rs = $cmd->query($sql);
                     if ($rs) {
                         $res['mensaje'] = 'ok';
@@ -86,20 +85,11 @@ try {
                     }
                 }
 
-                if ($res['mensaje'] == 'ok') {
-                    $sql = "UPDATE far_pedido SET val_total=(SELECT SUM(valor*cantidad) FROM far_pedido_detalle WHERE id_pedido=$id_pedido) WHERE id_pedido=$id_pedido";
-                    $rs = $cmd->query($sql);
-
-                    $sql = "SELECT val_total FROM far_pedido WHERE id_pedido=" . $id_pedido;
-                    $rs = $cmd->query($sql);
-                    $obj_pedido = $rs->fetch();
-                    $res['val_total'] = formato_valor($obj_pedido['val_total']);
-                }
             } else {
-                $res['mensaje'] = 'Solo puede Modificar Pedidos en estado Pendiente';
+                $res['mensaje'] = 'Solo puede Modificar traslados en estado Pendiente';
             }
         } else {
-            $res['mensaje'] = 'Primero debe guardar el Pedido';
+            $res['mensaje'] = 'Primero debe guardar el traslado';
         }
     } else {
         $res['mensaje'] = 'El Usuario del Sistema no tiene Permisos para esta Acción';

@@ -7,6 +7,7 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 
 $proceso = isset($_POST['proceso']) && $_POST['proceso'] ? $_POST['proceso'] : '';
+$id_area = isset($_POST['id_area']) && $_POST['id_area'] ? $_POST['id_area'] : '-1';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -23,7 +24,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             <!--Formulario de busqueda de activos fijos-->
             <form id="frm_buscar_activos_fijos">
                 <div class="form-row">
-                    <input type="hidden" id="txt_proceso_fil" value="<?php echo $proceso ?>">
+                    <input type="hidden" id="proceso_fil" value="<?php echo $proceso ?>">
+                    <input type="hidden" id="id_area_fil" value="<?php echo $id_area ?>">
                     <div class="form-group col-md-2">
                         <input type="text" class="filtro_acf form-control form-control-sm" id="txt_placa_acf_fil" placeholder="Placa">
                     </div>
@@ -53,6 +55,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <th>Sede</th> 
                             <th>Area</th> 
                             <th>Responsable</th>
+                            <th>Estado General</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
@@ -80,7 +83,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     type: 'POST',
                     dataType: 'json',
                     data: function(data) {
-                        data.proceso = $('#txt_proceso_fil').val();
+                        data.proceso = $('#proceso_fil').val();
+                        data.id_area = $('#id_area_fil').val();
                         data.placa = $('#txt_placa_acf_fil').val();
                         data.codigo = $('#txt_codigo_art_fil').val();
                         data.nombre = $('#txt_nombre_art_fil').val();                        
@@ -96,11 +100,12 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     { 'data': 'nom_sede' },
                     { 'data': 'nom_area' },
                     { 'data': 'nom_responsable' },
+                    { 'data': 'nom_estado_general' },
                     { 'data': 'nom_estado' }
                 ],
                 columnDefs: [
                     { class: 'text-wrap', targets: [3,8] },
-                    { width: '5%', targets: [0,1,2,4,5,6,7,9] }
+                    { width: '5%', targets: [0,1,2,4,5,6,7,9,10] }
                 ],
                 order: [
                     [0, "desc"]

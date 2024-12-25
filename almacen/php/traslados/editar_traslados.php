@@ -33,7 +33,7 @@ try {
             $detalle = $_POST['txt_det_traslado'];
 
              //Verifica si los datos estas activos o bloqueados en el formulario
-             if (isset($_POST['sl_sede_proveedor'])){
+             if (isset($_POST['sl_sede_origen'])){
                 $id_sede_origen = $_POST['sl_sede_origen'];
                 $id_bodega_origen = $_POST['sl_bodega_origen'];
                 $id_sede_destino = $_POST['sl_sede_destino'];
@@ -48,8 +48,8 @@ try {
                 $id_bodega_destino = $obj_traslado['id_bodega_destino'];                
             }
 
-            if ($id == -1) {
-                if($id_bodega_origen != $id_bodega_destino){
+            if($id_bodega_origen != $id_bodega_destino){
+                if ($id == -1) {                
                     $sql = "INSERT INTO far_traslado(fec_traslado,hor_traslado,id_sede_origen,id_bodega_origen,
                             id_sede_destino,id_bodega_destino,detalle,val_total,id_usr_crea,fec_creacion,estado)
                         VALUES('$fec_traslado','$hor_traslado',$id_sede_origen,$id_bodega_origen,$id_sede_destino,$id_bodega_destino,'$detalle',0,$id_usr_ope,'$fecha_ope',1)";
@@ -63,31 +63,31 @@ try {
                         $res['id'] = $obj['id'];
                     } else {
                         $res['mensaje'] = $cmd->errorInfo()[2];
-                    }
+                    }                 
                 } else {
-                    $res['mensaje'] = 'La Bodega que Solicita y la Bodega Proveedora deben ser diferentes';    
-                } 
-            } else {
-                $sql = "SELECT estado FROM far_traslado WHERE id_traslado=" . $id;
-                $rs = $cmd->query($sql);
-                $obj_tra = $rs->fetch();
-
-                if ($obj_tra['estado'] == 1) {
-                    $sql = "UPDATE far_traslado 
-                        SET detalle='$detalle',id_sede_origen=$id_sede_origen,id_bodega_origen=$id_bodega_origen,id_sede_destino=$id_sede_destino,id_bodega_destino=$id_bodega_destino
-                        WHERE id_traslado=" . $id;
+                    $sql = "SELECT estado FROM far_traslado WHERE id_traslado=" . $id;
                     $rs = $cmd->query($sql);
+                    $obj_tra = $rs->fetch();
 
-                    if ($rs) {
-                        $res['mensaje'] = 'ok';
-                        $res['id'] = $id;
+                    if ($obj_tra['estado'] == 1) {
+                        $sql = "UPDATE far_traslado 
+                            SET detalle='$detalle',id_sede_origen=$id_sede_origen,id_bodega_origen=$id_bodega_origen,id_sede_destino=$id_sede_destino,id_bodega_destino=$id_bodega_destino
+                            WHERE id_traslado=" . $id;
+                        $rs = $cmd->query($sql);
+
+                        if ($rs) {
+                            $res['mensaje'] = 'ok';
+                            $res['id'] = $id;
+                        } else {
+                            $res['mensaje'] = $cmd->errorInfo()[2];
+                        }
                     } else {
-                        $res['mensaje'] = $cmd->errorInfo()[2];
+                        $res['mensaje'] = 'Solo puede Modificar Traslados en estado Pendiente';
                     }
-                } else {
-                    $res['mensaje'] = 'Solo puede Modificar Traslados en estado Pendiente';
-                }
-            }
+                }    
+            }else {
+                $res['mensaje'] = 'La Bodega que Solicita y la Bodega Proveedora deben ser diferentes';    
+            } 
         }
 
         if ($oper == 'del') {
@@ -136,13 +136,13 @@ try {
                     $error = 0;
                     $cmd->beginTransaction();
 
-                    $sql = 'SELECT id_sede_origengen,id_bodega_origengen,id_sede_destinotino,id_bodega_destinotino,detalle FROM far_traslado WHERE id_traslado=' . $id;
+                    $sql = 'SELECT id_sede_origen,id_bodega_origen,id_sede_destino,id_bodega_destino,detalle FROM far_traslado WHERE id_traslado=' . $id;
                     $rs = $cmd->query($sql);
                     $obj_tra = $rs->fetch();
-                    $id_sede_origengen = $obj_tra['id_sede_origengen'];
-                    $id_bodega_origengen = $obj_tra['id_bodega_origengen'];
-                    $id_sede_destinotino = $obj_tra['id_sede_destinotino'];
-                    $id_bodega_destinotino = $obj_tra['id_bodega_destinotino'];
+                    $id_sede_origen = $obj_tra['id_sede_origen'];
+                    $id_bodega_origen = $obj_tra['id_bodega_origen'];
+                    $id_sede_destino = $obj_tra['id_sede_destino'];
+                    $id_bodega_destino = $obj_tra['id_bodega_destino'];
                     $detalle = 'TRASLADO BODEGAS: ' . $obj_tra['detalle'];
                     $fec_movimiento = date('Y-m-d');
 
@@ -165,7 +165,7 @@ try {
                         $id_cum = $obj_lo['id_cum'];
                         $fec_ven = $obj_lo['fec_vencimiento']; 
 
-                        $sql = "SELECT id_lote AS id_lote_destino FROM far_medicamento_lote WHERE lote='$lote' AND id_med=$id_med AND id_cum=$id_cum AND id_bodega=$id_bodega_destinotino LIMIT 1";
+                        $sql = "SELECT id_lote AS id_lote_destino FROM far_medicamento_lote WHERE lote='$lote' AND id_med=$id_med AND id_cum=$id_cum AND id_bodega=$id_bodega_destino LIMIT 1";
                         $rs = $cmd->query($sql);
                         $obj_ld = $rs->fetch();
 
@@ -173,7 +173,7 @@ try {
                             $id_lote_destino = $obj_ld['id_lote_destino'];
                         } else {                        
                             $sql1 = "INSERT INTO far_medicamento_lote(lote,id_med,id_cum,id_bodega,id_lote_pri,fec_vencimiento,id_usr_crea,estado) 
-                                    VALUES ('$lote',$id_med,$id_cum,$id_bodega_destinotino,$id_lote_origen,'$fec_ven',$id_usr_ope,1)";
+                                    VALUES ('$lote',$id_med,$id_cum,$id_bodega_destino,$id_lote_origen,'$fec_ven',$id_usr_ope,1)";
                             $rs1 = $cmd->query($sql1);
 
                             $sql = 'SELECT LAST_INSERT_ID() AS id_lote_destino';
@@ -229,7 +229,7 @@ try {
 
                             /* Genera el egreso de la bodega origen */
                             $sql = "INSERT INTO far_kardex(id_lote,fec_movimiento,id_egreso_tra,id_sede,id_bodega,id_egr_tra_detalle,detalle,can_egreso,existencia_lote,val_promedio_lote,id_med,existencia,val_promedio,estado) 
-                                    VALUES($id_lote_origen,'$fec_movimiento',$id,$id_sede_origengen,$id_bodega_origengen,$id_detalle,'$detalle',$cantidad,$existencia_lote_kdx,$val_promedio_lote,$id_medicamento,$existencia_med_kdx,$val_promedio_med,1)";
+                                    VALUES($id_lote_origen,'$fec_movimiento',$id,$id_sede_origen,$id_bodega_origen,$id_detalle,'$detalle',$cantidad,$existencia_lote_kdx,$val_promedio_lote,$id_medicamento,$existencia_med_kdx,$val_promedio_med,1)";
                             $rs1 = $cmd->query($sql);
         
                             $sql = "UPDATE far_medicamento_lote SET existencia=$existencia_lote_kdx WHERE id_lote=" . $id_lote_origen;
@@ -253,7 +253,7 @@ try {
                             }
 
                             $sql = "INSERT INTO far_kardex(id_lote,fec_movimiento,id_ingreso_tra,id_sede,id_bodega,id_ing_tra_detalle,detalle,can_ingreso,val_ingreso,existencia_lote,val_promedio_lote,id_med,existencia,val_promedio,estado) 
-                                    VALUES($id_lote_destino,'$fec_movimiento',$id,$id_sede_destinotino,$id_bodega_destinotino,$id_detalle,'$detalle',$cantidad,$val_promedio_med,$existencia_lote_kdx ,$valor_promedio_lote_kdx,$id_medicamento,$existencia_med,$val_promedio_med,1)";
+                                    VALUES($id_lote_destino,'$fec_movimiento',$id,$id_sede_destino,$id_bodega_destino,$id_detalle,'$detalle',$cantidad,$val_promedio_med,$existencia_lote_kdx ,$valor_promedio_lote_kdx,$id_medicamento,$existencia_med,$val_promedio_med,1)";
                             $rs4 = $cmd->query($sql);
 
                             $sql = "UPDATE far_medicamento_lote SET existencia=$existencia_lote_kdx,val_promedio=$valor_promedio_lote_kdx WHERE id_lote=" . $id_lote_destino;
@@ -311,7 +311,10 @@ try {
             $estado = $obj_tra['estado'];
 
             if ($estado == 2) {
-                $cmd->beginTransaction();
+                $respuesta = verificar_kardex($cmd, $id, "T");
+
+                if ($respuesta == 'ok') {
+                    $cmd->beginTransaction();
                     
                     $sql = "UPDATE far_traslado SET id_usr_anula=$id_usr_ope,fec_anulacion='$fecha_ope',estado=0 WHERE id_traslado=$id";
                     $rs = $cmd->query($sql);
@@ -344,6 +347,9 @@ try {
                         $cmd->rollBack();
                         $res['mensaje'] = $cmd->errorInfo()[2];
                     }
+                } else {
+                    $res['mensaje'] = $respuesta;
+                }    
             } else {
                 $res['mensaje'] = 'Solo puede Anular Traslados en estado Cerrado';
             }

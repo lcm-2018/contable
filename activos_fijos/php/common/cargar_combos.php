@@ -24,7 +24,10 @@ function usuarios($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_usuario,CONCAT_WS(' ',apellido1,apellido2,nombre1,nombre2) AS nom_usuario FROM seg_usuarios_sistema  WHERE id_usuario<>0";
+        $sql = "SELECT id_usuario,CONCAT_WS(' ',apellido1,apellido2,nombre1,nombre2) AS nom_usuario 
+                FROM seg_usuarios_sistema 
+                WHERE estado=1 AND es_administrativo=1
+                ORDER BY apellido1,apellido2,nombre1,nombre2";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
@@ -308,7 +311,7 @@ function tipos_activo($titulo = '', $valor = -1)
     echo '<option value="3"' . $selected . '>PROPIEDAD DE INVERSION</option>';
 }
 
-function subgrupo_articulo($cmd, $titulo = '', $id = 0)
+function subgrupo_articulo($cmd, $titulo = '', $id = -1)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
@@ -320,6 +323,27 @@ function subgrupo_articulo($cmd, $titulo = '', $id = 0)
                 echo '<option value="' . $obj['id_subgrupo'] . '" selected="selected">' . $obj['nom_subgrupo'] . '</option>';
             } else {
                 echo '<option value="' . $obj['id_subgrupo'] . '">' . $obj['nom_subgrupo'] . '</option>';
+            }
+        }
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+function areas($cmd, $titulo = '', $id = -1)
+{
+    try {
+        echo '<option value="">' . $titulo . '</option>';
+        $sql = "SELECT id_area,nom_area,id_responsable FROM far_centrocosto_area WHERE id_area<>0";
+        $rs = $cmd->query($sql);
+        $objs = $rs->fetchAll();
+        foreach ($objs as $obj) {
+            $dtad = 'data-idresponsable="' . $obj['id_responsable'] . '"';
+            if ($obj['id_area']  == $id) {
+                echo '<option value="' . $obj['id_area'] . '"' . $dtad . ' selected="selected">' . $obj['nom_area'] . '</option>';
+            } else {
+                echo '<option value="' . $obj['id_area'] . '"' . $dtad . '>' . $obj['nom_area'] . '</option>';
             }
         }
         $cmd = null;

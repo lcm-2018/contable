@@ -1246,7 +1246,7 @@ $rol = $_SESSION['rol'];
                             <div class="collapse" id="pagesCollapseReportes" aria-labelledby="headingOne">
                                 <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">                                    
                                     <?php if (PermisosUsuario($permisos, 5799, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/inf_personalizados/index.php">
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/inf_personalizados/index.php">
                                             <div class="form-row">
                                                 <div class="div-icono">
                                                     <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>

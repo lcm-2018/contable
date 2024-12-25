@@ -23,7 +23,7 @@ try {
 
         $id = isset($_POST['id_mant_detalle']) ? $_POST['id_mant_detalle'] : -1;
 
-        $sql = "SELECT estado FROM acf_mantenimiento_detalle WHERE id_mant_detalle=" . $id;
+        $sql = "SELECT estado,id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mant_detalle=" . $id;
         $rs = $cmd->query($sql);
         $obj_man = $rs->fetch();
 
@@ -62,6 +62,18 @@ try {
                 $sql->bindValue(':id_mant_detalle', $id, PDO::PARAM_INT);                    
                 $updated = $sql->execute();
 
+                if ($updated) {                    
+                    //Actualiza el estado=Inactivo cuando estado general=sin servicio
+                    if($_POST['sl_estado_general'] == 4){
+                        $sql = "UPDATE acf_hojavida SET estado_general=:estado_general,estado=:estado WHERE id_activo_fijo=:id_activo_fijo";
+                        $sql = $cmd->prepare($sql);
+                        $sql->bindValue(':estado_general', 4);
+                        $sql->bindValue(':estado', 4);
+                        $sql->bindValue(':id_activo_fijo', $obj_man['id_activo_fijo'], PDO::PARAM_INT);                            
+                        $updated = $sql->execute();
+                    }   
+                }
+
                 if ($updated) {
                     $res['mensaje'] = 'ok';
                     $res['id'] = $id;
@@ -70,7 +82,7 @@ try {
                 }
             } 
         } else {
-            $res['mensaje'] = 'Solo puede Modificar Procesos de Mantenimiento en estado Pendiente';
+            $res['mensaje'] = 'El Procesos de Mantenimiento ya esta Finalizado';
         }
     } else {
         $res['mensaje'] = 'El Usuario del Sistema no tiene Permisos para esta Acción';

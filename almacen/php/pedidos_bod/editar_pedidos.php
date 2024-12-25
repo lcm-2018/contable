@@ -47,8 +47,8 @@ try {
                 $id_bodega_destino = $obj_pedido['id_bodega_destino'];                
             }
 
-            if ($id == -1) {
-                if($id_bodega_origen != $id_bodega_destino){
+            if($id_bodega_origen != $id_bodega_destino){
+                if ($id == -1) {                
                     $sql = "INSERT INTO far_pedido(fec_pedido,hor_pedido,detalle,id_sede_origen,id_bodega_origen,
                             id_sede_destino,id_bodega_destino,val_total,id_usr_crea,fec_creacion,estado) 
                         VALUES('$fec_pedido','$hor_pedido','$detalle',$id_sede_origen,$id_bodega_origen,
@@ -63,30 +63,30 @@ try {
                         $res['id'] = $obj['id'];
                     } else {
                         $res['mensaje'] = $cmd->errorInfo()[2];
-                    }
+                    }                    
                 } else {
-                    $res['mensaje'] = 'La Bodega que Solicita y la Bodega Proveedora deben ser diferentes';    
-                }    
-            } else {
-                $sql = "SELECT estado FROM far_pedido WHERE id_pedido=" . $id;
-                $rs = $cmd->query($sql);
-                $obj_pedido = $rs->fetch();
-
-                if ($obj_pedido['estado'] == 1) {
-                    $sql = "UPDATE far_pedido SET detalle='$detalle',id_sede_origen=$id_sede_origen,id_bodega_origen=$id_bodega_origen,id_sede_destino=$id_sede_destino,id_bodega_destino=$id_bodega_destino
-                            WHERE id_pedido=" . $id;
+                    $sql = "SELECT estado FROM far_pedido WHERE id_pedido=" . $id;
                     $rs = $cmd->query($sql);
+                    $obj_pedido = $rs->fetch();
 
-                    if ($rs) {
-                        $res['mensaje'] = 'ok';
-                        $res['id'] = $id;
+                    if ($obj_pedido['estado'] == 1) {
+                        $sql = "UPDATE far_pedido SET detalle='$detalle',id_sede_origen=$id_sede_origen,id_bodega_origen=$id_bodega_origen,id_sede_destino=$id_sede_destino,id_bodega_destino=$id_bodega_destino
+                                WHERE id_pedido=" . $id;
+                        $rs = $cmd->query($sql);
+
+                        if ($rs) {
+                            $res['mensaje'] = 'ok';
+                            $res['id'] = $id;
+                        } else {
+                            $res['mensaje'] = $cmd->errorInfo()[2];
+                        }
                     } else {
-                        $res['mensaje'] = $cmd->errorInfo()[2];
+                        $res['mensaje'] = 'Solo puede Modificar Pedidos en estado Pendiente';
                     }
-                } else {
-                    $res['mensaje'] = 'Solo puede Modificar Pedidos en estado Pendiente';
                 }
-            }
+            } else {
+                $res['mensaje'] = 'La Bodega que Solicita y la Bodega Proveedora deben ser diferentes';    
+            }    
         }
 
         if ($oper == 'del') {
@@ -185,9 +185,8 @@ try {
                 if ($estado != 2) {
                     $res['mensaje'] = 'Solo se puede anular pedidos en estado cerrado.<br/>';
                 } else if ($det_traslado >= 1) {
-                    $msg = 'El Pedido ya tiene registros de entrega en un Traslado';
+                    $res['mensaje'] = 'El Pedido ya tiene registros de entrega en un Traslado';
                 }
-                $res['mensaje'] = $msg;
             }
         }
     } else {

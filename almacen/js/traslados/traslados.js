@@ -303,7 +303,7 @@
                 type: 'POST',
                 url: 'editar_traslados_detalles.php',
                 dataType: 'json',
-                data: data + '&id_traslado=' + $('#id_traslado').val() + '&oper=add'
+                data: data + '&id_traslado=' + $('#id_traslado').val() + "&id_bodega=" + $('#sl_bodega_origen').val() + '&oper=add'
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
                     let pag = ($('#id_detalle').val() == -1) ? 0 : $('#tb_traslados_detalles').DataTable().page.info().page;

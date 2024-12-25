@@ -17,7 +17,7 @@ if ($length != -1) {
 $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 
-$where_gen = " WHERE HV.estado = 3"; //Con estado: 3-En Mantenimiento
+$where_gen = " WHERE MM.estado IN (3,4)"; //Con estado: 3-En ejecución, 4-Cerrado
 $where = $where_gen;
 if (isset($_POST['id_mantenimiento']) && $_POST['id_mantenimiento']) {
     $where .= " AND MM.id_mantenimiento='" . $_POST['id_mantenimiento'] . "'";
@@ -44,6 +44,7 @@ try {
 
     //Consulta el total de registros de la tabla
     $sql = "SELECT COUNT(*) AS total FROM acf_mantenimiento_detalle AS MD
+            INNER JOIN acf_mantenimiento AS MM ON (MM.id_mantenimiento=MD.id_mantenimiento)
             INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo=MD.id_activo_fijo)" . $where_gen;
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
