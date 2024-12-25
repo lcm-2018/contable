@@ -47,11 +47,11 @@ try {
     $sql = "SELECT MD.id_mant_detalle,
                 HV.placa,FM.nom_medicamento AS nom_articulo,                
                 CA.nom_area,MD.observacion_mant,
-                CASE HV.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
+                CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
             FROM acf_mantenimiento_detalle MD
             INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = MD.id_activo_fijo)
             INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
-            INNER JOIN far_centrocosto_area AS CA ON (CA.id_area=HV.id_area)
+            INNER JOIN far_centrocosto_area AS CA ON (CA.id_area=MD.id_area)
             WHERE MD.id_mantenimiento=" . $_POST['id_mantenimiento'] . $where . " ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();

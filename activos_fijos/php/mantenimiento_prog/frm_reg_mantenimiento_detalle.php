@@ -13,7 +13,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_md = isset($_POST['id_md']) ? $_POST['id_md'] : -1;
 
-$sql = "SELECT MD.*,HV.placa,HV.num_serial,FM.nom_medicamento AS nom_articulo
+$sql = "SELECT MD.*,HV.placa,HV.num_serial,FM.nom_medicamento AS nom_articulo,
+            CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
         FROM acf_mantenimiento_detalle AS MD
         INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo=MD.id_activo_fijo)
         INNER JOIN far_medicamentos FM ON (FM.id_med=HV.id_articulo)
@@ -40,13 +41,17 @@ $editar = in_array($obj['estado'],[1,2]) && $id_md != -1 ? '' : 'disabled="disab
                         <label for="txt_placa" class="small">Placa</label>
                         <input type="text" class="form-control form-control-sm" id="txt_placa" class="small" value="<?php echo $obj['placa'] ?>" readonly="readonly">
                     </div>  
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-9">
                         <label for="txt_nom_art" class="small">Articulo</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly">
                     </div>  
                     <div class="form-group col-md-3">
                         <label for="txt_nom_art" class="small">No. Serial</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['num_serial'] ?>" readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="txt_est_gen" class="small">Estado General</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_est_gen" class="small" value="<?php echo $obj['estado_general'] ?>" readonly="readonly">
                     </div>
                     <div class="form-group col-md-12">
                         <label for="txt_observacio_mant" class="small">Observación del Mantenimiento</label>                   

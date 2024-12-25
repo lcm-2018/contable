@@ -36,6 +36,7 @@ try {
                     if ($obj_traslado['id_area_origen'] == $id_area) {
                         $id = $_POST['id_detalle'];
                         $id_activo_fijo = $_POST['id_txt_actfij'];
+                        $estado_general = $_POST['txt_est_general'];
                         $observacion = $_POST['txt_observacion'];
                     
                         if ($id == -1) {   
@@ -43,8 +44,8 @@ try {
                             $rs = $cmd->query($sql);
                             $obj = $rs->fetch();
                             if ($obj['count'] == 0) {
-                                $sql = "INSERT INTO acf_traslado_detalle(id_traslado,id_activo_fijo,observacion)
-                                        VALUES($id_traslado,$id_activo_fijo,'$observacion')";
+                                $sql = "INSERT INTO acf_traslado_detalle(id_traslado,id_activo_fijo,estado_general,observacion)
+                                        VALUES($id_traslado,$id_activo_fijo,$estado_general,'$observacion')";
                                 $rs = $cmd->query($sql);
 
                                 if ($rs) {

@@ -15,47 +15,42 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $where = " WHERE 1";
-if($idrol !=1){
-    $where .= " AND far_traslado.id_bodega_destino IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
+if (isset($_POST['id_areori']) && $_POST['id_areori']) {
+    $where .= " AND acf_traslado.id_area_origen='" . $_POST['id_areori'] . "'";
 }
-
-if (isset($_POST['id_sedsol']) && $_POST['id_sedsol']) {
-    $where .= " AND far_traslado.id_sede_destino='" . $_POST['id_sedsol'] . "'";
-}
-if (isset($_POST['id_bodsol']) && $_POST['id_bodsol']) {
-    $where .= " AND far_traslado.id_bodega_destino='" . $_POST['id_bodsol'] . "'";
+if (isset($_POST['id_resori']) && $_POST['id_resori']) {
+    $where .= " AND acf_traslado.id_usr_origen='" . $_POST['id_resori'] . "'";
 }
 if (isset($_POST['id_traslado']) && $_POST['id_traslado']) {
-    $where .= " AND far_traslado.id_traslado='" . $_POST['id_traslado'] . "'";
-}
-if (isset($_POST['num_traslado']) && $_POST['num_traslado']) {
-    $where .= " AND far_traslado.num_traslado='" . $_POST['num_traslado'] . "'";
+    $where .= " AND acf_traslado.id_traslado='" . $_POST['id_traslado'] . "'";
 }
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
-    $where .= " AND far_traslado.fec_traslado BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+    $where .= " AND acf_traslado.fec_traslado BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
 }
-if (isset($_POST['id_sedpro']) && $_POST['id_sedpro']) {
-    $where .= " AND far_traslado.id_sede_origen='" . $_POST['id_sedpro'] . "'";
+if (isset($_POST['id_aredes']) && $_POST['id_aredes']) {
+    $where .= " AND acf_traslado.id_area_destino='" . $_POST['id_aredes'] . "'";
 }
-if (isset($_POST['id_bodpro']) && $_POST['id_bodpro']) {
-    $where .= " AND far_traslado.id_bodega_origen='" . $_POST['id_bodpro'] . "'";
+if (isset($_POST['id_resdes']) && $_POST['id_resdes']) {
+    $where .= " AND acf_traslado.id_usr_destino='" . $_POST['id_resdes'] . "'";
 }
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
-    $where .= " AND far_traslado.estado=" . $_POST['estado'];
+    $where .= " AND acf_traslado.estado=" . $_POST['estado'];
 }
-
 try {
-    $sql = "SELECT far_traslado.id_traslado,far_traslado.num_traslado,
-                    far_traslado.fec_traslado,far_traslado.hor_traslado,far_traslado.detalle,                    
-                    ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
-                    sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
-                    far_traslado.val_total,
-                    CASE far_traslado.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
-                FROM far_traslado             
-                INNER JOIN tb_sedes AS ss ON (ss.id_sede = far_traslado.id_sede_destino)
-                INNER JOIN far_bodegas AS bs ON (bs.id_bodega = far_traslado.id_bodega_destino)           
-                INNER JOIN tb_sedes AS sp ON (sp.id_sede = far_traslado.id_sede_origen)
-                INNER JOIN far_bodegas AS bp ON (bp.id_bodega = far_traslado.id_bodega_origen) $where ORDER BY far_traslado.id_traslado DESC";
+    $sql = "SELECT acf_traslado.id_traslado,
+                acf_traslado.fec_traslado,acf_traslado.hor_traslado,acf_traslado.observaciones,                    
+                ao.nom_area AS nom_area_origen,
+                CONCAT_WS(' ',uo.apellido1,uo.apellido2,uo.nombre1,uo.nombre2)  AS nom_usuario_origen,                    
+                ad.nom_area AS nom_area_destino,
+                CONCAT_WS(' ',ud.apellido1,ud.apellido2,ud.nombre1,ud.nombre2)  AS nom_usuario_destino,                
+                acf_traslado.estado,
+                CASE acf_traslado.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
+            FROM acf_traslado             
+            INNER JOIN far_centrocosto_area AS ao ON (ao.id_area = acf_traslado.id_area_origen)
+            LEFT JOIN seg_usuarios_sistema AS uo ON (uo.id_usuario = acf_traslado.id_usr_origen)           
+            INNER JOIN far_centrocosto_area AS ad ON (ad.id_area = acf_traslado.id_area_destino)
+            LEFT JOIN seg_usuarios_sistema AS ud ON (ud.id_usuario = acf_traslado.id_usr_destino) $where 
+            ORDER BY acf_traslado.id_traslado DESC";
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
 } catch (PDOException $e) {
@@ -88,7 +83,7 @@ try {
 
     <table style="width:100%; font-size:80%">
         <tr style="text-align:center">
-            <th>REPORTE DE trasladoS DE BODEGAS ENTRE: <?php echo $_POST['fec_ini'].' y '. $_POST['fec_fin'] ?></th>
+            <th>REPORTE DE TRASLADOS DE ACTIVOS FIJOS ENTRE: <?php echo $_POST['fec_ini'].' y '. $_POST['fec_fin'] ?></th>
         </tr>     
     </table>
 
@@ -96,20 +91,18 @@ try {
         <thead style="font-size:80%">                
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th rowspan="2">Id</th>
-                <th rowspan="2">No. traslado</th>
                 <th rowspan="2">Fecha traslado</th>
                 <th rowspan="2">Hora traslado</th>
-                <th rowspan="2">Detalle</th>
-                <th colspan="2">Unidad DE donde se solicita</th>
-                <th colspan="2">Unidad Proveedora A donde se solicita</th>
-                <th rowspan="2">Valor Total</th>
+                <th rowspan="2">Observaciones</th>
+                <th colspan="2">Unidad Origen</th>
+                <th colspan="2">Unidad Destino</th>
                 <th rowspan="2">Estado</th>
             </tr>
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
-                <th>Sede</th>
-                <th>Bodega</th>
-                <th>Sede</th>
-                <th>Bodega</th>
+                <th>Area</th>
+                <th>Responsable</th>
+                <th>Area</th>
+                <th>Responsable</th>
             </tr> 
         </thead>
         <tbody style="font-size: 60%;">
@@ -118,15 +111,13 @@ try {
             foreach ($objs as $obj) {
                 $tabla .=  '<tr class="resaltar" style="text-align:center"> 
                         <td>' . $obj['id_traslado'] . '</td>  
-                        <td>' . $obj['num_traslado'] . '</td>
                         <td>' . $obj['fec_traslado'] . '</td>
                         <td>' . $obj['hor_traslado'] . '</td>   
-                        <td style="text-align:left">' . $obj['detalle']. '</td>   
-                        <td>' . mb_strtoupper($obj['nom_sede_solicita']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_bodega_solicita']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_sede_provee']). '</td>   
-                        <td>' . mb_strtoupper($obj['nom_bodega_provee']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']) . '</td>   
+                        <td style="text-align:left">' . $obj['observaciones']. '</td>   
+                        <td>' . mb_strtoupper($obj['nom_area_origen']) . '</td>   
+                        <td>' . mb_strtoupper($obj['nom_usuario_origen']) . '</td>   
+                        <td>' . mb_strtoupper($obj['nom_area_destino']). '</td>   
+                        <td>' . mb_strtoupper($obj['nom_usuario_destino']) . '</td>   
                         <td>' . $obj['nom_estado']. '</td></tr>';
             }
             echo $tabla;
@@ -134,7 +125,7 @@ try {
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="11" style="text-align:left">
+                <td colspan="9" style="text-align:left">
                     No. de Registros: <?php echo count($objs); ?>
                 </td>
             </tr>

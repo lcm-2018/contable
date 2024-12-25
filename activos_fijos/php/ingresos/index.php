@@ -111,8 +111,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Detalle</th>
                                         <th>Tercero</th>
                                         <th>Tipo Ingreso</th>
-                                        <th>Vr. Total</th>
                                         <th>Sede</th>
+                                        <th>Vr. Total</th>                                        
                                         <th>Estado</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>

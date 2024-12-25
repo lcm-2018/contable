@@ -35,7 +35,7 @@
                     data.nombre = $('#txt_nombre_filtro').val();
                     data.num_serial = $('#txt_serial_filtro').val();
                     data.marca = $('#sl_marcas_filtro').val();
-                    data.tipoactivo = $('#sl_tipoactivo_filtro').val();
+                    data.estado_gen = $('#sl_estadogen_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
                 }
             },
@@ -47,10 +47,11 @@
                 { 'data': 'num_serial' },
                 { 'data': 'marca' },
                 { 'data': 'valor' },
-                { 'data': 'tipo_activo' },
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_area' },
                 { 'data': 'nom_responsable' },
+                { 'data': 'estado_general' },
+                { 'data': 'nom_estado_general' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
@@ -58,8 +59,8 @@
             columnDefs: [
                 { class: 'text-wrap', targets: [3, 5] },
                 { type: "numeric-comma", targets: 6 },
-                { visible: false, targets: 11 },
-                { orderable: false, targets: 13 }
+                { visible: false, targets: [10, 12] },
+                { orderable: false, targets: 14 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 2) {

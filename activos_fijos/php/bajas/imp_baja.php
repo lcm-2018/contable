@@ -14,31 +14,23 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 
 try {
-    $sql = "SELECT AT.id_traslado,AT.fec_traslado,AT.hor_traslado,AT.observaciones,                    
-                AO.nom_area AS nom_area_origen,
-                CONCAT_WS(' ',UO.apellido1,UO.apellido2,UO.nombre1,UO.nombre2)  AS nom_usuario_origen,                    
-                AD.nom_area AS nom_area_destino,
-                CONCAT_WS(' ',UD.apellido1,UD.apellido2,UD.nombre1,UD.nombre2)  AS nom_usuario_destino,                
-                CASE AT.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
-                CASE AT.estado WHEN 0 THEN AT.fec_anula WHEN 1 THEN AT.fec_crea WHEN 2 THEN AT.fec_cierre END AS fec_estado,
+    $sql = "SELECT AB.id_baja,AB.fec_orden,AB.hor_orden,AB.observaciones,                    
+                CASE AB.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
+                CASE AB.estado WHEN 0 THEN AB.fec_anula WHEN 1 THEN AB.fec_crea WHEN 2 THEN AB.fec_cierre END AS fec_estado,
                 CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
                 usr.descripcion AS usr_perfil,usr.nom_firma
-            FROM acf_traslado AS AT            
-            INNER JOIN far_centrocosto_area AS ao ON (ao.id_area = AT.id_area_origen)
-            LEFT JOIN seg_usuarios_sistema AS uo ON (uo.id_usuario = AT.id_usr_origen)           
-            INNER JOIN far_centrocosto_area AS ad ON (ad.id_area = AT.id_area_destino)
-            LEFT JOIN seg_usuarios_sistema AS ud ON (ud.id_usuario = AT.id_usr_destino)
-            LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario = AT.id_usr_cierre)
-            WHERE AT.id_traslado=" . $id . " LIMIT 1";
+            FROM acf_baja AS AB            
+            LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario = AB.id_usr_cierre)
+            WHERE AB.id_baja=" . $id . " LIMIT 1";
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
 
-    $sql = "SELECT HV.placa,FM.nom_medicamento AS nom_articulo,TD.observacion,
-                CASE TD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
-            FROM acf_traslado_detalle AS TD
-            INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = TD.id_activo_fijo)
+    $sql = "SELECT HV.placa,FM.nom_medicamento AS nom_articulo,BD.observacion,
+                CASE BD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
+            FROM acf_baja_detalle AS BD
+            INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = BD.id_activo_fijo)
             INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
-            WHERE TD.id_traslado=" . $id . " ORDER BY TD.id_traslado_detalle";
+            WHERE BD.id_baja=" . $id . " ORDER BY BD.id_baja_detalle";
     $rs = $cmd->query($sql);
     $obj_ds = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -73,35 +65,25 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>ORDEN DE TRASLADO DE ACTIVOS FIJOS</th>
+            <th>ORDEN DE BAJA DE ACTIVOS FIJOS</th>
         </tr>
     </table>
 
     <table style="width:100%; font-size:60%; text-align:left; border:#A9A9A9 1px solid;">
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td>Id. traslado</td>
-            <td>Fecha traslado</td>
-            <td>Hora traslado</td>
+            <td>Id. baja</td>
+            <td>Fecha baja</td>
+            <td>Hora baja</td>
             <td>Estado</td>
             <td colspan="2">Fecha Estado</td>
         </tr>
         <tr>
-            <td><?php echo $obj_e['id_traslado']; ?></td>
-            <td><?php echo $obj_e['fec_traslado']; ?></td>
-            <td><?php echo $obj_e['hor_traslado']; ?></td>
+            <td><?php echo $obj_e['id_baja']; ?></td>
+            <td><?php echo $obj_e['fec_orden']; ?></td>
+            <td><?php echo $obj_e['hor_orden']; ?></td>
             <td><?php echo $obj_e['estado']; ?></td>
             <td colspan="2"><?php echo $obj_e['fec_estado']; ?></td>
-        </tr>
-        <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="3">Area Origen y Responsable</td>
-            <td colspan="3">Area Destino y Responsable</td>
-        </tr>
-        <tr>
-            <td><?php echo $obj_e['nom_area_origen']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_usuario_origen']; ?></td>
-            <td><?php echo $obj_e['nom_area_destino']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_usuario_destino']; ?></td>
-        </tr>
+        </tr>        
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td colspan="6">Observaciones</td>
         </tr>

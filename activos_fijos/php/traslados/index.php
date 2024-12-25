@@ -112,7 +112,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th rowspan="2">Id</th>
                                         <th rowspan="2">Fecha traslado</th>
                                         <th rowspan="2">Hora traslado</th>
-                                        <th rowspan="2">Detalle</th>                                        
+                                        <th rowspan="2">Observaciones</th>                                        
                                         <th colspan="2">Unidad Origen</th>
                                         <th colspan="2">Unidad Destino</th>                                       
                                         <th rowspan="2">Id.Estado</th>

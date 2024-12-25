@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -10,41 +10,40 @@ include '../../../permisos.php';
 include '../common/funciones_generales.php';
 
 $oper = isset($_POST['oper']) ? $_POST['oper'] : exit('Acción no permitida');
-$fecha_ope = date('Y-m-d H:i:s');
-$id_usr_ope = $_SESSION['id_user'];
+$fecha_crea = date('Y-m-d H:i:s');
+$id_usr_crea = $_SESSION['id_user'];
 $res = array();
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-    if ((PermisosUsuario($permisos, 5705, 2) && $oper == 'add' && $_POST['id_detalle'] == -1) ||
-        (PermisosUsuario($permisos, 5705, 3) && $oper == 'add' && $_POST['id_detalle'] != -1) ||
-        (PermisosUsuario($permisos, 5705, 4) && $oper == 'del') || $id_rol == 1) {
+    if ((PermisosUsuario($permisos, 5709, 2) && $oper == 'add' && $_POST['id_detalle'] == -1) ||
+        (PermisosUsuario($permisos, 5709, 3) && $oper == 'add' && $_POST['id_detalle'] != -1) ||
+        (PermisosUsuario($permisos, 5709, 4) && $oper == 'del') || $id_rol == 1) {
 
-        $id_mantenimiento = $_POST['id_mantenimiento'];
+        $id_baja = $_POST['id_baja'];
 
-        if ($id_mantenimiento > 0) {
+        if ($id_baja > 0) {
 
-            $sql = "SELECT estado FROM acf_mantenimiento WHERE id_mantenimiento=" . $id_mantenimiento;
+            $sql = "SELECT estado FROM acf_baja WHERE id_baja=" . $id_baja;
             $rs = $cmd->query($sql);
-            $obj_mantenimiento = $rs->fetch();            
+            $obj_baja = $rs->fetch();            
           
-            if ($obj_mantenimiento['estado'] == 1) {
+            if ($obj_baja['estado'] == 1) {
                 if ($oper == 'add') {
-                    $id = $_POST['id_mant_detalle'];        
+                    $id = $_POST['id_detalle'];
                     $id_activo_fijo = $_POST['id_txt_actfij'];
                     $estado_general = $_POST['txt_est_general'];
-                    $id_area = $_POST['id_txt_area'];
-                    $observacion = $_POST['txt_observaciones'];                    
-                   
+                    $observacion = $_POST['txt_observacion'];
+                
                     if ($id == -1) {   
-                        $sql = "SELECT COUNT(*) AS count FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id_mantenimiento AND id_activo_fijo=$id_activo_fijo";
+                        $sql = "SELECT COUNT(*) AS count FROM acf_baja_detalle WHERE id_baja=$id_baja AND id_activo_fijo=" . $id_activo_fijo;
                         $rs = $cmd->query($sql);
                         $obj = $rs->fetch();
                         if ($obj['count'] == 0) {
-                            $sql = "INSERT INTO acf_mantenimiento_detalle(id_mantenimiento,id_activo_fijo,estado_general,id_area,observacion_mant,estado)
-                                    VALUES($id_mantenimiento,$id_activo_fijo,$estado_general,$id_area,'$observacion',1)";
+                            $sql = "INSERT INTO acf_baja_detalle(id_baja,id_activo_fijo,estado_general,observacion)
+                                    VALUES($id_baja,$id_activo_fijo,$estado_general,'$observacion')";
                             $rs = $cmd->query($sql);
 
                             if ($rs) {
@@ -57,10 +56,10 @@ try {
                                 $res['mensaje'] = $cmd->errorInfo()[2];
                             }
                         } else {
-                            $res['mensaje'] = 'El Activo Fijo ya existe en los detalles del la Orden de Mantenimiento';    
+                            $res['mensaje'] = 'El Activo Fijo ya existe en los detalles de la Orden de Baja';    
                         }    
                     } else {
-                        $sql = "UPDATE acf_mantenimiento_detalle SET observacion_mant='$observacion' WHERE id_mant_detalle=" . $id;
+                        $sql = "UPDATE acf_baja_detalle SET observacion='$observacion' WHERE id_baja_detalle=" . $id;
                         $rs = $cmd->query($sql);
                         if ($rs) {
                             $res['mensaje'] = 'ok';
@@ -68,12 +67,12 @@ try {
                         } else {
                             $res['mensaje'] = $cmd->errorInfo()[2];
                         }
-                    }
+                    }                       
                 }
 
                 if ($oper == 'del') {
                     $id = $_POST['id'];
-                    $sql = "DELETE FROM acf_mantenimiento_detalle WHERE id_mant_detalle=" . $id;
+                    $sql = "DELETE FROM acf_baja_detalle WHERE id_baja_detalle=" . $id;
                     $rs = $cmd->query($sql);
                     if ($rs) {
                         $res['mensaje'] = 'ok';
@@ -81,11 +80,12 @@ try {
                         $res['mensaje'] = $cmd->errorInfo()[2];
                     }
                 }
+
             } else {
-                $res['mensaje'] = 'Solo puede Modificar Ordenes de Mantenimiento en estado Pendiente';
+                $res['mensaje'] = 'Solo puede Modificar Ordenes de Baja en estado Pendiente';
             }
         } else {
-            $res['mensaje'] = 'Primero debe guardar la Orden de Mantenimiento';
+            $res['mensaje'] = 'Primero debe guardar la Orden de Baja';
         }
     } else {
         $res['mensaje'] = 'El Usuario del Sistema no tiene Permisos para esta Acción';

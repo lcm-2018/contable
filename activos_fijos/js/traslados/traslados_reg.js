@@ -29,13 +29,12 @@
                 { 'data': 'placa' },
                 { 'data': 'nom_articulo' },
                 { 'data': 'estado_general' },
-                { 'data': 'nom_area' },
                 { 'data': 'observacion' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [2, 5] },
-                { orderable: false, targets: 6 }
+                { class: 'text-wrap', targets: [2, 4] },
+                { orderable: false, targets: 5 }
             ],
             order: [
                 [0, "desc"]

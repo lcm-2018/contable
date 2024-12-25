@@ -8,13 +8,14 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
 include '../../../conexion.php';
 include '../../../permisos.php';
 include '../common/cargar_combos.php';
+include '../common/funciones_generales.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -32,14 +33,14 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     <div id="layoutSidenav">
         <?php include '../../../navlateral.php' ?>
         <div id="layoutSidenav_content">
-            <main> 
+            <main>
                 <div class="container-fluid p-2">
                     <div class="card mb-4">
                         <div class="card-header" id="divTituloPag">
                             <div class="row">
                                 <div class="col-md-11">
                                     <i class="fas fa-list-ul fa-lg" style="color:#1D80F7"></i>
-                                    BAJA ACTIVO FIJO
+                                    BAJAS DE ACTIVOS FIJOS
                                 </div>
                             </div>
                         </div>
@@ -50,8 +51,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <!--Opciones de filtros -->
                             <div class="form-row">
                                 <div class="form-group col-md-1">
-                                    <input type="text" class="filtro form-control form-control-sm" id="txt_idbaja_filtro" placeholder="Id. Baja">
-                                </div>
+                                    <input type="text" class="filtro form-control form-control-sm" id="txt_id_baja_filtro" placeholder="Id. baja">
+                                </div>                                
                                 <div class="form-group col-md-3">
                                     <div class="form-row">
                                         <div class="form-group col-md-6">
@@ -61,7 +62,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
                                         </div>
                                     </div>
-                                </div>
+                                </div> 
                                 <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estados_movimientos('--Estado--') ?>
@@ -78,23 +79,24 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             </div>
 
                             <!--Lista de registros en la tabla-->
-                            <!--1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir-->
                             <?php
-                            if (PermisosUsuario($permisos, 5703, 2) || $id_rol == 1) {
+                            if (PermisosUsuario($permisos, 5709, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';
                             } else {
                                 echo '<input type="hidden" id="peReg" value="0">';
                             }
                             ?>
                             <table id="tb_bajas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
-                                <thead>
+                                <thead>                               
                                     <tr class="text-center centro-vertical">
                                         <th>Id</th>
-                                        <th>Observacion</th>
-                                        <th>Fecha Baja</th>
+                                        <th>Fecha baja</th>
+                                        <th>Hora baja</th>
+                                        <th>Observaciones</th>                                        
+                                        <th>Id.Estado</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
-                                    </tr>
+                                    </tr>                                    
                                 </thead>
                             </table>
                             <table class="table-bordered table-sm col-md-2">

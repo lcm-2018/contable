@@ -116,7 +116,7 @@ try {
             $id_area_destino = isset($obj_traslado['id_area_destino']) ? $obj_traslado['id_area_destino'] : 0;
             $id_usr_destino = isset($obj_traslado['id_usr_destino']) ? $obj_traslado['id_usr_destino'] : 0;
 
-            $sql = "SELECT COUNT(*) AS total FROM acf_traslado WHERE id_traslado=" . $id;
+            $sql = "SELECT COUNT(*) AS total FROM acf_traslado_detalle WHERE id_traslado=" . $id;
             $rs = $cmd->query($sql);
             $obj_traslado = $rs->fetch();
             $num_detalles = $obj_traslado['total'];

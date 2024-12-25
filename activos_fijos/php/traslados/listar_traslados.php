@@ -19,25 +19,25 @@ $dir = $_POST['order'][0]['dir'];
 
 $where = " WHERE 1";
 if (isset($_POST['id_areori']) && $_POST['id_areori']) {
-    $where .= " AND acf_traslado.id_area_origen='" . $_POST['id_areori'] . "'";
+    $where .= " AND AT.id_area_origen='" . $_POST['id_areori'] . "'";
 }
 if (isset($_POST['id_resori']) && $_POST['id_resori']) {
-    $where .= " AND acf_traslado.id_usr_origen='" . $_POST['id_resori'] . "'";
+    $where .= " AND AT.id_usr_origen='" . $_POST['id_resori'] . "'";
 }
 if (isset($_POST['id_traslado']) && $_POST['id_traslado']) {
-    $where .= " AND acf_traslado.id_traslado='" . $_POST['id_traslado'] . "'";
+    $where .= " AND AT.id_traslado='" . $_POST['id_traslado'] . "'";
 }
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
-    $where .= " AND acf_traslado.fec_traslado BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+    $where .= " AND AT.fec_traslado BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
 }
 if (isset($_POST['id_aredes']) && $_POST['id_aredes']) {
-    $where .= " AND acf_traslado.id_area_destino='" . $_POST['id_aredes'] . "'";
+    $where .= " AND AT.id_area_destino='" . $_POST['id_aredes'] . "'";
 }
 if (isset($_POST['id_resdes']) && $_POST['id_resdes']) {
-    $where .= " AND acf_traslado.id_usr_destino='" . $_POST['id_resdes'] . "'";
+    $where .= " AND AT.id_usr_destino='" . $_POST['id_resdes'] . "'";
 }
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
-    $where .= " AND acf_traslado.estado=" . $_POST['estado'];
+    $where .= " AND AT.estado=" . $_POST['estado'];
 }
 
 try {
@@ -45,31 +45,29 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM acf_traslado $where";
+    $sql = "SELECT COUNT(*) AS total FROM acf_traslado";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(*) AS total FROM acf_traslado $where";
+    $sql = "SELECT COUNT(*) AS total FROM acf_traslado AS AT $where";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT acf_traslado.id_traslado,
-                acf_traslado.fec_traslado,acf_traslado.hor_traslado,acf_traslado.observaciones,                    
-                ao.nom_area AS nom_area_origen,
-                CONCAT_WS(' ',uo.apellido1,uo.apellido2,uo.nombre1,uo.nombre2)  AS nom_usuario_origen,                    
-                ad.nom_area AS nom_area_destino,
-                CONCAT_WS(' ',ud.apellido1,ud.apellido2,ud.nombre1,ud.nombre2)  AS nom_usuario_destino,                
-                acf_traslado.estado,
-                CASE acf_traslado.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
-            FROM acf_traslado             
-            INNER JOIN far_centrocosto_area AS ao ON (ao.id_area = acf_traslado.id_area_origen)
-            LEFT JOIN seg_usuarios_sistema AS uo ON (uo.id_usuario = acf_traslado.id_usr_origen)           
-            INNER JOIN far_centrocosto_area AS ad ON (ad.id_area = acf_traslado.id_area_destino)
-            LEFT JOIN seg_usuarios_sistema AS ud ON (ud.id_usuario = acf_traslado.id_usr_destino)
+    $sql = "SELECT AT.id_traslado,AT.fec_traslado,AT.hor_traslado,AT.observaciones,                    
+                AO.nom_area AS nom_area_origen,
+                CONCAT_WS(' ',UO.apellido1,UO.apellido2,UO.nombre1,UO.nombre2)  AS nom_usuario_origen,                    
+                AD.nom_area AS nom_area_destino,
+                CONCAT_WS(' ',UD.apellido1,UD.apellido2,UD.nombre1,UD.nombre2)  AS nom_usuario_destino,                
+                AT.estado,CASE AT.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
+            FROM acf_traslado AS AT           
+            INNER JOIN far_centrocosto_area AS AO ON (AO.id_area = AT.id_area_origen)
+            LEFT JOIN seg_usuarios_sistema AS UO ON (UO.id_usuario = AT.id_usr_origen)           
+            INNER JOIN far_centrocosto_area AS AD ON (AD.id_area = AT.id_area_destino)
+            LEFT JOIN seg_usuarios_sistema AS UD ON (UD.id_usuario = AT.id_usr_destino)
             $where ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);

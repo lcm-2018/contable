@@ -34,7 +34,9 @@ if (empty($obj)) {
     $activofijo = datos_activo_fijo($cmd, $id_acf);
     $obj['id_activo_fijo'] = $activofijo['id_activo_fijo'];
     $obj['placa'] = $activofijo['placa'];
-    $obj['nom_articulo'] = $activofijo['nom_articulo'];    
+    $obj['nom_articulo'] = $activofijo['nom_articulo'];
+    $obj['estado_general'] = $activofijo['estado_general'];    
+    $obj['id_area'] = $activofijo['id_area'];  
 }
 ?>
 
@@ -53,6 +55,8 @@ if (empty($obj)) {
                         <label for="txt_placa" class="small">Placa</label>
                         <input type="text" class="form-control form-control-sm" id="txt_placa" class="small" value="<?php echo $obj['placa'] ?>" readonly="readonly">
                         <input type="hidden" id="id_txt_actfij" name="id_txt_actfij" value="<?php echo $obj['id_activo_fijo'] ?>">
+                        <input type="hidden" id="txt_est_general" name="txt_est_general" value="<?php echo $obj['estado_general'] ?>">
+                        <input type="hidden" id="id_txt_area" name="id_txt_area" value="<?php echo $obj['id_area'] ?>">
                     </div>  
                     <div class="form-group col-md-9">
                         <label for="txt_nom_art" class="small">Articulo</label>

@@ -34,8 +34,8 @@ if (isset($_POST['num_serial']) && $_POST['num_serial']) {
 if (isset($_POST['marca']) && $_POST['marca']) {
     $where .= " AND HV.id_marca=" . $_POST['marca'];
 }
-if (isset($_POST['tipoactivo']) && $_POST['tipoactivo']) {
-    $where .= " AND HV.tipo_activo=" . $_POST['tipoactivo'];
+if (isset($_POST['estado_gen']) && $_POST['estado_gen']) {
+    $where .= " AND HV.estado_general=" . $_POST['estado_gen'];
 }
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND HV.estado=" . $_POST['estado'];
@@ -66,8 +66,9 @@ try {
                 MA.descripcion marca,HV.valor,
                 SE.nom_sede,AR.nom_area,
                 CONCAT_WS(' ',US.apellido1,US.apellido2,US.nombre1,US.nombre2) AS nom_responsable,
-                CASE HV.tipo_activo WHEN 1 THEN 'PROPIEDAD, PLANTA Y EQUIPO' WHEN 2 THEN 'PROPIDAD PARA LA VENTA' 
-                                    WHEN 3 THEN 'PROPIEDAD DE INVERSION' END AS tipo_activo,
+                HV.estado_general,
+                CASE HV.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' 
+                                        WHEN 4 THEN 'SIN SERVICIO' END AS nom_estado_general,
                 HV.estado,
                 CASE HV.estado WHEN 1 THEN 'ACTIVO' WHEN 2 THEN 'PARA MANTENIMIENTO' WHEN 3 THEN 'EN MANTENIMIENTO'
                                     WHEN 4 THEN 'INACTIVO' WHEN 5 THEN 'DADO DE BAJA' END AS nom_estado
@@ -118,11 +119,12 @@ if (!empty($objs)) {
             "nom_articulo" => $obj['nom_articulo'],            
             "num_serial" => $obj['num_serial'],
             "marca" => $obj['marca'],
-            "valor" => $obj['valor'],
-            "tipo_activo" => $obj['tipo_activo'],
+            "valor" => $obj['valor'],            
             "nom_sede" => $obj['nom_sede'],
             "nom_area" => $obj['nom_area'],
             "nom_responsable" => $obj['nom_responsable'],
+            "estado_general" => $obj['estado_general'],
+            "nom_estado_general" => $obj['nom_estado_general'],
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $imagen . $componente . $archivos . $eliminar . '</div>',

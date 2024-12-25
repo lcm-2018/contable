@@ -93,7 +93,7 @@ try {
 
     <table style="width:100%; font-size:80%">
         <tr style="text-align:center">
-            <th>REPORTE DE PEDIDOS DE BODEGAS ENTRE: <?php echo $_POST['fec_ini'].' y '. $_POST['fec_fin'] ?></th>
+            <th>REPORTE DE PEDIDOS DE DEPENDENCIAS ENTRE: <?php echo $_POST['fec_ini'].' y '. $_POST['fec_fin'] ?></th>
         </tr>     
     </table>
 

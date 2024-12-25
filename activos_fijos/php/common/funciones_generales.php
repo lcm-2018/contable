@@ -54,7 +54,7 @@ function datos_articulo($cmd, $id_med){
 function datos_activo_fijo($cmd, $id_acf){
     try {
         $res = array();
-        $sql = "SELECT acf_hojavida.id_activo_fijo,acf_hojavida.placa,
+        $sql = "SELECT acf_hojavida.id_activo_fijo,acf_hojavida.placa,acf_hojavida.estado_general,acf_hojavida.id_area,
                     far_medicamentos.cod_medicamento,
                     far_medicamentos.nom_medicamento
                 FROM acf_hojavida
@@ -66,7 +66,9 @@ function datos_activo_fijo($cmd, $id_acf){
             $res = array('id_activo_fijo' => $obj['id_activo_fijo'],
                         'placa' => $obj['placa'],
                         'cod_articulo' => $obj['cod_medicamento'],
-                        'nom_articulo' => $obj['nom_medicamento']
+                        'nom_articulo' => $obj['nom_medicamento'],
+                        'estado_general' => $obj['estado_general'],
+                        'id_area' => $obj['id_area']
                     );
         } else {
             $res = array('id_activo_fijo' => '', 'placa' => '', 'cod_articulo' => '', 'nom_articulo' => '');

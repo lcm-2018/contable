@@ -64,13 +64,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_tipoactivo_filtro">
-                                        <?php tipos_activo('--Tipo Activo--') ?>
+                                    <select class="form-control form-control-sm" id="sl_estadogen_filtro">
+                                        <?php estado_general_activo('--Estado General--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
                                     <select class="filtro form-control form-control-sm" id="sl_estado_filtro">
-                                        <?php estado_activo('--Estado--') ?>
+                                        <?php estado_activo('--Estado Proceso--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
@@ -100,13 +100,14 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Articulo</th>                                        
                                         <th>No. Serial</th>
                                         <th>Marca</th>
-                                        <th>Valor</th>
-                                        <th>Tipo Activo</th>
+                                        <th>Valor</th>                                        
                                         <th>Sede</th>
                                         <th>Area</th>
                                         <th>Responsable</th>
-                                        <th>Estado</th>
-                                        <th>Estado</th>
+                                        <th>Id.Estado General</th>
+                                        <th>Estado General</th>
+                                        <th>Id.Estado</th>
+                                        <th>Estado Proceso</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>

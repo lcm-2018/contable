@@ -20,7 +20,7 @@ $dir = $_POST['order'][0]['dir'];
 $where = "";
 if (isset($_POST['search']['value']) && $_POST['search']['value']){
     $search = $_POST['search']['value'];
-    $where .= " AND M.nom_medicamento LIKE '%$search%'";
+    $where .= " AND (FM.nom_medicamento LIKE '%$search%' OR HV.placa LIKE '$search%')";
 }
 
 try {
@@ -35,25 +35,22 @@ try {
 
     //Consulta el total de registros aplicando el filtro
     $sql = "SELECT COUNT(*) AS total 
-            FROM acf_baja_detalle MD
-                INNER JOIN acf_hojavida HV ON HV.id_activo_fijo = MD.id_activo_fijo
-                INNER JOIN far_medicamentos M ON M.id_med = HV.id_articulo 
-            WHERE MD.id_baja=" . $_POST['id_baja'] . $where; 
+            FROM acf_baja_detalle AS BD
+            INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = BD.id_activo_fijo)
+            INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
+            WHERE BD.id_baja=" . $_POST['id_baja'] . $where; 
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT 
-                MD.id_baja_detalle,
-                m.nom_medicamento articulo,
-                HV.placa,
-                MD.observacion_baja 
-            FROM acf_baja_detalle MD
-                INNER JOIN acf_hojavida HV ON HV.id_activo_fijo = MD.id_activo_fijo
-                INNER JOIN far_medicamentos M ON M.id_med = HV.id_articulo
-            WHERE MD.id_baja=" . $_POST['id_baja'] . $where . " ORDER BY $col $dir $limit";
-
+    $sql = "SELECT BD.id_baja_detalle,
+                HV.placa,FM.nom_medicamento AS nom_articulo,BD.observacion,
+                CASE BD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
+            FROM acf_baja_detalle AS BD
+            INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = BD.id_activo_fijo)
+            INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
+            WHERE BD.id_baja=" . $_POST['id_baja'] . $where . " ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;
@@ -63,24 +60,23 @@ try {
 
 $editar = NULL;
 $eliminar = NULL;
-$editaractivofijo = NULL;
 $data = [];
 if (!empty($objs)) {
     foreach ($objs as $obj) {
         $id = $obj['id_baja_detalle'];
         //Permite crear botones en la cuadricula si tiene permisos de 1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir
-        if (PermisosUsuario($permisos, 5703, 3) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5709, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
-        }
-        
-        if (PermisosUsuario($permisos, 5703, 4) || $id_rol == 1) {
+        }        
+        if (PermisosUsuario($permisos, 5709, 4) || $id_rol == 1) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
         $data[] = [
             "id_baja_detalle" => $id,
-            "articulo" => $obj['articulo'],
             "placa" => $obj['placa'],
-            "observacion" => $obj['observacion_baja'],
+            "nom_articulo" => $obj['nom_articulo'],
+            "estado_general" => $obj['estado_general'],
+            "observacion" => $obj['observacion'],            
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }    
@@ -92,5 +88,3 @@ $datos = [
 ];
 
 echo json_encode($datos);
-
-   

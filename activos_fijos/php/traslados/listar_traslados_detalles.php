@@ -35,7 +35,7 @@ try {
 
     //Consulta el total de registros aplicando el filtro
     $sql = "SELECT COUNT(*) AS total 
-            FROM acf_traslado_detalle TD
+            FROM acf_traslado_detalle AS TD
             INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = TD.id_activo_fijo)
             INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
             WHERE TD.id_traslado=" . $_POST['id_traslado'] . $where; 
@@ -45,13 +45,11 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT TD.id_traslado_detalle,
-                HV.placa,FM.nom_medicamento AS nom_articulo,                
-                CA.nom_area,TD.observacion,
-                CASE HV.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
-            FROM acf_traslado_detalle TD
+                HV.placa,FM.nom_medicamento AS nom_articulo,TD.observacion,
+                CASE TD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
+            FROM acf_traslado_detalle AS TD
             INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = TD.id_activo_fijo)
             INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
-            INNER JOIN far_centrocosto_area AS CA ON (CA.id_area=HV.id_area)
             WHERE TD.id_traslado=" . $_POST['id_traslado'] . $where . " ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
@@ -78,7 +76,6 @@ if (!empty($objs)) {
             "placa" => $obj['placa'],
             "nom_articulo" => $obj['nom_articulo'],
             "estado_general" => $obj['estado_general'],
-            "nom_area" => $obj['nom_area'],
             "observacion" => $obj['observacion'],            
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];

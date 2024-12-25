@@ -50,15 +50,15 @@
                 { 'data': 'detalle' },
                 { 'data': 'nom_tercero' },
                 { 'data': 'nom_tipo_ingreso' },
-                { 'data': 'val_total' },
                 { 'data': 'nom_sede' },
+                { 'data': 'val_total' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [6, 7] },
-                { type: "numeric-comma", targets: 9 },
+                { type: "numeric-comma", targets: 10 },
                 { visible: false, targets: 11 },
                 { orderable: false, targets: 13 }
             ],

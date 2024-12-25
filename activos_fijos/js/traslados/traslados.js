@@ -91,7 +91,7 @@
         }
     });
 
-    //Filtrar las Bodegas acorde a la Sede y Usuario de sistema    
+    //Seleccionr el responsable de la area
     $('#divForms').on("change", "#sl_area_origen", function() {
         let id_res = $(this).find('option:selected').attr('data-idresponsable');
         $('#sl_responsable_origen').val(id_res);
@@ -355,14 +355,13 @@
             $('#divMsgError').html('Debe especificar un rango de fechas');
         } else {
             $.post("imp_traslados.php", {
-                id_sedsol: $('#sl_sedsol_filtro').val(),
-                id_bodsol: $('#sl_bodsol_filtro').val(),
+                id_areori: $('#sl_areori_filtro').val(),
+                id_resori: $('#sl_resori_filtro').val(),
                 id_traslado: $('#txt_id_traslado_filtro').val(),
-                num_traslado: $('#txt_num_traslado_filtro').val(),
                 fec_ini: $('#txt_fecini_filtro').val(),
                 fec_fin: $('#txt_fecfin_filtro').val(),
-                id_sedpro: $('#sl_sedpro_filtro').val(),
-                id_bodpro: $('#sl_bodpro_filtro').val(),
+                id_aredes: $('#sl_aredes_filtro').val(),
+                id_resdes: $('#sl_resdes_filtro').val(),
                 estado: $('#sl_estado_filtro').val()
             }, function(he) {
                 $('#divTamModalImp').removeClass('modal-sm');
