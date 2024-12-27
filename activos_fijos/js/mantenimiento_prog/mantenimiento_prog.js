@@ -35,6 +35,7 @@
                 { 'data': 'nom_estado_man' },
                 { 'data': 'placa' },
                 { 'data': 'nom_articulo' },
+                { 'data': 'estado_general' },
                 { 'data': 'tipo_mantenimiento' },
                 { 'data': 'fec_ini_mantenimiento' },
                 { 'data': 'fec_fin_mantenimiento' },
@@ -44,8 +45,8 @@
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: 5 },
-                { visible: false, targets: 9 },
-                { orderable: false, targets: 11 }
+                { visible: false, targets: 10 },
+                { orderable: false, targets: 12 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 1) {
@@ -301,6 +302,47 @@
         }).always(function() {}).fail(function(xhr, textStatus, errorThrown) {
             console.error(xhr.responseText)
             alert('Ocurrió un error');
+        });
+    });
+
+    //Imprimir listado de registros
+    $('#btn_imprime_filtro').on('click', function() {
+        reloadtable('tb_progreso_mantenimientos');
+        $('.is-invalid').removeClass('is-invalid');
+        var verifica = verifica_vacio($('#txt_fecini_filtro'));
+        verifica += verifica_vacio($('#txt_fecfin_filtro'));
+        if (verifica >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe especificar un rango de fechas');
+        } else {
+            $.post("imp_mantenimientos_prog.php", {
+                id_mantenimiento: $('#txt_idmant_filtro').val(),
+                placa: $('#txt_placa_filtro').val(),
+                nombre: $('#txt_nombre_filtro').val(),
+                fec_ini: $('#txt_fecini_filtro').val(),
+                fec_fin: $('#txt_fecfin_filtro').val(),
+                id_tip_man: $('#sl_tipomantenimiento_filtro').val(),
+                estado: $('#sl_estado_filtro').val()
+            }, function(he) {
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
+            });
+        }
+    });
+
+    //Imprimit un registro de Mantenimientos
+    $('#divForms').on("click", "#btn_imprimir", function() {
+        $.post("imp_mantenimiento_prog.php", {
+            id: $('#id_mant_detalle').val()
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
         });
     });
 

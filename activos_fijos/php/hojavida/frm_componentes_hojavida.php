@@ -65,7 +65,7 @@ $obj = $rs->fetch();
         </div>
     </div>
     <div class="text-center pt-3">
-        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir">Imprimir</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir_componentes">Imprimir</button>
         <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Salir</a>
     </div>
 </div>

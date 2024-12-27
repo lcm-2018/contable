@@ -103,7 +103,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th rowspan="2">Fecha</th>
                                         <th rowspan="2">Hora</th>
                                         <th rowspan="2">Tipo</th>                                        
-                                        <th rowspan="2">Observacion</th>
+                                        <th rowspan="2">Observaciones</th>
                                         <th colspan="2">Responsable</th>
                                         <th colspan="2">Periodo Mantenimiento</th>
                                         <th rowspan="2">Id.Estado</th>

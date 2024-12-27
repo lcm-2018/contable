@@ -21,7 +21,6 @@ $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 
 $where = " WHERE 1";
-
 if (isset($_POST['nombre']) && $_POST['nombre']) {
     $where .= " AND FM.nom_medicamento LIKE '%" . $_POST['nombre'] . "%'";
 }

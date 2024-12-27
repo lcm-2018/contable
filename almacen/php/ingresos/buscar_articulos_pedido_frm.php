@@ -104,7 +104,7 @@ $id_pedido = isset($_POST['id_pedido']) && $_POST['id_pedido'] ? $_POST['id_pedi
                     { width: '5%', targets: [0,1,3,4,5] }
                 ],
                 order: [
-                    [0, "desc"]
+                    [0, "asc"]
                 ],
                 lengthMenu: [
                     [10, 25, 50, -1],

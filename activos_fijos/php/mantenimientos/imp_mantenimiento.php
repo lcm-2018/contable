@@ -14,23 +14,32 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 
 try {
-    $sql = "SELECT AB.id_baja,AB.fec_orden,AB.hor_orden,AB.observaciones,                    
-                CASE AB.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
-                CASE AB.estado WHEN 0 THEN AB.fec_anula WHEN 1 THEN AB.fec_crea WHEN 2 THEN AB.fec_cierre END AS fec_estado,
-                CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
+    $sql = "SELECT M.id_mantenimiento,M.fec_mantenimiento,M.hor_mantenimiento,
+                CASE M.tipo_mantenimiento WHEN 1 THEN 'PREVENTIVO' WHEN 2 THEN 'CORRECTIVO INTERNO' WHEN 3 THEN 'CORRECTIVO EXTERNO' END AS tipo_mantenimiento, 
+                M.observaciones,
+                CONCAT_WS(' ',U.apellido1,U.apellido2,U.nombre1,U.nombre2) AS nom_responsable,
+                T.nom_tercero,M.fec_ini_mantenimiento,M.fec_fin_mantenimiento,
+                CASE M.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'APROBADO' WHEN 3 THEN 'EN EJECUCION' WHEN 4 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS estado,
+                CASE M.estado WHEN 1 THEN M.fec_creacion WHEN 2 THEN M.fec_aprueba WHEN 3 THEN M.fec_ejecucion WHEN 4 THEN M.fec_cierre WHEN 0 THEN M.fec_anulacion END AS fec_estado,
+                CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_aprueba,
                 usr.descripcion AS usr_perfil,usr.nom_firma
-            FROM acf_baja AS AB            
-            LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario = AB.id_usr_cierre)
-            WHERE AB.id_baja=" . $id . " LIMIT 1";
+            FROM acf_mantenimiento AS M
+            INNER JOIN tb_terceros T ON (T.id_tercero = M.id_tercero)
+            INNER JOIN seg_usuarios_sistema U ON (U.id_usuario = M.id_responsable)
+            LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario = M.id_usr_aprueba)
+            WHERE M.id_mantenimiento=" . $id . " LIMIT 1";
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
 
-    $sql = "SELECT HV.placa,FM.nom_medicamento AS nom_articulo,BD.observacion,
-                CASE BD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
-            FROM acf_baja_detalle AS BD
-            INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = BD.id_activo_fijo)
+    $sql = "SELECT MD.id_mant_detalle,
+                HV.placa,FM.nom_medicamento AS nom_articulo,                
+                CA.nom_area,MD.observacion_mant,
+                CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
+            FROM acf_mantenimiento_detalle MD
+            INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = MD.id_activo_fijo)
             INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
-            WHERE BD.id_baja=" . $id . " ORDER BY BD.id_baja_detalle";
+            INNER JOIN far_centrocosto_area AS CA ON (CA.id_area=MD.id_area)
+            WHERE MD.id_mantenimiento=" . $id . " ORDER BY MD.id_mant_detalle";
     $rs = $cmd->query($sql);
     $obj_ds = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -65,24 +74,38 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>ORDEN DE BAJA DE ACTIVOS FIJOS</th>
+            <th>ORDEN DE MANTENIMIENTO DE ACTIVOS FIJOS</th>
         </tr>
     </table>
 
     <table style="width:100%; font-size:60%; text-align:left; border:#A9A9A9 1px solid;">
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td>Id. Baja</td>
-            <td>Fecha Baja</td>
-            <td>Hora Baja</td>
+            <td>Id. Mantenimiento</td>
+            <td>Fecha</td>
+            <td>Hora</td>
             <td>Estado</td>
-            <td colspan="2">Fecha Estado</td>
+            <td>Fecha Estado</td>
         </tr>
         <tr>
-            <td><?php echo $obj_e['id_baja']; ?></td>
-            <td><?php echo $obj_e['fec_orden']; ?></td>
-            <td><?php echo $obj_e['hor_orden']; ?></td>
+            <td><?php echo $obj_e['id_mantenimiento']; ?></td>
+            <td><?php echo $obj_e['fec_mantenimiento']; ?></td>
+            <td><?php echo $obj_e['hor_mantenimiento']; ?></td>
             <td><?php echo $obj_e['estado']; ?></td>
-            <td colspan="2"><?php echo $obj_e['fec_estado']; ?></td>
+            <td><?php echo $obj_e['fec_estado']; ?></td>
+        </tr> 
+        <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
+            <td>Tipo Mantenimiento</td>
+            <td>Responsable</td>
+            <td>Tercero</td>
+            <td>Fecha Inicio Mantenimiento</td>
+            <td>Fecha Fin Mantenimiento</td>
+        </tr>
+        <tr>
+            <td><?php echo $obj_e['tipo_mantenimiento']; ?></td>
+            <td><?php echo $obj_e['nom_responsable']; ?></td>
+            <td><?php echo $obj_e['nom_tercero']; ?></td>
+            <td><?php echo $obj_e['fec_ini_mantenimiento']; ?></td>
+            <td><?php echo $obj_e['fec_fin_mantenimiento']; ?></td>
         </tr>        
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td colspan="6">Observaciones</td>
@@ -98,6 +121,7 @@ try {
                 <th>Placa</th>
                 <th>Articulo</th>
                 <th>Estado General</th>
+                <th>Area</th>
                 <th>Observación</th>
             </tr>
         </thead>
@@ -109,7 +133,8 @@ try {
                         <td>' . $obj['placa'] . '</td>
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_articulo']) . '</td>   
                         <td>' . $obj['estado_general'] . '</td>
-                        <td>' . $obj['observacion'] . '</td></tr>';
+                        <td>' . $obj['nom_area'] . '</td>
+                        <td>' . $obj['observacion_mant'] . '</td></tr>';
             }
             echo $tabla;
             ?>
@@ -117,7 +142,7 @@ try {
         <tfoot style="font-size:60%">
             <tr style="background-color:#CED3D3; color:#000000">                
                 <td>TOTAL REGISTROS:<?php echo COUNT($obj_ds); ?> </td>
-                <td colspan="3"></td>
+                <td colspan="4"></td>
             </tr>
         </tfoot>
     </table>
@@ -135,7 +160,7 @@ try {
         <tr>
             <td style="vertical-align: top">
                 <div>-------------------------------------------------</div>
-                <div><?php echo $obj_e['usr_cierra']; ?></div>
+                <div><?php echo $obj_e['usr_aprueba']; ?></div>
                 <div><?php echo $obj_e['usr_perfil']; ?></div>
             </td>
             <td style="vertical-align: top">

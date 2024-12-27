@@ -23,10 +23,10 @@ if (isset($_POST['id_mantenimiento']) && $_POST['id_mantenimiento']) {
     $where .= " AND MM.id_mantenimiento='" . $_POST['id_mantenimiento'] . "'";
 }
 if (isset($_POST['placa']) && $_POST['placa']) {
-    $where .= " AND HV.placa='" . $_POST['placa'] . "'";
+    $where .= " AND HV.placa LIKE '" . $_POST['placa'] . "%'";
 }
 if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND FM.nom_medicamento='" . $_POST['nombre'] . "'";
+    $where .= " AND FM.nom_medicamento LIKE '%" . $_POST['nombre'] . "%'";
 }
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
     $where .= " AND MM.fec_mantenimiento BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
@@ -63,6 +63,7 @@ try {
     $sql = "SELECT MD.id_mant_detalle,MM.id_mantenimiento,MM.fec_mantenimiento,	
                 CASE MM.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'APROBADO' WHEN 3 THEN 'EN EJECUCION' WHEN 4 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado_man,		
                 HV.placa,FM.nom_medicamento AS nom_articulo,
+                CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general,
                 CASE MM.tipo_mantenimiento WHEN 1 THEN 'PREVENTIVO' WHEN 2 THEN 'CORRECTIVO INTERNO' WHEN 3 THEN 'CORRECTIVO EXTERNO' END AS tipo_mantenimiento, 
                 MM.fec_ini_mantenimiento,MM.fec_fin_mantenimiento,MD.estado,
                 CASE MD.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'EN MANTENIMIENTO' WHEN 3 THEN 'FINALIZADO' END AS nom_estado
@@ -98,6 +99,7 @@ if (!empty($objs)) {
             "nom_estado_man" => $obj['nom_estado_man'],
             "placa" => $obj['placa'],
             "nom_articulo" => $obj['nom_articulo'],
+            "estado_general" => $obj['estado_general'],
             "tipo_mantenimiento" => $obj['tipo_mantenimiento'],
             "fec_ini_mantenimiento" => $obj['fec_ini_mantenimiento'],
             "fec_fin_mantenimiento" => $obj['fec_fin_mantenimiento'],

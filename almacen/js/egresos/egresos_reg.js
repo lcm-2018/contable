@@ -40,7 +40,7 @@
                 { orderable: false, targets: 8 }
             ],
             order: [
-                [0, "desc"]
+                [0, "asc"]
             ],
             lengthMenu: [
                 [10, 25, 50, -1],

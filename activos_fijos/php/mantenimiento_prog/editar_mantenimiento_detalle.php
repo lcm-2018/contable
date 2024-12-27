@@ -51,7 +51,8 @@ try {
             
             if ($oper == 'close') {
                 $sql = "UPDATE acf_mantenimiento_detalle 
-                        SET observacion_mant=:observacion_mant,estado_fin_mant=:estado_fin_mant,observacion_fin_mant=:observacion_fin_mant,estado=:estado
+                        SET observacion_mant=:observacion_mant,estado_fin_mant=:estado_fin_mant,observacion_fin_mant=:observacion_fin_mant,
+                            estado=:estado,id_usr_finaliza=:id_usr_finaliza,fec_finaliza=:fec_finaliza
                         WHERE id_mant_detalle=:id_mant_detalle";
                 $sql = $cmd->prepare($sql);
                 
@@ -59,6 +60,8 @@ try {
                 $sql->bindValue(':estado_fin_mant', $_POST['sl_estado_general'], PDO::PARAM_INT);                
                 $sql->bindValue(':observacion_fin_mant', $_POST['txt_observacio_fin_mant']);
                 $sql->bindValue(':estado', 3, PDO::PARAM_INT);
+                $sql->bindParam(':id_usr_finaliza', $id_usr_ope, PDO::PARAM_INT);
+                $sql->bindParam(':fec_finaliza', $fecha_ope, PDO::PARAM_STR);
                 $sql->bindValue(':id_mant_detalle', $id, PDO::PARAM_INT);                    
                 $updated = $sql->execute();
 

@@ -53,8 +53,8 @@ if (empty($obj)) {
                     <div class="form-group col-md-3">
                         <label for="txt_placa" class="small">Placa</label>
                         <input type="text" class="form-control form-control-sm" id="txt_placa" class="small" value="<?php echo $obj['placa'] ?>" readonly="readonly">
-                        <input type="text" id="id_txt_actfij" name="id_txt_actfij" value="<?php echo $obj['id_activo_fijo'] ?>">
-                        <input type="text" id="txt_est_general" name="txt_est_general" value="<?php echo $obj['estado_general'] ?>">
+                        <input type="hidden" id="id_txt_actfij" name="id_txt_actfij" value="<?php echo $obj['id_activo_fijo'] ?>">
+                        <input type="hidden" id="txt_est_general" name="txt_est_general" value="<?php echo $obj['estado_general'] ?>">
                     </div>  
                     <div class="form-group col-md-9">
                         <label for="txt_nom_art" class="small">Articulo</label>

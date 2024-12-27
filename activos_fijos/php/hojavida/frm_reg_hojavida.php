@@ -83,7 +83,7 @@ $editar = $id != -1 ? '' : 'disabled="disabled"';
                         <input type="text" class="form-control form-control-sm" id="placa" name="placa" value="<?php echo $obj['placa'] ?>">
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="nom_articulo" class="small">Articulo</label>
+                        <label for="nom_articulo" class="small">Artículo</label>
                         <input type="text" class="form-control form-control-sm" id="nom_articulo" name="nom_articulo" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly" title="Doble Click para Seleccionar el Articulo">
                         <input type="hidden" id="id_articulo" name="id_articulo" value="<?php echo $obj['id_articulo'] ?>">
                     </div>                    
@@ -169,7 +169,7 @@ $editar = $id != -1 ? '' : 'disabled="disabled"';
                         <input type="date" class="form-control form-control-sm" id="fecha_instalacion" name="fecha_instalacion" value="<?php echo $obj['fecha_instalacion'] ?>">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="periodo_garantia" class="small">Período de Garantía</label>
+                        <label for="periodo_garantia" class="small">Periodo de Garantía</label>
                         <input type="text" class="form-control form-control-sm" id="periodo_garantia" name="periodo_garantia" value="<?php echo $obj['periodo_garantia'] ?>">
                     </div>
                     <div class="form-group col-md-3">

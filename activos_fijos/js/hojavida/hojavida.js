@@ -508,4 +508,65 @@
         });
     });
 
+    //Imprimir listado de registros
+    $('#btn_imprime_filtro').on('click', function() {
+        reloadtable('tb_hojavida');
+        $.post("imp_hojasvida.php", {
+            placa: $('#txt_placa_filtro').val(),
+            nombre: $('#txt_nombre_filtro').val(),
+            num_serial: $('#txt_serial_filtro').val(),
+            marca: $('#sl_marcas_filtro').val(),
+            estado_gen: $('#sl_estadogen_filtro').val(),
+            estado: $('#sl_estado_filtro').val()
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
+
+    //Imprimit un registro
+    $('#divForms').on("click", "#btn_imprimir", function() {
+        $.post("imp_hojavida.php", {
+            id: $('#id_hv').val()
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
+
+    //Imprimit un registro Activo Fijo y Componentes
+    $('#divForms').on("click", "#btn_imprimir_componentes", function() {
+        $.post("imp_hojavida.php", {
+            id: $('#id_hv').val(),
+            tipo: 'com',
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
+
+    //Imprimit un registro Activo Fijo y documentos
+    $('#divForms').on("click", "#btn_imprimir_documentos", function() {
+        $.post("imp_hojavida.php", {
+            id: $('#id_hv').val(),
+            tipo: 'doc',
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
+
+
 })(jQuery);

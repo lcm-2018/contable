@@ -58,7 +58,7 @@ try {
                 CONCAT_WS(' ',U.apellido1,U.apellido2,U.nombre1,U.nombre2) AS nom_responsable,
                 T.nom_tercero,M.fec_ini_mantenimiento,M.fec_fin_mantenimiento,M.estado,
                 CASE M.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'APROBADO' WHEN 3 THEN 'EN EJECUCION' WHEN 4 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
-            FROM acf_mantenimiento M
+            FROM acf_mantenimiento AS M
             INNER JOIN tb_terceros T ON (T.id_tercero = M.id_tercero)
             INNER JOIN seg_usuarios_sistema U ON (U.id_usuario = M.id_responsable)
             $where ORDER BY $col $dir $limit";

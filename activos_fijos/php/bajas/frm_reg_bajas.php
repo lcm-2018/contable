@@ -49,7 +49,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
         <div class="px-2">
             <!--Formulario de registro de baja-->
             <form id="frm_reg_bajas">
-                <input type="text" id="id_baja" name="id_baja" value="<?php echo $id ?>">
+                <input type="hidden" id="id_baja" name="id_baja" value="<?php echo $id ?>">
                 <div class="form-row">
                     <div class="form-group col-md-1">
                         <label for="txt_ide" class="small">Id.</label>

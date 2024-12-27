@@ -413,5 +413,44 @@
         });
     });
 
+    //Imprimir listado de registros
+    $('#btn_imprime_filtro').on('click', function() {
+        reloadtable('tb_mantenimientos');
+        $('.is-invalid').removeClass('is-invalid');
+        var verifica = verifica_vacio($('#txt_fecini_filtro'));
+        verifica += verifica_vacio($('#txt_fecfin_filtro'));
+        if (verifica >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe especificar un rango de fechas');
+        } else {
+            $.post("imp_mantenimientos.php", {
+                id_mantenimiento: $('#txt_idmantenimiento_filtro').val(),
+                fec_ini: $('#txt_fecini_filtro').val(),
+                fec_fin: $('#txt_fecfin_filtro').val(),
+                id_tercero: $('#sl_tercero_filtro').val(),
+                id_tipo_mant: $('#sl_tipomantenimiento_filtro').val(),
+                estado: $('#sl_estado_filtro').val()
+            }, function(he) {
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
+            });
+        }
+    });
+
+    //Imprimit un Mantenimiento
+    $('#divForms').on("click", "#btn_imprimir", function() {
+        $.post("imp_mantenimiento.php", {
+            id: $('#id_mantenimiento').val()
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
 
 })(jQuery);

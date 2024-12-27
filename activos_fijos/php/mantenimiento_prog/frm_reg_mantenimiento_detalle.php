@@ -74,6 +74,7 @@ $editar = in_array($obj['estado'],[1,2]) && $id_md != -1 ? '' : 'disabled="disab
     <div class="text-center pt-3">
         <button type="button" class="btn btn-primary btn-sm" id="btn_guardar_detalle" <?php echo $editar ?>>Guardar</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_finalizar_detalle" <?php echo $editar ?>>Finalizar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir">Imprimir</button>
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>
