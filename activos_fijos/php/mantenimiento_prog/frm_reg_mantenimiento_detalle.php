@@ -14,15 +14,17 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id_md = isset($_POST['id_md']) ? $_POST['id_md'] : -1;
 
 $sql = "SELECT MD.*,HV.placa,HV.num_serial,FM.nom_medicamento AS nom_articulo,
-            CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
+            CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general,
+            MM.estado AS estado_man
         FROM acf_mantenimiento_detalle AS MD
+        INNER JOIN acf_mantenimiento AS MM ON (MM.id_mantenimiento=MD.id_mantenimiento)
         INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo=MD.id_activo_fijo)
         INNER JOIN far_medicamentos FM ON (FM.id_med=HV.id_articulo)
         WHERE MD.id_mant_detalle=" . $id_md . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 
-$editar = in_array($obj['estado'],[1,2]) && $id_md != -1 ? '' : 'disabled="disabled"';
+$editar = in_array($obj['estado'],[1,2]) && $id_md != -1 && in_array($obj['estado_man'],[3])? '' : 'disabled="disabled"';
 
 ?>
 

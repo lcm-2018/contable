@@ -13,7 +13,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT M.*,            
-            CASE M.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'APROBADO' WHEN 3 THEN 'EN EJECUCION' WHEN 4 THEN 'FINALIZADO' END AS nom_estado            
+            CASE M.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'APROBADO' WHEN 3 THEN 'EN EJECUCION' WHEN 4 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado     
         FROM acf_mantenimiento M
         WHERE M.id_mantenimiento=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
@@ -115,6 +115,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <th>Area</th>
                         <th>Observación</th>
                         <th>Acciones</th>
+                        <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody class="text-left centro-vertical"></tbody>

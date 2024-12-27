@@ -130,25 +130,38 @@ try {
             $num_detalles = $obj_mant['total'];
 
             if ($estado == 1 && $num_detalles > 0) {
-                $error = 0;
-                $cmd->beginTransaction();
+                $sql = "SELECT GROUP_CONCAT(acf_hojavida.placa) as placas 
+                        FROM acf_mantenimiento_detalle 
+                        INNER JOIN acf_hojavida ON (acf_hojavida.id_activo_fijo = acf_mantenimiento_detalle.id_activo_fijo)
+                        WHERE acf_mantenimiento_detalle.id_mantenimiento=$id AND acf_hojavida.estado IN (4,5)";
+                $rs = $cmd->query($sql);
+                $obj_mant = $rs->fetch();
+                $placas = isset($obj_mant['placas']) ? $obj_mant['placas'] : '';
 
-                $sql = "UPDATE acf_mantenimiento SET estado=2,id_usr_aprueba=$id_usr_ope,fec_aprueba='$fecha_ope' WHERE id_mantenimiento=$id";
-                $rs1 = $cmd->query($sql);
+                if(!$placas){
+                    $error = 0;
+                    $cmd->beginTransaction();
 
-                $sql = "UPDATE acf_hojavida SET estado=2 WHERE id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
-                $rs2 = $cmd->query($sql);
-                
-                if ($rs1 == false || $rs2 == false || error_get_last()) {
-                    $error = 1;
-                }                
-                if ($error == 0) {
-                    $cmd->commit();
-                    $res['mensaje'] = 'ok';
+                    $sql = "UPDATE acf_mantenimiento SET estado=2,id_usr_aprueba=$id_usr_ope,fec_aprueba='$fecha_ope' WHERE id_mantenimiento=$id";
+                    $rs1 = $cmd->query($sql);
+
+                    $sql = "UPDATE acf_hojavida SET estado=2 
+                            WHERE estado=1 AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
+                    $rs2 = $cmd->query($sql);
+                    
+                    if ($rs1 == false || $rs2 == false || error_get_last()) {
+                        $error = 1;
+                    }                
+                    if ($error == 0) {
+                        $cmd->commit();
+                        $res['mensaje'] = 'ok';
+                    } else {
+                        $cmd->rollBack();
+                        $res['mensaje'] = $cmd->errorInfo()[2];
+                    }
                 } else {
-                    $cmd->rollBack();
-                    $res['mensaje'] = $cmd->errorInfo()[2];
-                }
+                    $res['mensaje'] = 'La Ordenes de Mantenimiento tiene Equipos Inactivos : ' . $placas;    
+                }    
             } else {
                 if ($estado != 1) {
                     $res['mensaje'] = 'Solo puede Aprobar Ordenes de Mantenimiento en estado Pendiente';
@@ -167,25 +180,38 @@ try {
             $estado = isset($obj_mant['estado']) ? $obj_mant['estado'] : -1;
 
             if ($estado == 2) {
-                $error = 0;
-                $cmd->beginTransaction();
+                $sql = "SELECT GROUP_CONCAT(acf_hojavida.placa) as placas 
+                        FROM acf_mantenimiento_detalle 
+                        INNER JOIN acf_hojavida ON (acf_hojavida.id_activo_fijo = acf_mantenimiento_detalle.id_activo_fijo)
+                        WHERE acf_mantenimiento_detalle.id_mantenimiento=$id AND acf_hojavida.estado IN (4,5)";
+                $rs = $cmd->query($sql);
+                $obj_mant = $rs->fetch();
+                $placas = isset($obj_mant['placas']) ? $obj_mant['placas'] : '';
 
-                $sql = "UPDATE acf_mantenimiento SET estado=3,id_usr_ejecucion=$id_usr_ope,fec_ejecucion='$fecha_ope' WHERE id_mantenimiento=" . $id;
-                $rs1 = $cmd->query($sql);
+                if(!$placas){
+                    $error = 0;
+                    $cmd->beginTransaction();
 
-                $sql = "UPDATE acf_hojavida SET estado=3 WHERE id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
-                $rs2 = $cmd->query($sql);
-                
-                if ($rs1 == false || $rs2 == false || error_get_last()) {
-                    $error = 1;
-                }                
-                if ($error == 0) {
-                    $cmd->commit();
-                    $res['mensaje'] = 'ok';
+                    $sql = "UPDATE acf_mantenimiento SET estado=3,id_usr_ejecucion=$id_usr_ope,fec_ejecucion='$fecha_ope' WHERE id_mantenimiento=" . $id;
+                    $rs1 = $cmd->query($sql);
+
+                    $sql = "UPDATE acf_hojavida SET estado=3 
+                            WHERE estado IN (1,2) AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
+                    $rs2 = $cmd->query($sql);
+                    
+                    if ($rs1 == false || $rs2 == false || error_get_last()) {
+                        $error = 1;
+                    }                
+                    if ($error == 0) {
+                        $cmd->commit();
+                        $res['mensaje'] = 'ok';
+                    } else {
+                        $cmd->rollBack();
+                        $res['mensaje'] = $cmd->errorInfo()[2];
+                    }
                 } else {
-                    $cmd->rollBack();
-                    $res['mensaje'] = $cmd->errorInfo()[2];
-                }
+                    $res['mensaje'] = 'La Ordenes de Mantenimiento tiene Equipos Inactivos : ' . $placas;    
+                }     
             } else {
                 $res['mensaje'] = 'Solo puede por en Ejecución Ordenes de Mantenimiento en estado Aprobado';
             }   
@@ -206,7 +232,8 @@ try {
                 $sql = "UPDATE acf_mantenimiento SET estado=4,id_usr_cierre=$id_usr_ope,fec_cierre='$fecha_ope' WHERE id_mantenimiento=" . $id;
                 $rs1 = $cmd->query($sql);
 
-                $sql = "UPDATE acf_hojavida SET estado=1 WHERE estado IN (2,3) AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
+                $sql = "UPDATE acf_hojavida SET estado=1 
+                        WHERE estado IN (2,3) AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
                 $rs2 = $cmd->query($sql);
                 
                 if ($rs1 == false || $rs2 == false || error_get_last()) {
@@ -239,7 +266,8 @@ try {
                 $sql = "UPDATE acf_mantenimiento SET estado=0,id_usr_anula=$id_usr_ope,fec_anulacion='$fecha_ope' WHERE id_mantenimiento=" . $id;
                 $rs1 = $cmd->query($sql);
 
-                $sql = "UPDATE acf_hojavida SET estado=1 WHERE estado IN (2,3) AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
+                $sql = "UPDATE acf_hojavida SET estado=1 
+                        WHERE estado IN (2,3) AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
                 $rs2 = $cmd->query($sql);
                 
                 if ($rs1 == false || $rs2 == false || error_get_last()) {
@@ -256,6 +284,27 @@ try {
                 $res['mensaje'] = 'Solo puede Anular Ordenes de Mantenimiento en estado Aprobado';
             }   
         }
+
+        //Coloca un estado de los activos que estan en algun mantenimiento
+        if ($oper == 'close' || $oper == 'annul') {
+            //Colocar en Para mantenimiento
+            $sql = "UPDATE acf_hojavida SET estado=2 
+                    WHERE estado=1 AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)
+                            AND id_activo_fijo IN (SELECT MD.id_activo_fijo 
+                                                    FROM acf_mantenimiento_detalle AS MD
+                                                    INNER JOIN acf_mantenimiento AS MM ON (MM.id_mantenimiento=MD.id_mantenimiento)
+                                                    WHERE MM.estado=2)";
+            $rs = $cmd->query($sql);
+
+            //Colocar en En mantenimiento
+            $sql = "UPDATE acf_hojavida SET estado=3 
+                    WHERE estado IN (1,2) AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)
+                            AND id_activo_fijo IN (SELECT MD.id_activo_fijo 
+                                                    FROM acf_mantenimiento_detalle AS MD
+                                                    INNER JOIN acf_mantenimiento AS MM ON (MM.id_mantenimiento=MD.id_mantenimiento)
+                                                    WHERE MM.estado=3)";
+            $rs = $cmd->query($sql);
+        }    
 
     } else {
         $res['mensaje'] = 'El Usuario del Sistema no tiene Permisos para esta Acción';

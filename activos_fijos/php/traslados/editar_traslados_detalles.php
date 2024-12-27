@@ -43,7 +43,17 @@ try {
                             $sql = "SELECT COUNT(*) AS count FROM acf_traslado_detalle WHERE id_traslado=$id_traslado AND id_activo_fijo=" . $id_activo_fijo;
                             $rs = $cmd->query($sql);
                             $obj = $rs->fetch();
-                            if ($obj['count'] == 0) {
+                            $det_ing = $obj['count'];
+
+                            $sql = "SELECT acf_traslado.id_traslado 
+                                    FROM acf_traslado_detalle 
+                                    INNER JOIN acf_traslado ON (acf_traslado.id_traslado=acf_traslado_detalle.id_traslado)
+                                    WHERE acf_traslado.estado=1 AND acf_traslado.id_traslado<>$id_traslado AND acf_traslado_detalle.id_activo_fijo=$id_activo_fijo LIMIT 1";
+                            $rs = $cmd->query($sql);
+                            $obj = $rs->fetch();
+                            $otro_tra = isset($obj['id_traslado']) ? $obj['id_traslado'] : 0;
+
+                            if ($det_ing == 0 && $otro_tra == 0) {
                                 $sql = "INSERT INTO acf_traslado_detalle(id_traslado,id_activo_fijo,estado_general,observacion)
                                         VALUES($id_traslado,$id_activo_fijo,$estado_general,'$observacion')";
                                 $rs = $cmd->query($sql);
@@ -58,7 +68,11 @@ try {
                                     $res['mensaje'] = $cmd->errorInfo()[2];
                                 }
                             } else {
-                                $res['mensaje'] = 'El Activo Fijo ya existe en los detalles del traslado';    
+                                if($det_ing != 0){
+                                    $res['mensaje'] = 'El Activo Fijo ya existe en los detalles del traslado';    
+                                }if($otro_tra != 0){
+                                    $res['mensaje'] = 'El Activo Fijo existe en los detalles de un traslado Pendiente : ' . $otro_tra;    
+                                }    
                             }    
                         } else {
                             $sql = "UPDATE acf_traslado_detalle SET observacion='$observacion' WHERE id_traslado_detalle=" . $id;

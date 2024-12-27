@@ -47,7 +47,8 @@ try {
     $sql = "SELECT MD.id_mant_detalle,
                 HV.placa,FM.nom_medicamento AS nom_articulo,                
                 CA.nom_area,MD.observacion_mant,
-                CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
+                CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general,
+                CASE MD.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'EN MANTENIMIENTO' WHEN 3 THEN 'FINALIZADO' END AS estado
             FROM acf_mantenimiento_detalle MD
             INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = MD.id_activo_fijo)
             INNER JOIN far_medicamentos AS FM ON (FM.id_med = HV.id_articulo)
@@ -81,6 +82,7 @@ if (!empty($objs)) {
             "nom_area" => $obj['nom_area'],
             "observacion_mant" => $obj['observacion_mant'],            
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
+            "estado" => $obj['estado'],            
         ];
     }    
 }

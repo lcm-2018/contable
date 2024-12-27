@@ -106,6 +106,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Responsable</th>
                                         <th>Id.Estado General</th>
                                         <th>Estado General</th>
+                                        <th>M(A-E)</th>
                                         <th>Id.Estado</th>
                                         <th>Estado Proceso</th>
                                         <th>Acciones</th>

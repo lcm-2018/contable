@@ -52,6 +52,7 @@
                 { 'data': 'nom_responsable' },
                 { 'data': 'estado_general' },
                 { 'data': 'nom_estado_general' },
+                { 'data': 'mantenimiento' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
@@ -59,8 +60,8 @@
             columnDefs: [
                 { class: 'text-wrap', targets: [3, 5] },
                 { type: "numeric-comma", targets: 6 },
-                { visible: false, targets: [10, 12] },
-                { orderable: false, targets: 14 }
+                { visible: false, targets: [10, 13] },
+                { orderable: false, targets: 15 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 2) {

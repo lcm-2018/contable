@@ -70,13 +70,24 @@ try {
                                         WHEN 4 THEN 'SIN SERVICIO' END AS nom_estado_general,
                 HV.estado,
                 CASE HV.estado WHEN 1 THEN 'ACTIVO' WHEN 2 THEN 'PARA MANTENIMIENTO' WHEN 3 THEN 'EN MANTENIMIENTO'
-                                    WHEN 4 THEN 'INACTIVO' WHEN 5 THEN 'DADO DE BAJA' END AS nom_estado
-            FROM acf_hojavida HV
+                                    WHEN 4 THEN 'INACTIVO' WHEN 5 THEN 'DADO DE BAJA' END AS nom_estado,
+                MAPRO.aprobado,MEJEC.ejecucion
+            FROM acf_hojavida AS HV
             INNER JOIN far_medicamentos FM On (FM.id_med = HV.id_articulo)
             INNER JOIN acf_marca MA ON (MA.id = HV.id_marca)
             LEFT JOIN tb_sedes SE ON (SE.id_sede=HV.id_sede)
             LEFT JOIN far_centrocosto_area AR ON (AR.id_area=HV.id_area)
             LEFT JOIN seg_usuarios_sistema AS US ON (US.id_usuario=HV.id_responsable)
+            LEFT JOIN (SELECT MDA.id_activo_fijo,GROUP_CONCAT(MMA.id_mantenimiento) AS aprobado
+                        FROM acf_mantenimiento_detalle AS MDA
+                        INNER JOIN acf_mantenimiento AS MMA ON (MMA.id_mantenimiento=MDA.id_mantenimiento)
+                        WHERE MMA.estado=2 GROUP BY MDA.id_activo_fijo
+                        ) AS MAPRO ON (MAPRO.id_activo_fijo=HV.id_activo_fijo)
+            LEFT JOIN (SELECT MDE.id_activo_fijo,GROUP_CONCAT(MME.id_mantenimiento) AS ejecucion
+                        FROM acf_mantenimiento_detalle AS MDE
+                        INNER JOIN acf_mantenimiento AS MME ON (MME.id_mantenimiento=MDE.id_mantenimiento)
+                        WHERE MME.estado=3 GROUP BY MDE.id_activo_fijo
+                        ) AS MEJEC ON (MEJEC.id_activo_fijo=HV.id_activo_fijo)
             $where ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -124,6 +135,7 @@ if (!empty($objs)) {
             "nom_responsable" => $obj['nom_responsable'],
             "estado_general" => $obj['estado_general'],
             "nom_estado_general" => $obj['nom_estado_general'],
+            "mantenimiento" => $obj['aprobado'] .'-'. $obj['ejecucion'],
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $imagen . $componente . $archivos . $eliminar . '</div>',

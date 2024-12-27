@@ -34,9 +34,9 @@ try {
                         WHERE id_mant_detalle=:id_mant_detalle";
                 $sql = $cmd->prepare($sql);
                 
-                $sql->bindValue(':observacion_mant', $_POST['txt_observacio_mant']);
+                $sql->bindValue(':observacion_mant', $_POST['txt_observacio_mant'], PDO::PARAM_STR);
                 $sql->bindValue(':estado_fin_mant', $_POST['sl_estado_general'] ? $_POST['sl_estado_general'] : null, PDO::PARAM_INT);                
-                $sql->bindValue(':observacion_fin_mant', $_POST['txt_observacio_fin_mant']);
+                $sql->bindValue(':observacion_fin_mant', $_POST['txt_observacio_fin_mant'], PDO::PARAM_STR);
                 $sql->bindValue(':estado', 2, PDO::PARAM_INT);
                 $sql->bindValue(':id_mant_detalle', $id, PDO::PARAM_INT);                    
                 $updated = $sql->execute();
@@ -56,21 +56,31 @@ try {
                         WHERE id_mant_detalle=:id_mant_detalle";
                 $sql = $cmd->prepare($sql);
                 
-                $sql->bindValue(':observacion_mant', $_POST['txt_observacio_mant']);
-                $sql->bindValue(':estado_fin_mant', $_POST['sl_estado_general'], PDO::PARAM_INT);                
-                $sql->bindValue(':observacion_fin_mant', $_POST['txt_observacio_fin_mant']);
+                $sql->bindValue(':observacion_mant', $_POST['txt_observacio_mant'], PDO::PARAM_STR);
+                $sql->bindValue(':estado_fin_mant', $_POST['sl_estado_general'], PDO::PARAM_INT);
+                $sql->bindValue(':observacion_fin_mant', $_POST['txt_observacio_fin_mant'], PDO::PARAM_STR);
                 $sql->bindValue(':estado', 3, PDO::PARAM_INT);
                 $sql->bindParam(':id_usr_finaliza', $id_usr_ope, PDO::PARAM_INT);
                 $sql->bindParam(':fec_finaliza', $fecha_ope, PDO::PARAM_STR);
-                $sql->bindValue(':id_mant_detalle', $id, PDO::PARAM_INT);                    
+                $sql->bindValue(':id_mant_detalle', $id, PDO::PARAM_INT); 
                 $updated = $sql->execute();
 
                 if ($updated) {                    
-                    //Actualiza el estado=Inactivo cuando estado general=sin servicio
+                    //Actualiza el estado general del activo fijo
+                    $sql = "UPDATE acf_hojavida SET estado_general=:estado_general,causa_est_general=:causa_est_general WHERE id_activo_fijo=:id_activo_fijo";
+                    $sql = $cmd->prepare($sql);
+                    $sql->bindValue(':estado_general', $_POST['sl_estado_general'], PDO::PARAM_INT);
+                    $sql->bindValue(':causa_est_general',$_POST['txt_observacio_fin_mant'], PDO::PARAM_STR);
+                    $sql->bindValue(':id_activo_fijo', $obj_man['id_activo_fijo'], PDO::PARAM_INT);                            
+                    $updated = $sql->execute();
+                }
+
+                if ($updated) {                    
+                    //Actualiza el estado=Inactivo cuando estado general=Fuera de servicio
                     if($_POST['sl_estado_general'] == 4){
-                        $sql = "UPDATE acf_hojavida SET estado_general=:estado_general,estado=:estado WHERE id_activo_fijo=:id_activo_fijo";
+                        $sql = "UPDATE acf_hojavida SET fecha_fuera_servicio=:fecha_fuera_servicio,estado=:estado WHERE id_activo_fijo=:id_activo_fijo";
                         $sql = $cmd->prepare($sql);
-                        $sql->bindValue(':estado_general', 4);
+                        $sql->bindValue(':fecha_fuera_servicio',date('Y-m-d'), PDO::PARAM_STR);
                         $sql->bindValue(':estado', 4);
                         $sql->bindValue(':id_activo_fijo', $obj_man['id_activo_fijo'], PDO::PARAM_INT);                            
                         $updated = $sql->execute();

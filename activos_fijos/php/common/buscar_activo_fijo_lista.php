@@ -19,7 +19,7 @@ $dir = $_POST['order'][0]['dir'];
 //Estados de Activos: 1-Activo, 2-Para mantenimiento, 3-En Mantenimiento, 4-Inactivo, 5-Dado de Baja
 $where_gen = " WHERE 1<>1";
 if ($_POST['proceso'] == "mant"){           //mant-Proceso de mantenimiento
-    $where_gen = " WHERE HV.estado IN (1)";
+    $where_gen = " WHERE HV.estado IN (1,2,3)";
 
 } else if ($_POST['proceso'] == "tras"){   //tras-Proceso de traslado
     $where_gen = " WHERE HV.estado IN (1,2,3,4) AND HV.id_area=" . $_POST['id_area'];

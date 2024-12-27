@@ -161,16 +161,25 @@ try {
             $id_area_origen = isset($obj_traslado['id_area_origen']) ? $obj_traslado['id_area_origen'] : 0;
             $id_usr_origen = isset($obj_traslado['id_usr_origen']) ? $obj_traslado['id_usr_origen'] : 0;
 
-            $sql = 'SELECT IF(SUM(IF(acf_traslado.id_area_destino=acf_hojavida.id_area,1,0))=COUNT(*),1,0) AS continuar
+            $sql = "SELECT IF(SUM(IF(acf_traslado.id_area_destino=acf_hojavida.id_area,1,0))=COUNT(*),1,0) AS continuar
                     FROM acf_traslado_detalle
                     INNER JOIN acf_traslado ON (acf_traslado.id_traslado=acf_traslado_detalle.id_traslado)
                     INNER JOIN acf_hojavida ON (acf_hojavida.id_activo_fijo=acf_traslado_detalle.id_activo_fijo)
-                    WHERE acf_traslado.id_traslado=' . $id;
+                    WHERE acf_traslado.id_traslado=" . $id;
             $rs = $cmd->query($sql);
             $obj_traslado = $rs->fetch();
             $continuar = $obj_traslado['continuar'];
 
-            if ($estado == 2 && $continuar == 1) {
+            $sql = "SELECT COUNT(*) as count
+                    FROM acf_traslado_detalle
+                    INNER JOIN acf_traslado ON (acf_traslado.id_traslado=acf_traslado_detalle.id_traslado)
+                    WHERE acf_traslado_detalle.id_activo_fijo IN (SELECT id_activo_fijo FROM acf_traslado_detalle WHERE id_traslado=$id)
+                    AND acf_traslado.id_traslado>$id AND acf_traslado.estado<>0";
+            $rs = $cmd->query($sql);
+            $obj_traslado = $rs->fetch();
+            $tra_det = $obj_traslado['count'];
+
+            if ($estado == 2 && $continuar == 1 && $tra_det ==0) {
                 $error = 0;
                 $cmd->beginTransaction();
 
@@ -195,7 +204,9 @@ try {
                 if ($estado != 2) {
                     $res['mensaje'] = 'Solo se puede anular traslados en estado cerrado';
                 } else if ($continuar != 1) {
-                    $res['mensaje'] = 'El traslado ya tiene traslados posteriores';
+                    $res['mensaje'] = 'Los Activos del traslado ya tiene traslados posteriores';
+                }else if ($tra_det != 0) {
+                    $res['mensaje'] = 'Los Activos estan en traslado posteriores';
                 }
             }
         }

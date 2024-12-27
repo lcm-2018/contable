@@ -31,11 +31,12 @@
                 { 'data': 'estado_general' },
                 { 'data': 'nom_area' },
                 { 'data': 'observacion_mant' },
-                { 'data': 'botones' }
+                { 'data': 'botones' },
+                { 'data': 'estado' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [2, 5] },
-                { orderable: false, targets: 6 }
+                { orderable: false, targets: [6, 7] }
             ],
             order: [
                 [0, "asc"]
