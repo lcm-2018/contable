@@ -28,23 +28,37 @@ try {
             $id_cobertura = $_POST['sl_cobertura'];
             $id_modalidad = $_POST['sl_modalidad'];
             $id_cta_pre = $_POST['id_txt_cta_pre'] ? $_POST['id_txt_cta_pre'] : 'NULL';
+            $id_cta_pre_ant = $_POST['id_txt_cta_pre_ant'] ? $_POST['id_txt_cta_pre_ant'] : 'NULL';
             $id_cta_deb = $_POST['id_txt_cta_deb'] ? $_POST['id_txt_cta_deb'] : 'NULL';
             $id_cta_cre = $_POST['id_txt_cta_cre'] ? $_POST['id_txt_cta_cre'] : 'NULL';
             $id_cta_cop = $_POST['id_txt_cta_cop'] ? $_POST['id_txt_cta_cop'] : 'NULL';
-            $id_cta_gid = $_POST['id_txt_cta_gid'] ? $_POST['id_txt_cta_gid'] : 'NULL';
-            $id_cta_gic = $_POST['id_txt_cta_gic'] ? $_POST['id_txt_cta_gic'] : 'NULL';
-            $id_cta_gde = $_POST['id_txt_cta_gde'] ? $_POST['id_txt_cta_gde'] : 'NULL';
+            $id_cta_cop_cap = $_POST['id_txt_cta_cop_cap'] ? $_POST['id_txt_cta_cop_cap'] : 'NULL';
+            $id_cta_gli_deb = $_POST['id_txt_cta_gli_deb'] ? $_POST['id_txt_cta_gli_deb'] : 'NULL';
+            $id_cta_gli_cre = $_POST['id_txt_cta_gli_cre'] ? $_POST['id_txt_cta_gli_cre'] : 'NULL';
+            $id_cta_glo_def = $_POST['id_txt_cta_glo_def'] ? $_POST['id_txt_cta_glo_def'] : 'NULL';
             $id_cta_dev = $_POST['id_txt_cta_dev'] ? $_POST['id_txt_cta_dev'] : 'NULL';
             $id_cta_caj = $_POST['id_txt_cta_caj'] ? $_POST['id_txt_cta_caj'] : 'NULL';
+            $id_cta_fac_glo = $_POST['id_txt_cta_fac_glo'] ? $_POST['id_txt_cta_fac_glo'] : 'NULL';
+            $id_cta_x_ide = $_POST['id_txt_cta_x_ide'] ? $_POST['id_txt_cta_x_ide'] : 'NULL';
             $fec_vig = $_POST['txt_fec_vig'] ? "'".$_POST['txt_fec_vig']."'" : 'NULL';
             $estado = $_POST['sl_estado'];
 
             if ($id == -1) {
-                $sql = "INSERT INTO tb_homologacion(id_regimen,id_cobertura,id_modalidad,id_cta_presupuesto,id_cta_debito,id_cta_credito,
-                                id_cta_copago,id_cta_glosaini_debito,id_cta_glosaini_credito,id_cta_glosadefinitiva,id_cta_devolucion,id_cta_caja,
+                $sql = "INSERT INTO tb_homologacion(id_regimen,id_cobertura,id_modalidad,
+                                id_cta_presupuesto,id_cta_presupuesto_ant,
+                                id_cta_debito,id_cta_credito,
+                                id_cta_copago,id_cta_copago_capitado,
+                                id_cta_glosaini_debito,id_cta_glosaini_credito,
+                                id_cta_glosadefinitiva,id_cta_devolucion,id_cta_caja,
+                                id_cta_fac_global,id_cta_x_ident,
                                 fecha_vigencia,estado,id_usr_crea,fec_creacion) 
-                        VALUES($id_regimen,$id_cobertura,$id_modalidad,$id_cta_pre,$id_cta_deb,$id_cta_cre,
-                                $id_cta_cop,$id_cta_gid,$id_cta_gic,$id_cta_gde,$id_cta_dev,$id_cta_caj,
+                        VALUES($id_regimen,$id_cobertura,$id_modalidad,
+                                $id_cta_pre,$id_cta_pre_ant,
+                                $id_cta_deb,$id_cta_cre,
+                                $id_cta_cop,$id_cta_cop_cap,
+                                $id_cta_gli_deb,$id_cta_gli_cre,
+                                $id_cta_glo_def,$id_cta_dev,$id_cta_caj,
+                                $id_cta_fac_glo,$id_cta_x_ide,
                                 $fec_vig,$estado,$id_usr_ope,'$fecha_ope')";
                 $rs = $cmd->query($sql);
 
@@ -60,9 +74,12 @@ try {
             } else {
                 $sql = "UPDATE tb_homologacion 
                         SET id_regimen=$id_regimen,id_cobertura=$id_cobertura,id_modalidad=$id_modalidad,
-                            id_cta_presupuesto=$id_cta_pre,id_cta_debito=$id_cta_deb,id_cta_credito=$id_cta_cre,
-                            id_cta_copago=$id_cta_cop,id_cta_glosaini_debito=$id_cta_gid,id_cta_glosaini_credito=$id_cta_gic,
-                            id_cta_glosadefinitiva=$id_cta_gde,id_cta_devolucion=$id_cta_dev,id_cta_caja=$id_cta_caj,
+                            id_cta_presupuesto=$id_cta_pre,id_cta_presupuesto_ant=$id_cta_pre_ant,
+                            id_cta_debito=$id_cta_deb,id_cta_credito=$id_cta_cre,
+                            id_cta_copago=$id_cta_cop,id_cta_copago_capitado=$id_cta_cop_cap,
+                            id_cta_glosaini_debito=$id_cta_gli_deb,id_cta_glosaini_credito=$id_cta_gli_cre,
+                            id_cta_glosadefinitiva=$id_cta_glo_def,id_cta_devolucion=$id_cta_dev,id_cta_caja=$id_cta_caj,
+                            id_cta_fac_global=$id_cta_fac_glo,id_cta_x_ident=$id_cta_x_ide,
                             fecha_vigencia=$fec_vig,estado=$estado
                         WHERE id_homo=" . $id;
                 $rs = $cmd->query($sql);

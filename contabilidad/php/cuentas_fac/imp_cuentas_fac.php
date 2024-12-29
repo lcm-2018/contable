@@ -21,29 +21,37 @@ if (isset($_POST['nombre']) && $_POST['nombre']) {
 try {
     $sql = "SELECT tb_homologacion.id_homo,tb_regimenes.descripcion_reg AS nom_regimen,
 	            tb_cobertura.nom_cobertura,tb_modalidad.nom_modalidad,tb_homologacion.fecha_vigencia,
-                c_presup.cod_pptal AS cta_presupuesto,
+                c_presto.cod_pptal AS cta_presupuesto,
+                c_presto_ant.cod_pptal AS cta_presupuesto_ant,
                 c_debito.cuenta AS cta_debito,
                 c_credito.cuenta AS cta_credito,
                 c_copago.cuenta AS cta_copago,
-                c_glindeb.cuenta AS cta_glosaini_debito,
-                c_glincre.cuenta AS cta_glosaini_credito,
-                c_gldef.cuenta AS cta_glosadefinitiva,
+                c_copago_cap.cuenta AS cta_copago_capitado,
+                c_gloini_deb.cuenta AS cta_glosaini_debito,
+                c_gloini_cre.cuenta AS cta_glosaini_credito,
+                c_glo_def.cuenta AS cta_glosadefinitiva,
                 c_devol.cuenta AS cta_devolucion,
-                c_caja.cuenta AS cta_caja,                
+                c_caja.cuenta AS cta_caja,
+                c_fac_glo.cuenta AS cta_fac_global,
+                c_x_ide.cuenta AS cta_x_ident,
 	            IF(tb_homologacion.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM tb_homologacion
             INNER JOIN tb_regimenes ON (tb_regimenes.id_regimen=tb_homologacion.id_regimen)
             INNER JOIN tb_cobertura ON (tb_cobertura.id_cobertura=tb_homologacion.id_cobertura)
             INNER JOIN tb_modalidad ON (tb_modalidad.id_modalidad=tb_homologacion.id_modalidad)
-            LEFT JOIN pto_cargue  AS c_presup ON (c_presup.id_cargue=tb_homologacion.id_cta_presupuesto)
+            LEFT JOIN pto_cargue  AS c_presto ON (c_presto.id_cargue=tb_homologacion.id_cta_presupuesto)
+            LEFT JOIN pto_cargue  AS c_presto_ant ON (c_presto_ant.id_cargue=tb_homologacion.id_cta_presupuesto_ant)
             LEFT JOIN ctb_pgcp AS c_debito ON (c_debito.id_pgcp=tb_homologacion.id_cta_debito)
             LEFT JOIN ctb_pgcp AS c_credito ON (c_credito.id_pgcp=tb_homologacion.id_cta_credito)
             LEFT JOIN ctb_pgcp AS c_copago ON (c_copago.id_pgcp=tb_homologacion.id_cta_copago)
-            LEFT JOIN ctb_pgcp AS c_glindeb ON (c_glindeb.id_pgcp=tb_homologacion.id_cta_glosaini_debito)
-            LEFT JOIN ctb_pgcp AS c_glincre ON (c_glincre.id_pgcp=tb_homologacion.id_cta_glosaini_credito)
-            LEFT JOIN ctb_pgcp AS c_gldef ON (c_gldef.id_pgcp=tb_homologacion.id_cta_glosadefinitiva)
+            LEFT JOIN ctb_pgcp AS c_copago_cap ON (c_copago_cap.id_pgcp=tb_homologacion.id_cta_copago_capitado)
+            LEFT JOIN ctb_pgcp AS c_gloini_deb ON (c_gloini_deb.id_pgcp=tb_homologacion.id_cta_glosaini_debito)
+            LEFT JOIN ctb_pgcp AS c_gloini_cre ON (c_gloini_cre.id_pgcp=tb_homologacion.id_cta_glosaini_credito)
+            LEFT JOIN ctb_pgcp AS c_glo_def ON (c_glo_def.id_pgcp=tb_homologacion.id_cta_glosadefinitiva)        
             LEFT JOIN ctb_pgcp AS c_devol ON (c_devol.id_pgcp=tb_homologacion.id_cta_devolucion)
             LEFT JOIN ctb_pgcp AS c_caja ON (c_caja.id_pgcp=tb_homologacion.id_cta_caja)
+            LEFT JOIN ctb_pgcp AS c_fac_glo ON (c_fac_glo.id_pgcp=tb_homologacion.id_cta_fac_global)
+            LEFT JOIN ctb_pgcp AS c_x_ide ON (c_x_ide.id_pgcp=tb_homologacion.id_cta_x_ident)
             $where ORDER BY tb_homologacion.id_homo DESC";
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
@@ -83,25 +91,14 @@ try {
 
     <table style="width:100% !important">
         <thead style="font-size:80%">                
-            <tr style="background-color:#CED3D3; color:#000000; text-align:center">
-                <th rowspan="2">Id</th>
-                <th rowspan="2">Régimen</th>
-                <th rowspan="2">Cobertura</th>
-                <th rowspan="2">Modadlidad</th>
-                <th rowspan="2">Fecha Inicio de Vigencia</th>
-                <th colspan="9">Cuentas</th>
-                <th rowspan="2">Estado</th>
-            </tr>
-            <tr style="background-color:#CED3D3; color:#000000; text-align:center">
-                <th>Presup.</th>
-                <th>Debito</th>
-                <th>Credito</th>
-                <th>Copago</th>
-                <th>GI_deb.</th>
-                <th>GI_cre.</th>
-                <th>G_def.</th>
-                <th>Devol.</th>
-                <th>Caja</th>
+            <tr style="background-color:#CED3D3; color:#000000; text-align:left">
+                <th>Id</th>
+                <th>Régimen</th>
+                <th>Cobertura</th>
+                <th>Modadlidad</th>
+                <th>Fecha Inicio de Vigencia</th>                
+                <th>Cuentas Contables</th>                
+                <th>Estado</th>
             </tr>
         </thead>
         <tbody style="font-size: 60%;">
@@ -113,16 +110,50 @@ try {
                         <td style="text-align:left">' . $obj['nom_regimen'] . '</td>
                         <td style="text-align:left">' . $obj['nom_cobertura'] . '</td>
                         <td style="text-align:left">' . $obj['nom_modalidad'] . '</td>
-                        <td>' . $obj['fecha_vigencia'] . '</td>
-                        <td>' . $obj['cta_presupuesto'] . '</td>
-                        <td>' . $obj['cta_debito'] . '</td>
-                        <td>' . $obj['cta_credito'] . '</td>
-                        <td>' . $obj['cta_copago'] . '</td>
-                        <td>' . $obj['cta_glosaini_debito'] . '</td>
-                        <td>' . $obj['cta_glosaini_credito'] . '</td>
-                        <td>' . $obj['cta_glosadefinitiva'] . '</td>
-                        <td>' . $obj['cta_devolucion'] . '</td>
-                        <td>' . $obj['cta_caja'] . '</td>
+                        <td style="text-align:left">' . $obj['fecha_vigencia'] . '</td>
+                        <td style="text-align:left">
+                            <table>
+                                <tr><td style="text-align:left">Presupuesto</td>
+                                    <td style="text-align:left">' . $obj['cta_presupuesto'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Presupuesto Anterior</td>
+                                    <td style="text-align:left">' . $obj['cta_presupuesto_ant'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Débito</td>                                
+                                    <td style="text-align:left">' . $obj['cta_debito'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Crédito</td>
+                                    <td style="text-align:left">' . $obj['cta_credito'] . '</td>
+                                </tr>    
+                                    <td style="text-align:left">Copago</td>
+                                    <td style="text-align:left">' . $obj['cta_copago'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Copago Capitado</td>
+                                    <td style="text-align:left">' . $obj['cta_copago_capitado'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Glosa Inicial Débito</td>
+                                    <td style="text-align:left">' . $obj['cta_glosaini_debito'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Glosa Inicial Crédito</td>
+                                    <td style="text-align:left">' . $obj['cta_glosaini_credito'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Glosa Definitiva</td>
+                                    <td style="text-align:left">' . $obj['cta_glosadefinitiva'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Devolución</td>
+                                    <td style="text-align:left">' . $obj['cta_devolucion'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Caja</td>
+                                    <td style="text-align:left">' . $obj['cta_caja'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Factura Global</td>
+                                    <td style="text-align:left">' . $obj['cta_fac_global'] . '</td>
+                                </tr>
+                                    <td style="text-align:left">Por Identificar</td>
+                                    <td style="text-align:left">' . $obj['cta_x_ident'] . '</td>
+                                </tr>
+                            </table>
+                        </td>     
                         <td>' . $obj['estado'] . '</td></tr>';              
             }
             echo $tabla;
@@ -130,7 +161,7 @@ try {
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="15" style="text-align:left">
+                <td colspan="7" style="text-align:left">
                     No. de Registros: <?php echo count($objs); ?>
                 </td>
             </tr>

@@ -42,22 +42,26 @@
                 { 'data': 'nom_modalidad' },
                 { 'data': 'fecha_vigencia' },
                 { 'data': 'cta_presupuesto' },
+                { 'data': 'cta_presupuesto_ant' },
                 { 'data': 'cta_debito' },
                 { 'data': 'cta_credito' },
                 { 'data': 'cta_copago' },
+                { 'data': 'cta_copago_capitado' },
                 { 'data': 'cta_glosaini_debito' },
                 { 'data': 'cta_glosaini_credito' },
                 { 'data': 'cta_glosadefinitiva' },
                 { 'data': 'cta_devolucion' },
                 { 'data': 'cta_caja' },
+                { 'data': 'cta_fac_global' },
+                { 'data': 'cta_x_ident' },
                 { 'data': 'vigente' },
                 { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [2, 3] },
-                { visible: false, targets: 14 },
-                { orderable: false, targets: 16 },
+                { visible: false, targets: 18 },
+                { orderable: false, targets: 20 },
             ],
             rowCallback: function(row, data, index) {
                 if (data.vigente == 'X') {
@@ -141,7 +145,7 @@
     });
 
     // Autocompletar cuenta contable presupuesto
-    $('#divForms').on("input", "#txt_cta_pre", function() {
+    $('#divForms').on("input", ".cuenta_pre", function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
@@ -155,12 +159,13 @@
             },
             minLength: 2,
             select: function(event, ui) {
+                var that = $(this);
                 if (ui.item.tipo == 1 || ui.item.id == '') {
-                    $('#id_txt_cta_pre').val(ui.item.id);
+                    $('#' + that.attr('data-campoid')).val(ui.item.id);
                 } else {
-                    $('#id_txt_cta_pre').val('-1');
+                    $('#' + that.attr('data-campoid')).val('-1');
                     $('#divModalError').modal('show');
-                    $('#divMsgError').html('Debe seleccionar una cuenta detalle');
+                    $('#divMsgError').html('Debe seleccionar una cuenta tipo detalle');
                 }
             },
         });
@@ -200,26 +205,34 @@
         error += verifica_vacio($('#sl_cobertura'));
         error += verifica_vacio($('#sl_modalidad'));
         error += verifica_vacio_2($('#id_txt_cta_pre'), $('#txt_cta_pre'));
+        error += verifica_vacio_2($('#id_txt_cta_pre_ant'), $('#txt_cta_pre_ant'));
         error += verifica_vacio_2($('#id_txt_cta_deb'), $('#txt_cta_deb'));
         error += verifica_vacio_2($('#id_txt_cta_cre'), $('#txt_cta_cre'));
         error += verifica_vacio_2($('#id_txt_cta_cop'), $('#txt_cta_cop'));
-        error += verifica_vacio_2($('#id_txt_cta_gid'), $('#txt_cta_gid'));
-        error += verifica_vacio_2($('#id_txt_cta_gic'), $('#txt_cta_gic'));
-        error += verifica_vacio_2($('#id_txt_cta_gde'), $('#txt_cta_gde'));
+        error += verifica_vacio_2($('#id_txt_cta_cop_cap'), $('#txt_cta_cop_cap'));
+        error += verifica_vacio_2($('#id_txt_cta_gli_deb'), $('#txt_cta_gli_deb'));
+        error += verifica_vacio_2($('#id_txt_cta_gli_cre'), $('#txt_cta_gli_cre'));
+        error += verifica_vacio_2($('#id_txt_cta_glo_def'), $('#txt_cta_glo_def'));
         error += verifica_vacio_2($('#id_txt_cta_dev'), $('#txt_cta_dev'));
         error += verifica_vacio_2($('#id_txt_cta_caj'), $('#txt_cta_caj'));
+        error += verifica_vacio_2($('#id_txt_cta_fac_glo'), $('#txt_cta_fac_glo'));
+        error += verifica_vacio_2($('#id_txt_cta_x_ide'), $('#txt_cta_x_ide'));
         error += verifica_vacio($('#txt_fec_vig'));
         error += verifica_vacio($('#sl_estado'));
 
         var error1 = verifica_valmin_2($('#id_txt_cta_pre'), $('#txt_cta_pre'), 0)
+        error1 += verifica_valmin_2($('#id_txt_cta_pre_ant'), $('#txt_cta_pre_ant'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_deb'), $('#txt_cta_deb'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_cre'), $('#txt_cta_cre'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_cop'), $('#txt_cta_cop'), 0);
-        error1 += verifica_valmin_2($('#id_txt_cta_gid'), $('#txt_cta_gid'), 0);
-        error1 += verifica_valmin_2($('#id_txt_cta_gic'), $('#txt_cta_gic'), 0);
-        error1 += verifica_valmin_2($('#id_txt_cta_gde'), $('#txt_cta_gde'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_cop_cap'), $('#txt_cta_cop_cap'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_gli_deb'), $('#txt_cta_gli_deb'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_gli_cre'), $('#txt_cta_gli_cre'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_glo_def'), $('#txt_cta_glo_def'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_dev'), $('#txt_cta_dev'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_caj'), $('#txt_cta_caj'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_fac_glo'), $('#txt_cta_fac_glo'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_x_ide'), $('#txt_cta_x_ide'), 0);
 
         if (error >= 1) {
             $('#divModalError').modal('show');

@@ -76,20 +76,24 @@ include '../../../permisos.php';
                                         <th rowspan="2">Cobertura</th>
                                         <th rowspan="2">Modalidad</th>
                                         <th rowspan="2">Fecha Inicio de Vigencia</th>
-                                        <th colspan="10">Cuentas</th>
+                                        <th colspan="14">Cuentas</th>
                                         <th rowspan="2">Estado</th>
                                         <th rowspan="2">Acciones</th>
                                     </tr>
                                     <tr class="text-center centro-vertical">
-                                        <th>Presup.</th>
-                                        <th>Debito</th>
-                                        <th>Credito</th>
+                                        <th>Presto.</th>
+                                        <th>Presto.Ant.</th>
+                                        <th>Débito</th>
+                                        <th>Crédito</th>
                                         <th>Copago</th>
-                                        <th>GI_deb.</th>
-                                        <th>GI_cre.</th>
-                                        <th>G_def.</th>
+                                        <th>Cop.Cap.</th>
+                                        <th>Glo.Ini.deb.</th>
+                                        <th>Glo.Ini.cre.</th>
+                                        <th>Glo_def.</th>
                                         <th>Devol.</th>
                                         <th>Caja</th>
+                                        <th>Fac.Glob.</th>
+                                        <th>Por Iden.</th>
                                         <th>Vigente</th>
                                     </tr>
                                 </thead>
