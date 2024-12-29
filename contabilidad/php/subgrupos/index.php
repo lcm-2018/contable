@@ -58,11 +58,11 @@ include '../../../permisos.php';
                             </div>
 
                             <!--Lista de registros en la tabla
-                                5001-Opcion [Articulos][Subgrupos]
+                                5509-Opcion [Articulos][Subgrupos]
                                 1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
                             -->
                             <?php
-                            if (PermisosUsuario($permisos, 5001, 2) || $id_rol == 1) {
+                            if (PermisosUsuario($permisos, 5509, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';
                             } else {
                                 echo '<input type="hidden" id="peReg" value="0">';

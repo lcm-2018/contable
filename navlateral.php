@@ -617,10 +617,32 @@ $rol = $_SESSION['rol'];
                                             ?>
                                                 <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/php/cuentas_fac/index.php">
                                                     <div class="div-icono">
-                                                        <i class="fas fas fa-clipboard-check fa-sm" style="color: black;"></i>
+                                                        <i class="fas fa-calculator fa-sm" style="color: green;"></i>
                                                     </div>
                                                     <div>
                                                         Cuentas Facturación
+                                                    </div>
+                                                </a>
+                                            <?php }
+                                            if (PermisosUsuario($permisos, 5508, 0) || $id_rol == 1) {
+                                            ?>
+                                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/php/centro_costos/index.php">
+                                                    <div class="div-icono">
+                                                        <i class="fas fa-file-invoice-dollar fa-sm" style="color: green;"></i>
+                                                    </div>
+                                                    <div>
+                                                        Centros de Costo
+                                                    </div>
+                                                </a>
+                                            <?php }
+                                            if (PermisosUsuario($permisos, 5509, 0) || $id_rol == 1) {
+                                            ?>
+                                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/php/subgrupos/index.php">
+                                                    <div class="div-icono">
+                                                        <i class="fas fa-layer-group fa-sm" style="color: green;"></i>
+                                                    </div>
+                                                    <div>
+                                                        SubGrupos
                                                     </div>
                                                 </a>
                                             <?php }
@@ -802,16 +824,6 @@ $rol = $_SESSION['rol'];
                             </a>
                             <div class="collapse" id="pagesCollapseArticulos" aria-labelledby="headingOne">
                                 <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
-                                    <?php if (PermisosUsuario($permisos, 5010, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/centro_costos/index.php?var=3">
-                                            <div class="div-icono">
-                                                <i class="fas fa-file-invoice-dollar fa-sm" style="color: #E74C3C;"></i>
-                                            </div>
-                                            <div>
-                                                Centro Costos
-                                            </div>
-                                        </a>
-                                    <?php } ?>
                                     <?php if (PermisosUsuario($permisos, 5015, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/centrocosto_areas/index.php?var=3">
                                             <div class="div-icono">
@@ -829,16 +841,6 @@ $rol = $_SESSION['rol'];
                                             </div>
                                             <div>
                                                 Presentación Comercial
-                                            </div>
-                                        </a>
-                                    <?php } ?>
-                                    <?php if (PermisosUsuario($permisos, 5001, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/subgrupos/index.php?var=3">
-                                            <div class="div-icono">
-                                                <i class="fas fa-layer-group fa-sm" style="color: #E74C3C;"></i>
-                                            </div>
-                                            <div>
-                                                Subgrupos
                                             </div>
                                         </a>
                                     <?php } ?>

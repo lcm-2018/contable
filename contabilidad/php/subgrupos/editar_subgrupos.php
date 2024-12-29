@@ -18,9 +18,9 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-    if ((PermisosUsuario($permisos, 5001, 2) && $oper == 'add' && $_POST['id_subgrupo'] == -1) ||
-        (PermisosUsuario($permisos, 5001, 3) && $oper == 'add' && $_POST['id_subgrupo'] != -1) ||
-        (PermisosUsuario($permisos, 5001, 4) && $oper == 'del') || $id_rol == 1) {
+    if ((PermisosUsuario($permisos, 5509, 2) && $oper == 'add' && $_POST['id_subgrupo'] == -1) ||
+        (PermisosUsuario($permisos, 5509, 3) && $oper == 'add' && $_POST['id_subgrupo'] != -1) ||
+        (PermisosUsuario($permisos, 5509, 4) && $oper == 'del') || $id_rol == 1) {
 
         if ($oper == 'add') {
             $id = $_POST['id_subgrupo'];

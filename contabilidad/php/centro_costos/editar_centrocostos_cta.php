@@ -17,9 +17,9 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-    if ((PermisosUsuario($permisos, 5010, 2) && $oper == 'add' && $_POST['id_ceccta'] == -1) ||
-        (PermisosUsuario($permisos, 5010, 3) && $oper == 'add' && $_POST['id_ceccta'] != -1) ||
-        (PermisosUsuario($permisos, 5010, 4) && $oper == 'del') || $id_rol == 1) {
+    if ((PermisosUsuario($permisos, 5508, 2) && $oper == 'add' && $_POST['id_ceccta'] == -1) ||
+        (PermisosUsuario($permisos, 5508, 3) && $oper == 'add' && $_POST['id_ceccta'] != -1) ||
+        (PermisosUsuario($permisos, 5508, 4) && $oper == 'del') || $id_rol == 1) {
 
         $id_cencos = $_POST['id_cencos'];
 

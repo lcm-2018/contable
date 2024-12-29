@@ -70,10 +70,10 @@ if (!empty($objs)) {
         $eliminar = NULL;
         $id = $obj['id_subgrupo_cta'];
         //Permite crear botones en la cuadricula si tiene permisos de 3-Editar,4-Eliminar
-        if (PermisosUsuario($permisos, 5001, 3) || $id_rol == 1) {    
+        if (PermisosUsuario($permisos, 5509, 3) || $id_rol == 1) {    
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }
-        if (PermisosUsuario($permisos, 5001, 4) || $id_rol == 1) {    
+        if (PermisosUsuario($permisos, 5509, 4) || $id_rol == 1) {    
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
         $data[] = [

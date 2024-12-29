@@ -58,13 +58,13 @@ if (!empty($objs)) {
     foreach ($objs as $obj) {
         $id = $obj['id_subgrupo'];
         /*Permisos del usuario
-            5001-Opcion [General][Subgrupos]
+            5509-Opcion [General][Subgrupos]
             1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
         */    
-        if (PermisosUsuario($permisos, 5001, 3) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5509, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }
-        if (PermisosUsuario($permisos, 5001, 4) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5509, 4) || $id_rol == 1) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
 

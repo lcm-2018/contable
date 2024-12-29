@@ -58,13 +58,13 @@ if (!empty($objs)) {
     foreach ($objs as $obj) {
         $id = $obj['id_centro'];
         /*Permisos del usuario
-           5010-Opcion [General][Centros Costo]
+           5508-Opcion [General][Centros Costo]
             1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
         */    
-        if (PermisosUsuario($permisos, 5010, 3) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5508, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }
-        if (PermisosUsuario($permisos, 5010, 4) || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5508, 4) || $id_rol == 1) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
 
