@@ -1,20 +1,28 @@
 <?php
 session_start();
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
     header("Location: ../../../index.php");
     exit();
 }
-$id_compra = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
+$id_adqi = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
+$id_user = $_SESSION['id_user'];
 function pesos($valor)
 {
     return '$ ' . number_format($valor, 0, ',', '.');
 }
 $vigencia = $_SESSION['vigencia'];
 include '../../../conexion.php';
-include '../../../terceros.php';
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `nombre1`,`nombre2`,`apellido1`,`apellido2` FROM `seg_usuarios_sistema` WHERE `id_usuario` = {$id_user}";
+    $rs = $cmd->query($sql);
+    $usuario = $rs->fetch();
+    $usuario = trim($usuario['nombre1'] . ' ' . $usuario['nombre2'] . ' ' . $usuario['apellido1'] . ' ' . $usuario['apellido2']);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -35,9 +43,31 @@ try {
                 ON (`ctt_adquisiciones`.`id_area` = `tb_area_c`.`id_area`)
             LEFT JOIN `tb_terceros`
                 ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
-            WHERE `id_adquisicion` = $id_compra LIMIT 1";
+            WHERE `id_adquisicion` = $id_adqi LIMIT 1";
     $rs = $cmd->query($sql);
     $compra = $rs->fetch();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `ctt_bien_servicio`.`bien_servicio`
+                , `ctt_orden_compra_detalle`.`cantidad`
+                , `ctt_orden_compra_detalle`.`val_unid` AS `val_estimado_unid`
+                , `ctt_orden_compra_detalle`.`id_detalle`
+                , `ctt_orden_compra_detalle`.`id_servicio` AS `id_bn_sv`
+            FROM
+                `ctt_orden_compra_detalle`
+                INNER JOIN `ctt_orden_compra` 
+                    ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
+                INNER JOIN `ctt_bien_servicio` 
+                    ON (`ctt_orden_compra_detalle`.`id_servicio` = `ctt_bien_servicio`.`id_b_s`)
+            WHERE (`ctt_orden_compra`.`id_adq` = $id_adqi)";
+    $rs = $cmd->query($sql);
+    $oferta = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -52,7 +82,7 @@ try {
                 `ctt_adquisiciones`
             INNER JOIN `pto_cdp` 
                 ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
-            WHERE `ctt_adquisiciones`.`id_adquisicion` = '$id_compra'";
+            WHERE `ctt_adquisiciones`.`id_adquisicion` = '$id_adqi'";
     $rs = $cmd->query($sql);
     $data_cdp = $rs->fetch();
     $cmd = null;
@@ -100,17 +130,13 @@ try {
                 `ctt_estudios_previos`
             INNER JOIN `tb_forma_pago_compras` 
                 ON (`ctt_estudios_previos`.`id_forma_pago` = `tb_forma_pago_compras`.`id_form_pago`)
-            WHERE `id_compra` = '$id_compra'";
+            WHERE `id_compra` = '$id_adqi'";
     $rs = $cmd->query($sql);
     $estudio_prev = $rs->fetch();
+    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$id_t[] = $estudio_prev['id_supervisor'];
-$id_t[] = $compra['id_tercero_api'];
-$ids = implode(',', $id_t);
-$terceros = getTerceros($ids, $cmd);
-$cmd = null;
 if ($compra['id_tercero_api'] > 0) {
     $key = array_search($compra['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
     $tercero = ltrim($terceros[$key]['nom_tercero']);
@@ -172,11 +198,16 @@ foreach ($valores as $vl) {
 $meses = ['', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 $fecI = explode('-', $estudio_prev['fec_ini_ejec']);
 $fecF = explode('-', $estudio_prev['fec_fin_ejec']);
-$fecha = mb_strtoupper($fecI[2] . ' de ' . $meses[intval($fecI[1])] . ' de ' . $fecI[0]);
+$fecha = $fecI[2] . ' de ' . $meses[intval($fecI[1])] . ' de ' . $fecI[0];
+$letras = new NumberFormatter("es", NumberFormatter::SPELLOUT);
+$diaI = $fecI[2] == '01' ? 'primero' : $letras->format($fecI[2]);
+$diaF = $fecF[2] == '01' ? 'primero' : $letras->format($fecF[2]);
+$fecI_let =  $diaI . ' (' . $fecI[2] . ')' . ' de ' . mb_strtoupper($meses[intval($fecI[1])]) . ' de ' . $fecI[0];
+$fecF_let = $diaF . ' (' . $fecF[2] . ')' . ' de ' . mb_strtoupper($meses[intval($fecF[1])]) . ' de ' . $fecF[0];
+$fecha2 = mb_strtoupper($fecha);
 $valor = $estudio_prev['val_contrata'];
 $val_num = pesos($valor);
 $objeto = mb_strtoupper($compra['objeto']);
-$letras = new NumberFormatter("es", NumberFormatter::SPELLOUT);
 $val_letras = str_replace('-', '', mb_strtoupper($letras->format($valor, 2)));
 $start = new DateTime($estudio_prev['fec_ini_ejec']);
 $end = new DateTime($estudio_prev['fec_fin_ejec']);
@@ -213,9 +244,11 @@ $rubro = !empty($cod_cargue) ? $cod_cargue['nom_rubro'] : 'XXX';
 $cod_presupuesto = !empty($cod_cargue) ? $cod_cargue['id_pto_cargue'] : 'XXX';
 $cpd = !empty($data_cdp) ? $data_cdp['id_cdp'] : 'XXX';
 $fec_cdp = !empty($data_cdp) ? $data_cdp['fecha_cdp'] : 'XXX';
+$servicio = mb_strtoupper($oferta[0]['bien_servicio']);
+/*
 $key = array_search($id_ter_sup, array_column($terceros, 'id_tercero_api'));
 $supervisor = $terceros[$key]['nom_tercero'];
-$supervisor = $id_ter_sup == '' ? 'XXXXX' : $supervisor;
+$supervisor = $id_ter_sup == '' ? 'XXXXX' : $supervisor;*/
 $solicitante = $compra['area']; //area solicitante
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -240,50 +273,57 @@ require_once '../../../vendor/autoload.php';
 
 use PhpOffice\PhpWord\TemplateProcessor;
 
+$docx = "plantilla_anexos.docx";
+
+$plantilla = new TemplateProcessor($docx);
+/*
 if ($compra['id_area'] == '5') {
     $docx = "plantilla_anexos_salud.docx";
 } else {
-    $docx = "plantilla_anexos.docx";
 }
 
-$plantilla = new TemplateProcessor($docx);
 if ($compra['id_area'] == '5') {
     $plantilla->cloneRowAndSetValues('req_min', $req_min);
     $plantilla->cloneRowAndSetValues('req_min1', $req_min1);
     $plantilla->cloneRowAndSetValues('describ_val', $describ_val);
-}
+}*/
 $plantilla->setValue('fecha', $fecha);
-$plantilla->setValue('val_num', $val_num);
-$plantilla->setValue('objeto', $objeto);
-$plantilla->setValue('expedicion', $expedicion);
-$plantilla->setValue('val_letras', $val_letras);
-$plantilla->cloneRowAndSetValues('actividad', $actividad);
-$markerToCheck = 'actividad1';
-$placeholders = $plantilla->getVariables();
-$marker_exists = in_array($markerToCheck, $placeholders);
-if ($marker_exists) {
-    $plantilla->cloneRowAndSetValues('actividad1', $actividad1);
+$plantilla->setValue('servicio', $servicio);
+$plantilla->setValue('inicia', $fecI_let);
+$plantilla->setValue('termina', $fecF_let);
+$plantilla->setValue('usuario', $usuario);
+if (false) {
+    $plantilla->setValue('val_num', $val_num);
+    $plantilla->setValue('objeto', $objeto);
+    $plantilla->setValue('expedicion', $expedicion);
+    $plantilla->setValue('val_letras', $val_letras);
+    $plantilla->cloneRowAndSetValues('actividad', $actividad);
+    $markerToCheck = 'actividad1';
+    $placeholders = $plantilla->getVariables();
+    $marker_exists = in_array($markerToCheck, $placeholders);
+    if ($marker_exists) {
+        $plantilla->cloneRowAndSetValues('actividad1', $actividad1);
+    }
+    $plantilla->cloneRowAndSetValues('producto', $producto);
+    $plantilla->cloneRowAndSetValues('obligacion', $obligacion);
+    $plantilla->cloneRowAndSetValues('pago', $pago);
+    $plantilla->cloneRowAndSetValues('pago_s', $pago_s);
+    $plantilla->setValue('plazo', $plazo);
+    $plantilla->setValue('rubro', $rubro);
+    $plantilla->setValue('cod_presupuesto', $cod_presupuesto);
+    $plantilla->setValue('vigencia', $vigencia);
+    $plantilla->setValue('cpd', $cpd);
+    $plantilla->setValue('fec_cdp', $fec_cdp);
+    $plantilla->setValue('tercero', $tercero);
+    $plantilla->setValue('cedula', number_format($cedula, 0, '', '.'));
+    $plantilla->setValue('supervisor', $supervisor);
+    $plantilla->setValue('solicitante', $solicitante);
+    $plantilla->setValue('dir_tercero', $dir_tercero);
+    $plantilla->setValue('tel_tercero', $tel_tercero);
+    $plantilla->setValue('mun_tercero', $mun_tercero);
+    $plantilla->setValue('dpto_tercero', $dpto_tercero);
+    $plantilla->setValue('numds', $numds);
 }
-$plantilla->cloneRowAndSetValues('producto', $producto);
-$plantilla->cloneRowAndSetValues('obligacion', $obligacion);
-$plantilla->cloneRowAndSetValues('pago', $pago);
-$plantilla->cloneRowAndSetValues('pago_s', $pago_s);
-$plantilla->setValue('plazo', $plazo);
-$plantilla->setValue('rubro', $rubro);
-$plantilla->setValue('cod_presupuesto', $cod_presupuesto);
-$plantilla->setValue('vigencia', $vigencia);
-$plantilla->setValue('cpd', $cpd);
-$plantilla->setValue('fec_cdp', $fec_cdp);
-$plantilla->setValue('tercero', $tercero);
-$plantilla->setValue('cedula', number_format($cedula, 0, '', '.'));
-$plantilla->setValue('supervisor', $supervisor);
-$plantilla->setValue('solicitante', $solicitante);
-$plantilla->setValue('dir_tercero', $dir_tercero);
-$plantilla->setValue('tel_tercero', $tel_tercero);
-$plantilla->setValue('mun_tercero', $mun_tercero);
-$plantilla->setValue('dpto_tercero', $dpto_tercero);
-$plantilla->setValue('numds', $numds);
-
 
 $plantilla->saveAs('anexos.docx');
 header("Content-Disposition: attachment; Filename=anexos.docx");

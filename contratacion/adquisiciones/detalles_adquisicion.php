@@ -866,6 +866,7 @@ if (!empty($adquisicion)) {
                                                         }
                                                         if ($adquisicion['estado'] == 9) { ?>
                                                             <a type="button" class="btn btn-warning btn-sm" id="btnFormatoDesigSuper" style="color:white">DESCARGAR FORMATO DESIGNACIÓN DE SUPERVISIÓN&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
+                                                            <a type="button" class="btn btn-success btn-sm" id="btnFormatoContrato" style="color:white">DESCARGAR FORMATO CONTRATO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
                                                             <?php if (false) { ?>
                                                                 <a type="button" class="btn btn-success btn-sm" id="btnEnviarActaSupervision" value="<?php echo $adquisicion['id_supervision'] ?>" style="color:white">ENVIAR SUPERVISIÓN&nbsp&nbsp;<span class="fas fa-file-upload fa-lg"></span></a>
                                                         <?php

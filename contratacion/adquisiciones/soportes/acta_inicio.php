@@ -4,68 +4,34 @@ if (!isset($_SESSION['user'])) {
     header("Location: ../../../index.php");
     exit();
 }
-$id_compra = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
-
-include '../../../conexion.php';
-require_once '../../../vendor/autoload.php';
+$id_adqi = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
+$id_user = $_SESSION['id_user'];
 
 function pesos($valor)
 {
-    return '$ ' . number_format($valor, 0, ',', '.');
+    return '$ ' . number_format($valor, 2, ',', '.');
 }
+include '../../../conexion.php';
+
+$vigencia = $_SESSION['vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `ctt_adquisiciones`.`id_adquisicion`
-                , `ctt_adquisiciones`.`id_tipo_bn_sv`
-                , `ctt_adquisiciones`.`id_modalidad`
-                , `ctt_modalidad`.`modalidad`
-                , `ctt_adquisiciones`.`objeto`
-                , `ctt_adquisiciones`.`id_supervision`
-                , `tb_terceros`.`id_tercero_api`
-                , `tb_terceros`.`nit_tercero`
-                , `tb_terceros`.`nom_tercero`
-                , `tb_area_c`.`id_area`
-                , `tb_area_c`.`area`
-            FROM
-                `ctt_adquisiciones`
-            INNER JOIN `ctt_modalidad` 
-                ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
-            INNER JOIN `tb_area_c` 
-                ON (`ctt_adquisiciones`.`id_area` = `tb_area_c`.`id_area`)
-            LEFT JOIN `tb_terceros`
-                ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
-            WHERE `id_adquisicion` = '$id_compra' LIMIT 1";
-    $rs = $cmd->query($sql);
-    $compra = $rs->fetch();
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `ctt_estudios_previos`.`forma_pago`
-            FROM
-                `ctt_estudios_previos`
-            INNER JOIN `tb_forma_pago_compras` 
-                ON (`ctt_estudios_previos`.`id_forma_pago` = `tb_forma_pago_compras`.`id_form_pago`)
-            WHERE `id_compra` = '$id_compra'";
-    $rs = $cmd->query($sql);
-    $estudio_prev = $rs->fetch();
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-$iduser = $_SESSION['id_user'];
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT CONCAT_WS (' ', `nombre1` , `nombre2` , `apellido1` , `apellido2`) AS `nombre` FROM `seg_usuarios_sistema` WHERE (`id_usuario`  = '$iduser')";
+    $sql = "SELECT `nombre1`,`nombre2`,`apellido1`,`apellido2` FROM `seg_usuarios_sistema` WHERE `id_usuario` = {$id_user}";
     $rs = $cmd->query($sql);
     $usuario = $rs->fetch();
+    $usuario = trim($usuario['nombre1'] . ' ' . $usuario['nombre2'] . ' ' . $usuario['apellido1'] . ' ' . $usuario['apellido2']);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `razon_social_ips` FROM `tb_datos_ips` LIMIT 1";
+    $rs = $cmd->query($sql);
+    $empresa = $rs->fetch();
+    $empresa = mb_strtoupper($empresa['razon_social_ips']);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -74,192 +40,105 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `ctt_contratos`.`id_contrato_compra`
-                , `ctt_contratos`.`id_compra`
-                , `ctt_contratos`.`fec_ini`
+                `ctt_contratos`.`fec_ini`
                 , `ctt_contratos`.`fec_fin`
                 , `ctt_contratos`.`val_contrato`
-                , `tb_forma_pago_compras`.`descripcion`
-                , `ctt_contratos`.`id_supervisor`
+                , `ctt_contratos`.`num_contrato`
+                , `tb_terceros`.`genero`
                 , `tb_terceros`.`nom_tercero`
-                , `tb_terceros`,`id_tercero_api`
-                ,  `tb_terceros`.`nit_tercero`
-                , `id_secop`
-                ,`num_contrato`
+                , `tb_terceros`.`nit_tercero`
+                , `adq`.`cantidad`
+                , `ctt_bien_servicio`.`bien_servicio`
+                , `ctt_adquisiciones`.`objeto`
+                , `supervisor`.`nom_tercero` AS `supervisor`
+                , `supervisor`.`nit_tercero` AS `cc_super`
             FROM
                 `ctt_contratos`
-            INNER JOIN `tb_forma_pago_compras` 
-                ON (`ctt_contratos`.`id_forma_pago` = `tb_forma_pago_compras`.`id_form_pago`)
-            LEFT JOIN `tb_terceros` 
-                ON (`ctt_contratos`.`id_supervisor` = `tb_terceros`.`id_tercero_api`)
-            WHERE `id_compra` = '$id_compra'";
+                INNER JOIN `ctt_adquisiciones` 
+                    ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
+                INNER JOIN `tb_terceros` 
+                    ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                INNER JOIN `tb_terceros`  AS `supervisor`
+                    ON (`ctt_contratos`.`id_supervisor` = `supervisor`.`id_tercero_api`)
+                INNER JOIN
+                    (SELECT
+                        `ctt_adquisiciones`.`id_adquisicion`
+                        , SUM(`ctt_orden_compra_detalle`.`cantidad`) AS `cantidad`
+                        , `ctt_orden_compra_detalle`.`id_servicio`
+                    FROM
+                        `ctt_orden_compra_detalle`
+                        INNER JOIN `ctt_orden_compra` 
+                            ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
+                        INNER JOIN `ctt_adquisiciones` 
+                            ON (`ctt_orden_compra`.`id_adq` = `ctt_adquisiciones`.`id_adquisicion`)
+                    GROUP BY `ctt_adquisiciones`.`id_adquisicion`)  AS `adq`
+                    ON (`adq`.`id_adquisicion` = `ctt_adquisiciones`.`id_adquisicion`)
+                INNER JOIN `ctt_bien_servicio` 
+                    ON (`adq`.`id_servicio` = `ctt_bien_servicio`.`id_b_s`)
+            WHERE (`ctt_contratos`.`id_compra` = $id_adqi)";
     $rs = $cmd->query($sql);
     $contrato = $rs->fetch();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `ctt_adquisiciones`.`id_adquisicion`
-                , `pto_cdp`.`id_manu`
-                , `pto_cdp`.`objeto`
-                , `pto_cdp`.`fecha`
-            FROM
-                `pto_cdp`
-                INNER JOIN `ctt_adquisiciones` 
-                    ON (`pto_cdp`.`id_pto_cdp` = `ctt_adquisiciones`.`id_cdp`)
-            WHERE `ctt_adquisiciones`.`id_adquisicion` = $id_compra LIMIT 1";
-    $rs = $cmd->query($sql);
-    $cdp = $rs->fetch();
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+$no_contrato = $contrato['num_contrato'];
+$contratista = mb_strtoupper($contrato['nom_tercero']);
+$nit = $contrato['nit_tercero'];
+$cedula = number_format($nit, 0, '', '.');
+$supervisor = mb_strtoupper($contrato['supervisor']);
+$cc_super = number_format($contrato['cc_super'], 0, '', '.');
+$servicio = $contrato['bien_servicio'];
+$inicia = $contrato['fec_ini'];
+$termina = $contrato['fec_fin'];
+if ($contrato['genero'] == 'M') {
+    $distincion = 'el';
+    $distincionM = 'EL';
+    $terminacion = 'o';
+    $terminacionM = 'O';
+} else {
+    $distincion = 'la';
+    $distincionM = 'LA';
+    $terminacion = 'a';
+    $terminacionM = 'A';
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `pto_crp`.`id_manu`
-                , `pto_crp`.`fecha`
-                , `pto_crp`.`objeto`
-            FROM
-                `ctt_adquisiciones`
-                INNER JOIN `pto_cdp` 
-                    ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
-                INNER JOIN `pto_crp`
-                    ON (`pto_cdp`.`id_pto_cdp` = `pto_crp`.`id_cdp`)             
-            WHERE `ctt_adquisiciones`.`id_adquisicion` = $id_compra LIMIT 1";
-    $rs = $cmd->query($sql);
-    $crp = $rs->fetch();
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 
-$url = $api . 'terceros/datos/res/datos/id/' . $compra['id_tercero_api'];
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$tercer = json_decode($result, true);
-
-$url = $api . 'terceros/datos/res/listar/supervision/' . $compra['id_supervision'];
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$supervision = json_decode($result, true);
-if (empty($supervision)) {
-    $supervision = [];
-    $supervision['fec_designacion'] = 'XXXX-XX-XX';
-}
-$contra = $contrato['id_contrato_compra'];
-
-
-use PhpOffice\PhpWord\TemplateProcessor;
-
-$letras = new NumberFormatter("es", NumberFormatter::SPELLOUT);
-$date = new DateTime('now', new DateTimeZone('America/Bogota'));
-$fecha_h = $date->format('Y-m-d');
-$genero = $tercer[0]['genero'] == 'F' ? 'a' : 'o';
-$solicitante = $compra['area'];
-$objeto = $compra['objeto'];
-$vigencia = $_SESSION['vigencia'];
-$supervisor = $compra['nom_tercero'];
-$tercero = $tercer[0]['nombre1'] . ' ' . $tercer[0]['nombre2'] . ' ' . $tercer[0]['apellido1'] . ' ' . $tercer[0]['apellido2'];
-$cedula_ter = $tercer[0]['cc_nit'];
 $meses = ['', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-$fecha = explode('-', $fecha_h);
-$hoy_min = mb_strtolower($fecha[2] . ' de ' . $meses[intval($fecha[1])] . ' de ' . $fecha[0]);
-$fec_contrato = explode('-', $contrato['fec_ini']);
-$fecha_contrato = mb_strtolower($fec_contrato[2] . ' de ' . $meses[intval($fec_contrato[1])] . ' de ' . $fec_contrato[0]);
-$no_contrato = mb_strtoupper(str_pad($contrato['num_contrato'], 3, "0", STR_PAD_LEFT) . ' de ' . $fecha_contrato);
-$contratomin = mb_strtolower($no_contrato);
-$hoy_may = mb_strtoupper($hoy_min);
-$forma_pago = explode('||', $estudio_prev['forma_pago']);
-$pago = [];
-foreach ($forma_pago as $fp) {
-    $pago[] = ['pago' => $fp];
-}
-$fec_designa = explode('-', $supervision['fec_designacion']);
-$fecha = mb_strtolower($fec_designa[2] . ' de ' . $meses[intval($fec_designa[1])] . ' de ' . $fec_designa[0]);
-$fechaM = mb_strtoupper($fecha);
-$fec_inicia = mb_strtoupper($letras->format($fec_contrato[2]) . ' (' . $fec_contrato[2] . ') de ' . $meses[intval($fec_contrato[1])] . ' de ' . $fec_contrato[0]);
-$fec_contrato_f = explode('-', $contrato['fec_fin']);
-$fec_fin = mb_strtoupper($letras->format($fec_contrato_f[2]) . ' (' . $fec_contrato_f[2] . ') de ' . $meses[intval($fec_contrato_f[1])] . ' de ' . $fec_contrato_f[0]);
-$fcdp = isset($cdp['fecha']) ? explode('-', date('Y-m-d', strtotime($cdp['fecha']))) : ['XXXX', 'XX', 'XX'];
-$fcrp = isset($crp['fecha']) ? explode('-', date('Y-m-d', strtotime($crp['fecha']))) : ['XXXX', 'XX', 'XX'];
-$fec_cdp = mb_strtoupper($fcdp[2] . ' de ' . $meses[intval($fcdp[1])] . ' de ' . $fcdp[0]);
-$fec_crp = mb_strtoupper($fcrp[2] . ' de ' . $meses[intval($fcrp[1])] . ' de ' . $fcrp[0]);
-$n_cdp = !empty($cdp['id_manu']) ? $cdp['id_manu'] : 'XXX' . '-' . $fec_cdp;
-$n_rpres = !empty($crp['id_manu']) ? $crp['id_manu'] : 'XXX' . '-' . $fec_crp;
+$vigencia = $_SESSION['vigencia'];
+$letras = new NumberFormatter("es", NumberFormatter::SPELLOUT);
 $valor = $contrato['val_contrato'];
 $val_num = pesos($valor);
 $val_letras = str_replace('-', '', mb_strtoupper($letras->format($valor, 2)));
+
 $start = new DateTime($contrato['fec_ini']);
-$end = new DateTime($contrato['fec_fin']);
-$plazo = $start->diff($end);
-$p_mes = $plazo->format('%m');
-$p_dia = $plazo->format('%d');
-if ($p_dia >= 28) {
-    $p_mes++;
-    $p_dia = 0;
-}
-if ($p_mes < 1) {
-    $p_mes = '';
-} else if ($p_mes == 1) {
-    $p_mes = 'UN (01) MES';
-} else {
-    $p_mes = mb_strtoupper($letras->format($p_mes)) . ' (' . str_pad($p_mes, 2, '0', STR_PAD_LEFT) . ') MESES';
-}
-$y = ' Y ';
-if ($p_dia < 1) {
-    $y = '';
-    $p_dia = '';
-} else if ($p_dia == 1) {
-    $p_dia = 'UN (01) DÍA';
-} else {
-    $p_dia = mb_strtoupper($letras->format($p_dia)) . ' (' . str_pad($p_dia, 2, '0', STR_PAD_LEFT) . ') DÍAS';
-}
-$proyecto = $usuario['nombre'];
-$plazo = $p_mes == '' ? $p_dia : $p_mes . $y . $p_dia;
-if ($compra['id_area'] == '5') {
-    $docx = 'plantilla_acta_inicio_salud.docx';
-} else {
-    $docx = 'plantilla_acta_inicio.docx';
-}
+$fecI = explode('-', $contrato['fec_ini']);
+$diaI = $fecI[2] == '01' ? 'primero' : $letras->format($fecI[2]);
+$fecI_let =  $diaI . ' (' . $fecI[2] . ')' . ' de ' . $meses[intval($fecI[1])] . ' de ' . $fecI[0];
+$objeto = $contrato['objeto'];
+
+require_once '../../../vendor/autoload.php';
+
+use PhpOffice\PhpWord\TemplateProcessor;
+
+$docx = 'plantilla_acta_inicio.docx';
 
 $plantilla = new TemplateProcessor($docx);
-
-$plantilla->setValue('solicitante', $solicitante);
+$plantilla->setValue('no_contrato', $no_contrato);
+$plantilla->setValue('empresa', $empresa);
+$plantilla->setValue('contratista', $contratista);
+$plantilla->setValue('cedula', $cedula);
+$plantilla->setValue('servicio', $servicio);
+$plantilla->setValue('inicia', $inicia);
+$plantilla->setValue('termina', $termina);
+$plantilla->setValue('distincion', $distincion);
+$plantilla->setValue('terminacion', $terminacion);
+$plantilla->setValue('val_num', $val_num);
+$plantilla->setValue('fecI_let', $fecI_let);
+$plantilla->setValue('usuario', $usuario);
 $plantilla->setValue('objeto', $objeto);
 $plantilla->setValue('supervisor', $supervisor);
-$plantilla->setValue('tercero', $tercero);
-$plantilla->setValue('plazo', $plazo);
-$plantilla->setValue('fecha', $fecha);
-$plantilla->setValue('fec_inicia', $fec_inicia);
-$plantilla->setValue('fec_fin', $fec_fin);
-$plantilla->setValue('val_num', $val_num);
-$plantilla->setValue('val_letras', $val_letras);
-$plantilla->setValue('cedula', number_format($cedula_ter, 0, '', '.'));
-$plantilla->cloneRowAndSetValues('pago', $pago);
-$plantilla->setValue('no_contrato', $no_contrato);
-$plantilla->setValue('contratomin', $contratomin);
-$plantilla->setValue('hoy_may', $hoy_may);
-$plantilla->setValue('n_cdp', $n_cdp);
-$plantilla->setValue('n_rpres', $n_rpres);
-$plantilla->setValue('genero', $genero);
-$plantilla->setValue('hoy_min', $hoy_min);
-$plantilla->setValue('proyecto', $proyecto);
-
-
-$plantilla->saveAs('acta_inicio.docx');
-header("Content-Disposition: attachment; Filename=acta_inicio.docx");
-echo file_get_contents('acta_inicio.docx');
-unlink('acta_inicio.docx');
+$plantilla->setValue('cc_super', $cc_super);
+$plantilla->saveAs('acta.docx');
+header("Content-Disposition: attachment; Filename=Acta-contrato-CHT-" . $no_contrato . ".docx");
+echo file_get_contents('acta.docx');
+unlink('acta.docx');

@@ -1441,6 +1441,10 @@
         let id = $('#id_compra').val();
         $('<form action="soportes/designacion_supervisor.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
     });
+    $('#btnFormatoContrato').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/contrato_ps.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
     $('#btnFormActaInicio').on('click', function () {
         let id = $('#id_compra').val();
         $('<form action="soportes/acta_inicio.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();

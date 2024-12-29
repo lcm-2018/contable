@@ -7,7 +7,6 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../../../simpleXLSX.php';
 
-$id_pto = isset($_POST['idPto']) ? $_POST['idPto'] : exit('Acción no permitida');
 $file_tmp = $_FILES['file']['tmp_name'];
 $id_user = $_SESSION['id_user'];
 $estado = 1;

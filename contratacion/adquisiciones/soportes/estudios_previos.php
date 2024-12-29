@@ -4,7 +4,7 @@ if (!isset($_SESSION['user'])) {
     header("Location: ../../../index.php");
     exit();
 }
-$id_compra = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
+$id_adqi = isset($_POST['id']) ? $_POST['id'] : exit('Acción no pemitida');
 function pesos($valor)
 {
     return '$ ' . number_format($valor, 0, ',', '.');
@@ -15,10 +15,16 @@ $vigencia = $_SESSION['vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_orden` FROM `ctt_adquisiciones` WHERE `id_adquisicion` = $id_compra LIMIT 1";
+    $sql = "SELECT 
+                `ctt_adquisiciones`.`id_orden`,`pto_cdp`.`id_manu` 
+            FROM `ctt_adquisiciones`
+            LEFT JOIN `pto_cdp` 
+                ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
+            WHERE `id_adquisicion` = $id_adqi LIMIT 1";
     $rs = $cmd->query($sql);
     $adquisicion = $rs->fetch();
-    if ($adquisicion['id_orden'] == '') {
+    $id_orden = $adquisicion['id_orden'];
+    if ($id_orden == '') {
         $sql = "SELECT
                 `ctt_bien_servicio`.`bien_servicio`
                 , `ctt_orden_compra_detalle`.`cantidad`
@@ -31,7 +37,7 @@ try {
                     ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
                 INNER JOIN `ctt_bien_servicio` 
                     ON (`ctt_orden_compra_detalle`.`id_servicio` = `ctt_bien_servicio`.`id_b_s`)
-            WHERE (`ctt_orden_compra`.`id_adq` = $id_compra)";
+            WHERE (`ctt_orden_compra`.`id_adq` = $id_adqi)";
     } else {
         $sql = "SELECT
                 `far_alm_pedido_detalle`.`id_ped_detalle` AS `id_detalle`
@@ -44,7 +50,7 @@ try {
                 `far_alm_pedido_detalle`
                 INNER JOIN `far_medicamentos` 
                     ON (`far_alm_pedido_detalle`.`id_medicamento` = `far_medicamentos`.`id_med`)
-            WHERE (`far_alm_pedido_detalle`.`id_pedido` = {$adquisicion['id_orden']})";
+            WHERE (`far_alm_pedido_detalle`.`id_pedido` = {$id_orden})";
     }
     $rs = $cmd->query($sql);
     $oferta = $rs->fetchAll();
@@ -72,9 +78,9 @@ try {
                 `ctt_clasificacion_bn_sv`
                 LEFT JOIN  `tb_codificacion_unspsc`
                 ON (`ctt_clasificacion_bn_sv`.`cod_unspsc` = `tb_codificacion_unspsc`.`codigo`)
-            WHERE `ctt_clasificacion_bn_sv`.`id_b_s` IN($cod)";
+            WHERE `ctt_clasificacion_bn_sv`.`id_b_s` IN($cod) AND `ctt_clasificacion_bn_sv`.`vigencia` = '$vigencia'";
     $rs = $cmd->query($sql);
-    $codigo_servicio = $rs->fetchAll();
+    $codigo_servicio = $rs->fetch();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -97,7 +103,7 @@ try {
                 ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
             INNER JOIN `tb_area_c` 
                 ON (`ctt_adquisiciones`.`id_area` = `tb_area_c`.`id_area`)
-            WHERE `id_adquisicion` = '$id_compra' LIMIT 1";
+            WHERE `id_adquisicion` = '$id_adqi' LIMIT 1";
     $rs = $cmd->query($sql);
     $compra = $rs->fetch();
     $cmd = null;
@@ -114,7 +120,7 @@ try {
             FROM
                 `ctt_escala_honorarios`
                 INNER JOIN`pto_cargue`
-                ON (`ctt_escala_honorarios`.`cod_pptal` = `pto_cargue`.`cod_pptal`)
+                ON (`ctt_escala_honorarios`.`cod_pptal` = `pto_cargue`.`id_cargue`)
             WHERE `ctt_escala_honorarios`.`id_tipo_b_s` = $tipo_bn AND `ctt_escala_honorarios`.`vigencia` = '$vigencia'";
     $rs = $cmd->query($sql);
     $cod_cargue = $rs->fetch();
@@ -141,18 +147,20 @@ try {
                 , `ctt_estudios_previos`.`describe_valor`
                 , `tb_forma_pago_compras`.`descripcion`
                 , `ctt_estudios_previos`.`id_supervisor`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
             FROM
                 `ctt_estudios_previos`
             INNER JOIN `tb_forma_pago_compras` 
                 ON (`ctt_estudios_previos`.`id_forma_pago` = `tb_forma_pago_compras`.`id_form_pago`)
-            WHERE `id_compra` = '$id_compra'";
+            LEFT JOIN `tb_terceros` 
+                ON (`ctt_estudios_previos`.`id_supervisor` = `tb_terceros`.`id_tercero_api`)
+            WHERE `id_compra` = '$id_adqi'";
     $rs = $cmd->query($sql);
     $estudio_prev = $rs->fetch();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$id_ter_sup = $estudio_prev['id_supervisor'];
-$terceros = getTerceros($id_ter_sup, $cmd);
 $cmd = null;
 $est_prev = $estudio_prev['id_est_prev'];
 try {
@@ -184,16 +192,22 @@ require_once '../../../vendor/autoload.php';
 
 use PhpOffice\PhpWord\TemplateProcessor;
 
+$servicio = $id_orden == '' ? $oferta[0]['bien_servicio'] : 'XXXXXXXXX';
+$cdp = $adquisicion['id_manu'] == '' ? 'XXXXXXXXX' : $vigencia . str_pad($adquisicion['id_manu'], 6, "0", STR_PAD_LEFT);
 $meses = ['', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 $fecI = explode('-', $estudio_prev['fec_ini_ejec']);
 $fecF = explode('-', $estudio_prev['fec_fin_ejec']);
 $fecha = mb_strtoupper($fecI[2] . ' de ' . $meses[intval($fecI[1])] . ' de ' . $fecI[0]);
+$letras = new NumberFormatter("es", NumberFormatter::SPELLOUT);
+$diaI = $fecI[2] == '01' ? 'PRIMERO' : mb_strtoupper($letras->format($fecI[2]));
+$diaF = $fecF[2] == '01' ? 'PRIMERO' : mb_strtoupper($letras->format($fecF[2]));
+$fecI_let =  $diaI . ' (' . $fecI[2] . ')' . ' DE ' . mb_strtoupper($meses[intval($fecI[1])]) . ' DE ' . $fecI[0];
+$fecF_let = $diaF . ' (' . $fecF[2] . ')' . ' DE ' . mb_strtoupper($meses[intval($fecF[1])]) . ' DE ' . $fecF[0];
 $valor = $estudio_prev['val_contrata'];
 $val_num = pesos($valor);
 $objeto = mb_strtoupper($compra['objeto']);
-$supervisor = $supervisor_res[0]['nom_tercero'];
-$supervisor = $id_ter_sup == '' ? 'PENDIENTE' : $supervisor;
-$letras = new NumberFormatter("es", NumberFormatter::SPELLOUT);
+$supervisor = $estudio_prev['nom_tercero'];
+$supervisor = $estudio_prev['id_supervisor'] == '' ? 'PENDIENTE' : $supervisor;
 $val_letras = str_replace('-', '', mb_strtoupper($letras->format($valor, 2)));
 $start = new DateTime($estudio_prev['fec_ini_ejec']);
 $end = new DateTime($estudio_prev['fec_fin_ejec']);
@@ -262,9 +276,9 @@ foreach ($valores as $va) {
     $describ_val[] = ['describ_val' => $va];
 }
 
-$segmento = !empty($codigo_servicio) ? substr($codigo_servicio['codigo'], 0, 2) : 'XXX';
-$familia = !empty($codigo_servicio) ? substr($codigo_servicio['codigo'], 0, 4) : 'XXX';
-$clase = !empty($codigo_servicio) ? substr($codigo_servicio['codigo'], 0, 6) : 'XXX';
+$segmento = !empty($codigo_servicio) ? ($codigo_servicio['codigo'] != '' ? substr($codigo_servicio['codigo'], 0, 2) : 'XX') : 'XX';
+$familia = !empty($codigo_servicio) ? ($codigo_servicio['codigo'] != '' ? substr($codigo_servicio['codigo'], 0, 4) : 'XXXX') : 'XXXX';
+$clase = !empty($codigo_servicio) ? ($codigo_servicio['codigo'] != '' ? substr($codigo_servicio['codigo'], 0, 6) : 'XXXXXX') : 'XXXXXX';
 if (!empty($cod_cargue)) {
     $rubro = $cod_cargue['id_pto_cargue'] . '-' . $cod_cargue['nom_rubro'];
 } else {
@@ -293,37 +307,41 @@ if (!empty($oferta)) {
         'val_unid' => 'XXX'
     ];
 }
-if ($compra['id_area'] == '5') {
-    $docx = 'plantilla_est_prev_salud.docx';
-} else {
-    $docx = 'plantilla_est_prev.docx';
-}
+
+$docx = 'plantilla_est_prev_taminango.docx';
+
 $plantilla = new TemplateProcessor($docx);
+/*
 if ($compra['id_area'] == '5') {
     $plantilla->cloneRowAndSetValues('req_min', $req_min);
     $plantilla->cloneRowAndSetValues('garantia', $garantia);
     $plantilla->cloneRowAndSetValues('describ_val', $describ_val);
-}
-$plantilla->setValue('proyecto', $proyecto);
-$plantilla->setValue('seg', $segmento);
-$plantilla->setValue('flia', $familia);
-$plantilla->setValue('clas', $clase);
-$plantilla->cloneBlock('necesidades', 0, true, false, $necesidad);
-$plantilla->cloneRowAndSetValues('actividad', $actividad);
-$plantilla->cloneRowAndSetValues('producto', $producto);
-$plantilla->cloneRowAndSetValues('obligacion', $obligacion);
-$plantilla->cloneRowAndSetValues('unspsc', $listServ);
-$plantilla->cloneBlock('forma_pago', 0, true, false, $pago);
-$plantilla->setValue('rubro', $rubro);
-$plantilla->setValue('nombre_rubro', $cod_cargue['nom_rubro']);
-$plantilla->setValue('cod_rubro', $cod_cargue['id_pto_cargue']);
-$plantilla->setValue('fecha', $fecha);
-$plantilla->setValue('val_num', $val_num);
+}*/
+$plantilla->setValue('servicio', $servicio);
+$plantilla->setValue('cdp', $cdp);
+$plantilla->cloneRowAndSetValues('necesidad', $necesidad);
 $plantilla->setValue('objeto', $objeto);
-$plantilla->setValue('supervisor', $supervisor);
+$plantilla->setValue('val_num', $val_num);
 $plantilla->setValue('val_letras', $val_letras);
-$plantilla->setValue('plazo', $plazo);
-
+$plantilla->cloneRowAndSetValues('actividad', $actividad);
+$plantilla->setValue('inicia', $fecI_let);
+$plantilla->setValue('termina', $fecF_let);
+if (false) {
+    $plantilla->setValue('proyecto', $proyecto);
+    $plantilla->setValue('seg', $segmento);
+    $plantilla->setValue('flia', $familia);
+    $plantilla->setValue('clas', $clase);
+    $plantilla->cloneBlock('necesidades', 0, true, false, $necesidad);
+    $plantilla->cloneRowAndSetValues('producto', $producto);
+    $plantilla->cloneRowAndSetValues('obligacion', $obligacion);
+    $plantilla->cloneRowAndSetValues('unspsc', $listServ);
+    $plantilla->cloneBlock('forma_pago', 0, true, false, $pago);
+    $plantilla->setValue('rubro', $rubro);
+    $plantilla->setValue('nombre_rubro', $cod_cargue['nom_rubro']);
+    $plantilla->setValue('cod_rubro', $cod_cargue['id_pto_cargue']);
+    $plantilla->setValue('fecha', $fecha);
+    $plantilla->setValue('supervisor', $supervisor);
+}
 $plantilla->saveAs('estudios_previos.docx');
 header("Content-Disposition: attachment; Filename=estudios_previos.docx");
 echo file_get_contents('estudios_previos.docx');
