@@ -31,24 +31,15 @@ try {
             $fec_traslado = $_POST['txt_fec_traslado'];
             $hor_traslado = $_POST['txt_hor_traslado'];
             $detalle = $_POST['txt_det_traslado'];
+            $id_sede_origen = $_POST['id_sede_origen'];
+            $id_bodega_origen = $_POST['id_bodega_origen'];
+            $id_sede_destino = $_POST['id_sede_destino'];
+            $id_bodega_destino = $_POST['id_bodega_destino'];
 
-             //Verifica si los datos estas activos o bloqueados en el formulario
-             if (isset($_POST['sl_sede_origen'])){
-                $id_sede_origen = $_POST['sl_sede_origen'];
-                $id_bodega_origen = $_POST['sl_bodega_origen'];
-                $id_sede_destino = $_POST['sl_sede_destino'];
-                $id_bodega_destino = $_POST['sl_bodega_destino'];
-            }else{
-                $sql = "SELECT id_sede_origen,id_bodega_origen,id_sede_destino,id_bodega_destino FROM far_traslado WHERE id_traslado=" . $id;
-                $rs = $cmd->query($sql);
-                $obj_traslado = $rs->fetch();
-                $id_sede_origen = $obj_traslado['id_sede_origen'];    
-                $id_bodega_origen = $obj_traslado['id_bodega_origen'];                
-                $id_sede_destino = $obj_traslado['id_sede_destino'];    
-                $id_bodega_destino = $obj_traslado['id_bodega_destino'];                
-            }
+            if($id_bodega_origen != $id_bodega_destino){        
+                
+                $cmd->beginTransaction();
 
-            if($id_bodega_origen != $id_bodega_destino){
                 if ($id == -1) {                
                     $sql = "INSERT INTO far_traslado(fec_traslado,hor_traslado,id_sede_origen,id_bodega_origen,
                             id_sede_destino,id_bodega_destino,detalle,val_total,id_usr_crea,fec_creacion,estado)
@@ -84,7 +75,102 @@ try {
                     } else {
                         $res['mensaje'] = 'Solo puede Modificar Traslados en estado Pendiente';
                     }
-                }    
+                }  
+
+                //Generar el traslado en base al pedido
+                $generar_traslado = $_POST['generar_traslado'];                
+
+                if ($res['mensaje'] == 'ok' && $generar_traslado == 1){
+
+                    $id_pedido = $_POST['txt_id_pedido'];
+                    $id_traslado = $res['id'];
+
+                    $sql = 'SELECT PD.id_ped_detalle,PD.id_medicamento,PD.cantidad,
+                                FM.val_promedio,FM.cod_medicamento,FM.nom_medicamento
+                            FROM far_pedido_detalle AS PD
+                            INNER JOIN far_medicamentos AS FM ON (FM.id_med = PD.id_medicamento) 
+                            WHERE PD.id_pedido=' . $id_pedido;
+                    $rs = $cmd->query($sql);
+                    $objs = $rs->fetchAll();
+
+                    $fec_actual = date('Y-m-d');
+                    $sql = "SELECT id_lote,existencia 
+                            FROM far_medicamento_lote 
+                            WHERE id_med=:id_med AND existencia>=0 AND id_bodega=$id_bodega_origen AND estado=1 AND fec_vencimiento>='$fec_actual' 
+                            ORDER BY fec_vencimiento,existencia";
+                    $rs1 = $cmd->prepare($sql);
+                    $lotes = array();
+
+                    foreach ($objs as $obj) {
+                        $rs1->bindParam(':id_med', $obj['id_medicamento']);
+                        $rs1->execute();
+                        $obj_lotes = $rs1->fetchAll();
+                        $cantidad = $obj['cantidad'];
+                        $val_promedio = $obj['val_promedio'];
+                        $id_detalle = $obj['id_ped_detalle'];
+
+                        if (count($obj_lotes) >= 1) {
+                            $i = 0;
+                            while ($cantidad >= 1) {
+                                if (!isset($obj_lotes[$i])) {
+                                    break;
+                                }
+                                $id_lote = $obj_lotes[$i]['id_lote'];
+                                $cantidad_lote = $obj_lotes[$i]['existencia'];
+
+                                $q = 0;
+                                if ($cantidad_lote >= $cantidad) {
+                                    $q = $cantidad;
+                                    $cantidad = 0;
+                                } else {
+                                    $q = $cantidad_lote;
+                                    $cantidad = $cantidad - $cantidad_lote;
+                                }
+                                $lotes[] = array('id_lote' => $id_lote, 'cantidad' => (int) $q, 'val_promedio' => $val_promedio, 'id_detalle' => $id_detalle);
+                                $i++;
+                            }
+
+                            if ($cantidad >= 1) {/* Completar la cantidad cuando ya no hay mas lotes en el ultimo lote encontrado */
+                                $index = count($lotes) - 1;
+                                $id_lote = $lotes[$index]['id_lote'];
+                                $q = $lotes[$index]['cantidad'] + $cantidad;
+                                $lotes[$index] = array('id_lote' => $id_lote, 'cantidad' => (int) $q, 'val_promedio' => $val_promedio, 'id_detalle' => $id_detalle);
+                            }
+                        } else {
+                            if ($res['mensaje'] == 'ok'){
+                                $res['mensaje'] = 'Los Artículos no tienen lotes disponibles para generar el traslado: ' . $obj['cod_medicamento'] . '-' . $obj['nom_medicamento'];
+                            } else {
+                                $res['mensaje'] .= ', ' . $obj['cod_medicamento'] . '-' . $obj['nom_medicamento'];
+                            }    
+                        }
+                    }                    
+
+                    if ($res['mensaje'] == 'ok'){
+                        $sql = "INSERT INTO far_traslado_detalle(id_traslado,id_lote_origen,cantidad,valor,id_ped_detalle) 
+                                VALUES (:id_traslado,:id_loteorigen,:cantidad,:val_promedio,:id_detalle)";
+                        $rs2 = $cmd->prepare($sql);
+                        foreach ($lotes as $lt) {
+                            if ($lt['cantidad'] > 0) {
+                                $rs2->bindParam(':id_traslado', $id_traslado);
+                                $rs2->bindParam(':id_loteorigen', $lt['id_lote']);
+                                $rs2->bindParam(':cantidad', $lt['cantidad']);
+                                $rs2->bindParam(':val_promedio', $lt['val_promedio']);
+                                $rs2->bindParam(':id_detalle', $lt['id_detalle']);
+                                $rs2->execute();
+                            }
+                        }
+
+                        $sql = "UPDATE far_traslado SET val_total=(SELECT SUM(valor*cantidad) FROM far_traslado_detalle WHERE id_traslado=$id_traslado) WHERE id_traslado=$id_traslado";
+                        $rs = $cmd->query($sql);
+                    }    
+                }
+
+                if ($res['mensaje'] == 'ok'){
+                    $cmd->commit();
+                } else {
+                    $cmd->rollBack();
+                }
+
             }else {
                 $res['mensaje'] = 'La Bodega que Solicita y la Bodega Proveedora deben ser diferentes';    
             } 

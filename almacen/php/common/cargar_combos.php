@@ -115,7 +115,7 @@ function bodegas_usuario($cmd, $titulo = '', $idsede = 0, $id = 0)
             $rs = $cmd->query($sql);
             $objs = $rs->fetchAll();
             foreach ($objs as $obj) {
-                if ($obj['id_bodega']  == $id  || count($objs) == 1) {
+                if ($obj['id_bodega']  == $id) {
                     echo '<option value="' . $obj['id_bodega'] . '" selected="selected">' . $obj['nombre'] . '</option>';
                 } else {
                     echo '<option value="' . $obj['id_bodega'] . '">' . $obj['nombre'] . '</option>';

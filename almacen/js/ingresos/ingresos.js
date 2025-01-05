@@ -96,6 +96,9 @@
         }
     });
 
+    /* ---------------------------------------------------
+    INGRESO EN BASE A UN PEDIDO
+    -----------------------------------------------------*/
     // Activar campos para Orden de Compra y seleccionar el pedido de orden de compra
     $('#divForms').on("change", "#sl_tip_ing", function() {
         if ($(this).find('option:selected').attr('data-ordcom') == 1) {
@@ -139,6 +142,34 @@
         $('#divModalBus').modal('hide');
     });
 
+    $('#divModalBus').on('click', '#tb_pedidos_ing .btn_imprimir', function() {
+        let id = $(this).attr('value');
+        $.post("../pedidos_alm/imp_pedido.php", { id: id }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
+
+    //Imprimit el Pedido
+    $('#divForms').on("click", "#btn_imprime_pedido", function() {
+        let id = $('#txt_id_pedido').val();
+        if (id) {
+            $.post("../pedidos_alm/imp_pedido.php", { id: id }, function(he) {
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
+            });
+        }
+    });
+
+    /* ---------------------------------------------------
+    ENCABEZADO DE UN INGRESO
+    -----------------------------------------------------*/
     //Editar un registro Orden Ingreso
     $('#tb_ingresos').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');

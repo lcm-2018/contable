@@ -18,7 +18,7 @@ $id_pedido = isset($_POST['id_pedido']) && $_POST['id_pedido'] ? $_POST['id_pedi
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h7 style="color: white;">ARTICULOS DEL PEDIDO DE ORDEN DE COMPRA</h7>
+            <h7 style="color: white;">ARTICULOS DEL PEDIDO DE ALMACÉN - ORDEN DE COMPRA</h7>
         </div>
         <div class="px-2">
 

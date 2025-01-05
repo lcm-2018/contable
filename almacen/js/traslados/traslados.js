@@ -94,14 +94,6 @@
     });
     $('#sl_seddes_filtro').trigger('change');
 
-    $('#divForms').on("change", "#sl_sede_origen", function() {
-        $('#sl_bodega_origen').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), }, function() {});
-    });
-
-    $('#divForms').on("change", "#sl_sede_destino", function() {
-        $('#sl_bodega_destino').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), todas: true }, function() {});
-    });
-
     //Buascar registros de traslados
     $('#btn_buscar_filtro').on("click", function() {
         $('.is-invalid').removeClass('is-invalid');
@@ -112,6 +104,101 @@
         if (e.keyCode == 13) {
             reloadtable('tb_traslados');
         }
+    });
+
+    /* ---------------------------------------------------
+    TRASLADO EN BASE A UN PEDIDO
+    -----------------------------------------------------*/
+    //Seleccionar un Pedido para hacer el traslado
+    $('#divForms').on("dblclick", "#txt_des_pedido", function() {
+        $.post("buscar_pedidos_frm.php", function(he) {
+            $('#divTamModalBus').removeClass('modal-sm');
+            $('#divTamModalBus').removeClass('modal-lg');
+            $('#divTamModalBus').addClass('modal-xl');
+            $('#divModalBus').modal('show');
+            $("#divFormsBus").html(he);
+        });
+    });
+
+    $('#divModalBus').on('dblclick', '#tb_pedidos_tra tr', function() {
+        let data = $('#tb_pedidos_tra').DataTable().row(this).data();
+        $('#txt_id_pedido').val(data.id_pedido);
+        $('#txt_des_pedido').val(data.detalle + '(' + data.fec_pedido + ')');
+
+        if (data.id_pedido) {
+            $('#sl_sede_origen').val(data.id_sede_origen).prop('disabled', true);
+            $('#id_sede_origen').val(data.id_sede_origen);
+            $('#sl_bodega_origen').load('../common/cargar_bodegas_usuario.php', { id_sede: data.id_sede_origen }, function() {
+                $(this).val(data.id_bodega_origen).prop('disabled', true);
+                $('#id_bodega_origen').val(data.id_bodega_origen);
+            });
+
+            $('#sl_sede_destino').val(data.id_sede_destino).prop('disabled', true);
+            $('#id_sede_destino').val(data.id_sede_destino);
+            $('#sl_bodega_destino').load('../common/cargar_bodegas_usuario.php', { id_sede: data.id_sede_destino, titulo: '', todas: true }, function() {
+                $(this).val(data.id_bodega_destino).prop('disabled', true);
+                $('#id_bodega_destino').val(data.id_bodega_destino);
+            });
+        }
+        $('#divModalBus').modal('hide');
+    });
+
+    $('#divModalBus').on('click', '#tb_pedidos_tra .btn_imprimir', function() {
+        let id = $(this).attr('value');
+        $.post("../pedidos_bod/imp_pedido.php", { id: id }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
+
+    $('#divForms').on("click", "#btn_cancelar_pedido", function() {
+        let table = $('#tb_traslados_detalles').DataTable();
+        let filas = table.rows().count();
+        if (filas == 0) {
+            $('#txt_id_pedido').val('');
+            $('#txt_des_pedido').val('');
+            $('#sl_sede_origen').prop('disabled', false);
+            $('#sl_bodega_origen').prop('disabled', false);
+            $('#sl_sede_destino').prop('disabled', false);
+            $('#sl_bodega_destino').prop('disabled', false);
+        }
+    });
+
+    //Imprimit el Pedido
+    $('#divForms').on("click", "#btn_imprime_pedido", function() {
+        let id = $('#txt_id_pedido').val();
+        if (id) {
+            $.post("../pedidos_bod/imp_pedido.php", { id: id }, function(he) {
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
+            });
+        }
+    });
+
+    /* ---------------------------------------------------
+    ENCABEZADO DE UN TRASLADO
+    -----------------------------------------------------*/
+
+    $('#divForms').on("change", "#sl_sede_origen", function() {
+        $('#sl_bodega_origen').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val() }, function() {});
+        $('#id_sede_origen').val($('#sl_sede_origen').val());
+    });
+    $('#divForms').on("change", "#sl_bodega_origen", function() {
+        $('#id_bodega_origen').val($('#sl_bodega_origen').val());
+    });
+
+    $('#divForms').on("change", "#sl_sede_destino", function() {
+        $('#sl_bodega_destino').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), todas: true }, function() {});
+        $('#id_sede_destino').val($('#sl_sede_destino').val());
+    });
+    $('#divForms').on("change", "#sl_bodega_destino", function() {
+        $('#id_bodega_destino').val($('#sl_bodega_destino').val());
     });
 
     //Editar un registro Traslado
@@ -126,8 +213,24 @@
 
     //Guardar registro Traslado
     $('#divForms').on("click", "#btn_guardar", function() {
-        $('.is-invalid').removeClass('is-invalid');
+        let table = $('#tb_traslados_detalles').DataTable();
+        let filas = table.rows().count();
+        let id_pedido = $('#txt_id_pedido').val();
 
+        if (id_pedido && filas == 0) {
+            confirmar_proceso_msg('traslados_pedido', 'Desea Generar el Traslado en base al Pedido ' + id_pedido);
+        } else {
+            guardar_traslado(0);
+        }
+    });
+
+    $('#divModalConfDel').on("click", "#traslados_pedido", function() {
+        $('#divModalConfDel').modal('hide');
+        guardar_traslado(1);
+    });
+
+    function guardar_traslado(generar_traslado) {
+        $('.is-invalid').removeClass('is-invalid');
         var error = verifica_vacio($('#sl_sede_origen'));
         error += verifica_vacio($('#sl_bodega_origen'));
         error += verifica_vacio($('#sl_sede_destino'));
@@ -147,11 +250,13 @@
                     type: 'POST',
                     url: 'editar_traslados.php',
                     dataType: 'json',
-                    data: data + "&oper=add"
+                    data: data + "&oper=add" + '&generar_traslado=' + generar_traslado
                 }).done(function(r) {
                     if (r.mensaje == 'ok') {
                         let pag = ($('#id_traslado').val() == -1) ? 0 : $('#tb_traslados').DataTable().page.info().page;
                         reloadtable('tb_traslados', pag);
+                        if (generar_traslado == 1) reloadtable('tb_traslados_detalles');
+
                         $('#id_traslado').val(r.id);
                         $('#txt_ide').val(r.id);
 
@@ -169,7 +274,7 @@
                 });
             }
         }
-    });
+    };
 
     //Borrar un registro Traslado
     $('#tb_traslados').on('click', '.btn_eliminar', function() {

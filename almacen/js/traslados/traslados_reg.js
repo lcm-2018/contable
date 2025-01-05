@@ -54,11 +54,15 @@
                 $('#sl_bodega_origen').prop('disabled', true);
                 $('#sl_sede_destino').prop('disabled', true);
                 $('#sl_bodega_destino').prop('disabled', true);
+                $('#txt_des_pedido').prop('disabled', true);
+                $('#btn_cancelar_pedido').prop('disabled', true);
             } else {
                 $('#sl_sede_origen').prop('disabled', false);
                 $('#sl_bodega_origen').prop('disabled', false);
                 $('#sl_sede_destino').prop('disabled', false);
                 $('#sl_bodega_destino').prop('disabled', false);
+                $('#txt_des_pedido').prop('disabled', false);
+                $('#btn_cancelar_pedido').prop('disabled', false);
             }
         });
 

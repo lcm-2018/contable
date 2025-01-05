@@ -116,9 +116,19 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <input type="text" class="form-control form-control-sm" id="txt_id_pedido" name="txt_id_pedido" class="small" value="<?php echo $obj['id_pedido'] ?>" readonly="readonly">
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="txt_des_pedido" class="small">Pedido para Orden de Coampra</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_des_pedido" name="txt_des_pedido" class="small" value="<?php echo $obj['des_pedido'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Pedido">
-                    </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-11">
+                                <label for="txt_des_pedido" class="small">Pedido de Almacén - Orden de Coampra</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_des_pedido" name="txt_des_pedido" class="small" value="<?php echo $obj['des_pedido'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Pedido">                        
+                            </div>                    
+                            <div class="form-group col-md-1">            
+                                <label for="txt_des_pedido" class="small">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_imprime_pedido" class="btn btn-outline-success btn-sm" title="Imprimir Pedido">
+                                    <span class="fas fa-print" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>    
+                        </div>    
+                    </div>    
                 </div>    
                 <div class="form-row">     
                     <div class="form-group col-md-12">
