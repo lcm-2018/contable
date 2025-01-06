@@ -100,7 +100,7 @@ try {
             <td>Bodega</td>
             <td>Tipo de Egreso</td>
             <td colspan="2">Tercero</td>
-            <td colspan="2">Centro Costo</td>
+            <td colspan="2">Dependencia</td>
         </tr>
         <tr>
             <td><?php echo $obj_e['nom_sede']; ?></td>

@@ -33,19 +33,11 @@ try {
             $id_tipegr = $_POST['sl_tip_egr'];
             $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;
             $id_cencosto = $_POST['sl_centrocosto'] ? $_POST['sl_centrocosto'] : 0;
+            $id_sede = $_POST['id_sede_egr'];
+            $id_bodega = $_POST['id_bodega_egr'];                
             $detalle = $_POST['txt_det_egr'];
-
-            //Verifica si los datos estas activos o bloqueados en el formulario
-            if (isset($_POST['sl_sede_egr'])){
-                $id_sede = $_POST['sl_sede_egr'];
-                $id_bodega = $_POST['sl_bodega_egr'];                
-            }else{
-                $sql = "SELECT id_sede,id_bodega FROM far_orden_egreso WHERE id_egreso=" . $id;
-                $rs = $cmd->query($sql);
-                $obj_egreso = $rs->fetch();
-                $id_sede = $obj_egreso['id_sede'];    
-                $id_bodega = $obj_egreso['id_bodega'];                
-            }
+            
+            $cmd->beginTransaction();
 
             if ($id == -1) {
                 $sql = "INSERT INTO far_orden_egreso(fec_egreso,hor_egreso,id_tipo_egreso,
@@ -83,6 +75,100 @@ try {
                 } else {
                     $res['mensaje'] = 'Solo puede Modificar Ordenes de Egreso en estado Pendiente';
                 }
+            }
+
+            //Generar el traslado en base al pedido
+            $generar_egreso = $_POST['generar_egreso'];                
+
+            if ($res['mensaje'] == 'ok' && $generar_egreso == 1){
+
+                $id_pedido = $_POST['txt_id_pedido'];
+                $id_egreso = $res['id'];
+
+                $sql = 'SELECT PD.id_ped_detalle,PD.id_medicamento,PD.cantidad,
+                            FM.val_promedio,FM.cod_medicamento,FM.nom_medicamento
+                        FROM far_cec_pedido_detalle AS PD
+                        INNER JOIN far_medicamentos AS FM ON (FM.id_med = PD.id_medicamento) 
+                        WHERE PD.id_pedido=' . $id_pedido;
+                $rs = $cmd->query($sql);
+                $objs = $rs->fetchAll();
+
+                $fec_actual = date('Y-m-d');
+                $sql = "SELECT id_lote,existencia 
+                        FROM far_medicamento_lote 
+                        WHERE id_med=:id_med AND existencia>=0 AND id_bodega=$id_bodega AND estado=1 AND fec_vencimiento>='$fec_actual' 
+                        ORDER BY fec_vencimiento,existencia";
+                $rs1 = $cmd->prepare($sql);
+                $lotes = array();
+
+                foreach ($objs as $obj) {
+                    $rs1->bindParam(':id_med', $obj['id_medicamento']);
+                    $rs1->execute();
+                    $obj_lotes = $rs1->fetchAll();
+                    $cantidad = $obj['cantidad'];
+                    $val_promedio = $obj['val_promedio'];
+                    $id_detalle = $obj['id_ped_detalle'];
+
+                    if (count($obj_lotes) >= 1) {
+                        $i = 0;
+                        while ($cantidad >= 1) {
+                            if (!isset($obj_lotes[$i])) {
+                                break;
+                            }
+                            $id_lote = $obj_lotes[$i]['id_lote'];
+                            $cantidad_lote = $obj_lotes[$i]['existencia'];
+
+                            $q = 0;
+                            if ($cantidad_lote >= $cantidad) {
+                                $q = $cantidad;
+                                $cantidad = 0;
+                            } else {
+                                $q = $cantidad_lote;
+                                $cantidad = $cantidad - $cantidad_lote;
+                            }
+                            $lotes[] = array('id_lote' => $id_lote, 'cantidad' => (int) $q, 'val_promedio' => $val_promedio, 'id_detalle' => $id_detalle);
+                            $i++;
+                        }
+
+                        if ($cantidad >= 1) {/* Completar la cantidad cuando ya no hay mas lotes en el ultimo lote encontrado */
+                            $index = count($lotes) - 1;
+                            $id_lote = $lotes[$index]['id_lote'];
+                            $q = $lotes[$index]['cantidad'] + $cantidad;
+                            $lotes[$index] = array('id_lote' => $id_lote, 'cantidad' => (int) $q, 'val_promedio' => $val_promedio, 'id_detalle' => $id_detalle);
+                        }
+                    } else {
+                        if ($res['mensaje'] == 'ok'){
+                            $res['mensaje'] = 'Los Artículos no tienen lotes disponibles para generar el Egreso: ' . $obj['cod_medicamento'] . '-' . $obj['nom_medicamento'];
+                        } else {
+                            $res['mensaje'] .= ', ' . $obj['cod_medicamento'] . '-' . $obj['nom_medicamento'];
+                        }    
+                    }
+                }                    
+
+                if ($res['mensaje'] == 'ok'){
+                    $sql = "INSERT INTO far_orden_egreso_detalle(id_egreso,id_lote,cantidad,valor,id_ped_detalle) 
+                            VALUES (:id_egreso,:id_lote,:cantidad,:val_promedio,:id_detalle)";
+                    $rs2 = $cmd->prepare($sql);
+                    foreach ($lotes as $lt) {
+                        if ($lt['cantidad'] > 0) {
+                            $rs2->bindParam(':id_egreso', $id_egreso);
+                            $rs2->bindParam(':id_lote', $lt['id_lote']);
+                            $rs2->bindParam(':cantidad', $lt['cantidad']);
+                            $rs2->bindParam(':val_promedio', $lt['val_promedio']);
+                            $rs2->bindParam(':id_detalle', $lt['id_detalle']);
+                            $rs2->execute();
+                        }
+                    }
+
+                    $sql = "UPDATE far_orden_egresso SET val_total=(SELECT SUM(valor*cantidad) FROM far_orden_egreso_detalle WHERE id_egreso=$id_egreso) WHERE id_egreso=$id_egreso";
+                    $rs = $cmd->query($sql);
+                }    
+            }
+
+            if ($res['mensaje'] == 'ok'){
+                $cmd->commit();
+            } else {
+                $cmd->rollBack();
             }
         }
 

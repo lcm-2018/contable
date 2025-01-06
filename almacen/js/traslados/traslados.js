@@ -189,6 +189,7 @@
         $('#sl_bodega_origen').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val() }, function() {});
         $('#id_sede_origen').val($('#sl_sede_origen').val());
     });
+
     $('#divForms').on("change", "#sl_bodega_origen", function() {
         $('#id_bodega_origen').val($('#sl_bodega_origen').val());
     });
@@ -197,6 +198,7 @@
         $('#sl_bodega_destino').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), todas: true }, function() {});
         $('#id_sede_destino').val($('#sl_sede_destino').val());
     });
+
     $('#divForms').on("change", "#sl_bodega_destino", function() {
         $('#id_bodega_destino').val($('#sl_bodega_destino').val());
     });

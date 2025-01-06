@@ -104,7 +104,7 @@ try {
                 <th>Detalle</th>
                 <th>Tipo Egreso</th>
                 <th>Tercero</th>
-                <th>Centro Costo</th>                                
+                <th>Dependencia</th>                                
                 <th>Sede</th>
                 <th>Bodega</th>
                 <th>Vr. Total</th>

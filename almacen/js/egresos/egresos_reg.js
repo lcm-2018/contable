@@ -52,9 +52,13 @@
             if (rows > 0) {
                 $('#sl_sede_egr').prop('disabled', true);
                 $('#sl_bodega_egr').prop('disabled', true);
+                $('#txt_des_pedido').prop('disabled', true);
+                $('#btn_cancelar_pedido').prop('disabled', true);
             } else {
                 $('#sl_sede_egr').prop('disabled', false);
                 $('#sl_bodega_egr').prop('disabled', false);
+                $('#txt_des_pedido').prop('disabled', false);
+                $('#btn_cancelar_pedido').prop('disabled', false);
             }
         });
 

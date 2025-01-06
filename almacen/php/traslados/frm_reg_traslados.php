@@ -16,7 +16,8 @@ $sql = "SELECT TT.*,
             CASE TT.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado,
             PEDIDO.id_pedido,PEDIDO.des_pedido 
         FROM far_traslado AS TT
-        LEFT JOIN (SELECT TD.id_traslado,PD.id_pedido,PP.detalle AS des_pedido FROM far_traslado_detalle AS TD 
+        LEFT JOIN (SELECT TD.id_traslado,PD.id_pedido,PP.detalle AS des_pedido 
+                    FROM far_traslado_detalle AS TD 
                     INNER JOIN far_pedido_detalle AS PD ON (PD.id_ped_detalle=TD.id_ped_detalle)
                     INNER JOIN far_pedido AS PP ON (PP.id_pedido=PD.id_pedido)
                     GROUP BY TD.id_traslado) AS PEDIDO ON (PEDIDO.id_traslado=TT.id_traslado)    
