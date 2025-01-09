@@ -1966,7 +1966,7 @@ const generaMovimientoCxp = () => {
 						$('#tableMvtoContableDetalle').append(tfootHtml);
 					});
 				} else {
-					mjeError("Error al guardar");
+					mjeError("Error al guardar:" + response.msg);
 				}
 			})
 			.catch((error) => {

@@ -1,6 +1,5 @@
 <?php
 session_start();
-printf('<pre>%s</pre>', var_export($_POST, true));
 if (isset($_POST)) {
     $fecha = $_POST['fecha'];
     $id_pto = $_POST['id_pto'];
@@ -43,8 +42,7 @@ if (isset($_POST)) {
         $query->bindParam(10, $fecha2);
         $query->execute();
         if ($cmd->lastInsertId() > 0) {
-            $id = $cmd->lastInsertId();
-            $response[] = array("value" => 'ok', "id" => $id);
+            echo 'ok';
         } else {
             echo $query->errorInfo()[2];
         }
@@ -58,9 +56,10 @@ if (isset($_POST)) {
         $query->bindParam(":valor", $valorCdp);
         $query->bindParam("id", $id);
         $query->execute();
-        $cmd = null;
-        echo "modificado";
-        $response[] = array("value" => 'no');
+        if ($query->rowCount() > 0) {
+            echo 'ok';
+        } else {
+            echo $query->errorInfo()[2];
+        }
     }
-    echo json_encode($response);
 }

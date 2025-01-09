@@ -14,7 +14,8 @@ if (isset($_POST['search'])) {
                 `tb_sedes`
                 INNER JOIN `tb_municipios` 
                     ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`)
-            WHERE (`tb_municipios`.`nom_municipio` LIKE '%$search%')";
+            WHERE (`tb_municipios`.`nom_municipio` LIKE '%$search%')
+            GROUP BY `tb_sedes`.`id_municipio`";
     $res = $conexion->query($sql);
     if ($res->num_rows > 0) {
         while ($row = $res->fetch_assoc()) {

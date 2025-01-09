@@ -41,13 +41,13 @@ try {
     $formapago = $rs->fetchAll();
     if ($tipo != 4) {
         $sql = "SELECT
-                `ctb_referencia`.`id_cuenta` AS `cuenta`
-                , `ctb_referencia`.`accion`
-            FROM
-                `ctb_doc`
-                INNER JOIN `ctb_referencia` 
-                    ON (`ctb_doc`.`id_ref_ctb` = `ctb_referencia`.`id_ctb_referencia`)
-            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
+                    `ctb_referencia`.`id_cuenta` AS `cuenta`
+                    , `ctb_referencia`.`accion`
+                FROM
+                    `ctb_doc`
+                    INNER JOIN `ctb_referencia` 
+                        ON (`ctb_doc`.`id_ref_ctb` = `ctb_referencia`.`id_ctb_referencia`)
+                WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
         $rs = $cmd->query($sql);
         $cuenta_ctb = $rs->fetch();
     } else {

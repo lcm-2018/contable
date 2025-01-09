@@ -1519,10 +1519,6 @@ var GuardaFormaPago = function () {
 		$('#valor_pag').addClass('is-invalid');
 		$('#valor_pag').focus();
 		mjeError('El valor debe ser mayor a cero');
-	} else if (Number($('#numSaldoDips').val()) <= 0) {
-		$('#divSaldoDisp').addClass('is-invalid');
-		$('#divSaldoDisp').focus();
-		mjeError('El saldo disponible debe ser mayor a cero');
 	} else {
 		var datos = $('#formAddFormaPago').serialize();
 		var url = "datos/registrar/registrar_mvto_registrar_forma_pago.php";

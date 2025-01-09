@@ -20,6 +20,8 @@ try {
                 `ctt_adquisiciones`.`id_adquisicion`
                 , `tb_tipo_compra`.`id_tipo`
                 , `tb_tipo_compra`.`tipo_compra`
+                , `tb_tipo_bien_servicio`.`id_tipo_cotrato`
+                , `ctt_adquisiciones`.`id_tipo_bn_sv`
             FROM
                 `tb_tipo_contratacion`
                 INNER JOIN `tb_tipo_compra` 
@@ -31,6 +33,25 @@ try {
             WHERE `ctt_adquisiciones`.`id_adquisicion` = $id_adq";
     $rs = $cmd->query($sql);
     $tipo_adq = $rs->fetch();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$tp_bs = $tipo_adq['id_tipo_bn_sv'];
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `id_relacion`, `id_formato`
+            FROM
+                `ctt_formatos_doc_rel`
+            WHERE (`id_tipo_bn_sv` = $tp_bs)";
+    $rs = $cmd->query($sql);
+    $formatos = $rs->fetchAll();
+    $posicion = [];
+    foreach ($formatos as $f) {
+        $posicion[$f['id_formato']] = $f['id_relacion'];
+    }
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -804,9 +825,9 @@ if (!empty($adquisicion)) {
                                                             include 'datos/listar/datos_estudio_previo.php';
                                                             if ($adquisicion['estado'] <= 7) {
                                                             ?>
-                                                                <a type="button" class="btn btn-warning btn-sm" id="btnFormatoEstudioPrevio" style="color:white">DESCARGAR FORMATO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
-                                                                <a type="button" class="btn btn-info btn-sm" id="btnMatrizRiesgo" style="color:white">MATRIZ DE RIESGOS&nbsp&nbsp;<span class="fas fa-download fa-lg"></span></a>
-                                                                <a type="button" class="btn btn-primary btn-sm" id="btnAnexos" style="color:white">ANEXOS&nbsp&nbsp;<span class="far fa-copy fa-lg"></span></a>
+                                                                <a type="button" text="<?= isset($posicion[1]) ? $posicion[1] : 0 ?>" class="btn btn-warning btn-sm downloadFormsCtt" id="btnFormatoEstudioPrevio" style="color:white">DESCARGAR FORMATO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
+                                                                <a type="button" class="btn btn-info btn-sm" id="x-x" style="color:white">MATRIZ DE RIESGOS&nbsp&nbsp;<span class="fas fa-download fa-lg"></span></a>
+                                                                <a type="button" text="<?= isset($posicion[2]) ? $posicion[2] : 0 ?>" class="btn btn-primary btn-sm downloadFormsCtt" id="btnAnexos" style="color:white">ANEXOS&nbsp&nbsp;<span class="far fa-copy fa-lg"></span></a>
                                                         <?php }
                                                         } ?>
                                                     </div>
@@ -866,7 +887,7 @@ if (!empty($adquisicion)) {
                                                         }
                                                         if ($adquisicion['estado'] == 9) { ?>
                                                             <a type="button" class="btn btn-warning btn-sm" id="btnFormatoDesigSuper" style="color:white">DESCARGAR FORMATO DESIGNACIÓN DE SUPERVISIÓN&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
-                                                            <a type="button" class="btn btn-success btn-sm" id="btnFormatoContrato" style="color:white">DESCARGAR FORMATO CONTRATO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
+                                                            <a type="button" text="<?= isset($posicion[3]) ? $posicion[3] : 0 ?>" class="btn btn-success btn-sm downloadFormsCtt" id="btnFormatoContrato" style="color:white">DESCARGAR FORMATO CONTRATO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
                                                             <?php if (false) { ?>
                                                                 <a type="button" class="btn btn-success btn-sm" id="btnEnviarActaSupervision" value="<?php echo $adquisicion['id_supervision'] ?>" style="color:white">ENVIAR SUPERVISIÓN&nbsp&nbsp;<span class="fas fa-file-upload fa-lg"></span></a>
                                                         <?php
@@ -984,7 +1005,7 @@ if (!empty($adquisicion)) {
                                                         <?php
                                                         if ($adquisicion['estado'] >= 9) {
                                                         ?>
-                                                            <a type="button" class="btn btn-warning btn-sm" id="btnFormActaInicio" style="color:white">DESCARGAR FORMATO ACTA DE INICIO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
+                                                            <a type="button" text="<?= isset($posicion[4]) ? $posicion[4] : 0 ?>" class="btn btn-warning btn-sm downloadFormsCtt" id="btnFormActaInicio" style="color:white">DESCARGAR FORMATO ACTA DE INICIO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
                                                         <?php
                                                         } else { ?>
                                                             <div class="alert alert-warning" role="alert">

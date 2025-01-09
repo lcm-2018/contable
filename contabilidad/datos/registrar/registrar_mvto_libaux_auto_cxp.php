@@ -1,5 +1,8 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
     header('Location: ../index.php');
     exit();
@@ -18,6 +21,7 @@ $fecha2 = $date->format('Y-m-d H:i:s');
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 $response['status'] = 'error';
+$response['msg'] = '<br>Ningún registro afectado';
 $datosDoc = GetValoresCxP($id_doc, $cmd);
 try {
     $query = "SELECT `id_ctb_libaux` FROM `ctb_libaux` WHERE `id_ctb_doc` = ?";
@@ -232,65 +236,3 @@ if ($acumulador > 0) {
 }
 echo json_encode($response);
 exit();
-if (isset($_POST)) {
-    // Busco en el tipo de bien o servicio que corresponde
-
-    foreach ($datosretencion as $key => $value) {
-        $id_rte = $value['id_causa_retencion'];
-        $credito = $value['valor_retencion'];
-        $id_terceroapi = $value['id_terceroapi'];
-        // consultar el id del tercero refernciado por el id_terceroapi
-        $sql = $cmd->prepare("SELECT id_tercero FROM seg_terceros WHERE id_tercero_api = ? ;");
-        $sql->bindParam(1, $id_terceroapi, PDO::PARAM_INT);
-        $sql->execute();
-        $result = $sql->fetch();
-        $id_tercero = $result['id_tercero'];
-        // Consultar el numero de cuenta para un registro similiar
-        $sql = $cmd->prepare("SELECT cuenta FROM ctb_libaux WHERE id_rte = ? ;");
-        $sql->bindParam(1, $id_rte, PDO::PARAM_INT);
-        $sql->execute();
-        $result = $sql->fetch();
-        $cuenta = $result['cuenta'];
-        $query->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $response[] = array("value" => 'ok');
-        } else {
-            $response[] = array("value" => 'Error del insert');
-            print_r($query->errorInfo()[2]);
-        }
-    }
-    // Liquido el valor de la cuenta por pagar, busco la diferencia debito credito en el libro auxiliar para el documento
-    $sql = $cmd->prepare("SELECT SUM(debito) AS debito, SUM(credito) AS credito FROM ctb_libaux WHERE id_ctb_doc = ? ;");
-    $sql->bindParam(1, $id_doc, PDO::PARAM_INT);
-    $sql->execute();
-    $result = $sql->fetch();
-    $deb = $result['debito'];
-    $cre = $result['credito'];
-    $credito = $deb - $cre;
-    $valor = 0;
-    $id_cc = 0;
-    $id_rte = 0;
-    // buscar id_cta_factura
-    $sql = $cmd->prepare("SELECT id_cta_factura FROM seg_ctb_factura WHERE id_ctb_doc = ? ;");
-    $sql->bindParam(1, $id_doc, PDO::PARAM_INT);
-    $sql->execute();
-    $result = $sql->fetch();
-    $id_fac = $result['id_cta_factura'];
-    // buscar la cuenta asociada al tipo de cuenta por pagar 
-    $sql = $cmd->prepare("SELECT cuenta FROM ctb_libaux WHERE id_tipo_ad = ? AND id_fac >0;");
-    $sql->bindParam(1, $id_tipo_bn_sv, PDO::PARAM_INT);
-    $sql->execute();
-    $result = $sql->fetch();
-    $cuenta = $result['cuenta'];
-    $id_tercero = $id_tercero_ant;
-    $query->execute();
-    if ($cmd->lastInsertId() > 0) {
-        $response[] = array("value" => 'ok');
-    } else {
-        $response[] = array("value" => 'Error del insert');
-        print_r($query->errorInfo()[2]);
-    }
-
-
-    echo json_encode($response);
-}

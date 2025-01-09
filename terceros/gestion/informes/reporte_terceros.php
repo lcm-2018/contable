@@ -20,7 +20,9 @@ try {
 }
 $id_t = [];
 foreach ($terEmpr as $l) {
-    $id_t[] = $l['id_tercero_api'];
+    if ($l['id_tercero_api'] > 0) {
+        $id_t[] = $l['id_tercero_api'];
+    }
 }
 $payload = json_encode($id_t);
 //API URL

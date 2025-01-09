@@ -227,6 +227,42 @@
             "pageLength": -1
         });
         $('#tableBnSv').wrap('<div class="overflow" />');
+        $('#tableFormCtt').DataTable({
+            dom: setdom,
+            buttons: [{
+                //Registar modalidad de contratación
+                action: function (e, dt, node, config) {
+                    $.post("datos/cargar/formatos_ctt.php", function (he) {
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').removeClass('modal-lg');
+                        $('#divTamModalForms').removeClass('modal-sm');
+                        $('#divModalForms').modal('show');
+                        $("#divForms").html(he);
+                    });
+                }
+            }],
+            language: setIdioma,
+            "ajax": {
+                url: 'datos/listar/datos_formatos_ctt.php',
+                type: 'POST',
+                dataType: 'json',
+            },
+            "columns": [
+                { 'data': 'id' },
+                { 'data': 'formato' },
+                { 'data': 'tp_ctt' },
+                { 'data': 'botones' },
+            ],
+            "order": [
+                [0, "asc"]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
+        });
+        $('#tableFormCtt').wrap('<div class="overflow" />');
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
     });
     //Agregar modalidad contratacion
@@ -597,6 +633,9 @@
             $("#divForms").html(he);
         });
     });
+    $('#subirFormatos').on('click', function () {
+        alert('Subir formatos');
+    });
     $('#divModalForms').on('click', '#btnGuardaHomologacion', function () {
         let tipo = $(this).attr('text');
         if ($('#fileHomologacion').val() === '') {
@@ -641,6 +680,95 @@
             });
         }
         return false;
+    });
+
+    $('#divModalForms').on('click', '#btnGuardaFormatoCtt', function () {
+        $('.is-invalid').removeClass('is-invalid');
+        if ($('#slcTipoFormato').val() === '0') {
+            $('#slcTipoFormato').addClass('is-invalid');
+            $('#slcTipoFormato').focus();
+            mjeError('¡Debe seleccionar un tipo de formato!');
+        } else if ($('#slcTipoBnSv').val() === '0') {
+            $('#slcTipoBnSv').addClass('is-invalid');
+            $('#slcTipoBnSv').focus();
+            mjeError('¡Debe seleccionar un tipo de bien o servicio!');
+        } else if ($('#fileContratacion').val() === '') {
+            $('#fileContratacion').addClass('is-invalid');
+            $('#fileContratacion').focus();
+            mjeError('¡Debe elegir un archivo!');
+        } else {
+            let archivo = $('#fileContratacion').val();
+            let ext = archivo.substring(archivo.lastIndexOf(".")).toLowerCase();
+            if (ext !== '.docx') {
+                mjeError('¡Solo se permite documentos .docx!');
+                return false;
+            } else if ($('#fileContratacion')[0].files[0].size > 10485760) {
+                mjeError('¡Documento debe tener un tamaño menor a 10Mb!');
+                return false;
+            }
+            let datos = new FormData();
+            datos.append('fileContratacion', $('#fileContratacion')[0].files[0]);
+            datos.append('slcTipoFormato', $('#slcTipoFormato').val());
+            datos.append('slcTipoBnSv', $('#slcTipoBnSv').val());
+            $('#btnGuardaContratacion').attr('disabled', true);
+            $('#btnGuardaContratacion').html('<i class="fas fa-spinner fa-pulse"></i> Cargando...');
+            $.ajax({
+                type: 'POST',
+                url: 'registrar/new_formato.php',
+                contentType: false,
+                data: datos,
+                processData: false,
+                cache: false,
+                success: function (r) {
+                    $('#btnGuardaContratacion').attr('disabled', false);
+                    $('#btnGuardaContratacion').html('Guardar');
+                    if (r == 'ok') {
+                        $('#tableFormCtt').DataTable().ajax.reload();
+                        $('#divModalForms').modal('hide');
+                        mje('Proceso realizado Correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+        return false;
+    });
+    $('#tableFormCtt').on('click', '.borrar', function () {
+        let id = $(this).attr('value');
+        Swal.fire({
+            title: "¿Confirma que desea eliminar el documento?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'eliminar/del_formato.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            $('#tableFormCtt').DataTable().ajax.reload();
+                            mje('Documento eliminado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    $('#tableFormCtt').on('click', '.descargar', function () {
+        let id = $(this).attr('value');
+        $('<form action="datos/descargar/formato_ctt.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>')
+            .appendTo('body').submit();
+    });
+    $('#btnDownloadVarsCtt').on('click', function () {
+        window.location.href = 'datos/listar/variables_contratacion.php';
     });
     $(document).ready(function () {
         var maxBnSv = 100;

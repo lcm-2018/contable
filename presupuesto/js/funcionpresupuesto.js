@@ -233,7 +233,7 @@
         $("#tableCargaPresupuesto").wrap('<div class="overflow" />');
         //dataTable ejecucion de presupuesto
         let id_ejec = $("#id_pto_ppto").val();
-        $("#tableEjecPresupuesto").DataTable({
+        var tableEjecPresupuesto = $("#tableEjecPresupuesto").DataTable({
             dom: setdom,
             buttons: [
                 {
@@ -269,6 +269,13 @@
             order: [[0, "desc"]],
             pageLength: 25,
         });
+        // Control del campo de búsqueda
+        $('#tableEjecPresupuesto_filter input').unbind(); // Desvinculamos el evento por defecto
+        $('#tableEjecPresupuesto_filter input').bind('keypress', function (e) {
+            if (e.keyCode == 13) { // Si se presiona Enter (código 13)
+                tableEjecPresupuesto.search(this.value).draw(); // Realiza la búsqueda y actualiza la tabla
+            }
+        });
         $("#tableEjecPresupuesto").wrap('<div class="overflow" />');
 
         //dataTable detalle CDP
@@ -301,7 +308,7 @@
         $("#tableEjecCdp").wrap('<div class="overflow" />');
 
         //dataTable ejecucion de presupuesto listado de reistros presupuestales
-        $("#tableEjecPresupuestoCrp").DataTable({
+        var tableEjecPresupuestoCrp = $("#tableEjecPresupuestoCrp").DataTable({
             dom: setdom,
             buttons: [
                 {
@@ -345,6 +352,13 @@
             ],
             order: [[0, "desc"]],
             pageLength: 25,
+        });
+        // Control del campo de búsqueda
+        $('#tableEjecPresupuestoCrp_filter input').unbind(); // Desvinculamos el evento por defecto
+        $('#tableEjecPresupuestoCrp_filter input').bind('keypress', function (e) {
+            if (e.keyCode == 13) { // Si se presiona Enter (código 13)
+                tableEjecPresupuestoCrp.search(this.value).draw(); // Realiza la búsqueda y actualiza la tabla
+            }
         });
         $("#tableEjecPresupuestoCrp").wrap('<div class="overflow" />');
 
@@ -1245,8 +1259,8 @@ $('#divModalForms').on('click', '#registrarModificaPto', function () {
             data: datos,
             success: function (r) {
                 if (r == 'ok') {
-                    var idt = 'tableModificaPresupuesto';
-                    reloadtable(idt);
+                    $('#tableModPresupuesto').DataTable().ajax.reload();
+                    $('#divModalForms').modal('hide');
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html('Registrado correctamente');
                 } else {
@@ -1670,47 +1684,58 @@ function RegDetalleCDPs(boton) {
     var tipoRubro = fila.querySelector('input[name="tipoRubro"]').value;
     var id_rubroCod = fila.querySelector('input[name="id_rubroCod"]').value;
     var id_pto_mod = fila.querySelector('input[name="id_pto_mod"]').value;
+    var fecha = $("#fecha").val();
     if (tipoRubro == '0') {
         mjeError("El rubro no es un detalle...", "Verifique la información registrada");
     } else if (Number(valorDeb) == 0) {
         mjeError("Valor debe ser mayor a cero...", "Verifique la información registrada");
     } else {
-        var datos = new FormData();
-        datos.append('opcion', opcion);
-        datos.append('valorDeb', valorDeb);
-        datos.append('tipoRubro', tipoRubro);
-        datos.append('id_rubroCod', id_rubroCod);
-        datos.append('id_pto_mod', id_pto_mod);
+        consultaSaldoRubro(valorDeb, id_rubroCod, fecha)
+            .then(function (saldo) {
+                if (saldo.status === 'error') {
+                    mjeError("El valor es mayor al saldo del rubro: " + saldo.saldo, "Verifique la información registrada");
+                } else {
+                    var datos = new FormData();
+                    datos.append('opcion', opcion);
+                    datos.append('valorDeb', valorDeb);
+                    datos.append('tipoRubro', tipoRubro);
+                    datos.append('id_rubroCod', id_rubroCod);
+                    datos.append('id_pto_mod', id_pto_mod);
+                    if ($("#valida").length > 0) {
+                        var data = new FormData();
+                        data.append('id_pto', $("#id_pto_presupuestos").val());
+                        data.append('dateFecha', $("#fecha").val());
+                        data.append('numSolicitud', $("#solicitud").val());
+                        data.append('txtObjeto', $("#objeto").val());
+                        data.append('id_adq', $("#id_adq").val());
+                        data.append('id_otro', $("#id_otro").val());
 
-        if ($("#valida").length > 0) {
-            var data = new FormData();
-            data.append('id_pto', $("#id_pto_presupuestos").val());
-            data.append('dateFecha', $("#fecha").val());
-            data.append('numSolicitud', $("#solicitud").val());
-            data.append('txtObjeto', $("#objeto").val());
-            data.append('id_adq', $("#id_adq").val());
-            data.append('id_otro', $("#id_otro").val());
+                        url = "datos/registrar/new_ejecucion_presupuesto.php";
 
-            url = "datos/registrar/new_ejecucion_presupuesto.php";
-
-            fetch(url, {
-                method: "POST",
-                body: data,
-            })
-                .then((response) => response.json())
-                .then((response) => {
-                    if (response.status == "ok") {
-                        var idCdp = response.msg;
-                        datos.append('id_cdp', idCdp);
-                        RegistraDetalle(datos, $('#id_pto_presupuestos').val() + '|' + idCdp);
+                        fetch(url, {
+                            method: "POST",
+                            body: data,
+                        })
+                            .then((response) => response.json())
+                            .then((response) => {
+                                if (response.status == "ok") {
+                                    var idCdp = response.msg;
+                                    datos.append('id_cdp', idCdp);
+                                    RegistraDetalle(datos, $('#id_pto_presupuestos').val() + '|' + idCdp);
+                                } else {
+                                    mjeError(response.msg, "Verifique la información ingresada");
+                                }
+                            });
                     } else {
-                        mjeError(response.msg, "Verifique la información ingresada");
+                        datos.append('id_cdp', $("#id_cdp").val());
+                        RegistraDetalle(datos, 0);
                     }
-                });
-        } else {
-            datos.append('id_cdp', $("#id_cdp").val());
-            RegistraDetalle(datos, 0);
-        }
+                }
+            })
+            .catch(function (error) {
+                console.error("Error al consultar el saldo del rubro: ", error);
+            });
+
 
     }
     function RegistraDetalle(campos, opcion) {
@@ -2208,21 +2233,19 @@ const verHistorial = (boton) => {
     var fila = boton.closest('tr');
     var inputRubroCod = fila.querySelector('input[name="id_rubroCod"]');
     var rubro = inputRubroCod.value;
-    fetch("datos/reportes/form_resumen_rubro.php", {
-        method: "POST",
-        body: JSON.stringify({ rubro: rubro }),
-    })
-        .then((response) => response.text())
-        .then((response) => {
+    var fecha = $("#fecha").val();
+    $.ajax({
+        type: "POST",
+        url: "datos/reportes/form_resumen_rubro.php",
+        data: { rubro: rubro, fecha: fecha },
+        success: function (res) {
             $("#divTamModalPermisos").removeClass("modal-xl");
             $("#divTamModalPermisos").removeClass("modal-lg");
             $("#divTamModalPermisos").addClass("");
             $("#divModalPermisos").modal("show");
-            divTablePermisos.innerHTML = response;
-        })
-        .catch((error) => {
-            console.log("Error:");
-        });
+            divTablePermisos.innerHTML = res;
+        },
+    });
 };
 
 // Ver historial de ejecución del rubro desde CDP
@@ -2271,38 +2294,22 @@ const consultaSaldoCdp = (anno) => {
 };
 
 // Consultar saldo del rubro en modificacion
-const consultaSaldoRubro = (anno) => {
-    let estado = $("#btnIngresos").hasClass("active");
-    let tipo_mod = tipo_doc.value;
-    var guardarButton = document.getElementById("registrarMovDetalle");
-
-    console.log(estado);
-    if (estado == false && tipo_mod != "ADI") {
-        let rubro = id_rubroCod.value;
-        let valor = valorDeb.value;
-        valor = parseFloat(valor.replace(/\,/g, "", ""));
-        fetch("datos/consultar/consultaSaldoCdp.php", {
-            method: "POST",
-            body: JSON.stringify({ vigencia: anno, rubro: rubro }),
-        })
-            .then((response) => response.json())
-            .then((response) => {
-                console.log(response);
-                let saldo = response[0].total;
-                valorDeb.max = response[0].total;
-                if (saldo < valor) {
-                    guardarButton.disabled = true;
-                    mjeError("El saldo del rubro es insuficiente", "");
-                    valorDeb.focus();
-                } else {
-                    guardarButton.disabled = false;
-                }
-            })
-            .catch((error) => {
-                console.log("Error:");
-            });
-    }
-};
+function consultaSaldoRubro(valor, rubro, fecha) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            type: "POST",
+            url: "datos/consultar/consultaSaldoRubro.php",
+            data: { valor: valor, rubro: rubro, fecha: fecha },
+            dataType: "json",
+            success: function (res) {
+                resolve(res);
+            },
+            error: function (err) {
+                reject(err);
+            }
+        });
+    });
+}
 
 // Funcion para realizar el registro presupuestal a un crp
 $("#divForms").on("click", "#btnGestionCRP", function () {

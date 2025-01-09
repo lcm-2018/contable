@@ -49,9 +49,9 @@ try {
                         ON ( `pto_crp`.`id_pto_crp` = `ctb_doc`.`id_crp`)
                     INNER JOIN `pto_cdp` 
                         ON (`pto_crp`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
-                    INNER JOIN `ctt_adquisiciones` 
+                    LEFT JOIN `ctt_adquisiciones` 
                         ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
-                    INNER JOIN `ctt_contratos` 
+                    LEFT JOIN `ctt_contratos` 
                         ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
                 WHERE `ctb_doc`.`id_crp` IS NOT NULL) AS `t1`  
             WHERE  `valor` > `valor_pagado`";

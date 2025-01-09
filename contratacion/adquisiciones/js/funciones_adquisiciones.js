@@ -969,11 +969,6 @@
             $('#numValContrata').addClass('is-invalid');
             $('#divModalError').modal('show');
             $('#divMsgError').html('Valor total del contrato debe ser mayor a cero');
-        } else if ($('#numDS').val() == '') {
-            $('#numDS').focus();
-            $('#numDS').addClass('is-invalid');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Número DC no puede ser vacío');
         } else {
             let validar = false;
             $('.slcCentroCosto').each(function () {
@@ -1104,9 +1099,6 @@
             } else if ($('#slcSupervisor').val() == 0) {
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Debe selecionar un supervisor o elegir "PENDIENTE"');
-            } else if ($('#numDS').val() == '' || parseInt($('#numDS').val()) <= 0) {
-                $('#divModalError').modal('show');
-                $('#divMsgError').html('Debe ingresar un número DS');
             } else if ($('#slcFormPago').val() == 3 && $('#check_3').prop("checked") == false) {
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Para Pago Anticipado debe selecionar Póliza de manejo de anticipo');
@@ -1162,9 +1154,6 @@
         } else if ($('#numValContrata').val() == '' || parseInt($('#numValContrata').val()) <= 0) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Valor de contratación debe ser mayor a cero');
-        } else if ($('#numDS').val() == '' || parseInt($('#numDS').val()) <= 0) {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Número DS debe ser mayor a cero');
         } else if ($('#slcSupervisor').val() == '0') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe seleccionar un supervisor');
@@ -1208,6 +1197,19 @@
         }
         return false;
     });
+    $('.downloadFormsCtt').on('click', function () {
+        let form = $(this).attr('text');
+        let id = $('#id_compra').val();
+        if (form == '0') {
+            mjeError('No se ha cargado un formato para esta documento');
+        } else {
+            $('<form action="soportes/genera_formato.php" method="post">' +
+                '<input type="hidden" name="form" value="' + form + '" />' +
+                '<input type="hidden" name="id_adq" value="' + id + '" />' +
+                '</form>').appendTo('body').submit();
+        }
+    });
+    /*
     $('#btnFormatoEstudioPrevio').on('click', function () {
         let id = $('#id_compra').val();
         $('<form action="soportes/estudios_previos.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
@@ -1220,6 +1222,28 @@
         let id = $('#id_compra').val();
         $('<form action="soportes/anexos.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
     });
+    $('#btnFormatoCompraVenta').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/compraventa.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
+    $('#btnFormatoServicios').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/prestacion_servicios.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
+    $('#btnFormatoDesigSuper').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/designacion_supervisor.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
+    $('#btnFormatoContrato').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/contrato_ps.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
+    $('#btnFormActaInicio').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/acta_inicio.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
+    */
+
     $('#modificarEstPrev').on('click', '.borrar', function () {
         let id = $(this).attr('value');
         let tip = 'EstudPrevio';
@@ -1428,26 +1452,6 @@
             }
         });
         return false;
-    });
-    $('#btnFormatoCompraVenta').on('click', function () {
-        let id = $('#id_compra').val();
-        $('<form action="soportes/compraventa.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
-    });
-    $('#btnFormatoServicios').on('click', function () {
-        let id = $('#id_compra').val();
-        $('<form action="soportes/prestacion_servicios.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
-    });
-    $('#btnFormatoDesigSuper').on('click', function () {
-        let id = $('#id_compra').val();
-        $('<form action="soportes/designacion_supervisor.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
-    });
-    $('#btnFormatoContrato').on('click', function () {
-        let id = $('#id_compra').val();
-        $('<form action="soportes/contrato_ps.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
-    });
-    $('#btnFormActaInicio').on('click', function () {
-        let id = $('#id_compra').val();
-        $('<form action="soportes/acta_inicio.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
     });
     $('#btnCerrarContrato').on('click', function () {
         var id_adq = $('#id_compra').val();

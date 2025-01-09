@@ -13,6 +13,8 @@ insert into `api_demo`.`seg_pais`(`id_pais`,`codigo_pais`,`nombre_pais`) select 
 
 insert  into `ctt_estado_adq`(`id`,`descripcion`) values (1,'INICIAL'),(2,'ORDENADA'),(3,'ENVIADA'),(4,'RECIBIDA'),(5,'SELECCIONADA'),(6,'ESTUDIOS PREVIOS'),(7,'CONTRATACIÓN INICIAL'),(8,'CONTRATO ENVIADO'),(9,'CONTRATO RECIBIDO'),(10,'DESIGNADO SUPERVISION'),(11,'RECIBIDO'),(99,'ANULADO');
 
+insert  into `tb_tipo_compra`(`id_tipo`,`tipo_compra`) values (1,'BIENES'),(2,'SERVICIOS'),(3,'PROYECTOS');
+
 insert  into `tb_tipo_contratacion`(`id_tipo`,`id_tipo_compra`,`tipo_contrato`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`) values (1,2,'PRESTACION DE SERVICIOS',NULL,NULL,NULL,NULL),(2,2,'OTROS SERVICIOS',NULL,NULL,NULL,NULL),(3,1,'SUMINISTRO',1,'2024-08-22 11:22:06',NULL,NULL);
 
 insert  into `tb_tipo_bien_servicio`(`id_tipo_b_s`,`id_tipo_cotrato`,`filtro_adq`,`tipo_bn_sv`,`cta_contable`,`objeto_definido`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`) values (1,3,1,'ELEMENTOS DE CONSUMO',NULL,'SUMINISTRO DE ELEMENTOS DE CONSUMO SOLICITADOS DESDE ALMACÉN',1,'2024-08-22 11:23:21',NULL,NULL),(2,3,2,'ACTIVOS FIJOS',NULL,'SUMINISTRO DE ELEMENTOS DE CONSUMO SOLICITADOS DESDE ALMACÉN',1,'2024-08-22 11:24:10',NULL,NULL);

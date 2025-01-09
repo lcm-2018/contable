@@ -458,50 +458,49 @@ try {
                 }
                 ?>
             </div>
-            <div class="form-row text-center px-4 pt-2">
-                <div class="form-group col-md-6">
-                    <label for="txtDescNec" class="small">Descripción de la necesidad</label>
-                    <textarea name="txtDescNec" id="txtDescNec" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['necesidad']))) ?></textarea>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="txtActEspecificas" class="small">Actividades específicas</label>
-                    <textarea name="txtActEspecificas" id="txtActEspecificas" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['act_especificas']))) ?></textarea>
-                </div>
-            </div>
-            <div class="form-row text-center px-4">
-                <div class="form-group col-md-6">
-                    <label for="txtProdEntrega" class="small">PRODUCTOS A ENTREGAR</label>
-                    <textarea name="txtProdEntrega" id="txtProdEntrega" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['prod_entrega']))) ?></textarea>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="txtObligContratista" class="small">Obligaciones del Contratista</label>
-                    <textarea name="txtObligContratista" id="txtObligContratista" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['obligaciones']))) ?></textarea>
-                </div>
-            </div>
-            <div class="form-row text-center px-4">
-                <div class="form-group col-md-6">
-                    <label for="txtDescValor" class="small">Descripción de valor</label>
-                    <textarea name="txtDescValor" id="txtDescValor" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['describe_valor']))) ?></textarea>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="txtFormPago" class="small">Forma de Pago</label>
-                    <textarea name="txtFormPago" id="txtFormPago" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['forma_pago']))) ?></textarea>
-                </div>
-
-            </div>
-            <div class="form-row text-center px-4">
-                <div class="form-group col-md-6">
-                    <label for="txtReqMinHab" class="small">Req. mínimos Habilitantes</label>
-                    <textarea name="txtReqMinHab" id="txtReqMinHab" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['requisitos']))) ?></textarea>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="txtGarantias" class="small">Garantías Contratación</label>
-                    <textarea name="txtGarantias" id="txtGarantias" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['garantia']))) ?></textarea>
+            <div class="px-4">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link active small text-secondary" id="nav_necesidad-tab" data-toggle="tab" href="#nav_necesidad" role="tab" aria-controls="nav_necesidad" aria-selected="true" title="Descripción de la necesidad">Necesidad</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-actividad-tab" data-toggle="tab" href="#nav-actividad" role="tab" aria-controls="nav-actividad" aria-selected="false">Actividades</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-producto-tab" data-toggle="tab" href="#nav-producto" role="tab" aria-controls="nav-producto" aria-selected="false" title="Productos a entregar">Productos</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-obligacion-tab" data-toggle="tab" href="#nav-obligacion" role="tab" aria-controls="nav-obligacion" aria-selected="false" title="Obligaciones del contratista">Obligaciones</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-valor-tab" data-toggle="tab" href="#nav-valor" role="tab" aria-controls="nav-valor" aria-selected="false" title="Descripción del valor">Valor</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-pago-tab" data-toggle="tab" href="#nav-pago" role="tab" aria-controls="nav-pago" aria-selected="false" title="Forma de Pago">Pago</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-requisito-tab" data-toggle="tab" href="#nav-requisito" role="tab" aria-controls="nav-requisito" aria-selected="false" title="Requisitos mínimos habilitanes">Requisitos</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-garantia-tab" data-toggle="tab" href="#nav-garantia" role="tab" aria-controls="nav-garantia" aria-selected="false" title="Garantías de Contratación">Garantías</a>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav_necesidad" role="tabpanel" aria-labelledby="nav_regTercro-tab">
+                        <textarea name="txtDescNec" id="txtDescNec" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['necesidad']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-actividad" role="tabpanel" aria-labelledby="nav-actividad-tab">
+                        <textarea name="txtActEspecificas" id="txtActEspecificas" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['act_especificas']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-producto" role="tabpanel" aria-labelledby="nav-producto-tab">
+                        <textarea name="txtProdEntrega" id="txtProdEntrega" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['prod_entrega']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-obligacion" role="tabpanel" aria-labelledby="nav-obligacion-tab">
+                        <textarea name="txtObligContratista" id="txtObligContratista" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['obligaciones']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-valor" role="tabpanel" aria-labelledby="nav-valor-tab">
+                        <textarea name="txtDescValor" id="txtDescValor" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['describe_valor']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-pago" role="tabpanel" aria-labelledby="nav-pago-tab">
+                        <textarea name="txtFormPago" id="txtFormPago" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['forma_pago']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-requisito" role="tabpanel" aria-labelledby="nav-requisito-tab">
+                        <textarea name="txtReqMinHab" id="txtReqMinHab" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['requisitos']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-garantia" role="tabpanel" aria-labelledby="nav-garantia-tab">
+                        <textarea name="txtGarantias" id="txtGarantias" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['garantia']))) ?></textarea>
+                    </div>
                 </div>
             </div>
         </form>
         <div class="text-center">
-            <div class="text-center pb-3">
+            <div class="text-center py-3">
                 <button class="btn btn-primary btn-sm" id="btnDuplicaAdq">Duplicar</button>
                 <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal"> Cancelar</a>
             </div>

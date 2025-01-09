@@ -177,15 +177,53 @@ $vigencia = $_SESSION['vigencia'];
                                 </div>
                                 <!--parte-->
                                 <div class="card">
+                                    <div class="card-header card-header-detalles py-0 headings" id="formCtt">
+                                        <h5 class="mb-0">
+                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapeseFCtt" aria-expanded="true" aria-controls="collapeseFCtt">
+                                                <div class="form-row">
+                                                    <div class="div-icono">
+                                                        <span class="fas fa-file-word fa-lg" style="color: #2980B9;"></span>
+                                                    </div>
+                                                    <div>
+                                                        5. FORMATOS DE CONTRATACIÓN
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </h5>
+                                    </div>
+                                    <div id="collapeseFCtt" class="collapse" aria-labelledby="formCtt">
+                                        <div class="card-body">
+                                            <div class="text-right">
+                                                <button type="button" class="btn btn-outline-info mb-1" id="btnDownloadVarsCtt" title="Descargar variables de contratación">
+                                                    <span class="fas fa-download mr-2"></span>Variables
+                                                </button>
+                                            </div>
+                                            <table id="tableFormCtt" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Tipo de Formato</th>
+                                                        <th>Tipo de Bien/Servicio</th>
+                                                        <th>Acción</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="modificaFormCtt">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--parte-->
+                                <div class="card">
                                     <div class="card-header card-header-detalles py-0 headings" id="masOpciones">
                                         <h5 class="mb-0">
                                             <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapeseMsOp" aria-expanded="true" aria-controls="collapeseMsOp">
                                                 <div class="form-row">
                                                     <div class="div-icono">
-                                                        <span class="fas fa-bars fa-lg" style="color: #2980B9;"></span>
+                                                        <span class="fas fa-bars fa-lg" style="color: #34495e;"></span>
                                                     </div>
                                                     <div>
-                                                        5. MÁS OPCIONES
+                                                        6. MÁS OPCIONES
                                                     </div>
                                                 </div>
                                             </a>

@@ -20,7 +20,7 @@ $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
 $search_value = $_POST['search'] ?? '';
 // Verifico si serach_value tiene datos para buscar
 if (!empty($search_value)) {
-    $buscar = "AND (pto_documento.id_manu LIKE '%$search_value%' OR pto_documento.objeto LIKE '%$search_value%' OR pto_documento.fecha LIKE '%$search_value%' OR afec.dispon LIKE '$search_value' )";
+    $buscar = "AND (pto_cdp.id_manu LIKE '%$search_value%' OR pto_cdp.objeto LIKE '%$search_value%' OR pto_cdp.fecha LIKE '%$search_value%')";
 } else {
     $buscar = '';
 }
@@ -59,7 +59,7 @@ try {
                 WHERE (`pto_crp`.`estado` > 0)
                 GROUP BY `pto_cdp_detalle`.`id_pto_cdp`) AS `crp`
                 ON (`pto_cdp`.`id_pto_cdp` = `crp`.`id_pto_cdp`)
-            WHERE `pto_cdp`.`id_pto` = $id_pto_presupuestos
+            WHERE `pto_cdp`.`id_pto` = $id_pto_presupuestos $buscar
             ORDER BY `pto_cdp`.`id_manu` DESC
             LIMIT $start, $length";
     $rs = $cmd->query($sql);

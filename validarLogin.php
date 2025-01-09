@@ -1,5 +1,4 @@
-<?php
-session_start();
+<?php session_start();
 include 'conexion.php';
 $res = array();
 $usuario = $_POST['user'];

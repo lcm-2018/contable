@@ -162,39 +162,48 @@ foreach ($rubros as $rb) {
         return (strpos($rubros['cod_pptal'], $rubro) === 0);
     });
     if (!empty($filtro)) {
+        $acum[$rubro] = [
+            'inicial' => 0,
+            'adicion' => 0,
+            'reduccion' => 0,
+            'reconocimiento' => 0,
+            'recaudo' => 0,
+        ];
         foreach ($filtro as $f) {
-            $val_inicial = $f['inicial'];
-            $val_adicion = $f['val_adicion'];
-            $val_reduccion = $f['val_reduccion'];
-            $val_reconocimiento = $f['val_reconocimiento'];
-            $val_recaudo = $f['val_recaudo'];
-            $val_ini = isset($acum[$rubro]['inicial']) ? $acum[$rubro]['inicial'] : 0;
-            $val_ad = isset($acum[$rubro]['adicion']) ? $acum[$rubro]['adicion'] : 0;
-            $val_red = isset($acum[$rubro]['reduccion']) ? $acum[$rubro]['reduccion'] : 0;
-            $val_reco = isset($acum[$rubro]['reconocimiento']) ? $acum[$rubro]['reconocimiento'] : 0;
-            $val_reca = isset($acum[$rubro]['recaudo']) ? $acum[$rubro]['recaudo'] : 0;
-            $acum[$rubro] = [
-                'inicial' => $val_ini + $val_inicial,
-                'adicion' => $val_adicion + $val_ad,
-                'reduccion' => $val_adicion + $val_ad,
-                'reconocimiento' => $val_reconocimiento + $val_reco,
-                'recaudo' => $val_recaudo + $val_reca,
-            ];
-            if ($detalle_mes == 1) {
-                $val_adicion_mes = $f['val_adicion_mes'];
-                $val_reduccion_mes = $f['val_reduccion_mes'];
-                $val_reconocimiento_mes = $f['val_reconocimiento_mes'];
-                $val_recaudo_mes = $f['val_recaudo_mes'];
-                $val_ad_mes = isset($acum[$rubro]['adicion_mes']) ? $acum[$rubro]['adicion_mes'] : 0;
-                $val_red_mes = isset($acum[$rubro]['reduccion_mes']) ? $acum[$rubro]['reduccion_mes'] : 0;
-                $val_rec_mes = isset($acum[$rubro]['reconocimiento_mes']) ? $acum[$rubro]['reconocimiento_mes'] : 0;
-                $val_reca_mes = isset($acum[$rubro]['recaudo_mes']) ? $acum[$rubro]['recaudo_mes'] : 0;
-                $acum[$rubro] += [
-                    'adicion_mes' => $val_adicion_mes + $val_ad_mes,
-                    'reduccion_mes' => $val_reduccion_mes + $val_red_mes,
-                    'reconocimiento_mes' => $val_reconocimiento_mes + $val_rec_mes,
-                    'recaudo_mes' => $val_recaudo_mes + $val_reca_mes,
+            if ($f['tipo_dato'] == 1) {
+                $val_inicial = $f['inicial'];
+                $val_adicion = $f['val_adicion'];
+                $val_reduccion = $f['val_reduccion'];
+                $val_reconocimiento = $f['val_reconocimiento'];
+                $val_recaudo = $f['val_recaudo'];
+                $val_ini = isset($acum[$rubro]['inicial']) ? $acum[$rubro]['inicial'] : 0;
+                $val_ad = isset($acum[$rubro]['adicion']) ? $acum[$rubro]['adicion'] : 0;
+                $val_red = isset($acum[$rubro]['reduccion']) ? $acum[$rubro]['reduccion'] : 0;
+                $val_reco = isset($acum[$rubro]['reconocimiento']) ? $acum[$rubro]['reconocimiento'] : 0;
+                $val_reca = isset($acum[$rubro]['recaudo']) ? $acum[$rubro]['recaudo'] : 0;
+                $acum[$rubro] = [
+                    'inicial' => $val_ini + $val_inicial,
+                    'adicion' => $val_adicion + $val_ad,
+                    'reduccion' => $val_adicion + $val_ad,
+                    'reconocimiento' => $val_reconocimiento + $val_reco,
+                    'recaudo' => $val_recaudo + $val_reca,
                 ];
+                if ($detalle_mes == 1) {
+                    $val_adicion_mes = $f['val_adicion_mes'];
+                    $val_reduccion_mes = $f['val_reduccion_mes'];
+                    $val_reconocimiento_mes = $f['val_reconocimiento_mes'];
+                    $val_recaudo_mes = $f['val_recaudo_mes'];
+                    $val_ad_mes = isset($acum[$rubro]['adicion_mes']) ? $acum[$rubro]['adicion_mes'] : 0;
+                    $val_red_mes = isset($acum[$rubro]['reduccion_mes']) ? $acum[$rubro]['reduccion_mes'] : 0;
+                    $val_rec_mes = isset($acum[$rubro]['reconocimiento_mes']) ? $acum[$rubro]['reconocimiento_mes'] : 0;
+                    $val_reca_mes = isset($acum[$rubro]['recaudo_mes']) ? $acum[$rubro]['recaudo_mes'] : 0;
+                    $acum[$rubro] += [
+                        'adicion_mes' => $val_adicion_mes + $val_ad_mes,
+                        'reduccion_mes' => $val_reduccion_mes + $val_red_mes,
+                        'reconocimiento_mes' => $val_reconocimiento_mes + $val_rec_mes,
+                        'recaudo_mes' => $val_recaudo_mes + $val_reca_mes,
+                    ];
+                }
             }
         }
     }

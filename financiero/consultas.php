@@ -152,6 +152,51 @@ function saldoRubroGastos($vigencia, $id_cargue, $cx)
     return $saldos;
 }
 
+function SaldoRubro($cmd, $id_rubro, $fecha)
+{
+
+    try {
+        $sql = "SELECT
+                    `pto_cargue`.`id_cargue`
+                    ,`pto_cargue`.`valor_aprobado`
+                    , IFNULL(`cdp`.`debito_cdp`, 0) AS `debito_cdp`
+                    , IFNULL(`cdp`.`credito_cdp`,0) AS `credito_cdp`
+                    , IFNULL(`mod`.`debito_mod`, 0) AS `debito_mod`
+                    , IFNULL(`mod`.`credito_mod`,0) AS `credito_mod`
+                FROM
+                    `pto_cargue`
+                LEFT JOIN 
+                        (SELECT
+                            `pto_cdp_detalle`.`id_rubro`
+                            , SUM(`pto_cdp_detalle`.`valor`) AS `debito_cdp`
+                            , SUM(`pto_cdp_detalle`.`valor_liberado`) AS `credito_cdp`
+                        FROM
+                            `pto_cdp_detalle`
+                        INNER JOIN `pto_cdp` 
+                            ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
+                        WHERE (`pto_cdp`.`fecha` <='$fecha' AND `pto_cdp`.`estado` > 0)
+                        GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `cdp`
+                    ON (`cdp`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN 
+                        (SELECT
+                            `pto_mod_detalle`.`id_cargue`
+                            , SUM(`pto_mod_detalle`.`valor_deb`) AS `debito_mod`
+                            , SUM(`pto_mod_detalle`.`valor_cred`) AS `credito_mod`
+                        FROM
+                            `pto_mod_detalle`
+                        INNER JOIN `pto_mod` 
+                            ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
+                        WHERE (`pto_mod`.`fecha` <= '$fecha' AND `pto_mod`.`estado` > 0 AND `pto_mod`.`id_tipo_mod` != 1)
+                        GROUP BY `pto_mod_detalle`.`id_cargue`) AS `mod`
+                    ON (`mod`.`id_cargue` = `pto_cargue`.`id_cargue`)
+            WHERE `pto_cargue`.`id_cargue` = $id_rubro";
+        $rs = $cmd->query($sql);
+        $saldo = $rs->fetch();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+    return $saldo;
+};
 // Funcion para determinar el saldo que tiene un cdp para registrar
 function saldoCdp($cdp, $rubro, $cx)
 {
