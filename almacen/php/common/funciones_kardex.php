@@ -283,7 +283,7 @@ function verificar_existencias($cmd, $id, $tipo)
 
     foreach ($objs_med as $med) {
         if ($cerrar == 'ok') {
-            $cerrar = 'Imposible cerrar el movimiento, los siguientes medicamentos tiene existencias insuficientes.';
+            $cerrar = 'Imposible cerrar el movimiento, los siguientes Articulos tiene existencias insuficientes.';
             $cerrar .= '<br/><br/><label style="color:red">' . $med['lote'] . '</label> : ' . $med['nom_medicamento'];
         } else {
             $cerrar .= '<br/><label style="color:red">' . $med['lote'] . '</label> : ' . $med['nom_medicamento'];

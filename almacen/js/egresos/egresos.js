@@ -85,16 +85,13 @@
         $('#tb_egresos').wrap('<div class="overflow"/>');
     });
 
-    //Buascar registros de Egresos
+    //Filtrar las Bodegas acorde a la Sede y Usuario de sistema
     $('#sl_sede_filtro').on("change", function() {
         $('#sl_bodega_filtro').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), titulo: '--Bodega--' }, function() {});
     });
     $('#sl_sede_filtro').trigger('change');
 
-    $('#divForms').on("change", "#sl_sede_egr", function() {
-        $('#sl_bodega_egr').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val() }, function() {});
-    });
-
+    //Buascar registros de Egresos
     $('#btn_buscar_filtro').on("click", function() {
         $('.is-invalid').removeClass('is-invalid');
         reloadtable('tb_egresos');
@@ -104,6 +101,86 @@
         if (e.keyCode == 13) {
             reloadtable('tb_egresos');
         }
+    });
+
+    /* ---------------------------------------------------
+    EGRESO EN BASE A UN PEDIDO
+    -----------------------------------------------------*/
+    //Seleccionar un Pedido para hacer el traslado
+    $('#divForms').on("dblclick", "#txt_des_pedido", function() {
+        $.post("buscar_pedidos_frm.php", function(he) {
+            $('#divTamModalBus').removeClass('modal-sm');
+            $('#divTamModalBus').removeClass('modal-lg');
+            $('#divTamModalBus').addClass('modal-xl');
+            $('#divModalBus').modal('show');
+            $("#divFormsBus").html(he);
+        });
+    });
+
+    $('#divModalBus').on('dblclick', '#tb_pedidos_egr tr', function() {
+        let data = $('#tb_pedidos_egr').DataTable().row(this).data();
+        $('#txt_id_pedido').val(data.id_pedido);
+        $('#txt_des_pedido').val(data.detalle + '(' + data.fec_pedido + ')');
+
+        if (data.id_pedido) {
+            $('#sl_sede_egr').val(data.id_sede).prop('disabled', true);
+            $('#id_sede_egr').val(data.id_sede);
+            $('#sl_bodega_egr').load('../common/cargar_bodegas_usuario.php', { id_sede: data.id_sede }, function() {
+                $(this).val(data.id_bodega).prop('disabled', true);
+                $('#id_bodega_egr').val(data.id_bodega);
+            });
+            $('#sl_centrocosto').val(data.id_cencosto);
+        }
+        $('#divModalBus').modal('hide');
+    });
+
+    $('#divModalBus').on('click', '#tb_pedidos_egr .btn_imprimir', function() {
+        let id = $(this).attr('value');
+        $.post("../pedidos_cec/imp_pedido.php", { id: id }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
+
+    $('#divForms').on("click", "#btn_cancelar_pedido", function() {
+        let table = $('#tb_egresos_detalles').DataTable();
+        let filas = table.rows().count();
+        if (filas == 0) {
+            $('#txt_id_pedido').val('');
+            $('#txt_des_pedido').val('');
+            $('#sl_sede_egr').prop('disabled', false);
+            $('#sl_bodega_egr').prop('disabled', false);
+        }
+    });
+
+    //Imprimit el Pedido
+    $('#divForms').on("click", "#btn_imprime_pedido", function() {
+        let id = $('#txt_id_pedido').val();
+        if (id) {
+            $.post("../pedidos_cec/imp_pedido.php", { id: id }, function(he) {
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
+            });
+        }
+    });
+
+    /* ---------------------------------------------------
+    ENCABEZADO DE UN EGRESO
+    -----------------------------------------------------*/
+
+    $('#divForms').on("change", "#sl_sede_egr", function() {
+        $('#sl_bodega_egr').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val() }, function() {});
+        $('#id_sede_egr').val($('#sl_sede_egr').val());
+    });
+
+    $('#divForms').on("change", "#sl_bodega_egr", function() {
+        $('#id_bodega_egr').val($('#sl_bodega_egr').val());
     });
 
     //Editar un registro Orden Egreso
@@ -116,10 +193,26 @@
         });
     });
 
-    //Guardar registro Orden Egreso
+    //Guardar registro Egreso
     $('#divForms').on("click", "#btn_guardar", function() {
-        $('.is-invalid').removeClass('is-invalid');
+        let table = $('#tb_egresos_detalles').DataTable();
+        let filas = table.rows().count();
+        let id_pedido = $('#txt_id_pedido').val();
 
+        if (id_pedido && filas == 0) {
+            confirmar_proceso_msg('egreso_pedido', 'Desea Generar el Egreso en base al Pedido ' + id_pedido);
+        } else {
+            guardar_egreso(0);
+        }
+    });
+
+    $('#divModalConfDel').on("click", "#egreso_pedido", function() {
+        $('#divModalConfDel').modal('hide');
+        guardar_egreso(1);
+    });
+
+    function guardar_egreso(generar_egreso) {
+        $('.is-invalid').removeClass('is-invalid');
         var error = verifica_vacio($('#sl_sede_egr'));
         error += verifica_vacio($('#sl_bodega_egr'));
         error += verifica_vacio($('#sl_tip_egr'));
@@ -140,11 +233,14 @@
                 type: 'POST',
                 url: 'editar_egresos.php',
                 dataType: 'json',
-                data: data + "&oper=add"
+                data: data + "&oper=add" + '&generar_egreso=' + generar_egreso
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
                     let pag = ($('#id_egreso').val() == -1) ? 0 : $('#tb_egresos').DataTable().page.info().page;
                     reloadtable('tb_egresos', pag);
+
+                    if (generar_egreso == 1) reloadtable('tb_egresos_detalles');
+
                     $('#id_egreso').val(r.id);
                     $('#txt_ide').val(r.id);
 
@@ -161,7 +257,7 @@
                 alert('Ocurrió un error');
             });
         }
-    });
+    };
 
     //Borrar un registro Orden Egreso
     $('#tb_egresos').on('click', '.btn_eliminar', function() {

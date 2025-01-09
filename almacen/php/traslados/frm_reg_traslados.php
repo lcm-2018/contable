@@ -12,10 +12,16 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT far_traslado.*,            
-            CASE far_traslado.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
-        FROM far_traslado       
-        WHERE id_traslado=" . $id . " LIMIT 1";
+$sql = "SELECT TT.*,            
+            CASE TT.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado,
+            PEDIDO.id_pedido,PEDIDO.des_pedido 
+        FROM far_traslado AS TT
+        LEFT JOIN (SELECT TD.id_traslado,PD.id_pedido,PP.detalle AS des_pedido 
+                    FROM far_traslado_detalle AS TD 
+                    INNER JOIN far_pedido_detalle AS PD ON (PD.id_ped_detalle=TD.id_ped_detalle)
+                    INNER JOIN far_pedido AS PP ON (PP.id_pedido=PD.id_pedido)
+                    GROUP BY TD.id_traslado) AS PEDIDO ON (PEDIDO.id_traslado=TT.id_traslado)    
+        WHERE TT.id_traslado=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 
@@ -76,6 +82,32 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <label for="txt_est_traslado" class="small">Estado traslado</label>
                         <input type="text" class="form-control form-control-sm" id="txt_est_traslado" name="txt_est_traslado" class="small" value="<?php echo $obj['nom_estado'] ?>" readonly="readonly">
                     </div>
+                </div>
+                <div class="form-row">  
+                    <div class="form-group col-md-1">
+                        <label for="txt_id_pedido" class="small">Id. Pedido</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_id_pedido" name="txt_id_pedido" class="small" value="<?php echo $obj['id_pedido'] ?>" readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <div class="form-row">
+                            <div class="form-group col-md-10">
+                                <label for="txt_des_pedido" class="small">Pedido de una Bodega</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_des_pedido" name="txt_des_pedido" class="small" value="<?php echo $obj['des_pedido'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Pedido">
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_imprime_pedido" class="btn btn-outline-success btn-sm" title="Imprimir Pedido Seleccionado">
+                                    <span class="fas fa-print" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_cancelar_pedido" class="btn btn-outline-success btn-sm" title="Cancelar Selección">
+                                    <span class="fas fa-ban" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                        </div>
+                    </div>        
                 </div>    
                 <div class="form-row">                    
                     <div class="form-group col-md-3">
@@ -83,24 +115,28 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <select class="form-control form-control-sm" id="sl_sede_origen" name="sl_sede_origen" <?php echo $editar ?>>
                             <?php sedes_usuario($cmd, '', $obj['id_sede_origen']) ?>   
                         </select>
+                        <input type="hidden" id="id_sede_origen" name="id_sede_origen" value="<?php echo $obj['id_sede_origen'] ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_bodega_origen" class="small">Bodega Origen</label>
                         <select class="form-control form-control-sm" id="sl_bodega_origen" name="sl_bodega_origen" <?php echo $editar ?>>
                             <?php bodegas_usuario($cmd, '', $obj['id_sede_origen'], $obj['id_bodega_origen']) ?>   
                         </select>
+                        <input type="hidden" id="id_bodega_origen" name="id_bodega_origen" value="<?php echo $obj['id_bodega_origen'] ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_sede_destino" class="small">Sede Destino</label>
                         <select class="form-control form-control-sm" id="sl_sede_destino" name="sl_sede_destino" <?php echo $editar ?>>
                             <?php sedes($cmd, '', $obj['id_sede_destino']) ?>   
                         </select>
+                        <input type="hidden" id="id_sede_destino" name="id_sede_destino" value="<?php echo $obj['id_sede_destino'] ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_bodega_destino" class="small">Bodega Destino</label>
                         <select class="form-control form-control-sm" id="sl_bodega_destino" name="sl_bodega_destino" <?php echo $editar ?>> 
                             <?php bodegas_sede($cmd, '', $obj['id_sede_destino'], $obj['id_bodega_destino']) ?>   
                         </select>
+                        <input type="hidden" id="id_bodega_destino" name="id_bodega_destino" value="<?php echo $obj['id_bodega_destino'] ?>">
                     </div>                
                     <div class="form-group col-md-12">
                         <label for="txt_det_traslado" class="small">DETALLE</label>

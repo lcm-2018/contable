@@ -12,10 +12,16 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT far_orden_egreso.*,
-            CASE far_orden_egreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
-        FROM far_orden_egreso 
-        WHERE id_egreso=" . $id . " LIMIT 1";
+$sql = "SELECT EE.*,
+            CASE EE.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado,
+            EGRESO.id_pedido,EGRESO.des_pedido 
+        FROM far_orden_egreso AS EE
+        LEFT JOIN (SELECT ED.id_egreso,PD.id_pedido,PP.detalle AS des_pedido 
+                    FROM far_orden_egreso_detalle AS ED 
+                    INNER JOIN far_cec_pedido_detalle AS PD ON (PD.id_ped_detalle=ED.id_ped_detalle)
+                    INNER JOIN far_cec_pedido AS PP ON (PP.id_pedido=PD.id_pedido)
+                    GROUP BY ED.id_egreso) AS EGRESO ON (EGRESO.id_egreso=EE.id_egreso)   
+        WHERE EE.id_egreso=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 
@@ -64,12 +70,14 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <select class="form-control form-control-sm" id="sl_sede_egr" name="sl_sede_egr" <?php echo $editar ?>>
                             <?php sedes_usuario($cmd, '', $obj['id_sede']) ?>
                         </select>
+                        <input type="hidden" id="id_sede_egr" name="id_sede_egr" value="<?php echo $obj['id_sede'] ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_bodega_egr" class="small" required>Bodega</label>
                         <select class="form-control form-control-sm" id="sl_bodega_egr" name="sl_bodega_egr" <?php echo $editar ?>>
                             <?php bodegas_usuario($cmd, '', $obj['id_sede'], $obj['id_bodega']) ?>   
                         </select>
+                        <input type="hidden" id="id_bodega_egr" name="id_bodega_egr" value="<?php echo $obj['id_bodega'] ?>">
                     </div>
                     <div class="form-group col-md-6">
                         <div class="form-row">
@@ -91,6 +99,34 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             </div>
                         </div>    
                     </div>
+                </div>    
+                <div class="form-row">  
+                    <div class="form-group col-md-1">
+                        <label for="txt_id_pedido" class="small">Id. Pedido</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_id_pedido" name="txt_id_pedido" class="small" value="<?php echo $obj['id_pedido'] ?>" readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <div class="form-row">
+                            <div class="form-group col-md-10">
+                                <label for="txt_des_pedido" class="small">Pedido de una Dependencia</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_des_pedido" name="txt_des_pedido" class="small" value="<?php echo $obj['des_pedido'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Pedido">
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_imprime_pedido" class="btn btn-outline-success btn-sm" title="Imprimir Pedido Seleccionado">
+                                    <span class="fas fa-print" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_cancelar_pedido" class="btn btn-outline-success btn-sm" title="Cancelar Selección">
+                                    <span class="fas fa-ban" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                        </div>
+                    </div>        
+                </div> 
+                <div class="form-row">  
                     <div class="form-group col-md-2">
                         <label for="sl_tip_egr" class="small" required>Tipo egreso</label>
                         <select class="form-control form-control-sm" id="sl_tip_egr" name="sl_tip_egr">
@@ -104,7 +140,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="sl_centrocosto" class="small">Centro Costo</label>
+                        <label for="sl_centrocosto" class="small">Dependencia</label>
                         <select class="form-control form-control-sm" id="sl_centrocosto" name="sl_centrocosto">
                             <?php centros_costo($cmd, '', $obj['id_centrocosto']) ?>
                         </select>
