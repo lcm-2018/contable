@@ -69,7 +69,7 @@ if ($id_rol != 1) {
         <?php include '../modales.php' ?>
     </div>
     <?php include '../scripts.php' ?>
-    <script src="js/funciones_docs.js?<?= date('YmdHHmmss')?>"></script>
+    <script src="js/funciones_docs.js?<?= date('YmdHHmmss') ?>"></script>
 </body>
 
 </html>
