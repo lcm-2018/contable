@@ -67,6 +67,21 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+
+try {
+    $sql = "SELECT
+                `pto_cdp`.`id_pto_cdp`
+                , `pto_crp`.`id_pto_crp`
+            FROM
+                `pto_cdp`
+                LEFT JOIN `pto_crp` 
+                    ON (`pto_crp`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
+            WHERE (`pto_cdp`.`id_pto` = $id_pto_presupuestos)";
+    $rs = $cmd->query($sql);
+    $registros = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 // obtener el numero total de registros de la anterior consulta
 try {
     $sql = "SELECT COUNT(*) AS `total` FROM `pto_cdp` WHERE `id_pto` = $id_pto_presupuestos";
@@ -79,7 +94,7 @@ try {
 
 if (!empty($listappto)) {
     foreach ($listappto as $lp) {
-        $anular = $dato = $borrar = $imprimir = $historial = null;
+        $anular = $dato = $borrar = $imprimir = $historial = $abrir = null;
         $id_pto = $lp['id_pto_cdp'];
         // Sumar el valor del cdp de la tabla id_pto_mtvo
         $valor_cdp = number_format($lp['val_cdp'], 2, ',', '.');
@@ -123,12 +138,21 @@ if (!empty($listappto)) {
                 $editar = null;
             }
         }
+        $key = array_search($id_pto, array_column($registros, 'id_pto_cdp'));
+        $valida = $registros[$key]['id_pto_crp'] == '' ? true : false;
+        if ($id_rol == 1 && $lp['estado'] == 2 && $valida) {
+            $abrir = '<a onclick="abrirCdp(' . $id_pto . ')" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb " title="Abrir CDP"><span class="fas fa-lock fa-lg"></span></a>';
+            if ($fecha < $fecha_cierre) {
+                $abrir = null;
+            }
+        }
         if ($lp['estado'] == 0) {
             $borrar = null;
             $editar = null;
             $detalles = null;
             $anular = null;
             $historial = null;
+            $abrir = null;
             $dato = '<span class="badge badge-pill badge-secondary">Anulado</span>';
             $registrar = '';
             $xregistrar = '';
@@ -145,7 +169,7 @@ if (!empty($listappto)) {
             'liberado' =>  '<div class="text-right">' . $valor_cdp_lib . '</div>',
             'xregistrar' =>  '<div class="text-right">' . $xregistrar  . '</div>',
             'accion' => '<div class="text-center">' . $registrar . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . $historial . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . $historial . $abrir . '</div>',
         ];
     }
 } else {

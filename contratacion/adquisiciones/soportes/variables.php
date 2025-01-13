@@ -293,7 +293,6 @@ foreach ($valores as $va) {
     $describ_val[] = ['describ_val' => $va];
 }
 $plazo = $p_mes == '' ? $p_dia : $p_mes . $y . $p_dia;
-
 /*
 $segmento = !empty($codigo_servicio) ? ($codigo_servicio['codigo'] != '' ? substr($codigo_servicio['codigo'], 0, 2) : 'XX') : 'XX';
 $familia = !empty($codigo_servicio) ? ($codigo_servicio['codigo'] != '' ? substr($codigo_servicio['codigo'], 0, 4) : 'XXXX') : 'XXXX';

@@ -26,6 +26,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+/*
 if ($total == 0) {
     exit('El rubro no tiene valor aprobado');
 }
@@ -36,7 +37,7 @@ foreach ($saldo as $s) {
 }
 if ($total < 0) {
     exit('El rubro no tiene valor disponible');
-}
+}*/
 try {
     if ($op == 0) {
         $sql = "INSERT INTO `pto_mod_detalle`

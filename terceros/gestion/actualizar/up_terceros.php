@@ -13,7 +13,6 @@ function UpTercerosEmpresa($api, $ids, $cmd, $fecInicio)
     $result = curl_exec($ch);
     curl_close($ch);
     $terceros = json_decode($result, true);
-    return ($terceros);
     $tipodoc = $nombre = $nit = $direccion = $telefono = $municipio = $email = $idter = NULL;
     $c = 0;
     $fecInicio = $fecInicio == '' ? `fec_inicio` : $fecInicio;

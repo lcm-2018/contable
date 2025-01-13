@@ -26,13 +26,13 @@ foreach ($variables as $v) {
     if (in_array($var_, $marcadores)) {
         if ($tip_ == '1') {
             $plantilla->setValue($var_, $$var_);
-        } else {
-            $plantilla->cloneBlock($var_, $$var_);
+        } else if ($tip_ == '2') {
+            $plantilla->cloneRowAndSetValues($var_, $$var_);
         }
     }
 }
 
-$plantilla->saveAs('estudios_previos.docx');
-header("Content-Disposition: attachment; Filename=estudios_previos.docx");
-echo file_get_contents('estudios_previos.docx');
-unlink('estudios_previos.docx');
+$plantilla->saveAs('formato_doc.docx');
+header("Content-Disposition: attachment; Filename=formato_doc.docx");
+echo file_get_contents('formato_doc.docx');
+unlink('formato_doc.docx');

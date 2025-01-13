@@ -18,7 +18,19 @@ $id_vigencia = $_SESSION['id_vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_pto_mod`, `fecha`, `id_manu`, `objeto`, `id_tipo_mod`, `id_pto` FROM `pto_mod` WHERE `id_pto_mod` = $id_pto_mod";
+    $sql = "SELECT 
+                `pto_mod`.`id_pto_mod`
+                , `pto_mod`.`fecha`
+                , `pto_mod`.`id_manu`
+                , `pto_mod`.`objeto`
+                , `pto_mod`.`id_tipo_mod`
+                , `pto_mod`.`id_pto`
+                , `pto_tipo_mvto`. `codigo`
+                , `pto_tipo_mvto`.`id_tmvto`
+            FROM `pto_mod`
+                INNER JOIN `pto_tipo_mvto` 
+                    ON (`pto_mod`.`id_tipo_mod` = `pto_tipo_mvto`.`id_tmvto`)
+            WHERE `pto_mod`.`id_pto_mod` = $id_pto_mod";
     $rs = $cmd->query($sql);
     $datos = $rs->fetch();
     $cmd = null;

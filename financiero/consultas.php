@@ -152,7 +152,7 @@ function saldoRubroGastos($vigencia, $id_cargue, $cx)
     return $saldos;
 }
 
-function SaldoRubro($cmd, $id_rubro, $fecha)
+function SaldoRubro($cmd, $id_rubro, $fecha, $id_cdp)
 {
 
     try {
@@ -174,7 +174,7 @@ function SaldoRubro($cmd, $id_rubro, $fecha)
                             `pto_cdp_detalle`
                         INNER JOIN `pto_cdp` 
                             ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                        WHERE (`pto_cdp`.`fecha` <='$fecha' AND `pto_cdp`.`estado` > 0)
+                        WHERE (`pto_cdp`.`fecha` <='$fecha' AND `pto_cdp`.`estado` > 0 AND `pto_cdp`.`id_pto_cdp` <> $id_cdp)
                         GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `cdp`
                     ON (`cdp`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN 
@@ -186,7 +186,7 @@ function SaldoRubro($cmd, $id_rubro, $fecha)
                             `pto_mod_detalle`
                         INNER JOIN `pto_mod` 
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
-                        WHERE (`pto_mod`.`fecha` <= '$fecha' AND `pto_mod`.`estado` > 0 AND `pto_mod`.`id_tipo_mod` != 1)
+                        WHERE (`pto_mod`.`fecha` <= '$fecha' AND `pto_mod`.`estado` > 0 AND `pto_mod`.`id_tipo_mod` <> 1)
                         GROUP BY `pto_mod_detalle`.`id_cargue`) AS `mod`
                     ON (`mod`.`id_cargue` = `pto_cargue`.`id_cargue`)
             WHERE `pto_cargue`.`id_cargue` = $id_rubro";

@@ -1667,8 +1667,7 @@ function RegDetalleMod(boton) {
             .then((response) => response.text())
             .then((response) => {
                 if (response == "ok") {
-                    let id = "tableModDetalle";
-                    reloadtable(id);
+                    $('#tableModDetalle').DataTable().ajax.reload();
                     mje("Proceso realizado correctamente");
                 } else {
                     mjeError(response, "Verifique la información ingresada");
@@ -1684,13 +1683,14 @@ function RegDetalleCDPs(boton) {
     var tipoRubro = fila.querySelector('input[name="tipoRubro"]').value;
     var id_rubroCod = fila.querySelector('input[name="id_rubroCod"]').value;
     var id_pto_mod = fila.querySelector('input[name="id_pto_mod"]').value;
+    var id_cdp = $("#id_cdp").val();
     var fecha = $("#fecha").val();
     if (tipoRubro == '0') {
         mjeError("El rubro no es un detalle...", "Verifique la información registrada");
     } else if (Number(valorDeb) == 0) {
         mjeError("Valor debe ser mayor a cero...", "Verifique la información registrada");
     } else {
-        consultaSaldoRubro(valorDeb, id_rubroCod, fecha)
+        consultaSaldoRubro(valorDeb, id_rubroCod, fecha, id_cdp)
             .then(function (saldo) {
                 if (saldo.status === 'error') {
                     mjeError("El valor es mayor al saldo del rubro: " + saldo.saldo, "Verifique la información registrada");
@@ -1888,6 +1888,21 @@ var cerrarCRP = function (dato) {
         });
 };
 // Abrir documento modificación presupuestal
+function abrirCdp(id) {
+    $.ajax({
+        type: "POST",
+        url: "datos/actualizar/abrir_cdp.php",
+        data: { id: id },
+        success: function (res) {
+            if (res == 'ok') {
+                mje("Documento abierto");
+                $('#tableEjecPresupuesto').DataTable().ajax.reload();
+            } else {
+                mjeError("Documento no abierto", res);
+            }
+        },
+    });
+};
 let abrirDocumentoMod = function (dato) {
     let doc = id_pto_doc.value;
     fetch("datos/consultar/consultaAbrir.php", {
@@ -1951,9 +1966,7 @@ $('#modificarModDetalle').on('click', '.borrar', function () {
                 .then((response) => {
                     console.log(response);
                     if (response[0].value == "ok") {
-                        // Reonlidar la tabla
-                        let id = "tableModDetalle";
-                        reloadtable(id);
+                        $('#tableModDetalle').DataTable().ajax.reload();
                         mje("Registro eliminado");
                     } else {
                         mjeError("No se puede eliminar el registro");
@@ -2234,10 +2247,11 @@ const verHistorial = (boton) => {
     var inputRubroCod = fila.querySelector('input[name="id_rubroCod"]');
     var rubro = inputRubroCod.value;
     var fecha = $("#fecha").val();
+    var id_cdp = $("#id_cdp").val();
     $.ajax({
         type: "POST",
         url: "datos/reportes/form_resumen_rubro.php",
-        data: { rubro: rubro, fecha: fecha },
+        data: { rubro: rubro, fecha: fecha, id_cdp: id_cdp },
         success: function (res) {
             $("#divTamModalPermisos").removeClass("modal-xl");
             $("#divTamModalPermisos").removeClass("modal-lg");
@@ -2294,12 +2308,12 @@ const consultaSaldoCdp = (anno) => {
 };
 
 // Consultar saldo del rubro en modificacion
-function consultaSaldoRubro(valor, rubro, fecha) {
+function consultaSaldoRubro(valor, rubro, fecha, id_cdp) {
     return new Promise((resolve, reject) => {
         $.ajax({
             type: "POST",
             url: "datos/consultar/consultaSaldoRubro.php",
-            data: { valor: valor, rubro: rubro, fecha: fecha },
+            data: { valor: valor, rubro: rubro, fecha: fecha, id_cdp: id_cdp },
             dataType: "json",
             success: function (res) {
                 resolve(res);

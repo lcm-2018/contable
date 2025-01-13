@@ -29,8 +29,6 @@ $tipouser = 'user';
 $nit_act = $_SESSION['nit_emp'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 //API URL
-$url = $api . 'terceros/datos/res/modificar/tercero/' . $idter;
-$ch = curl_init($url);
 $data = [
     "slcGenero" => $genero,
     "datFecNacimiento" => $fecNacimiento,
@@ -51,6 +49,8 @@ $data = [
     "tipuser" => $tipouser,
     "nit_emp" => $nit_act
 ];
+$url = $api . 'terceros/datos/res/modificar/tercero/' . $idter;
+$ch = curl_init($url);
 $payload = json_encode($data);
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -63,7 +63,7 @@ if ($res == '1' || $res == '0' || $fecInicio != '') {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $respuesta = UpTercerosEmpresa($api, [$idter], $cmd, $fecInicio);
-    if ($respuesta == 'ok' || $res == '1') {
+    if ($respuesta == 'ok') {
         echo 'ok';
     } else {
         echo $respuesta;

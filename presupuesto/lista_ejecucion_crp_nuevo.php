@@ -38,12 +38,13 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-            `objeto`
+            `objeto`,`fecha`
             FROM `pto_cdp`
             WHERE `id_pto_cdp` = $id_cdp";
     $rs = $cmd->query($sql);
-    $objeto = $rs->fetch();
-    $objeto = !empty($objeto) ? $objeto['objeto'] : '';
+    $objeto_ = $rs->fetch();
+    $objeto = !empty($objeto_) ? $objeto_['objeto'] : '';
+    $fecha_cdp = !empty($objeto_) ? $objeto_['fecha'] : date('Y-m-d');
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -126,7 +127,7 @@ if ($id_ter == 0) {
     $ccnit = $ctt['nit_tercero'];
     $datosCRP['id_tercero_api'] = $id_ter;
 }
-$fecha_cierre =  date("Y-m-d", strtotime($datosCRP['fecha']));
+$fecha_cierre =  date("Y-m-d", strtotime($fecha_cdp));
 $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
 ?>
 

@@ -14,13 +14,13 @@ try {
     $sql = "SELECT
                 `ctt_formatos_doc_rel`.`id_relacion`
                 , `ctt_formatos_doc`.`descripcion`
-                , `tb_tipo_contratacion`.`tipo_contrato`
+                ,  `tb_tipo_bien_servicio`.`tipo_bn_sv`
             FROM
                 `ctt_formatos_doc_rel`
                 INNER JOIN `ctt_formatos_doc` 
                     ON (`ctt_formatos_doc_rel`.`id_formato` = `ctt_formatos_doc`.`id_fdoc`)
-                INNER JOIN `tb_tipo_contratacion` 
-                    ON (`ctt_formatos_doc_rel`.`id_tipo_ctt` = `tb_tipo_contratacion`.`id_tipo`)
+                INNER JOIN `tb_tipo_bien_servicio` 
+                    ON (`ctt_formatos_doc_rel`.`id_tipo_bn_sv` = `tb_tipo_bien_servicio`.`id_tipo_b_s`)
             WHERE `ctt_formatos_doc_rel`.`id_relacion` = $id_relacion";
     $rs = $cmd->query($sql);
     $data = $rs->fetch();
@@ -33,7 +33,7 @@ if (isset($data)) {
     $file = '../../../adquisiciones/soportes/' . $data['id_relacion'] . '.docx';
     if (file_exists($file)) {
         header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . $data['tipo_contrato'] . ' - ' . $data['descripcion'] . '.docx"');
+        header('Content-Disposition: attachment; filename="' . $data['tipo_bn_sv'] . ' - ' . $data['descripcion'] . '.docx"');
         readfile($file);
     } else {
         echo 'El archivo no existe';
