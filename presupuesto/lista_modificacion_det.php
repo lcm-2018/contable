@@ -37,11 +37,11 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 
 try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `pto_mod`.`id_pto_mod`
                 , `pto_mod_detalle`.`id_pto_mod`
@@ -60,10 +60,44 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `id_pto`, `id_tipo`
+            FROM
+                `pto_presupuestos`
+            WHERE (`id_vigencia` = $id_vigencia)";
+    $rs = $cmd->query($sql);
+    $presupuestos = $rs->fetchAll();
+    $key = array_search(1, array_column($presupuestos, 'id_tipo'));
+    $ingreso = $presupuestos[$key]['id_pto'];
+    $key = array_search(2, array_column($presupuestos, 'id_tipo'));
+    $gasto = $presupuestos[$key]['id_pto'];
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 $dif = !empty($valores) ? ($valores['debito'] - $valores['credito']) : 0;
 $dif = abs($dif);
 $fecha = date('Y-m-d', strtotime($datos['fecha']));
 $consulta = $sql;
+
+switch ($datos['codigo']) {
+    case 'ADI':
+        $campo1 = 'Ingreso';
+        $campo2 = 'Gasto';
+        break;
+    case 'RED':
+        $campo1 = 'Crédito';
+        $campo2 = 'Contracrédito';
+        break;
+    default:
+        $campo1 = 'Débito';
+        $campo2 = 'Crédito';
+        break;
+}
 ?>
 
 <body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ? 'sb-sidenav-toggled' : '' ?>">
@@ -105,7 +139,27 @@ $consulta = $sql;
                                         </div>
                                         <div class="col-10"><?php echo $datos['objeto']; ?></div>
                                     </div>
+                                    <?php
+                                    if ($datos['codigo'] == 'ADI' || $datos['codigo'] == 'RED') {
+                                    ?>
+                                        <div class="row">
+                                            <div class="col-2"></div>
+                                            <div class="col-10">
+                                                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                                    <label class="btn btn-outline-info active">
+                                                        <input type="radio" class="btnOptionPto" name="tipoPto" id="ptoIngresos" value="<?= $ingreso ?>" <?= $_POST['id_pto'] == $ingreso ? 'checked' : '' ?>> Ingresos
+                                                    </label>
+                                                    <label class="btn btn-outline-info">
+                                                        <input type="radio" class="btnOptionPto" name="tipoPto" value="<?= $gasto ?>" id="ptoGastos" <?= $_POST['id_pto'] == $gasto ? 'checked' : '' ?>>Gasto
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php
+                                    }
+                                    ?>
                                 </div>
+
                             </div>
                             <br>
                             <?php if (PermisosUsuario($permisos, 5401, 2) || $id_rol == 1) {
@@ -122,8 +176,8 @@ $consulta = $sql;
                                         <tr>
                                             <th style="width: 8%;">ID</th>
                                             <th style="width: 50%;">Codigo</th>
-                                            <th style="width: 15%;" Class="text-center">Débito</th>
-                                            <th style="width: 15%;" Class="text-center">Crédito</th>
+                                            <th style="width: 15%;" Class="text-center"><?= $campo1; ?></th>
+                                            <th style="width: 15%;" Class="text-center"><?= $campo2; ?></th>
                                             <th style="width: 12%;">Acciones</th>
                                         </tr>
                                     </thead>

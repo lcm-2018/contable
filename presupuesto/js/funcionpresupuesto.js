@@ -436,7 +436,10 @@
             language: setIdioma,
             ajax: {
                 url: "datos/listar/datos_modifica_det.php",
-                data: { id_pto_mod: id_pto_mod, id_pto: id_pto },
+                data: function (d) {
+                    d.id_pto_mod = id_pto_mod;
+                    d.id_pto = $("#id_pto_movto").val();
+                },
                 type: "POST",
                 dataType: "json",
             },
@@ -984,6 +987,17 @@ const imprimirFormatoCrp = (id) => {
 function imprSelecCdp(nombre, id) {
     if (Number(id) > 0) {
         cerrarCDP(id);
+    }
+    var ficha = document.getElementById(nombre);
+    var ventimp = window.open(" ", "popimpr");
+    ventimp.document.write(ficha.innerHTML);
+    ventimp.document.close();
+    ventimp.print();
+    ventimp.close();
+}
+function imprSelecMod(nombre, id) {
+    if (Number(id) > 0) {
+        cerrarMod(id);
     }
     var ficha = document.getElementById(nombre);
     var ventimp = window.open(" ", "popimpr");
@@ -1834,25 +1848,6 @@ let terminarDetalleMod = function (dato) {
     }
 };
 // Cerrar documento presupuestal modificacion
-let cerrarDocumentoMod = function (dato) {
-    fetch("datos/consultar/consultaCerrar.php", {
-        method: "POST",
-        body: dato,
-    })
-        .then((response) => response.json())
-        .then((response) => {
-            if (response[0].value == "ok") {
-                mje("Documento cerrado");
-                let id = "tableModPresupuesto";
-                reloadtable(id);
-                document.getElementById("editar_" + dato).style.display = "none";
-                document.getElementById("eliminar_" + dato).style.display = "none";
-            } else {
-                mjeError("Documento no aprobado", "Verifique sumas iguales");
-            }
-        });
-};
-// Cerrar documento presupuestal modificacion
 var cerrarCDP = function (dato) {
     fetch("datos/actualizar/cerrar_cdp.php", {
         method: "POST",
@@ -1865,6 +1860,21 @@ var cerrarCDP = function (dato) {
                 reloadtable(id);
                 id = "tableEjecCdp";
                 reloadtable(id);
+            } else {
+                mjeError("No se puede cerrar documento actual", "--");
+            }
+        });
+};
+var cerrarMod = function (dato) {
+    fetch("datos/actualizar/cerrar_mod.php", {
+        method: "POST",
+        body: dato,
+    })
+        .then((response) => response.json())
+        .then((response) => {
+            if (response.status == "ok") {
+                $("#tableModPresupuesto").DataTable().ajax.reload();
+                $("#tableModDetalle").DataTable().ajax.reload();
             } else {
                 mjeError("No se puede cerrar documento actual", "--");
             }
@@ -2453,6 +2463,12 @@ $('#registrarMovDetalle').on('click', function () {
     }
 
 });
+
+$('.btnOptionPto').on('click', function () {
+    var id_pto = $(this).attr('value');
+    $('#id_pto_movto').val(id_pto);
+    $('#tableModDetalle').DataTable().ajax.reload();
+});
 // Ver historial de CDP para liquidación de saldos sin ejecutar
 const verLiquidarCdp = (id) => {
     fetch("lista_historial_cdp.php", {
@@ -2793,50 +2809,6 @@ function changeEstadoAnulacion() {
         });
     }
 };
-/*
-const changeEstadoAnulacion = async () => {
-    let formEnvio = new FormData(formAnulacionCrpp);
-    for (var pair of formEnvio.entries()) {
-        console.log(pair[0] + ", " + pair[1]);
-        // obtener el valor de la etiqueta min del imput fecha
-        let fecha_min = document.querySelector("#fecha").getAttribute("min");
-        // validar que el value del campo  fecha no sea menor a fecha_min
-        if (formEnvio.get("fecha") < fecha_min) {
-            mjeError("La fecha no puede ser menor al cierre de periodo", "Fecha permitida: " + fecha_min);
-            return false;
-        }
-    }
-    try {
-        const response = await fetch("datos/registrar/registrar_anulacion_doc.php", {
-            method: "POST",
-            body: formEnvio,
-        });
-        const data = await response.json();
-        console.log(data);
-        if (data[0].value == "ok") {
-            // realizar un case para opciones 1.2.3
-            if (data[0].tipo == 1) {
-                let tabla = "tableEjecPresupuesto";
-                reloadtable(tabla);
-            }
-            if (data[0].tipo == 2) {
-                let tabla = "tableEjecPresupuestoCrp";
-                reloadtable(tabla);
-            }
-            if (data[0].tipo == 3) {
-                let tabla = "tableModPresupuesto";
-                reloadtable(tabla);
-            }
-            mje("Anulación guardada con  éxito...");
-            // cerrar modal
-            $("#divModalForms").modal("hide");
-        }
-    } catch (error) {
-        console.error(error);
-    }
-};
-*/
-// ================================================   FIN LIQUIDAR SALDO DE CDP =====================================
 
 const cargarReportePresupuesto = (id) => {
     let url = "";
@@ -3011,29 +2983,3 @@ function redireccionar3(ruta) {
             .submit();
     }, 100);
 }
-
-const abrirLink = (link) => {
-    if (link == 1) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_sia/index.php");
-    if (link == 2) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_chip/cgr_ingresos.php");
-    if (link == 3) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_chip/cgr_gastos.php");
-    if (link == 4) window.open("http://localhost:3080/2022/USUARIOS_REG/mod_informes/ejec_pptal_ing.php");
-    if (link == 5) window.open("http://localhost:3080/2022/USUARIOS_REG/mod_informes/ejec_pptal_gastos.php");
-    if (link == 6) window.open("http://localhost:3080/2022/USUARIOS_REG/mvto_ppto_gas/relacion_compromisos_corte.php");
-    if (link == 7) window.open("http://localhost:3080/2022/USUARIOS_REG/mod_informes/modificaciones_mensual.php");
-    if (link == 8) window.open("http://localhost:3080/2022/USUARIOS_REG/mod_informes/modificaciones_mensual_ing.php");
-    if (link == 9) window.open("http://localhost:3080/2022/USUARIOS_REG/2193/2193_hom_ing.php");
-    if (link == 10) window.open("http://localhost:3080/2022/USUARIOS_REG/2193_gas/2193_hom_ing.php");
-    if (link == 11) window.open("http://localhost:3080/2022/USUARIOS_REG/2193/a.php");
-    if (link == 12) window.open("http://localhost:3080/2022/USUARIOS_REG/2193_gas/a.php");
-    if (link == 13) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_sia/busca_contrato.php");
-    if (link == 14) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_contabilidad/libro_auxiliar.php");
-    if (link == 15) window.open("http://localhost:3080/2022/USUARIOS_REG/balance_prueba/balance_prueba.php");
-    if (link == 16) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_contabilidad/mayor_balance_corte_f.php");
-    if (link == 17) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_contabilidad/balance_general_corte.php");
-    if (link == 18) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_contabilidad/estado_resultados_corte.php");
-    if (link == 19) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_contaduria_gral/a.php");
-    if (link == 20) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_contaduria_gral/cuenta_puntos.php");
-    if (link == 21) window.open("");
-
-    // generar funcion numeros para
-};

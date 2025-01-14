@@ -134,7 +134,7 @@ try {
 }
 ?>
 <div class="text-right pt-3">
-    <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecCdp('areaImprimir');"> Imprimir</a>
+    <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecMod('areaImprimir',<?= $dto ?>);"> Imprimir</a>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>
 <div class="contenedor bg-light" id="areaImprimir">
@@ -222,11 +222,14 @@ try {
                 $rubro = $rp['cod_pptal'];
                 $afecta = $rp['valor_deb'];
                 if ($afecta > 0) {
-                    echo "<tr>
+                    // todos los $rp['cod_pptal'] que empiecen por 1
+                    if (substr($rp['cod_pptal'], 0, 1) == '1') {
+                        echo "<tr>
                             <td class='text-left'>" . $rp['cod_pptal'] . "</td>
                             <td class='text-left'>" . $rp['nom_rubro'] . "</td>
                             <td style='text-align:right'>" . number_format($afecta, 2, ",", ".")  . "</td>
                         </tr>";
+                    }
                 }
             }
             ?>
@@ -240,7 +243,7 @@ try {
                 </div>
             </div>
         </div>
-        <table class="table-bordered bg-light" style="width:100% !important;<?php echo $vertabla; ?>">
+        <table class="table-bordered bg-light" style="width:100% !important;">
             <tr>
                 <td>Código</td>
                 <td>Nombre</td>
@@ -249,13 +252,16 @@ try {
             <?php
             foreach ($rubros as $rp) {
                 $rubro = $rp['cod_pptal'];
-                $afecta = $rp['valor_cred'];
+                $afecta = $rp['valor_deb'];
                 if ($afecta > 0) {
-                    echo "<tr>
+                    // todos los $rp['cod_pptal'] que empiecen por 1
+                    if (substr($rp['cod_pptal'], 0, 1) == '2') {
+                        echo "<tr>
                             <td class='text-left'>" . $rp['cod_pptal'] . "</td>
                             <td class='text-left'>" . $rp['nom_rubro'] . "</td>
                             <td style='text-align:right'>" . number_format($afecta, 2, ",", ".")  . "</td>
                         </tr>";
+                    }
                 }
             }
             ?>

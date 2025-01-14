@@ -15,6 +15,7 @@ $fecha_cierre = fechaCierre($_SESSION['vigencia'], 4, $cmd);
 // Div de acciones de la lista
 $tipo_doc = $_POST['id_pto_doc'];
 $id_pto_presupuestos = $_POST['id_pto_ppto'];
+$id_vigencia = $_SESSION['id_vigencia'];
 try {
     $sql = "SELECT
                 `pto_mod`.`id_pto_mod`
@@ -34,7 +35,9 @@ try {
                     ON (`pto_mod`.`id_tipo_mod` = `pto_tipo_mvto`.`id_tmvto`)
                 INNER JOIN `pto_actos_admin` 
                     ON (`pto_mod`.`id_tipo_acto` = `pto_actos_admin`.`id_acto`)
-            WHERE `pto_mod`.`id_tipo_mod` = $tipo_doc AND `pto_mod`.`id_pto` = $id_pto_presupuestos
+                INNER JOIN `pto_presupuestos` 
+                    ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
+            WHERE `pto_mod`.`id_tipo_mod` = $tipo_doc AND `pto_presupuestos`.`id_vigencia` = $id_vigencia
             ORDER BY `pto_mod`.`id_manu` ASC";
     $rs = $cmd->query($sql);
     $listappto = $rs->fetchAll(PDO::FETCH_ASSOC);
@@ -46,12 +49,17 @@ try {
                 `pto_mod_detalle`.`id_pto_mod`
                 , SUM(`pto_mod_detalle`.`valor_deb`) AS `debito`
                 , SUM(`pto_mod_detalle`.`valor_cred`) AS `credito`
+                , `pto_presupuestos`.`id_tipo`
             FROM
                 `pto_mod_detalle`
                 INNER JOIN `pto_mod` 
                     ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
+                INNER JOIN `pto_cargue`
+                    ON (`pto_mod_detalle`.`id_cargue` = `pto_cargue`.`id_cargue`)
+                INNER JOIN `pto_presupuestos`
+                    ON (`pto_cargue`.`id_pto` = `pto_presupuestos`.`id_pto`)
             WHERE (`pto_mod`.`id_tipo_mod` = $tipo_doc AND `pto_mod`.`estado` >= 1)
-            GROUP BY `pto_mod_detalle`.`id_pto_mod`";
+            GROUP BY `pto_mod_detalle`.`id_pto_mod`, `pto_presupuestos`.`id_tipo`";
     $rs = $cmd->query($sql);
     $valores = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -66,8 +74,26 @@ if (!empty($listappto)) {
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
         $key = array_search($id_pto, array_column($valores, 'id_pto_mod'));
         if ($key !== false) {
-            $valor1 = $valores[$key]['debito'];
-            $valor2 = $valores[$key]['credito'];
+            // filtrar por id_pto_mod para obtener todos los valores 
+            $filtro = [];
+            $filtro = array_filter($valores, function ($val) use ($id_pto) {
+                return $val['id_pto_mod'] == $id_pto;
+            });
+            $valor1 = 0;
+            $valor2 = 0;
+            foreach ($filtro as $f) {
+                $tipo_pto = $f['id_tipo'];
+                if ($tipo_pto == '1') {
+                    $valor1 += $f['debito'] - $f['credito'];
+                    $valor2 += 0;
+                } else if ($tipo_pto == '2') {
+                    $valor1 += 0;
+                    $valor2 += $f['debito'] - $f['credito'];
+                } else {
+                    $valor1 += $f['debito'];
+                    $valor2 += $f['credito'];
+                }
+            }
         } else {
             $valor1 = 0;
             $valor2 = 0;

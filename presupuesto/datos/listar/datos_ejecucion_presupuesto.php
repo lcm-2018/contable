@@ -140,7 +140,7 @@ if (!empty($listappto)) {
         }
         $key = array_search($id_pto, array_column($registros, 'id_pto_cdp'));
         $valida = $registros[$key]['id_pto_crp'] == '' ? true : false;
-        if ($id_rol == 1 && $lp['estado'] == 2 && $valida) {
+        if (($id_rol == 1 || PermisosUsuario($permisos, 5401, 5)) && $lp['estado'] == 2 && $valida) {
             $abrir = '<a onclick="abrirCdp(' . $id_pto . ')" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb " title="Abrir CDP"><span class="fas fa-lock fa-lg"></span></a>';
             if ($fecha < $fecha_cierre) {
                 $abrir = null;

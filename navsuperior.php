@@ -35,7 +35,6 @@ $url = $_SESSION['urlin'];
                 <?php if ($id_rol == 1) { ?>
                     <a class="dropdown-item sombra" href="<?php echo $url ?>/actualizar/empresa/formupempresa.php">Editar Empresa</a>
                 <?php } ?>
-                <a class="dropdown-item sombra" href="<?php echo $url ?>/vigencia.php">Cambiar Vigencia</a>
                 <a class="dropdown-item sombra" href="#" id="linkChangePass">Cambiar Contraseña</a>
                 <?php if ($id_rol == 1) { ?>
                     <div class="dropdown-divider"></div>

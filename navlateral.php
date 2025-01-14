@@ -6,6 +6,18 @@ if (!isset($_SESSION['user'])) {
 include_once 'conexion.php';
 include_once 'permisos.php';
 $rol = $_SESSION['rol'];
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $sql = "SELECT
+                `id_vigencia`, `anio`
+            FROM
+                `tb_vigencias`";
+    $rs = $cmd->query($sql);
+    $vigencias = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    $res['mensaje'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 ?>
 <div id="layoutSidenav_nav">
     <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
@@ -1144,7 +1156,7 @@ $rol = $_SESSION['rol'];
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-caret-down"></i></div>
                             </a>
                             <div class="collapse" id="pagesCollapseMovimientos" aria-labelledby="headingOne">
-                                <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">                                   
+                                <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
                                     <?php if (PermisosUsuario($permisos, 5703, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/ingresos/index.php?var=3">
                                             <div class="form-row">
@@ -1233,7 +1245,7 @@ $rol = $_SESSION['rol'];
                                         </a>
                                     <?php } ?>
                                 </nav>
-                            </div>                            
+                            </div>
                             <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapseReportes" aria-expanded="false" aria-controls="pagesCollapseMovimientos">
                                 <div class="form-row">
                                     <div class="div-icono">
@@ -1246,7 +1258,7 @@ $rol = $_SESSION['rol'];
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-caret-down"></i></div>
                             </a>
                             <div class="collapse" id="pagesCollapseReportes" aria-labelledby="headingOne">
-                                <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">                                    
+                                <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
                                     <?php if (PermisosUsuario($permisos, 5799, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/inf_personalizados/index.php">
                                             <div class="form-row">
@@ -1263,12 +1275,12 @@ $rol = $_SESSION['rol'];
                             </div>
                         </nav>
                     </div>
-                    <?php
+                <?php
                 }
 
                 //$key = array_search('9', array_column($perm_modulos, 'id_modulo'));
                 if (false) {
-                    ?>
+                ?>
                     <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapseCostos" aria-expanded="false" aria-controls="collapsePages2">
                         <div class="form-row">
                             <div class="div-icono">
@@ -1339,14 +1351,27 @@ $rol = $_SESSION['rol'];
             </style>
             <div class="small">Actualmente:</div>
             <?php
+            $slcVigencia = '<select id="slcVigToChange" class="form-control form-control-sm rounded-pill" style="width: 120px; transform: scale(0.8); display: inline-block;">';
+            foreach ($vigencias as $vg) {
+                $selected = ($vg['id_vigencia'] == $_SESSION['id_vigencia']) ? 'selected' : '';
+                $slcVigencia .= '<option value="' . $vg['id_vigencia'] . '|' . $vg['anio'] . '" ' . $selected . '>' . $vg['anio'] . '</option>';
+            }
+            $slcVigencia .= '</select>';
             if ($id_rol == 1) {
-                $valida = '<div><a type="button" id="btnRegVigencia" href="javascript:void(0)" title="Agregar Vigencia">Vigencia:</a> ' . $_SESSION['vigencia'] . '</div>';
+                $valida = '<a type="button" class="pt-1" id="btnRegVigencia" href="javascript:void(0)" title="Agregar Vigencia">Vigencia:</a>';
             } else {
-                $valida = '<div>Vigencia: ' . $_SESSION['vigencia'] . '</div>';
+                $valida = '<span class="pt-1">Vigencia:</span>';
             }
             ?>
             <div class="small">
-                <?php echo $valida ?>
+                <div class="form-row py-0">
+                    <div class="col py-0">
+                        <?php echo $valida ?>
+                    </div>
+                    <div class="col py-0">
+                        <?php echo $slcVigencia ?>
+                    </div>
+                </div>
                 <div>Usuario: <?php echo mb_strtoupper($_SESSION['user']) ?></div>
             </div>
         </div>

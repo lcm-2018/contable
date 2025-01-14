@@ -65,10 +65,7 @@ if (esta === -1) {
                         $('#divErrorLogin').html("Usuario y/o Contraseña incorrecto(s)");
                         break;
                     case 1:
-                        window.location = "vigencia.php";
-                        break;
-                    case 2:
-                        window.location = "terceros/gestion/detalles_tercero.php";
+                        window.location = "inicio.php";
                         break;
                     case 3:
                         $('#divModalError').modal('show');
@@ -606,6 +603,19 @@ if (esta === -1) {
         $('<form action="' + window.urlin + '/tesoreria/lista_documentos_com.php" method="post">' +
             '<input type="hidden" name="var" value="' + id + '" />' +
             '</form>').appendTo('body').submit();
+    });
+    $('#slcVigToChange').on('change', function () {
+        let vig = $(this).val();
+        $.ajax({
+            type: 'POST',
+            url: window.urlin + '/variablesinicio.php',
+            data: { vig: vig },
+            success: function (r) {
+                if (r === '1') {
+                    location.reload();
+                }
+            }
+        });
     });
 })(jQuery);
 
