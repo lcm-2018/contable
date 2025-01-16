@@ -14,9 +14,8 @@
             buttons: [{
                 action: function(e, dt, node, config) {
                     $.post("frm_reg_subgrupos.php", function(he) {
-                        //$('#divTamModalForms').removeClass('modal-xl');
-                        //$('#divTamModalForms').removeClass('modal-sm');
-                        //$('#divTamModalForms').removeClass('modal-lg');
+                        $('#divTamModalForms').removeClass('modal-sm');
+                        $('#divTamModalForms').removeClass('modal-lg');
                         $('#divTamModalForms').addClass('modal-xl');
                         $('#divModalForms').modal('show');
                         $("#divForms").html(he);
@@ -39,7 +38,10 @@
                 { 'data': 'id_subgrupo' }, //Index=0
                 { 'data': 'cod_subgrupo' },
                 { 'data': 'nom_subgrupo' },
-                { 'data': 'cuenta' },
+                { 'data': 'cuenta_cs' },
+                { 'data': 'cuenta_af' },
+                { 'data': 'cuenta_dep' },
+                { 'data': 'cuenta_gas' },
                 { 'data': 'nom_grupo' },
                 { 'data': 'lote_xdef' },
                 { 'data': 'estado' },
@@ -165,23 +167,23 @@
     });
 
     /* ---------------------------------------------------
-    CUENTAS CONTABLES
+    CUENTAS CONTABLES ARTICULOS CONSUMIBLES
     -----------------------------------------------------*/
 
     //Editar un registro 
-    $('#divForms').on('click', '#tb_cuentas .btn_editar', function() {
+    $('#divForms').on('click', '#tb_cuentas_cs .btn_editar', function() {
         let id = $(this).attr('value');
         $.post("frm_reg_subgrupos_cta.php", { id: id }, function(he) {
-            $('#divTamModalReg').removeClass('modal-lg');
+            $('#divTamModalReg').removeClass('modal-xl');
             $('#divTamModalReg').removeClass('modal-sm');
-            $('#divTamModalReg').addClass('modal-xl');
+            $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
         });
     });
 
     // Autocompletar cuenta contable 
-    $('#divFormsReg').on("input", "#txt_cta_con", function() {
+    $('#divFormsReg').on("input", ".cuenta", function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
@@ -197,9 +199,9 @@
             select: function(event, ui) {
                 var that = $(this);
                 if (ui.item.tipo == 'D' || ui.item.id == '') {
-                    $('#id_txt_cta_con').val(ui.item.id);
+                    $('#' + that.attr('data-campoid')).val(ui.item.id);
                 } else {
-                    $('#id_txt_cta_con').val('-1');
+                    $('#' + that.attr('data-campoid')).val('-1');
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Debe seleccionar una cuenta tipo detalle');
                 }
@@ -232,11 +234,11 @@
                 data: data + "&id_subgrupo=" + $('#id_subgrupo').val() + "&oper=add"
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
-                    let pag = ($('#txt_cta_con').val() == -1) ? 0 : $('#tb_cuentas').DataTable().page.info().page;
-                    reloadtable('tb_cuentas', pag);
+                    let pag = ($('#id_subgrupocta').val() == -1) ? 0 : $('#tb_cuentas_cs').DataTable().page.info().page;
+                    reloadtable('tb_cuentas_cs', pag);
                     pag = $('#tb_subgrupos').DataTable().page.info().page;
                     reloadtable('tb_subgrupos', pag);
-                    $('#txt_cta_con').val(r.id);
+                    $('#id_subgrupocta').val(r.id);
                     $('#divModalReg').modal('hide');
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");
@@ -250,12 +252,12 @@
         }
     });
 
-    //Borrarr un registro CUM de Articulo
-    $('#divForms').on('click', '#tb_cuentas .btn_eliminar', function() {
+    //Borrarr un registro Cuenta
+    $('#divForms').on('click', '#tb_cuentas_cs .btn_eliminar', function() {
         let id = $(this).attr('value');
-        confirmar_del('cuenta', id);
+        confirmar_del('cuenta_cs', id);
     });
-    $('#divModalConfDel').on("click", "#cuenta", function() {
+    $('#divModalConfDel').on("click", "#cuenta_cs", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
@@ -265,8 +267,99 @@
         }).done(function(r) {
             $('#divModalConfDel').modal('hide');
             if (r.mensaje == 'ok') {
-                let pag = $('#tb_cuentas').DataTable().page.info().page;
-                reloadtable('tb_cuentas', pag);
+                let pag = $('#tb_cuentas_cs').DataTable().page.info().page;
+                reloadtable('tb_cuentas_cs', pag);
+                $('#divModalDone').modal('show');
+                $('#divMsgDone').html("Proceso realizado con éxito");
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function() {}).fail(function() {
+            alert('Ocurrió un error');
+        });
+    });
+
+    /* ---------------------------------------------------
+    CUENTAS CONTABLES ARTICULOS ACTIVOS FIJOS
+    -----------------------------------------------------*/
+
+    //Editar un registro 
+    $('#divForms').on('click', '#tb_cuentas_af .btn_editar', function() {
+        let id = $(this).attr('value');
+        $.post("frm_reg_subgrupos_cta_af.php", { id: id }, function(he) {
+            $('#divTamModalReg').removeClass('modal-xl');
+            $('#divTamModalReg').removeClass('modal-sm');
+            $('#divTamModalReg').addClass('modal-lg');
+            $('#divModalReg').modal('show');
+            $("#divFormsReg").html(he);
+        });
+    });
+
+    //Guardar registro Cuenta
+    $('#divFormsReg').on("click", "#btn_guardar_cta_af", function() {
+        $('.is-invalid').removeClass('is-invalid');
+
+        var error = verifica_vacio_2($('#id_txt_cta_con_act'), $('#txt_cta_con_act'));
+        error += verifica_vacio_2($('#id_txt_cta_con_dep'), $('#txt_cta_con_dep'));
+        error += verifica_vacio_2($('#id_txt_cta_con_gas'), $('#txt_cta_con_gas'));
+        error += verifica_vacio($('#txt_fec_vig'));
+        error += verifica_vacio($('#sl_estado_cta'));
+
+        var error1 = verifica_valmin_2($('#id_txt_cta_con_act'), $('#txt_cta_con_act'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_con_dep'), $('#txt_cta_con_dep'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_con_gas'), $('#txt_cta_con_gas'), 0);
+
+        if (error >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Los datos resaltados son obligatorios');
+        } else if (error1 >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Todas las cuentas deben ser tipo detalle')
+        } else {
+            var data = $('#frm_reg_subgrupos_cta_af').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'editar_subgrupos_cta_af.php',
+                dataType: 'json',
+                data: data + "&id_subgrupo=" + $('#id_subgrupo').val() + "&oper=add"
+            }).done(function(r) {
+                if (r.mensaje == 'ok') {
+                    let pag = ($('#id_subgrupocta_af').val() == -1) ? 0 : $('#tb_cuentas_af').DataTable().page.info().page;
+                    reloadtable('tb_cuentas_af', pag);
+                    pag = $('#tb_subgrupos').DataTable().page.info().page;
+                    reloadtable('tb_subgrupos', pag);
+                    $('#id_subgrupocta_af').val(r.id);
+                    $('#divModalReg').modal('hide');
+                    $('#divModalDone').modal('show');
+                    $('#divMsgDone').html("Proceso realizado con éxito");
+                } else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r.mensaje);
+                }
+            }).always(function() {}).fail(function() {
+                alert('Ocurrió un error');
+            });
+        }
+    });
+
+    //Borrarr un registro Cuenta
+    $('#divForms').on('click', '#tb_cuentas_af .btn_eliminar', function() {
+        let id = $(this).attr('value');
+        confirmar_del('cuenta_af', id);
+    });
+    $('#divModalConfDel').on("click", "#cuenta_af", function() {
+        var id = $(this).attr('value');
+        $.ajax({
+            type: 'POST',
+            url: 'editar_subgrupos_cta_af.php',
+            dataType: 'json',
+            data: { id: id, id_subgrupo: $('#id_subgrupo').val(), oper: 'del' }
+        }).done(function(r) {
+            $('#divModalConfDel').modal('hide');
+            if (r.mensaje == 'ok') {
+                let pag = $('#tb_cuentas_af').DataTable().page.info().page;
+                reloadtable('tb_cuentas_af', pag);
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
             } else {

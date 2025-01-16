@@ -183,9 +183,9 @@
     $('#divForms').on('click', '#tb_cuentas .btn_editar', function() {
         let id = $(this).attr('value');
         $.post("frm_reg_centrocostos_cta.php", { id: id }, function(he) {
-            $('#divTamModalReg').removeClass('modal-lg');
+            $('#divTamModalReg').removeClass('modal-xl');
             $('#divTamModalReg').removeClass('modal-sm');
-            $('#divTamModalReg').addClass('modal-xl');
+            $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
         });
@@ -243,11 +243,11 @@
                 data: data + "&id_cencos=" + $('#id_centrocosto').val() + "&oper=add"
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
-                    let pag = ($('#txt_cta_con').val() == -1) ? 0 : $('#tb_cuentas').DataTable().page.info().page;
+                    let pag = ($('#id_ceccta').val() == -1) ? 0 : $('#tb_cuentas').DataTable().page.info().page;
                     reloadtable('tb_cuentas', pag);
                     pag = $('#tb_centro_costos').DataTable().page.info().page;
                     reloadtable('tb_centro_costos', pag);
-                    $('#txt_cta_con').val(r.id);
+                    $('#id_ceccta').val(r.id);
                     $('#divModalReg').modal('hide');
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");

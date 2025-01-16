@@ -64,21 +64,58 @@ if(empty($obj)){
                         </select>
                     </div>
                 </div>
-
-                <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
-                    <thead>
-                        <tr class="text-center centro-vertical">
-                            <th>Id</th>
-                            <th>Cuenta Contable</th>
-                            <th>Fecha Inicio de Vigencia</th>
-                            <th>Cuenta Vigente</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                </table>
-
             </form>
+
+            <!--Tabs para CUENTAS-->
+            <div class="p-3">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link active small" id="nav_lista_cta_cs-tab" data-toggle="tab" href="#nav_lista_cta_cs" role="tab" aria-controls="nav_lista_cta_cs" aria-selected="true">ARTICULOS DE CONSUMO</a>
+                        <a class="nav-item nav-link small" id="nav_lista_cta_af-tab" data-toggle="tab" href="#nav_lista_cta_af" role="tab" aria-controls="nav_lista_cta_af" aria-selected="false">ARTICULOS ACTIVOS FIJOS</a>
+                    </div>
+                </nav>
+
+                <div class="tab-content pt-2" id="nav-tabContent">
+                    <!--Cuentas de Articulos de Consumo-->
+                    <div class="tab-pane fade show active" id="nav_lista_cta_cs" role="tabpanel" aria-labelledby="nav_lista_cta_cs-tab">
+                        <table id="tb_cuentas_cs" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <thead>
+                                <tr class="text-center centro-vertical">
+                                    <th>Id</th>
+                                    <th>Cuenta Contable</th>
+                                    <th>Fecha Inicio de Vigencia</th>
+                                    <th>Cuenta Vigente</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-left centro-vertical"></tbody>
+                        </table>
+                    </div> 
+                    
+                    <!--Cuentas de Articulos de Activos Fijos-->
+                    <div class="tab-pane fade" id="nav_lista_cta_af" role="tabpanel" aria-labelledby="nav_lista_cta_af-tab">
+                        <table id="tb_cuentas_af" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <thead>
+                                <tr class="text-center centro-vertical">
+                                    <th rowspan="2">Id</th>
+                                    <th colspan="3">Cuentas Contables</th>
+                                    <th rowspan="2">Fecha Inicio de Vigencia</th>
+                                    <th rowspan="2">Cuenta Vigente</th>
+                                    <th rowspan="2">Estado</th>
+                                    <th rowspan="2">Acciones</th>
+                                </tr>
+                                <tr class="text-center centro-vertical">
+                                    <th>Activo</th>
+                                    <th>Depreciación</th>
+                                    <th>Gasto Depreciación</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-left centro-vertical"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>         
         </div>
     </div>
     <div class="text-center pt-3">

@@ -68,20 +68,37 @@ if (!empty($objs)) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
 
-        $sql = "SELECT CONCAT_WS(' - ',ctb_pgcp.cuenta,ctb_pgcp.nombre) AS cuenta
-                FROM far_subgrupos_cta    
-                INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=far_subgrupos_cta.id_cuenta)            
-                WHERE far_subgrupos_cta.estado=1 AND far_subgrupos_cta.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND far_subgrupos_cta.id_subgrupo=$id
-                ORDER BY far_subgrupos_cta.fecha_vigencia DESC LIMIT 1";
+        $sql = "SELECT CACT.cuenta
+                FROM far_subgrupos_cta AS SBG
+                INNER JOIN ctb_pgcp AS CACT ON (CACT.id_pgcp=SBG.id_cuenta)            
+                WHERE SBG.estado=1 AND SBG.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND SBG.id_subgrupo=$id
+                ORDER BY SBG.fecha_vigencia DESC LIMIT 1";
         $rs = $cmd->query($sql);
         $objs_cta = $rs->fetch();
-        $cuenta = isset($objs_cta['cuenta']) ? $objs_cta['cuenta'] : '';
+        $cuenta_cs = isset($objs_cta['cuenta']) ? $objs_cta['cuenta'] : '';
+
+        $sql = "SELECT CACT.cuenta AS cuenta_af,
+                    CDEP.cuenta AS cuenta_dep,CGAS.cuenta AS cuenta_gas
+                FROM far_subgrupos_cta_af AS SBG
+                INNER JOIN ctb_pgcp AS CACT ON (CACT.id_pgcp=SBG.id_cuenta)
+                INNER JOIN ctb_pgcp AS CDEP ON (CDEP.id_pgcp=SBG.id_cuenta_dep)
+                INNER JOIN ctb_pgcp AS CGAS ON (CGAS.id_pgcp=SBG.id_cuenta_gas)
+                WHERE SBG.estado=1 AND SBG.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND SBG.id_subgrupo=$id
+                ORDER BY SBG.fecha_vigencia DESC LIMIT 1";
+        $rs = $cmd->query($sql);
+        $objs_cta = $rs->fetch();
+        $cuenta_af = isset($objs_cta['cuenta_af']) ? $objs_cta['cuenta_af'] : '';
+        $cuenta_dep = isset($objs_cta['cuenta_dep']) ? $objs_cta['cuenta_dep'] : '';
+        $cuenta_gas = isset($objs_cta['cuenta_gas']) ? $objs_cta['cuenta_gas'] : '';
 
         $data[] = [
             "id_subgrupo" => $id,
             "cod_subgrupo" => $obj['cod_subgrupo'],
             "nom_subgrupo" => mb_strtoupper($obj['nom_subgrupo']),
-            "cuenta" => $cuenta,
+            "cuenta_cs" => $cuenta_cs,
+            "cuenta_af" => $cuenta_af,
+            "cuenta_dep" => $cuenta_dep,
+            "cuenta_gas" => $cuenta_gas,
             "nom_grupo" => mb_strtoupper($obj['nom_grupo']),
             "lote_xdef" => $obj['lote_xdef'],
             "estado" => $obj['estado'],

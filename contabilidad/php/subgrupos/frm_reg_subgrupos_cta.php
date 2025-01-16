@@ -34,7 +34,7 @@ if (empty($obj)) {
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h7 style="color: white;">REGISRTAR CUENTA DE UN SUBGRUPO</h7>
+            <h7 style="color: white;">REGISRTAR CUENTA CONTABLE DE SUBGRUPO - CONSUMO</h7>
         </div>
         <div class="px-2">
 
@@ -42,12 +42,12 @@ if (empty($obj)) {
             <form id="frm_reg_subgrupos_cta">
                 <input type="hidden" id="id_subgrupocta" name="id_subgrupocta" value="<?php echo $id ?>">
                 <div class=" form-row">
-                    <div class="form-group col-md-8">
+                    <div class="form-group col-md-12">
                         <label for="txt_cta_con" class="small">Cuenta Contable</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_cta_con" value="<?php echo $obj['cuenta'] ?>">
+                        <input type="text" class="form-control form-control-sm cuenta" id="txt_cta_con" data-campoid="id_txt_cta_con" value="<?php echo $obj['cuenta'] ?>">
                         <input type="hidden" id="id_txt_cta_con" name="id_txt_cta_con" value="<?php echo $obj['id_cuenta'] ?>">
                     </div>
-                    <div class="form-group col-md-2">
+                    <div class="form-group col-md-3">
                         <label for="txt_fec_vig" class="small">Fecha Inicio de Vigencia</label>
                         <input type="date" class="form-control form-control-sm" id="txt_fec_vig" name="txt_fec_vig" value="<?php echo $obj['fecha_vigencia'] ?>">
                     </div> 

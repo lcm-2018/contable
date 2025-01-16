@@ -5,9 +5,9 @@
             buttons: [{
                 action: function(e, dt, node, config) {
                     $.post("frm_reg_centrocostos_cta.php", { id_cencos: $('#id_centrocosto').val() }, function(he) {
-                        $('#divTamModalReg').removeClass('modal-lg');
+                        $('#divTamModalReg').removeClass('modal-xl');
                         $('#divTamModalReg').removeClass('modal-sm');
-                        $('#divTamModalReg').addClass('modal-xl');
+                        $('#divTamModalReg').addClass('modal-lg');
                         $('#divModalReg').modal('show');
                         $("#divFormsReg").html(he);
                     });
@@ -16,6 +16,7 @@
             language: setIdioma,
             processing: true,
             serverSide: true,
+            autoWidth: false,
             ajax: {
                 url: 'listar_centrocostos_cta.php',
                 type: 'POST',
@@ -34,7 +35,8 @@
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: 1 },
-                { orderable: false, targets: 5 }
+                { orderable: false, targets: 5 },
+                { width: '5%', targets: [0, 2, 3, 4, 5] }
             ],
             rowCallback: function(row, data) {
                 var vigente = $($(row).find("td")[3]).text();

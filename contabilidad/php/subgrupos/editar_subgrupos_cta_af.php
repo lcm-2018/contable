@@ -17,8 +17,8 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-    if ((PermisosUsuario($permisos, 5509, 2) && $oper == 'add' && $_POST['id_subgrupocta'] == -1) ||
-        (PermisosUsuario($permisos, 5509, 3) && $oper == 'add' && $_POST['id_subgrupocta'] != -1) ||
+    if ((PermisosUsuario($permisos, 5509, 2) && $oper == 'add' && $_POST['id_subgrupocta_af'] == -1) ||
+        (PermisosUsuario($permisos, 5509, 3) && $oper == 'add' && $_POST['id_subgrupocta_af'] != -1) ||
         (PermisosUsuario($permisos, 5509, 4) && $oper == 'del') || $id_rol == 1) {
 
         $id_subgrupo = $_POST['id_subgrupo'];
@@ -29,15 +29,17 @@ try {
                 $rs = $cmd->query($sql);
                 $obj_subgrp = $rs->fetch();
 
-                if($obj_subgrp['id_grupo'] == 1 || $obj_subgrp['id_grupo'] == 2){
-                    $id = $_POST['id_subgrupocta'];
-                    $id_cta = $_POST['id_txt_cta_con'] ? $_POST['id_txt_cta_con'] : 'NULL';
+                if($obj_subgrp['id_grupo'] == 3 || $obj_subgrp['id_grupo'] == 4 || $obj_subgrp['id_grupo'] == 5){
+                    $id = $_POST['id_subgrupocta_af'];
+                    $id_cta_act = $_POST['id_txt_cta_con_act'] ? $_POST['id_txt_cta_con_act'] : 'NULL';
+                    $id_cta_dep = $_POST['id_txt_cta_con_dep'] ? $_POST['id_txt_cta_con_dep'] : 'NULL';
+                    $id_cta_gas = $_POST['id_txt_cta_con_gas'] ? $_POST['id_txt_cta_con_gas'] : 'NULL';
                     $fec_vig = $_POST['txt_fec_vig'] ? "'".$_POST['txt_fec_vig']."'" : 'NULL';
                     $estado = $_POST['sl_estado_cta'];                
 
                     if ($id == -1) {
-                        $sql = "INSERT INTO far_subgrupos_cta(id_subgrupo,id_cuenta,fecha_vigencia,estado,id_usr_crea,fec_creacion)  
-                                VALUES($id_subgrupo,$id_cta,$fec_vig,$estado,$id_usr_crea,'$fecha_crea')";
+                        $sql = "INSERT INTO far_subgrupos_cta_af(id_subgrupo,id_cuenta,id_cuenta_dep,id_cuenta_gas,fecha_vigencia,estado,id_usr_crea,fec_creacion)  
+                                VALUES($id_subgrupo,$id_cta_act,$id_cta_dep,$id_cta_gas,$fec_vig,$estado,$id_usr_crea,'$fecha_crea')";
                         $rs = $cmd->query($sql);
 
                         if ($rs) {
@@ -50,8 +52,8 @@ try {
                             $res['mensaje'] = $cmd->errorInfo()[2];
                         }
                     } else {
-                        $sql = "UPDATE far_subgrupos_cta 
-                                SET id_cuenta=$id_cta,fecha_vigencia=$fec_vig,estado=$estado
+                        $sql = "UPDATE far_subgrupos_cta_af 
+                                SET id_cuenta=$id_cta_act,id_cuenta_dep=$id_cta_dep,id_cuenta_gas=$id_cta_gas,fecha_vigencia=$fec_vig,estado=$estado
                                 WHERE id_subgrupo_cta=" . $id;
                         $rs = $cmd->query($sql);
 
@@ -63,13 +65,13 @@ try {
                         }
                     }
                 } else {
-                    $res['mensaje'] = 'La cuenta se asigna a Tipos de Articulos de Consumo';
+                    $res['mensaje'] = 'Las cuentas se asignan a Tipos de Articulos de Activos Fijos';
                 }    
             }
 
             if ($oper == 'del') {
                 $id = $_POST['id'];
-                $sql = "DELETE FROM far_subgrupos_cta WHERE id_subgrupo_cta=" . $id;
+                $sql = "DELETE FROM far_subgrupos_cta_af WHERE id_subgrupo_cta=" . $id;
                 $rs = $cmd->query($sql);
                 if ($rs) {
                     $res['mensaje'] = 'ok';

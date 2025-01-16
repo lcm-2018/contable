@@ -16,6 +16,7 @@
             language: setIdioma,
             processing: true,
             serverSide: true,
+            autoWidth: false,
             ajax: {
                 url: 'listar_traslados_detalles.php',
                 type: 'POST',
