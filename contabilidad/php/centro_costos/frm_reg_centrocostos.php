@@ -64,19 +64,53 @@ if (empty($obj)) {
                         <input type="hidden" id="id_txt_responsable" name="id_txt_responsable" value="<?php echo $obj['id_responsable'] ?>">
                     </div>
                 </div>
-                <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
-                    <thead>
-                        <tr class="text-center centro-vertical">
-                            <th>Id</th>
-                            <th>Cuenta Contable</th>
-                            <th>Fecha Inicio de Vigencia</th>
-                            <th>Cuenta Vigente</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                </table>
-            </form>
+            </form>    
+
+            <!--Tabs para CUENTAS-->
+            <div class="p-3">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link active small" id="nav_lista_cta_cc-tab" data-toggle="tab" href="#nav_lista_cta_cc" role="tab" aria-controls="nav_lista_cta_cc" aria-selected="true">CUENTA CONTABLE - CENTRO DE COSTO</a>
+                        <a class="nav-item nav-link small" id="nav_lista_cta_sg-tab" data-toggle="tab" href="#nav_lista_cta_sg" role="tab" aria-controls="nav_lista_cta_sg" aria-selected="false">CUENTA CONTABLE - POR SUBGRUPO</a>
+                    </div>
+                </nav>
+
+                <div class="tab-content pt-2" id="nav-tabContent">
+                    
+                    <!--Cuentas del Centro de Costo-->
+                    <div class="tab-pane fade show active" id="nav_lista_cta_cc" role="tabpanel" aria-labelledby="nav_lista_cta_cc-tab">
+                        <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <thead>
+                                <tr class="text-center centro-vertical">
+                                    <th>Id</th>
+                                    <th>Cuenta Contable</th>
+                                    <th>Fecha Inicio de Vigencia</th>
+                                    <th>Cuenta Vigente</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-left centro-vertical"></tbody>
+                        </table>    
+                    </div> 
+                    
+                    <!--Cuentas por Subgrupo-->
+                    <div class="tab-pane fade" id="nav_lista_cta_sg" role="tabpanel" aria-labelledby="nav_lista_cta_sg-tab">
+                        <table id="tb_cuentas_sg" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <thead>
+                                <tr class="text-center centro-vertical">
+                                    <th>Id</th>
+                                    <th>Fecha Inicio de Vigencia</th>
+                                    <th>Cuenta Vigente</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-left centro-vertical"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>      
         </div>
     </div>
     <div class="text-center pt-3">

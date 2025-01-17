@@ -76,7 +76,7 @@ include '../../../permisos.php';
                                         <th rowspan="2">Cobertura</th>
                                         <th rowspan="2">Modalidad</th>
                                         <th rowspan="2">Fecha Inicio de Vigencia</th>
-                                        <th colspan="14">Cuentas</th>
+                                        <th colspan="14">Cuentas Contables</th>
                                         <th rowspan="2">Estado</th>
                                         <th rowspan="2">Acciones</th>
                                     </tr>

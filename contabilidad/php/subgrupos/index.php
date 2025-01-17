@@ -74,7 +74,7 @@ include '../../../permisos.php';
                                         <th rowspan="2">Id</th>
                                         <th rowspan="2">Código</th>
                                         <th rowspan="2">Nombre</th>
-                                        <th colspan="4">Cuentas</th>
+                                        <th colspan="4">Cuentas Contables Vigenetes</th>
                                         <th rowspan="2">Grupo</th>
                                         <th rowspan="2">Lote x Defecto</th>
                                         <th rowspan="2">Estado</th>

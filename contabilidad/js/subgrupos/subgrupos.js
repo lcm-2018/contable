@@ -252,7 +252,7 @@
         }
     });
 
-    //Borrarr un registro Cuenta
+    //Borrar un registro Cuenta
     $('#divForms').on('click', '#tb_cuentas_cs .btn_eliminar', function() {
         let id = $(this).attr('value');
         confirmar_del('cuenta_cs', id);
@@ -343,7 +343,7 @@
         }
     });
 
-    //Borrarr un registro Cuenta
+    //Borrar un registro Cuenta
     $('#divForms').on('click', '#tb_cuentas_af .btn_eliminar', function() {
         let id = $(this).attr('value');
         confirmar_del('cuenta_af', id);
