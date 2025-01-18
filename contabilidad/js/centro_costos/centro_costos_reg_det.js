@@ -27,7 +27,7 @@
                 { orderable: false, targets: 4 },
             ],
             order: [
-                [1, "desc"]
+                [1, "asc"]
             ],
             lengthMenu: [
                 [10, 25, 50, -1],

@@ -79,8 +79,8 @@ try {
                         WHERE SBG.estado=1 AND SBG.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND SBG.id_subgrupo=" . $obj['id_subgrupo'] . "
                         ORDER BY SBG.fecha_vigencia DESC LIMIT 1";
                 $rs = $cmd->query($sql);
-                $objs_cta = $rs->fetch();
-                $cuenta_cs = isset($objs_cta['cuenta']) ? $objs_cta['cuenta'] : '';
+                $obj_cta = $rs->fetch();
+                $cuenta_cs = isset($obj_cta['cuenta']) ? $obj_cta['cuenta'] : '';
 
                 $sql = "SELECT CONCAT_WS(' - ',CACT.cuenta,CACT.nombre) AS cuenta_af,
                             CONCAT_WS(' - ',CDEP.cuenta,CDEP.nombre) AS cuenta_dep,
@@ -92,10 +92,10 @@ try {
                         WHERE SBG.estado=1 AND SBG.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND SBG.id_subgrupo=" . $obj['id_subgrupo'] . "
                         ORDER BY SBG.fecha_vigencia DESC LIMIT 1";
                 $rs = $cmd->query($sql);
-                $objs_cta = $rs->fetch();
-                $cuenta_af = isset($objs_cta['cuenta_af']) ? $objs_cta['cuenta_af'] : '';
-                $cuenta_dep = isset($objs_cta['cuenta_dep']) ? $objs_cta['cuenta_dep'] : '';
-                $cuenta_gas = isset($objs_cta['cuenta_gas']) ? $objs_cta['cuenta_gas'] : '';
+                $obj_cta = $rs->fetch();
+                $cuenta_af = isset($obj_cta['cuenta_af']) ? $obj_cta['cuenta_af'] : '';
+                $cuenta_dep = isset($obj_cta['cuenta_dep']) ? $obj_cta['cuenta_dep'] : '';
+                $cuenta_gas = isset($obj_cta['cuenta_gas']) ? $obj_cta['cuenta_gas'] : '';
                         
                 $tabla .=  
                     '<tr class="resaltar" style="text-align:left"> 

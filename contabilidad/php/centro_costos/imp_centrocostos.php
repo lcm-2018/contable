@@ -62,7 +62,7 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>Id</th>
                 <th>Nombre</th>
-                <th>Cuenta Contable Vigente</th>
+                <th>Cuenta Contable Centro Costo</th>
                 <th>Responsable</th>
             </tr>
         </thead>
@@ -77,14 +77,43 @@ try {
                         WHERE tb_centrocostos_cta.estado=1 AND tb_centrocostos_cta.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND tb_centrocostos_cta.id_cencos=" . $obj['id_centro'] . "
                         ORDER BY tb_centrocostos_cta.fecha_vigencia DESC LIMIT 1";
                 $rs = $cmd->query($sql);
-                $objs_cta = $rs->fetch();
-                $cuenta = isset($objs_cta['cuenta']) ? $objs_cta['cuenta'] : '';
+                $obj_cta = $rs->fetch();
+                $cuenta = isset($obj_cta['cuenta']) ? $obj_cta['cuenta'] : '';
                 
-                $tabla .=  '<tr class="resaltar" style="text-align:center"> 
-                    <td>' . $obj['id_centro'] .'</td>                    
-                    <td style="text-align:left">' . mb_strtoupper($obj['nom_centro']). '</td>
-                    <td style="text-align:left">' . $cuenta .'</td>
-                    <td>' . $obj['usr_respon'] .'</td></tr>';
+                $sql = "SELECT id_cecsubgrp AS id FROM tb_centrocostos_subgr_cta
+                        WHERE estado=1 AND fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND id_cencos=" . $obj['id_centro'] . " 
+                        ORDER BY fecha_vigencia DESC LIMIT 1";
+                $rs = $cmd->query($sql);
+                $obj_cta = $rs->fetch();
+                $id = isset($obj_cta['id']) ? $obj_cta['id'] : -1;
+
+                $sql = "SELECT SG.nom_subgrupo,C.cuenta
+                        FROM far_subgrupos AS SG
+                        LEFT JOIN (SELECT CSG.*,CONCAT_WS(' - ',CTA.cuenta,CTA.nombre) AS cuenta
+                                FROM tb_centrocostos_subgr_cta_detalle AS CSG
+                                INNER JOIN ctb_pgcp AS CTA ON (CTA.id_pgcp=CSG.id_cuenta)
+                                WHERE CSG.id_cecsubgrp=" . $id .") AS C ON (C.id_subgrupo=SG.id_subgrupo)
+                        WHERE SG.id_grupo IN (1,2) ORDER BY SG.id_subgrupo";
+                $rs = $cmd->query($sql);
+                $objs_ctas = $rs->fetchAll();
+
+                $tabla .=  
+                    '<tr class="resaltar" style="text-align:left"> 
+                        <td>' . $obj['id_centro'] .'</td>                    
+                        <td>' . mb_strtoupper($obj['nom_centro']). '</td>
+                        <td>' . $cuenta .'</td>
+                        <td>' . $obj['usr_respon'] .'</td>
+                     <tr class="resaltar" style="text-align:left"> 
+                        <td colspan="4">
+                            <table>';
+                            foreach ($objs_ctas as $cta){
+                                $tabla .=
+                                    '<tr> 
+                                        <td>' . $cta['nom_subgrupo'] .':</td>                    
+                                        <td>' . $cta['cuenta'] .'</td></tr>';
+                            } 
+                            $tabla .=
+                                    '</table></td></tr>';
             }            
             echo $tabla;
             ?>            
