@@ -26,6 +26,7 @@
             language: setIdioma,
             processing: true,
             serverSide: true,
+            autoWidth: false,
             ajax: {
                 url: 'listar_ingresos_detalles.php',
                 type: 'POST',

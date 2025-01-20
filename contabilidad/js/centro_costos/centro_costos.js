@@ -176,23 +176,23 @@
     });
 
     /* ---------------------------------------------------
-    CUENTAS CONTABLES
+    CUENTAS CONTABLES CENTRO DE COSTO
     -----------------------------------------------------*/
 
     //Editar un registro 
     $('#divForms').on('click', '#tb_cuentas .btn_editar', function() {
         let id = $(this).attr('value');
         $.post("frm_reg_centrocostos_cta.php", { id: id }, function(he) {
-            $('#divTamModalReg').removeClass('modal-lg');
+            $('#divTamModalReg').removeClass('modal-xl');
             $('#divTamModalReg').removeClass('modal-sm');
-            $('#divTamModalReg').addClass('modal-xl');
+            $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
         });
     });
 
-    // Autocompletar cuenta contable 
-    $('#divFormsReg').on("input", "#txt_cta_con", function() {
+    // Autocompletar cuenta contable     
+    $('#divFormsReg,#divFormsBus').on("input", ".cuenta", function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
@@ -208,9 +208,9 @@
             select: function(event, ui) {
                 var that = $(this);
                 if (ui.item.tipo == 'D' || ui.item.id == '') {
-                    $('#id_txt_cta_con').val(ui.item.id);
+                    $('#' + that.attr('data-campoid')).val(ui.item.id);
                 } else {
-                    $('#id_txt_cta_con').val('-1');
+                    $('#' + that.attr('data-campoid')).val('-1');
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Debe seleccionar una cuenta tipo detalle');
                 }
@@ -243,11 +243,11 @@
                 data: data + "&id_cencos=" + $('#id_centrocosto').val() + "&oper=add"
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
-                    let pag = ($('#txt_cta_con').val() == -1) ? 0 : $('#tb_cuentas').DataTable().page.info().page;
+                    let pag = ($('#id_ceccta').val() == -1) ? 0 : $('#tb_cuentas').DataTable().page.info().page;
                     reloadtable('tb_cuentas', pag);
                     pag = $('#tb_centro_costos').DataTable().page.info().page;
                     reloadtable('tb_centro_costos', pag);
-                    $('#txt_cta_con').val(r.id);
+                    $('#id_ceccta').val(r.id);
                     $('#divModalReg').modal('hide');
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");
@@ -261,7 +261,7 @@
         }
     });
 
-    //Borrarr un registro CUM de Articulo
+    //Borrar un registro Cuenta
     $('#divForms').on('click', '#tb_cuentas .btn_eliminar', function() {
         let id = $(this).attr('value');
         confirmar_del('cuenta', id);
@@ -289,5 +289,162 @@
         });
     });
 
+    /* ---------------------------------------------------
+    CUENTAS CONTABLES POR SUBGRUPO ENCABEZADO
+    -----------------------------------------------------*/
+
+    //Editar un registro 
+    $('#divForms').on('click', '#tb_cuentas_sg .btn_editar', function() {
+        let id = $(this).attr('value');
+        $.post("frm_reg_centrocostos_sg.php", { id: id }, function(he) {
+            $('#divTamModalReg').removeClass('modal-xl');
+            $('#divTamModalReg').removeClass('modal-sm');
+            $('#divTamModalReg').addClass('modal-lg');
+            $('#divModalReg').modal('show');
+            $("#divFormsReg").html(he);
+        });
+    });
+
+    //Guardar registro Subgrupo
+    $('#divFormsReg').on("click", "#btn_guardar_sg", function() {
+        $('.is-invalid').removeClass('is-invalid');
+
+        var error = verifica_vacio($('#txt_fec_vig'));
+        error += verifica_vacio($('#sl_estado_cta'));
+
+        if (error >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Los datos resaltados son obligatorios');
+        } else {
+            var data = $('#frm_reg_centrocostos_sg').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'editar_centrocostos_sg.php',
+                dataType: 'json',
+                data: data + "&id_cencos=" + $('#id_centrocosto').val() + "&oper=add"
+            }).done(function(r) {
+                if (r.mensaje == 'ok') {
+                    let pag = ($('#id_cec_sg').val() == -1) ? 0 : $('#tb_cuentas_sg').DataTable().page.info().page;
+                    reloadtable('tb_cuentas_sg', pag);
+                    $('#id_cec_sg').val(r.id);
+                    $('#divModalDone').modal('show');
+                    $('#divMsgDone').html("Proceso realizado con éxito");
+                } else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r.mensaje);
+                }
+            }).always(function() {}).fail(function() {
+                alert('Ocurrió un error');
+            });
+        }
+    });
+
+    //Borrar un registro Subgrupo
+    $('#divForms').on('click', '#tb_cuentas_sg .btn_eliminar', function() {
+        let id = $(this).attr('value');
+        confirmar_del('cuenta_sg', id);
+    });
+    $('#divModalConfDel').on("click", "#cuenta_sg", function() {
+        var id = $(this).attr('value');
+        $.ajax({
+            type: 'POST',
+            url: 'editar_centrocostos_sg.php',
+            dataType: 'json',
+            data: { id: id, id_cencos: $('#id_centrocosto').val(), oper: 'del' }
+        }).done(function(r) {
+            $('#divModalConfDel').modal('hide');
+            if (r.mensaje == 'ok') {
+                let pag = $('#tb_cuentas_sg').DataTable().page.info().page;
+                reloadtable('tb_cuentas_sg', pag);
+                $('#divModalDone').modal('show');
+                $('#divMsgDone').html("Proceso realizado con éxito");
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function() {}).fail(function() {
+            alert('Ocurrió un error');
+        });
+    });
+
+    /* ---------------------------------------------------
+    CUENTAS CONTABLES POR SUBGRUPO - DETALLE
+    -----------------------------------------------------*/
+
+    //Editar un registro 
+    $('#divFormsReg').on('click', '#tb_cuentas_sg_det .btn_editar', function() {
+        let id = $(this).attr('value');
+        let fila = $(this).closest('tr');
+        let data = $('#tb_cuentas_sg_det').DataTable().row(fila).data();
+        $.post("frm_reg_centrocostos_sg_cta.php", { id: id, id_subgrupo: data.id_subgrupo }, function(he) {
+            $('#divTamModalBus').removeClass('modal-xl');
+            $('#divTamModalBus').removeClass('modal-sm');
+            $('#divTamModalBus').addClass('modal-lg');
+            $('#divModalBus').modal('show');
+            $("#divFormsBus").html(he);
+        });
+    });
+
+    //Guardar registro Cuenta
+    $('#divTamModalBus').on("click", "#btn_guardar_sg_cta", function() {
+        $('.is-invalid').removeClass('is-invalid');
+
+        var error = verifica_vacio_2($('#id_txt_cta_con'), $('#txt_cta_con'));
+
+        if (error >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Los datos resaltados son obligatorios');
+        } else {
+            var data = $('#frm_reg_centrocostos_sg_cta').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'editar_centrocostos_sg_cta.php',
+                dataType: 'json',
+                data: data + "&id_cec_sg=" + $('#id_cec_sg').val() + "&oper=add"
+            }).done(function(r) {
+                if (r.mensaje == 'ok') {
+                    let pag = ($('#id_cec_sgcta').val() == -1) ? 0 : $('#tb_cuentas_sg_det').DataTable().page.info().page;
+                    reloadtable('tb_cuentas_sg_det', pag);
+                    $('#id_cec_sgcta').val(r.id);
+                    $('#divModalBus').modal('hide');
+                    $('#divModalDone').modal('show');
+                    $('#divMsgDone').html("Proceso realizado con éxito");
+                } else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r.mensaje);
+                }
+            }).always(function() {}).fail(function() {
+                alert('Ocurrió un error');
+            });
+        }
+    });
+
+    //Borrarr un registro Cuenta
+    $('#divFormsReg').on('click', '#tb_cuentas_sg_det .btn_eliminar', function() {
+        let id = $(this).attr('value');
+        confirmar_del('cuenta_sg_det', id);
+    });
+    $('#divModalConfDel').on("click", "#cuenta_sg_det", function() {
+        var id = $(this).attr('value');
+        $.ajax({
+            type: 'POST',
+            url: 'editar_centrocostos_sg_cta.php',
+            dataType: 'json',
+            data: { id: id, id_cec_sg: $('#id_cec_sg').val(), oper: 'del' }
+        }).done(function(r) {
+            $('#divModalConfDel').modal('hide');
+            if (r.mensaje == 'ok') {
+                let pag = $('#tb_cuentas_sg_det').DataTable().page.info().page;
+                reloadtable('tb_cuentas_sg_det', pag);
+                $('#divModalDone').modal('show');
+                $('#divMsgDone').html("Proceso realizado con éxito");
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function() {}).fail(function() {
+            alert('Ocurrió un error');
+        });
+    });
 
 })(jQuery);

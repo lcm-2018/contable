@@ -14,9 +14,8 @@
             buttons: [{
                 action: function(e, dt, node, config) {
                     $.post("frm_reg_cuentas_fac.php", function(he) {
-                        //$('#divTamModalForms').removeClass('modal-xl');
-                        //$('#divTamModalForms').removeClass('modal-sm');
-                        //$('#divTamModalForms').removeClass('modal-lg');
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').removeClass('modal-sm');
                         $('#divTamModalForms').addClass('modal-lg');
                         $('#divModalForms').modal('show');
                         $("#divForms").html(he);

@@ -58,7 +58,7 @@ if(empty($obj)){
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">REGISRTAR CUENTAS DE FACTURACION</h5>
+            <h5 style="color: white;">REGISRTAR CUENTAS CONTABLES DE FACTURACION</h5>
         </div>
         <div class="px-2">
             <form id="frm_reg_cuentas_fac">

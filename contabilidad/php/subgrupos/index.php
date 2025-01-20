@@ -71,14 +71,20 @@ include '../../../permisos.php';
                             <table id="tb_subgrupos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>
                                     <tr class="text-center centro-vertical">
-                                        <th>Id</th>
-                                        <th>Código</th>
-                                        <th>Nombre</th>
-                                        <th>Cuenta Contable Vigente</th>
-                                        <th>Grupo</th>
-                                        <th>Lote x Defecto</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
+                                        <th rowspan="2">Id</th>
+                                        <th rowspan="2">Código</th>
+                                        <th rowspan="2">Nombre</th>
+                                        <th colspan="4">Cuentas Contables Vigenetes</th>
+                                        <th rowspan="2">Grupo</th>
+                                        <th rowspan="2">Lote x Defecto</th>
+                                        <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Acciones</th>
+                                    </tr>
+                                    <tr class="text-center centro-vertical">
+                                        <th>Consumo</th>
+                                        <th>Activo Fijo</th>
+                                        <th>Depreciación Acf</th>
+                                        <th>Gasto Depresc. Acf</th>
                                     </tr>
                                 </thead>
                             </table>
