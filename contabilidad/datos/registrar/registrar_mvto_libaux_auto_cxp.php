@@ -51,7 +51,7 @@ try {
                     ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                 INNER JOIN `pto_cdp` 
                     ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                INNER JOIN `ctt_adquisiciones` 
+                LEFT JOIN `ctt_adquisiciones` 
                     ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
             WHERE (`ctb_libaux`.`id_ctb_libaux` 
                 IN (SELECT
@@ -68,7 +68,7 @@ try {
                             ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                         INNER JOIN `pto_cdp` 
                             ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                        INNER JOIN `ctt_adquisiciones` 
+                        LEFT JOIN `ctt_adquisiciones` 
                             ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
                     WHERE (`ctb_libaux`.`debito` > 0)
                     GROUP BY `ctt_adquisiciones`.`id_tipo_bn_sv`))";
@@ -89,7 +89,7 @@ try {
                     ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                 INNER JOIN `pto_cdp` 
                     ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                INNER JOIN `ctt_adquisiciones` 
+                LEFT JOIN `ctt_adquisiciones` 
                     ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
             WHERE (`ctb_libaux`.`id_ctb_libaux` 
                 IN (SELECT
@@ -106,7 +106,7 @@ try {
                             ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                         INNER JOIN `pto_cdp` 
                             ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                        INNER JOIN `ctt_adquisiciones` 
+                        LEFT JOIN `ctt_adquisiciones` 
                             ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
                     WHERE (`ctb_libaux`.`credito` > 0)
                     GROUP BY `ctt_adquisiciones`.`id_tipo_bn_sv`))";
@@ -123,7 +123,7 @@ try {
                     `ctb_doc`
                     INNER JOIN `pto_crp` 
                         ON (`ctb_doc`.`id_crp` = `pto_crp`.`id_pto_crp`)
-                    INNER JOIN `ctt_adquisiciones` 
+                    LEFT JOIN `ctt_adquisiciones` 
                         ON (`pto_crp`.`id_cdp` = `ctt_adquisiciones`.`id_cdp`)
                     INNER JOIN `ctb_causa_costos` 
                         ON (`ctb_causa_costos`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)

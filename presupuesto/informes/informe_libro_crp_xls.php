@@ -55,7 +55,7 @@ try {
                         ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
                     INNER JOIN `pto_cargue` 
                         ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                WHERE (`pto_crp`.`fecha` BETWEEN '2024-01-01' AND '2024-06-19' AND `pto_crp`.`estado` <> 0)) AS `taux`
+                WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` <> 0)) AS `taux`
                 LEFT JOIN
                         (SELECT
                             `pto_cdp_detalle`.`id_pto_cdp`
@@ -67,7 +67,7 @@ try {
                                 ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                             INNER JOIN `pto_crp` 
                                 ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
-                        WHERE (`pto_crp`.`fecha` BETWEEN '2024-01-01' AND '2024-06-19' AND `pto_crp`.`estado` <> 0)
+                        WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` <> 0)
                         GROUP BY `pto_cdp_detalle`.`id_pto_cdp`, `pto_cdp_detalle`.`id_rubro`) AS `t1`
                     ON (`t1`.`id_pto_cdp` = `taux`.`id_pto_cdp` AND `t1`.`id_rubro` = `taux`.`id_rubro`)
                 LEFT JOIN
@@ -83,7 +83,7 @@ try {
                                 ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
                             INNER JOIN `pto_cop_detalle` 
                                 ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
-                        WHERE (`pto_crp`.`fecha` BETWEEN '2024-01-01' AND '2024-06-19' AND `pto_crp`.`estado` <> 0)
+                        WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` <> 0)
                         GROUP BY `pto_cdp_detalle`.`id_pto_cdp`, `pto_cdp_detalle`.`id_rubro`) AS `t2`
                             ON (`t2`.`id_pto_cdp` = `taux`.`id_pto_cdp` AND `t2`.`id_rubro` = `taux`.`id_rubro`)
                 LEFT JOIN `ctt_adquisiciones` 

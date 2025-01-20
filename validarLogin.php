@@ -7,7 +7,7 @@ $passlow = $_POST['passwd'];
 $year = date('Y');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $sql = "SELECT `id_vigencia` FROM `tb_vigencias` WHERE `anio` = $year";
+    $sql = "SELECT `id_vigencia`, `anio` FROM  `tb_vigencias` WHERE `id_vigencia` = (SELECT MAX(`id_vigencia`) FROM `tb_vigencias`)";
     $rs = $cmd->query($sql);
     $vigencia = $rs->fetch();
     $cmd = null;
@@ -51,7 +51,7 @@ try {
         $_SESSION['navarlat'] = '0';
         $_SESSION['caracter'] = $empresa['caracter'];
         $_SESSION['id_vigencia'] = $vigencia['id_vigencia'];
-        $_SESSION['vigencia'] = $year;
+        $_SESSION['vigencia'] = $vigencia['anio'];
         $_SESSION['nit_emp'] = $empresa['nit'];
         $res['mensaje'] = 1;
         if ($obj['estado'] === '0') {

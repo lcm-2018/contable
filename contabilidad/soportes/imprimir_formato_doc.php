@@ -22,11 +22,42 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id_t = [];
 try {
     $sql = "SELECT 
-                `detalle`,`fecha`,`id_manu`,`id_tercero`,`fecha_reg`, `id_tipo_doc` AS `tipo_doc`, `estado`
-            FROM `ctb_doc` 
-            WHERE `id_ctb_doc` = $dto";
+                `ctb_doc`.`detalle`
+                , `ctb_doc`.`fecha`
+                , `ctb_doc`.`id_manu`
+                , `ctb_doc`.`id_tercero`
+                , `ctb_doc`.`fecha_reg`
+                , `ctb_doc`.`id_tipo_doc` AS `tipo_doc`
+                , `ctb_doc`.`estado`
+                , CONCAT_WS (' ',`us1`.`nombre1`, `us1`.`nombre2`, `us1`.`apellido1`, `us1`.`apellido2`) AS `usuario_reg`
+                , CONCAT_WS (' ',`us2`.`nombre1`, `us2`.`nombre2`, `us2`.`apellido1`, `us2`.`apellido2`) AS `usuario_act`
+            FROM `ctb_doc`
+                INNER JOIN `seg_usuarios_sistema`  AS `us1` 
+                    ON (`ctb_doc`.`id_user_reg` = `us1`.`id_usuario`)
+                LEFT JOIN `seg_usuarios_sistema`  AS `us2`
+                    ON (`ctb_doc`.`id_user_act` = `us2`.`id_usuario`)
+            WHERE `ctb_doc`.`id_ctb_doc` = $dto";
     $res = $cmd->query($sql);
     $doc = $res->fetch();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $sql = "SELECT
+                `ctb_causa_costos`.`valor`
+                , `far_centrocosto_area`.`nom_area`
+                , `tb_municipios`.`nom_municipio`
+            FROM
+                `ctb_causa_costos`
+                INNER JOIN `far_centrocosto_area` 
+                    ON (`ctb_causa_costos`.`id_area_cc` = `far_centrocosto_area`.`id_area`)
+                INNER JOIN `tb_sedes` 
+                    ON (`far_centrocosto_area`.`id_sede` = `tb_sedes`.`id_sede`)
+                INNER JOIN `tb_municipios` 
+                    ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`)
+            WHERE (`ctb_causa_costos`.`id_ctb_doc` = $dto)";
+    $res = $cmd->query($sql);
+    $costos = $res->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -443,13 +474,13 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                         <td>Vencimiento</td>
                     </tr>
                     <tr>
-                        <td style="text-align: left"><?php echo $factura['tipo']; ?></td>
+                        <td style="text-align: left"><?php echo $factura['tipo_doc']; ?></td>
                         <td><?php echo $prefijo . $factura['num_doc']; ?></td>
                         <td><?php echo $fecha_fact; ?></td>
                         <td><?php echo $fecha_ven; ?></td>
                     </tr>
                     <tr>
-                        <td style="text-align: left">Valor factura</td>
+                        <td style="text-align: left">Valor <?= mb_strtolower($factura['tipo_doc']); ?></td>
                         <td>Valor IVA</td>
                         <td>Base</td>
                         <td></td>
@@ -504,7 +535,36 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
             ?>
         <?php } ?>
 
-
+        </br>
+        <div class="row">
+            <div class="col-12">
+                <div style="text-align: left">
+                    <div><strong>Distribución de costos: </strong></div>
+                </div>
+            </div>
+        </div>
+        <table class="table-bordered bg-light" style="width:100% !important; border-collapse: collapse;">
+            <tr>
+                <td style="text-align: left;border: 1px solid black">Municipio</td>
+                <td style='border: 1px solid black'>Centro Costo</td>
+                <td style='border: 1px solid black'>Valor</td>
+            </tr>
+            <?php
+            $tot_costos = 0;
+            foreach ($costos as $ct) {
+                echo "<tr style='border: 1px solid black'>
+                            <td class='text-left' style='border: 1px solid black'>" . $ct['nom_municipio'] . "</td>
+                            <td class='text-left' style='border: 1px solid black'>" . $ct['nom_area'] .  "</td>
+                            <td class='text-right' style='border: 1px solid black;text-align: right'>" . number_format($ct['valor'], 2, ",", ".")  . "</td>
+                        </tr>";
+                $tot_costos += $ct['valor'];
+            }
+            ?>
+            <tr>
+                <td style="text-align: left;border: 1px solid black" colspan="2">Total</td>
+                <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_costos, 2, ",", "."); ?> </td>
+            </tr>
+        </table>
         </br>
         <div class="row">
             <div class="col-12">
@@ -591,7 +651,7 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
         </br>
         <div class="row">
             <div class="col-12">
-                <div style="text-align: center">
+                <div style="text-align: center; font-size: 10px;">
                     <div>___________________________________</div>
                     <div><?= $nom_respon; ?> </div>
                     <div><?= $cargo_respon; ?> </div>
@@ -617,9 +677,11 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                 </tr>
                 <tr style="text-align:center">
                     <td>
-                        <?= trim($cdp['usuario_act']) == '' ? $cdp['usuario'] : $cdp['usuario_act'] ?>
+                        <br><br>
+                        <?= trim($doc['usuario_act']) == '' ? $doc['usuario_reg'] : $doc['usuario_act'] ?>
                     </td>
                     <td>
+                        <br><br>
                         <?php
                         $key = array_search('2', array_column($responsables, 'tipo_control'));
                         $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
@@ -628,8 +690,9 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                         ?>
                     </td>
                     <td>
+                        <br><br>
                         <?php
-                        $key = array_search('2', array_column($responsables, 'tipo_control'));
+                        $key = array_search('3', array_column($responsables, 'tipo_control'));
                         $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
                         $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
                         echo $nombre . '<br> ' . $cargo;

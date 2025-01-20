@@ -18,7 +18,7 @@ $estado = 1;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "INSERT INTO `bd_cronhis`.`nom_otros_descuentos`
+    $sql = "INSERT INTO `nom_otros_descuentos`
                 (`id_empleado`,`id_tipo_dcto`,`fecha`,`fecha_fin`, `concepto`,`valor`,`estado`,`id_user_reg`,`fec_reg`)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $sql = $cmd->prepare($sql);

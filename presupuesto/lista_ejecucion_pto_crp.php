@@ -39,13 +39,7 @@ try {
                                     EJECUCION <?php echo strtoupper($nomPresupuestos['nombre']); ?> - REGISTROS PRESUPUESTALES
                                 </div>
                                 <input type="hidden" id="id_pto_ppto" value="<?php echo $_POST['id_pto']; ?>">
-                                <?php if (PermisosUsuario($permisos, 5401, 2) || $id_rol == 1) {
-                                    echo  '<input type="hidden" id="peReg" value="1">';
-                                } else {
-                                    echo  '<input type="hidden" id="peReg" value="0">';
-                                }
-                                ?>
-
+                                <input type="hidden" id="peReg" value="0">
                             </div>
                         </div>
                         <div class="card-body" id="divCuerpoPag">

@@ -2,8 +2,6 @@
 
 include '../../../conexion.php';
 // Consexion a cronhis asistencial
-$cmd2 = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base_f;$charset", $bd_usuario, $bd_clave);
-$cmd2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 //
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -14,7 +12,7 @@ $fecha = $_post['fecha'];
 // $sql = "SELECT SUM(`valor`) as valor FROM `seg_vta_copagos` WHERE (`cc_fact` =$tercero AND `num_fact_anula` = 0 AND `fecha` ='$fecha');";
 try {
     $sql = "SELECT cc_facturador,SUM(valor) AS valor FROM(
-SELECT  num_documento AS cc_facturador
+SELECT  `num_documento` AS cc_facturador
       , num_doc_usr AS cc_paciente
       , paciente AS nom_paciente
       , concepto
@@ -24,12 +22,12 @@ SELECT  num_documento AS cc_facturador
       , vista_aux_arqueo.valor
       , t.valor AS ingreso      
 FROM vista_aux_arqueo
-      LEFT JOIN (SELECT id_factura,valor FROM vista_aux_arqueo WHERE `estado`=0 AND fec_factura <> IFNULL(DATE_FORMAT(fec_anulacion,'%Y-%m-%d'),'1900-01-01')) AS t
+      LEFT JOIN (SELECT id_factura,valor FROM vista_aux_arqueo WHERE `estado`= 0 AND fec_factura <> IFNULL(DATE_FORMAT(fec_anulacion,'%Y-%m-%d'),'1900-01-01')) AS t
       ON(vista_aux_arqueo.id_fac_anulada = t.id_factura)
 WHERE fec_factura <> IFNULL(DATE_FORMAT(fec_anulacion,'%Y-%m-%d'),'1900-01-01') AND fec_factura = '$fecha') AS temp
     WHERE temp.cc_facturador ='$tercero' AND anulada IS NULL
     GROUP BY temp.cc_facturador";
-    $res = $cmd2->query($sql);
+    $res = $cmd->query($sql);
     $datos = $res->fetch();
     $valor = $datos['valor'];
 } catch (Exception $e) {
@@ -57,7 +55,7 @@ FROM vista_aux_arqueo
 WHERE fec_factura <> IFNULL(DATE_FORMAT(fec_anulacion,'%Y-%m-%d'),'1900-01-01') AND fec_factura = '$fecha' AND `id_fac_anulada` IS NOT NULL) AS temp
     WHERE temp.cc_facturador ='$tercero'
     GROUP BY temp.cc_facturador";
-    $res = $cmd2->query($sql);
+    $res = $cmd->query($sql);
     $datos = $res->fetch();
 } catch (Exception $e) {
     echo $e->getMessage();
@@ -76,5 +74,4 @@ if ($valor > 0) {
 }
 echo json_encode($response);
 $cmd = null;
-$cmd2 = null;
 exit;

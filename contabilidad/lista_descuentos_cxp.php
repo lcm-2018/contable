@@ -110,7 +110,7 @@ $val_iva = $valores[1];
         ],
         columnDefs: [{
             class: 'text-wrap',
-            targets: [0,1]
+            targets: [0, 1]
         }],
     });
     $('#tableCausacionRetenciones').wrap('<div class="overflow" />');
@@ -141,37 +141,44 @@ $val_iva = $valores[1];
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-4">
-                            <label for="tipo_rete" class="small">Tipo retención</label>
-                            <select class="form-control form-control-sm py-0 sm" name="tipo_rete" id="tipo_rete" onchange="mostrarRetenciones(value);" required>
-                                <option value="0">-- Seleccionar --</option>
-                                <?php
-                                foreach ($retenciones as $retencion) {
-                                    echo "<option value='$retencion[id_retencion_tipo]'>$retencion[tipo]</option>";
-                                }
-                                ?>
-                            </select>
-                            <input type="hidden" name="id_docr" id="id_docr" value="<?php echo $id_doc; ?>">
-                            <input type="hidden" name="tarifa" id="tarifa" value="">
-                            <input type="hidden" name="id_terceroapi" id="id_terceroapi" value="">
-                            <input type="hidden" name="id_detalle" id="id_detalle" value="0">
-                            <input type="hidden" name="id_rango" id="id_rango" value="0">
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <label for="tipo_rete" class="small">Tipo retención</label>
+                                    <select class="form-control form-control-sm py-0 sm" name="tipo_rete" id="tipo_rete" onchange="mostrarRetenciones(value);" required>
+                                        <option value="0">-- Seleccionar --</option>
+                                        <?php
+                                        foreach ($retenciones as $retencion) {
+                                            echo "<option value='$retencion[id_retencion_tipo]'>$retencion[tipo]</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                    <input type="hidden" name="id_docr" id="id_docr" value="<?php echo $id_doc; ?>">
+                                    <input type="hidden" name="tarifa" id="tarifa" value="">
+                                    <input type="hidden" name="id_terceroapi" id="id_terceroapi" value="">
+                                    <input type="hidden" name="id_detalle" id="id_detalle" value="0">
+                                    <input type="hidden" name="id_rango" id="id_rango" value="0">
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group col-md-4" id="divRete">
-                            <label for="id_rete" class="small">Retención</label>
-                            <select class="form-control form-control-sm py-0 sm" id="id_rete" name="id_rete">
-                                <option value="0">-- Seleccionar --</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="valor_rte" class="small">Valor retención</label>
-                            <input type="text" name="valor_rte" id="valor_rte" class="form-control form-control-sm text-right" onkeyup="valorMiles(id)" value="<?php echo 0; ?>">
+                        <div class="form-group col-md-8">
+                            <div id="divRete">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="id_rete" class="small">Retención</label>
+                                        <select class="form-control form-control-sm py-0 sm" id="id_rete" name="id_rete">
+                                            <option value="0">-- Seleccionar --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="valor_rte" class="small">Valor retención</label>
+                                        <input type="text" name="valor_rte" id="valor_rte" class="form-control form-control-sm text-right" onkeyup="valorMiles(id)" value="<?php echo 0; ?>">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-row mb-2" id="conDivSobre">
-                        <div class="form-group col-md-4" id="divSede">
-                        </div>
-                        <div class="form-group col-md-4" id="divSobre">
-                        </div>
+                    <div id="divRetIca">
+
                     </div>
                 </form>
                 <table id="tableCausacionRetenciones" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width: 100%;">

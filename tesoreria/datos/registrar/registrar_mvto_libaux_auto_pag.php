@@ -84,6 +84,10 @@ try {
         $id_cuenta = $fp['cta_contable'];
         $credito = $fp['valor'];
         $total += $credito;
+        if (isset($cuenta_ctb['accion']) && $cuenta_ctb['accion'] == '1') {
+            $debito = $credito;
+            $credito = 0;
+        }
         $sql->execute();
         if ($cmd->lastInsertId() > 0) {
             $registros++;
@@ -99,6 +103,10 @@ try {
             $id_cuenta = $cuenta_ctb['cuenta'];
         }
         $debito = $total;
+        if (isset($cuenta_ctb['accion']) && $cuenta_ctb['accion'] == '1') {
+            $credito = $total;
+            $debito = 0;
+        }
         $sql->execute();
         if ($cmd->lastInsertId() > 0) {
             $registros++;

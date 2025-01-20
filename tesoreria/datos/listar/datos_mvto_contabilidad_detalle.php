@@ -74,22 +74,13 @@ if (!empty($listappto)) {
         $borrar = $editar = $detalles = $registrar = null;
         if ($estado == 1) {
             $detalles = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
-            if (PermisosUsuario($permisos, 5501, 2) || $id_rol == 1) {
+            if (PermisosUsuario($permisos, 5603, 2) || PermisosUsuario($permisos, 5501, 2) || $id_rol == 1) {
                 $registrar = '<a value="' . $id_ctb . '" onclick="CargarFormularioCrpp(' . $id_ctb . ')" class="text-blue " role="button" title="Detalles"><span>Registrar</span></a>';
             }
-            if (PermisosUsuario($permisos, 5501, 3) || $id_rol == 1) {
+            if (PermisosUsuario($permisos, 5603, 2) || PermisosUsuario($permisos, 5501, 3) || $id_rol == 1) {
                 $editar = '<a text="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb modificar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
-                /*
-            $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-            ...
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a value="' . $id_ctb . '" class="dropdown-item sombra carga" href="#">Cargar presupuesto</a>
-            <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Another action</a>
-            <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Something else here</a>
-            </div>';*/
             }
-            if (PermisosUsuario($permisos, 5501, 4) || $id_rol == 1) {
+            if (PermisosUsuario($permisos, 5603, 2) || PermisosUsuario($permisos, 5501, 4) || $id_rol == 1) {
                 $borrar = '<a value="' . $id . '" onclick="eliminarRegistroDetalletesPag(' . $id . ')"class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Borrar"><span class="fas fa-trash-alt fa-lg"></span></a>';
             }
         }

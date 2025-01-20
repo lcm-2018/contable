@@ -1447,18 +1447,24 @@ let calculoIva = function () {
 // Muestra el select según el tipo de retención seleccionado
 const mostrarRetenciones = (dato) => {
 	let id_doc = $("#id_ctb_doc").val();
+	let tipo = $("#tipo_rete").val();
 	fetch("datos/consultar/consulta_retenciones.php", {
 		method: "POST",
-		body: JSON.stringify({ id: dato }),
+		body: JSON.stringify({ id: dato, tipo: tipo }),
 	})
 		.then((response) => response.text())
 		.then((response) => {
+			if (tipo == 3) {
+				response = '';
+			} else {
+				$('#divRetIca').html('');
+			}
 			$('#divRete').html(response);
 		})
 		.catch((error) => {
 			console.log("Error:");
 		});
-	if (dato == 3) {
+	if (tipo == 3) {
 		// Enviar y consultar el valor causado por cada sede ======= Valor causado por sede
 		if ($('#factura_des').val() != '0|0') {
 			let valores = $('#factura_des').val();
@@ -1468,19 +1474,7 @@ const mostrarRetenciones = (dato) => {
 			})
 				.then((response) => response.text())
 				.then((response) => {
-					divSede.innerHTML = response;
-				})
-				.catch((error) => {
-					console.log("Error:");
-				});
-			// Treer consulta de sobretasa bomberil
-			fetch("datos/consultar/consulta_retenciones_sobre.php", {
-				method: "POST",
-				body: JSON.stringify({ id_doc: id_doc }),
-			})
-				.then((response) => response.text())
-				.then((response) => {
-					divSobre.innerHTML = response;
+					$('#divRetIca').html(response);
 				})
 				.catch((error) => {
 					console.log("Error:");
@@ -1490,9 +1484,6 @@ const mostrarRetenciones = (dato) => {
 			$('#tipo_rete').val('0');
 		}
 	} else {
-		// ocultar div   id="divSobre"
-		divSobre.innerHTML = "";
-		divSede.innerHTML = "";
 		valor_rte.value = 0;
 	}
 	id_terceroapi.value = "";
@@ -1829,7 +1820,7 @@ const ProcesaFacturas = (boton) => {
 		$('#valor_iva').addClass('is-invalid');
 		$('#valor_iva').focus();
 		mjeError("El valor del IVA no puede ser menor a cero");
-	} else if (Number($('#valor_base').val()) < 0) {
+	} else if (Number($('#valor_base').val()) <= 0) {
 		$('#valor_base').addClass('is-invalid');
 		$('#valor_base').focus();
 		mjeError("Debe ingresar el valor base");
@@ -2098,8 +2089,43 @@ const eliminarRegistroDoc = (id) => {
 };
 
 /*=================================   IMPRESION DE PFORMATOS =====================================*/
+function ValidaValoresIguales(id, callback) {
+	var ruta = "datos/consultar/consulta_valores_doc.php";
+	$.ajax({
+		url: ruta,
+		method: 'POST',
+		dataType: 'json',
+		data: { id: id },
+		success: function (response) {
+			if (response.res == 'ok') {
+				callback(true);
+			} else {
+				callback(false);
+			}
+		},
+		error: function (xhr, status, error) {
+			console.error("Error en la solicitud AJAX:", error);
+			callback(false);
+		}
+	});
+}
 const imprimirFormatoDoc = (id) => {
-	let tipo = $("#id_ctb_doc").val();
+	let tipo = $("#tipodato").length ? $("#tipodato").val() : $("#id_ctb_doc").val();
+	if (tipo == '3') {
+		ValidaValoresIguales(id, function (resultado) {
+			if (resultado === true) {
+				ImprimirD(id, tipo);
+			} else {
+				mjeError("Verificar igualdad en valores y cuentas contables vacias");
+			}
+		});
+	} else {
+		ImprimirD(id, tipo);
+	}
+
+};
+
+function ImprimirD(id, tipo) {
 	let url = "soportes/imprimir_formato_doc.php";
 	$.post(url, { id: id, tipo: tipo }, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
@@ -2109,6 +2135,7 @@ const imprimirFormatoDoc = (id) => {
 		$("#divForms").html(he);
 	});
 };
+
 const imprSelecDoc = (nombre, id) => {
 	cerrarDocumentoCtb(id);
 	var ficha = document.getElementById(nombre);

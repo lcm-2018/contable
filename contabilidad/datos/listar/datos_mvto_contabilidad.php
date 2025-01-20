@@ -27,7 +27,7 @@ try {
                 `pto_crp`.`id_manu` AS `id_crp`
                 , `ctb_doc`.`id_ctb_doc`
                 , `ctb_doc`.`id_manu`
-                , `ctb_doc`.`id_tipo_doc` AS `tipo`
+                , `ctb_factura`.`id_tipo_doc` AS `tipo`
                 , `ctb_doc`.`fecha`
                 , `ctb_doc`.`detalle`
                 , `ctb_doc`.`id_tercero`
@@ -48,6 +48,8 @@ try {
                     ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
                 LEFT JOIN `tb_terceros` 
                     ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                LEFT JOIN `ctb_factura` 
+                    ON (`ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
             WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where)
             GROUP BY `ctb_doc`.`id_ctb_doc`
             ORDER BY $col $dir $limit";

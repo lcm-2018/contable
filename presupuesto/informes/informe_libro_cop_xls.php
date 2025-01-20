@@ -53,7 +53,7 @@ try {
                         ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                     INNER JOIN `pto_cargue` 
                         ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                WHERE (`ctb_doc`.`fecha` BETWEEN '2024-01-01' AND '2024-06-19' AND `ctb_doc`.`estado` <> 0)) AS `taux`
+                WHERE (`ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `ctb_doc`.`estado` <> 0)) AS `taux`
                 LEFT JOIN 
                     (SELECT
                         `ctb_doc`.`id_ctb_doc`
@@ -67,7 +67,7 @@ try {
                             ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                         INNER JOIN `ctb_doc` 
                             ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                    WHERE (`ctb_doc`.`fecha` BETWEEN '2024-01-01' AND '2024-06-19' AND `ctb_doc`.`estado` <> 0)
+                    WHERE (`ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `ctb_doc`.`estado` <> 0)
                     GROUP BY `ctb_doc`.`id_ctb_doc`, `pto_cdp_detalle`.`id_rubro`) AS `t1`
                     ON (`taux`.`id_ctb_doc` = `t1`.`id_ctb_doc` AND `taux`.`id_rubro` = `t1`.`id_rubro`)
                 LEFT JOIN
@@ -87,7 +87,7 @@ try {
                             ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                         INNER JOIN `ctb_doc` AS `ctb_doc_pag`
                             ON (`pto_pag_detalle`.`id_ctb_doc` = `ctb_doc_pag`.`id_ctb_doc`)
-                    WHERE (`ctb_doc_pag`.`fecha` BETWEEN '2024-01-01' AND '2024-06-19' AND `ctb_doc_pag`.`estado` <> 0)
+                    WHERE (`ctb_doc_pag`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `ctb_doc_pag`.`estado` <> 0)
                     GROUP BY `pto_cdp_detalle`.`id_rubro`, `ctb_doc`.`id_ctb_doc`) AS `t2`
                     ON (`taux`.`id_ctb_doc` = `t2`.`id_ctb_doc` AND `taux`.`id_rubro` = `t2`.`id_rubro`)
             ORDER BY `taux`.`fec_cop` ASC";

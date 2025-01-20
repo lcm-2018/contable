@@ -9,7 +9,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT `nombre1`,`nombre2`,`apellido1`,`apellido2` FROM `seg_usuarios_sistema` WHERE `id_usuario` = {$id_user}";
     $rs = $cmd->query($sql);
-    $usuario = $rs->fetch();
+    $usuario = $rs->fetch(PDO::FETCH_ASSOC);
     $usuario = !empty($usuario) ? trim($usuario['nombre1'] . ' ' . $usuario['nombre2'] . ' ' . $usuario['apellido1'] . ' ' . $usuario['apellido2']) : 'XXXXXX';
     $cmd = null;
 } catch (PDOException $e) {
@@ -21,7 +21,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT `variable`, `tipo`, `contexto`, `ejemplo` FROM `ctt_variables_forms`";
     $rs = $cmd->query($sql);
-    $variables = $rs->fetchAll();
+    $variables = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -37,7 +37,7 @@ try {
                 ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
             WHERE `id_adquisicion` = $id_adqi LIMIT 1";
     $rs = $cmd->query($sql);
-    $adquisicion = $rs->fetch();
+    $adquisicion = $rs->fetch(PDO::FETCH_ASSOC);
     $id_orden = $adquisicion['id_orden'];
     if ($id_orden == '') {
         $sql = "SELECT
@@ -68,7 +68,7 @@ try {
             WHERE (`far_alm_pedido_detalle`.`id_pedido` = {$id_orden})";
     }
     $rs = $cmd->query($sql);
-    $oferta = $rs->fetchAll();
+    $oferta = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -95,7 +95,7 @@ try {
                 ON (`ctt_clasificacion_bn_sv`.`cod_unspsc` = `tb_codificacion_unspsc`.`codigo`)
             WHERE `ctt_clasificacion_bn_sv`.`id_b_s` IN($cod) AND `ctt_clasificacion_bn_sv`.`vigencia` = '$vigencia'";
     $rs = $cmd->query($sql);
-    $codigo_servicio = $rs->fetch();
+    $codigo_servicio = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -124,7 +124,7 @@ try {
                 ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_adquisicion` = $id_adqi LIMIT 1";
     $rs = $cmd->query($sql);
-    $compra = $rs->fetch();
+    $compra = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -143,7 +143,7 @@ try {
                 ON (`ctt_escala_honorarios`.`cod_pptal` = `pto_cargue`.`id_cargue`)
             WHERE `ctt_escala_honorarios`.`id_tipo_b_s` = $tipo_bn AND `ctt_escala_honorarios`.`vigencia` = '$vigencia'";
     $rs = $cmd->query($sql);
-    $cod_cargue = $rs->fetch();
+    $cod_cargue = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -177,7 +177,7 @@ try {
                 ON (`ctt_estudios_previos`.`id_supervisor` = `tb_terceros`.`id_tercero_api`)
             WHERE `id_compra` = '$id_adqi'";
     $rs = $cmd->query($sql);
-    $estudio_prev = $rs->fetch();
+    $estudio_prev = $rs->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
@@ -197,7 +197,28 @@ try {
                 ON (`seg_garantias_compra`.`id_poliza` = `tb_polizas`.`id_poliza`)
             WHERE `seg_garantias_compra`.`id_est_prev` = $id_ep";
     $rs = $cmd->query($sql);
-    $garantias = $rs->fetchAll();
+    $garantias = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `ctt_contratos`.`id_contrato_compra`
+                , `ctt_contratos`.`id_compra`
+                , `ctt_contratos`.`fec_ini`
+                , `ctt_contratos`.`fec_fin`
+                , `tb_forma_pago_compras`.`descripcion`
+                , `ctt_contratos`.`id_supervisor`
+            FROM
+                `ctt_contratos`
+            INNER JOIN `tb_forma_pago_compras` 
+                ON (`ctt_contratos`.`id_forma_pago` = `tb_forma_pago_compras`.`id_form_pago`)
+            WHERE `id_compra` = '$id_adqi'";
+    $rs = $cmd->query($sql);
+    $contrato = $rs->fetch();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -208,18 +229,41 @@ foreach ($garantias as $g) {
     $polizas .=  $num . '. ' . ucfirst(strtolower($g['descripcion']) . ' por el ' . $g['porcentaje'] . '%. ');
     $num++;
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `tb_datos_ips`.`nit_ips` AS `nit`
+                , `tb_datos_ips`.`dv` AS `dig_ver`
+                , `tb_datos_ips`.`razon_social_ips` AS `nombre`
+                , `tb_municipios`.`nom_municipio`
+            FROM
+                `tb_datos_ips`
+                INNER JOIN `tb_municipios` 
+                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`) LIMIT 1";
+    $rs = $cmd->query($sql);
+    $compania = $rs->fetch();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 
 $servicio = $id_orden == '' ? $oferta[0]['bien_servicio'] : 'XXXXXXXXX';
+$empresa = $compania['nombre'];
+$municipio = $compania['nom_municipio'];
 $n_cdp = $adquisicion['id_manu'] == '' ? 'XXXXXXXXX' : $adquisicion['id_manu'];
 $meses = ['', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 $fecI = explode('-', $estudio_prev['fec_ini_ejec']);
 $fecF = explode('-', $estudio_prev['fec_fin_ejec']);
 $fecha = mb_strtoupper($fecI[2] . ' de ' . $meses[intval($fecI[1])] . ' de ' . $fecI[0]);
+$fecha_anexo = $fecI[2] . ' de ' . $meses[intval($fecI[1])] . ' de ' . $fecI[0];
 $letras = new NumberFormatter("es", NumberFormatter::SPELLOUT);
 $diaI = $fecI[2] == '01' ? 'PRIMERO' : mb_strtoupper($letras->format($fecI[2]));
 $diaF = $fecF[2] == '01' ? 'PRIMERO' : mb_strtoupper($letras->format($fecF[2]));
 $fecI_let =  $diaI . ' (' . $fecI[2] . ')' . ' DE ' . mb_strtoupper($meses[intval($fecI[1])]) . ' DE ' . $fecI[0];
 $fecF_let = $diaF . ' (' . $fecF[2] . ')' . ' DE ' . mb_strtoupper($meses[intval($fecF[1])]) . ' DE ' . $fecF[0];
+$fec_inicia = mb_strtolower($fecI_let);
+$fec_fin = mb_strtolower($fecF_let);
 $valor = $estudio_prev['val_contrata'];
 $val_num = pesos($valor);
 $objeto_ep = mb_strtoupper($compra['objeto']);
@@ -293,6 +337,8 @@ foreach ($valores as $va) {
     $describ_val[] = ['describ_val' => $va];
 }
 $plazo = $p_mes == '' ? $p_dia : $p_mes . $y . $p_dia;
+$forma_pago = $contrato['descripcion'];
+
 /*
 $segmento = !empty($codigo_servicio) ? ($codigo_servicio['codigo'] != '' ? substr($codigo_servicio['codigo'], 0, 2) : 'XX') : 'XX';
 $familia = !empty($codigo_servicio) ? ($codigo_servicio['codigo'] != '' ? substr($codigo_servicio['codigo'], 0, 4) : 'XXXX') : 'XXXX';
