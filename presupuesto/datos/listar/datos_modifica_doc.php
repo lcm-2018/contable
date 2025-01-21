@@ -83,10 +83,10 @@ if (!empty($listappto)) {
             $valor2 = 0;
             foreach ($filtro as $f) {
                 $tipo_pto = $f['id_tipo'];
-                if ($tipo_pto == '1') {
+                if ($tipo_pto == '1' && ($tipo_doc == '3' || $tipo_doc == '2')) {
                     $valor1 += $f['debito'] - $f['credito'];
                     $valor2 += 0;
-                } else if ($tipo_pto == '2') {
+                } else if ($tipo_pto == '2' && ($tipo_doc == '3' || $tipo_doc == '2')) {
                     $valor1 += 0;
                     $valor2 += $f['debito'] - $f['credito'];
                 } else {
@@ -113,7 +113,7 @@ if (!empty($listappto)) {
         }
         if ($diferencia == 0) {
             $valor2 = number_format($valor2, 2, '.', ',');
-            $estado = '<div class="text-right">' . $valor2 . '</div>';
+            $estado = '<div class="text-right" ' . $valor1 . '-' . $valor2 . '>' . $valor2 . '</div>';
         } else {
             $estado = '<div class="text-center"><span class="label text-danger">Incorrecto</span></div>';
         }

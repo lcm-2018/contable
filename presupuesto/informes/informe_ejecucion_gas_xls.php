@@ -67,20 +67,20 @@ if ($detalle_mes == 1) {
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                         INNER JOIN `pto_presupuestos` 
                             ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 1 AND `pto_presupuestos`.`id_tipo` = 2)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND (`pto_mod`.`id_tipo_mod` = 6 OR `pto_mod`.`id_tipo_mod` = 1) AND `pto_presupuestos`.`id_tipo` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `credito_mes`
                     ON(`credito_mes`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
                     (SELECT
                         `pto_mod_detalle`.`id_cargue`
-                        , SUM(`pto_mod_detalle`.`valor_deb`) AS `valor`
+                        , SUM(`pto_mod_detalle`.`valor_cred`) AS `valor`
                     FROM
                         `pto_mod_detalle`
                         INNER JOIN `pto_mod` 
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                         INNER JOIN `pto_presupuestos` 
                             ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 6 AND `pto_presupuestos`.`id_tipo` = 2)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND (`pto_mod`.`id_tipo_mod` = 6 OR `pto_mod`.`id_tipo_mod` = 1) AND `pto_presupuestos`.`id_tipo` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `contracredito_mes`
                     ON(`contracredito_mes`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
@@ -199,20 +199,20 @@ try {
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                         INNER JOIN `pto_presupuestos` 
                             ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 1 AND `pto_presupuestos`.`id_tipo` = 2)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND (`pto_mod`.`id_tipo_mod` = 6 OR `pto_mod`.`id_tipo_mod` = 1) AND `pto_presupuestos`.`id_tipo` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `credito`
                     ON(`credito`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
                     (SELECT
                         `pto_mod_detalle`.`id_cargue`
-                        , SUM(`pto_mod_detalle`.`valor_deb`) AS `valor`
+                        , SUM(`pto_mod_detalle`.`valor_cred`) AS `valor`
                     FROM
                         `pto_mod_detalle`
                         INNER JOIN `pto_mod` 
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                         INNER JOIN `pto_presupuestos` 
                             ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 6 AND `pto_presupuestos`.`id_tipo` = 2)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND (`pto_mod`.`id_tipo_mod` = 6 OR `pto_mod`.`id_tipo_mod` = 1) AND `pto_presupuestos`.`id_tipo` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `contracredito`
                     ON(`contracredito`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
@@ -300,6 +300,18 @@ foreach ($rubros as $rb) {
             'causado' => 0,
             'pagado' => 0,
         ];
+        if ($detalle_mes == 1) {
+            $acum[$rubro] += [
+                'adicion_mes' => 0,
+                'reduccion_mes' => 0,
+                'credito_mes' => 0,
+                'contracredito_mes' => 0,
+                'comprometido_mes' => 0,
+                'regitrado_mes' => 0,
+                'causado_mes' => 0,
+                'pagado_mes' => 0,
+            ];
+        }
         foreach ($filtro as $f) {
             if ($f['tipo_dato'] == 1) {
                 $val_inicial = $f['inicial'];
@@ -324,7 +336,7 @@ foreach ($rubros as $rb) {
                     'inicial' => $val_ini + $val_inicial,
                     'adicion' => $val_adicion + $val_ad,
                     'reduccion' => $val_adicion + $val_ad,
-                    'credito' => $val_reduccion + $val_red,
+                    'credito' => $val_credito + $val_cre,
                     'contracredito' => $val_contracredito + $val_ccre,
                     'comprometido' => $val_comprometido + $val_cdp,
                     'regitrado' => $val_registrado + $val_crp,
