@@ -7,16 +7,16 @@ include_once 'conexion.php';
 include_once 'permisos.php';
 $rol = $_SESSION['rol'];
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $con = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $sql = "SELECT
                 `id_vigencia`, `anio`
             FROM
                 `tb_vigencias`";
-    $rs = $cmd->query($sql);
+    $rs = $con->query($sql);
     $vigencias = $rs->fetchAll();
-    $cmd = null;
+    $con = null;
 } catch (PDOException $e) {
-    $res['mensaje'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 ?>
 <div id="layoutSidenav_nav">

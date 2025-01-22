@@ -274,7 +274,8 @@ try {
                     GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `pagado`
                     ON(`pagado`.`id_rubro` = `pto_cargue`.`id_cargue`)
                     $join_mes
-                   WHERE (`pto_presupuestos`.`id_tipo` = 2)";
+                   WHERE (`pto_presupuestos`.`id_tipo` = 2)
+                   ORDER BY `pto_cargue`.`cod_pptal`";
     $res = $cmd->query($sql);
     $rubros = $res->fetchAll();
 } catch (PDOException $e) {
@@ -314,6 +315,7 @@ foreach ($rubros as $rb) {
         }
         foreach ($filtro as $f) {
             if ($f['tipo_dato'] == 1) {
+                // Valores generales
                 $val_inicial = $f['inicial'];
                 $val_adicion = $f['val_adicion'];
                 $val_reduccion = $f['val_reduccion'];
@@ -323,27 +325,21 @@ foreach ($rubros as $rb) {
                 $val_registrado = $f['val_registrado'];
                 $val_causado = $f['val_causado'];
                 $val_pagado = $f['val_pagado'];
-                $val_ini = isset($acum[$rubro]['inicial']) ? $acum[$rubro]['inicial'] : 0;
-                $val_ad = isset($acum[$rubro]['adicion']) ? $acum[$rubro]['adicion'] : 0;
-                $val_red = isset($acum[$rubro]['reduccion']) ? $acum[$rubro]['reduccion'] : 0;
-                $val_cre = isset($acum[$rubro]['credito']) ? $acum[$rubro]['credito'] : 0;
-                $val_ccre = isset($acum[$rubro]['contracredito']) ? $acum[$rubro]['contracredito'] : 0;
-                $val_cdp = isset($acum[$rubro]['comprometido']) ? $acum[$rubro]['comprometido'] : 0;
-                $val_crp = isset($acum[$rubro]['regitrado']) ? $acum[$rubro]['regitrado'] : 0;
-                $val_cop = isset($acum[$rubro]['causado']) ? $acum[$rubro]['causado'] : 0;
-                $val_pag = isset($acum[$rubro]['pagado']) ? $acum[$rubro]['pagado'] : 0;
-                $acum[$rubro] = [
-                    'inicial' => $val_ini + $val_inicial,
-                    'adicion' => $val_adicion + $val_ad,
-                    'reduccion' => $val_adicion + $val_ad,
-                    'credito' => $val_credito + $val_cre,
-                    'contracredito' => $val_contracredito + $val_ccre,
-                    'comprometido' => $val_comprometido + $val_cdp,
-                    'regitrado' => $val_registrado + $val_crp,
-                    'causado' => $val_causado + $val_cop,
-                    'pagado' => $val_pagado + $val_pag,
-                ];
+
+                // Acumulación de valores generales
+                $acum[$rubro]['inicial'] += $val_inicial;
+                $acum[$rubro]['adicion'] += $val_adicion;
+                $acum[$rubro]['reduccion'] += $val_reduccion;
+                $acum[$rubro]['credito'] += $val_credito;
+                $acum[$rubro]['contracredito'] += $val_contracredito;
+                $acum[$rubro]['comprometido'] += $val_comprometido;
+                $acum[$rubro]['regitrado'] += $val_registrado;
+                $acum[$rubro]['causado'] += $val_causado;
+                $acum[$rubro]['pagado'] += $val_pagado;
+
+                // Si se requiere detalle mensual
                 if ($detalle_mes == 1) {
+                    // Valores mensuales
                     $val_adicion_mes = $f['val_adicion_mes'];
                     $val_reduccion_mes = $f['val_reduccion_mes'];
                     $val_credito_mes = $f['val_credito_mes'];
@@ -352,24 +348,16 @@ foreach ($rubros as $rb) {
                     $val_registrado_mes = $f['val_registrado_mes'];
                     $val_causado_mes = $f['val_causado_mes'];
                     $val_pagado_mes = $f['val_pagado_mes'];
-                    $val_ad_mes = isset($acum[$rubro]['adicion_mes']) ? $acum[$rubro]['adicion_mes'] : 0;
-                    $val_red_mes = isset($acum[$rubro]['reduccion_mes']) ? $acum[$rubro]['reduccion_mes'] : 0;
-                    $val_cre_mes = isset($acum[$rubro]['credito_mes']) ? $acum[$rubro]['credito_mes'] : 0;
-                    $val_ccre_mes = isset($acum[$rubro]['contracredito_mes']) ? $acum[$rubro]['contracredito_mes'] : 0;
-                    $val_cdp_mes = isset($acum[$rubro]['comprometido_mes']) ? $acum[$rubro]['comprometido_mes'] : 0;
-                    $val_crp_mes = isset($acum[$rubro]['regitrado_mes']) ? $acum[$rubro]['regitrado_mes'] : 0;
-                    $val_cop_mes = isset($acum[$rubro]['causado_mes']) ? $acum[$rubro]['causado_mes'] : 0;
-                    $val_pag_mes = isset($acum[$rubro]['pagado_mes']) ? $acum[$rubro]['pagado_mes'] : 0;
-                    $acum[$rubro] += [
-                        'adicion_mes' => $val_adicion_mes + $val_ad_mes,
-                        'reduccion_mes' => $val_reduccion_mes + $val_red_mes,
-                        'credito_mes' => $val_credito_mes + $val_cre_mes,
-                        'contracredito_mes' => $val_contracredito_mes + $val_ccre_mes,
-                        'comprometido_mes' => $val_comprometido_mes + $val_cdp_mes,
-                        'regitrado_mes' => $val_registrado_mes + $val_crp_mes,
-                        'causado_mes' => $val_causado_mes + $val_cop_mes,
-                        'pagado_mes' => $val_pagado_mes + $val_pag_mes,
-                    ];
+
+                    // Acumulación de valores mensuales
+                    $acum[$rubro]['adicion_mes'] += $val_adicion_mes;
+                    $acum[$rubro]['reduccion_mes'] += $val_reduccion_mes;
+                    $acum[$rubro]['credito_mes'] += $val_credito_mes;
+                    $acum[$rubro]['contracredito_mes'] += $val_contracredito_mes;
+                    $acum[$rubro]['comprometido_mes'] += $val_comprometido_mes;
+                    $acum[$rubro]['regitrado_mes'] += $val_registrado_mes;
+                    $acum[$rubro]['causado_mes'] += $val_causado_mes;
+                    $acum[$rubro]['pagado_mes'] += $val_pagado_mes;
                 }
             }
         }
