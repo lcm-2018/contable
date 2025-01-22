@@ -31,33 +31,28 @@ try {
             WHERE (`ctb_causa_costos`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll();
+    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 try {
-    $sql = "SELECT
-                `ctb_causa_costos`.`id`
-                , `ctb_causa_costos`.`id_ctb_doc`
-                , `ctb_causa_costos`.`valor`
-                , `tb_sedes`.`nom_sede`
-                , `tb_municipios`.`nom_municipio`
-                , `far_centrocosto_area`.`nom_area` AS `descripcion`
-            FROM
-                `ctb_causa_costos`
-                INNER JOIN `far_centrocosto_area` 
-                    ON (`ctb_causa_costos`.`id_area_cc` = `far_centrocosto_area`.`id_area`)
-                INNER JOIN `tb_sedes` 
-                    ON (`far_centrocosto_area`.`id_sede` = `tb_sedes`.`id_sede`)
-                INNER JOIN `tb_municipios` 
-                    ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`)
-            WHERE (`ctb_causa_costos`.`id_ctb_doc` = $id_doc)";
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT SUM(`valor_pago`) AS `valor_pago` FROM `ctb_factura` WHERE (`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
-    $rubros = $rs->fetchAll();
+    $valor_factura = $rs->fetch();
+    $valor_max = !empty($valor_factura) ? $valor_factura['valor_pago'] : 0;
+    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$cmd = null;
-
+$val_cc = 0;
+foreach ($rubros as $r) {
+    $val_cc += $r['valor'];
+}
+$min = 0;
+$max = $valor_max - $val_cc;
+$max = $max < 0 ? 0 : $max;
 ?>
 <script>
     $('#tableCausacionCostos').DataTable({
@@ -119,7 +114,7 @@ $cmd = null;
                     </div>
                     <div class="form-group col-md-3">
                         <label for="valor_cc" class="small">VALOR CC</label>
-                        <input type="text" name="valor_cc" id="valor_cc" class="form-control form-control-sm" value="" required style="text-align: right;" onkeyup="valorMiles(id)" ondblclick="valorCostoReg('<?php echo $id_doc; ?>');">
+                        <input type="text" name="valor_cc" id="valor_cc" min="<?= $min; ?>" max="<?= $max; ?>" class="form-control form-control-sm" required style="text-align: right;" onkeyup="valorMiles(id)" value="<?= $max; ?>">
                     </div>
                 </div>
             </form>

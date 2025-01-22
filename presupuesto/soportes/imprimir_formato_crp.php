@@ -82,44 +82,12 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-try {
-    $sql = "SELECT
-                `pto_cargue`.`cod_pptal`
-                ,`pto_cargue`.`nom_rubro`
-            FROM
-                `pto_cargue`
-                INNER JOIN `pto_presupuestos` 
-                    ON (`pto_cargue`.`id_pto` = `pto_presupuestos`.`id_pto`)
-            WHERE (`pto_presupuestos`.`id_vigencia` = $id_vigencia AND `pto_presupuestos`.`id_tipo` = 2)";
-    $res = $cmd->query($sql);
-    $codigos = $res->fetchAll();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-$data = [];
-foreach ($codigos as $cd) {
-    $raiz = $cd['cod_pptal'];
-    foreach ($rubros as $rp) {
-        $codigo = $rp['cod_pptal'];
-        if (substr($codigo, 0, strlen($raiz)) === $raiz) {
-            $data[$raiz]['valor'] = isset($data[$raiz]['valor']) ? $data[$raiz]['valor'] + $rp['valor'] : $rp['valor'];
-            $data[$raiz]['nombre'] = $cd['nom_rubro'];
-        }
-    }
-}
-try {
-    $sql = "SELECT `razon_social_ips` AS `nombre`, `nit_ips` AS `nit`, `dv` AS `dig_ver` FROM `tb_datos_ips`;";
-    $res = $cmd->query($sql);
-    $empresa = $res->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-$enletras = numeroLetras($total);
 $fecha = date('Y-m-d', strtotime($crp['fecha']));
 // Consulto responsable del documento
 try {
     $sql = "SELECT
                 `fin_maestro_doc`.`control_doc`
+                , `fin_maestro_doc`.`acumula`
                 , `tb_terceros`.`nom_tercero`
                 , `tb_terceros`.`nit_tercero`
                 , `tb_terceros`.`genero`
@@ -149,9 +117,49 @@ try {
     $gen_respon = $key !== false ? $responsables[$key]['genero'] : '';
     $control = $key !== false ? $responsables[$key]['control_doc'] : '';
     $control = $control == '' || $control == '0' ? false : true;
+    $ver_acumula = $responsables[0]['acumula'] == 1 ?  true : false;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$where = '';
+if ($ver_acumula) {
+    $where = "AND `pto_cargue`.`tipo_dato` = 1";
+}
+try {
+    $sql = "SELECT
+                `pto_cargue`.`cod_pptal`
+                ,`pto_cargue`.`nom_rubro`
+            FROM
+                `pto_cargue`
+                INNER JOIN `pto_presupuestos` 
+                    ON (`pto_cargue`.`id_pto` = `pto_presupuestos`.`id_pto`)
+            WHERE (`pto_presupuestos`.`id_vigencia` = $id_vigencia AND `pto_presupuestos`.`id_tipo` = 2 $where)";
+    $res = $cmd->query($sql);
+    $codigos = $res->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
+$data = [];
+foreach ($codigos as $cd) {
+    $raiz = $cd['cod_pptal'];
+    foreach ($rubros as $rp) {
+        $codigo = $rp['cod_pptal'];
+        if (substr($codigo, 0, strlen($raiz)) === $raiz) {
+            $data[$raiz]['valor'] = isset($data[$raiz]['valor']) ? $data[$raiz]['valor'] + $rp['valor'] : $rp['valor'];
+            $data[$raiz]['nombre'] = $cd['nom_rubro'];
+        }
+    }
+}
+try {
+    $sql = "SELECT `razon_social_ips` AS `nombre`, `nit_ips` AS `nit`, `dv` AS `dig_ver` FROM `tb_datos_ips`;";
+    $res = $cmd->query($sql);
+    $empresa = $res->fetch();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+$enletras = numeroLetras($total);
+
 // Consulta terceros en la api ********************************************* API
 $id_t[] = $crp['id_tercero_api'];
 $ids = implode(',', $id_t);

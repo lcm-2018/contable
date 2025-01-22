@@ -158,6 +158,7 @@ if (!empty($listappto)) {
         $tercero = $lp['nom_tercero'] != '' ? $lp['nom_tercero'] : '---';
         // consultar la diferencia en array diferencias
         $key = array_search($id_ctb, array_column($diferencias, 'id_ctb_doc'));
+        $imprimir = null;
         if ($key  !== false) {
             $valor_debito = $diferencias[$key]['debito'];
             $dif = $diferencias[$key]['diferencia'];

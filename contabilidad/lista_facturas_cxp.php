@@ -11,6 +11,7 @@ include '../financiero/consultas.php';
 $datos = isset($_POST['id']) ? explode('|', $_POST['id']) : exit('Acceso no disponible');
 $id_doc = $datos[0];
 $id_factura = isset($datos[1]) ? $datos[1] : 0;
+$vigencia = $_SESSION['vigencia'];
 function pesos($valor)
 {
     return number_format($valor, 2, '.', ',');
@@ -158,11 +159,11 @@ if (empty($detalle)) {
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="fechaDoc" class="small">Fecha factura</label>
-                                <input type="date" name="fechaDoc" id="fechaDoc" class="form-control form-control-sm" value="<?php echo $detalle['fecha_fact'] ?>" min="<?php echo $detalle['fecha_fact']; ?>" max="<?php echo $fecha_max; ?>">
+                                <input type="date" name="fechaDoc" id="fechaDoc" class="form-control form-control-sm" value="<?php echo $detalle['fecha_fact'] ?>" min="<?= $vigencia . '-01-01'; ?>" max="<?= $vigencia . '-12-31'; ?>">
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="fechaVen" class="small">Fecha vencimiento</label>
-                                <input type="date" name="fechaVen" id="fechaVen" class="form-control form-control-sm" value="<?php echo $detalle['fecha_ven'] ?>" min="<?php echo $detalle['fecha_fact']; ?>" max="<?php echo $fecha_max; ?>">
+                                <input type="date" name="fechaVen" id="fechaVen" class="form-control form-control-sm" value="<?php echo $detalle['fecha_ven'] ?>" min="<?= $vigencia . '-01-01'; ?>" max="<?= $vigencia . '-12-31'; ?>">
                             </div>
                         </div>
                     </div>

@@ -5,6 +5,7 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../../conexion.php';
+$id_vigencia = $_SESSION['id_vigencia'];
 $buscar = mb_strtoupper($_POST['term']);
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -19,7 +20,7 @@ try {
                 INNER JOIN `pto_presupuestos` 
                     ON (`pto_cargue`.`id_pto` = `pto_presupuestos`.`id_pto`)
             WHERE (`pto_presupuestos`.`id_tipo` = 2
-                AND `pto_presupuestos`.`id_vigencia` = 8
+                AND `pto_presupuestos`.`id_vigencia` = $id_vigencia
                 AND (`pto_cargue`.`cod_pptal` LIKE '%$buscar%'
                 OR `pto_cargue`.`nom_rubro` LIKE '%$buscar%'))";
     $rs = $cmd->query($sql);

@@ -1241,6 +1241,8 @@ let mostrarCentroCostos = function (dato) {
 // Guardar datos de causación de costos
 var guardarCostos = function () {
 	var valor = Number($('#valor_cc').val().replace(/\,/g, "", ""));
+	var max = Number($('#valor_cc').attr('max').replace(/\,/g, "", ""));
+
 	$('.is-invalid').removeClass('is-invalid');
 	if ($('#id_municipio').val() == '0') {
 		$('#municipio').addClass('is-invalid');
@@ -1254,10 +1256,10 @@ var guardarCostos = function () {
 		$('#id_cc').addClass('is-invalid');
 		$('#id_cc').focus();
 		mjeError('Debe seleccionar un centro de costo');
-	} else if (valor <= 0) {
+	} else if (valor <= 0 || valor > max) {
 		$('#valor_cc').addClass('is-invalid');
 		$('#valor_cc').focus();
-		mjeError('El valor del centro de costo debe ser mayor a cero');
+		mjeError('El valor del centro de costo debe ser mayor a cero y menor a ' + max.toLocaleString("es-MX"));
 	} else {
 		var data = $('#formGuardaCentroCosto').serialize();
 		$.ajax({

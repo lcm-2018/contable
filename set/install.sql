@@ -1,15 +1,17 @@
-insert  into `seg_rol`(`id_rol`,`nom_rol`,`id_usr_crea`) values (1,'ADMINISTRADOR',NULL);
+/*insert  into `seg_rol`(`id_rol`,`nom_rol`,`id_usr_crea`) values (1,'ADMINISTRADOR',NULL);
 insert  into `seg_usuarios_sistema`(`id_usuario`,`id_user_fin`,`login`,`clave`,`id_rol`,`id_tipo_doc`,`num_documento`,`apellido1`,`apellido2`,`nombre1`,`nombre2`,`sexo`,`direccion`,`telefono`,`email`,`es_administrativo`,`es_auditor`,`es_asistencial`,`es_promotor`,`es_dispensador`,`es_habilitadovc`,`descripcion`,`num_tarjeta`,`num_citas`,`fec_inactivacion`,`fec_cambioclave`,`fec_finalizacion`,`nom_firma`,`id_centrocosto`,`fil_atencion`,`fil_ingreso`,`num_turnos`,`id_usr_crea`,`fec_creacion`,`id_usr_edita`,`id_origen`,`estado`,`es_medico`,`es_enfermero`,`es_facturador`,`es_custodia_hc`) values 
 	(1,NULL,'demo','0a3fd85d00c79751921f1c260b9641ae37655446cc07db3d697362e49fb128b3e1e4d0891554f42e2529c92a937a7ac6c2e13386983431a810e4be775f3ed148',1,4,'12345','ADMINP','A','ADMINN','B','M','','7252963','18011ff5f@correo.com',1,0,0,0,1,1,'Dpto. Sistemas<br/>U. Nariño','XXXX',NULL,NULL,'2024-03-20 14:32:22',NULL,'1-20230905115532firma.jpg',0,'[\"16\",\"17\",\"48\",\"12\",\"5\",\"24\",\"21\",\"20\",\"49\",\"13\",\"9\",\"11\",\"6\",\"8\",\"10\",\"7\",\"14\",\"27\",\"22\",\"26\",\"25\",\"19\",\"15\",\"30\",\"31\",\"32\"]','[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\"]',NULL,1,NULL,1,NULL,1,0,0,0,0);
 insert  into `seg_modulos`(`id_modulo`,`nom_modulo`,`fec_mensaje`,`fec_caduca`,`estado`) values (10,'Administración',NULL,NULL,1),(11,'Admisiones',NULL,NULL,1),(12,'Facturación',NULL,NULL,1),(13,'Historia Clínica',NULL,NULL,1),(14,'Laboratorio',NULL,NULL,1),(15,'Procedimientos Especializados',NULL,NULL,1),(16,'Farmacia',NULL,NULL,1),(17,'Informes',NULL,NULL,1),(50,'Almacén',NULL,NULL,1),(51,'Nómina',NULL,NULL,1),(52,'Terceros',NULL,NULL,1),(53,'Contratación',NULL,NULL,1),(54,'Presupuesto',NULL,NULL,1),(55,'Contabilidad',NULL,NULL,1),(56,'Tesorería',NULL,NULL,1),(57,'Activos fijos',NULL,NULL,1);
+*/
+INSERT  INTO `seg_modulos`
+	(`id_modulo`,`nom_modulo`,`fec_mensaje`,`fec_caduca`,`estado`) 
+VALUES (50,'Almacén',NULL,NULL,1),(51,'Nómina',NULL,NULL,1),(52,'Terceros',NULL,NULL,1),(53,'Contratación',NULL,NULL,1),(54,'Presupuesto',NULL,NULL,1),(55,'Contabilidad',NULL,NULL,1),(56,'Tesorería',NULL,NULL,1),(57,'Activos fijos',NULL,NULL,1),(59,'Consultas',NULL,NULL,1);
 
-insert  into `seg_permisos_modulos`(`id_per_mod`,`id_usuario`,`id_modulo`) values (1,1,50),(2,1,51),(3,1,52),(4,1,53),(5,1,54),(6,1,55),(7,1,56),(8,1,57);
+insert  into `seg_permisos_modulos`(`id_per_mod`,`id_usuario`,`id_modulo`) values (1,1,50),(2,1,51),(3,1,52),(4,1,53),(5,1,54),(6,1,55),(7,1,56),(8,1,57),(9,1,59);
 
 update tb_datos_ips set caracter = 2;
 
 insert  into `tb_tipo_tercero`(`id_tipo`,`descripcion`) values (1,'OTRO'),(2,'PROVEEDOR'),(3,'SUPERVISOR'),(4,'CONTRATISTA');
-
-insert into `api_demo`.`seg_pais`(`id_pais`,`codigo_pais`,`nombre_pais`) select `id_pais`,`codigo`,`nom_pais` from `contable_demo`.`tb_paises` where `contable_demo`.`tb_paises`.`id_pais` >0;
 
 insert  into `ctt_estado_adq`(`id`,`descripcion`) values (1,'INICIAL'),(2,'ORDENADA'),(3,'ENVIADA'),(4,'RECIBIDA'),(5,'SELECCIONADA'),(6,'ESTUDIOS PREVIOS'),(7,'CONTRATACIÓN INICIAL'),(8,'CONTRATO ENVIADO'),(9,'CONTRATO RECIBIDO'),(10,'DESIGNADO SUPERVISION'),(11,'RECIBIDO'),(99,'ANULADO');
 

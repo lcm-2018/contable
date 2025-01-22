@@ -225,6 +225,7 @@ if ($id_r == 3) {
                 </thead>
                 <tbody>
                     <?php
+                    $acciones = null;
                     if ($id_r == 1 || $id_r == 2) {
                         $id_t = [];
                         foreach ($listado as $rp) {

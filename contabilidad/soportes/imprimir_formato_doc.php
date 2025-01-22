@@ -77,7 +77,7 @@ try {
 $enletras = numeroLetras($total);
 try {
     $sql = "SELECT
-                `ctb_doc`.`id_manu`
+                `pto_crp`.`id_manu`
                 , `pto_cargue`.`cod_pptal` AS `rubro`
                 , `pto_cargue`.`nom_rubro`
                 , `pto_cop_detalle`.`id_tercero_api`
@@ -91,6 +91,8 @@ try {
                     ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
                 INNER JOIN `pto_cdp_detalle` 
                     ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                INNER JOIN `pto_crp`
+                    ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
                 INNER JOIN `pto_cargue` 
                     ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 INNER JOIN `ctb_fuente` 
@@ -223,6 +225,7 @@ try {
     $sql = "SELECT
                 `fin_maestro_doc`.`control_doc`
                 , `fin_maestro_doc`.`id_doc_fte`
+                , `fin_maestro_doc`.`costos`
                 , `ctb_fuente`.`nombre`
                 , `tb_terceros`.`nom_tercero`
                 , `tb_terceros`.`nit_tercero`
@@ -256,6 +259,7 @@ try {
     $control = $key !== false ? $responsables[$key]['control_doc'] : '';
     $control = $control == '' || $control == '0' ? false : true;
     $nombre_doc = $key !== false ? $responsables[$key]['nombre'] : '';
+    $ver_costos = $responsables[0]['costos'] == 1 ? false : true;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -480,7 +484,7 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                         <td><?php echo $fecha_ven; ?></td>
                     </tr>
                     <tr>
-                        <td style="text-align: left">Valor <?= mb_strtolower($factura['tipo_doc']); ?></td>
+                        <td style="text-align: left">Valor Total</td>
                         <td>Valor IVA</td>
                         <td>Base</td>
                         <td></td>
@@ -533,38 +537,41 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
             <?php
             }
             ?>
-        <?php } ?>
+        <?php }
+        if ($ver_costos) {
+        ?>
 
-        </br>
-        <div class="row">
-            <div class="col-12">
-                <div style="text-align: left">
-                    <div><strong>Distribución de costos: </strong></div>
+            </br>
+            <div class="row">
+                <div class="col-12">
+                    <div style="text-align: left">
+                        <div><strong>Distribución de costos: </strong></div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <table class="table-bordered bg-light" style="width:100% !important; border-collapse: collapse;">
-            <tr>
-                <td style="text-align: left;border: 1px solid black">Municipio</td>
-                <td style='border: 1px solid black'>Centro Costo</td>
-                <td style='border: 1px solid black'>Valor</td>
-            </tr>
-            <?php
-            $tot_costos = 0;
-            foreach ($costos as $ct) {
-                echo "<tr style='border: 1px solid black'>
+            <table class="table-bordered bg-light" style="width:100% !important; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: left;border: 1px solid black">Municipio</td>
+                    <td style='border: 1px solid black'>Centro Costo</td>
+                    <td style='border: 1px solid black'>Valor</td>
+                </tr>
+                <?php
+                $tot_costos = 0;
+                foreach ($costos as $ct) {
+                    echo "<tr style='border: 1px solid black'>
                             <td class='text-left' style='border: 1px solid black'>" . $ct['nom_municipio'] . "</td>
                             <td class='text-left' style='border: 1px solid black'>" . $ct['nom_area'] .  "</td>
                             <td class='text-right' style='border: 1px solid black;text-align: right'>" . number_format($ct['valor'], 2, ",", ".")  . "</td>
                         </tr>";
-                $tot_costos += $ct['valor'];
-            }
-            ?>
-            <tr>
-                <td style="text-align: left;border: 1px solid black" colspan="2">Total</td>
-                <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_costos, 2, ",", "."); ?> </td>
-            </tr>
-        </table>
+                    $tot_costos += $ct['valor'];
+                }
+                ?>
+                <tr>
+                    <td style="text-align: left;border: 1px solid black" colspan="2">Total</td>
+                    <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_costos, 2, ",", "."); ?> </td>
+                </tr>
+            </table>
+        <?php } ?>
         </br>
         <div class="row">
             <div class="col-12">
@@ -582,7 +589,7 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                     <td style='border: 1px solid black'>Nombre</td>
                     <td style='border: 1px solid black'>Terceros</td>
                     <td style='border: 1px solid black'>Nombre</td>
-                    <td style='border: 1px solid black'>Debito</td>
+                    <td style='border: 1px solid black'>Débito</td>
                     <td style='border: 1px solid black'>Crédito</td>
                 </tr>
                 <?php
@@ -617,7 +624,7 @@ if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
                 <tr>
                     <td style="text-align: left;border: 1px solid black">Cuenta</td>
                     <td style='border: 1px solid black'>Nombre</td>
-                    <td style='border: 1px solid black'>Debito</td>
+                    <td style='border: 1px solid black'>Débito</td>
                     <td style='border: 1px solid black'>Crédito</td>
                 </tr>
                 <?php
