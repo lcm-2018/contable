@@ -57,7 +57,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 </div>
                                 <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_subgrupo_filtro">
-                                        <?php subgrupo_articulo($cmd,'--Subgrupo--') ?>
+                                        <?php subgrupo_articulo($cmd,'--Subgrupo--') ?> 
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">

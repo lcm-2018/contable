@@ -344,8 +344,8 @@ function grupo_articulo($cmd, $titulo = '', $id = 0)
 }
 
 function subgrupo_articulo($cmd, $titulo = '', $id = 0)
-{
-    try {
+{    
+    try {        
         echo '<option value="">' . $titulo . '</option>';
         $sql = "SELECT id_subgrupo,nom_subgrupo FROM far_subgrupos WHERE id_grupo IN (1,2)";
         $rs = $cmd->query($sql);
