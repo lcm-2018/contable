@@ -36,6 +36,7 @@ try {
                 , `ctb_doc`.`estado`
                 , `ctb_fuente`.`cod`
                 , `ctb_fuente`.`nombre`
+                , `pag`.`id_ctb_doc` AS `pag`
             FROM
                 `ctb_doc`
                 LEFT JOIN `ctb_fuente` 
@@ -50,6 +51,15 @@ try {
                     ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
                 LEFT JOIN `ctb_factura` 
                     ON (`ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN 
+                    (SELECT
+                        `pto_cop_detalle`.`id_ctb_doc`
+                    FROM
+                        `pto_pag_detalle`
+                        INNER JOIN `pto_cop_detalle` 
+                            ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                    GROUP BY `pto_cop_detalle`.`id_ctb_doc`) AS `pag`
+                    ON (`pag`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
             WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where)
             GROUP BY `ctb_doc`.`id_ctb_doc`
             ORDER BY $col $dir $limit";
@@ -100,7 +110,7 @@ try {
 }
 // consultar la fecha de cierre del periodo del módulo de presupuesto 
 try {
-    $sql = "SELECT fecha_cierre FROM tb_fin_periodos WHERE id_modulo = 3";
+    $sql = "SELECT fecha_cierre FROM tb_fin_periodos WHERE id_modulo = 55";
     $rs = $cmd->query($sql);
     $fecha_cierre = $rs->fetch();
     $fecha_cierre = !empty($fecha_cierre) ? $fecha_cierre['fecha_cierre'] : date("Y-m-d");
@@ -154,11 +164,11 @@ if (!empty($listappto)) {
         $valor_debito = 0;
         $id_ctb = $lp['id_ctb_doc'];
         $estado = $lp['estado'];
-        $dato = null;
+        $anular = $dato = null;
         $tercero = $lp['nom_tercero'] != '' ? $lp['nom_tercero'] : '---';
         // consultar la diferencia en array diferencias
         $key = array_search($id_ctb, array_column($diferencias, 'id_ctb_doc'));
-        $imprimir = null;
+        $editar = $detalles = $borrar = $imprimir = $enviar = $acciones = $dato = $imprimir = null;
         if ($key  !== false) {
             $valor_debito = $diferencias[$key]['debito'];
             $dif = $diferencias[$key]['diferencia'];
@@ -175,18 +185,21 @@ if (!empty($listappto)) {
         $id_manu_rp = $lp['id_crp'] != '' ? $lp['id_crp'] : '-';
 
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
-        // Sumar el valor del crp de la tabla id_pto_mtvo asociado al CDP
-        if ($estado == 0) {
-            $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
-        } else {
-            $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoCtb(' . $id_ctb . ')" href="#">Abrir documento</a>';
-        }
+
         // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
-        if ($fecha <= $fecha_cierre) {
+        if ($fecha > $fecha_cierre) {
+            $anular = null;
+            $cerrar = null;
+        } else if ($lp['pag'] != '') {
             $anular = null;
             $cerrar = null;
         } else {
-            $anular = '<a value="' . $id_ctb . '" class="dropdown-item sombra " href="#" onclick="anularDocumentoCont(' . $id_ctb . ');">Anulación</a>';
+            //$anular = '<a value="' . $id_ctb . '" class="dropdown-item sombra " href="#" onclick="anularDocumentoCont(' . $id_ctb . ');">Anulación</a>';
+            if ($estado == '1') {
+                $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="CierraDocCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
+            } else {
+                $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoCtb(' . $id_ctb . ')" href="#">Abrir documento</a>';
+            }
         }
         $base = base64_encode($id_ctb . '|' . $id_ctb_doc);
         if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
@@ -202,18 +215,6 @@ if (!empty($listappto)) {
             <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Duplicar</a>
             <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Parametrizar</a>
             </div>';
-            // Acciones teniendo en cuenta el tipo de rol
-            //si es lider de proceso puede abrir o cerrar documentos
-            // $acciones = null;
-            if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
-                if ($estado == 0) {
-                    $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
-                } else {
-                    $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoCtb(' . $id_ctb . ')" href="#">Abrir documento</a>';
-                }
-            } else {
-                $cerrar = null;
-            }
         } else {
             $editar = null;
             $detalles = null;
@@ -242,7 +243,7 @@ if (!empty($listappto)) {
                 }
             }
         }
-        if ($estado == 5) {
+        if ($estado == 0) {
             $editar = null;
             $borrar = null;
             $imprimir = null;

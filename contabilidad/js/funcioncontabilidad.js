@@ -797,14 +797,14 @@ let abrirDocumentoCtb = function (dato) {
 		method: "POST",
 		body: dato,
 	})
-		.then((response) => response.json())
+		.then((response) => response.text())
 		.then((response) => {
-			if (response[0].value == "ok") {
+			if (response == "ok") {
 				mje("Documento abierto");
 				let id = "tableMvtoContable";
 				reloadtable(id);
 			} else {
-				mjeError("Documento no abierto", "Tiene pagos asociados");
+				mjeError("Error:", response);
 			}
 		});
 };
@@ -2110,6 +2110,22 @@ function ValidaValoresIguales(id, callback) {
 			callback(false);
 		}
 	});
+}
+function CierraDocCtb(id) {
+	let tipo = $("#tipodato").length ? $("#tipodato").val() : $("#id_ctb_doc").val();
+	if (tipo == '3') {
+		ValidaValoresIguales(id, function (resultado) {
+			if (resultado === true) {
+				cerrarDocumentoCtb(id);
+				mje("Documento cerrado correctamente");
+			} else {
+				mjeError("Verificar igualdad en valores y cuentas contables vacias");
+			}
+		});
+	} else {
+		cerrarDocumentoCtb(id);
+		mje("Documento cerrado correctamente");
+	}
 }
 const imprimirFormatoDoc = (id) => {
 	let tipo = $("#tipodato").length ? $("#tipodato").val() : $("#id_ctb_doc").val();

@@ -1,43 +1,31 @@
 <?php
 
 include '../../../conexion.php';
+session_start();
 $data = file_get_contents("php://input");
+$id_user = $_SESSION['id_user'];
+$date = new DateTime('now', new DateTimeZone('America/Bogota'));
+$fecha = $date->format('Y-m-d H:i:s');
+$estado = '1';
 // update ctb_libaux set estado='C' where id_ctb_doc=$data;
 // Realizo conexion con la base de datos
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-} catch (Exception $e) {
-    die("No se pudo conectar: " . $e->getMessage());
-}
-// Verificar si la causación ya fue pagada
-$sql = "SELECT id_ctb_cop FROM pto_documento_detalles WHERE id_ctb_cop=?";
-$query = $cmd->prepare($sql);
-$query->bindParam(1, $data, PDO::PARAM_INT);
-$query->execute();
-$causacion = $query->fetchAll();
-// contar cuantos registros hay
-$contar = count($causacion);
-if ($contar > 0) {
-    $response[] = array("estado" => "pagado");
-} else {
-    try {
-        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $cmd->beginTransaction();
-
-        $query = $cmd->prepare("UPDATE ctb_doc SET estado=0 WHERE id_ctb_doc=?");
-        $query->bindParam(1, $data, PDO::PARAM_INT);
-        $query->execute();
-        // Actualizo el campo estado de la tabla pto_documento_detalles
-        $query = $cmd->prepare("UPDATE pto_documento_detalles SET estado=3 WHERE id_ctb_doc=?");
-        $query->bindParam(1, $data, PDO::PARAM_INT);
-        $query->execute();
-        $response[] = array("value" => "ok");
-        $cmd->commit();
-    } catch (Exception $e) {
-        $cmd->rollBack();
-        $response[] = array("value" => "no");
+    $sql = "UPDATE `ctb_doc`
+                SET `estado` = ?, `id_user_act` = ?, `fecha_act` = ?
+            WHERE `id_ctb_doc` = ?";
+    $query = $cmd->prepare($sql);
+    $query->bindParam(1, $estado, PDO::PARAM_INT);
+    $query->bindParam(2, $id_user, PDO::PARAM_INT);
+    $query->bindParam(3, $fecha, PDO::PARAM_STR);
+    $query->bindParam(4, $data, PDO::PARAM_INT);
+    $query->execute();
+    if ($query->rowCount() > 0) {
+        echo "ok";
+    } else {
+        echo "error: " . $cmd->errorInfo()[2];
     }
+} catch (Exception $e) {
+    echo $e->getMessage();
 }
-echo json_encode($response);
-$cmd = null;

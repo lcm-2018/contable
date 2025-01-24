@@ -1834,20 +1834,19 @@ const registrarPresupuestoIng = async () => {
 	}
 };
 // ===================================================  SCRIPT PARA ABRIR DOCUMENTO =================================
-let abrirDocumentoTes = function (dato) {
+let abrirDocumentoTes = function (id) {
 	//let doc = id_ctb_doc.value;
 	fetch("datos/consultar/consultaAbrir.php", {
 		method: "POST",
-		body: dato,
+		body: id,
 	})
-		.then((response) => response.json())
+		.then((response) => response.text())
 		.then((response) => {
-			if (response[0].value == "ok") {
+			if (response == "ok") {
 				mje("Documento abierto");
-				let id = "tableMvtoTesoreriaPagos";
-				reloadtable(id);
+				$("#tableMvtoTesoreriaPagos").DataTable().ajax.reload();
 			} else {
-				mjeError("Documento no abierto", "Tiene pagos asociados");
+				mjeError("Error al abrir documento: " + response);
 			}
 		});
 };

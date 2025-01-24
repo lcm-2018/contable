@@ -23,7 +23,16 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 try {
-    $sql = "SELECT * FROM 
+    $sql = "SELECT 
+                `t1`.`id_ctb_doc`
+                , `t1`.`causacion`
+                , `t1`.`registro`
+                , `t1`.`id_tercero`
+                , `t1`.`fecha`
+                , SUM(`t1`.`valor`) AS `valor`
+                , SUM(`t1`.`valor_pagado`) AS `valor_pagado`
+                , `t1`.`num_contrato`
+            FROM 
                 (SELECT
                     `ctb_doc`.`id_ctb_doc`
                     , `ctb_doc`.`id_manu` AS `causacion`
@@ -54,7 +63,8 @@ try {
                     LEFT JOIN `ctt_contratos` 
                         ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
                 WHERE `ctb_doc`.`id_crp` IS NOT NULL) AS `t1`  
-            WHERE  `valor` > `valor_pagado`";
+            WHERE  `valor` > `valor_pagado`
+            GROUP BY `id_ctb_doc`";
     $sql2 = $sql;
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();

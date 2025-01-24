@@ -248,6 +248,28 @@ $id_forma = 0;
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>
 <div class="contenedor bg-light" id="areaImprimir">
+    <style>
+        /* CSS para replicar la clase .row */
+        .row-custom {
+            display: flex;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+
+        .row-custom>div {
+            padding-right: 15px;
+            padding-left: 15px;
+        }
+
+        /* Opcional: columnas */
+        .col-6-custom {
+            flex: 0 0 50%;
+            /* Toma el 50% del ancho */
+            max-width: 50%;
+            /* Limita el ancho máximo al 50% */
+        }
+    </style>
     <div class="px-2 " style="width:90% !important;margin: 0 auto;">
 
         </br>
@@ -567,21 +589,20 @@ $id_forma = 0;
         </br>
         <?php if ($id_forma == 2) {
         ?>
-            <div class="row">
-                <div class="col-6">
-                    <div style="text-align: center">
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: center">
                         <div>___________________________________</div>
                         <div><?php echo $nom_respon; ?> </div>
                         <div><?php echo $cargo_respon; ?> </div>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div style="text-align: center">
+                    </td>
+                    <td>
                         <div>___________________________________</div>
+                        <div><?= $tercero; ?></div>
                         <div>RECIBE CC/NIT:</div>
-                    </div>
-                </div>
-            </div>
+                    </td>
+                </tr>
+            </table>
         <?php
         } else {
         ?>
@@ -627,7 +648,7 @@ $id_forma = 0;
                     </td>
                     <td>
                         <?php
-                        $key = array_search('2', array_column($responsables, 'tipo_control'));
+                        $key = array_search('3', array_column($responsables, 'tipo_control'));
                         $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
                         $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
                         echo $nombre . '<br> ' . $cargo;

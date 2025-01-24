@@ -49,7 +49,7 @@ try {
         $query->bindParam(1, $id_tercero, PDO::PARAM_STR);
         $query->bindParam(2, $id_codigoCta, PDO::PARAM_STR);
         $query->bindParam(3, $valorDebito, PDO::PARAM_STR);
-        $query->bindParam(4, $valorCredito, PDO::PARAM_INT);
+        $query->bindParam(4, $valorCredito, PDO::PARAM_STR);
         $query->bindParam(5, $opcion, PDO::PARAM_INT);
         if (!($query->execute())) {
             echo $query->errorInfo()[2];

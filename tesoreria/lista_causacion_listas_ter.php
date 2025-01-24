@@ -15,7 +15,13 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 try {
-    $sql = "SELECT * 
+    $sql = "SELECT
+                `t1`.`id_pto_cop_det`
+                , SUM(`t1`.`val_cop`) AS `val_cop`
+                , SUM(`t1`.`val_pag`) AS `val_pag`
+                , `t1`.`id_manu`
+                , `t1`.`id_ctb_doc`
+                , `t1`.`fecha`
             FROM 
                 (SELECT
                     `pto_cop_detalle`.`id_pto_cop_det`
@@ -40,7 +46,8 @@ try {
                     GROUP BY `id_pto_cop_det`) AS `pagado`
                     ON (`pto_cop_detalle`.`id_pto_cop_det` = `pagado`.`id_pto_cop_det`)
                 WHERE `pto_cop_detalle`.`id_tercero_api` = $id_tercero AND `ctb_doc`.`estado` = 2) AS `t1`
-            WHERE `val_cop` > `val_pag`";
+            WHERE `val_cop` > `val_pag`
+            GROUP BY `t1`.`id_ctb_doc`";
     $rs = $cmd->query($sql);
     $causaciones = $rs->fetchAll();
 } catch (PDOException $e) {

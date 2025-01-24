@@ -48,7 +48,9 @@ try {
                         `pto_crp_detalle`
                     INNER JOIN `pto_cdp_detalle` 
                         ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                    WHERE (`pto_cdp_detalle`.`id_pto_cdp` = $id_cdp $where)
+                    INNER JOIN `pto_crp` 
+                        ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                    WHERE (`pto_cdp_detalle`.`id_pto_cdp` = $id_cdp AND `pto_crp`.`estado` > 0 $where)
                     GROUP BY `pto_crp_detalle`.`id_pto_cdp_det`) AS `t1`
                     ON (`t1`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
             WHERE (`pto_cdp_detalle`.`id_pto_cdp` = $id_cdp)";

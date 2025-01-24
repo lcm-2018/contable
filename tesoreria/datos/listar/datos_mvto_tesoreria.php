@@ -24,7 +24,17 @@ $dato = null;
 $where = $_POST['search']['value'] != '' ? "AND `ctb_doc`.`fecha` LIKE '%{$_POST['search']['value']}%' OR `ctb_doc`.`id_manu` LIKE '%{$_POST['search']['value']}%' OR  `tb_terceros`.`nom_tercero` LIKE '%{$_POST['search']['value']}%' OR `tb_terceros`.`nit_tercero` LIKE '%{$_POST['search']['value']}%'" : '';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$fecha_cierre = fechaCierre($vigencia, 56, $cmd);
+try {
+    $sql = "SELECT `fecha_cierre` FROM `tb_fin_periodos` WHERE `id_modulo` = 56";
+    $rs = $cmd->query($sql);
+    $fecha_cierre = $rs->fetch();
+    $fecha_cierre = !empty($fecha_cierre) ? $fecha_cierre['fecha_cierre'] : date("Y-m-d");
+    $fecha_cierre = date('Y-m-d', strtotime($fecha_cierre));
+    // incrementar un dia a $fecha cierre
+    $fecha_cierre = date('Y-m-d', strtotime($fecha_cierre . '+1 day'));
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 try {
 
     $sql = "SELECT
@@ -128,8 +138,7 @@ if (!empty($listappto)) {
         $valor_total = 0;
         $id_ctb = $lp['id_ctb_doc'];
         $estado = $lp['estado'];
-        $enviar = NULL;
-        $dato = null;
+        $editar = $borrar = $imprimir = $acciones = $enviar = $dato = $cerrar = $anular = null;
         $tercero = $lp['nom_tercero'];
         $ccnit = $lp['nit_tercero'];
         if ($lp['tipo'] == 'N') {
@@ -149,11 +158,16 @@ if (!empty($listappto)) {
         // Sumar el valor del crp de la tabla id_pto_mtvo asociado al CDP
         // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
         $editar = $detalles = $acciones = $borrar = null;
-        if ($fecha <= $fecha_cierre) {
+        //$anular = '<a value="' . $id_ctb . '" class="dropdown-item sombra " href="#" onclick="anularDocumentoTes(' . $id_ctb . ');">Anulación</a>';
+        if ($estado == 1) {
+            $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
+        } else {
+            $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoTes(' . $id_ctb . ')" href="#">Abrir documento</a>';
+        }
+        if ($fecha >= $fecha_cierre) {
             $anular = null;
             $cerrar = null;
         } else {
-            $anular = '<a value="' . $id_ctb . '" class="dropdown-item sombra " href="#" onclick="anularDocumentoTes(' . $id_ctb . ');">Anulación</a>';
         }
         if ((PermisosUsuario($permisos, 5601, 3) || $id_rol == 1)) {
             $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb modificar"  text="' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
@@ -164,11 +178,6 @@ if (!empty($listappto)) {
         }
         if ((PermisosUsuario($permisos, 5601, 4) || $id_rol == 1)) {
             $borrar = '<a value="' . $id_ctb . '" onclick="eliminarRegistroTec(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-            if ($estado == 1) {
-                $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
-            } else {
-                $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoTes(' . $id_ctb . ')" href="#">Abrir documento</a>';
-            }
             $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
             ...
             </button>

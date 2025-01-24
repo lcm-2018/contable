@@ -54,32 +54,46 @@ try {
                 `nom_empleado`
                 LEFT JOIN  
                 (SELECT
-                        `ts1`.`id_empleado`, `val_bsp`,`mes`,`anio` 
+                    `ts1`.`id_empleado`, `val_bsp`,`mes`,`anio` 
+                FROM 
+                    (SELECT 
+                        `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
                     FROM 
-                        (SELECT 
-                            `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
-                        FROM 
+                        `nom_liq_bsp`
+                    WHERE `id_bonificaciones` IN 
+                        (SELECT
+                            MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                        FROM
                             `nom_liq_bsp`
-                        WHERE `id_bonificaciones` IN 
-                            (SELECT
-                                MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
-                            FROM
-                                `nom_liq_bsp`
-                            INNER JOIN `nom_nominas`
-                                ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                            WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
-                            GROUP BY `nom_liq_bsp`.`id_empleado`
-                            UNION ALL
-                            SELECT
-                                MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
-                            FROM
-                                `nom_liq_bsp`
-                            INNER JOIN `nom_nominas` 
-                                ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                            WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
-                            GROUP BY `nom_liq_bsp`.`id_empleado`)
-                        GROUP BY `id_empleado`) AS  `ts1`
-                    ON (`nom_empleado`.`id_empleado` = `ts1`.`id_empleado`)
+                        INNER JOIN `nom_nominas` 
+                            ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                        WHERE (`nom_nominas`.`tipo` = 'N' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                        GROUP BY `nom_liq_bsp`.`id_empleado`
+                        UNION ALL
+                        SELECT
+                            MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                        FROM
+                            `nom_liq_bsp`
+                        INNER JOIN `nom_nominas` 
+                            ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                        WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                        GROUP BY `nom_liq_bsp`.`id_empleado`)
+                    GROUP BY `id_empleado`) AS  `ts1`
+                INNER JOIN
+                    (SELECT 
+                        `id_empleado`,`mes`,`anio` 
+                    FROM  `nom_liq_bsp` 
+                    WHERE  `id_bonificaciones` IN 
+                        (SELECT
+                            MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                        FROM
+                            `nom_liq_bsp`
+                        INNER JOIN `nom_nominas` 
+                            ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                        WHERE (`nom_nominas`.`tipo` = 'N' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                        GROUP BY `nom_liq_bsp`.`id_empleado`)) AS `ts2`
+                    ON (`ts1`.`id_empleado` = `ts2`.`id_empleado`)) AS `t1`
+                    ON (`t1`.`id_empleado` = `nom_empleado`.`id_empleado`)
                 LEFT JOIN 
                 (SELECT 
                     `id_empleado`,`corte` AS `corte_ces`
@@ -99,7 +113,7 @@ try {
                         `nom_liq_prima`
                     INNER JOIN `nom_nominas`
                         ON (`nom_liq_prima`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                    WHERE `nom_nominas`.`tipo` = 'PV'
+                    WHERE `nom_nominas`.`tipo` = 'PV' AND `nom_nominas`.`vigencia` <= '$vigencia'
                     GROUP BY `id_empleado`
                     UNION ALL 
                     SELECT
@@ -124,7 +138,7 @@ try {
                     , SUM(`nom_liq_vac`.`val_prima_vac`) AS `val_prima_vac`
                     , SUM(`nom_liq_vac`.`val_liq`) AS `val_liq`
                     , SUM(`nom_liq_vac`.`val_bon_recrea`) AS `val_bon_recrea`
-                    , `nom_vacaciones`.`corte` AS `corte`  
+                    , `nom_vacaciones`.`corte`  
                 FROM
                     `nom_liq_vac`
                 INNER JOIN `nom_vacaciones` 
@@ -137,7 +151,7 @@ try {
                         ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
                     INNER JOIN `nom_nominas`
                         ON (`nom_liq_vac`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                    WHERE `nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'VC'
+                    WHERE (`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'VC') AND `nom_nominas`.`vigencia` <= '$vigencia'
                     GROUP BY `id_empleado`
                     UNION ALL 
                     SELECT 

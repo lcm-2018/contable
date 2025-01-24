@@ -24,11 +24,11 @@ try {
                 , `ctb_causa_retencion`.`id_terceroapi`
             FROM
                 `ctb_causa_retencion`
-                INNER JOIN `ctb_retencion_rango` 
+                LEFT JOIN `ctb_retencion_rango` 
                     ON (`ctb_causa_retencion`.`id_rango` = `ctb_retencion_rango`.`id_rango`)
-                INNER JOIN `ctb_retenciones` 
+                LEFT JOIN `ctb_retenciones` 
                     ON (`ctb_retencion_rango`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
-                INNER JOIN `ctb_retencion_tipo` 
+                LEFT JOIN `ctb_retencion_tipo` 
                     ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
             WHERE (`ctb_causa_retencion`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);

@@ -169,9 +169,10 @@ try {
     $ctas_ret = $rs->fetchAll();
     $credito = 0;
     $acumulador = 0;
+    $ref = 0;
     $query = "INSERT INTO `ctb_libaux`
-	            (`id_ctb_doc`,`id_tercero_api`,`id_cuenta`,`debito`,`credito`,`id_user_reg`,`fecha_reg`)
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
+	            (`id_ctb_doc`,`id_tercero_api`,`id_cuenta`,`debito`,`credito`,`id_user_reg`,`fecha_reg`,`ref`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $query = $cmd->prepare($query);
     $query->bindParam(1, $id_doc, PDO::PARAM_INT);
     $query->bindParam(2, $id_tercero, PDO::PARAM_INT);
@@ -180,6 +181,7 @@ try {
     $query->bindParam(5, $credito, PDO::PARAM_STR);
     $query->bindParam(6, $iduser, PDO::PARAM_INT);
     $query->bindParam(7, $fecha2);
+    $query->bindParam(8, $ref, PDO::PARAM_INT);
     $total_debito = 0;
     $total_credito = 0;
     foreach ($datoscostos as $dc) {
@@ -216,6 +218,7 @@ try {
         $id_cuenta = $key !== false ? $ctas_credito[$key]['id_cuenta'] : NULL;
         $credito = $total_debito - $total_credito;
         $id_tercero = $id_tercero_ant;
+        $ref = 1;
         $query->execute();
         if ($cmd->lastInsertId() > 0) {
             $acumulador++;
