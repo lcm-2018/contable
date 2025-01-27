@@ -42,8 +42,8 @@ try {
 
                 if ($id == -1) {                
                     $sql = "INSERT INTO far_traslado(fec_traslado,hor_traslado,id_sede_origen,id_bodega_origen,
-                            id_sede_destino,id_bodega_destino,detalle,val_total,id_usr_crea,fec_creacion,estado)
-                        VALUES('$fec_traslado','$hor_traslado',$id_sede_origen,$id_bodega_origen,$id_sede_destino,$id_bodega_destino,'$detalle',0,$id_usr_ope,'$fecha_ope',1)";
+                            id_sede_destino,id_bodega_destino,detalle,val_total,id_usr_crea,fec_creacion,creado_far,estado)
+                        VALUES('$fec_traslado','$hor_traslado',$id_sede_origen,$id_bodega_origen,$id_sede_destino,$id_bodega_destino,'$detalle',0,$id_usr_ope,'$fecha_ope',0,1)";
                     $rs = $cmd->query($sql);
 
                     if ($rs) {

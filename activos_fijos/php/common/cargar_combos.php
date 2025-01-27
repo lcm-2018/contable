@@ -331,22 +331,48 @@ function subgrupo_articulo($cmd, $titulo = '', $id = -1)
     }
 }
 
-function areas($cmd, $titulo = '', $id = -1)
+function bodegas_sede($cmd, $titulo = '', $idsede = 0, $id = 0)
+{  
+    try {
+        echo '<option value="">' . $titulo . '</option>';
+        if ($idsede != 0) {
+            $sql = "SELECT far_bodegas.id_bodega,far_bodegas.nombre FROM far_bodegas
+                INNER JOIN tb_sedes_bodega ON (tb_sedes_bodega.id_bodega=far_bodegas.id_bodega)
+                WHERE tb_sedes_bodega.id_sede=$idsede";
+            $rs = $cmd->query($sql);
+            $objs = $rs->fetchAll();
+            foreach ($objs as $obj) {
+                if ($obj['id_bodega']  == $id) {
+                    echo '<option value="' . $obj['id_bodega'] . '" selected="selected">' . $obj['nombre'] . '</option>';
+                } else {
+                    echo '<option value="' . $obj['id_bodega'] . '">' . $obj['nombre'] . '</option>';
+                }
+            }
+            $cmd = null;
+        }
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+function areas_sede($cmd, $titulo = '', $idsede = 0, $id = -1)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_area,nom_area,id_responsable FROM far_centrocosto_area WHERE id_area<>0";
-        $rs = $cmd->query($sql);
-        $objs = $rs->fetchAll();
-        foreach ($objs as $obj) {
-            $dtad = 'data-idresponsable="' . $obj['id_responsable'] . '"';
-            if ($obj['id_area']  == $id) {
-                echo '<option value="' . $obj['id_area'] . '"' . $dtad . ' selected="selected">' . $obj['nom_area'] . '</option>';
-            } else {
-                echo '<option value="' . $obj['id_area'] . '"' . $dtad . '>' . $obj['nom_area'] . '</option>';
+        if ($idsede != 0) {
+            $sql = "SELECT id_area,nom_area,id_responsable FROM far_centrocosto_area WHERE id_sede=$idsede";
+            $rs = $cmd->query($sql);
+            $objs = $rs->fetchAll();
+            foreach ($objs as $obj) {
+                $dtad = 'data-idresponsable="' . $obj['id_responsable'] . '"';
+                if ($obj['id_area']  == $id) {
+                    echo '<option value="' . $obj['id_area'] . '"' . $dtad . ' selected="selected">' . $obj['nom_area'] . '</option>';
+                } else {
+                    echo '<option value="' . $obj['id_area'] . '"' . $dtad . '>' . $obj['nom_area'] . '</option>';
+                }
             }
-        }
-        $cmd = null;
+            $cmd = null;
+        }    
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }

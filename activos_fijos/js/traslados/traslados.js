@@ -31,11 +31,13 @@
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
+                    data.id_sedori = $('#sl_sedori_filtro').val();
                     data.id_areori = $('#sl_areori_filtro').val();
                     data.id_resori = $('#sl_resori_filtro').val();
                     data.id_traslado = $('#txt_id_traslado_filtro').val();
                     data.fec_ini = $('#txt_fecini_filtro').val();
                     data.fec_fin = $('#txt_fecfin_filtro').val();
+                    data.id_seddes = $('#sl_seddes_filtro').val();
                     data.id_aredes = $('#sl_aredes_filtro').val();
                     data.id_resdes = $('#sl_resdes_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
@@ -46,8 +48,10 @@
                 { 'data': 'fec_traslado' },
                 { 'data': 'hor_traslado' },
                 { 'data': 'observaciones' },
+                { 'data': 'nom_sede_origen' },
                 { 'data': 'nom_area_origen' },
                 { 'data': 'nom_usuario_origen' },
+                { 'data': 'nom_sede_destino' },
                 { 'data': 'nom_area_destino' },
                 { 'data': 'nom_usuario_destino' },
                 { 'data': 'estado' },
@@ -55,9 +59,9 @@
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [3, 4, 5, 6, 7] },
-                { visible: false, targets: 8 },
-                { orderable: false, targets: 10 }
+                { class: 'text-wrap', targets: [3, 4, 5, 6, 7, 8, 9] },
+                { visible: false, targets: 10 },
+                { orderable: false, targets: 12 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 1) {
@@ -91,6 +95,24 @@
         }
     });
 
+    //Filtrar las areas acorde a la sede.
+    $('#sl_sedori_filtro').on("change", function() {
+        $('#sl_areori_filtro').load('../common/cargar_areas_sede.php', { id_sede: $(this).val(), titulo: '--Area Origen--' }, function() {});
+    });
+    $('#sl_sedori_filtro').trigger('change');
+
+    $('#sl_seddes_filtro').on("change", function() {
+        $('#sl_aredes_filtro').load('../common/cargar_areas_sede.php', { id_sede: $(this).val(), titulo: '--Area Destino--' }, function() {});
+    });
+    $('#sl_seddes_filtro').trigger('change');
+
+    $('#divForms').on("change", "#sl_sede_origen", function() {
+        $('#sl_area_origen').load('../common/cargar_areas_sede.php', { id_sede: $(this).val() }, function() {});
+    });
+    $('#divForms').on("change", "#sl_sede_destino", function() {
+        $('#sl_area_destino').load('../common/cargar_areas_sede.php', { id_sede: $(this).val() }, function() {});
+    });
+
     //Seleccionr el responsable de la area
     $('#divForms').on("change", "#sl_area_origen", function() {
         let id_res = $(this).find('option:selected').attr('data-idresponsable');
@@ -116,8 +138,10 @@
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
 
-        var error = verifica_vacio($('#sl_area_origen'));
+        var error = verifica_vacio($('#sl_sede_origen'));
+        error += verifica_vacio($('#sl_area_origen'));
         error += verifica_vacio($('#sl_responsable_origen'));
+        error += verifica_vacio($('#sl_sede_destino'));
         error += verifica_vacio($('#sl_area_destino'));
         error += verifica_vacio($('#sl_responsable_destino'));
         error += verifica_vacio($('#txt_obs_traslado'));
@@ -355,11 +379,13 @@
             $('#divMsgError').html('Debe especificar un rango de fechas');
         } else {
             $.post("imp_traslados.php", {
+                id_sedori: $('#sl_sedori_filtro').val(),
                 id_areori: $('#sl_areori_filtro').val(),
                 id_resori: $('#sl_resori_filtro').val(),
                 id_traslado: $('#txt_id_traslado_filtro').val(),
                 fec_ini: $('#txt_fecini_filtro').val(),
                 fec_fin: $('#txt_fecfin_filtro').val(),
+                id_seddes: $('#sl_seddes_filtro').val(),
                 id_aredes: $('#sl_aredes_filtro').val(),
                 id_resdes: $('#sl_resdes_filtro').val(),
                 estado: $('#sl_estado_filtro').val()

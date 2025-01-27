@@ -110,12 +110,12 @@ try {
                             if($obj['id_grupo'] == 1 || $obj['id_grupo'] == 2){  
                                 $tabla .= 
                                     '<tr>    
-                                       <td>Cta. Subgrupo de Consumo:</td><td>' . $cuenta_cs .'</td>
+                                       <td>Cta. Inventario:</td><td>' . $cuenta_cs .'</td>
                                     </tr></table></td></tr>';
                             }else{        
                                 $tabla .= 
                                     '<tr>    
-                                        <td>Cta. Subgrupo Activo Fijo:</td><td> ' . $cuenta_af .'</td>
+                                        <td>Cta. Activo Fijo:</td><td> ' . $cuenta_af .'</td>
                                     </tr>
                                     <tr>        
                                         <td>Cta. Depreciación Activo Fijo:</td><td> ' . $cuenta_dep .'</td>

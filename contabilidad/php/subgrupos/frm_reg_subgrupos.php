@@ -70,8 +70,8 @@ if(empty($obj)){
             <div class="p-3">
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link active small" id="nav_lista_cta_cs-tab" data-toggle="tab" href="#nav_lista_cta_cs" role="tab" aria-controls="nav_lista_cta_cs" aria-selected="true">CUENTA CONTABLE - ARTICULOS DE CONSUMO</a>
-                        <a class="nav-item nav-link small" id="nav_lista_cta_af-tab" data-toggle="tab" href="#nav_lista_cta_af" role="tab" aria-controls="nav_lista_cta_af" aria-selected="false">CUENTA CONTABLE - ARTICULOS ACTIVOS FIJOS</a>
+                        <a class="nav-item nav-link active small" id="nav_lista_cta_cs-tab" data-toggle="tab" href="#nav_lista_cta_cs" role="tab" aria-controls="nav_lista_cta_cs" aria-selected="true">CUENTA CONTABLE - INVENTARIO</a>
+                        <a class="nav-item nav-link small" id="nav_lista_cta_af-tab" data-toggle="tab" href="#nav_lista_cta_af" role="tab" aria-controls="nav_lista_cta_af" aria-selected="false">CUENTA CONTABLE - ACTIVO FIJO</a>
                     </div>
                 </nav>
 

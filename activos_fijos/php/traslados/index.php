@@ -51,8 +51,12 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <!--Opciones de filtros -->
                             <div class="form-row">
                                 <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_sedori_filtro">
+                                        <?php sedes($cmd, '--Sede Origen--') ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_areori_filtro">
-                                        <?php areas($cmd, '--Area Origen--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
@@ -74,8 +78,12 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </div>
                                 </div> 
                                 <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_seddes_filtro">
+                                        <?php sedes($cmd, '--Sede Destino--') ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_aredes_filtro">
-                                        <?php areas($cmd, '--Area Destino--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
@@ -113,15 +121,17 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th rowspan="2">Fecha traslado</th>
                                         <th rowspan="2">Hora traslado</th>
                                         <th rowspan="2">Observaciones</th>                                        
-                                        <th colspan="2">Unidad Origen</th>
-                                        <th colspan="2">Unidad Destino</th>                                       
+                                        <th colspan="3">Unidad Origen</th>
+                                        <th colspan="3">Unidad Destino</th>                                       
                                         <th rowspan="2">Id.Estado</th>
                                         <th rowspan="2">Estado</th>
                                         <th rowspan="2">Acciones</th>
                                     </tr>
                                     <tr class="text-center centro-vertical">
+                                        <th>Sede</th>
                                         <th>Area</th>
                                         <th>Responsable</th>
+                                        <th>Sede</th>
                                         <th>Area</th>
                                         <th>Responsable</th>
                                     </tr>    

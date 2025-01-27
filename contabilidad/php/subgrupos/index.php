@@ -81,7 +81,7 @@ include '../../../permisos.php';
                                         <th rowspan="2">Acciones</th>
                                     </tr>
                                     <tr class="text-center centro-vertical">
-                                        <th>Consumo</th>
+                                        <th>Inventario</th>
                                         <th>Activo Fijo</th>
                                         <th>Depreciación Acf</th>
                                         <th>Gasto Depresc. Acf</th>

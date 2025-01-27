@@ -15,20 +15,22 @@ $id = isset($_POST['id']) ? $_POST['id'] : -1;
 
 try {
     $sql = "SELECT AT.id_traslado,AT.fec_traslado,AT.hor_traslado,AT.observaciones,                    
-                AO.nom_area AS nom_area_origen,
+                AO.nom_area AS nom_area_origen,SO.nom_sede AS nom_sede_origen,
                 CONCAT_WS(' ',UO.apellido1,UO.apellido2,UO.nombre1,UO.nombre2)  AS nom_usuario_origen,                    
-                AD.nom_area AS nom_area_destino,
+                AD.nom_area AS nom_area_destino,SD.nom_sede AS nom_sede_destino,
                 CONCAT_WS(' ',UD.apellido1,UD.apellido2,UD.nombre1,UD.nombre2)  AS nom_usuario_destino,                
                 CASE AT.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
                 CASE AT.estado WHEN 0 THEN AT.fec_anula WHEN 1 THEN AT.fec_crea WHEN 2 THEN AT.fec_cierre END AS fec_estado,
-                CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
-                usr.descripcion AS usr_perfil,usr.nom_firma
+                CONCAT_WS(' ',USR.nombre1,USR.nombre2,USR.apellido1,USR.apellido2) AS usr_cierra,
+                USR.descripcion AS usr_perfil,USR.nom_firma
             FROM acf_traslado AS AT            
-            INNER JOIN far_centrocosto_area AS ao ON (ao.id_area = AT.id_area_origen)
-            LEFT JOIN seg_usuarios_sistema AS uo ON (uo.id_usuario = AT.id_usr_origen)           
-            INNER JOIN far_centrocosto_area AS ad ON (ad.id_area = AT.id_area_destino)
-            LEFT JOIN seg_usuarios_sistema AS ud ON (ud.id_usuario = AT.id_usr_destino)
-            LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario = AT.id_usr_cierre)
+            INNER JOIN far_centrocosto_area AS AO ON (AO.id_area = AT.id_area_origen)
+            INNER JOIN tb_sedes AS SO ON (SO.id_sede = AO.id_sede)
+            LEFT JOIN seg_usuarios_sistema AS UO ON (UO.id_usuario = AT.id_usr_origen)           
+            INNER JOIN far_centrocosto_area AS AD ON (AD.id_area = AT.id_area_destino)
+            INNER JOIN tb_sedes AS SD ON (SD.id_sede = AD.id_sede)
+            LEFT JOIN seg_usuarios_sistema AS UD ON (UD.id_usuario = AT.id_usr_destino)
+            LEFT JOIN seg_usuarios_sistema AS USR ON (USR.id_usuario = AT.id_usr_cierre)
             WHERE AT.id_traslado=" . $id . " LIMIT 1";
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
@@ -93,14 +95,20 @@ try {
             <td colspan="2"><?php echo $obj_e['fec_estado']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="3">Area Origen y Responsable</td>
-            <td colspan="3">Area Destino y Responsable</td>
+            <td>Sede Origen</td>
+            <td>Area Origen</td>
+            <td>Responsable Origen</td>
+            <td>Sede Destino</td>
+            <td>Area Destino</td>
+            <td>Responsable Destino</td>
         </tr>
         <tr>
+            <td><?php echo $obj_e['nom_sede_origen']; ?></td>
             <td><?php echo $obj_e['nom_area_origen']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_usuario_origen']; ?></td>
+            <td><?php echo $obj_e['nom_usuario_origen']; ?></td>
+            <td><?php echo $obj_e['nom_sede_destino']; ?></td>
             <td><?php echo $obj_e['nom_area_destino']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_usuario_destino']; ?></td>
+            <td><?php echo $obj_e['nom_usuario_destino']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td colspan="6">Observaciones</td>

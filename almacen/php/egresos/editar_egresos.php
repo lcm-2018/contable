@@ -41,9 +41,9 @@ try {
 
             if ($id == -1) {
                 $sql = "INSERT INTO far_orden_egreso(fec_egreso,hor_egreso,id_tipo_egreso,
-                        id_cliente,id_centrocosto,detalle,val_total,id_sede,id_bodega,id_usr_crea,fec_creacion,estado)
+                        id_cliente,id_centrocosto,detalle,val_total,id_sede,id_bodega,id_usr_crea,fec_creacion,creado_far,estado)
                     VALUES('$fec_egr','$hor_egr',$id_tipegr,
-                        $id_tercero,$id_cencosto,'$detalle',0,$id_sede,$id_bodega,$id_usr_ope,'$fecha_ope',1)";
+                        $id_tercero,$id_cencosto,'$detalle',0,$id_sede,$id_bodega,$id_usr_ope,'$fecha_ope',0,1)";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {

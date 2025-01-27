@@ -12,10 +12,12 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT acf_traslado.*,                           
-            CASE acf_traslado.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
-        FROM acf_traslado             
-        WHERE id_traslado=" . $id . " LIMIT 1";
+$sql = "SELECT AFT.*,ARO.id_sede AS id_sede_origen,ARD.id_sede AS id_sede_destino,
+            CASE AFT.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
+        FROM acf_traslado AS AFT 
+        INNER JOIN far_centrocosto_area AS ARO ON (ARO.id_area=AFT.id_area_origen)
+        INNER JOIN far_centrocosto_area AS ARD ON (ARD.id_area=AFT.id_area_destino)       
+        WHERE AFT.id_traslado=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 
@@ -70,9 +72,15 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                 </div>    
                 <div class="form-row">
                     <div class="form-group col-md-3">
+                        <label for="sl_sede_origen" class="small">Sede Origen</label>
+                        <select class="form-control form-control-sm" id="sl_sede_origen" name="sl_sede_origen">
+                            <?php sedes($cmd, '', $obj['id_sede_origen']) ?>   
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
                         <label for="sl_area_origen" class="small">Area Origen</label>
                         <select class="form-control form-control-sm" id="sl_area_origen" name="sl_area_origen">
-                            <?php areas($cmd, '', $obj['id_area_origen']) ?>   
+                            <?php areas_sede($cmd, '', $obj['id_sede_origen'], $obj['id_area_origen']) ?>   
                         </select>
                     </div>
                     <div class="form-group col-md-3">
@@ -82,9 +90,15 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-3">
+                        <label for="sl_sede_destino" class="small">Sede Destino</label>
+                        <select class="form-control form-control-sm" id="sl_sede_destino" name="sl_sede_destino">
+                            <?php sedes($cmd, '', $obj['id_sede_destino']) ?>   
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
                         <label for="sl_area_destino" class="small">Area Destino</label>
                         <select class="form-control form-control-sm" id="sl_area_destino" name="sl_area_destino">
-                            <?php areas($cmd, '', $obj['id_area_destino']) ?>   
+                            <?php areas_sede($cmd, '', $obj['id_sede_destino'], $obj['id_area_destino']) ?>    
                         </select>
                     </div>
                     <div class="form-group col-md-3">

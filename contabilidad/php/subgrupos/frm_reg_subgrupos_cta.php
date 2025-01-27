@@ -34,7 +34,7 @@ if (empty($obj)) {
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h7 style="color: white;">REGISRTAR CUENTA CONTABLE DE SUBGRUPO - CONSUMO</h7>
+            <h7 style="color: white;">REGISRTAR CUENTA CONTABLE DE SUBGRUPO - INVENTARIO</h7>
         </div>
         <div class="px-2">
 
