@@ -380,6 +380,19 @@ try {
                                     </div>
                                 </a>
                             <?php }
+                            if (PermisosUsuario($permisos, 5199, 0) || $id_rol == 1) {
+                            ?>
+                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/nomina/php/inf_personalizados/index.php">
+                                    <div class="form-row">
+                                        <div class="div-icono">
+                                            <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
+                                        </div>
+                                        <div>
+                                            Inf. Personalizados
+                                        </div>
+                                    </div>
+                                </a>
+                            <?php }
                             ?>
                         </nav>
                     </div>
