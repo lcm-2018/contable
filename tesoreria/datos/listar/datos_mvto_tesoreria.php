@@ -138,7 +138,7 @@ if (!empty($listappto)) {
         $valor_total = 0;
         $id_ctb = $lp['id_ctb_doc'];
         $estado = $lp['estado'];
-        $editar = $borrar = $imprimir = $acciones = $enviar = $dato = $cerrar = $anular = null;
+        $editar = $borrar = $imprimir = $detalles = $enviar = $dato = $cerrar = $anular = null;
         $tercero = $lp['nom_tercero'];
         $ccnit = $lp['nit_tercero'];
         if ($lp['tipo'] == 'N') {
@@ -154,21 +154,6 @@ if (!empty($listappto)) {
         }
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
 
-
-        // Sumar el valor del crp de la tabla id_pto_mtvo asociado al CDP
-        // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
-        $editar = $detalles = $acciones = $borrar = null;
-        //$anular = '<a value="' . $id_ctb . '" class="dropdown-item sombra " href="#" onclick="anularDocumentoTes(' . $id_ctb . ');">Anulación</a>';
-        if ($estado == 1) {
-            $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
-        } else {
-            $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoTes(' . $id_ctb . ')" href="#">Abrir documento</a>';
-        }
-        if ($fecha >= $fecha_cierre) {
-            $anular = null;
-            $cerrar = null;
-        } else {
-        }
         if ((PermisosUsuario($permisos, 5601, 3) || $id_rol == 1)) {
             $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb modificar"  text="' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
             $detalles = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" title="Detalles" onclick="cargarListaDetallePagoEdit(' . $id_ctb . ')"><span class="fas fa-eye fa-lg"></span></a>';
@@ -178,42 +163,41 @@ if (!empty($listappto)) {
         }
         if ((PermisosUsuario($permisos, 5601, 4) || $id_rol == 1)) {
             $borrar = '<a value="' . $id_ctb . '" onclick="eliminarRegistroTec(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-            $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-            ...
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-           ' . $cerrar . '
-            ' . $anular . '
-            <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Duplicar</a>
-            <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Parametrizar</a>
-            </div>';
+        }
+        if ((PermisosUsuario($permisos, 5601, 5) || $id_rol == 1)) {
+            if ($estado == 1) {
+                $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" title="Cerrar"><span class="fas fa-lock fa-lg"></span></a>';
+            } else {
+                $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" onclick="abrirDocumentoTes(' . $id_ctb . ')" title="Abrir"><span class="fas fa-unlock fa-lg"></span></a>';
+            }
+            $anular = '<a value="' . $id_ctb . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" onclick="anularDocumentoTes(' . $id_ctb . ')" title="Anular"><span class="fas fa-ban fa-lg"></span></a>';
+            if ($fecha >= $fecha_cierre) {
+                $anular = null;
+                $cerrar = null;
+            }
         }
 
         if ($estado >= 2) {
             $editar = null;
             $borrar = null;
         }
-        if ($estado == 0) {
+        if ($estado == '0') {
             $editar = null;
             $borrar = null;
-            $imprimir = null;
             $acciones = null;
             $enviar = null;
-            $dato = '<span class="badge badge-pill badge-danger">Anulado</span>';
+            $cerrar = null;
+            $anular = null;
+            $detalles = null;
+            $dato = '<span class="badge badge-pill badge-secondary">Anulado</span>';
         }
-        /*
-        if ($id_ctb == 3684) {
-            $enviar = '<button id ="enviar_' . $id_ctb . '" value="14" onclick="EnviarNomina(this)" class="btn btn-outline-primary btn-sm bt-sm btn-circle shadow-gb"  title="Procesar nómina (Soporte Electrónico)"><span class="fas fa-paper-plane fa-lg"></span></button>';
-        }
-*/
         $data[] = [
-
             'numero' =>  $lp['id_manu'],
             'fecha' => $fecha,
             'ccnit' => $ccnit,
             'tercero' => $tercero,
             'valor' =>  '<div class="text-right">' . $valor_total . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir . $acciones . $enviar . $dato . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir . $enviar . $dato . $cerrar . $anular . '</div>',
         ];
     }
 } else {

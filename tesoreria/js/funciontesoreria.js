@@ -1969,41 +1969,35 @@ const anularDocumentoTes = (id) => {
 		$("#divForms").html(he);
 	});
 };
-
-// Enviar datos para anulacion
-const changeEstadoAnulacionCtb = async () => {
-	let formEnvio = new FormData(formAnulacionCrpp);
-	for (var pair of formEnvio.entries()) {
-		console.log(pair[0] + ", " + pair[1]);
-		// obtener el valor de la etiqueta min del imput fecha
-		let fecha_min = document.querySelector("#fecha").getAttribute("min");
-		// validar que el value del campo  fecha no sea menor a fecha_min
-		if (formEnvio.get("fecha") < fecha_min) {
-			mjeError("La fecha no puede ser menor al cierre de periodo", "Fecha permitida: " + fecha_min);
-			return false;
-		}
-	}
-	try {
-		const response = await fetch("datos/registrar/registrar_anulacion_ctb.php", {
-			method: "POST",
-			body: formEnvio,
-		});
-		const data = await response.json();
-		console.log(data);
-		if (data[0].value == "ok") {
-			// realizar un case para opciones 1.2.3
-			if (data[0].tipo == 1) {
-				let tabla = "tableMvtoTesoreriaPagos";
-				reloadtable(tabla);
+function changeEstadoAnulacionTes() {
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#fecha').val() == '') {
+		$('#fecha').addClass('is-invalid');
+		$('#fecha').focus();
+		mjeError('Debe seleccionar una fecha');
+	} else if ($('#objeto').val() == '') {
+		$('#objeto').addClass('is-invalid');
+		$('#objeto').focus();
+		mjeError('Debe digitar un motivo de anulación');
+	} else {
+		var datos = $('#formAnulaDocTes').serialize();
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: "datos/registrar/registrar_anulacion_tes.php",
+			data: datos,
+			success: function (r) {
+				if (r.status == 'ok') {
+					$('#divModalForms').modal('hide');
+					$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+					mje('Documento anulado correctamente');
+				} else {
+					mjeError('Error: ' + r.msg);
+				}
 			}
-			mje("Anulación guardada con  éxito...");
-			// cerrar modal
-			$("#divModalForms").modal("hide");
-		}
-	} catch (error) {
-		console.error(error);
+		});
 	}
-};
+}
 // ========================================== Gestión de chequeras ======================================================
 // Enviar datos para anulacion
 //Guardar datos de chequera

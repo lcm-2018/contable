@@ -784,7 +784,7 @@ let cerrarDocumentoCtb = function (dato) {
 		.then((response) => response.json())
 		.then((response) => {
 			if (response.status == "ok") {
-				location.reload();
+				$('#tableMvtoContable').DataTable().ajax.reload();
 			} else {
 				mjeError("Documento no cerrado", "Verifique información ingresada" + response.msg);
 			}
@@ -2716,40 +2716,35 @@ const anularDocumentoCont = (id) => {
 		$("#divForms").html(he);
 	});
 };
-// Enviar datos para anulacion
-const changeEstadoAnulaCtb = async () => {
-	let formEnvio = new FormData(formAnulacionCtb);
-	for (var pair of formEnvio.entries()) {
-		console.log(pair[0] + ", " + pair[1]);
-		// obtener el valor de la etiqueta min del imput fecha
-		let fecha_min = document.querySelector("#fecha").getAttribute("min");
-		// validar que el value del campo  fecha no sea menor a fecha_min
-		if (formEnvio.get("fecha") < fecha_min) {
-			mjeError("La fecha no puede ser menor al cierre de periodo", "Fecha permitida: " + fecha_min);
-			return false;
-		}
-	}
-	try {
-		const response = await fetch("datos/registrar/registrar_anula_ctb.php", {
-			method: "POST",
-			body: formEnvio,
-		});
-		const data = await response.json();
-		console.log(data);
-		if (data[0].value == "ok") {
-			// realizar un case para opciones 1.2.3
-			if (data[0].tipo == 1) {
-				let tabla = "tableMvtoContable";
-				reloadtable(tabla);
+function changeEstadoAnulaCtb() {
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#fecha').val() == '') {
+		$('#fecha').addClass('is-invalid');
+		$('#fecha').focus();
+		mjeError('Debe seleccionar una fecha');
+	} else if ($('#objeto').val() == '') {
+		$('#objeto').addClass('is-invalid');
+		$('#objeto').focus();
+		mjeError('Debe digitar un motivo de anulación');
+	} else {
+		var datos = $('#formAnulaDocCtb').serialize();
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: "datos/registrar/registrar_anulacion_ctb.php",
+			data: datos,
+			success: function (r) {
+				if (r.status == 'ok') {
+					$('#divModalForms').modal('hide');
+					$('#tableMvtoContable').DataTable().ajax.reload();
+					mje('Documento anulado correctamente');
+				} else {
+					mjeError('Error: ' + r.msg);
+				}
 			}
-			mje("Anulación guardada con  éxito...");
-			// cerrar modal
-			$("#divModalForms").modal("hide");
-		}
-	} catch (error) {
-		console.error(error);
+		});
 	}
-};
+}
 // ================================== INFORMES CONTABILIDAD =================================================
 
 const cargarReporteContable = (id) => {

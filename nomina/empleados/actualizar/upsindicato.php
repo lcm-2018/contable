@@ -9,7 +9,7 @@ include '../../../conexion.php';
 
 $idsind = isset($_POST['numidSindicato']) ? $_POST['numidSindicato'] : exit('Acción no permitida');
 $idsindicato = $_POST['slcUpSindicato'];
-$porcentaje = str_replace(',', '.', $_POST['txtUpPorcentajeSind']) / 100;
+$porcentaje = str_replace(',', '.', $_POST['txtUpPorcentajeSind']);
 $fini = date('Y-m-d', strtotime($_POST['datUpFecInicioSind']));
 if ($_POST['datUpFecFinSind'] === '') {
     $ffin;

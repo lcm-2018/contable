@@ -8,7 +8,7 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 $idemple = isset($_POST['idEmpSindicato']) ? $_POST['idEmpSindicato'] : exit('Acción no permitida');
 $sindicato = $_POST['slcSindicato'];
-$porcentaje = str_replace(',', '.', $_POST['txtPorcentajeSind']) / 100;
+$porcentaje = str_replace(',', '.', $_POST['txtPorcentajeSind']);
 $finsind = date('Y-m-d', strtotime($_POST['datFecInicioSind']));
 if ($_POST['datFecFinSind'] === '') {
     $ffinsind;

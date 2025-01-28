@@ -242,6 +242,7 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $id_forma = 0;
+$anulado = $documento['estado'] == '0' ? 'ANULADO' : '';
 ?>
 <div class="text-right pt-3">
     <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>
@@ -269,6 +270,43 @@ $id_forma = 0;
             max-width: 50%;
             /* Limita el ancho máximo al 50% */
         }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            /* Se añade rotación */
+            font-size: 100px;
+            color: rgba(255, 0, 0, 0.2);
+            /* Cambia la opacidad para que sea tenue */
+            z-index: 1000;
+            pointer-events: none;
+            /* Para que no interfiera con el contenido */
+            white-space: nowrap;
+            /* Evita que el texto se divida en varias líneas */
+        }
+
+        /* Estilos específicos para la impresión */
+        @media print {
+
+            body {
+                position: relative;
+            }
+
+            .watermark {
+                position: fixed;
+                /* Cambiar a 'fixed' para impresión */
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 100px;
+                color: rgba(255, 0, 0, 0.2);
+                /* Asegura que el color y opacidad se mantengan */
+                z-index: -1;
+                /* Colocar detrás del contenido impreso */
+            }
+        }
     </style>
     <div class="px-2 " style="width:90% !important;margin: 0 auto;">
 
@@ -291,7 +329,9 @@ $id_forma = 0;
                 <div class="col lead"><label><strong> <?php echo $nom_doc . ' No: ' . $documento['id_manu']; ?></strong></label></div>
             </div>
         </div>
-
+        <div class="watermark">
+            <h3><?php echo $anulado ?></h3>
+        </div>
         <div class="row">
             <div class="col-12">
                 <div style="text-align: left">
@@ -587,37 +627,20 @@ $id_forma = 0;
         </table>
         </br>
         </br>
-        <?php if ($id_forma == 2) {
-        ?>
-            <table style="width: 100%;">
-                <tr>
-                    <td style="text-align: center">
-                        <div>___________________________________</div>
-                        <div><?php echo $nom_respon; ?> </div>
-                        <div><?php echo $cargo_respon; ?> </div>
-                    </td>
-                    <td>
-                        <div>___________________________________</div>
-                        <div><?= $tercero; ?></div>
-                        <div>RECIBE CC/NIT:</div>
-                    </td>
-                </tr>
-            </table>
-        <?php
-        } else {
-        ?>
-            <div class="row">
-                <div class="col-12">
-                    <div style="text-align: center">
-                        <div>___________________________________</div>
-                        <div><?php echo $nom_respon; ?> </div>
-                        <div><?php echo $cargo_respon; ?> </div>
-                    </div>
-                </div>
-            </div>
-        <?php
-        }
-        ?>
+        <table style="width: 100%;">
+            <tr>
+                <td style="text-align: center">
+                    <div>___________________________________</div>
+                    <div><?php echo $nom_respon; ?> </div>
+                    <div><?php echo $cargo_respon; ?> </div>
+                </td>
+                <td>
+                    <div>___________________________________</div>
+                    <div><?= $tercero; ?></div>
+                    <div>RECIBE CC/NIT:</div>
+                </td>
+            </tr>
+        </table>
         </br> </br> </br>
         <?php
         if ($control) {

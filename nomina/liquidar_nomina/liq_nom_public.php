@@ -765,7 +765,7 @@ if (isset($_POST['check'])) {
                     }
                 }
             }
-            $valhora = $salbase / 240;
+            $valhora = $salbase / 230;
             if (!empty($horas)) {
                 foreach ($horas as $h) {
                     if ($h['id_empleado'] == $i) {
@@ -773,12 +773,11 @@ if (isset($_POST['check'])) {
                         if ($h['codigo'] == 3 || $h['codigo'] == 5) {
                             $factor = $h['factor'] / 100;
                             $cnthe = $h['cantidad_he'];
-                            $valhe = $valhora * $factor * $cnthe;
                         } else {
                             $factor = ($h['factor'] / 100) + 1;
                             $cnthe = $h['cantidad_he'];
-                            $valhe = $valhora * $factor * $cnthe;
                         }
+                        $valhe = $valhora * $factor * $cnthe;
                         try {
                             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);

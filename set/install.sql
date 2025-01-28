@@ -110,3 +110,23 @@ insert  into `ctt_variables_forms`(`id_var`,`variable`,`tipo`,`contexto`,`ejempl
 insert  into `far_area_tipo`(`id_tipo`,`nom_tipo`) values (0,''),(1,'Consultorio'),(2,'Sala Clínicas'),(3,'Oficina');
 
 insert  into `tes_caja_conceptos`(`id_caja_concptos`,`id_caja_tipogasto`,`concepto`,`estado`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`) values (1,1,'Impresos y publicaciones',1,1,'2023-04-26 22:12:37',NULL,NULL),(2,1,'Comunicación y transporte',1,1,'2023-04-26 22:12:37',NULL,NULL),(3,1,'Elementos para mantenimiento administrativo',1,1,'2023-04-26 22:12:37',NULL,NULL),(4,2,'Mantenimiento operativo',1,1,'2023-04-26 22:12:37',NULL,NULL);
+
+insert  into `seg_opciones`(`id_opcion`,`nom_opcion`,`id_modulo`,`estado`) values (5002,'[General][Artículos]',50,1),(5003,'[Pedidos][De Bodega]',50,1),(5004,'[Pedidos][De Dependencia]',50,1),(5005,'[Pedidos][De Almacén]',50,1),(5006,'[Movimientos][Ingresos]',50,1),(5007,'[Movimientos][Egresos]',50,1),(5008,'[Movimientos][Traslados]',50,1),(5009,'[Movimientos][Recalcular]',50,1),(5011,'[Reporte][Existencia General]',50,1),(5012,'[Reporte][Existencia Detallada]',50,1),(5013,'[Reporte][Existencia a una Fecha]',50,1),(5014,'[Reporte][Movimientos por Periodo]',50,1),(5015,'[General][Areas-Centros Costo]',50,1),(5016,'[General][Presentaciones Comerciales]',50,1),(5099,'[Reporte][Personalizados]',50,1),(5101,'[Empleados][Empleados]',51,1),(5102,'[Devengados][Horas Extras]',51,1),(5103,'[Devengados][Viáticos]',51,1),(5104,'[Liquidar][Mensual]',51,1),(5105,'[Liquidar][Retroactivo]',51,1),(5106,'[Liquidar][Vacaciones]',51,1),(5107,'[Liquidar][Prestaciones Sociales]',51,1),(5108,'[Liquidar][Prima de Servicios]',51,1),(5109,'[Liquidar][Prima de Navidad]',51,1),(5110,'[Liquidar][Cesantías]',51,1),(5111,'[Liquidar][Liquidado]',51,1),(5112,'[Soporte NE][Soporte NE]',51,1),(5113,'[Certificaciones ][Certificaciones ]',51,1),(5114,'[Configuración][Configuración]',51,1),(5115,'[Informes][Informes]',51,1),(5201,'[Gestión][Gestión]',52,1),(5301,'[Adquisiciones][Adquisiciones]',53,1),(5302,'[Compras][Compras]',53,1),(5401,'[Gestión][Gestión]',54,1),(5402,'[Informes][Informes]',54,1),(5501,'[Movimientos][Movimientos]',55,1),(5502,'[Cuentas por Pagar][Cuentas por Pagar]',55,1),(5503,'[Informes][Informes]',55,1),(5504,'[Otros][Plan de cuentas]',55,1),(5505,'[Otros][Documentos]',55,1),(5506,'[Otros][Impuestos]',55,1),(5508,'[Otros][Centro Costos]',55,1),(5509,'[Otros][SubGrupos]',55,1),(5601,'[Pagos][Pagos]',56,1),(5602,'[Recaudos][Recaudos]',56,1),(5603,'[Traslados][Traslados]',56,1),(5604,'[Caja menor][Caja menor]',56,1),(5605,'[Informes][Informes]',56,1),(5606,'[Otros][Conciliaciones]',56,1),(5607,'[Otros][Cuentas]',56,1),(5608,'[Otros][Chequeras]',56,1),(5701,'[Entradas][Entradas]',57,1),(5702,'[Pedidos][Activos Fijos]',57,1),(5703,'[Movimientos][Ingresos]',57,1),(5704,'[Mantenimiento][Hoja de Vida]',57,1),(5705,'[Mantenimiento][Registro]',57,1),(5706,'[Mantenimiento][Progreso]',57,1),(5707,'[General][marcas]',57,1),(5708,'[Movimientos][Traslados]',57,1),(5709,'[Movimientos][Bajas]',57,1),(5799,'[Reporte][Personalizados]',57,1);
+
+INSERT INTO `tb_actividades_economicas` (`id_actividad`, `cod_actividad`, `descripcion`) 
+    VALUES 
+(495, '9900', 'Actividades de organizaciones y entidades extraterritoriales'),
+(496, '1031', 'Extracción de aceites de origen vegetal crudos'),
+(497, '1032', 'Elaboración de aceites y grasas de origen vegetal refinados'),
+(498, '6496', 'Capitalización'),
+(499, '6515', 'Seguros de salud'),
+(500, '7111', 'Actividades de arquitectura'),
+(501, '7112', 'Actividades de ingeniería y otras actividades conexas de consultoría técnica'),
+(502, '1033', 'Elaboración de aceites y grasas de origen animal'),
+(503, '8891', 'Actividades de guarderías para niños y niñas'),
+(504, '8899', 'Otras actividades de asistencia social n.c.p.'),
+(505, '0010', 'Asalariados'),
+(506, '7499', 'Otras actividades empresariales n.c.p.'),
+(507, '0081', 'Sin Actividad economica, solo para personas naturales'),
+(508, '0082', 'Personas Naturales Subsidiadas por Terceros'),
+(509, '0090', 'Rentistas de Capital, solo para personas naturales.');

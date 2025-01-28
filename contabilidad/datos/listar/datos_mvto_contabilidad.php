@@ -164,11 +164,10 @@ if (!empty($listappto)) {
         $valor_debito = 0;
         $id_ctb = $lp['id_ctb_doc'];
         $estado = $lp['estado'];
-        $anular = $dato = null;
         $tercero = $lp['nom_tercero'] != '' ? $lp['nom_tercero'] : '---';
-        // consultar la diferencia en array diferencias
+
         $key = array_search($id_ctb, array_column($diferencias, 'id_ctb_doc'));
-        $editar = $detalles = $borrar = $imprimir = $enviar = $acciones = $dato = $imprimir = null;
+        $editar = $detalles = $borrar = $imprimir = $enviar = $acciones = $dato = $imprimir = $anular = null;
         if ($key  !== false) {
             $valor_debito = $diferencias[$key]['debito'];
             $dif = $diferencias[$key]['diferencia'];
@@ -186,47 +185,37 @@ if (!empty($listappto)) {
 
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
 
-        // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
-        if ($fecha > $fecha_cierre) {
-            $anular = null;
-            $cerrar = null;
-        } else if ($lp['pag'] != '') {
-            $anular = null;
-            $cerrar = null;
-        } else {
-            //$anular = '<a value="' . $id_ctb . '" class="dropdown-item sombra " href="#" onclick="anularDocumentoCont(' . $id_ctb . ');">Anulación</a>';
-            if ($estado == '1') {
-                $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="CierraDocCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
-            } else {
-                $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoCtb(' . $id_ctb . ')" href="#">Abrir documento</a>';
-            }
-        }
         $base = base64_encode($id_ctb . '|' . $id_ctb_doc);
+        if (PermisosUsuario($permisos, 5501, 1)  || $id_rol == 1) {
+            $detalles = '<a text ="' . $base . '" onclick="cargarListaDetalle(this)" class="btn btn-outline-warning btn-sm btn-circle shadow-gb"  title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
+        }
         if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
             $editar = '<a class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar" text="' . $id_ctb . '"><span class="fas  fa-pencil-alt fa-lg"></span></a>';
-            $detalles = '<a text ="' . $base . '" onclick="cargarListaDetalle(this)" class="btn btn-outline-warning btn-sm btn-circle shadow-gb"  title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
-            $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoDoc(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
-            $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-            ...
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-           ' . $cerrar . '
-           ' . $anular . '
-            <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Duplicar</a>
-            <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Parametrizar</a>
-            </div>';
-        } else {
-            $editar = null;
-            $detalles = null;
-            $acciones = null;
         }
         if (PermisosUsuario($permisos, 5501, 4)  || $id_rol == 1) {
             $borrar = '<a value="' . $id_ctb . '" onclick="eliminarRegistroDoc(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-        } else {
-            $borrar = null;
+        }
+        if (PermisosUsuario($permisos, 5501, 5)  || $id_rol == 1) {
+            if ($fecha > $fecha_cierre) {
+                $anular = null;
+                $cerrar = null;
+            } else if ($lp['pag'] != '') {
+                $anular = null;
+                $cerrar = null;
+            } else {
+                if ($estado == 1) {
+                    $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb" onclick="CierraDocCtb(' . $id_ctb . ')" title="Cerrar"><span class="fas fa-lock fa-lg"></span></a>';
+                } else {
+                    $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" onclick="abrirDocumentoCtb(' . $id_ctb . ')" title="Abrir"><span class="fas fa-unlock fa-lg"></span></a>';
+                }
+                $anular = '<a value="' . $id_ctb . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" onclick="anularDocumentoCont(' . $id_ctb . ');" title="Anular"><span class="fas fa-ban fa-lg"></span></a>';
+            }
+        }
+        if (PermisosUsuario($permisos, 5501, 6)  || $id_rol == 1) {
+            $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoDoc(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
         }
 
-        if ($estado == 2) {
+        if ($estado == 2 || $estado == 0) {
             $editar = null;
             $borrar = null;
         }
@@ -244,12 +233,11 @@ if (!empty($listappto)) {
             }
         }
         if ($estado == 0) {
-            $editar = null;
-            $borrar = null;
-            $imprimir = null;
-            $acciones = null;
+            $anular = null;
             $enviar = null;
-            $dato = '<span class="badge badge-pill badge-danger">Anulado</span>';
+            $cerrar = null;
+            $detalles = null;
+            $dato = '<span class="badge badge-pill badge-secondary">Anulado</span>';
         }
 
         $data[] = [
@@ -259,7 +247,7 @@ if (!empty($listappto)) {
             'fecha' => $fecha,
             'tercero' => $tercero,
             'valor' =>  '<div class="text-right">' . $valor_total . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir  . $enviar . $acciones .  $dato . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir  . $enviar . $cerrar . $anular .  $dato . '</div>',
         ];
     }
 }

@@ -236,7 +236,7 @@ $id_crp = $crp['estado'] == '0' ? 0 : $id_crp;
         <div class="row">
             <div class="col-12">
                 <div class="text-justify">
-                    <p><?= $gen_respon == 'M' ? 'El' : 'La'; ?> suscrit<?= $gen_respon == 'M' ? 'o' : 'a'; ?> <?php echo $cargo_respon; ?> de la entidad <strong><?php echo $empresa['nombre']; ?></strong>, CERTIFICA que se realizó registro presupuestal de para respaldar un compromiso de acuerdo al siguiente detalle:</p>
+                    <p><?= $gen_respon == 'M' ? 'El' : 'La'; ?> suscrit<?= $gen_respon == 'M' ? 'o' : 'a'; ?> <?php echo $cargo_respon; ?> de la entidad <strong><?php echo $empresa['nombre']; ?></strong>, CERTIFICA que se realizó registro presupuestal para respaldar un compromiso de acuerdo al siguiente detalle:</p>
                 </div>
             </div>
         </div>

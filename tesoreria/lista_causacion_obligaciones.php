@@ -45,15 +45,18 @@ try {
                 FROM
                     `pto_cop_detalle`
                     LEFT JOIN 
-                    (SELECT
-                        `id_pto_cop_det`
-                        , IFNULL(SUM(`valor`),0) - IFNULL(SUM(`valor_liberado`),0) AS valor_pago
-                    FROM
-                        `pto_pag_detalle`
-                    GROUP BY `id_pto_cop_det`)AS `pto_pag_detalle`
+                        (SELECT
+                            `id_pto_cop_det`
+                            , IFNULL(SUM(`valor`),0) - IFNULL(SUM(`valor_liberado`),0) AS valor_pago
+                        FROM
+                            `pto_pag_detalle`
+                                INNER JOIN `ctb_doc`
+                                    ON (`pto_pag_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_doc`.`estado` > 0)
+                        GROUP BY `id_pto_cop_det`)AS `pto_pag_detalle`
                         ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
                     INNER JOIN `ctb_doc` 
-                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc` AND `ctb_doc`.`estado` > 0)
                     INNER JOIN `pto_crp` 
                         ON ( `pto_crp`.`id_pto_crp` = `ctb_doc`.`id_crp`)
                     INNER JOIN `pto_cdp` 
