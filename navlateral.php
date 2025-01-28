@@ -382,7 +382,7 @@ try {
                             <?php }
                             if (PermisosUsuario($permisos, 5199, 0) || $id_rol == 1) {
                             ?>
-                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/nomina/php/inf_personalizados/index.php">
+                                <a class="nav-link sombra opcion_personalizado" href="javascript:void(0)" txt_id_opcion="5199">
                                     <div class="form-row">
                                         <div class="div-icono">
                                             <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
@@ -1057,7 +1057,7 @@ try {
                                         </a>
                                     <?php } ?>
                                     <?php if (PermisosUsuario($permisos, 5099, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/inf_personalizados/index.php">
+                                        <a class="nav-link sombra opcion_personalizado" href="javascript:void(0)" txt_id_opcion="5099">
                                             <div class="form-row">
                                                 <div class="div-icono">
                                                     <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
@@ -1066,7 +1066,7 @@ try {
                                                     Inf. Personalizados
                                                 </div>
                                             </div>
-                                        </a>
+                                        </a>                                        
                                     <?php } ?>
                                 </nav>
                             </div>
@@ -1273,7 +1273,7 @@ try {
                             <div class="collapse" id="pagesCollapseReportes" aria-labelledby="headingOne">
                                 <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
                                     <?php if (PermisosUsuario($permisos, 5799, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/activos_fijos/php/inf_personalizados/index.php">
+                                        <a class="nav-link sombra opcion_personalizado" href="javascript:void(0)" txt_id_opcion="5799">
                                             <div class="form-row">
                                                 <div class="div-icono">
                                                     <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
@@ -1282,7 +1282,7 @@ try {
                                                     Inf. Personalizados
                                                 </div>
                                             </div>
-                                        </a>
+                                        </a>                                          
                                     <?php } ?>
                                 </nav>
                             </div>

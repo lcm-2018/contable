@@ -16,7 +16,8 @@ if ($length != -1){
 $col = $_POST['order'][0]['column']+1;
 $dir = $_POST['order'][0]['dir'];
 
-$where_tc = "WHERE tb_consultas_sql.tipo=1 AND tb_consultas_sql.id_opcion=5799";
+$id_opcion = isset($_POST['id_opcion']) ? $_POST['id_opcion'] : 0; 
+$where_tc = "WHERE tb_consultas_sql.tipo=1 AND tb_consultas_sql.id_opcion=$id_opcion";
 $where = $where_tc;
 if (isset($_POST['nombre']) && $_POST['nombre']) {
     $where .= " AND (tb_consultas_sql.nom_consulta LIKE '%" . $_POST['nombre'] . "%' OR 

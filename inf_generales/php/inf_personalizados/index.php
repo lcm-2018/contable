@@ -45,6 +45,7 @@ include '../../../permisos.php';
                                 <tr>
                                     <td style="width:50% !important">
                                         <div class="form-row">
+                                            <input type="hidden" id="txt_id_opcion" value="<?php echo $_POST['id_opcion'] ?>">
                                             <div class="form-group col-md-6">
                                                 <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
                                             </div>

@@ -18,6 +18,7 @@
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
+                    data.id_opcion = $('#txt_id_opcion').val();
                     data.nombre = $('#txt_nombre_filtro').val();
                 }
             },
