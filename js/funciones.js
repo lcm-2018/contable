@@ -2,13 +2,13 @@ let timeout;
 let actual = "EAC" + window.location + 'II';
 let esta = actual.indexOf('index')
 if (esta === -1) {
-    document.onmousemove = function () {
+    document.onmousemove = function() {
         clearTimeout(timeout);
-        timeout = setTimeout(function () {
+        timeout = setTimeout(function() {
             $.ajax({
                 type: 'POST',
                 url: window.urlin + '/cerrar_sesion.php',
-                success: function (r) {
+                success: function(r) {
                     $('#divModalXSesion').modal('show');
 
                 }
@@ -16,14 +16,14 @@ if (esta === -1) {
         }, 600000);
     }
 }
-(function ($) {
+(function($) {
     /*$(document).ready(function () {
         $("body").on("contextmenu", function (e) {
             return false;
         });
     });*/
     "use strict";
-    $("#sidebarToggle").click(function () {
+    $("#sidebarToggle").click(function() {
         let val = $(this).val();
         $.ajax({
             type: 'POST',
@@ -41,7 +41,7 @@ if (esta === -1) {
         }
     });
 
-    $("#btnLogin").click(function () {
+    $("#btnLogin").click(function() {
         let user = $("#txtUser").val();
         let clave = $("#passuser").val();
         if (user === "") {
@@ -58,7 +58,7 @@ if (esta === -1) {
                 dataType: 'json',
                 url: 'validarLogin.php',
                 data: { user: user, pass: pass, passwd: passwd }
-            }).done(function (res) {
+            }).done(function(res) {
                 switch (res.mensaje) {
                     case 0:
                         $('#divModalError').modal('show');
@@ -81,7 +81,7 @@ if (esta === -1) {
         return false;
     });
 
-    $("#btnEntrar").click(function () {
+    $("#btnEntrar").click(function() {
         var emp = $("#slcEmpresa").val();
         var vig = $("#slcVigencia").val();
         if (emp === '0') {
@@ -96,7 +96,7 @@ if (esta === -1) {
                 dataType: 'json',
                 url: 'variablesinicio.php',
                 data: { vig: vig }
-            }).done(function (res) {
+            }).done(function(res) {
                 if (res === 1) {
                     window.location = "inicio.php";
                 }
@@ -104,7 +104,7 @@ if (esta === -1) {
         }
         return false;
     });
-    $("#btnUpEmpresa").click(function () {
+    $("#btnUpEmpresa").click(function() {
         let nit = $("#txtUplogin").val();
         let nombre = $("#passUpuser").val();
         if (nit === "") {
@@ -121,7 +121,7 @@ if (esta === -1) {
                 type: 'POST',
                 url: 'upempresa.php',
                 data: dempresa,
-                success: function (r) {
+                success: function(r) {
                     if (r === '1') {
                         $('#divModalDone').modal('show');
                         $('#divMsgDone').html("Empresa actualizada correctamente");
@@ -137,8 +137,8 @@ if (esta === -1) {
 
     });
     //modal para cambiar contraseña
-    $('#linkChangePass').on('click', function () {
-        $.post(window.urlin + "/actualizar/form_up_password.php", function (he) {
+    $('#linkChangePass').on('click', function() {
+        $.post(window.urlin + "/actualizar/form_up_password.php", function(he) {
             $('#divTamModalPermisos').removeClass('modal-xl');
             $('#divTamModalPermisos').removeClass('modal-2x');
             $('#divTamModalPermisos').removeClass('modal-lg');
@@ -148,7 +148,7 @@ if (esta === -1) {
         });
     });
     //modificar contraseña
-    $('#divModalPermisos').on('click', '#btnChangePass', function () {
+    $('#divModalPermisos').on('click', '#btnChangePass', function() {
         let pass = $("#passAnt").val();
         let newpas = $("#passNew").val();
         let newpasconfir = $("#passNewConf").val();
@@ -174,7 +174,7 @@ if (esta === -1) {
                 type: 'POST',
                 url: window.urlin + '/actualizar/uppassword.php',
                 data: { pwd: pwd, newpwd: newpwd },
-                success: function (r) {
+                success: function(r) {
                     if (r == 'ok') {
                         $('#divModalPermisos').modal('hide');
                         $('#divModalDone').modal('show');
@@ -213,8 +213,8 @@ if (esta === -1) {
         "<'row'<'col-sm-12'tr>>" +
         "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
     //Modal permisos de usuarios 
-    var permisosModulos = function (id) {
-        $.post(window.urlin + "/actualizar/datos_up_permisos.php", { id: id }, function (he) {
+    var permisosModulos = function(id) {
+        $.post(window.urlin + "/actualizar/datos_up_permisos.php", { id: id }, function(he) {
             $('#divTamModalPermisos').removeClass('modal-xl');
             $('#divTamModalPermisos').removeClass('modal-sm');
             $('#divTamModalPermisos').addClass('modal-lg');
@@ -222,8 +222,8 @@ if (esta === -1) {
             $("#divTablePermisos").html(he);
         });
     }
-    var permisosOpciones = function (modulo, usuario) {
-        $.post(window.urlin + "/actualizar/datos_permisos_opciones.php", { modulo: modulo, usuario: usuario }, function (he) {
+    var permisosOpciones = function(modulo, usuario) {
+        $.post(window.urlin + "/actualizar/datos_permisos_opciones.php", { modulo: modulo, usuario: usuario }, function(he) {
             $('#divTamModalForms').removeClass('modal-lg');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-xl');
@@ -231,8 +231,8 @@ if (esta === -1) {
             $("#divForms").html(he);
         });
     }
-    var permisosOpcionesRol = function (id) {
-        $.post("datos/actualizar/formupconceptos.php", { id: id }, function (he) {
+    var permisosOpcionesRol = function(id) {
+        $.post("datos/actualizar/formupconceptos.php", { id: id }, function(he) {
             $('#divTamModalForms').removeClass('modal-lg');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-xl');
@@ -240,31 +240,31 @@ if (esta === -1) {
             $("#divForms").html(he);
         });
     }
-    $('#tableListUsuarios').on('click', '.setPermisos', function () {
+    $('#tableListUsuarios').on('click', '.setPermisos', function() {
         let id = $(this).attr('value');
         permisosModulos(id);
     });
-    $('#divModalPermisos').on('click', '#tableModulos .listPermisos', function () {
+    $('#divModalPermisos').on('click', '#tableModulos .listPermisos', function() {
         let modulo = $(this).attr('value');
         let user = $('#id_usuario').val();
         permisosOpciones(modulo, user);
     });
-    $("#divModalPermisos").on('click', '#modulos-tab', function () {
+    $("#divModalPermisos").on('click', '#modulos-tab', function() {
         $('#divTamModalPermisos').removeClass('modal-lg');
         $('#divTamModalPermisos').addClass('modal-xl');
     });
-    $("#divModalPermisos").on('click', '#crud-tab', function () {
+    $("#divModalPermisos").on('click', '#crud-tab', function() {
         $('#divTamModalPermisos').removeClass('modal-xl');
         $('#divTamModalPermisos').addClass('modal-lg');
     });
-    $("#divModalPermisos").on('click', '#tableModulos .estado', function () {
+    $("#divModalPermisos").on('click', '#tableModulos .estado', function() {
         var ids = $(this).attr('value');
         var id_user = $('#id_usuario').val();
         $.ajax({
             type: 'POST',
             url: '../actualizar/permiso_modulo.php',
             data: { ids: ids, id_user: id_user },
-            success: function (r) {
+            success: function(r) {
                 if (r == 'ok') {
                     permisosModulos(id_user);
                 } else {
@@ -275,7 +275,7 @@ if (esta === -1) {
         });
         return false;
     });
-    $("#divModalForms").on('click', '#tableOpcionesModulo .estado', function () {
+    $("#divModalForms").on('click', '#tableOpcionesModulo .estado', function() {
         var ids = $(this).attr('value');
         var id_user = $('#id_usuario').val();
         var id_modulo = $('#id_modulo').val();
@@ -283,7 +283,7 @@ if (esta === -1) {
             type: 'POST',
             url: '../actualizar/up_permisos_opciones.php',
             data: { ids: ids, id_user: id_user },
-            success: function (r) {
+            success: function(r) {
                 if (r == 'ok') {
                     permisosOpciones(id_modulo, id_user);
                 } else {
@@ -294,18 +294,18 @@ if (esta === -1) {
         });
         return false;
     });
-    $("#modificaPerfilesUsuarios").on('click', '.setPermisos', function () {
+    $("#modificaPerfilesUsuarios").on('click', '.setPermisos', function() {
         let id = $(this).parent().attr('text');
         permisosOpcionesRol(id);
     });
-    $("#divModalForms").on('click', '#tableOpcionesModuloRol .estado', function () {
+    $("#divModalForms").on('click', '#tableOpcionesModuloRol .estado', function() {
         var ids = $(this).attr('value');
         var id_rol = $('#id_rol').val();
         $.ajax({
             type: 'POST',
             url: '../actualizar/up_permisos_opciones_rol.php',
             data: { ids: ids, id_rol: id_rol },
-            success: function (r) {
+            success: function(r) {
                 if (r == 'ok') {
                     permisosOpcionesRol(id_rol);
                 } else {
@@ -316,20 +316,20 @@ if (esta === -1) {
         });
         return false;
     });
-    $('#passuser').on('focus', function () {
-        $(this).on('keydown', function (e) {
+    $('#passuser').on('focus', function() {
+        $(this).on('keydown', function(e) {
             if (e.originalEvent.getModifierState("CapsLock")) {
                 $('#caps-lock-message').show();
             } else {
                 $('#caps-lock-message').hide();
             }
-        }).on('blur', function () {
+        }).on('blur', function() {
             $('#caps-lock-message').hide();
         });
     });
     //Modal cierre de periodos 
     function cierrePeriodo() {
-        $.post(window.urlin + "/actualizar/form_cierre_periodo.php", function (he) {
+        $.post(window.urlin + "/actualizar/form_cierre_periodo.php", function(he) {
             $('#divTamModalPermisos').removeClass('modal-xl');
             $('#divTamModalPermisos').removeClass('modal-sm');
             $('#divTamModalPermisos').addClass('modal-lg');
@@ -337,8 +337,9 @@ if (esta === -1) {
             $("#divTablePermisos").html(he);
         });
     }
+
     function GestionDocs() {
-        $.post(window.urlin + "/actualizar/form_gestion_docs.php", function (he) {
+        $.post(window.urlin + "/actualizar/form_gestion_docs.php", function(he) {
             $('#divTamModalPermisos').removeClass('modal-xl');
             $('#divTamModalPermisos').removeClass('modal-sm');
             $('#divTamModalPermisos').addClass('modal-lg');
@@ -346,11 +347,11 @@ if (esta === -1) {
             $("#divTablePermisos").html(he);
         });
     }
-    $('#hrefCierre').on('click', function () {
+    $('#hrefCierre').on('click', function() {
         cierrePeriodo();
     });
 
-    $("#divTablePermisos").on('click', '.cerrar', function () {
+    $("#divTablePermisos").on('click', '.cerrar', function() {
         var id = $(this).attr('text');
         Swal.fire({
             title: "¿Confirma cerrar periodo?, Esta acción no se puede deshacer",
@@ -367,7 +368,7 @@ if (esta === -1) {
                     type: 'POST',
                     url: ruta,
                     data: { id: id },
-                    success: function (r) {
+                    success: function(r) {
                         if (r == 'ok') {
                             cierrePeriodo();
                             mje("Registro exitoso");
@@ -380,10 +381,10 @@ if (esta === -1) {
         });
         return false;
     });
-    $('#hrefGestionDocs').on('click', function () {
+    $('#hrefGestionDocs').on('click', function() {
         window.location = window.urlin + '/documentos/maestro.php';
     });
-    $("#divTablePermisos").on('click', '#dataTablePermiso span', function () {
+    $("#divTablePermisos").on('click', '#dataTablePermiso span', function() {
         let caden = $(this).attr('value');
         let cad = caden.split("|");
         let est = cad[0] == 'SI' ? '1' : '0';
@@ -406,7 +407,7 @@ if (esta === -1) {
             type: 'POST',
             url: window.urlin + '/actualizar/uppermisos.php',
             data: { est: est, id: id, perm: perm },
-            success: function (r) {
+            success: function(r) {
                 if (r !== '1') {
                     alert(r + ' Recargar Página');
                 }
@@ -414,7 +415,7 @@ if (esta === -1) {
         });
         return false;
     });
-    $('#fullscreen a').click(function () {
+    $('#fullscreen a').click(function() {
         if ((document.fullScreenElement && document.fullScreenElement !== null) || (!document.mozFullScreen && !document.webkitIsFullScreen)) {
             if (document.documentElement.requestFullScreen) {
                 document.documentElement.requestFullScreen();
@@ -438,7 +439,7 @@ if (esta === -1) {
         }
     });
     //Actualizar Perfil usuario del sistema
-    $("#btnUpUserPerfil").click(function () {
+    $("#btnUpUserPerfil").click(function() {
         let login = $("#txtUsuario").val();
         if (login === "") {
             $('#divModalError').modal('show');
@@ -449,7 +450,7 @@ if (esta === -1) {
                 type: 'POST',
                 url: 'upuser.php',
                 data: duser,
-                success: function (r) {
+                success: function(r) {
                     if (r === '1') {
                         $('#divModalDone').modal('show');
                         $('#divMsgDone').html("Usuario actualizado correctamente");
@@ -463,7 +464,7 @@ if (esta === -1) {
         }
 
     });
-    $('.table-hover tbody').on('dblclick', 'tr', function () {
+    $('.table-hover tbody').on('dblclick', 'tr', function() {
         let table = $('.table-hover').DataTable();
         if ($(this).hasClass('selecionada')) {
             $(this).removeClass('selecionada');
@@ -472,7 +473,7 @@ if (esta === -1) {
             $(this).addClass('selecionada');
         }
     });
-    $('#dataTableLiqNom tbody').on('dblclick', 'tr', function () {
+    $('#dataTableLiqNom tbody').on('dblclick', 'tr', function() {
         let table = $('#dataTableLiqNom').DataTable();
         if ($(this).hasClass('selecionada')) {
             $(this).removeClass('selecionada');
@@ -481,7 +482,7 @@ if (esta === -1) {
             $(this).addClass('selecionada');
         }
     });
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('#divModalForms').addClass('overflow');
         let id = $('#idEmpNovEps').val();
         $('#dataTableLiqNom').DataTable({
@@ -516,30 +517,30 @@ if (esta === -1) {
         $('.bttn-excel').attr('title', 'Exportar a Excel');
 
     });
-    $(document).ready(function () {
-        $('.dropdown-submenu a.test').on("click", function (e) {
+    $(document).ready(function() {
+        $('.dropdown-submenu a.test').on("click", function(e) {
             $(this).next('ul').toggle();
             e.stopPropagation();
             e.preventDefault();
         });
     });
-    $('.table').on('click', '.sorting', function () {
+    $('.table').on('click', '.sorting', function() {
         $('.sorting').removeClass('div-gris');
         $(this).addClass('div-gris');
     });
-    $('.dropdown-menu a.dropdown-toggle').on('click', function (e) {
+    $('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
         if (!$(this).next().hasClass('show')) {
             $(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
         }
         var $subMenu = $(this).next(".dropdown-menu");
         $subMenu.toggleClass('show');
-        $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function (e) {
+        $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
             $('.dropdown-submenu .show').removeClass("show");
         });
         return false;
     });
-    $('#btnRegVigencia').on('click', function () {
-        $.post(window.urlin + "/nomina/liquidar_nomina/datos/registrar/form_reg_vigencia.php", function (he) {
+    $('#btnRegVigencia').on('click', function() {
+        $.post(window.urlin + "/nomina/liquidar_nomina/datos/registrar/form_reg_vigencia.php", function(he) {
             $('#divTamModalForms').removeClass('modal-xl');
             $('#divTamModalForms').removeClass('modal-lg');
             $('#divTamModalForms').addClass('modal-sm');
@@ -547,7 +548,7 @@ if (esta === -1) {
             $("#divForms").html(he);
         });
     });
-    $('#divModalForms').on('click', '#btnRegVigencia', function () {
+    $('#divModalForms').on('click', '#btnRegVigencia', function() {
         $('.form-control').removeClass('is-invalid');
         if ($('#vigencia').val() == '' || Number($('#vigencia').val()) <= 2022) {
             $('#vigencia').focus();
@@ -560,7 +561,7 @@ if (esta === -1) {
                 type: 'POST',
                 url: window.urlin + '/nomina/liquidar_nomina/registrar/vigenciaf.php',
                 data: datos,
-                success: function (r) {
+                success: function(r) {
                     if (r.trim() === 'ok') {
                         $('#divModalForms').modal('hide');
                         let id = "tableVigencia";
@@ -575,13 +576,13 @@ if (esta === -1) {
             });
         }
     });
-    $('.btnListLiqPrima').on('click', function () {
+    $('.btnListLiqPrima').on('click', function() {
         let tipo = $(this).attr('value');
         let url = window.urlin + '/nomina/liquidar_nomina/listempliquidar_prima.php';
         $('<form action="' + url + '" method="post"><input type="hidden" name="tipo" value="' + tipo + '" /></form>').appendTo('body').submit();
     });
-    $('#hrefPerfiles').on('click', function () {
-        $.post(window.urlin + "/nomina/liquidar_nomina/datos/registrar/form_reg_vigencia.php", function (he) {
+    $('#hrefPerfiles').on('click', function() {
+        $.post(window.urlin + "/nomina/liquidar_nomina/datos/registrar/form_reg_vigencia.php", function(he) {
             $('#divTamModalForms').removeClass('modal-xl');
             $('#divTamModalForms').removeClass('modal-lg');
             $('#divTamModalForms').addClass('modal-sm');
@@ -589,34 +590,42 @@ if (esta === -1) {
             $("#divForms").html(he);
         });
     });
-    var DownoadFile = function (name) {
+    var DownoadFile = function(name) {
         $('<form action="' + window.urlin + '/formatos/download_formato.php" method="post"><input type="hidden" name="nom_file" value="' + name + '" /></form>').appendTo('body').submit();
     };
-    $('#formatoExcelPto').on('click', function () {
+    $('#formatoExcelPto').on('click', function() {
         DownoadFile('cargue_pto.xlsx');
     });
-    $('#formatoExcelPuc').on('click', function () {
+    $('#formatoExcelPuc').on('click', function() {
         DownoadFile('cargue_puc.xlsx');
     });
-    $('.tesoreria').on('click', function () {
+    $('.tesoreria').on('click', function() {
         let id = $(this).attr('text');
         $('<form action="' + window.urlin + '/tesoreria/lista_documentos_com.php" method="post">' +
             '<input type="hidden" name="var" value="' + id + '" />' +
             '</form>').appendTo('body').submit();
     });
-    $('#slcVigToChange').on('change', function () {
+    $('#slcVigToChange').on('change', function() {
         let vig = $(this).val();
         $.ajax({
             type: 'POST',
             url: window.urlin + '/variablesinicio.php',
             data: { vig: vig },
-            success: function (r) {
+            success: function(r) {
                 if (r === '1') {
                     location.reload();
                 }
             }
         });
     });
+
+    $('.opcion_personalizado').on('click', function() {
+        let id = $(this).attr('txt_id_opcion');
+        $('<form action="' + window.urlin + '/inf_generales/php/inf_personalizados/index.php" method="post">' +
+                '<input type="hidden" name="id_opcion" value="' + id + '" /></form>')
+            .appendTo('body').submit();
+    });
+
 })(jQuery);
 
 function elegirmes(id) {
@@ -635,6 +644,6 @@ function pesos(value) {
         style: 'currency',
         currency: 'COP', // Moneda en pesos colombianos
         minimumFractionDigits: 2, // Mínimo 2 decimales
-        maximumFractionDigits: 2  // Máximo 2 decimales
+        maximumFractionDigits: 2 // Máximo 2 decimales
     }).format(number);
 }

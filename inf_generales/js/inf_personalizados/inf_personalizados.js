@@ -18,6 +18,7 @@
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
+                    data.id_opcion = $('#txt_id_opcion').val();
                     data.nombre = $('#txt_nombre_filtro').val();
                 }
             },
@@ -67,8 +68,8 @@
                     str = '';
                 if (parametros[0].label) {
                     for (i in parametros) {
-                        str = '<label class="form-control-sm">&nbsp;' + parametros[i].label + '</label>';
-                        str += '<input type="text" class="form-control-sm" title="' + parametros[i].title + '"/><br/>';
+                        str = '<label class="small">&nbsp;' + parametros[i].label + '</label>';
+                        str += '<input type="text" class="form-control form-control-sm" title="' + parametros[i].title + '"/>';
                         $('#frm_parametros').append(str);
                     }
                 }
