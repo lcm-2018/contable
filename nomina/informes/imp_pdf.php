@@ -25,9 +25,20 @@ try {
 }
 try {
     $sql = "SELECT
-                `id_nomina`, `descripcion`, `mes`, `vigencia`, `tipo`, `estado`, `id_user_reg`
+                `nom_nominas`.`id_nomina`
+                , `nom_nominas`.`descripcion`
+                , `nom_nominas`.`mes`, `vigencia`
+                , `nom_nominas`.`tipo`
+                , `nom_nominas`.`estado`
+                , `nom_nominas`.`id_user_reg`
+                , CONCAT_WS(' ', `seg_usuarios_sistema`.`nombre1`
+                , `seg_usuarios_sistema`.`nombre2`
+                , `seg_usuarios_sistema`.`apellido1`
+                , `seg_usuarios_sistema`.`apellido2`) AS `usuario`
             FROM
                 `nom_nominas`
+                LEFT JOIN `seg_usuarios_sistema` 
+                    ON (`nom_nominas`.`id_user_reg` = `seg_usuarios_sistema`.`id_usuario`)            
             WHERE (`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $nomina = $rs->fetch(PDO::FETCH_ASSOC);
@@ -450,6 +461,45 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+$fecha = date('Y-m-d', strtotime($nomina['vigencia'] . '-' . $nomina['mes'] . '-01'));
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `fin_maestro_doc`.`control_doc`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`genero`
+                , `fin_respon_doc`.`cargo`
+                , `fin_respon_doc`.`tipo_control`
+                , `fin_tipo_control`.`descripcion` AS `nom_control`
+                , `fin_respon_doc`.`fecha_ini`
+                , `fin_respon_doc`.`fecha_fin`
+            FROM
+                `fin_respon_doc`
+                INNER JOIN `fin_maestro_doc` 
+                    ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
+                INNER JOIN `tb_terceros` 
+                    ON (`fin_respon_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                INNER JOIN `fin_tipo_control` 
+                    ON (`fin_respon_doc`.`tipo_control` = `fin_tipo_control`.`id_tipo`)
+            WHERE (`fin_maestro_doc`.`id_modulo` = 51 
+                AND `fin_respon_doc`.`fecha_fin` >= '$fecha' 
+                AND `fin_respon_doc`.`fecha_ini` <= '$fecha'
+                AND `fin_respon_doc`.`estado` = 1
+                AND `fin_maestro_doc`.`estado` = 1)";
+    $res = $cmd->query($sql);
+    $responsables = $res->fetchAll(PDO::FETCH_ASSOC);
+    $key = array_search('4', array_column($responsables, 'tipo_control'));
+    $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+    $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
+    $gen_respon = $key !== false ? $responsables[$key]['genero'] : '';
+    $control = isset($responsables[0]['control_doc']) ? $responsables[0]['control_doc'] : '';
+    $control = $control == '' || $control == '0' ? false : true;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 $meses = array(
     '01' => 'Enero',
     '02' => 'Febrero',
@@ -980,64 +1030,71 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                         <td colspan="38" style="padding: 30px;"></td>
                     </tr>
                     <tr style="font-size: 14px;">
-                        <td colspan="5"></td>
-                        <td colspan="7" style="text-align: center;">
-                            _______________________________________
+            </table>
+            </br>
+            </br>
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: center">
+                        <div>___________________________________</div>
+                        <div><?php echo $nom_respon; ?> </div>
+                        <div><?php echo $cargo_respon; ?> </div>
+                    </td>
+            </table>
+            </br> </br> </br>
+            <?php
+            if ($control) {
+            ?>
+                <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
+                    <tr style="text-align:left">
+                        <td style="width:33%">
+                            <strong>Elaboró:</strong>
                         </td>
-                        <td colspan="7" style="text-align: center;">
-                            _______________________________________
+                        <td style="width:33%">
+                            <strong>Revisó:</strong>
                         </td>
-                        <td colspan="7" style="text-align: center;">
-                            _______________________________________
+                        <td style="width:33%">
+                            <strong>Aprobó:</strong>
                         </td>
-                        <td colspan="8"></td>
                     </tr>
-                    <tr style="font-size: 14px;">
-                        <td colspan="5"></td>
-                        <td colspan="7" style="text-align: center;">
-                            <?php echo mb_strtoupper($usuario['nombre']); ?>
+                    <tr style="text-align:center">
+                        <td>
+                            <?= trim($nomina['usuario']) ?>
                         </td>
-                        <td colspan="7" style="text-align: center;">
-                            <?php echo mb_strtoupper('Jorge Eliecer Pérez izquierdo'); ?>
+                        <td>
+                            <br>
+                            <br>
+                            <?php
+                            $key = array_search('2', array_column($responsables, 'tipo_control'));
+                            $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                            $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                            echo $nombre . '<br> ' . $cargo;
+                            ?>
                         </td>
-                        <td colspan="7" style="text-align: center;">
-                            <?php echo mb_strtoupper('Gissel Dayana Medina barrios'); ?>
+                        <td>
+                            <br>
+                            <br>
+                            <?php
+                            $key = array_search('3', array_column($responsables, 'tipo_control'));
+                            $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                            $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                            echo $nombre . '<br> ' . $cargo;
+                            ?>
                         </td>
-                        <td colspan="8"></td>
                     </tr>
-                    <tr style="font-size: 14px;">
-                        <td colspan="5"></td>
-                        <td colspan="7" style="text-align: center;">
-                            Técnico administrativo
-                        </td>
-
-                        <td colspan="7" style="text-align: center;">
-                            Contador
-                        </td>
-                        <td colspan="7" style="text-align: center;">
-                            Jefe administrativa y financiera
-                        </td>
-                        <td colspan="8"></td>
-                    </tr>
-                    <tr style="font-size: 14px;">
-                        <td colspan="5"></td>
-                        <td colspan="7" style="text-align: center;">
-                            Elaboró
-                        </td>
-                        <td colspan="7" style="text-align: center;">
-                            Revisó
-                        </td>
-                        <td colspan="7" style="text-align: center;">
-                            Aprobó
-                        </td>
-                        <td colspan="8"></td>
-                    </tr>
-                </tbody>
-                <tfoot style="background-color: white !important;">
-                    <tr>
-                        <td colspan="38" style="text-align:right;font-size:70%;color:black">Fecha Imp: <?php echo $date->format('Y-m-d H:m:s') . ' CRONHIS' ?></td>
-                    </tr>
-                </tfoot>
+                </table>
+            <?php
+            }
+            ?>
+            </tr>
+            </tbody>
+            <tfoot style="background-color: white !important; font-size: 10px !important;">
+                <tr>
+                    <td colspan="38">
+                        <br>Fecha Imp: <?php echo $date->format('Y-m-d H:m:s') . ' CRONHIS' ?>
+                    </td>
+                </tr>
+            </tfoot>
             </table>
         </div>
     </div>
