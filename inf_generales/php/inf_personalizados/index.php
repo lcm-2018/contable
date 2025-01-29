@@ -76,7 +76,7 @@ include '../../../permisos.php';
                                             <div class="form-group col-md-12">
                                                 <textarea class="form-control form-control-sm" id="txt_des_consulta" name="txt_des_consulta" rows="3" readonly="readonly"></textarea>
                                             </div>
-                                            <div class="form-group col-md-12">
+                                            <div class="form-group col-md-6">
                                                 <form id="frm_parametros"></form>
                                             </div>
                                             <div class="form-group col-md-12">
