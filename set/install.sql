@@ -130,3 +130,7 @@ INSERT INTO `tb_actividades_economicas` (`id_actividad`, `cod_actividad`, `descr
 (507, '0081', 'Sin Actividad economica, solo para personas naturales'),
 (508, '0082', 'Personas Naturales Subsidiadas por Terceros'),
 (509, '0090', 'Rentistas de Capital, solo para personas naturales.');
+
+insert  into `ctb_tipo_doc`(`id_ctb_tipodoc`,`tipo`) 
+	values 
+(1,'FACTURA'),(2,'CUENTA DE COBRO'),(3,'DOCUMENTO EQUIVALENTE'),(4,'CAJA MENOR'),(5,'RESOLUCION'),(6,'OTROS');
