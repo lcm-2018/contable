@@ -13,6 +13,7 @@ function pesos($valor)
     return '$' . number_format($valor, 2);
 }
 include '../../conexion.php';
+include '../../permisos.php';
 include '../../financiero/consultas.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -77,12 +78,12 @@ try {
                     ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
             WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc) LIMIT 1 ";
     $res = $cmd->query($sql);
-    $datos_crpp = $res->fetch();
+    $datos_crpp = $res->fetch(PDO::FETCH_ASSOC);
     $id_crpp = !empty($datos_crpp) ? $datos_crpp['id_pto_crp'] : 0;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-
+$rubros = [];
 if ($id_crpp > 0) {
     try {
         $sql = "SELECT
@@ -173,7 +174,11 @@ try {
 }
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 try {
-    $sql = "SELECT `razon_social_ips` AS `nombre`, `nit_ips` AS `nit`, `dv` AS `dig_ver` FROM `tb_datos_ips`;";
+    $sql = "SELECT 
+                `tb_datos_ips`.`razon_social_ips` AS `nombre`, `tb_datos_ips`.`nit_ips` AS `nit`, `tb_datos_ips`.`dv` AS `dig_ver`, `tb_municipios`.`nom_municipio`
+            FROM `tb_datos_ips`
+                INNER JOIN `tb_municipios`
+                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)";
     $res = $cmd->query($sql);
     $empresa = $res->fetch();
 } catch (PDOException $e) {
@@ -209,6 +214,9 @@ $hora = date('H:i:s', strtotime($documento['fecha_reg']));
 try {
     $sql = "SELECT
                 `fin_maestro_doc`.`control_doc`
+                , `fin_maestro_doc`.`id_doc_fte`
+                , `fin_maestro_doc`.`costos`
+                , `ctb_fuente`.`nombre`
                 , `tb_terceros`.`nom_tercero`
                 , `tb_terceros`.`nit_tercero`
                 , `tb_terceros`.`genero`
@@ -221,6 +229,8 @@ try {
                 `fin_respon_doc`
                 INNER JOIN `fin_maestro_doc` 
                     ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
+                INNER JOIN `ctb_fuente` 
+                    ON (`ctb_fuente`.`id_doc_fuente` = `fin_maestro_doc`.`id_doc_fte`)
                 INNER JOIN `tb_terceros` 
                     ON (`fin_respon_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
                 INNER JOIN `fin_tipo_control` 
@@ -238,14 +248,83 @@ try {
     $gen_respon = $key !== false ? $responsables[$key]['genero'] : '';
     $control = $key !== false ? $responsables[$key]['control_doc'] : '';
     $control = $control == '' || $control == '0' ? false : true;
+    $nombre_doc = $key !== false ? $responsables[$key]['nombre'] : '';
+    $ver_costos = $responsables[0]['costos'] == 1 ? false : true;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+$id_vigencia = $_SESSION['id_vigencia'];
+try {
+    $sql = "SELECT 	
+                `t1`.`consecutivo` AS `cons_asigando`
+                , `t2`.`consecutivo` AS `cons_maximo`
+            FROM
+                (SELECT 
+                    MAX(`consecutivo`) AS `consecutivo`
+                FROM `tes_resolucion_pago`
+                WHERE `id_vigencia` = $id_vigencia) AS `t2`
+                LEFT JOIN
+                    (SELECT 
+                        `consecutivo`
+                    FROM `tes_resolucion_pago`
+                    WHERE `id_ctb_doc` = $id_doc AND `id_vigencia` = $id_vigencia) AS `t1` 
+                ON 1 = 1";
+    $res = $cmd->query($sql);
+    $consecutivos = $res->fetch(PDO::FETCH_ASSOC);
+    $id_user = $_SESSION['id_user'];
+    $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+    $num_resolucion = $vigencia . '0001';
+
+    if ($consecutivos['cons_asigando'] == '' && $consecutivos['cons_maximo'] > 0) {
+        $num_resolucion = $consecutivos['cons_maximo'] + 1;
+    } else if ($consecutivos['cons_asigando'] > 0) {
+        $num_resolucion = $consecutivos['cons_asigando'];
+    }
+    if ($consecutivos['cons_asigando'] == '') {
+        try {
+            $sql = "INSERT INTO `tes_resolucion_pago`
+	                    (`consecutivo`,`id_ctb_doc`,`id_vigencia`,`id_user_reg`,`fec_reg`)
+                    VALUES (?, ?, ?, ?, ?)";
+            $cmd->prepare($sql);
+            $sql = $cmd->prepare($sql);
+            $sql->bindParam(1, $num_resolucion, PDO::PARAM_INT);
+            $sql->bindParam(2, $id_doc, PDO::PARAM_INT);
+            $sql->bindParam(3, $id_vigencia, PDO::PARAM_INT);
+            $sql->bindParam(4, $id_user, PDO::PARAM_INT);
+            $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
+            $sql->execute();
+            if (!($cmd->lastInsertId() > 0)) {
+                echo $sql->errorInfo()[2];
+            }
+        } catch (PDOException $e) {
+            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+        }
+    }
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $id_forma = 0;
 $anulado = $documento['estado'] == '0' ? 'ANULADO' : '';
+$meses = [
+    '01' => 'enero',
+    '02' => 'febrero',
+    '03' => 'marzo',
+    '04' => 'abril',
+    '05' => 'mayo',
+    '06' => 'junio',
+    '07' => 'julio',
+    '08' => 'agosto',
+    '09' => 'septiembre',
+    '10' => 'octubre',
+    '11' => 'noviembre',
+    '12' => 'diciembre'
+];
 ?>
-<div class="text-right pt-3">
-    <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>
+<div class="text-right py-3">
+    <?php if (PermisosUsuario($permisos, 5601, 6)  || $id_rol == 1) { ?>
+        <a type="button" class="btn btn-info btn-sm" onclick="imprSelecTes('imprimeResolucion',<?php echo $id_doc; ?>);"> Resolución</a>
+        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>
+    <?php } ?>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>
 <div class="contenedor bg-light" id="areaImprimir">
@@ -422,7 +501,7 @@ $anulado = $documento['estado'] == '0' ? 'ANULADO' : '';
                             `seg_ctb_factura`
                             INNER JOIN `ctb_tipo_doc` 
                                 ON (`seg_ctb_factura`.`tipo_doc` = `ctb_tipo_doc`.`id_ctb_tipodoc`)
-                            WHERE (`seg_ctb_factura`.`id_ctb_doc` ={$doc['id_ctb_cop']});";
+                            WHERE (`seg_ctb_factura`.`id_ctb_doc` ={$documento['id_ctb_cop']});";
                     $res = $cmd->query($sql);
                     $factura = $res->fetch();
                     $fecha_fact = date('Y-m-d', strtotime($factura['fecha_fact']));
@@ -436,7 +515,7 @@ $anulado = $documento['estado'] == '0' ? 'ANULADO' : '';
                          SUM(`valor_retencion`) AS descuentos
                         FROM
                         `ctb_causa_retencion`
-                        WHERE (`id_ctb_doc` ={$doc['id_ctb_cop']});";
+                        WHERE (`id_ctb_doc` ={$documento['id_ctb_cop']});";
                     $rs = $cmd->query($sql);
                     $retenciones = $rs->fetch();
                     $descuentos = $retenciones['descuentos'];
@@ -445,7 +524,7 @@ $anulado = $documento['estado'] == '0' ? 'ANULADO' : '';
                 }
                 // Consulto el id_manu de la causación 
                 try {
-                    $sql = "SELECT id_manu FROM `ctb_doc` WHERE `id_ctb_doc` ={$doc['id_ctb_cop']};";
+                    $sql = "SELECT id_manu FROM `ctb_doc` WHERE `id_ctb_doc` ={$documento['id_ctb_cop']};";
                     $rs = $cmd->query($sql);
                     $causa = $rs->fetch();
                     $id_manu_doc = $causa['id_manu'];
@@ -685,4 +764,118 @@ $anulado = $documento['estado'] == '0' ? 'ANULADO' : '';
         </br> </br>
     </div>
 
+</div>
+<div class="contenedor bg-light" id="imprimeResolucion" style="display: none;">
+    <style>
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                page-break-inside: auto;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            tfoot {
+                display: table-footer-group;
+            }
+
+            tbody {
+                display: table-row-group;
+            }
+
+            tfoot tr {
+                page-break-inside: avoid;
+                padding-bottom: 50px;
+                width: 100%;
+                text-align: center;
+            }
+
+            tr {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+    <?php
+    $f_exp = explode('-', $fecha);
+    $cadena = [];
+    $cad_rubros = [];
+
+    foreach ($rubros as $rp) {
+        $cadena[] = $rp['rubro'] . ' - ' . $rp['nom_rubro'];
+        $cad_rubros[] = $rp['rubro'] . '-' . $rp['nom_rubro'] . '; según Registro Presupuestal: ' . $rp['id_manu'];
+    }
+    $cadena = implode(',', $cadena);
+    $cad_rubros = implode(',', $cad_rubros);
+    ?>
+    <div class="px-2 " style="width:90% !important;margin: 0 auto;">
+        <table style="width: 100%;" class="page_break_avoid">
+            <thead>
+                <tr>
+                    <td>
+                        <table class="table-bordered bg-light" style="width:100% !important;">
+                            <tr>
+                                <td class='text-center' style="width:25%"><label class="small"><img src="../images/logos/logo.png" width="150"></label></td>
+                                <td style="text-align:center">
+                                    <strong><?php echo $empresa['nombre']; ?> </strong>
+                                    <div>NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align:justify">
+                        <br><br>
+                        <p style="text-align:center;"><b>RESOLUCIÓN No.: <?php echo $num_resolucion; ?></b></p>
+                        <p style="text-align:center;"><b><?= $f_exp[2] . '-' . $meses[$f_exp[1]] . '-' . $f_exp[0] ?></b></p>
+                        <p style="text-align:center;">Por medio de la cual se ordena un pago</p>
+                        <p>EL GERENTE DE EL(LA) <?= $empresa['nombre'] ?> EN USO DE SUS FACULTADES CONSTITUCIONALES, LEGALES Y ESTATUTARIAS Y CONSIDERANDO</p>
+                        <p>Que, dentro del presupuesto de gastos de el(la) <?= $empresa['nombre'] ?>, para la vigencia fiscal del año <?= $vigencia ?>, se encuentra previsto un(os) rubro(s) radicado bajo código(s): <?= $cadena ?>.</p>
+                        <p>Que durante la presente vigencia se generaron obligaciones por concepto de: <?= mb_strtoupper($documento['detalle']); ?>, para lo cual se expidieron los respectivos actos administrativos.</p>
+                        <p>Por lo anteriormente expuesto:</p>
+                        <p style="text-align:center;"><b>RESUELVE</b></p>
+                        <p>ARTICULO PRIMERO: Reconocer y ordenar el pago al TESORERO GENERAL, a favor de I<?= $tercero; ?> por la suma de <?php echo $enletras . "  ($" . number_format($total, 2, ",", ".") . ')'; ?> por concepto de <?= mb_strtoupper($documento['detalle']); ?>.</p>
+                        <p>ARTICULO SEGUNDO: El valor reconocido en el artículo primero se imputará al (los) rubro(s) <?= $cad_rubros; ?>.</p>
+                        <p>ARTICULO TERCERO: Entréguese copia de la presente resolución con sus respectivos anexos para su correspondiente pago a la oficina de Tesorería de el(la) <?= $empresa['nombre'] ?> para lo de su competencia.</p>
+                        <p style="text-align:center; padding-bottom:30px;"><b>COMUNÍQUESE Y CÚMPLASE.</b></p>
+                        <p style="padding-bottom:40px;">Dada en <?= $empresa['nom_municipio'] ?>, a los <?= $f_exp[2] ?> días del mes de <?= $meses[$f_exp[1]] ?> del año <?= $f_exp[0] ?>.</p>
+                        <div class="row">
+                            <div class="col-12">
+                                <div style="text-align: center;">
+                                    <div>___________________________________</div>
+                                    <div><?= 'GERENTE' ?> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot style="font-size: 10px; color: #aab7b8; text-align: center;">
+                <tr>
+                    <td>
+                        <?php
+                        if ($_SESSION['nit_emp'] == '900190473') {
+                        ?>
+                            <?= $empresa['nombre'] ?><br>
+                            Sede Administrativa calle 26 No 8-114<br>
+                            Sede Asistencial carrera 1 con calle 18 esquina vía Pupiales<br>
+                            Fax 773 2413 - Teléfono 773 2394 Página web: www.ipsipialesese.gov.co<br>
+                            Correo electrónico: gerencia@ipsmunicipalese.gov.co<br>
+                            Ipiales Nariño
+                        <?php } ?>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 </div>

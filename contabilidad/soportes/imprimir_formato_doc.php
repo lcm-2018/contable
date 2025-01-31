@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
+$id_vigencia = $_SESSION['id_vigencia'];
 $dto = $_POST['id'];
 $tipo_doc = $_POST['tipo'];
 $prefijo = '';
@@ -267,6 +268,19 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+
+try {
+    $sql = "SELECT 
+                `tb_datos_ips`.`razon_social_ips` AS `nombre`, `tb_datos_ips`.`nit_ips` AS `nit`, `tb_datos_ips`.`dv` AS `dig_ver`, `tb_municipios`.`nom_municipio`
+            FROM `tb_datos_ips`
+                INNER JOIN `tb_municipios`
+                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)";
+    $res = $cmd->query($sql);
+    $empresa = $res->fetch();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 // fechas para factua
 $fecha_fact = isset($factura['fecha_fact']) ? date('Y-m-d', strtotime($factura['fecha_fact'])) : '';
 $fecha_ven = isset($factura['fecha_ven']) ? date('Y-m-d', strtotime($factura['fecha_ven'])) : '';
@@ -290,7 +304,6 @@ $meses = [
 ?>
 <div class="text-right py-3">
     <?php if (PermisosUsuario($permisos, 5501, 6)  || $id_rol == 1) { ?>
-        <a type="button" class="btn btn-info btn-sm" onclick="imprSelecDoc('imprimeResolucion',<?php echo $dto; ?>);"> Resolución</a>
         <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecDoc('areaImprimir',<?php echo $dto; ?>);"> Imprimir</a>
     <?php } ?>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
@@ -733,118 +746,7 @@ $meses = [
     </div>
 
 </div>
-<div class="contenedor bg-light" id="imprimeResolucion" style="display: none;">
-    <style>
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-            }
 
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                page-break-inside: auto;
-            }
-
-            thead {
-                display: table-header-group;
-            }
-
-            tfoot {
-                display: table-footer-group;
-            }
-
-            tbody {
-                display: table-row-group;
-            }
-
-            tfoot tr {
-                page-break-inside: avoid;
-                padding-bottom: 50px;
-                width: 100%;
-                text-align: center;
-            }
-
-            tr {
-                page-break-inside: avoid;
-            }
-        }
-    </style>
-    <?php
-    $f_exp = explode('-', $fecha);
-    $cadena = [];
-    $cad_rubros = [];
-    foreach ($rubros as $rp) {
-        $cadena[] = $rp['rubro'] . ' - ' . $rp['nom_rubro'];
-        $cad_rubros[] = $rp['rubro'] . '-' . $rp['nom_rubro'] . '; según Registro Presupuestal: ' . $rp['id_manu'];
-    }
-    $cadena = implode(',', $cadena);
-    $cad_rubros = implode(',', $cad_rubros);
-    ?>
-    <div class="px-2 " style="width:90% !important;margin: 0 auto;">
-        <table style="width: 100%;" class="page_break_avoid">
-            <thead>
-                <tr>
-                    <td>
-                        <table class="table-bordered bg-light" style="width:100% !important;">
-                            <tr>
-                                <td class='text-center' style="width:18%"><label class="small"><img src="../images/logos/logo.png" width="100"></label></td>
-                                <td style="text-align:center">
-                                    <strong><?php echo $empresa['nombre']; ?> </strong>
-                                    <div>NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></div>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align:justify">
-                        <p style="text-align:center;"><b>RESOLUCIÓN No.: <?php echo $doc['id_manu']; ?></b></p>
-                        <p style="text-align:center;"><b><?= $f_exp[2] . '-' . $meses[$f_exp[1]] . '-' . $f_exp[0] ?></b></p>
-                        <p style="text-align:center;">Por medio de la cual se ordena un pago</p>
-                        <p>EL GERENTE DE EL(LA) <?= $empresa['nombre'] ?> EN USO DE SUS FACULTADES CONSTITUCIONALES, LEGALES Y ESTATUTARIAS Y CONSIDERANDO</p>
-                        <p>Que, dentro del presupuesto de gastos de el(la) <?= $empresa['nombre'] ?>, para la vigencia fiscal del año <?= $vigencia ?>, se encuentra previsto un(os) rubro(s) radicado bajo código(s): <?= $cadena ?>.</p>
-                        <p>Que durante la presente vigencia se generaron obligaciones por concepto de: <?= mb_strtoupper($doc['detalle']); ?>, para lo cual se expidieron los respectivos actos administrativos.</p>
-                        <p>Por lo anteriormente expuesto:</p>
-                        <p style="text-align:center;"><b>RESUELVE</b></p>
-                        <p>ARTICULO PRIMERO: Reconocer y ordenar el pago al TESORERO GENERAL, a favor de I<?= $response['nombre']; ?> por la suma de <?php echo $enletras . "  ($" . number_format($total, 2, ",", ".") . ')'; ?> por concepto de <?= mb_strtoupper($doc['detalle']); ?>.</p>
-                        <p>ARTICULO SEGUNDO: El valor reconocido en el artículo primero se imputará al (los) rubro(s) <?= $cad_rubros; ?>.</p>
-                        <p>ARTICULO TERCERO: Entréguese copia de la presente resolución con sus respectivos anexos para su correspondiente pago a la oficina de Tesorería de el(la) <?= $empresa['nombre'] ?> para lo de su competencia.</p>
-                        <p style="text-align:center; padding-bottom:30px;"><b>COMUNÍQUESE Y CÚMPLASE.</b></p>
-                        <p style="padding-bottom:40px;">Dada en <?= $empresa['nom_municipio'] ?>, a los <?= $f_exp[2] ?> días del mes de <?= $meses[$f_exp[1]] ?> del año <?= $f_exp[0] ?>.</p>
-                        <div class="row">
-                            <div class="col-12">
-                                <div style="text-align: center;">
-                                    <div>___________________________________</div>
-                                    <div><?= 'GERENTE' ?> </div>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-            <tfoot style="font-size: 10px; color: #aab7b8; text-align: center;">
-                <tr>
-                    <td>
-                        <?php
-                        if ($_SESSION['nit_emp'] == '900190473') {
-                        ?>
-                            <?= $empresa['nombre'] ?><br>
-                            Sede Administrativa calle 26 No 8-114<br>
-                            Sede Asistencial carrera 1 con calle 18 esquina vía Pupiales<br>
-                            Fax 773 2413 - Teléfono 773 2394 Página web: www.ipsipialesese.gov.co<br>
-                            Correo electrónico: gerencia@ipsmunicipalese.gov.co<br>
-                            Ipiales Nariño
-                        <?php } ?>
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-</div>
 <?php
 function NombreTercero($id_tercero, $terceros)
 {

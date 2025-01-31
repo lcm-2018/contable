@@ -516,8 +516,6 @@ if (esta === -1) {
         $('.bttn-excel button').html('<span class="fas fa-file-excel fa-lg"></span>');
         $('.bttn-excel').attr('title', 'Exportar a Excel');
 
-    });
-    $(document).ready(function() {
         $('.dropdown-submenu a.test').on("click", function(e) {
             $(this).next('ul').toggle();
             e.stopPropagation();

@@ -465,6 +465,15 @@ try {
 <!DOCTYPE html>
 <html lang="es">
 <?php include '../../head.php' ?>
+<style>
+    .DTFC_LeftBodyLiner {
+        overflow-y: unset !important
+    }
+
+    .DTFC_RightBodyLiner {
+        overflow-y: unset !important
+    }
+</style>
 
 <body class="sb-nav-fixed <?php
                             if ($_SESSION['navarlat'] == '1') {
@@ -494,11 +503,6 @@ try {
                                             <input type="hidden" id="mesNomElec" value="<?php echo $mes ?>">
                                             <div>
                                                 <input type="hidden" id="id_nomina" value="<?php echo $id_nom['id_nomina'] ?>">
-                                                <!--<a type="button" id="btnExportaExcelNE" class="btn btn-outline-success btn-sm" value="<?php //echo $mes 
-                                                                                                                                            ?>" title="Exprotar a Excel">
-                                                    <span class="fas fa-file-excel fa-lg"></span>
-                                                </a>-->
-
                                                 <?php
                                                 if ($id_nom['estado'] == 1) {
                                                     if (PermisosUsuario($permisos, 5104, 5) || $id_rol == 1) {
@@ -511,7 +515,6 @@ try {
                                                 }
                                                 if ($id_nom['estado'] == 1) {
                                                     if (PermisosUsuario($permisos, 5104, 3) || $id_rol == 1) {
-                                                        //
                                                     ?>
                                                         <button id="btnConfirmaNomina" class="btn btn-outline-warning btn-sm px-2" value="<?php echo $mes ?>" title="DEFINITIVA">
                                                             <i class="fas fa-certificate"></i>&nbsp;&nbsp;</span>DEFINITIVA
@@ -538,7 +541,7 @@ try {
                                 </div>
                             </div>
                             <div class="card-body" id="divCuerpoPag">
-                                <div class="">
+                                <div>
                                     <table id="dataTableLiqNom" class="table-bordered table-sm  order-column nowrap" style="width:100%">
                                         <thead>
                                             <tr>
@@ -940,13 +943,15 @@ try {
                                                             ?>
                                                         </td>
                                                         <?php
-                                                        if ($id_nom['estado'] == 1 && $id_nom['planilla'] == 1) {
+                                                        if ($id_nom['estado'] == '1' && $id_nom['planilla'] == '1') {
                                                             if (PermisosUsuario($permisos, 5104, 5) || $id_rol == 1) {
                                                         ?>
                                                                 <td class="text-center">
                                                                     <a value="<?php echo $id ?>" class="btn btn-outline-danger btn-sm btn-circle shadow-gb anular" title="Anular Empleado"><span class="fas fa-ban fa-lg"></span></a>
                                                                 </td>
                                                         <?php
+                                                            }else{
+                                                                echo '<td></td>';
                                                             }
                                                         } else {
                                                             echo '<td></td>';
@@ -976,15 +981,6 @@ try {
         <?php include '../../modales.php' ?>
     </div>
     <?php include '../../scripts.php' ?>
-    <style>
-        .DTFC_LeftBodyLiner {
-            overflow-y: unset !important
-        }
-
-        .DTFC_RightBodyLiner {
-            overflow-y: unset !important
-        }
-    </style>
 </body>
 
 </html>
