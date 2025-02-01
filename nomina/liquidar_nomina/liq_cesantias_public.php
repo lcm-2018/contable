@@ -204,12 +204,16 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "SELECT 
-                `id_salario`,`id_empleado`, `salario_basico`  
+                `id_empleado`,`sal_base` AS `salario_basico`
+            FROM `nom_liq_salario`
+            WHERE `id_sal_liq` IN (SELECT
+                MAX(`nom_liq_salario`.`id_sal_liq`)
             FROM
-                `nom_salarios_basico`
-            WHERE `id_salario` 
-                IN (SELECT MAX(`id_salario`) AS `id_salario` FROM `nom_salarios_basico` GROUP BY `id_empleado`)
-            AND `id_empleado` IN ($ids)";
+                `nom_liq_salario`
+                INNER JOIN `nom_nominas` 
+                    ON (`nom_liq_salario`.`id_nomina` = `nom_nominas`.`id_nomina`)
+            WHERE (`nom_nominas`.`vigencia` <= '$vigencia' AND `nom_nominas`.`tipo` = 'N')
+            GROUP BY `nom_liq_salario`.`id_empleado`)";
     $rs = $cmd->query($sql);
     $salario = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -454,8 +458,8 @@ if (count($empleado) > 0) {
             try {
                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`) 
-                    VALUES (?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`,`sal_base`) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $sql = $cmd->prepare($sql);
                 $sql->bindParam(1, $id, PDO::PARAM_INT);
                 $sql->bindParam(2, $cesantia, PDO::PARAM_STR);
@@ -463,6 +467,7 @@ if (count($empleado) > 0) {
                 $sql->bindParam(4, $mpag, PDO::PARAM_STR);
                 $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
                 $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
+                $sql->bindParam(7, $salbase, PDO::PARAM_STR);
                 $sql->execute();
             } catch (PDOException $e) {
                 echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -470,8 +475,8 @@ if (count($empleado) > 0) {
             try {
                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`) 
-                    VALUES (?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`,`sal_base`) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $sql = $cmd->prepare($sql);
                 $sql->bindParam(1, $id, PDO::PARAM_INT);
                 $sql->bindParam(2, $icesantia, PDO::PARAM_STR);
@@ -479,6 +484,7 @@ if (count($empleado) > 0) {
                 $sql->bindParam(4, $mpag, PDO::PARAM_STR);
                 $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
                 $sql->bindParam(6, $id_nomina_ic, PDO::PARAM_INT);
+                $sql->bindParam(7, $salbase, PDO::PARAM_STR);
                 $sql->execute();
             } catch (PDOException $e) {
                 echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();

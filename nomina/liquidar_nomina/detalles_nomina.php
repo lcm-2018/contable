@@ -29,49 +29,6 @@ if ($key === false) {
 }
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT 
-                `id_empleado`, `vigencia`, `salario_basico`, `no_documento`, `estado`, CONCAT_WS(' ', `apellido1`, `apellido2`, `nombre1`, `nombre2`) AS `nombre`, `representacion`, `sede_emp`, `sede`, `cargo`, `id_nomina`
-            FROM
-                (SELECT  
-                    `nom_empleado`.`id_empleado`
-                    ,`nom_empleado`.`sede_emp`
-                    , `nom_empleado`.`tipo_doc`
-                    , `nom_empleado`.`no_documento`
-                    , `nom_empleado`.`genero`
-                    , `nom_empleado`.`apellido1`
-                    , `nom_empleado`.`apellido2`
-                    , `nom_empleado`.`nombre2`
-                    , `nom_empleado`.`nombre1`
-                    , `nom_empleado`.`representacion`
-                    , `nom_empleado`.`estado`
-                    , `nom_salarios_basico`.`id_salario`
-                    , `nom_salarios_basico`.`vigencia`
-                    , `nom_salarios_basico`.`salario_basico`
-                    , `nom_liq_salario`.`id_nomina`
-                    , `nom_cargo_empleado`.`descripcion_carg` AS `cargo`
-                    , `tb_sedes`.`nom_sede` AS `sede`
-                FROM `nom_salarios_basico`
-                    INNER JOIN `nom_empleado`
-                        ON(`nom_salarios_basico`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                    INNER JOIN `nom_liq_salario` 
-                        ON (`nom_liq_salario`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                    LEFT JOIN `nom_cargo_empleado` 
-                        ON (`nom_empleado`.`cargo` = `nom_cargo_empleado`.`id_cargo`)
-                    LEFT JOIN `tb_sedes` 
-                        ON (`nom_empleado`.`sede_emp` = `tb_sedes`.`id_sede`)
-                WHERE `nom_salarios_basico`.`id_salario` 
-                    IN(SELECT MAX(`id_salario`) FROM `nom_salarios_basico` WHERE `vigencia` <= '$anio' GROUP BY `id_empleado`)) AS t
-            WHERE `id_nomina` = $id_nomina
-            GROUP BY `id_empleado`";
-    $rs = $cmd->query($sql);
-    $obj = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "SELECT `id_nomina`, `estado`, `planilla`, `mes`, `tipo`  FROM `nom_nominas` WHERE `id_nomina` = $id_nomina LIMIT 1";
     $rs = $cmd->query($sql);
@@ -80,6 +37,41 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT  
+                `nom_empleado`.`id_empleado`
+                ,`nom_empleado`.`sede_emp`
+                , `nom_empleado`.`tipo_doc`
+                , `nom_empleado`.`no_documento`
+                , `nom_empleado`.`genero`
+                ,  CONCAT_WS(' ', `nom_empleado`.`nombre1`
+                , `nom_empleado`.`nombre2`
+                , `nom_empleado`.`apellido1`
+                , `nom_empleado`.`apellido2`) AS `nombre`
+                , `nom_empleado`.`representacion`
+                , `nom_empleado`.`estado`
+                , `nom_liq_salario`.`id_nomina`
+                , `nom_liq_salario`.`sal_base` AS `salario_basico`
+                , `nom_cargo_empleado`.`descripcion_carg` AS `cargo`
+                , `tb_sedes`.`nom_sede` AS `sede`
+            FROM `nom_empleado`
+                INNER JOIN `nom_liq_salario` 
+                    ON (`nom_liq_salario`.`id_empleado` = `nom_empleado`.`id_empleado`)
+                LEFT JOIN `nom_cargo_empleado` 
+                    ON (`nom_empleado`.`cargo` = `nom_cargo_empleado`.`id_cargo`)
+                LEFT JOIN `tb_sedes` 
+                    ON (`nom_empleado`.`sede_emp` = `tb_sedes`.`id_sede`)
+            WHERE `nom_liq_salario`.`id_nomina` = $id_nomina";
+    $rs = $cmd->query($sql);
+    $obj = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+
 $mes = $id_nom['mes'] != '' ? $id_nom['mes'] : '00';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -950,7 +942,7 @@ try {
                                                                     <a value="<?php echo $id ?>" class="btn btn-outline-danger btn-sm btn-circle shadow-gb anular" title="Anular Empleado"><span class="fas fa-ban fa-lg"></span></a>
                                                                 </td>
                                                         <?php
-                                                            }else{
+                                                            } else {
                                                                 echo '<td></td>';
                                                             }
                                                         } else {

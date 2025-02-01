@@ -835,7 +835,7 @@ $meses = [
             <tbody>
                 <tr>
                     <td style="text-align:justify">
-                        <br><br>
+                        <br>
                         <p style="text-align:center;"><b>RESOLUCIÓN No.: <?php echo $num_resolucion; ?></b></p>
                         <p style="text-align:center;"><b><?= $f_exp[2] . '-' . $meses[$f_exp[1]] . '-' . $f_exp[0] ?></b></p>
                         <p style="text-align:center;">Por medio de la cual se ordena un pago</p>

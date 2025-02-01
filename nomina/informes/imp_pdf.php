@@ -61,35 +61,30 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT 
-                `id_empleado`, `vigencia`, `salario_basico`, `no_documento`, `estado`, CONCAT_WS(' ', `apellido1`, `apellido2`, `nombre1`, `nombre2`) AS `nombre`, `representacion`
-            FROM
-                (SELECT  
-                    `nom_empleado`.`id_empleado`
-                    , `nom_empleado`.`tipo_doc`
-                    , `nom_empleado`.`no_documento`
-                    , `nom_empleado`.`genero`
-                    , `nom_empleado`.`apellido1`
-                    , `nom_empleado`.`apellido2`
-                    , `nom_empleado`.`nombre2`
-                    , `nom_empleado`.`nombre1`
-                    , `nom_empleado`.`representacion`
-                    , `nom_empleado`.`estado`
-                    , `nom_salarios_basico`.`id_salario`
-                    , `nom_salarios_basico`.`vigencia`
-                    , `nom_salarios_basico`.`salario_basico`
-                    , `nom_liq_salario`.`mes`
-                    , `nom_liq_salario`.`anio`
-                    , `nom_liq_salario`.`tipo_liq`
-                    , `nom_liq_salario`.`id_nomina`
-                FROM `nom_salarios_basico`
-                    INNER JOIN `nom_empleado`
-                        ON(`nom_salarios_basico`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                    INNER JOIN `nom_liq_salario` 
-                        ON (`nom_liq_salario`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                WHERE `nom_salarios_basico`.`id_salario` 
-                    IN(SELECT MAX(`id_salario`) FROM `nom_salarios_basico` WHERE `vigencia` <= '$vigencia' GROUP BY `id_empleado`)) AS t
-            WHERE `id_nomina` = $id_nomina";
+    $sql = "SELECT  
+                `nom_empleado`.`id_empleado`
+                ,`nom_empleado`.`sede_emp`
+                , `nom_empleado`.`tipo_doc`
+                , `nom_empleado`.`no_documento`
+                , `nom_empleado`.`genero`
+                ,  CONCAT_WS(' ', `nom_empleado`.`nombre1`
+                , `nom_empleado`.`nombre2`
+                , `nom_empleado`.`apellido1`
+                , `nom_empleado`.`apellido2`) AS `nombre`
+                , `nom_empleado`.`representacion`
+                , `nom_empleado`.`estado`
+                , `nom_liq_salario`.`id_nomina`
+                , `nom_liq_salario`.`sal_base` AS `salario_basico`
+                , `nom_cargo_empleado`.`descripcion_carg` AS `cargo`
+                , `tb_sedes`.`nom_sede` AS `sede`
+            FROM `nom_empleado`
+                INNER JOIN `nom_liq_salario` 
+                    ON (`nom_liq_salario`.`id_empleado` = `nom_empleado`.`id_empleado`)
+                LEFT JOIN `nom_cargo_empleado` 
+                    ON (`nom_empleado`.`cargo` = `nom_cargo_empleado`.`id_cargo`)
+                LEFT JOIN `tb_sedes` 
+                    ON (`nom_empleado`.`sede_emp` = `tb_sedes`.`id_sede`)
+            WHERE `nom_liq_salario`.`id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $obj = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;

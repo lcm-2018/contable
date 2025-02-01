@@ -18,7 +18,7 @@ function redondeo($value, $places)
 $anio = $_SESSION['vigencia'];
 $er = '';
 $er .= '
-  <div class="table-responsive w-100">
+  <div class="table-responsive w-100" style="max-height: 400px; overflow-y: auto;">
   <table class="table table-striped table-bordered table-sm">
   <thead>
     <tr>
@@ -1715,8 +1715,8 @@ if (isset($_POST['check'])) {
             try {
                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                $sql = "INSERT INTO nom_liq_salario (id_empleado, val_liq, forma_pago, metodo_pago, mes, anio, fec_reg, id_nomina) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `mes`, `anio`, `fec_reg`, `id_nomina`, `sal_base`) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $sql = $cmd->prepare($sql);
                 $sql->bindParam(1, $i, PDO::PARAM_INT);
                 $sql->bindParam(2, $salarioneto, PDO::PARAM_STR);
@@ -1726,6 +1726,7 @@ if (isset($_POST['check'])) {
                 $sql->bindParam(6, $anio, PDO::PARAM_STR);
                 $sql->bindValue(7, $date->format('Y-m-d H:i:s'));
                 $sql->bindParam(8, $id_nomina, PDO::PARAM_INT);
+                $sql->bindParam(9, $salbase, PDO::PARAM_STR);
                 $sql->execute();
             } catch (PDOException $e) {
                 echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -1744,7 +1745,8 @@ if (isset($_POST['check'])) {
         }
     }
     $er .= '</tbody>
-    </table>';
+    </table>
+    </div>';
     if ($mesliq == 0) {
         echo '0';
     } else {
