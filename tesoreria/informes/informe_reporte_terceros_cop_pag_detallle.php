@@ -47,14 +47,14 @@ try {
                 , IF(`pto_documento_detalles`.`id_tercero_api`,`pto_documento_detalles`.`id_tercero_api`,`ctb_doc`.`id_tercero`) AS id_tercero
                 , `ctb_doc`.`detalle`
                 , `ctb_doc`.`id_manu`
-                , `seg_ctb_factura`.`num_doc`
+                , `ctb_factura`.`num_doc`
                 , `pto_documento_detalles`.`valor`
                 , `pto_documento_detalles`.`rubro`
                 , `ctb_doc`.`id_ctb_doc`
             FROM
-                `seg_ctb_factura`
+                `ctb_factura`
                 INNER JOIN `ctb_doc` 
-                    ON (`seg_ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    ON (`ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                 INNER JOIN `pto_documento_detalles` 
                     ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
             WHERE (`ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_final'

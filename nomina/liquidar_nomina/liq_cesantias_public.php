@@ -360,8 +360,8 @@ if (count($empleado) > 0) {
             try {
                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                $sql = "INSERT INTO `nom_liq_cesantias`(`id_empleado`,`cant_dias`,`val_cesantias`,`val_icesantias`,`porcentaje_interes`,`fec_reg`,`id_nomina`, `corte`)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO `nom_liq_cesantias`(`id_empleado`,`cant_dias`,`val_cesantias`,`val_icesantias`,`porcentaje_interes`,`fec_reg`,`id_nomina`, `corte`, `salbase`, `gasrep`, `auxt`, `auxali`, `promHorExt`, `bspant`, `primserant`, `primavacant`, `primanavant`, `diasToCes`)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $sql = $cmd->prepare($sql);
                 $sql->bindParam(1, $id, PDO::PARAM_INT);
                 $sql->bindParam(2, $diasToCes, PDO::PARAM_STR);
@@ -371,6 +371,16 @@ if (count($empleado) > 0) {
                 $sql->bindValue(6, $date->format('Y-m-d H:i:s'));
                 $sql->bindParam(7, $id_nomina, PDO::PARAM_INT);
                 $sql->bindParam(8, $fec_corte, PDO::PARAM_STR);
+                $sql->bindParam(9, $salbase, PDO::PARAM_STR);
+                $sql->bindParam(10, $gasrep, PDO::PARAM_STR);
+                $sql->bindParam(11, $auxt, PDO::PARAM_STR);
+                $sql->bindParam(12, $auxali, PDO::PARAM_STR);
+                $sql->bindParam(13, $promHorExt, PDO::PARAM_STR);
+                $sql->bindParam(14, $bspant, PDO::PARAM_STR);
+                $sql->bindParam(15, $primserant, PDO::PARAM_STR);
+                $sql->bindParam(16, $primavacant, PDO::PARAM_STR);
+                $sql->bindParam(17, $primanavant, PDO::PARAM_STR);
+                $sql->bindParam(18, $diasToCes, PDO::PARAM_STR);
                 $sql->execute();
                 if (!($cmd->lastInsertId() > 0)) {
                     echo $sql->errorInfo()[2] . 'CES';

@@ -489,19 +489,19 @@ $meses = [
                 // Datos de la factura 
                 try {
                     $sql = "SELECT
-                            `seg_ctb_factura`.`id_ctb_doc`
+                            `ctb_factura`.`id_ctb_doc`
                             , `ctb_tipo_doc`.`tipo` as tipo
-                            , `seg_ctb_factura`.`num_doc`
-                            , `seg_ctb_factura`.`fecha_fact`
-                            , `seg_ctb_factura`.`fecha_ven`
-                            , `seg_ctb_factura`.`valor_pago`
-                            , `seg_ctb_factura`.`valor_iva`
-                            , `seg_ctb_factura`.`valor_base`
+                            , `ctb_factura`.`num_doc`
+                            , `ctb_factura`.`fecha_fact`
+                            , `ctb_factura`.`fecha_ven`
+                            , `ctb_factura`.`valor_pago`
+                            , `ctb_factura`.`valor_iva`
+                            , `ctb_factura`.`valor_base`
                             FROM
-                            `seg_ctb_factura`
+                            `ctb_factura`
                             INNER JOIN `ctb_tipo_doc` 
-                                ON (`seg_ctb_factura`.`tipo_doc` = `ctb_tipo_doc`.`id_ctb_tipodoc`)
-                            WHERE (`seg_ctb_factura`.`id_ctb_doc` ={$documento['id_ctb_cop']});";
+                                ON (`ctb_factura`.`tipo_doc` = `ctb_tipo_doc`.`id_ctb_tipodoc`)
+                            WHERE (`ctb_factura`.`id_ctb_doc` ={$documento['id_ctb_cop']});";
                     $res = $cmd->query($sql);
                     $factura = $res->fetch();
                     $fecha_fact = date('Y-m-d', strtotime($factura['fecha_fact']));

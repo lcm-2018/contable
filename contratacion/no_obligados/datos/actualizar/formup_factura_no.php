@@ -53,7 +53,7 @@ try {
     $sql = "SELECT
                 `id`, `descripcion`
             FROM
-                `seg_responsabilidad_fiscal` ORDER BY `descripcion` ASC";
+                `tb_responsabilidad_fiscal` ORDER BY `descripcion` ASC";
     $rs = $cmd->query($sql);
     $rep_fiscal = $rs->fetchAll();
     $cmd = null;

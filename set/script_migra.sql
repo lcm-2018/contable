@@ -781,7 +781,7 @@ INSERT INTO `cronhis`.`ctb_factura`
 	(`id_cta_factura`,`id_ctb_doc`,`id_tipo_doc`,`num_doc`,`fecha_fact`,`fecha_ven`,`valor_pago`,`valor_iva`,`valor_base`,`detalle`,`id_user_reg`,`fec_rec`,`id_user_act`,`fec_act`)       
 SELECT
 	`id_cta_factura`,`id_ctb_doc`,`tipo_doc`,`num_doc`,`fecha_fact`,`fecha_ven`,`valor_pago`,`valor_iva`,`valor_base`,`detalle`,`id_user_reg`,`fec_rec`,`id_user_act`,`fec_act`
-FROM `bd_contablersc`.`seg_ctb_factura`;
+FROM `bd_contablersc`.`ctb_factura`;
 
 INSERT INTO `cronhis`.`pto_cop_detalle`
 	(`id_ctb_doc`,`id_pto_crp_det`,`id_tercero_api`,`valor`,`valor_liberado`)

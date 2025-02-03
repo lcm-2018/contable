@@ -2247,6 +2247,29 @@ const EnviaDocumentoSoporte = (boton) => {
 	let id = boton.value;
 	boton.value = "";
 	boton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+	$.ajax({
+		type: "POST",
+		url: "soportes/equivalente/enviar_factura.php",
+		data: { id: id },
+		dataType: "json",
+		success: function (response) {
+			if (response.status == "ok") {
+				boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
+				$('#tableMvtoContable').DataTable().ajax.reload();
+				mje("Documento enviado correctamente");
+			} else {
+				boton.disabled = false;
+				boton.value = id;
+				boton.innerHTML = '<span class="fas fa-paper-plane fa-lg"></span>';
+				mjeError(response.msg);
+			}
+		},
+		error: function (xhr, status, error) {
+			console.error("Error en la solicitud AJAX:", error);
+		}
+	});
+
+	return false
 	fetch("soportes/equivalente/enviar_factura.php", {
 		method: "POST",
 		body: JSON.stringify({ id: id }),
