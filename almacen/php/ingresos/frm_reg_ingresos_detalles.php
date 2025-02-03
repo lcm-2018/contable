@@ -11,12 +11,11 @@ include '../common/funciones_generales.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$id_sede = isset($_POST['id_sede']) ? $_POST['id_sede'] : -1;
 $id_bodega = isset($_POST['id_bodega']) && $_POST['id_bodega'] ? $_POST['id_bodega'] : -1;
-
-$id_lote = isset($_POST['id_lote']) ? $_POST['id_lote'] : -1;
 $id_articulo = isset($_POST['id_articulo']) ? $_POST['id_articulo'] : -1;
+$id_lote = isset($_POST['id_lote']) ? $_POST['id_lote'] : -1;
 $cantidad = isset($_POST['cantidad']) ? $_POST['cantidad'] : 0;
+
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 
 $sql = "SELECT far_orden_ingreso_detalle.*,
@@ -38,11 +37,11 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     $obj['iva'] = 0;
+    $obj['id_med'] = $id_articulo;
+    $obj['id_lote'] = $id_lote;
     $obj['cantidad'] = (int)$cantidad;
-} else {
-    $id_lote = $obj['id_lote'];
-    $id_articulo = $obj['id_med'];;
-}
+} 
+
 ?>
 
 <div class="px-0">
@@ -63,7 +62,7 @@ if (empty($obj)) {
                     <div class="form-group col-md-3">
                         <label for="sl_lote_art" class="small">Lote</label>
                         <select class="form-control form-control-sm" id="sl_lote_art" name="sl_lote_art">
-                            <?php lotes_articulo($cmd, $id_bodega, $id_articulo, $id_lote, $obj['id_lote']) ?>
+                            <?php lotes_articulo($cmd, $id_bodega, $obj['id_med'], $obj['id_lote']) ?>
                         </select>
                     </div>
                     <div class="form-group col-md-10">

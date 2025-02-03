@@ -4,7 +4,11 @@
             dom: setdom,
             buttons: [{
                 action: function(e, dt, node, config) {
-                    $.post("../common/buscar_articulos_frm.php", { id_sede: $('#sl_sede_proveedor').val(), id_bodega: $('#sl_bodega_proveedor').val() }, function(he) {
+                    $.post("../common/buscar_articulos_frm.php", {
+                        id_sede: $('#sl_sede_proveedor').val(),
+                        id_bodega: $('#sl_bodega_proveedor').val(),
+                        id_subgrupo: sessionStorage.getItem("id_subgrupo")
+                    }, function(he) {
                         $('#divTamModalBus').removeClass('modal-lg');
                         $('#divTamModalBus').removeClass('modal-sm');
                         $('#divTamModalBus').addClass('modal-xl');

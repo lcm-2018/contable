@@ -88,7 +88,7 @@
     $('#sl_sede_filtro').trigger('change');
 
     $('#divForms').on("change", "#sl_sede_prov", function() {
-        $('#sl_bodega_prov').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val() }, function() {});
+        $('#sl_bodega_prov').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), todas: true }, function() {});
     });
 
     //Buscar registros de Pedido

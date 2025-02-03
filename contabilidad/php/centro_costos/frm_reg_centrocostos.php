@@ -70,8 +70,8 @@ if (empty($obj)) {
             <div class="p-3">
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link active small" id="nav_lista_cta_cc-tab" data-toggle="tab" href="#nav_lista_cta_cc" role="tab" aria-controls="nav_lista_cta_cc" aria-selected="true">CUENTA CONTABLE - CENTRO DE COSTO</a>
-                        <a class="nav-item nav-link small" id="nav_lista_cta_sg-tab" data-toggle="tab" href="#nav_lista_cta_sg" role="tab" aria-controls="nav_lista_cta_sg" aria-selected="false">CUENTA CONTABLE - POR SUBGRUPO</a>
+                        <a class="nav-item nav-link active small" id="nav_lista_cta_cc-tab" data-toggle="tab" href="#nav_lista_cta_cc" role="tab" aria-controls="nav_lista_cta_cc" aria-selected="true">CUENTA CONTABLE - FACTURACION</a>
+                        <a class="nav-item nav-link small" id="nav_lista_cta_sg-tab" data-toggle="tab" href="#nav_lista_cta_sg" role="tab" aria-controls="nav_lista_cta_sg" aria-selected="false">CUENTA CONTABLE - GASTOS POR SUBGRUPO</a>
                     </div>
                 </nav>
 

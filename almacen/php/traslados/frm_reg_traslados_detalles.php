@@ -14,7 +14,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id_lote = isset($_POST['id_lote']) ? $_POST['id_lote'] : -1;
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT far_traslado_detalle.*,
-            far_medicamento_lote.lote,far_medicamentos.nom_medicamento AS nom_articulo
+            far_medicamento_lote.lote,far_medicamento_lote.existencia,
+            far_medicamentos.nom_medicamento AS nom_articulo
         FROM far_traslado_detalle
         INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote=far_traslado_detalle.id_lote_origen)
         INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
@@ -35,6 +36,7 @@ if (empty($obj)) {
     $obj['lote'] = $lote['lote'];
     $obj['nom_articulo'] = $lote['nom_articulo'];
     $obj['valor'] = $lote['val_promedio'];
+    $obj['existencia'] = $lote['existencia'];
 }
 ?>
 
@@ -65,7 +67,11 @@ if (empty($obj)) {
                     <div class="form-group col-md-3">
                         <label for="txt_val_pro" class="small">Vr. Promedio</label>
                         <input type="text" class="form-control form-control-sm" id="txt_val_pro" name="txt_val_pro" value="<?php echo $obj['valor'] ?>" readonly="readonly">
-                    </div>                    
+                    </div>    
+                    <div class="form-group col-md-3">
+                        <label for="txt_exi_lote" class="small">Existencia Actual</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_exi_lote" name="txt_exi_lote" value="<?php echo $obj['existencia'] ?>" readonly="readonly">
+                    </div>                 
                 </div>
             </form>
         </div>

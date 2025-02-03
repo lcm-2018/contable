@@ -5,7 +5,11 @@
             buttons: [{
                 action: function(e, dt, node, config) {
                     if ($('#sl_tip_ing').find('option:selected').attr('data-ordcom') == 1) {
-                        $.post("buscar_articulos_pedido_frm.php", { id_sede: $('#id_txt_sede').val(), id_bodega: $('#id_txt_nom_bod').val(), id_pedido: $('#txt_id_pedido').val() }, function(he) {
+                        $.post("buscar_articulos_pedido_frm.php", {
+                            id_sede: $('#id_txt_sede').val(),
+                            id_bodega: $('#id_txt_nom_bod').val(),
+                            id_pedido: $('#txt_id_pedido').val()
+                        }, function(he) {
                             $('#divTamModalBus').removeClass('modal-lg');
                             $('#divTamModalBus').removeClass('modal-sm');
                             $('#divTamModalBus').addClass('modal-xl');
@@ -13,7 +17,11 @@
                             $("#divFormsBus").html(he);
                         });
                     } else {
-                        $.post("../common/buscar_lotes_frm.php", { id_sede: $('#id_txt_sede').val(), id_bodega: $('#id_txt_nom_bod').val() }, function(he) {
+                        $.post("../common/buscar_lotes_frm.php", {
+                            id_sede: $('#id_txt_sede').val(),
+                            id_bodega: $('#id_txt_nom_bod').val(),
+                            id_subgrupo: sessionStorage.getItem("id_subgrupo")
+                        }, function(he) {
                             $('#divTamModalBus').removeClass('modal-lg');
                             $('#divTamModalBus').removeClass('modal-sm');
                             $('#divTamModalBus').addClass('modal-xl');

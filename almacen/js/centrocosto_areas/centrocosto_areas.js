@@ -31,7 +31,8 @@
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
-                    data.nombre = $('#txt_nombre_filtro').val();
+                    data.nom_area = $('#txt_nombre_filtro').val();
+                    data.id_cencosto = $('#sl_centrocosto_filtro').val();
                 }
             },
             columns: [
@@ -170,7 +171,8 @@
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_cencos_areas');
         $.post("imp_cencos_areas.php", {
-            nombre: $('#txt_nombre_filtro').val()
+            nom_area: $('#txt_nombre_filtro').val(),
+            id_cencosto: $('#sl_centrocosto_filtro').val()
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

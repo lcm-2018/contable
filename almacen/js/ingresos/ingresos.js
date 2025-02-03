@@ -329,26 +329,23 @@
     DETALLES
     -----------------------------------------------------*/
     $('#divModalBus').on('dblclick', '#tb_lotes_articulos tr', function() {
+        let id_bodega = $('#id_txt_nom_bod').val();
         let data = $('#tb_lotes_articulos').DataTable().row(this).data();
-        $.post("frm_reg_ingresos_detalles.php", { id_lote: data.id_lote }, function(he) {
+        $.post("frm_reg_ingresos_detalles.php", { id_articulo: data.id_med, id_lote: data.id_lote, id_bodega: id_bodega }, function(he) {
             $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
         });
 
         $('#divModalReg').on('shown.bs.modal', function() {
-            if ($('#sl_lote_art option').length == 2 && $('#id_detalle').val() == -1) {
-                $('#sl_lote_art').prop('selectedIndex', $('#sl_lote_art option').length - 1);
-                $('#sl_lote_art').trigger('change');
-            }
+            $('#sl_lote_art').trigger('change');
         });
     });
 
     $('#divModalBus').on('dblclick', '#tb_articulos_pedido tr', function() {
-        let id_sede = $('#id_txt_sede').val(),
-            id_bodega = $('#id_txt_nom_bod').val();
+        let id_bodega = $('#id_txt_nom_bod').val();
         let data = $('#tb_articulos_pedido').DataTable().row(this).data();
-        $.post("frm_reg_ingresos_detalles.php", { id_articulo: data.id_med, cantidad: data.cantidad_pen, id_sede: id_sede, id_bodega: id_bodega }, function(he) {
+        $.post("frm_reg_ingresos_detalles.php", { id_articulo: data.id_med, cantidad: data.cantidad_pen, id_bodega: id_bodega }, function(he) {
             $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
@@ -371,8 +368,9 @@
     });
 
     $('#divForms').on('click', '#tb_ingresos_detalles .btn_editar', function() {
+        let id_bodega = $('#id_txt_nom_bod').val();
         let id = $(this).attr('value');
-        $.post("frm_reg_ingresos_detalles.php", { id: id }, function(he) {
+        $.post("frm_reg_ingresos_detalles.php", { id: id, id_bodega: id_bodega }, function(he) {
             $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);

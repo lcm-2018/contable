@@ -5,12 +5,14 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
+include '../common/cargar_combos.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-?>
+$id_subgrupo = isset($_POST['id_subgrupo']) ? $_POST['id_subgrupo'] : 0;
 
+?>
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
@@ -21,6 +23,11 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             <!--Formulario de busqueda de articulos-->
             <form id="frm_buscar_articulos">
                 <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <select class="form-control form-control-sm" id="sl_subgrupo_art_fil">
+                            <?php subgrupo_articulo($cmd,'--Subgrupo--', $id_subgrupo) ?> 
+                        </select>
+                    </div>
                     <div class="form-group col-md-2">
                         <input type="text" class="filtro_art form-control form-control-sm" id="txt_codigo_art_fil" placeholder="Codigo">
                     </div>
@@ -75,6 +82,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     type: 'POST',
                     dataType: 'json',
                     data: function(data) {
+                        data.id_subgrupo = $('#sl_subgrupo_art_fil').val();
                         data.codigo = $('#txt_codigo_art_fil').val();
                         data.nombre = $('#txt_nombre_art_fil').val();
                         data.con_existencia = $('#chk_conexistencia_lot_fil').is(':checked') ? 1 : 0;
@@ -92,7 +100,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     { width: '5%', targets: [0,1,3,4] }
                 ],
                 order: [
-                    [0, "desc"]
+                    [2, "asc"]
                 ],
                 lengthMenu: [
                     [10, 25, 50, -1],
@@ -116,6 +124,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     $('.filtro_art').mouseup(function(e) {
         reloadtable('tb_articulos_activos');
+    });
+
+    $('#sl_subgrupo_art_fil').on("change", function() {
+        sessionStorage.setItem("id_subgrupo", $(this).val());
     });
     
 </script>

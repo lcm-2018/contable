@@ -96,14 +96,18 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
             </form>    
             <table id="tb_pedidos_detalles" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                 <thead>
-                <tr class="text-center centro-vertical">
-                        <th>Id</th>
-                        <th>Código</th>
-                        <th>Descripción</th>                        
-                        <th>Cantidad</th>
-                        <th>Vr. Promedio</th> 
-                        <th>Total</th>
-                        <th>Acciones</th>
+                    <tr class="text-center centro-vertical">
+                        <th rowspan="2">Id</th>
+                        <th rowspan="2">Código</th>
+                        <th rowspan="2">Descripción</th>                        
+                        <th colspan="2">Cantidad</th>
+                        <th rowspan="2">Vr. Promedio</th> 
+                        <th rowspan="2">Total</th>
+                        <th rowspan="2">Acciones</th>
+                    </tr>
+                    <tr class="text-center centro-vertical">
+                        <th>Solicitada</th>
+                        <th>Aprobada</th>
                     </tr>
                 </thead>
                 <tbody class="text-left centro-vertical"></tbody>

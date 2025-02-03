@@ -20,6 +20,9 @@ $id_bodega = $_POST['id_bodega'];
 $where_gen = " WHERE far_medicamento_lote.id_bodega=$id_bodega AND far_medicamento_lote.estado=1 AND far_medicamentos.estado=1";
 
 $where = $where_gen;
+if (isset($_POST['id_subgrupo']) && $_POST['id_subgrupo']) {
+    $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];
+}
 if (isset($_POST['codigo']) && $_POST['codigo']) {
     $where .= " AND far_medicamentos.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";
 }

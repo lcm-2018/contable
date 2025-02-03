@@ -363,7 +363,7 @@ function subgrupo_articulo($cmd, $titulo = '', $id = 0)
     }
 }
 
-function lotes_articulo($cmd, $id_bodega, $id_articulo, $id_lote, $id = 0)
+function lotes_articulo($cmd, $id_bodega, $id_articulo, $id = 0)
 {
     try {        
         echo '<option value=""></option>';
@@ -374,17 +374,9 @@ function lotes_articulo($cmd, $id_bodega, $id_articulo, $id_lote, $id = 0)
                 FROM far_medicamento_lote
                 INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
                 INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
-                WHERE far_medicamento_lote.id_med=$id_articulo AND far_medicamento_lote.id_bodega=$id_bodega AND far_medicamento_lote.estado=1 AND far_medicamentos.estado=1";
-        if($id_lote != -1){
-            $sql = "SELECT far_medicamento_lote.id_lote,IF(fec_vencimiento='3000-01-01',lote,CONCAT(lote,'[',fec_vencimiento,']')) AS nom_lote,
-                    far_medicamentos.nom_medicamento AS nom_articulo,
-                    far_medicamento_lote.id_presentacion,far_presentacion_comercial.nom_presentacion,
-                    IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl
-                FROM far_medicamento_lote
-                INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
-                INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
-                WHERE far_medicamento_lote.id_lote=$id_lote";
-        }
+                WHERE (far_medicamento_lote.id_med=$id_articulo AND far_medicamento_lote.id_bodega=$id_bodega AND 
+                        far_medicamento_lote.estado=1 AND far_medicamentos.estado=1 AND
+                        far_medicamento_lote.fec_vencimiento>='" . date('Y-m-d') . "') OR far_medicamento_lote.id_lote=$id";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();        
         foreach ($objs as $obj) {

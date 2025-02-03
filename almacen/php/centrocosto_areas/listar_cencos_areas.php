@@ -17,8 +17,11 @@ $col = $_POST['order'][0]['column']+1;
 $dir = $_POST['order'][0]['dir'];
 
 $where = "WHERE far_centrocosto_area.id_area<>0";
-if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND far_centrocosto_area.nom_area LIKE '" . $_POST['nombre'] . "%'";
+if (isset($_POST['nom_area']) && $_POST['nom_area']) {
+    $where .= " AND far_centrocosto_area.nom_area LIKE '" . $_POST['nom_area'] . "%'";
+}
+if (isset($_POST['id_cencosto']) && $_POST['id_cencosto']) {
+    $where .= " AND far_centrocosto_area.id_centrocosto=" . $_POST['id_cencosto'];
 }
 
 try {

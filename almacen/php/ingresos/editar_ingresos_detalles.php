@@ -106,7 +106,7 @@ try {
                                 }
                             } else {
                                 $sql = "UPDATE far_orden_ingreso_detalle 
-                                    SET id_presentacion=$id_pre_lot,cantidad=$cantidad,valor_sin_iva=$vr_unidad,iva=$iva,valor=$vr_costo,observacion='$observacion'
+                                    SET id_lote=$id_lote,id_presentacion=$id_pre_lot,cantidad=$cantidad,valor_sin_iva=$vr_unidad,iva=$iva,valor=$vr_costo,observacion='$observacion'
                                     WHERE id_ing_detalle=" . $id;
 
                                 $rs = $cmd->query($sql);

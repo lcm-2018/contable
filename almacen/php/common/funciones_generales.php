@@ -52,7 +52,7 @@ function formato_valor($valor){
 function datos_lote($cmd, $id_lote){
     try {
         $res = array();
-        $sql = "SELECT far_medicamento_lote.id_lote,far_medicamento_lote.lote,
+        $sql = "SELECT far_medicamento_lote.id_lote,far_medicamento_lote.lote,far_medicamento_lote.existencia,
                     far_medicamentos.nom_medicamento AS nom_articulo,far_medicamentos.val_promedio,
                     far_medicamento_lote.id_presentacion,far_presentacion_comercial.nom_presentacion,
                     IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl
@@ -63,9 +63,9 @@ function datos_lote($cmd, $id_lote){
         $rs = $cmd->query($sql);
         $obj = $rs->fetch();
         if (isset($obj['id_lote'])) {
-            $res = array('id_lote' => $obj['id_lote'], 'lote' => $obj['lote'], 'nom_articulo' => $obj['nom_articulo'], 'val_promedio' => $obj['val_promedio'], 'id_presentacion' => $obj['id_presentacion'], 'nom_presentacion' => $obj['nom_presentacion'], 'cantidad_umpl' => $obj['cantidad_umpl']);
+            $res = array('id_lote' => $obj['id_lote'], 'lote' => $obj['lote'], 'nom_articulo' => $obj['nom_articulo'], 'val_promedio' => $obj['val_promedio'], 'existencia' => $obj['existencia'], 'id_presentacion' => $obj['id_presentacion'], 'nom_presentacion' => $obj['nom_presentacion'], 'cantidad_umpl' => $obj['cantidad_umpl']);
         } else {
-            $res = array('id_lote' => '', 'lote' => '', 'nom_articulo' => '', 'val_promedio' => '', 'id_presentacion' => '', 'nom_presentacion' => '', 'cantidad_umpl' => '');
+            $res = array('id_lote' => '', 'lote' => '', 'nom_articulo' => '', 'val_promedio' => '', 'existencia' => '', 'id_presentacion' => '', 'nom_presentacion' => '', 'cantidad_umpl' => '');
         }
         $cmd = null;
         return $res;

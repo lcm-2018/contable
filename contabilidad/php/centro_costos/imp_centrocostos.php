@@ -62,7 +62,7 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>Id</th>
                 <th>Nombre</th>
-                <th>Cuenta Contable Centro Costo</th>
+                <th>Cuenta Contable Facturación</th>
                 <th>Responsable</th>
             </tr>
         </thead>

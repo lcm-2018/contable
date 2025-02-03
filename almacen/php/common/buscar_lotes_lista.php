@@ -20,6 +20,9 @@ $id_bodega = $_POST['id_bodega'];
 $where_gen = " WHERE far_medicamento_lote.id_bodega=$id_bodega AND far_medicamento_lote.estado=1 AND far_medicamentos.estado=1";
 
 $where = $where_gen;
+if (isset($_POST['id_subgrupo']) && $_POST['id_subgrupo']) {
+    $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];
+}
 if (isset($_POST['codigo']) && $_POST['codigo']) {
     $where .= " AND far_medicamentos.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";
 }
@@ -52,7 +55,8 @@ try {
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT far_medicamento_lote.id_lote,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
+    $sql = "SELECT far_medicamento_lote.id_lote,far_medicamentos.id_med,
+                far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
 	            far_medicamento_lote.lote,far_presentacion_comercial.nom_presentacion,
                 ROUND(far_medicamento_lote.existencia/IFNULL(far_presentacion_comercial.cantidad,1),1) AS existencia_umpl,
 	            far_medicamento_lote.existencia,far_medicamentos.val_promedio,far_medicamento_lote.fec_vencimiento
@@ -73,6 +77,7 @@ if (!empty($objs)) {
     foreach ($objs as $obj) {
         $data[] = [
             "id_lote" => $obj['id_lote'],
+            "id_med" => $obj['id_med'],
             "cod_medicamento" => $obj['cod_medicamento'],
             "nom_medicamento" => $obj['nom_medicamento'],
             "lote" => $obj['lote'],
