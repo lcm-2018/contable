@@ -50,9 +50,9 @@ try {
             if($id_bodega_origen != $id_bodega_destino){
                 if ($id == -1) {                
                     $sql = "INSERT INTO far_pedido(fec_pedido,hor_pedido,detalle,id_sede_origen,id_bodega_origen,
-                            id_sede_destino,id_bodega_destino,val_total,id_usr_crea,fec_creacion,estado) 
+                            id_sede_destino,id_bodega_destino,val_total,id_usr_crea,fec_creacion,creado_far,estado) 
                         VALUES('$fec_pedido','$hor_pedido','$detalle',$id_sede_origen,$id_bodega_origen,
-                            $id_sede_destino,$id_bodega_destino,0,$id_usr_ope,'$fecha_ope',1)";
+                            $id_sede_destino,$id_bodega_destino,0,$id_usr_ope,'$fecha_ope',0,1)";
                     $rs = $cmd->query($sql);
 
                     if ($rs) {
