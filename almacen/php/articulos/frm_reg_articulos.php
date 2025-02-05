@@ -47,7 +47,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                 <div class=" form-row">
                     <div class="form-group col-md-2">
                         <label for="txt_cod_art" class="small">Código</label>
-                        <input type="text" class="form-control form-control-sm number" id="txt_cod_art" name="txt_cod_art" required value="<?php echo $obj['cod_medicamento'] ?>">
+                        <input type="text" class="form-control form-control-sm valcode" id="txt_cod_art" name="txt_cod_art" required value="<?php echo $obj['cod_medicamento'] ?>">
                     </div>
                     <div class="form-group col-md-6">
                         <label for="txt_nom_art" class="small">Nombre</label>
