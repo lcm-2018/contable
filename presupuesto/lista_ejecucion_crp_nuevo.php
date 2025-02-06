@@ -157,7 +157,7 @@ $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
                                             <div class="col-2">
                                                 <div class="col"><label for="fecha" class="small">NUMERO CRP:</label></div>
                                             </div>
-                                            <div class="col-6 pb-1"><input type="number" name="numCdp" id="numCdp" class="form-control form-control-sm" value="<?php echo $datosCRP['id_manu']; ?>" readonly>
+                                            <div class="col-6 pb-1"><input type="number" name="numCdp" id="numCdp" class="form-control form-control-sm" value="<?php echo $datosCRP['id_manu']; ?>" <?php echo $automatico; ?>>
                                                 <input type="hidden" id="id_pto_ppto" name="id_pto_presupuestos" value="<?php echo $id_pto; ?>">
 
                                             </div>

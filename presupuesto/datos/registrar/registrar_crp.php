@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 $id_pto = $_POST['id_pto_presupuestos'];
+$id_manu = $_POST['numCdp'];
 $fecha = $_POST['fecha'];
 $contrato = $_POST['contrato'];
 $tercero = $_POST['id_tercero'];
@@ -21,16 +22,20 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                MAX(`id_manu`) AS `id_manu` 
+                `id_manu` 
             FROM
                 `pto_crp`
-            WHERE (`id_pto` = $id_pto)";
+            WHERE (`id_pto` = $id_pto AND `id_manu` = $id_manu)";
     $rs = $cmd->query($sql);
     $consecutivo = $rs->fetch();
-    $numCrp = !empty($consecutivo) ? $consecutivo['id_manu'] + 1 : 1;
+    if (!empty($consecutivo)) {
+        $response['msg'] = 'El consecutivo de CDP <b>' . $id_manu . '</b> ya se encuentra registrado';
+        echo json_encode($response);
+        exit();
+    }
     $cmd = null;
 } catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    $response['msg'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 if ($id_crp == 0) {
     try {
@@ -43,7 +48,7 @@ if ($id_crp == 0) {
         $sql->bindParam(1, $id_pto, PDO::PARAM_INT);
         $sql->bindParam(2, $id_cdp, PDO::PARAM_INT);
         $sql->bindParam(3, $fecha, PDO::PARAM_STR);
-        $sql->bindParam(4, $numCrp, PDO::PARAM_INT);
+        $sql->bindParam(4, $id_manu, PDO::PARAM_INT);
         $sql->bindParam(5, $tercero, PDO::PARAM_INT);
         $sql->bindParam(6, $objeto, PDO::PARAM_STR);
         $sql->bindParam(7, $contrato, PDO::PARAM_STR);

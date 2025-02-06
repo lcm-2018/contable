@@ -625,7 +625,9 @@ $meses = [
                 <td class='text-left' style='border: 1px solid black'>" . $pg['documento'] . "</td>
                 <td class='text-right' style='border: 1px solid black'>" . number_format($pg['valor'], 2, ',', '.') . "</td>
                 </tr>";
-                $id_forma = $pg['id_forma_pago'];
+                if ($pg['id_forma_pago'] == 2) {
+                    $id_forma = 2;
+                }
             }
             ?>
         </table>
@@ -713,11 +715,17 @@ $meses = [
                     <div><?php echo $nom_respon; ?> </div>
                     <div><?php echo $cargo_respon; ?> </div>
                 </td>
-                <td>
-                    <div>___________________________________</div>
-                    <div><?= $tercero; ?></div>
-                    <div>RECIBE CC/NIT:</div>
-                </td>
+                <?php
+                if ($_SESSION['nit_emp'] != '844001355' || $id_forma == 2) {
+                ?>
+                    <td>
+                        <div>___________________________________</div>
+                        <div><?= $tercero; ?></div>
+                        <div>RECIBE CC/NIT:</div>
+                    </td>
+                <?php
+                }
+                ?>
             </tr>
         </table>
         </br> </br> </br>

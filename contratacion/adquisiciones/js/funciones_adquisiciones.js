@@ -1272,13 +1272,17 @@
     });
     $('#btnAddContrato').on('click', function () {
         let id = $('#id_compra').val();
-        $.post("datos/registrar/formadd_contrato_compra.php", { id: id }, function (he) {
-            $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-xl');
-            $('#divTamModalForms').addClass('modal-lg');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
-        });
+        if ($('#num_cdp').length) {
+            $.post("datos/registrar/formadd_contrato_compra.php", { id: id }, function (he) {
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').removeClass('modal-xl');
+                $('#divTamModalForms').addClass('modal-lg');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            });
+        } else {
+            mjeError('No se ha cargado un CDP para este proceso');
+        }
     });
     $('#divModalForms').on('change', '#datFecIniEjec', function () {
         let i = $('#datFecIniEjec').val();

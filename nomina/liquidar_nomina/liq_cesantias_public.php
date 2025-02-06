@@ -53,118 +53,188 @@ try {
             FROM
                 `nom_empleado`
                 LEFT JOIN  
-                (SELECT
-                    `ts1`.`id_empleado`, `val_bsp`,`mes`,`anio` 
-                FROM 
-                    (SELECT 
-                        `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
-                    FROM 
-                        `nom_liq_bsp`
-                    WHERE `id_bonificaciones` IN 
+                    (SELECT
+                        `tbsp`.`id_empleado`
+                        , CASE
+                            WHEN `tbsp`.`fec_comp1` > IFNULL(`tbspra`.`fec_comp2`,'1900-01-01') THEN `tbsp`.`val_bsp`
+                            ELSE IFNULL(`tbsp`.`val_bsp`,0) + IFNULL(`tbspra`.`val_bsp_ra`,0)
+                        END AS `val_bsp`
+                        , RIGHT(`tbsp`.`fec_comp1`, 2) AS `mes` 
+                        , LEFT(`tbsp`.`fec_comp1`, 4) AS `anio`
+                    FROM	
                         (SELECT
-                            MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
-                        FROM
-                            `nom_liq_bsp`
-                        INNER JOIN `nom_nominas` 
-                            ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                        WHERE (`nom_nominas`.`tipo` = 'N' AND `nom_nominas`.`vigencia` <= '$vigencia')
-                        GROUP BY `nom_liq_bsp`.`id_empleado`
-                        UNION ALL
-                        SELECT
-                            MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
-                        FROM
-                            `nom_liq_bsp`
-                        INNER JOIN `nom_nominas` 
-                            ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                        WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
-                        GROUP BY `nom_liq_bsp`.`id_empleado`)
-                    GROUP BY `id_empleado`) AS  `ts1`
-                INNER JOIN
-                    (SELECT 
-                        `id_empleado`,`mes`,`anio` 
-                    FROM  `nom_liq_bsp` 
-                    WHERE  `id_bonificaciones` IN 
-                        (SELECT
-                            MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
-                        FROM
-                            `nom_liq_bsp`
-                        INNER JOIN `nom_nominas` 
-                            ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                        WHERE (`nom_nominas`.`tipo` = 'N' AND `nom_nominas`.`vigencia` <= '$vigencia')
-                        GROUP BY `nom_liq_bsp`.`id_empleado`)) AS `ts2`
-                    ON (`ts1`.`id_empleado` = `ts2`.`id_empleado`)) AS `t1`
+                            `id_empleado`
+                            , `val_bsp`
+                            , CONCAT(`anio`,`mes`) AS `fec_comp1` 
+                        FROM `nom_liq_bsp`
+                        WHERE `id_bonificaciones` IN
+                            (SELECT
+                                MAX(`nom_liq_bsp`.`id_bonificaciones`)
+                            FROM
+                                `nom_liq_bsp`
+                                INNER JOIN `nom_nominas` 
+                                ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                            WHERE (`nom_nominas`.`vigencia` <= '$vigencia' AND `nom_nominas`.`estado` = 5 AND `nom_nominas`.`tipo` = 'N')
+                            GROUP BY `nom_liq_bsp`.`id_empleado`)) AS `tbsp`
+                        LEFT JOIN
+                            (SELECT
+                                `nom_liq_bsp`.`id_empleado`
+                                , `nom_liq_bsp`.`val_bsp` AS `val_bsp_ra`
+                                , DATE_FORMAT(`nom_retroactivos`.`fec_final`, '%Y%m') AS `fec_comp2`
+                            FROM `nom_liq_bsp`
+                                INNER JOIN `nom_nominas`
+                                    ON(`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                                LEFT JOIN `nom_retroactivos`
+                                    ON(`nom_retroactivos`.`id_incremento` = `nom_nominas`.`id_incremento`)
+                            WHERE `nom_liq_bsp`.`id_bonificaciones` IN
+                                (SELECT
+                                    MAX(`nom_liq_bsp`.`id_bonificaciones`)
+                                FROM
+                                    `nom_liq_bsp`
+                                    INNER JOIN `nom_nominas` 
+                                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                                WHERE (`nom_nominas`.`vigencia` <= '$vigencia' AND `nom_nominas`.`estado` = 5 AND `nom_nominas`.`tipo` = 'RA')
+                                GROUP BY `nom_liq_bsp`.`id_empleado`)) `tbspra`
+                            ON(`tbsp`.`id_empleado` = `tbspra`.`id_empleado`)) AS `t1`
                     ON (`t1`.`id_empleado` = `nom_empleado`.`id_empleado`)
                 LEFT JOIN 
-                (SELECT 
-                    `id_empleado`,`corte` AS `corte_ces`
-                FROM `nom_liq_cesantias`
-                WHERE `id_liq_cesan`  IN (SELECT MAX(`id_liq_cesan`) FROM `nom_liq_cesantias` WHERE `id_empleado`IN ($ids) GROUP BY `id_empleado`)) AS `t2`
-                    ON (`nom_empleado`.`id_empleado` = `t2`.`id_empleado`)
-                LEFT JOIN
-                (SELECT   
-                    `id_empleado`
-                    , SUM(`val_liq_ps`) AS `val_liq_ps` 
-                    , `corte` AS `corte_prim_sv`
-                FROM `nom_liq_prima` 
-                WHERE `id_liq_prima` IN 
-                    (SELECT
-                        MAX(`id_liq_prima`) AS `id_lp`
-                    FROM
-                        `nom_liq_prima`
-                    INNER JOIN `nom_nominas`
-                        ON (`nom_liq_prima`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                    WHERE `nom_nominas`.`tipo` = 'PV' AND `nom_nominas`.`vigencia` <= '$vigencia'
-                    GROUP BY `id_empleado`
-                    UNION ALL 
-                    SELECT
-                        MAX(`id_liq_prima`) AS `id_lp`
-                    FROM
-                        `nom_liq_prima`
-                    INNER JOIN `nom_nominas`
-                        ON (`nom_liq_prima`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                    WHERE `nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia'
-                    GROUP BY `id_empleado`)
-                GROUP BY `id_empleado`) AS `t3`
-                    ON (`nom_empleado`.`id_empleado` = `t3`.`id_empleado`)
-                LEFT JOIN 
-                (SELECT 
-                    `id_empleado`,`val_liq_pv`,`corte` AS `corte_prim_nav`
-                FROM `nom_liq_prima_nav`
-                WHERE `id_liq_privac` IN (SELECT MAX(`id_liq_privac`) FROM `nom_liq_prima_nav` WHERE `id_empleado`IN ($ids) GROUP BY `id_empleado`)) AS `t4`
-                    ON (`nom_empleado`.`id_empleado` = `t4`.`id_empleado`)
-                LEFT JOIN 
-                (SELECT
-                    `nom_vacaciones`.`id_empleado`
-                    , SUM(`nom_liq_vac`.`val_prima_vac`) AS `val_prima_vac`
-                    , SUM(`nom_liq_vac`.`val_liq`) AS `val_liq`
-                    , SUM(`nom_liq_vac`.`val_bon_recrea`) AS `val_bon_recrea`
-                    , `nom_vacaciones`.`corte`  
-                FROM
-                    `nom_liq_vac`
-                INNER JOIN `nom_vacaciones` 
-                    ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
-                WHERE (`nom_liq_vac`.`id_vac` IN 
                     (SELECT 
-                        MAX(`nom_vacaciones`.`id_vac`) 
-                    FROM  `nom_vacaciones`
-                    INNER JOIN  nom_liq_vac
-                        ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
-                    INNER JOIN `nom_nominas`
-                        ON (`nom_liq_vac`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                    WHERE (`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'VC') AND `nom_nominas`.`vigencia` <= '$vigencia'
-                    GROUP BY `id_empleado`
-                    UNION ALL 
-                    SELECT 
-                        MAX(`nom_vacaciones`.`id_vac`) 
-                    FROM  `nom_vacaciones`
-                    INNER JOIN  nom_liq_vac
-                        ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
-                    INNER JOIN `nom_nominas`
-                        ON (`nom_liq_vac`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                    WHERE `nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia'
-                    GROUP BY `id_empleado`))
-                GROUP BY `id_empleado`) AS `t5`
-                    ON (`nom_empleado`.`id_empleado` = `t5`.`id_empleado`)
+                        `id_empleado`,`corte` AS `corte_ces`
+                    FROM `nom_liq_cesantias`
+                    WHERE `id_liq_cesan`  IN 
+                        (SELECT 
+                            MAX(`id_liq_cesan`) 
+                        FROM `nom_liq_cesantias`
+                            INNER JOIN `nom_nominas`
+                                ON (`nom_liq_cesantias`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                        WHERE `nom_nominas`.`tipo` = 'CE' AND `nom_nominas`.`vigencia` <= '$vigencia' AND `nom_nominas`.`estado` = 5
+                        GROUP BY `id_empleado`)) AS `t2`
+                        ON (`nom_empleado`.`id_empleado` = `t2`.`id_empleado`)
+                LEFT JOIN
+                    (SELECT 
+                        `tpv`.`id_empleado`
+                        , CASE 
+                            WHEN `tpv`.`corte_pv` > IFNULL(`tra`.`corte_ra`,'1900-01-01') THEN IFNULL(`tpv`.`val_liq_pv`,0)
+                            ELSE IFNULL(`tpv`.`val_liq_pv`,0) + IFNULL(`tra`.`val_liq_ra`,0)
+                        END AS `val_liq_ps`
+                        , `tpv`.`corte_pv` AS `corte_prim_sv`
+                    FROM
+                        (SELECT   
+                            `id_empleado`
+                            , `val_liq_ps` AS `val_liq_pv`
+                            , `corte` AS `corte_pv`
+                        FROM `nom_liq_prima` 
+                        WHERE `id_liq_prima` IN 
+                            (SELECT
+                                MAX(`id_liq_prima`) AS `id_lp`
+                            FROM
+                                `nom_liq_prima`
+                                INNER JOIN `nom_nominas`
+                                    ON (`nom_liq_prima`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                            WHERE `nom_nominas`.`tipo` = 'PV' AND `nom_nominas`.`vigencia` <= '$vigencia' AND `nom_nominas`.`estado` = 5
+                            GROUP BY `id_empleado`)) AS `tpv`
+                        LEFT JOIN 
+                            (SELECT   
+                                `id_empleado`
+                                , `val_liq_ps` AS `val_liq_ra`
+                                , `nom_retroactivos`.`fec_final` AS `corte_ra`
+                            FROM `nom_liq_prima` 
+                                INNER JOIN `nom_nominas`
+                                    ON(`nom_liq_prima`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                                LEFT JOIN `nom_retroactivos`
+                                    ON(`nom_retroactivos`.`id_incremento` = `nom_nominas`.`id_incremento`)
+                            WHERE `id_liq_prima` IN 
+                                    (SELECT
+                                        MAX(`id_liq_prima`) AS `id_lp`
+                                    FROM
+                                        `nom_liq_prima`
+                                        INNER JOIN `nom_nominas`
+                                            ON (`nom_liq_prima`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                                    WHERE `nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia' AND `nom_nominas`.`estado` = 5
+                                    GROUP BY `id_empleado`)) AS `tra`
+                                    ON (`tpv`.`id_empleado` = `tra`.`id_empleado`)) AS `t3`
+                        ON (`nom_empleado`.`id_empleado` = `t3`.`id_empleado`)
+                LEFT JOIN 
+                    (SELECT 
+                        `id_empleado`,`val_liq_pv`,`corte` AS `corte_prim_nav`
+                    FROM `nom_liq_prima_nav`
+                    WHERE `id_liq_privac` IN 
+                            (SELECT 
+                                MAX(`id_liq_privac`) 
+                            FROM `nom_liq_prima_nav` 
+                                INNER JOIN `nom_nominas` 
+                                    ON (`nom_liq_prima_nav`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                            WHERE `nom_nominas`.`tipo` = 'PN' AND `nom_nominas`.`vigencia` <= '$vigencia' AND `nom_nominas`.`estado` = 5
+                            GROUP BY `id_empleado`)) AS `t4`
+                        ON (`nom_empleado`.`id_empleado` = `t4`.`id_empleado`)
+                LEFT JOIN 
+                    (SELECT 
+                        `tvc`.`id_empleado`
+                        , CASE
+                            WHEN `tvc`.`corte` > IFNULL(`travc`.`fec_final`,'1900-01-01') THEN IFNULL(`tvc`.`val_prima_vac`,0)
+                                            ELSE IFNULL(`tvc`.`val_prima_vac`,0) + IFNULL(`travc`.`val_prima_vac_racv`,0)
+                                        END AS `val_prima_vac`
+                            , CASE
+                            WHEN `tvc`.`corte` > IFNULL(`travc`.`fec_final`,'1900-01-01') THEN IFNULL(`tvc`.`val_liq`,0)
+                                            ELSE IFNULL(`tvc`.`val_liq`,0) + IFNULL(`travc`.`val_liq_racv`,0)
+                                        END AS `val_liq`
+                            , CASE
+                            WHEN `tvc`.`corte` > IFNULL(`travc`.`fec_final`,'1900-01-01') THEN IFNULL(`tvc`.`val_bon_recrea`,0)
+                                            ELSE IFNULL(`tvc`.`val_bon_recrea`,0) + IFNULL(`travc`.`val_bon_recrea_racv`,0)
+                                        END AS `val_bon_recrea`
+                            , `tvc`.`corte`
+                    FROM 
+                        (SELECT
+                            `nom_vacaciones`.`id_empleado`
+                            , `nom_liq_vac`.`val_prima_vac`
+                            , `nom_liq_vac`.`val_liq`
+                            , `nom_liq_vac`.`val_bon_recrea`
+                            , `nom_vacaciones`.`corte` 
+                        FROM
+                            `nom_liq_vac`
+                            INNER JOIN `nom_nominas` 
+                                ON (`nom_liq_vac`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                            INNER JOIN `nom_vacaciones` 
+                                ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
+                        WHERE `nom_liq_vac`.`id_liq_vac` IN
+                                (SELECT
+                                    MAX(`nom_liq_vac`.`id_liq_vac`) 
+                                FROM
+                                    `nom_liq_vac`
+                                    INNER JOIN `nom_nominas` 
+                                    ON (`nom_liq_vac`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                                    INNER JOIN `nom_vacaciones` 
+                                    ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
+                                WHERE `nom_nominas`.`vigencia` <= '$vigencia' AND (`nom_nominas`.`tipo` = 'VC' OR `nom_nominas`.`tipo` = 'N') AND `nom_nominas`.`estado` = 5
+                                GROUP BY `nom_vacaciones`.`id_empleado`)) AS `tvc` 
+                        LEFT JOIN
+                            (SELECT
+                                `nom_vacaciones`.`id_empleado`
+                                , `nom_liq_vac`.`val_prima_vac` AS `val_prima_vac_racv`
+                                , `nom_liq_vac`.`val_liq` AS `val_liq_racv`
+                                , `nom_liq_vac`.`val_bon_recrea` AS `val_bon_recrea_racv`
+                                , `nom_retroactivos`.`fec_final`
+                            FROM
+                                `nom_liq_vac`
+                                INNER JOIN `nom_nominas` 
+                                    ON (`nom_liq_vac`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                                INNER JOIN `nom_vacaciones` 
+                                    ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
+                                LEFT JOIN `nom_retroactivos`
+                                    ON(`nom_retroactivos`.`id_incremento` = `nom_nominas`.`id_incremento`)
+                            WHERE `nom_liq_vac`.`id_liq_vac` IN
+                                (SELECT
+                                    MAX(`nom_liq_vac`.`id_liq_vac`) 
+                                FROM
+                                    `nom_liq_vac`
+                                    INNER JOIN `nom_nominas` 
+                                    ON (`nom_liq_vac`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                                    INNER JOIN `nom_vacaciones` 
+                                    ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
+                                WHERE `nom_nominas`.`vigencia` <= '$vigencia' AND `nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`estado` = 5
+                                GROUP BY `nom_vacaciones`.`id_empleado`)) AS `travc`
+                            ON(`travc`.`id_empleado` = `tvc`.`id_empleado`)) AS `t5`
+                        ON (`nom_empleado`.`id_empleado` = `t5`.`id_empleado`)
             WHERE `nom_empleado`.`id_empleado` IN ($ids)";
     $rs = $cmd->query($sql);
     $cortes = $rs->fetchAll(PDO::FETCH_ASSOC);

@@ -8,6 +8,7 @@ include '../../../conexion.php';
 $id_pto = $_POST['id_pto'];
 $fecha = $_POST['dateFecha'];
 $num_solicitud = $_POST['numSolicitud'];
+$id_manu = $_POST['id_manu'];
 $estado = 1;
 $objeto = $_POST['txtObjeto'];
 $id_adq = isset($_POST['id_adq']) ? $_POST['id_adq'] : 0;
@@ -20,13 +21,17 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                MAX(`id_manu`) AS `id_manu` 
+                `id_manu` 
             FROM
                 `pto_cdp`
-            WHERE (`id_pto` = $id_pto)";
+            WHERE (`id_pto` = $id_pto AND `id_manu` = $id_manu)";
     $rs = $cmd->query($sql);
     $consecutivo = $rs->fetch();
-    $numCdp = !empty($consecutivo) ? $consecutivo['id_manu'] + 1 : 1;
+    if (!empty($consecutivo)) {
+        $response['msg'] = 'El consecutivo de CDP <b>' . $id_manu . '</b> ya se encuentra registrado';
+        echo json_encode($response);
+        exit();
+    }
     $cmd = null;
 } catch (PDOException $e) {
     $response['msg'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
@@ -40,7 +45,7 @@ try {
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_pto, PDO::PARAM_INT);
     $sql->bindParam(2, $fecha, PDO::PARAM_STR);
-    $sql->bindParam(3, $numCdp, PDO::PARAM_INT);
+    $sql->bindParam(3, $id_manu, PDO::PARAM_INT);
     $sql->bindParam(4, $objeto, PDO::PARAM_STR);
     $sql->bindParam(5, $num_solicitud, PDO::PARAM_STR);
     $sql->bindParam(6, $estado, PDO::PARAM_STR);

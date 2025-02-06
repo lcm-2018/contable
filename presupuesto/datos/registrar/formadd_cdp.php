@@ -45,7 +45,7 @@ try {
             <div class="form-row px-4 pt-2">
                 <div class="form-group col-md-4">
                     <label for="id_manu" class="small">CONSECUTIVO CDP</label>
-                    <input type="number" name="id_manu" id="id_manu" class="form-control form-control-sm" value="<?php echo $id_manu ?>" readonly>
+                    <input type="number" name="id_manu" id="id_manu" class="form-control form-control-sm" value="<?php echo $id_manu ?>">
                 </div>
                 <div class="form-group col-md-4">
                     <label for="dateFecha" class="small">FECHA</label>

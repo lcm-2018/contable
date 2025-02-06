@@ -767,6 +767,7 @@ if (!empty($adquisicion)) {
                                                         <?php
                                                         if (!empty($cdp)) {
                                                         ?>
+                                                            <input type="hidden" id="num_cdp" value="<?php echo $cdp['id_manu'] ?>">
                                                             <table class="table table-striped table-bordered table-sm nowrap table-hover shadow tableCDP" style="width:100%">
                                                                 <thead class="text-center">
                                                                     <tr>
