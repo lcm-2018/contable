@@ -250,7 +250,7 @@ try {
     $control = $key !== false ? $responsables[$key]['control_doc'] : '';
     $control = $control == '' || $control == '0' ? false : true;
     $nombre_doc = $key !== false ? $responsables[$key]['nombre'] : '';
-    $ver_costos = $responsables[0]['costos'] == 1 ? false : true;
+    $ver_costos = isset($responsables[0]) && $responsables[0]['costos'] == 1 ? false : true;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }

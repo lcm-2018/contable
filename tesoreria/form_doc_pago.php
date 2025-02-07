@@ -55,6 +55,7 @@ try {
                 , `ctb_doc`.`detalle`
                 , `ctb_doc`.`id_ref_ctb`
                 , `ctb_doc`.`id_ref`
+                , `ctb_doc`.`doc_soporte` AS `check`
                 , `tes_caja_doc`.`id_caja`
             FROM
                 `ctb_doc`
@@ -115,6 +116,8 @@ if (empty($datos)) {
     $datos['detalle'] = '';
     $datos['id_ref_ctb'] = 0;
     $datos['id_ref'] = '';
+    $datos['id_caja'] = 0;
+    $datos['check'] = 0;
     $tercero = '';
 } else {
     $ids = $datos['id_tercero'];
@@ -131,13 +134,24 @@ $cero = isset($datos['id_caja']) ? $datos['id_caja'] : 0;
         <form id="formGetMvtoTes">
             <input type="hidden" name="id_ctb_doc" value="<?php echo $id_ctb_doc; ?>">
             <div class="form-row px-4 pt-2">
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-4">
                     <label for="fecha" class="small">FECHA</label>
                     <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datos['fecha'])); ?>" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>">
                 </div>
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-4">
                     <label for="numDoc" class="small">NUMERO</label>
                     <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" readonly value="<?php echo $datos['id_manu'] ?>">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="numDoc" class="small">&nbsp;</label>
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox" name="chDocSoporte" id="chDocSoporte" <?php echo $datos['check'] == 0 ? '' : 'checked'; ?>>
+                            </div>
+                        </div>
+                        <input type="text" class="form-control" disabled value="DOC. SOPORTE">
+                    </div>
                 </div>
             </div>
             <?php if ($id_ctb_doc == '14') { ?>

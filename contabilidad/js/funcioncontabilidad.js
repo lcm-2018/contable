@@ -2291,7 +2291,7 @@ const EnviaDocumentoSoporte = (boton) => {
 		data: { id: id },
 		dataType: "json",
 		success: function (response) {
-			if (response.status == "ok") {
+			if (response[0].value == "ok") {
 				boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
 				$('#tableMvtoContable').DataTable().ajax.reload();
 				mje("Documento enviado correctamente");

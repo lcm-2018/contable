@@ -7,6 +7,7 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 $fecha = $_POST['fecha'];
 $id_tipo_doc = $_POST['id_ctb_doc'];
+$doc_soporte = isset($_POST['chDocSoporte']) ? 1 : 0;
 $id_tercero = $_POST['id_tercero'];
 $detalle = $_POST['objeto'];
 $referencia = isset($_POST['referencia']) && $_POST['referencia'] > 0 ? $_POST['referencia'] : NULL;
@@ -39,8 +40,8 @@ try {
     if ($id_reg == 0) {
         $estado = 1;
         $query = "INSERT INTO `ctb_doc`
-                    (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`,`id_ref`,`id_ref_ctb`)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`,`id_ref`,`id_ref_ctb`,`doc_soporte`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $query = $cmd->prepare($query);
         $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
         $query->bindParam(2, $id_tipo_doc, PDO::PARAM_INT);
@@ -53,6 +54,7 @@ try {
         $query->bindParam(9, $fecha2);
         $query->bindParam(10, $referencia, PDO::PARAM_INT);
         $query->bindParam(11, $id_ref_ctb, PDO::PARAM_INT);
+        $query->bindParam(12, $doc_soporte, PDO::PARAM_INT);
         $query->execute();
         if ($cmd->lastInsertId() > 0) {
             if (isset($_POST['id_caja'])) {
@@ -70,7 +72,7 @@ try {
         }
     } else {
         $query = "UPDATE `ctb_doc`
-                    SET `id_tercero` = ?, `fecha` = ?, `detalle` = ?, `id_ref`= ?,`id_ref_ctb` = ?
+                    SET `id_tercero` = ?, `fecha` = ?, `detalle` = ?, `id_ref`= ?,`id_ref_ctb` = ?, `doc_soporte` = ?
                 WHERE (`id_ctb_doc` = ?)";
         $query = $cmd->prepare($query);
         $query->bindParam(1, $id_tercero, PDO::PARAM_INT);
@@ -78,7 +80,8 @@ try {
         $query->bindParam(3, $detalle, PDO::PARAM_STR);
         $query->bindParam(4, $referencia, PDO::PARAM_INT);
         $query->bindParam(5, $id_ref_ctb, PDO::PARAM_INT);
-        $query->bindParam(6, $id_reg, PDO::PARAM_INT);
+        $query->bindParam(6, $doc_soporte, PDO::PARAM_INT);
+        $query->bindParam(7, $id_reg, PDO::PARAM_INT);
         if (!($query->execute())) {
             echo $query->errorInfo()[2] . $query->queryString;
         } else {

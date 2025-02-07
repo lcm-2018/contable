@@ -1244,8 +1244,6 @@ function GuardarRubrosCaja() {
 	}
 }
 var DetalleImputacionCajaMenor = function () {
-	alert('hola');
-	return false;
 	var band = true;
 	var valor = 0;
 	var min, max;
@@ -1264,17 +1262,17 @@ var DetalleImputacionCajaMenor = function () {
 		}
 	});
 	if (band) {
-		var data = $('#formImputacion').serialize();
+		var id_ctb_doc = $('#id_ctb_doc').val();
+		var data = $('#formImputacion').serialize() + '&id_ctb_doc=' + id_ctb_doc;
 		$.ajax({
 			type: 'POST',
 			dataType: 'json',
-			url: 'datos/registrar/registrar_mvto_cobp.php',
+			url: 'datos/registrar/registrar_mvto_caja.php',
 			data: data,
 			success: function (r) {
 				if (r.status == 'ok') {
+					$('#valor').val(r.acumulado);
 					mje('Proceso realizado correctamente');
-					ImputacionCtasPorPagar($('#id_ctb_doc').val());
-					$('#valImputacion').html(r.acumulado);
 				} else {
 					mjeError('Error:', r.msg);
 				}

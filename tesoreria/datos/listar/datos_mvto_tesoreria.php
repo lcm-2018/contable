@@ -50,6 +50,7 @@ try {
                 , `nom_nomina_pto_ctb_tes`.`tipo`
                 , `ctb_doc`.`id_tipo_doc`
                 , `ctb_doc`.`id_vigencia`
+                , `ctb_doc`.`doc_soporte`
             FROM
                 `ctb_doc`
                 LEFT JOIN `nom_nomina_pto_ctb_tes` 
@@ -108,6 +109,22 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$inicia = $_SESSION['vigencia'] . '-01-01';
+$termina = $_SESSION['vigencia'] . '-12-31';
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `id_soporte`, `id_factura_no`, `shash`, `referencia`, `fecha`
+            FROM
+                `seg_soporte_fno`
+            WHERE (`fecha` BETWEEN '$inicia' AND '$termina')";
+    $rs = $cmd->query($sql);
+    $equivalente = $rs->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 // consultar la fecha de cierre del periodo del módulo de presupuesto 
 if (!empty($listappto)) {
 
@@ -138,11 +155,20 @@ if (!empty($listappto)) {
         $valor_total = 0;
         $id_ctb = $lp['id_ctb_doc'];
         $estado = $lp['estado'];
-        $editar = $borrar = $imprimir = $detalles = $enviar = $dato = $cerrar = $anular = null;
+        $editar = $borrar = $imprimir = $detalles = $enviar = $dato = $cerrar = $anular = $doc_soporte = null;
         $tercero = $lp['nom_tercero'];
         $ccnit = $lp['nit_tercero'];
         if ($lp['tipo'] == 'N') {
             $enviar = '<button id ="enviar_' . $id_ctb . '" value="' . $lp['id_nomina'] . '" onclick="EnviarNomina(this)" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Procesar nómina (Soporte Electrónico)"><span class="fas fa-paper-plane fa-lg"></span></button>';
+        }
+        $disabled = $estado == 2 ? '' : 'disabled';
+        if ($lp['doc_soporte'] == 1) {
+            $key = array_search($id_ctb, array_column($equivalente, 'id_factura_no'));
+            if ($key !== false) {
+                $doc_soporte = '<a onclick="VerSoporteElectronico(' . $equivalente[$key]['id_soporte'] . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="VER DOCUMENTO"><span class="far fa-file-pdf fa-lg"></span></a>';
+            } else {
+                $doc_soporte = '<button value="' . $id_ctb . '" onclick="EnviaDocumentoSoporte(this)" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="REPORTAR FACTURA" ' . $disabled . '><span class="fas fa-paper-plane fa-lg"></span></button>';
+            }
         }
         // fin api terceros
         $key = array_search($id_ctb, array_column($suma, 'id_ctb_doc'));
@@ -160,7 +186,7 @@ if (!empty($listappto)) {
         if ((PermisosUsuario($permisos, 5601, 3) || PermisosUsuario($permisos, 5602, 3) || PermisosUsuario($permisos, 5603, 3) || $id_rol == 1)) {
             $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb modificar"  text="' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }
-        if ((PermisosUsuario($permisos, 5601, 4) ||PermisosUsuario($permisos, 5602, 4) ||PermisosUsuario($permisos, 5603, 4) || $id_rol == 1)) {
+        if ((PermisosUsuario($permisos, 5601, 4) || PermisosUsuario($permisos, 5602, 4) || PermisosUsuario($permisos, 5603, 4) || $id_rol == 1)) {
             $borrar = '<a value="' . $id_ctb . '" onclick="eliminarRegistroTec(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
         if ((PermisosUsuario($permisos, 5601, 5) || PermisosUsuario($permisos, 5602, 5) || PermisosUsuario($permisos, 5603, 5) || $id_rol == 1)) {
@@ -199,7 +225,7 @@ if (!empty($listappto)) {
             'ccnit' => $ccnit,
             'tercero' => $tercero,
             'valor' =>  '<div class="text-right">' . $valor_total . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir . $enviar . $dato . $cerrar . $anular . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir . $enviar . $dato . $cerrar . $doc_soporte . $anular . '</div>',
         ];
     }
 } else {

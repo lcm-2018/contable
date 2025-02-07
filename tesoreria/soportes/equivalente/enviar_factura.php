@@ -76,13 +76,13 @@ try {
     $sql = "SELECT
                 `ctb_doc`.`id_ctb_doc`
                 , `ctb_doc`.`id_tercero`
-                , `ctb_factura`.`fecha_fact`
-                , `ctb_factura`.`fecha_ven`
-                , `ctb_factura`.`valor_pago`
-                , `ctb_factura`.`valor_iva`
-                , `ctb_factura`.`valor_base`
+                , '' AS `fecha_fact`
+                , '' AS`fecha_ven`
+                , `tmv`.`valor` AS `valor_pago`
+                , 0 AS `valor_iva`
+                , 0 AS `valor_base`
                 , `ctb_doc`.`detalle`
-                , `ctb_factura`.`detalle` AS `nota`
+                , 'Gastos de caja menor' AS `nota`
                 , `tb_terceros`.`nit_tercero`
                 , `tb_terceros`.`nom_tercero`
                 , `tb_terceros`.`email`
@@ -92,17 +92,22 @@ try {
                 , `tb_municipios`.`cod_postal`
                 , `tb_departamentos`.`codigo_departamento`
                 , `tb_departamentos`.`nom_departamento`
-                , `tb_terceros`.`dir_tercero`
+                , `tb_terceros`.`dir_tercero` 
             FROM
-                `ctb_factura`
-                INNER JOIN `ctb_doc` 
-                    ON (`ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                `ctb_doc` 
                 INNER JOIN `tb_terceros`
                     ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
                 INNER JOIN `tb_municipios`
                     ON (`tb_terceros`.`id_municipio` = `tb_municipios`.`id_municipio`)
                 INNER JOIN `tb_departamentos`
                     ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departamento`)
+                INNER JOIN
+                    (SELECT
+                        `id_ctb_doc`
+                        , SUM(`valor`) AS `valor`
+                    FROM `tes_caja_mvto`
+                    GROUP BY `id_ctb_doc`) AS `tmv`
+			        ON (`tmv`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
             WHERE (`ctb_doc`.`id_ctb_doc` = $id_facno) LIMIT 1";
     $rs = $cmd->query($sql);
     $contab = $rs->fetch();
@@ -132,7 +137,7 @@ try {
             WHERE (`ctb_factura`.`id_ctb_doc` = $id_facno) LIMIT 1";
     $rs = $cmd->query($sql);
     $unspsc = $rs->fetch();
-    $unspsc = !empty($unspsc) ? $unspsc : ['id_unspsc' => '85101604'];
+    $unspsc = !empty($unspsc) ? $unspsc : ['id_unspsc' => '85101508'];
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -155,8 +160,8 @@ $factura['codigo_municipio'] = $contab['codigo_municipio'];
 $factura['nom_municipio'] = $contab['nom_municipio'];
 $factura['cod_postal'] = $contab['cod_postal'];
 $factura['direccion'] = $contab['dir_tercero'];
-$factura['fec_compra'] = date('Y-m-d', strtotime($contab['fecha_fact']));
-$factura['fec_vence'] = date('Y-m-d', strtotime($contab['fecha_ven']));
+$factura['fec_compra'] = date('Y-m-d');
+$factura['fec_vence'] = date('Y-m-d', strtotime('+1 month', strtotime(date('Y-m-d'))));
 $factura['met_pago'] = '';
 $factura['form_pago'] = '';
 $factura['val_retefuente'] = 0;

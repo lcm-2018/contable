@@ -82,6 +82,15 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+try {
+    $query = "SELECT SUM(`valor`) AS `val_imputacion` FROM `tes_caja_mvto` WHERE `id_ctb_doc` = ?";
+    $query = $cmd->prepare($query);
+    $query->bindParam(1, $id_doc_pag, PDO::PARAM_INT);
+    $query->execute();
+    $val_imp = $query->fetch(PDO::FETCH_ASSOC)['val_imputacion'];
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 $ver = 'readonly';
 ?>
 <!DOCTYPE html>
@@ -167,7 +176,7 @@ $ver = 'readonly';
                                             </div>
                                             <div class="col-4">
                                                 <div class="input-group input-group-sm">
-                                                    <input type="text" name="valor" id="valor" value="<?php echo 0; ?>" class="form-control" style="text-align: right;" required readonly>
+                                                    <input type="text" name="valor" id="valor" value="<?php echo $val_imp ?>" class="form-control" style="text-align: right;" required readonly>
                                                     <div class="input-group-append" id="button-addon4">
                                                         <?php if ($datosDoc['estado'] == 1) { ?>
                                                             <a class="btn btn-outline-success" onclick="ImputacionCtasCajas(<?php echo $datosDoc['id_caja_const'] ?>)"><span class="fas fa-plus fa-lg"></span></a>
