@@ -1739,6 +1739,7 @@ function RegDetalleCDPs(boton) {
                         data.append('txtObjeto', $("#objeto").val());
                         data.append('id_adq', $("#id_adq").val());
                         data.append('id_otro', $("#id_otro").val());
+                        data.append('id_manu', $("#id_pto_docini").val());
 
                         url = "datos/registrar/new_ejecucion_presupuesto.php";
 

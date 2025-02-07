@@ -154,17 +154,16 @@ if (!empty($listappto)) {
         }
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
 
-        if ((PermisosUsuario($permisos, 5601, 3) || $id_rol == 1)) {
-            $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb modificar"  text="' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+        if ((PermisosUsuario($permisos, 5601, 1)  || PermisosUsuario($permisos, 5602, 1) || PermisosUsuario($permisos, 5603, 1) || $id_rol == 1)) {
             $detalles = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" title="Detalles" onclick="cargarListaDetallePagoEdit(' . $id_ctb . ')"><span class="fas fa-eye fa-lg"></span></a>';
-            $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoTes(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
-            // Acciones teniendo en cuenta el tipo de rol
-            //si es lider de proceso puede abrir o cerrar documentos
         }
-        if ((PermisosUsuario($permisos, 5601, 4) || $id_rol == 1)) {
+        if ((PermisosUsuario($permisos, 5601, 3) || PermisosUsuario($permisos, 5602, 3) || PermisosUsuario($permisos, 5603, 3) || $id_rol == 1)) {
+            $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb modificar"  text="' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+        }
+        if ((PermisosUsuario($permisos, 5601, 4) ||PermisosUsuario($permisos, 5602, 4) ||PermisosUsuario($permisos, 5603, 4) || $id_rol == 1)) {
             $borrar = '<a value="' . $id_ctb . '" onclick="eliminarRegistroTec(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
-        if ((PermisosUsuario($permisos, 5601, 5) || $id_rol == 1)) {
+        if ((PermisosUsuario($permisos, 5601, 5) || PermisosUsuario($permisos, 5602, 5) || PermisosUsuario($permisos, 5603, 5) || $id_rol == 1)) {
             if ($estado == 1) {
                 $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" title="Cerrar"><span class="fas fa-lock fa-lg"></span></a>';
             } else {
@@ -175,6 +174,9 @@ if (!empty($listappto)) {
                 $anular = null;
                 $cerrar = null;
             }
+        }
+        if ((PermisosUsuario($permisos, 5601, 6) || PermisosUsuario($permisos, 5602, 6) || PermisosUsuario($permisos, 5603, 6) || $id_rol == 1)) {
+            $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoTes(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
         }
 
         if ($estado >= 2) {

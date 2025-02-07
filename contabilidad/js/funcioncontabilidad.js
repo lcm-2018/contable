@@ -1450,6 +1450,8 @@ let calculoIva = function () {
 const mostrarRetenciones = (dato) => {
 	let id_doc = $("#id_ctb_doc").val();
 	let tipo = $("#tipo_rete").val();
+	$('#divTamModalForms').removeClass('modal-xl');
+	$('#divTamModalForms').addClass('modal-lg');
 	fetch("datos/consultar/consulta_retenciones.php", {
 		method: "POST",
 		body: JSON.stringify({ id: dato, tipo: tipo }),
@@ -1476,6 +1478,8 @@ const mostrarRetenciones = (dato) => {
 			})
 				.then((response) => response.text())
 				.then((response) => {
+					$('#divTamModalForms').removeClass('modal-lg');
+					$('#divTamModalForms').addClass('modal-xl');
 					$('#divRetIca').html(response);
 				})
 				.catch((error) => {
@@ -1543,6 +1547,31 @@ const aplicaDescuentoRetenciones = (retencion) => {
 		$("#id_rete").val("0");
 	}
 };
+// Aplica tarifa de acuerdo a la retención seleccionada
+const aplicaDctoRetIca = (elemento, id, op) => {
+	var fila = elemento.parentNode.parentNode;
+	var bs = Number(op) == 1 ? 'base' : 'valor_rte';
+	var base = parseFloat(fila.querySelector("input[name='" + bs + "[]']").value.replace(/\,/g, "", ""));
+	if (Number(op) == 2 && base == 0) {
+		fila.querySelector("select[name='id_rete_sobre[]']").value = 0;
+		mjeError('El valor base para la sobretasa no puede ser cero');
+		return false
+	}
+	$.ajax({
+		type: "POST",
+		dataType: "json",
+		url: "datos/consultar/consulta_tarifa_ret.php",
+		data: { id: id, base: base },
+		success: function (r) {
+			if (r.status == "ok") {
+				let campo = Number(op) == 1 ? 'valor_rte' : 'valor_sob';
+				fila.querySelector("input[name='" + campo + "[]']").value = r.pesos;
+			} else {
+				mjeError("Error: ", r.msg);
+			}
+		},
+	});
+};
 var ValorBase = function (data) {
 	data = data.split("|");
 	$("#valor_base").val(data[0]);
@@ -1551,37 +1580,46 @@ var ValorBase = function (data) {
 // Guardar valor de la retención
 var GuardarRetencion = function () {
 	$('.is-invalid').removeClass('is-invalid');
-	if ($('#tipo_rete').val() == '0') {
-		$('#tipo_rete').addClass('is-invalid');
-		$('#tipo_rete').focus();
-		mjeError('Debe seleccionar un tipo retención');
-	} else if ($('#id_rete').val() == '0') {
-		$('#id_rete').addClass('is-invalid');
-		$('#id_rete').focus();
-		mjeError('Debe seleccionar una retención');
-	} else if (Number($('#valor_rte').val()) < 0) {
-		$('#valor_rte').addClass('is-invalid');
-		$('#valor_rte').focus();
-		mjeError('Debe ingresar un valor de retención');
+	if ($('#tipo_rete').val() == '3') {
+		enviaRetenciones();
 	} else {
-		var data = $('#formAddRetencioness').serialize();
-		$.ajax({
-			type: 'POST',
-			dataType: 'json',
-			url: 'datos/registrar/registrar_mvto_retenciones.php',
-			data: data,
-			success: function (r) {
-				if (r.status == 'ok') {
-					mje('Proceso realizado correctamente');
-					DesctosCtasPorPagar($('#id_ctb_doc').val(), $('#factura_des').val());
-					$('#valDescuentos').html(r.acumulado);
-				} else {
-					mjeError('Error:', r.msg);
-				}
-			}
-		});
+		if ($('#tipo_rete').val() == '0') {
+			$('#tipo_rete').addClass('is-invalid');
+			$('#tipo_rete').focus();
+			mjeError('Debe seleccionar un tipo retención');
+		} else if ($('#id_rete').val() == '0') {
+			$('#id_rete').addClass('is-invalid');
+			$('#id_rete').focus();
+			mjeError('Debe seleccionar una retención');
+		} else if (Number($('#valor_rte').val()) < 0) {
+			$('#valor_rte').addClass('is-invalid');
+			$('#valor_rte').focus();
+			mjeError('Debe ingresar un valor de retención');
+		} else {
+			enviaRetenciones();
+		}
 	}
 };
+function enviaRetenciones() {
+	$("#formAddRetencioness").find(":disabled").prop("disabled", false);
+	var data = $('#formAddRetencioness').serialize();
+	$("#formAddRetencioness").find(":disabled").prop("disabled", true);
+	$.ajax({
+		type: 'POST',
+		dataType: 'json',
+		url: 'datos/registrar/registrar_mvto_retenciones.php',
+		data: data,
+		success: function (r) {
+			if (r.status == 'ok') {
+				mje('Proceso realizado correctamente');
+				DesctosCtasPorPagar($('#id_ctb_doc').val(), $('#factura_des').val());
+				$('#valDescuentos').html(r.acumulado);
+			} else {
+				mjeError('Error:', r.msg);
+			}
+		}
+	});
+}
 document.addEventListener("submit", (e) => {
 	e.preventDefault();
 	if (e.target.id == "formAddRetencioness") {

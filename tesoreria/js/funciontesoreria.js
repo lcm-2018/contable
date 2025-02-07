@@ -1205,6 +1205,10 @@ function GuardarRubrosCaja() {
 		$('#numValor').addClass('is-invalid');
 		$('#numValor').focus();
 		mjeError('El valor no puede ser menor o igual a cero');
+	} else if (Number($('#numValor').val()) > Number($('#numValor').attr('max'))) {
+		$('#numValor').addClass('is-invalid');
+		$('#numValor').focus();
+		mjeError('El valor no puede ser mayor al saldo ' + $('#numValor').attr('max'));
 	} else if ($('#id_rubroCod').val() == '0') {
 		$('#rubroCod').addClass('is-invalid');
 		$('#rubroCod').focus();
@@ -1239,6 +1243,45 @@ function GuardarRubrosCaja() {
 		});
 	}
 }
+var DetalleImputacionCajaMenor = function () {
+	alert('hola');
+	return false;
+	var band = true;
+	var valor = 0;
+	var min, max;
+	$('.is-invalid').removeClass('is-invalid');
+	$('.ValImputacion').each(function () {
+		valor = $(this).val();
+		min = Number($(this).attr('min'));
+		max = Number($(this).attr('max'));
+		valor = Number(valor.replace(/\,/g, "", ""));
+		if (valor < min || valor > max) {
+			$(this).addClass('is-invalid');
+			$(this).focus();
+			mjeError('El valor debe estar entre ' + min.toLocaleString("es-MX") + ' y ' + max.toLocaleString("es-MX"));
+			band = false;
+			return false;
+		}
+	});
+	if (band) {
+		var data = $('#formImputacion').serialize();
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: 'datos/registrar/registrar_mvto_cobp.php',
+			data: data,
+			success: function (r) {
+				if (r.status == 'ok') {
+					mje('Proceso realizado correctamente');
+					ImputacionCtasPorPagar($('#id_ctb_doc').val());
+					$('#valImputacion').html(r.acumulado);
+				} else {
+					mjeError('Error:', r.msg);
+				}
+			}
+		});
+	}
+};
 function EditResponsableCaja(detalle) {
 	let id = $('#id_caja').val();
 	cargarResponsableCaja(id, detalle);
