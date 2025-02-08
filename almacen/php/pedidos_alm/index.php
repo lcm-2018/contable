@@ -61,7 +61,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <div class="form-group col-md-2">
                                     <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
                                 </div>                                
-                                <div class="form-group col-md-2">
+                                <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estados_pedidos('--Estado--') ?>
                                     </select>

@@ -14,6 +14,8 @@ $id_subgrupo = isset($_POST['id_subgrupo']) ? $_POST['id_subgrupo'] : 0;
 
 $id_sede = isset($_POST['id_sede']) ? $_POST['id_sede'] : -1;
 $id_bodega = isset($_POST['id_bodega']) && $_POST['id_bodega'] ? $_POST['id_bodega'] : -1;
+$tipo = isset($_POST['tipo']) ? $_POST['tipo']  : '';
+$checked = $tipo=='I' ? '': 'checked';
 
 $sql = "SELECT nombre FROM far_bodegas WHERE id_bodega=$id_bodega";
 $rs = $cmd->query($sql);
@@ -57,7 +59,7 @@ $nom_bodega = isset($obj['nombre']) ? $obj['nombre'] : '';
                             </div>
                             <div class="form-group col-md-3">
                                 <div class="form-control form-control-sm">
-                                    <input class="filtro_lot form-check-input" type="checkbox" id="chk_conexistencia_lot_fil" checked>
+                                    <input class="filtro_lot form-check-input" type="checkbox" id="chk_conexistencia_lot_fil" <?php echo $checked ?>>
                                     <label class="filtro_lot form-check-label small" for="chk_conexistencia_lot_fil">Con Existencias</label>
                                 </div>
                             </div>

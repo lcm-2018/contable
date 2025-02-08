@@ -40,6 +40,7 @@
                     data.id_sedpro = $('#sl_sedpro_filtro').val();
                     data.id_bodpro = $('#sl_bodpro_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
+                    data.modulo = $('#sl_modulo_origen').val();
                 }
             },
             columns: [

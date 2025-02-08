@@ -52,6 +52,9 @@ if (isset($_POST['id_tipegr']) && $_POST['id_tipegr']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_orden_egreso.estado=" . $_POST['estado'];
 }
+if (isset($_POST['estado']) && strlen($_POST['modulo'])) {
+    $where .= " AND far_orden_egreso.creado_far=" . $_POST['modulo'];
+}
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

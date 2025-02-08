@@ -48,6 +48,9 @@ if (isset($_POST['id_boddes']) && $_POST['id_boddes']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_traslado.estado=" . $_POST['estado'];
 }
+if (isset($_POST['estado']) && strlen($_POST['modulo'])) {
+    $where .= " AND far_traslado.creado_far=" . $_POST['modulo'];
+}
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

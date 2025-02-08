@@ -40,6 +40,7 @@
                     data.id_seddes = $('#sl_seddes_filtro').val();
                     data.id_boddes = $('#sl_boddes_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
+                    data.modulo = $('#sl_modulo_origen').val();
                 }
             },
             columns: [

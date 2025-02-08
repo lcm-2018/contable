@@ -415,6 +415,16 @@ function estados_sino($titulo = '',$estado = -1)
     echo '<option value="0"' . $selected . '>NO</option>';
 }
 
+function modulo_origen($titulo = '',$estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>FARMACIA</option>';
+    $selected = ($estado == 0) ? 'selected="selected"' : '';
+    echo '<option value="0"' . $selected . '>ALMACEN</option>';
+}
+
+
 function tipo_area($cmd, $titulo ='', $id = 0)
 {
     try {

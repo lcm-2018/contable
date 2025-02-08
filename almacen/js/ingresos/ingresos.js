@@ -39,6 +39,7 @@
                     data.id_tercero = $('#sl_tercero_filtro').val();
                     data.id_tiping = $('#sl_tiping_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
+                    data.modulo = $('#sl_modulo_origen').val();
                 }
             },
             columns: [
@@ -360,11 +361,13 @@
     });
 
     $('#divModalReg').on("change", "#sl_lote_art", function() {
-        let lote = $(this).find('option:selected');
-        $('#txt_nom_art').val(lote.attr('data-nom_articulo'));
-        $('#txt_pre_lot').val(lote.attr('data-nom_presentacion'));
-        $('#id_txt_pre_lot').val(lote.attr('data-id_presentacion'));
-        $('#txt_can_lot').val(lote.attr('data-cantidad_umpl'));
+        if ($('#id_detalle').val() == -1) {
+            let lote = $(this).find('option:selected');
+            $('#txt_nom_art').val(lote.attr('data-nom_articulo'));
+            $('#txt_pre_lot').val(lote.attr('data-nom_presentacion'));
+            $('#id_txt_pre_lot').val(lote.attr('data-id_presentacion'));
+            $('#txt_can_lot').val(lote.attr('data-cantidad_umpl'));
+        }
     });
 
     $('#divForms').on('click', '#tb_ingresos_detalles .btn_editar', function() {

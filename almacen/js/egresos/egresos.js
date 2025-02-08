@@ -41,6 +41,7 @@
                     data.id_cencost = $('#sl_centrocosto_filtro').val();
                     data.id_tipegr = $('#sl_tipegr_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
+                    data.modulo = $('#sl_modulo_origen').val();
                 }
             },
             columns: [
