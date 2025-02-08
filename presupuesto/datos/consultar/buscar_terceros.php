@@ -32,9 +32,10 @@ if ($buscar == '%%') {
     }
 } else {
     foreach ($terceros as $s) {
-        $nom_tercero = mb_strtoupper($s['nom_tercero']);
+        $nom_tercero = mb_strtoupper($s['nom_tercero'] . ' -> ' . $s['nit_tercero']);
         $pos = strpos($nom_tercero, $buscar);
-        if ($pos !== false) {
+        $nit = strpos($s['nit_tercero'], $buscar);
+        if ($pos !== false || $nit !== false) {
             $data[] = [
                 'id' => $s['id_tercero_api'],
                 'label' => $nom_tercero,

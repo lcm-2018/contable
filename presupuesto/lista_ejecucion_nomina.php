@@ -54,7 +54,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT SUM(`valor`) AS `total`, `id_nomina` FROM `nom_cdp_empleados` GROUP BY `id_nomina`";
     $rs = $cmd->query($sql);
-    $totxnomina = $rs->fetchAll();
+    $totxnomina = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
@@ -126,13 +126,12 @@ $meses = [
                     <?php
                     foreach ($solicitudes as $ce) {
                         $id_nom = $ce['id_nomina'];
+                        $key = array_search($id_nom, array_column($totxnomina, 'id_nomina'));
+                        $total = $key !== false ? $totxnomina[$key]['total'] : 0;
+                        $patronal = '';
                         if ($ce['tipo'] == 'PL') {
                             $patronal = ' - PATRONAL';
                             $total = $ce['patronal'];
-                        } else {
-                            $key = array_search($id_nom, array_column($totxnomina, 'id_nomina'));
-                            $total = $key !== false ? $totxnomina[$key]['total'] : 0;
-                            $patronal = '';
                         }
                         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
                             $editar = '<button value="' . $id_nom . '|' . $ce['tipo'] . '" onclick="CofirmaCdpRp(this)" class="btn btn-outline-primary btn-sm btn-circle shadow-gb confirmar" title="Confirmar Generación de CDP y RP"><span class="fas  fa-check-square fa-lg"></span></button>';

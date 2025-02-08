@@ -28,6 +28,7 @@ try {
                 , `ctb_doc`.`id_ctb_doc`
                 , `ctb_doc`.`id_manu`
                 , `ctb_factura`.`id_tipo_doc` AS `tipo`
+                , `ctb_factura`.`id_cta_factura` AS `id_fac`
                 , `ctb_doc`.`fecha`
                 , `ctb_doc`.`detalle`
                 , `ctb_doc`.`id_tercero`
@@ -163,6 +164,7 @@ if (!empty($listappto)) {
     foreach ($listappto as $lp) {
         $valor_debito = 0;
         $id_ctb = $lp['id_ctb_doc'];
+        $id_fac = $lp['id_fac'];
         $estado = $lp['estado'];
         $tercero = $lp['nom_tercero'] != '' ? $lp['nom_tercero'] : '---';
 

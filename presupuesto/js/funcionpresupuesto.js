@@ -566,7 +566,12 @@
     $("#divForms").on("click", "#btnGestionCDP", function () {
         var op = $(this).attr('text');
         $('.is-invalid').removeClass('is-invalid');
-        if ($("#dateFecha").val() === "") {
+        if (Number($('#id_manu').val()) <= 0) {
+            $("#id_manu").focus();
+            $("#id_manu").addClass('is-invalid');
+            $("#divModalError").modal("show");
+            $("#divMsgError").html("¡El numero de CDP debe ser mayor a cero!");
+        } else if ($("#dateFecha").val() === "") {
             $("#dateFecha").focus();
             $("#dateFecha").addClass('is-invalid');
             $("#divModalError").modal("show");
@@ -602,8 +607,7 @@
                 dataType: "json",
                 success: function (r) {
                     if (r.status === "ok") {
-                        let id = "tableEjecPresupuesto";
-                        reloadtable(id);
+                        $('#tableEjecPresupuesto').DataTable().ajax.reload();
                         $("#divModalForms").modal("hide");
                         $("#divModalDone").modal("show");
                         $("#divMsgDone").html("Proceso realizado correctamente...");
@@ -722,7 +726,19 @@
     //2. Editar detalles de CDP
     $("#modificarEjecPresupuesto").on("click", ".editar", function () {
         let id_cdp = $(this).attr("value");
-        $.post("datos/actualizar/formup_cdp.php", { id_cdp: id_cdp }, function (he) {
+        let id_pto = $("#id_pto_ppto").val();
+        $.post("datos/actualizar/formup_cdp.php", { id_cdp: id_cdp, id_pto: id_pto }, function (he) {
+            $("#divTamModalForms").removeClass("modal-xl");
+            $("#divTamModalForms").removeClass("modal-sm");
+            $("#divTamModalForms").addClass("modal-lg");
+            $("#divModalForms").modal("show");
+            $("#divForms").html(he);
+        });
+    });
+    $("#tableEjecPresupuestoCrp").on("click", ".editar", function () {
+        let id_crp = $(this).attr("value");
+        let id_pto = $("#id_pto_ppto").val();
+        $.post("datos/actualizar/formup_crp.php", { id_crp: id_crp, id_pto: id_pto }, function (he) {
             $("#divTamModalForms").removeClass("modal-xl");
             $("#divTamModalForms").removeClass("modal-sm");
             $("#divTamModalForms").addClass("modal-lg");
@@ -1701,7 +1717,7 @@ function RegDetalleCDPs(boton) {
     var fecha = $("#fecha").val();
     if (tipoRubro == '0') {
         mjeError("El rubro no es un detalle...", "Verifique la información registrada");
-    } else if (Number(valorDeb) == 0) {
+    } else if (Number(valorDeb) < 0) {
         mjeError("Valor debe ser mayor a cero...", "Verifique la información registrada");
     } else {
         consultaSaldoRubro(valorDeb, id_rubroCod, fecha, id_cdp)
@@ -1723,6 +1739,7 @@ function RegDetalleCDPs(boton) {
                         data.append('txtObjeto', $("#objeto").val());
                         data.append('id_adq', $("#id_adq").val());
                         data.append('id_otro', $("#id_otro").val());
+                        data.append('id_manu', $("#id_pto_docini").val());
 
                         url = "datos/registrar/new_ejecucion_presupuesto.php";
 
@@ -2371,22 +2388,22 @@ $("#divForms").on("click", "#btnGestionCRP", function () {
             url = "datos/registrar/registrar_crp.php";
         } else {
             datos = $("#formUpCRP").serialize()
-            url = "datos/actualizar/up_ejecucion_presupuesto.php";
+            url = "datos/actualizar/up_ejecucion_presupuesto_crp.php";
         }
         $.ajax({
             type: "POST",
             url: url,
             data: datos,
+            dataType: "json",
             success: function (r) {
-                if (r === "ok") {
-                    let id = "tableEjecPresupuestoCrp";
-                    reloadtable(id);
+                if (r.status === "ok") {
+                    $('#tableEjecPresupuestoCrp').DataTable().ajax.reload();
                     $("#divModalForms").modal("hide");
                     $("#divModalDone").modal("show");
                     $("#divMsgDone").html("Proceso realizado correctamente...");
                 } else {
                     $("#divModalError").modal("show");
-                    $("#divMsgError").html(r);
+                    $("#divMsgError").html(r.msg);
                 }
             },
         });
@@ -2418,11 +2435,11 @@ $('#registrarMovDetalle').on('click', function () {
         var validar = true;
         $('.valor-detalle').each(function () {
             var valor = parseFloat($(this).val().replace(/\,/g, "", ""));
-            if (valor <= 0 || $(this).val() == '') {
+            if (valor < 0 || $(this).val() == '') {
                 validar = false;
                 $(this).focus();
                 $(this).addClass('is-invalid');
-                mjeError('El valor no puede ser cero o menor', '');
+                mjeError('El valor no puede ser menor a cero', '');
                 return false;
             } else {
                 let min = $(this).attr('min');

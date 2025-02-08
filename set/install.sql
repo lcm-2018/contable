@@ -1,10 +1,10 @@
 /*insert  into `seg_rol`(`id_rol`,`nom_rol`,`id_usr_crea`) values (1,'ADMINISTRADOR',NULL);
 insert  into `seg_usuarios_sistema`(`id_usuario`,`id_user_fin`,`login`,`clave`,`id_rol`,`id_tipo_doc`,`num_documento`,`apellido1`,`apellido2`,`nombre1`,`nombre2`,`sexo`,`direccion`,`telefono`,`email`,`es_administrativo`,`es_auditor`,`es_asistencial`,`es_promotor`,`es_dispensador`,`es_habilitadovc`,`descripcion`,`num_tarjeta`,`num_citas`,`fec_inactivacion`,`fec_cambioclave`,`fec_finalizacion`,`nom_firma`,`id_centrocosto`,`fil_atencion`,`fil_ingreso`,`num_turnos`,`id_usr_crea`,`fec_creacion`,`id_usr_edita`,`id_origen`,`estado`,`es_medico`,`es_enfermero`,`es_facturador`,`es_custodia_hc`) values 
-	(1,NULL,'demo','0a3fd85d00c79751921f1c260b9641ae37655446cc07db3d697362e49fb128b3e1e4d0891554f42e2529c92a937a7ac6c2e13386983431a810e4be775f3ed148',1,4,'12345','ADMINP','A','ADMINN','B','M','','7252963','18011ff5f@correo.com',1,0,0,0,1,1,'Dpto. Sistemas<br/>U. Nariño','XXXX',NULL,NULL,'2024-03-20 14:32:22',NULL,'1-20230905115532firma.jpg',0,'[\"16\",\"17\",\"48\",\"12\",\"5\",\"24\",\"21\",\"20\",\"49\",\"13\",\"9\",\"11\",\"6\",\"8\",\"10\",\"7\",\"14\",\"27\",\"22\",\"26\",\"25\",\"19\",\"15\",\"30\",\"31\",\"32\"]','[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\"]',NULL,1,NULL,1,NULL,1,0,0,0,0);
+(1,NULL,'demo','0a3fd85d00c79751921f1c260b9641ae37655446cc07db3d697362e49fb128b3e1e4d0891554f42e2529c92a937a7ac6c2e13386983431a810e4be775f3ed148',1,4,'12345','ADMINP','A','ADMINN','B','M','','7252963','18011ff5f@correo.com',1,0,0,0,1,1,'Dpto. Sistemas<br/>U. Nariño','XXXX',NULL,NULL,'2024-03-20 14:32:22',NULL,'1-20230905115532firma.jpg',0,'[\"16\",\"17\",\"48\",\"12\",\"5\",\"24\",\"21\",\"20\",\"49\",\"13\",\"9\",\"11\",\"6\",\"8\",\"10\",\"7\",\"14\",\"27\",\"22\",\"26\",\"25\",\"19\",\"15\",\"30\",\"31\",\"32\"]','[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\"]',NULL,1,NULL,1,NULL,1,0,0,0,0);
 insert  into `seg_modulos`(`id_modulo`,`nom_modulo`,`fec_mensaje`,`fec_caduca`,`estado`) values (10,'Administración',NULL,NULL,1),(11,'Admisiones',NULL,NULL,1),(12,'Facturación',NULL,NULL,1),(13,'Historia Clínica',NULL,NULL,1),(14,'Laboratorio',NULL,NULL,1),(15,'Procedimientos Especializados',NULL,NULL,1),(16,'Farmacia',NULL,NULL,1),(17,'Informes',NULL,NULL,1),(50,'Almacén',NULL,NULL,1),(51,'Nómina',NULL,NULL,1),(52,'Terceros',NULL,NULL,1),(53,'Contratación',NULL,NULL,1),(54,'Presupuesto',NULL,NULL,1),(55,'Contabilidad',NULL,NULL,1),(56,'Tesorería',NULL,NULL,1),(57,'Activos fijos',NULL,NULL,1);
 */
 INSERT  INTO `seg_modulos`
-	(`id_modulo`,`nom_modulo`,`fec_mensaje`,`fec_caduca`,`estado`) 
+(`id_modulo`,`nom_modulo`,`fec_mensaje`,`fec_caduca`,`estado`) 
 VALUES (50,'Almacén',NULL,NULL,1),(51,'Nómina',NULL,NULL,1),(52,'Terceros',NULL,NULL,1),(53,'Contratación',NULL,NULL,1),(54,'Presupuesto',NULL,NULL,1),(55,'Contabilidad',NULL,NULL,1),(56,'Tesorería',NULL,NULL,1),(57,'Activos fijos',NULL,NULL,1),(59,'Consultas',NULL,NULL,1);
 
 insert  into `seg_permisos_modulos`(`id_per_mod`,`id_usuario`,`id_modulo`) values (1,1,50),(2,1,51),(3,1,52),(4,1,53),(5,1,54),(6,1,55),(7,1,56),(8,1,57),(9,1,59);
@@ -132,7 +132,7 @@ INSERT INTO `tb_actividades_economicas` (`id_actividad`, `cod_actividad`, `descr
 (509, '0090', 'Rentistas de Capital, solo para personas naturales.');
 
 insert  into `ctb_tipo_doc`(`id_ctb_tipodoc`,`tipo`) 
-	values 
+values 
 (1,'FACTURA'),(2,'CUENTA DE COBRO'),(3,'DOCUMENTO EQUIVALENTE'),(4,'CAJA MENOR'),(5,'RESOLUCION'),(6,'OTROS');
 
 INSERT INTO `tb_responsabilidad_fiscal` (`id`, `codigo`, `descripcion`) VALUES
@@ -143,3 +143,53 @@ INSERT INTO `tb_responsabilidad_fiscal` (`id`, `codigo`, `descripcion`) VALUES
 (5, 'O-48', 'Impuesto sobre las ventas'),
 (6, 'O-49', 'No responsable de IVA'),
 (7, 'R-99-PN', 'No aplica - Otros *');
+
+insert  into `ctb_retencion_tipo`
+(`id_retencion_tipo`,`tipo`,`id_tercero`,`estado`,`id_user_reg`,`fecha_reg`,`id_user_act`,`fecha_act`) 
+values 
+(1,'Retención en la fuente',680,1,NULL,NULL,1,'2024-10-17 12:31:11'),(2,'Retención de IVA',680,1,NULL,NULL,1,'2024-10-17 12:31:09'),(3,'Retención de ICA',680,1,NULL,NULL,1,'2024-10-17 12:31:09'),(4,'Sobretasa bomberil',903,1,NULL,NULL,1,'2024-10-17 12:31:08'),(5,'Estampillas',903,1,NULL,NULL,1,'2024-10-17 12:31:07'),(6,'Otras retenciones',903,1,NULL,NULL,1,'2024-10-17 12:31:07'),(7,'Seguridad social',903,1,NULL,NULL,1,'2024-10-17 12:31:06');
+
+insert  into `ctb_retenciones`(`id_retencion`,`id_retencion_tipo`,`nombre_retencion`,`id_cuenta`,`estado`,`id_user_reg`,`fecha_reg`,`id_user_act`,`fecha_act`) values (1,1,'Compras generales (no declarantes) 3.5%',NULL,1,NULL,NULL,1,'2024-10-17 18:35:12'),(2,2,'Responsables de impuestos a la ventas compras 15%',NULL,1,NULL,NULL,1,'2024-10-17 18:35:14'),(3,2,'A no residentes por servicios prestados',167,1,NULL,NULL,1,'2024-10-17 18:35:56'),(4,3,'Retencion por ICA 6 por mil',NULL,1,NULL,NULL,1,'2024-10-17 18:35:15'),(5,3,'Retencion por ICA 10 por mil',NULL,1,NULL,NULL,1,'2024-10-17 18:35:16'),(6,4,'Sobretasa bomberil 6%',NULL,1,NULL,NULL,1,'2024-10-17 18:35:16'),(9,4,'Sobretasa bomberil 10%',NULL,1,NULL,NULL,1,'2024-10-17 18:35:17'),(10,6,'Papeleria',NULL,1,NULL,NULL,1,'2024-10-17 18:36:02'),(11,3,'Retencion por ICA 1 por mil',NULL,0,NULL,NULL,NULL,NULL),(12,3,'Retencion por ICA 2 por mil',NULL,0,NULL,NULL,NULL,NULL),(13,3,'Retencion por ICA 3 por mil',NULL,0,NULL,NULL,NULL,NULL),(14,3,'Retencion por ICA 4 por mil',NULL,0,NULL,NULL,NULL,NULL),(15,3,'Retencion por ICA 5 por mil',NULL,0,NULL,NULL,NULL,NULL),(16,3,'Retencion por ICA 7 por mil',NULL,0,NULL,NULL,NULL,NULL),(17,3,'Retencion por ICA 8 por mil',NULL,0,NULL,NULL,NULL,NULL),(18,3,'Retencion por ICA 9 por mil',NULL,0,NULL,NULL,NULL,NULL),(19,4,'Sobretasa bomberil 1%',NULL,0,NULL,NULL,NULL,NULL),(20,4,'Sobretasa bomberil 2%',NULL,0,NULL,NULL,NULL,NULL),(21,4,'Sobretasa bomberil 3%',NULL,0,NULL,NULL,NULL,NULL),(22,4,'Sobretasa bomberil 4%',NULL,0,NULL,NULL,NULL,NULL),(23,4,'Sobretasa bomberil 5%',NULL,0,NULL,NULL,NULL,NULL),(24,4,'Sobretasa bomberil 7%',NULL,0,NULL,NULL,NULL,NULL),(25,4,'Sobretasa bomberil 8%',NULL,0,NULL,NULL,NULL,NULL),(26,4,'Sobretasa bomberil 9%',NULL,0,NULL,NULL,NULL,NULL),(27,1,'Arrendamiento de bienes muebles 4%',NULL,0,NULL,NULL,NULL,NULL),(28,1,'Compras de combustibles derivados del petróleo 0.10%',NULL,0,NULL,NULL,NULL,NULL),(29,1,'Compras generales (declarantes renta) 2.5%',NULL,0,NULL,NULL,NULL,NULL),(31,1,'Contratos de consultoría de obras públicas 2%',NULL,0,NULL,NULL,NULL,NULL),(32,1,'Diseño de página web y consultoría en programas de informática a obligados a declarar renta 3.5% ',NULL,0,NULL,NULL,NULL,NULL),(33,1,'Honorarios y comisiones (no declarantes renta) 10%',NULL,0,NULL,NULL,NULL,NULL),(34,1,'Honorarios y comisiones (personas jurídicas) 11%',NULL,0,NULL,NULL,NULL,NULL),(35,1,'Salarios y demás rentas de trabajo (Tabla art. 383 ET)',NULL,0,NULL,NULL,NULL,NULL),(36,1,'Servicios de licenciamiento o derecho de uso de software 3.5%',NULL,0,NULL,NULL,NULL,NULL),(37,1,'Servicios de transporte nacional de pasajeros por vía terrestre 3.5%',NULL,0,NULL,NULL,NULL,NULL),(38,1,'Servicios generales (declarantes renta) 4%',NULL,0,NULL,NULL,NULL,NULL),(39,1,'Servicios generales (no declarantes renta) 6%',NULL,0,NULL,NULL,NULL,NULL),(40,2,'Responsables de impuestos a la ventas servicios 15%',NULL,0,NULL,NULL,NULL,NULL),(41,3,'Retencion por ICA 2.5 por mil',NULL,0,NULL,NULL,NULL,NULL),(42,3,'Retencion por ICA 3.5 por mil',NULL,0,NULL,NULL,NULL,NULL),(43,3,'Retencion por ICA 12 por mil',NULL,0,NULL,NULL,NULL,NULL),(44,3,'Retencion por ICA 15 por mil',NULL,0,NULL,NULL,NULL,NULL),(45,4,'Sobretasa bomberil 11%',NULL,0,NULL,NULL,NULL,NULL),(46,4,'Sobretasa bomberil 16%',NULL,0,NULL,NULL,NULL,NULL),(47,4,'Sobretasa bomberil 15%',NULL,0,NULL,NULL,NULL,NULL),(48,4,'Sobretasa bomberil 20%',NULL,0,NULL,NULL,NULL,NULL),(49,5,'Tasa prodeporte y recreacion',NULL,0,NULL,NULL,NULL,NULL),(50,1,'Servicios prestados por empresas de vigilancia y aseo (sobre AIU)',NULL,0,NULL,NULL,NULL,NULL),(51,1,'Servicios integrales de salud prestados por IPS 2%',NULL,0,NULL,NULL,NULL,NULL),(52,2,'Responsables de impuestos a la ventas compras IVA 5%',NULL,0,NULL,NULL,NULL,NULL),(53,1,'Servicios de transporte de carga 1%',NULL,0,NULL,NULL,NULL,NULL),(54,7,'Aporte a salud',NULL,0,NULL,NULL,NULL,NULL),(55,7,'Aporte pensión',NULL,0,NULL,NULL,NULL,NULL),(56,7,'Fondo de solidaridad pensional',NULL,0,NULL,NULL,NULL,NULL);
+
+INSERT INTO `far_grupos` (`id_grupo`, `nom_grupo`) VALUES
+(0,''),
+(1,'Consumible'),
+(2,'Consumible Control'),
+(3,'Intangibles'),
+(4,'Inmuebles'),
+(5,'Bienes Muebles');
+
+INSERT INTO `far_subgrupos` (`id_subgrupo`, `cod_subgrupo`, `nom_subgrupo`, `id_grupo`, `id_usr_crea`, `fec_crea`, `estado`, `lote_xdef`) VALUES
+(1,'11','Medicamento',1,1,'2024-03-13 12:04:17',1,0),
+(2,'12','Insumo medico quirurgico ',1,1,'2024-03-13 12:04:17',1,1),
+(3,'13','Oxigenos',1,1,'2024-03-13 12:04:17',1,1),
+(4,'14','Dotación a trabajadores',1,1,'2024-03-13 12:04:17',1,1),
+(5,'15','Viveres y rancho',1,1,'2024-03-13 12:04:17',1,1),
+(6,'16','Materiales odontologicos',1,1,'2024-03-13 12:04:17',1,1),
+(7,'17','Material reactivos y de laboratorio',1,1,'2024-03-13 12:04:17',1,1),
+(8,'18','Dotación hospitalaria',1,1,'2024-03-13 12:04:17',1,1),
+(9,'19','Papeleria y elementos de oficina',1,1,'2024-03-13 12:04:18',1,1),
+(10,'110','Repuestos',1,1,'2024-03-13 12:04:18',1,1),
+(11,'111','Material de construcción ',1,1,'2024-03-13 12:04:18',1,1),
+(12,'112','Elementos y accesorios de aseo',1,1,'2024-03-13 12:04:18',1,1),
+(13,'113','Aceites grasas y lubricantes',1,1,'2024-03-13 12:04:18',1,1),
+(14,'21','Accesorios equipos de computo',2,1,'2024-03-13 12:04:18',1,1),
+(15,'22','Elementos de oficina',2,1,'2024-03-13 12:04:18',1,1),
+(16,'23','Otros materiales y suministros',2,1,'2024-03-13 12:04:18',1,1),
+(17,'24','Preimpresos',2,1,'2024-03-13 12:04:18',1,1),
+(18,'25','Equipo medico menor cuantia',2,1,'2024-03-13 12:04:18',1,1),
+(19,'31','Licencias software',3,1,'2024-03-13 12:04:18',1,1),
+(20,'32','Seguros',3,1,'2024-03-13 12:04:18',1,1),
+(21,'33','Terrenos',3,1,'2024-03-13 12:04:18',1,1),
+(22,'34','Edificaciones',3,1,'2024-03-13 12:04:18',1,1),
+(23,'41','Maquinaria y equipo',4,1,'2024-03-13 12:04:18',1,1),
+(24,'42','Equipo médico y científico',4,1,'2024-03-13 12:04:18',1,1),
+(25,'43','Muebles, enseres y equipo de oficina',4,1,'2024-03-13 12:04:18',1,1),
+(26,'44','Equipos de comunicación y computación',4,1,'2024-03-13 12:04:18',1,1),
+(27,'45','Equipos de transporte, tracción y elevación',4,1,'2024-03-13 12:04:18',1,1),
+(28,'46','Redes, líneas y cables',4,1,'2024-03-13 12:04:18',1,1),
+(29,'47','Equipos de comedor, cocina, despensa y hotelería',4,1,'2024-03-13 12:04:18',1,1);
+
+INSERT  INTO `tes_caja_tipogasto`(`id_caja_tipogasto`,`nombre_tipogasto`,`estado`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`) VALUES (1,'ADQUISICION DE BIENES',1,1,'2023-04-26 19:39:50',NULL,NULL),(2,'ADQUISICION DE SERVICIOS',1,1,'2023-04-26 19:40:10',NULL,NULL);
+
+INSERT  INTO `tes_caja_conceptos`(`id_caja_concptos`,`id_caja_tipogasto`,`concepto`,`estado`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`) VALUES (1,1,'Impresos y publicaciones',1,1,'2023-04-26 22:12:37',NULL,NULL),(2,1,'Comunicación y transporte',1,1,'2023-04-26 22:12:37',NULL,NULL),(3,1,'Elementos para mantenimiento administrativo',1,1,'2023-04-26 22:12:37',NULL,NULL),(4,2,'Mantenimiento operativo',1,1,'2023-04-26 22:12:37',NULL,NULL);

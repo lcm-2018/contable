@@ -59,7 +59,9 @@ $lbl_mun = '<label class="small">Municipio</label>';
 $lbl_dat = '<label class="small">Retención</label>';
 $lbl_sob = '<label class="small">Sobretasa</label>';
 $lbl_ret = '<label class="small">Valor retención</label>';
+$lbl_vsb = '<label class="small">Valor sobretasa</label>';
 $val_ret = '<input type="text" name="valor_rte[]" class="form-control form-control-sm text-right" onkeyup="valorMiles(id)" value="0" disabled>';
+$val_sob = '<input type="text" name="valor_sob[]" class="form-control form-control-sm text-right" onkeyup="valorMiles(id)" value="0" disabled>';
 $primero = true;
 $response = '<div class="border px-2 rounded mb-1 bg-light" style="max-height: 200px; overflow-y: auto;">';
 foreach ($retenciones as $ret) {
@@ -72,22 +74,22 @@ foreach ($retenciones as $ret) {
     $response .= '<input type="hidden" name="id_rete_sede[]" value="' . $ret['id_municipio'] . '">';
     $response .= '<div class="form-control form-control-sm text-left">' . $ret['nom_municipio'] . '->' . pesos($ret['base']) . '</div>';
     $response .= '</div>';
-    $response .= '<div class="form-group col-md-3">';
+    $response .= '<div class="form-group col-md-2">';
     if ($primero) {
         $response .= $lbl_dat;
     }
-    $response .= '<select class="form-control form-control-sm py-0 sm" name="id_rete[]"  required>';
+    $response .= '<select class="form-control form-control-sm py-0 sm" name="id_rete[]" onchange="aplicaDctoRetIca(this,value,1)" required>';
     $response .= '<option value="0">-- Seleccionar--</option>';
     foreach ($datas as $dat) {
         $response .= '<option value="' . $dat['id_retencion'] . '">' . $dat['nombre_retencion'] .  '</option>';
     }
     $response .= "</select>";
     $response .= '</div>';
-    $response .= '<div class="form-group col-md-3">';
+    $response .= '<div class="form-group col-md-2">';
     if ($primero) {
         $response .= $lbl_sob;
     }
-    $response .= '<select class="form-control form-control-sm py-0 sm" name="id_rete_sobre[]"  required>';
+    $response .= '<select class="form-control form-control-sm py-0 sm" name="id_rete_sobre[]" onchange="aplicaDctoRetIca(this,value,2)" required>';
     $response .= '<option value="0">-- Seleccionar--</option>';
     foreach ($sobretasa as $sb) {
         $response .= '<option value="' . $sb['id_retencion'] . '">' . $sb['nombre_retencion'] .  '</option>';
@@ -99,6 +101,12 @@ foreach ($retenciones as $ret) {
         $response .= $lbl_ret;
     }
     $response .= $val_ret;
+    $response .= '</div>';
+    $response .= '<div class="form-group col-md-2">';
+    if ($primero) {
+        $response .= $lbl_vsb;
+    }
+    $response .= $val_sob;
     $response .= '</div>';
     $response .= '</div>';
     $primero = false;

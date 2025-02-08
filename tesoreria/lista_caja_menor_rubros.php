@@ -26,7 +26,27 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-
+try {
+    $sql = "SELECT
+                `tes_caja_const`.`id_caja_const`
+                , `tes_caja_const`.`valor_total`
+                , IFNULL(`t1`.`valor`,0) AS `valor` 
+            FROM
+                `tes_caja_const`
+                INNER JOIN
+                (SELECT
+                    `id_caja_const`
+                    , SUM(`valor`) AS `valor`
+                FROM `tes_caja_rubros`
+                GROUP BY `id_caja_const`) AS `t1` 
+                    ON (`t1`.`id_caja_const` = `tes_caja_const`.`id_caja_const`)
+            WHERE `tes_caja_const`.`id_caja_const` = $id_caja";
+    $rs = $cmd->query($sql);
+    $valores = $rs->fetch(PDO::FETCH_ASSOC);
+    $max = $valores['valor_total'] - $valores['valor'];
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 try {
     $sql = "SELECT
                 `tes_caja_rubros`.`id_caja_rubros`
@@ -100,7 +120,7 @@ if (empty($detalle)) {
         'id_cta_contable' => 0,
         'id_caja_concepto' => 0,
         'concepto' => '',
-        'valor' => 0
+        'valor' => $max
     ];
 }
 ?>
@@ -159,7 +179,7 @@ if (empty($detalle)) {
                 </div>
                 <div class="form-group col-md-6">
                     <label for="numValor" class="small">Valor</label>
-                    <input type="number" name="numValor" id="numValor" class="form-control form-control-sm" value="<?php echo $detalle['valor']; ?>">
+                    <input type="number" name="numValor" id="numValor" class="form-control form-control-sm" value="<?php echo $detalle['valor']; ?>" min="0" max="<?= $max; ?>">
                 </div>
             </div>
             <div class="form-row">

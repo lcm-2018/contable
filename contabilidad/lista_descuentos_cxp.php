@@ -200,7 +200,7 @@ $val_iva = $valores[1];
                             // Consulto el valor del tercero de la api
                             $id_ter = $ce['id_terceroapi'];
                             $tercero = getTerceros($id_ter, $cmd);
-                            $tercero = $tercero[0]['nom_tercero'];
+                            $tercero = isset($tercero[0]) ? $tercero[0]['nom_tercero'] : '--';
                             // Obtener el saldo del registro por obligar
 
                             if (true) {
