@@ -15,6 +15,7 @@ $id_ctb_doc = $_POST['id_doc'];
 $id_tipo_doc = $_POST['tipoDoc'];
 $fecha_fact = $_POST['fechaDoc'];
 $fecha_ven = $_POST['fechaVen'];
+$num_doc = $_POST['numFac'];
 $valor_pago = str_replace(",", "", $_POST['valor_pagar']);
 $valor_iva = str_replace(",", "", $_POST['valor_iva']);
 $valor_base = str_replace(",", "", $_POST['valor_base']);
@@ -24,14 +25,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $response['status'] = 'error';
-try {
-    $sql = "SELECT MAX(`num_doc`) AS `num_doc` FROM `ctb_factura` WHERE (`id_tipo_doc` = $id_tipo_doc AND `num_doc` > 0)";
-    $rs = $cmd->query($sql);
-    $datos = $rs->fetch();
-    $num_doc = !empty($datos) ? $datos['num_doc'] + 1 : 1;
-} catch (PDOException $e) {
-    $response['msg'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
+
 if ($id_cta_factura == 0) {
     try {
         $sql = "INSERT INTO `ctb_factura`

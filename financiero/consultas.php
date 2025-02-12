@@ -261,14 +261,17 @@ function GetValoresCxP($id_doc, $cmd)
                     , IFNULL(`imputacion`.`val_imputacion`,0) AS `val_imputacion`
                     , IFNULL(`centro_costo`.`val_ccosto`,0) AS `val_ccosto`
                     , IFNULL(`retencion`.`val_retencion`,0) AS `val_retencion`
+                    , `pto_crp`.`fecha` AS `fecha_crp`
                 FROM
                     `ctb_doc`
                     INNER JOIN `ctb_fuente` 
                         ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                    LEFT JOIN `pto_crp` 
+                        ON (`ctb_doc`.`id_crp` = `pto_crp`.`id_pto_crp`)
                     LEFT JOIN
                         (SELECT
                             `id_ctb_doc`
-                            , SUM(`valor_base`) AS `val_factura`
+                            , SUM(`valor_pago`) AS `val_factura`
                         FROM
                             `ctb_factura`
                         WHERE (`id_ctb_doc` = $id_doc)) AS `factura`

@@ -35,6 +35,71 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+if ($id_detalle > 0) {
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $sql = "SELECT
+                    `ctb_causa_costos`.`id`
+                    , `ctb_causa_costos`.`id_area_cc`
+                    , `tb_municipios`.`nom_municipio`
+                    , `tb_municipios`.`id_municipio`
+                    , `tb_sedes`.`id_sede`
+                    , `far_centrocosto_area`.`id_centrocosto`
+                    , `ctb_causa_costos`.`valor`
+                FROM
+                    `ctb_causa_costos`
+                    INNER JOIN `far_centrocosto_area` 
+                        ON (`ctb_causa_costos`.`id_area_cc` = `far_centrocosto_area`.`id_area`)
+                    INNER JOIN `tb_sedes` 
+                        ON (`far_centrocosto_area`.`id_sede` = `tb_sedes`.`id_sede`)
+                    INNER JOIN `tb_municipios` 
+                        ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`)
+                WHERE (`ctb_causa_costos`.`id` = $id_detalle)";
+        $rs = $cmd->query($sql);
+        $data = $rs->fetch();
+        $id_municipio = $data['id_municipio'];
+        $id_sede = $data['id_sede'];
+        $id_cc = $data['id_area_cc'];
+        $municipio = $data['nom_municipio'];
+        $value_cc = $data['valor'];
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $sql = "SELECT `id_sede`, `nom_sede` as `nombre` FROM `tb_sedes` WHERE `id_municipio` = $id_municipio";
+        $rs = $cmd->query($sql);
+        $sedes = $rs->fetchAll();
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $sql = "SELECT
+                    `id_area`
+                    , `nom_area`
+                FROM
+                    `far_centrocosto_area`
+                WHERE (`id_sede` = $id_sede)";
+        $rs = $cmd->query($sql);
+        $centros = $rs->fetchAll();
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+} else {
+    $id_municipio = 0;
+    $municipio = '';
+    $id_sede = 0;
+    $id_cc = 0;
+    $sedes = [];
+    $centros = [];
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -48,7 +113,9 @@ try {
 }
 $val_cc = 0;
 foreach ($rubros as $r) {
-    $val_cc += $r['valor'];
+    if ($r['id'] != $id_detalle) {
+        $val_cc += $r['valor'];
+    }
 }
 $min = 0;
 $max = $valor_max - $val_cc;
@@ -97,24 +164,36 @@ $max = $max < 0 ? 0 : $max;
                 <div class="form-row">
                     <div class="form-group col-md-3">
                         <label for="municipio" class="small">MUNICIPIO</label>
-                        <input type="text" name="municipio" id="municipio" class="form-control form-control-sm" value="" onchange="mostrarSedes();" required>
-                        <input type="hidden" name="id_municipio" id="id_municipio" value="0">
+                        <input type="text" name="municipio" id="municipio" class="form-control form-control-sm" value="<?= $municipio ?>" onchange="mostrarSedes();" required>
+                        <input type="hidden" name="id_municipio" id="id_municipio" value="<?= $id_municipio; ?>">
                     </div>
                     <div class="form-group col-md-3" id="divSede">
                         <label for="id_sede" class="small">SEDE</label>
-                        <select type="text" name="id_sede" id="id_sede" class="form-control form-control-sm">
+                        <select type="text" name="id_sede" id="id_sede" class="form-control form-control-sm" onchange="mostrarCentroCostos(value);">
                             <option value="0">--Seleccione--</option>
+                            <?php
+                            foreach ($sedes as $s) {
+                                $slc = $s['id_sede'] == $id_sede ? 'selected' : '';
+                                echo '<option value="' . $s['id_sede'] . '" ' . $slc . '>' . $s['nombre'] . '</option>';
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="form-group col-md-3" id="divCosto">
                         <label for="id_cc" class="small">CENTRO DE COSTO</label>
                         <select type="text" name="id_cc" id="id_cc" class="form-control form-control-sm">
                             <option value="0">--Seleccione--</option>
+                            <?php
+                            foreach ($centros as $c) {
+                                $slc = $c['id_area'] == $id_cc ? 'selected' : '';
+                                echo '<option value="' . $c['id_area'] . '" ' . $slc . '>' . $c['nom_area'] . '</option>';
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="form-group col-md-3">
                         <label for="valor_cc" class="small">VALOR CC</label>
-                        <input type="text" name="valor_cc" id="valor_cc" min="<?= $min; ?>" max="<?= $max; ?>" class="form-control form-control-sm" required style="text-align: right;" onkeyup="valorMiles(id)" value="<?= $max; ?>">
+                        <input type="text" name="valor_cc" id="valor_cc" min="<?= $min; ?>" max="<?= $max; ?>" class="form-control form-control-sm" required style="text-align: right;" onkeyup="valorMiles(id)" value="<?= isset($value_cc) ? $value_cc : $max; ?>">
                     </div>
                 </div>
             </form>
@@ -136,9 +215,13 @@ $max = $max < 0 ? 0 : $max;
                             $id = $ce['id'];
                             $editar = null;
                             $detalles = null;
-                            if (true) {
-                                $eliminar = '<a value="' . $id_doc . '" onclick="eliminarCentroCosto(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+                            if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
                                 $editar = '<a value="' . $id_doc . '" onclick="editarCentroCosto(' . $id . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+                            }
+                            if (PermisosUsuario($permisos, 5501, 4)  || $id_rol == 1) {
+                                $eliminar = '<a value="' . $id_doc . '" onclick="eliminarCentroCosto(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+                            }
+                            if (true) {
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
                             </button>
@@ -147,6 +230,7 @@ $max = $max < 0 ? 0 : $max;
                             </div>';
                             }
                             $valor = number_format($ce['valor'], 2, '.', ',');
+                            $acciones = null;
                         ?>
                             <tr id="<?php echo $id; ?>">
                                 <td class="text-left"><?php echo $ce['nom_municipio']; ?></td>
@@ -166,7 +250,7 @@ $max = $max < 0 ? 0 : $max;
     </div>
     <div class="text-right pt-3">
         <a type="button" class="btn btn-primary btn-sm" onclick="guardarCostos()">Guardar</a>
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>
 <?php

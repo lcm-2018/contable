@@ -213,9 +213,9 @@ $val_iva = $valores[1];
                             </div>';
                             } else {
                                 $editar = null;
-                                $detalles = null;
                             }
                             $valor = number_format($ce['valor_base'], 2, '.', ',');
+                            $acciones = NULL;
                         ?>
                             <tr id="<?php echo $id_doc; ?>">
                                 <td class="text-left"> <?php echo $tercero; ?></td>
@@ -242,6 +242,6 @@ $val_iva = $valores[1];
         <?php if ($band) { ?>
             <a type="button" class="btn btn-primary btn-sm" onclick="GuardarRetencion()">Guardar</a>
         <?php } ?>
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>

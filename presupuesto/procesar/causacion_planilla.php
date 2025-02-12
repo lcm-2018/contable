@@ -10,6 +10,7 @@ $id_vigencia = $_SESSION['id_vigencia'];
 $data = explode('|', file_get_contents("php://input"));
 $id_nomina = $data[0];
 $tipo_nomina = $data[1];
+$fec_doc = $data[2];
 $id_api_sena = 1245;
 $id_api_icbf = 1247;
 $id_api_comfam = 1246;
@@ -310,7 +311,7 @@ try {
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_pto, PDO::PARAM_INT);
     $sql->bindParam(2, $id_manu, PDO::PARAM_INT);
-    $sql->bindParam(3, $fecha, PDO::PARAM_STR);
+    $sql->bindParam(3, $fec_doc, PDO::PARAM_STR);
     $sql->bindParam(4, $objeto, PDO::PARAM_STR);
     $sql->bindParam(5, $iduser, PDO::PARAM_INT);
     $sql->bindParam(6, $fecha2);
@@ -360,7 +361,7 @@ try {
     $sql->bindParam(1, $id_pto, PDO::PARAM_INT);
     $sql->bindParam(2, $id_cdp, PDO::PARAM_INT);
     $sql->bindParam(3, $id_manu, PDO::PARAM_INT);
-    $sql->bindParam(4, $fecha, PDO::PARAM_STR);
+    $sql->bindParam(4, $fec_doc, PDO::PARAM_STR);
     $sql->bindParam(5, $objeto, PDO::PARAM_STR);
     $sql->bindParam(6, $iduser, PDO::PARAM_INT);
     $sql->bindParam(7, $fecha2);

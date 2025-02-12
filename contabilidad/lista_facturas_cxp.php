@@ -11,6 +11,7 @@ include '../financiero/consultas.php';
 $datos = isset($_POST['id']) ? explode('|', $_POST['id']) : exit('Acceso no disponible');
 $id_doc = $datos[0];
 $id_factura = isset($datos[1]) ? $datos[1] : 0;
+$objeto = $_POST['objeto'];
 $vigencia = $_SESSION['vigencia'];
 function pesos($valor)
 {
@@ -89,7 +90,7 @@ if (empty($detalle)) {
         'valor_pago' => 0,
         'valor_base' => 0,
         'valor_iva' => 0,
-        'detalle' => ''
+        'detalle' => $objeto
     ];
 }
 ?>

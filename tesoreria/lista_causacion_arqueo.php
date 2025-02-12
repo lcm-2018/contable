@@ -25,11 +25,20 @@ $fecha = fechaSesion($vigencia, $_SESSION['id_user'], $cmd);
 $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
 
 try {
-    $sql = "SELECT
-                `id_tercero_api`
+    $sql = "SELECT 
+                `tb_terceros`.`id_tercero_api` 
             FROM
-                `tes_facturador`
-            WHERE (`estado` = 1)";
+                `seg_usuarios_sistema` 
+                INNER JOIN `tb_terceros` 
+                    ON (`seg_usuarios_sistema`.`num_documento` = `tb_terceros`.`nit_tercero`) 
+            WHERE `seg_usuarios_sistema`.`id_usuario` IN 
+                (SELECT DISTINCT 
+                    `id_usr_crea` 
+                FROM
+                    (SELECT  `id_usr_crea`  FROM `fac_facturacion`  
+                    UNION 
+                    SELECT  `id_usr_crea`  FROM `fac_otros` 
+                    UNION SELECT  `id_usr_crea`  FROM `far_ventas`) AS `t`)";
     $rs = $cmd->query($sql);
     $facturador = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -43,6 +52,10 @@ if (!empty($facturador)) {
     }
     $ids = implode(',', $id_t);
     $terceros = getTerceros($ids, $cmd);
+    //ordenar terceros por nom_tercero
+    usort($terceros, function ($a, $b) {
+        return $a['nom_tercero'] <=> $b['nom_tercero'];
+    });
 }
 // consultar los conceptos asociados al recuado del arqueo
 try {
@@ -127,11 +140,8 @@ $valor_pagar = 0;
                         <div class="col" id="divBanco">
                             <select name="id_facturador" id="id_facturador" class="form-control form-control-sm" required onchange="calcularCopagos2(this)">
                                 <option value="0">--Seleccione--</option>
-                                <?php foreach ($facturador as $fact) {
-                                    $key = array_search($fact['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
-                                    $nombre = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
-                                    $cc = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
-                                    echo '<option value="' . $fact['id_tercero_api'] . '">' . $nombre . ' -> ' . $cc . '</option>';
+                                <?php foreach ($terceros as $tc) {
+                                    echo '<option value="' . $tc['id_tercero_api'] . '">' . $tc['nom_tercero'] . ' -> ' . $tc['nit_tercero'] . '</option>';
                                 }
                                 ?>
                             </select>

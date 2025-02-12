@@ -29,15 +29,22 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 if ($id_doc == 0) {
     try {
         $sql = "SELECT
-                    `pto_crp`.`id_pto_crp`
-                    , `pto_crp`.`id_tercero_api`
+                    `pto_crp`.`id_pto_crp` AS `id_crp`
+                    , `pto_crp`.`id_tercero_api` AS `id_tercero`
                     , `pto_crp`.`fecha`
-                    , `pto_crp`.`objeto`
+                    , `pto_crp`.`fecha` AS `fecha_crp`
+                    , `pto_crp`.`objeto` AS `detalle`
+                    , 'CUENTAS POR PAGAR' AS `fuente`
+                    , 0 AS `estado`
+                    , 0 AS `val_factura`
+                    , 0 AS `val_imputacion`
+                    , 0 AS `val_ccosto`
+                    , 0 AS `val_retencion`
                 FROM
                     `pto_crp`
                 WHERE (`pto_crp`.`id_pto_crp` = $id_crp) LIMIT 1";
         $rs = $cmd->query($sql);
-        $datosCrp = $rs->fetch();
+        $datosDoc = $rs->fetch();
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -53,48 +60,11 @@ if ($id_doc == 0) {
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
-
-    try {
-        if (isset($_SESSION['id_doc'])) {
-            // Usar el ID almacenado en la sesión
-            $id_doc = $_SESSION['id_doc'];
-        } else {
-            $estado = 1;
-            $id_tercero = $datosCrp['id_tercero_api'];
-            $detalle = $datosCrp['objeto'];
-            $iduser = $_SESSION['id_user'];
-            $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-            $fecha = $date->format('Y-m-d');
-            $fecha2 = $date->format('Y-m-d H:i:s');
-            $query = "INSERT INTO `ctb_doc`
-                        (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`, `id_crp`)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            $query = $cmd->prepare($query);
-            $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
-            $query->bindParam(2, $tipo_dato, PDO::PARAM_INT);
-            $query->bindParam(3, $id_manu, PDO::PARAM_INT);
-            $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
-            $query->bindParam(5, $fecha, PDO::PARAM_STR);
-            $query->bindParam(6, $detalle, PDO::PARAM_STR);
-            $query->bindParam(7, $estado, PDO::PARAM_INT);
-            $query->bindParam(8, $iduser, PDO::PARAM_INT);
-            $query->bindParam(9, $fecha2);
-            $query->bindParam(10, $id_crp, PDO::PARAM_INT);
-            $query->execute();
-            $ultimoInsert = $cmd->lastInsertId();
-            if ($ultimoInsert > 0) {
-                $_SESSION['id_doc'] = $ultimoInsert; // Guardar el ID en la sesión
-                $id_doc = $ultimoInsert;
-            } else {
-                echo $query->errorInfo()[2];
-                exit();
-            }
-        }
-    } catch (PDOException $e) {
-        echo $e->getMessage();
-    }
+} else {
+    $datosDoc = GetValoresCxP($id_doc, $cmd);
+    $id_manu = $datosDoc['id_manu'];
 }
-$datosDoc = GetValoresCxP($id_doc, $cmd);
+
 try {
     $sql = "SELECT
                 `id_ctb_doc`
@@ -113,15 +83,10 @@ $fecha = date('Y-m-d', strtotime($datosDoc['fecha']));
 
 // Consulto tercero registrado en contratación del api de tercero para mostrar el nombre
 // Consulta terceros en la api ********************************************* API
-if (!empty($datosDoc)) {
-    if ($datosDoc['id_tercero'] > 0) {
-        $terceros = getTerceros($datosDoc['id_tercero'], $cmd);
-        $tercero = ltrim($terceros[0]['nom_tercero']);
-    } else {
-        $tercero = '---';
-    }
-} else {
-    $tercero = '---';
+$tercero = '---';
+if (!empty($datosDoc) && $datosDoc['id_tercero'] > 0) {
+    $terceros = getTerceros($datosDoc['id_tercero'], $cmd);
+    $tercero = ltrim($terceros[0]['nom_tercero']);
 }
 $ver = 'readonly';
 ?>
@@ -154,38 +119,43 @@ $ver = 'readonly';
                             <div class="card-body" id="divCuerpoPag">
                                 <div>
                                     <div class="right-block">
-                                        <div class="row mb-1">
-                                            <div class="col-2">
-                                                <div class="col"><span class="small">NUMERO ACTO:</span></div>
-                                            </div>
-                                            <div class="col-10"><input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $datosDoc['id_manu']; ?>" required readonly>
-                                                <input type="hidden" id="tipodato" name="tipodato" value="<?php echo $tipo_dato; ?>">
-                                                <input type="hidden" id="id_crpp" name="id_crpp" value="<?php echo $datosDoc['id_crp'] > 0 ? $datosDoc['id_crp'] : 0 ?>">
+                                        <form id="formGetMvtoCtb">
+                                            <div class="row mb-1">
+                                                <div class="col-2">
+                                                    <div class="col"><span class="small">NUMERO ACTO:</span></div>
+                                                </div>
+                                                <div class="col-10">
+                                                    <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $id_manu; ?>" required>
+                                                    <input type="hidden" id="tipodato" name="tipodato" value="<?php echo $tipo_dato; ?>">
+                                                    <input type="hidden" id="id_crpp" name="id_crpp" value="<?php echo $datosDoc['id_crp'] > 0 ? $datosDoc['id_crp'] : 0 ?>">
 
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <div class="col-2">
-                                                <div class="col"><span class="small">FECHA:</span></div>
+                                            <div class="row mb-1">
+                                                <div class="col-2">
+                                                    <div class="col"><span class="small">FECHA:</span></div>
+                                                </div>
+                                                <div class="col-10">
+                                                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datosDoc['fecha'])); ?>" min="<?= date('Y-m-d', strtotime($datosDoc['fecha_crp'])) ?>" max="<?= $_SESSION['vigencia'] . '-12-31' ?>" required>
+                                                </div>
                                             </div>
-                                            <div class="col-10"> <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datosDoc['fecha'])); ?>" readonly></div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <div class="col-2">
-                                                <div class="col"><span class="small">TERCERO:</span></div>
+                                            <div class="row mb-1">
+                                                <div class="col-2">
+                                                    <div class="col"><span class="small">TERCERO:</span></div>
+                                                </div>
+                                                <div class="col-10"><input type="text" name="tercero" id="tercero" class="form-control form-control-sm" value="<?php echo $tercero; ?>" readonly>
+                                                    <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $datosDoc['id_tercero'] ?>">
+                                                </div>
                                             </div>
-                                            <div class="col-10"><input type="text" name="tercero" id="tercero" class="form-control form-control-sm" value="<?php echo $tercero; ?>" readonly>
-                                                <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $datosDoc['id_tercero'] ?>">
+                                            <div class="row mb-1">
+                                                <div class="col-2">
+                                                    <div class="col"><span class="small">OBJETO:</span></div>
+                                                </div>
+                                                <div class="col-10">
+                                                    <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-span="Default select example" rows="3" required="required"><?= substr($datosDoc['detalle'], 0, 200); ?></textarea>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <div class="col-2">
-                                                <div class="col"><span class="small">OBJETO:</span></div>
-                                            </div>
-                                            <div class="col-10">
-                                                <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-span="Default select example" rows="3" required="required" readonly><?php echo $datosDoc['detalle']; ?></textarea>
-                                            </div>
-                                        </div>
+                                        </form>
                                         <?php
                                         if ($tipo_dato == '3') {
                                         ?>
@@ -208,7 +178,7 @@ $ver = 'readonly';
                                                 <div class="col-4 input-group input-group-sm p-0">
                                                     <div class="form-control" readonly id="valCentroCosto"><?php echo pesos($datosDoc['val_ccosto']); ?></div>
                                                     <div class="input-group-append" title="Asignar centros de costo automaticamente">
-                                                        <button class="btn btn-outline-warning" type="button" onclick="CausaAuCentroCostos(id)"><i class="fas fa-eject fa-lg"></i></button>
+                                                        <button class="btn btn-outline-warning" type="button" onclick="CausaAuCentroCostos(id)" <?= $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-eject fa-lg"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -222,6 +192,7 @@ $ver = 'readonly';
                                             </div>
                                             <div class="text-center py-2">
                                                 <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoCxp();" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>
+                                                <button type="button" class="btn btn-warning btn-sm" onclick="" <?php echo $datosDoc['estado'] == '2' ? 'disabled' : '' ?> id="GuardaDocCtb" text="<?= $id_doc ?>">Guardar</button>
                                             </div>
                                         <?php
                                         }

@@ -309,7 +309,7 @@ if ($id_r == 3) {
                                         <td class="text-center"><?php echo $nominas[$key]['id_nomina'] ?></td>
                                         <td class="text-left"><?php echo $vl['id_manu']; ?></td>
                                         <td class="text-left"><?php echo '-'  ?></td>
-                                        <td class="text-left"><?php echo date('Y-m-d', strtotime($vl['fecha'])); ?></td>
+                                        <td class="text-left"><?php echo '<input type="date" class="form-control form-control-sm" name="fec_doc[]" value="' . date('Y-m-d', strtotime($vl['fecha'])) . '" min="' . date('Y-m-d', strtotime($vl['fecha'])) . '" max="' .$_SESSION['vigencia'] . '-12-31">'; ?></td>
                                         <td class="text-left"><?php echo $vl['objeto']; ?></td>
                                         <td class="text-right"> <?php echo  pesos($vl['valor']); ?></td>
                                         <td class="text-center"> <?php echo $causar ?></td>
@@ -329,8 +329,10 @@ if ($id_r == 3) {
         </div>
     </div>
     <div class="text-right pt-3">
-        <a type="button" class="btn btn-primary btn-sm" data-dismiss="modal"> Procesar lote</a>
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <?php if (false) { ?>
+            <a type="button" class="btn btn-primary btn-sm" data-dismiss="modal"> Procesar lote</a>
+        <?php } ?>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>
 <?php

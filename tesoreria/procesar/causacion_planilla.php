@@ -276,7 +276,7 @@ if ($nomina['tipo'] == 'N') {
 }
 $nom_mes = isset($meses[$nomina['mes']]) ? 'MES DE ' . mb_strtoupper($meses[$nomina['mes']]) : '';
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-$fecha = $date->format('Y-m-d');
+$fecha = $data[5];
 $objeto = "PAGO NOMINA PATRONAL " . $cual . " N° " . $nomina['id_nomina'] . ' ' . $nom_mes . " VIGENCIA " . $nomina['vigencia'];
 $sede = 1;
 $iduser = $_SESSION['id_user'];

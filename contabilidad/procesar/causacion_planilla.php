@@ -159,6 +159,29 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `nom_causacion`.`id_causacion`
+                , `nom_causacion`.`centro_costo`
+                , `nom_causacion`.`id_tipo`
+                , `nom_tipo_rubro`.`nombre`
+                , `nom_causacion`.`cuenta`
+                , `nom_causacion`.`detalle`
+                , `tb_centrocostos`.`es_pasivo`
+                FROM
+                    `nom_causacion`
+                INNER JOIN `nom_tipo_rubro` 
+                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
+                INNER JOIN `tb_centrocostos`
+                    ON (`nom_causacion`.`centro_costo` = `tb_centrocostos`.`id_centro`)";
+    $rs = $cmd->query($sql);
+    $cuentas_causacion = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 $cuentas = [];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -280,7 +303,7 @@ if ($nomina['tipo'] == 'N') {
 }
 $nom_mes = isset($meses[$nomina['mes']]) ? 'MES DE ' . mb_strtoupper($meses[$nomina['mes']]) : '';
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-$fecha = $date->format('Y-m-d');
+$fecha = $data[3];
 $objeto = "PAGO NOMINA PATRONAL " . $cual . " N° " . $nomina['id_nomina'] . ' ' . $nom_mes . " VIGENCIA " . $nomina['vigencia'];
 $sede = 1;
 $iduser = $_SESSION['id_user'];
@@ -351,7 +374,6 @@ try {
     $id_doc_nom = $cmd->lastInsertId();
     if (!($cmd->lastInsertId() > 0)) {
         echo $query->errorInfo()[2];
-        exit();
         exit();
     }
 } catch (PDOException $e) {

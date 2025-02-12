@@ -462,7 +462,7 @@ $meses = array(
     '12' => 'Diciembre'
 );
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-$fecha = $date->format('Y-m-d');
+$fecha = $data[5];
 if ($tipo_nomina == 'N') {
     $objeto = 'LIQUIDACIÓN MENSUAL EMPLEADOS, ' . mb_strtoupper($meses[$mes]) . ' DE ' . $vigencia;
     $id_nom_ce = $id_nomina;

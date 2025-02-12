@@ -40,7 +40,8 @@ $terceros = getTerceros($ids, $cmd);
 $cmd = null;
 $res['status'] = 'error';
 if (!empty($detalle)) {
-    $tercero = ltrim($terceros[0]['nom_tercero'] .' -> ' . $terceros[0]['nit_tercero']);
+    $tercero = isset($terceros[0]) ? ltrim($terceros[0]['nom_tercero'] . ' -> ' . $terceros[0]['nit_tercero']) : '';
+    $id_tercero = $detalle['id_tercero_api'] > 0 ? $detalle['id_tercero_api'] : 0;
     $res['status'] = 'ok';
     $res[1] = '<input type="text" id="codigoCta" name="codigoCta" class="form-control form-control-sm" value="' .  $detalle['cuenta'] . ' - ' . $detalle['nombre'] . '">
             <input type="hidden" name="id_codigoCta" id="id_codigoCta" class="form-control form-control-sm" value="' . $detalle['id_cuenta'] . '">

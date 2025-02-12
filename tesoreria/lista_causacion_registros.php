@@ -22,28 +22,26 @@ try {
                 , `nom_nominas`.`mes`
                 , `nom_nominas`.`vigencia`
                 , `nom_nominas`.`estado`
+                , DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') AS `fecha`
+                , `tb_terceros`.`nom_tercero`
+                , `valores`.`valor`
             FROM
-                `nom_nomina_pto_ctb_tes`
-                INNER JOIN `nom_nominas` 
+                `nom_nominas`
+                INNER JOIN `nom_nomina_pto_ctb_tes` 
                     ON (`nom_nomina_pto_ctb_tes`.`id_nomina` = `nom_nominas`.`id_nomina`)
-            WHERE (`nom_nominas`.`estado` = 4) AND`nom_nomina_pto_ctb_tes`.`tipo` <> 'PL'
-            UNION 
-            SELECT
-                `nom_nomina_pto_ctb_tes`.`id`
-                , `nom_nomina_pto_ctb_tes`.`id_nomina`
-                , `nom_nomina_pto_ctb_tes`.`tipo`
-                , `nom_nomina_pto_ctb_tes`.`cdp`
-                , `nom_nomina_pto_ctb_tes`.`crp`
-                , `nom_nomina_pto_ctb_tes`.`cnom`
-                , `nom_nominas`.`descripcion`
-                , `nom_nominas`.`mes`
-                , `nom_nominas`.`vigencia`
-                , `nom_nominas`.`planilla` AS `estado`
-            FROM
-                `nom_nomina_pto_ctb_tes`
-                INNER JOIN `nom_nominas` 
-                    ON (`nom_nomina_pto_ctb_tes`.`id_nomina` = `nom_nominas`.`id_nomina`)
-            WHERE (`nom_nominas`.`planilla` = 4 AND `nom_nomina_pto_ctb_tes`.`tipo` = 'PL')";
+                LEFT JOIN `ctb_doc`
+                    ON (`nom_nomina_pto_ctb_tes`.`cnom` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN `tb_terceros`
+                    ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                LEFT JOIN 
+                    (SELECT
+                        `id_ctb_doc`
+                        , SUM(`valor`) AS `valor` 
+                    FROM
+                        `pto_cop_detalle`
+                    GROUP BY `id_ctb_doc`) AS `valores`
+                    ON (`nom_nomina_pto_ctb_tes`.`cnom` = `valores`.`id_ctb_doc`)
+            WHERE `nom_nominas`.`estado` = 4 OR (`nom_nominas`.`planilla` = 4 AND `nom_nomina_pto_ctb_tes`.`tipo` = 'PL')";
     $rs = $cmd->query($sql);
     $nominas = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -78,7 +76,12 @@ try {
         },
         "order": [
             [0, "desc"]
-        ]
+        ],
+        columnDefs: [{
+            class: 'text-wrap',
+            targets: [1],
+        }],
+
     });
     $('#tableContrtacionCdp').wrap('<div class="overflow" />');
 </script>
@@ -111,10 +114,10 @@ try {
                     ?>
                             <tr>
                                 <td class="text-center"><?php echo $id_nomina ?></td>
-                                <td class="text-left"><?php echo $nm['descripcion'] . ' ' . $pl . ', NÓMINA No. ' . $nm['id_nomina'] . ' DE ' . $vigencia ?></td>
-                                <td class="text-left"><?php echo ''  ?></td>
-                                <td class="text-left"><?php echo '' ?></td>
-                                <td class="text-left"><?php echo '' ?></td>
+                                <td class="text-left" style="min-width: 300PX;"><?php echo $nm['descripcion'] . ' ' . $pl . ', NÓMINA No. ' . $nm['id_nomina'] . ' DE ' . $vigencia ?></td>
+                                <td class="text-left"><?php echo '<input type="date" name="fec_doc[]" class="form-control form-control-sm" value="' . $nm['fecha'] . '" min="' . $nm['fecha'] . '" max="' . $vigencia. '-12-31">' ?></td>
+                                <td class="text-left"><?php echo $nm['nom_tercero'] ?></td>
+                                <td class="text-left text-right"><?php echo '$ ' . number_format($nm['valor'], 2, ',', '.') ?></td>
                                 <td class="text-center"> <?php echo $causar ?></td>
                             </tr>
                     <?php

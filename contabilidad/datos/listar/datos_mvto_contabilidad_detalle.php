@@ -48,7 +48,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$estado = $estado['estado'];
+$estado = !empty($estado) ? $estado['estado'] : 1;
 $data = [];
 $totDebito = 0;
 $totCredito = 0;

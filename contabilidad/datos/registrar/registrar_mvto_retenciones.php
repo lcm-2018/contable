@@ -20,6 +20,7 @@ $id_doc = $_POST['id_docr'];
 $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha2 = $date->format('Y-m-d H:i:s');
+$contar = 0;
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -82,7 +83,6 @@ if ($tipo_rete != '3') {
     $val_sobretasas = $_POST['valor_sob'];
     $ids = array_merge($retenciones, $sobretasas);
     $ids = implode(',', $ids);
-    $contar = 0;
     try {
         $sql = "SELECT `id_retencion`,`id_rango`,`tarifa` FROM `ctb_retencion_rango` WHERE `id_retencion` IN ($ids)";
         $rs = $cmd->query($sql);

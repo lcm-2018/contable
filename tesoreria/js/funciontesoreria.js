@@ -408,9 +408,15 @@ function CegresoNomina() {
 	});
 }
 function CausaCENomina(boton) {
+	var fila = boton.parentNode.parentNode;
+	var fecha = fila.querySelector("input[name='fec_doc[]']").value;
+	if (fecha == "") {
+		mjeError("La fecha no puede estar vacia");
+		return false;
+	}
 	var cant = document.getElementById("total");
 	var valor = Number(cant.value);
-	var data = atob(boton.getAttribute("text"));
+	var data = atob(boton.getAttribute("text"))+ "|" + fecha;
 	data = data.split("|");
 	var tipo = data[1];
 	var ruta = "";

@@ -52,7 +52,8 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT SUM(`valor`) AS `total`, `id_nomina` FROM `nom_cdp_empleados` GROUP BY `id_nomina`";
+    $sql = "SELECT SUM(`valor`) AS `total`, `id_nomina` FROM `nom_cdp_empleados` WHERE `tipo` = 'N'
+            GROUP BY `id_nomina`";
     $rs = $cmd->query($sql);
     $totxnomina = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -116,9 +117,10 @@ $meses = [
             <table id="tableContrtacionCdp" class="table table-striped table-bordered  table-sm table-hover shadow" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th class="w-15">ID</th>
+                        <th class="w-10">ID</th>
                         <th class="w-60">DESCRIPCIÓN</th>
                         <th class="w-15">VALOR SOLICITADO</th>
+                        <th class="w-10">FECHA</th>
                         <th class="w-10">ACCIONES</th>
                     </tr>
                 </thead>
@@ -143,6 +145,7 @@ $meses = [
                             <td class="text-left"><?php echo $ce['id_nomina'] ?></td>
                             <td class="text-left"><?php echo $ce['descripcion'] . ' - ' . $meses[$mesu] . ' DE ' . $ce['vigencia'] . $patronal ?></td>
                             <td class="text-right">$ <?php echo number_format($total, 2, ',', '.') ?></td>
+                            <td class="text-center"><input type="date" class="form-control form-control-sm" name="fec_doc[]" value="<?php echo date('Y-m-d') ?>"></td>
                             <td class="text-center"> <?php echo $editar ?></td>
                         </tr>
                     <?php
@@ -153,6 +156,6 @@ $meses = [
         </div>
     </div>
     <div class="text-right pt-3">
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>

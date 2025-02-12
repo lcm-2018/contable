@@ -80,6 +80,7 @@
 		}
 		var tableMvtoCtb = $("#tableMvtoContable").DataTable({
 			dom: setdom,
+			autoWidth: false,
 			buttons: [
 				{
 					text: ' <span class="fas fa-plus-circle fa-lg"></span>',
@@ -114,7 +115,8 @@
 				{ data: "botones" }],
 			columnDefs: [
 				{ class: 'text-wrap', targets: [3] },
-				{ orderable: false, targets: 5 }
+				{ orderable: false, targets: 5 },
+				{ targets: -1, width: "160px", className: "text-nowrap" }
 			],
 			order: [
 				[2, "desc"],
@@ -509,6 +511,15 @@ document.addEventListener("submit", (e) => {
 
 $('#divModalForms').on('click', '#gestionarMvtoCtb', function () {
 	var id = $(this).attr('text');
+	GuardaDocCtb(id);
+
+});
+$('#GuardaDocCtb').on('click', function () {
+	var id = $(this).attr('text');
+	GuardaDocCtb(id);
+
+});
+function GuardaDocCtb(id) {
 	$('.is-invalid').removeClass('is-invalid');
 	if ($('#fecha').val() == '') {
 		$('#fecha').addClass('is-invalid');
@@ -526,6 +537,10 @@ $('#divModalForms').on('click', '#gestionarMvtoCtb', function () {
 		$('#objeto').addClass('is-invalid');
 		$('#objeto').focus();
 		mjeError('El objeto no puede estar vacio');
+	} else if ($('#objeto').val().length > 200) {
+		$('#objeto').addClass('is-invalid');
+		$('#objeto').focus();
+		mjeError('El objeto no puede tener mas de 200 caracteres');
 	} else {
 		var datos = $('#formGetMvtoCtb').serialize() + '&id=' + id;
 		url = "datos/registrar/registrar_mvto_contable_doc.php";
@@ -533,19 +548,39 @@ $('#divModalForms').on('click', '#gestionarMvtoCtb', function () {
 			type: 'POST',
 			url: url,
 			data: datos,
+			dataType: 'json',
 			success: function (r) {
-				if (r == 'ok') {
+				if (r.status == 'ok') {
 					$('#tableMvtoContable').DataTable().ajax.reload();
 					$('#divModalForms').modal('hide');
 					mje('Proceso realizado correctamente');
+					setTimeout(() => {
+						if ($('#tableMvtoContableDetalle').length) {
+							$('<form action="lista_documentos_det.php" method="post">' +
+								'<input type="hidden" name="id_doc" value="' + r.id_doc + '" />' +
+								'<input type="hidden" name="tipo_dato" value="' + r.t_dato + '" />' +
+								'</form>').appendTo("body").submit();
+						}
+					}, 300);
 				} else {
-					mjeError('Error:', r);
+					function mjeError(titulo, mensaje) {
+						Swal.fire({
+							title: titulo,
+							html: mensaje, // Renderiza el HTML en el mensaje
+							icon: "error"
+						});
+					}
+					mjeError('Error:', r.msg);
 				}
 
 			}
 		});
 	}
 	return false;
+};
+
+$('#divModalForms').on('keyup', '#valor_pagar', function () {
+	$('#valor_base').val($('#valor_pagar').val());
 
 });
 // Cargar lista detalle de movimiento contables
@@ -785,6 +820,7 @@ let cerrarDocumentoCtb = function (dato) {
 		.then((response) => {
 			if (response.status == "ok") {
 				$('#tableMvtoContable').DataTable().ajax.reload();
+				$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
 			} else {
 				mjeError("Documento no cerrado", "Verifique información ingresada" + response.msg);
 			}
@@ -878,7 +914,13 @@ let CargaObligaCrp = function (dato) {
 function CausaNomina(boton) {
 	var cant = document.getElementById("total");
 	var valor = Number(cant.value);
-	var data = boton.value;
+	var fila = boton.closest("tr");
+	var fecha = fila.querySelector("input[name='fec_doc[]']").value;
+	if (fecha == "") {
+		mjeError("La fecha no puede estar vacia");
+		return false;
+	}
+	var data = boton.value + "|" + fecha;
 	data = data.split("|");
 	var tipo = data[2];
 	var ruta = "";
@@ -1889,7 +1931,8 @@ const ProcesaFacturas = (boton) => {
 };
 const FacturarCtasPorPagar = (id) => {
 	let url = "lista_facturas_cxp.php";
-	$.post(url, { id: id }, function (he) {
+	var objeto = $('#objeto').length ? $('#objeto').val() : '';
+	$.post(url, { id: id, objeto: objeto }, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-lg");
 		$("#divTamModalForms").addClass("modal-xl");
@@ -2200,6 +2243,9 @@ const imprSelecDoc = (nombre, id) => {
 	ventimp.document.close();
 	ventimp.print();
 	ventimp.close();
+	if ($('#tableMvtoContableDetalle').length) {
+		window.location.reload();
+	}
 };
 
 // Imprimir certificado de ingresos y retenciones

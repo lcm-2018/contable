@@ -118,6 +118,22 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
+                `valor_pago`
+                , `valor_base`
+            FROM
+                `ctb_factura`
+            WHERE (`id_ctb_doc` = $id_doc)";
+    $rs = $cmd->query($sql);
+    $valor = $rs->fetch();
+    $val_sugerido = !empty($valor) ? $valor['valor_pago'] : 0;
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
                 `id_pto_crp_det`
                 , `valor`
                 , `valor_liberado`
@@ -157,25 +173,25 @@ try {
                             <?php if ($band) { ?>
                                 <span class="small">Código presupuestal</span>
                             <?php } ?>
-                            <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>"readonly><?php echo $l['cod_pptal'] ?></div>
+                            <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>" readonly><?php echo $l['cod_pptal'] ?></div>
                         </div>
                         <div class="form-group col-md-5">
                             <?php if ($band) { ?>
                                 <span class="small">Rubro</span>
                             <?php } ?>
-                            <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>"readonly><?php echo $l['nom_rubro'] ?></div>
+                            <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>" readonly><?php echo $l['nom_rubro'] ?></div>
                         </div>
                         <div class="form-group col-md-2">
                             <?php if ($band) { ?>
                                 <span for="valor" class="small">Valor RP</span>
                             <?php } ?>
-                            <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>"readonly><?php echo number_format($max, 2) ?></div>
+                            <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>" readonly><?php echo number_format($max, 2) ?></div>
                         </div>
                         <div class="form-group col-md-2">
                             <?php if ($band) { ?>
                                 <span for="valor" class="small">Valor CxP</span>
                             <?php } ?>
-                            <input type="text" name="valor[<?php echo $id_detalle ?>]" id="valor" onkeyup="valorMiles(id)" class="form-control form-control-sm text-right ValImputacion" min="0" max="<?php echo $max ?>" value="<?php echo number_format($value, 2) ?>">
+                            <input type="text" name="valor[<?php echo $id_detalle ?>]" id="valor" onkeyup="valorMiles(id)" class="form-control form-control-sm text-right ValImputacion" min="0" max="<?php echo $max ?>" value="<?php echo number_format($val_sugerido, 2) ?>">
                         </div>
                     </div>
                 <?php

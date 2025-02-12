@@ -113,12 +113,43 @@ if ($id_crpp > 0) {
     }
     // Consulto el numero de documentos asociados al pago 
     try {
-        /*
-        $sql = "SELECT `id_ctb_cop` FROM `pto_documento_detalles` WHERE (`id_ctb_doc` =$id_doc) GROUP BY `id_ctb_cop`;";
+        $sql = "SELECT
+                    `ctb_doc`.`id_manu`
+                    , `ctb_factura`.`num_doc`
+                    , `ctb_tipo_doc`.`tipo`
+                    , `ctb_factura`.`fecha_fact`
+                    , `ctb_factura`.`fecha_ven`
+                    , `ctb_factura`.`valor_pago`
+                    , `ctb_factura`.`valor_iva`
+                    , `ctb_factura`.`valor_base`
+                    , `descuento`.`dcto`
+                FROM
+                    `pto_pag_detalle`
+                    INNER JOIN `pto_cop_detalle` 
+                        ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                    INNER JOIN `ctb_doc` 
+                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    INNER JOIN `ctb_factura` 
+                        ON (`ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    INNER JOIN `ctb_tipo_doc` 
+                        ON (`ctb_factura`.`id_tipo_doc` = `ctb_tipo_doc`.`id_ctb_tipodoc`)
+                    LEFT JOIN
+                        (SELECT
+                            SUM(`ctb_causa_retencion`.`valor_retencion`) AS `dcto`
+                            , `pto_pag_detalle`.`id_ctb_doc`
+                        FROM
+                            `pto_pag_detalle`
+                            INNER JOIN `pto_cop_detalle` 
+                                ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                            INNER JOIN `ctb_doc` 
+                                ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                            INNER JOIN `ctb_causa_retencion` 
+                                ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`pto_pag_detalle`.`id_ctb_doc` = $id_doc)) AS `descuento`
+                        ON (`descuento`.`id_ctb_doc` = `pto_pag_detalle`.`id_ctb_doc`)
+                WHERE (`pto_pag_detalle`.`id_ctb_doc` = $id_doc)";
         $rs = $cmd->query($sql);
-        $documentos = $rs->fetchAll();
-        */
-        $documentos = [];
+        $data = $rs->fetch();
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -487,91 +518,41 @@ $meses = [
             </div>
             <?php
             $total_pto = 0;
-            foreach ($documentos as $doc) {
-                //Consulto la factura asociada a cada docuemnto
-                // Datos de la factura 
-                try {
-                    $sql = "SELECT
-                            `ctb_factura`.`id_ctb_doc`
-                            , `ctb_tipo_doc`.`tipo` as tipo
-                            , `ctb_factura`.`num_doc`
-                            , `ctb_factura`.`fecha_fact`
-                            , `ctb_factura`.`fecha_ven`
-                            , `ctb_factura`.`valor_pago`
-                            , `ctb_factura`.`valor_iva`
-                            , `ctb_factura`.`valor_base`
-                            FROM
-                            `ctb_factura`
-                            INNER JOIN `ctb_tipo_doc` 
-                                ON (`ctb_factura`.`tipo_doc` = `ctb_tipo_doc`.`id_ctb_tipodoc`)
-                            WHERE (`ctb_factura`.`id_ctb_doc` ={$documento['id_ctb_cop']});";
-                    $res = $cmd->query($sql);
-                    $factura = $res->fetch();
-                    $fecha_fact = date('Y-m-d', strtotime($factura['fecha_fact']));
-                    $fecha_ven = date('Y-m-d', strtotime($factura['fecha_ven']));
-                } catch (PDOException $e) {
-                    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-                }
-                // consulta para motrar cuadro de retenciones
-                try {
-                    $sql = "SELECT
-                         SUM(`valor_retencion`) AS descuentos
-                        FROM
-                        `ctb_causa_retencion`
-                        WHERE (`id_ctb_doc` ={$documento['id_ctb_cop']});";
-                    $rs = $cmd->query($sql);
-                    $retenciones = $rs->fetch();
-                    $descuentos = $retenciones['descuentos'];
-                } catch (PDOException $e) {
-                    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-                }
-                // Consulto el id_manu de la causación 
-                try {
-                    $sql = "SELECT id_manu FROM `ctb_doc` WHERE `id_ctb_doc` ={$documento['id_ctb_cop']};";
-                    $rs = $cmd->query($sql);
-                    $causa = $rs->fetch();
-                    $id_manu_doc = $causa['id_manu'];
-                } catch (PDOException $e) {
-                    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-                }
-
             ?>
 
-                <table class="table-bordered bg-light" style="width:100% !important;">
-                    <tr>
-                        <td style="text-align: left">Causación</td>
-                        <td>Documento</td>
-                        <td>Número</td>
-                        <td>Fecha</td>
-                        <td>Vencimiento</td>
-                    </tr>
-                    <tr>
-                        <td><?php echo   $id_manu_doc; ?></td>
-                        <td><?php echo $factura['tipo']; ?></td>
-                        <td><?php echo $factura['num_doc']; ?></td>
-                        <td><?php echo $fecha_fact; ?></td>
-                        <td><?php echo $fecha_ven; ?></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: left">Valor factura</td>
-                        <td>Valor IVA</td>
-                        <td>Base</td>
-                        <td>Descuentos</td>
-                        <td>Neto</td>
-                    </tr>
-                    <tr>
-                        <td><?php echo number_format($factura['valor_pago'], 2, ',', '.'); ?></td>
-                        <td><?php echo  number_format($factura['valor_iva'], 2, ',', '.');; ?></td>
-                        <td><?php echo number_format($factura['valor_base'], 2, ',', '.'); ?></td>
-                        <td><?php echo number_format($descuentos, 2, ',', '.'); ?></td>
-                        <td><?php echo number_format(($factura['valor_pago'] - $descuentos), 2, ',', '.'); ?></td>
-                    </tr>
-                </table>
-                </br>
-            <?php
-            }
-            ?>
-        <?php }
+            <table class="table-bordered bg-light" style="width:100% !important;">
+                <tr>
+                    <td style="text-align: left">Causación</td>
+                    <td>Documento</td>
+                    <td>Número</td>
+                    <td>Fecha</td>
+                    <td>Vencimiento</td>
+                </tr>
+                <tr>
+                    <td><?php echo   $data['id_manu']; ?></td>
+                    <td><?php echo $data['tipo']; ?></td>
+                    <td><?php echo $data['num_doc']; ?></td>
+                    <td><?php echo date('Y-m-d', strtotime($data['fecha_fact'])); ?></td>
+                    <td><?php echo date('Y-m-d', strtotime($data['fecha_ven'])); ?></td>
+                </tr>
+                <tr>
+                    <td style="text-align: left">Valor factura</td>
+                    <td>Valor IVA</td>
+                    <td>Base</td>
+                    <td>Descuentos</td>
+                    <td>Neto</td>
+                </tr>
+                <tr>
+                    <td><?php echo number_format($data['valor_pago'], 2, ',', '.'); ?></td>
+                    <td><?php echo  number_format($data['valor_iva'], 2, ',', '.');; ?></td>
+                    <td><?php echo number_format($data['valor_base'], 2, ',', '.'); ?></td>
+                    <td><?php echo number_format($data['dcto'], 2, ',', '.'); ?></td>
+                    <td><?php echo number_format(($data['valor_pago'] - $data['dcto']), 2, ',', '.'); ?></td>
+                </tr>
+            </table>
+            </br>
+        <?php
+        }
         ?>
         <?php if ($documento['id_tipo_doc'] == '9') { ?>
             <div class="row">

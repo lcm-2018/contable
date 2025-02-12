@@ -1313,9 +1313,16 @@ $("#divCuerpoPag").on("click", "#btnPtoNomina", function () {
     });
 });
 function CofirmaCdpRp(boton) {
+    var fila = boton.parentNode.parentNode;
+    var fecha = fila.querySelector("input[name='fec_doc[]']").value;
+    if(fecha == ""){
+        mjeError("La fecha no puede estar vacia");
+        return false;
+    }
     var cant = document.getElementById("cantidad");
     var valor = Number(cant.value);
     var data = boton.value;
+    data = data + "|" + fecha;
     var datos = data.split("|");
     var tipo = datos[1];
     var ruta = "";
