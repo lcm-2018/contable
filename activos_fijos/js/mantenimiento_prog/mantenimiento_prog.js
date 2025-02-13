@@ -244,6 +244,10 @@
                 reloadtable('tb_notas_mantenimiento', pag);
                 $('#id_nota').val(res.id_nota);
                 $('#archivo').val(res.nombre_archivo);
+
+                pag = $('#tb_progreso_mantenimientos').DataTable().page.info().page;
+                reloadtable('tb_progreso_mantenimientos', pag);
+
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
             } else {

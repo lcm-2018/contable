@@ -57,6 +57,11 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <?php centros_costo($cmd, '--Centro Costo--') ?>
                                     </select>
                                 </div>    
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_sede_filtro">
+                                        <?php sedes($cmd, '--Sede--') ?>
+                                    </select>
+                                </div>    
                                 <div class="form-group col-md-1">
                                     <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
                                         <span class="fas fa-search fa-lg" aria-hidden="true"></span>                                       
@@ -83,10 +88,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <tr class="text-center centro-vertical">
                                         <th>Id</th>                                        
                                         <th>Nombre</th>
-                                        <th>Centro Costo</th>
                                         <th>Tipo Area</th>
-                                        <th>Responsable</th>
+                                        <th>Centro Costo</th>                                        
                                         <th>Sede</th>
+                                        <th>Responsable</th>                                        
                                         <th>Bodega</th>
                                         <th>Acciones</th>
                                     </tr>

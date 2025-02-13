@@ -16,6 +16,7 @@
             language: setIdioma,
             processing: true,
             serverSide: true,
+            autoWidth: false,
             ajax: {
                 url: 'listar_pedidos_detalles.php',
                 type: 'POST',
@@ -29,13 +30,14 @@
                 { 'data': 'cod_medicamento' },
                 { 'data': 'nom_medicamento' },
                 { 'data': 'cantidad' },
+                { 'data': 'aprobado' },
                 { 'data': 'valor' },
                 { 'data': 'val_total' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: 2 },
-                { orderable: false, targets: 6 }
+                { orderable: false, targets: 7 }
             ],
             order: [
                 [0, "asc"]

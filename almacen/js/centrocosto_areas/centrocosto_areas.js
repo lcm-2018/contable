@@ -33,20 +33,22 @@
                 data: function(data) {
                     data.nom_area = $('#txt_nombre_filtro').val();
                     data.id_cencosto = $('#sl_centrocosto_filtro').val();
+                    data.id_sede = $('#sl_sede_filtro').val();
                 }
             },
             columns: [
                 { 'data': 'id_area' }, //Index=0              
                 { 'data': 'nom_area' },
-                { 'data': 'nom_centrocosto' },
                 { 'data': 'nom_tipo_area' },
-                { 'data': 'usr_responsable' },
+                { 'data': 'nom_centrocosto' },
                 { 'data': 'nom_sede' },
+                { 'data': 'usr_responsable' },
                 { 'data': 'nom_bodega' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [1, 2] },
+                { visible: false, targets: 6 },
                 { orderable: false, targets: 7 }
             ],
             order: [

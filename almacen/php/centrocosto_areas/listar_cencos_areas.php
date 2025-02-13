@@ -23,6 +23,9 @@ if (isset($_POST['nom_area']) && $_POST['nom_area']) {
 if (isset($_POST['id_cencosto']) && $_POST['id_cencosto']) {
     $where .= " AND far_centrocosto_area.id_centrocosto=" . $_POST['id_cencosto'];
 }
+if (isset($_POST['id_sede']) && $_POST['id_sede']) {
+    $where .= " AND far_centrocosto_area.id_sede=" . $_POST['id_sede'];
+}
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -79,11 +82,11 @@ if (!empty($objs)) {
         }
         $data[] = [
             "id_area" => $id,          
-            "nom_area" => mb_strtoupper($obj['nom_area']), 
+            "nom_area" => mb_strtoupper($obj['nom_area']),             
+            "nom_tipo_area" => mb_strtoupper($obj['nom_tipo_area']),             
             "nom_centrocosto" => mb_strtoupper($obj['nom_centrocosto']), 
-            "nom_tipo_area" => mb_strtoupper($obj['nom_tipo_area']), 
-            "usr_responsable" => mb_strtoupper($obj['usr_responsable']), 
             "nom_sede" => mb_strtoupper($obj['nom_sede']), 
+            "usr_responsable" => mb_strtoupper($obj['usr_responsable']), 
             "nom_bodega" => mb_strtoupper($obj['nom_bodega']), 
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];

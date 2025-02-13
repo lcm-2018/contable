@@ -109,6 +109,7 @@
         $('.is-invalid').removeClass('is-invalid');
 
         var error = verifica_vacio_2($('#id_txt_sede'), $('#txt_nom_sede'));
+        error += verifica_vacio_2($('#id_txt_area'), $('#txt_nom_area'));
         error += verifica_vacio($('#txt_fec_ing'));
         error += verifica_vacio($('#txt_hor_ing'));
         error += verifica_vacio($('#txt_num_fac'));

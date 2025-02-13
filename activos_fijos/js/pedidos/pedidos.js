@@ -51,7 +51,7 @@
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: 4 },
+                { class: 'text-wrap', targets: [4, 5] },
                 { type: "numeric-comma", targets: 6 },
                 { visible: false, targets: 7 },
                 { orderable: false, targets: 9 }
@@ -106,7 +106,8 @@
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
 
-        var error = verifica_vacio($('#txt_det_ped'));
+        var error = verifica_vacio_2($('#id_txt_nom_sed'), $('#txt_nom_sed'));
+        error += verifica_vacio($('#txt_det_ped'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');

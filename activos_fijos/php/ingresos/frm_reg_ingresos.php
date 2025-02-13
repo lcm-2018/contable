@@ -45,6 +45,9 @@ if (empty($obj)) {
     $obj['fec_ingreso'] = $fecha['fecha'];
     $obj['hor_ingreso'] = $fecha['hora'];
 }
+
+$area = area_principal($cmd);
+
 $guardar = in_array($obj['estado'],[1]) ? '' : 'disabled="disabled"';
 $cerrar = in_array($obj['estado'],[1]) && $id != -1 ? '' : 'disabled="disabled"';
 $anular = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
@@ -66,27 +69,36 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <label for="txt_fec_ing" class="small">Id.</label>
                         <input type="text" class="form-control form-control-sm" id="txt_ide" name="txt_ide" class="small" value="<?php echo ($id==-1?'':$id) ?>" readonly="readonly">
                     </div>                    
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label for="txt_nom_sede" class="small">Sede</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_sede" class="small" value="<?php echo $obj['nom_sede'] ?>" readonly="readonly">
                         <input type="hidden" id="id_txt_sede" name="id_txt_sede" value="<?php echo $obj['id_sede'] ?>">
                     </div>
-                    <div class="form-group col-md-2">
-                        <label for="txt_fec_ing" class="small">Fecha Ingreso</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_fec_ing" name="txt_fec_ing" class="small" value="<?php echo $obj['fec_ingreso'] ?>" readonly="readonly">
+                    <div class="form-group col-md-3">
+                        <label for="txt_nom_sede" class="small">Area</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_nom_area" class="small" value="<?php echo $area['nom_area'] ?>" readonly="readonly">
+                        <input type="hidden" id="id_txt_area" name="id_txt_area" value="<?php echo $area['id_area'] ?>">
                     </div>
-                    <div class="form-group col-md-2">
-                        <label for="txt_hor_ing" class="small">Hora Ingreso</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_hor_ing" name="txt_hor_ing" class="small" value="<?php echo $obj['hor_ingreso'] ?>" readonly="readonly">
-                    </div>
-                    <div class="form-group col-md-2">
-                        <label for="txt_num_ing" class="small">No. Ingreso</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_num_ing" name="txt_num_ing" class="small" value="<?php echo $obj['num_ingreso'] ?>" readonly="readonly">
-                    </div>
-                    <div class="form-group col-md-2">
-                        <label for="txt_est_ing" class="small">Estado Ingreso</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_est_ing" name="txt_est_ing" class="small" value="<?php echo $obj['nom_estado'] ?>" readonly="readonly">
-                    </div>
+                    <div class="form-group col-md-6">
+                        <div class="form-row">
+                            <div class="form-group col-md-3">
+                                <label for="txt_fec_ing" class="small">Fecha Ingreso</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_fec_ing" name="txt_fec_ing" class="small" value="<?php echo $obj['fec_ingreso'] ?>" readonly="readonly">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="txt_hor_ing" class="small">Hora Ingreso</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_hor_ing" name="txt_hor_ing" class="small" value="<?php echo $obj['hor_ingreso'] ?>" readonly="readonly">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="txt_num_ing" class="small">No. Ingreso</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_num_ing" name="txt_num_ing" class="small" value="<?php echo $obj['num_ingreso'] ?>" readonly="readonly">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="txt_est_ing" class="small">Estado Ingreso</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_est_ing" name="txt_est_ing" class="small" value="<?php echo $obj['nom_estado'] ?>" readonly="readonly">
+                            </div>
+                        </div>    
+                    </div>    
                     <div class="form-group col-md-2">
                         <label for="txt_num_fac" class="small">No. Acta y/o Remisión</label>
                         <input type="text" class="form-control form-control-sm" id="txt_num_fac" name="txt_num_fac" class="small" value="<?php echo $obj['num_factura'] ?>">

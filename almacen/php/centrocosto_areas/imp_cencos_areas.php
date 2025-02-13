@@ -72,11 +72,11 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Centro Costo</th>
                 <th>Tipo Area</th>
-                <th>Responsable</th>
+                <th>Centro Costo</th>                                
                 <th>Sede</th>
-                <th>Bodega</th>
+                <th>Responsable</th>
+                <th hidden>Bodega</th>
             </tr>
         </thead>
         <tbody style="font-size: 60%;">

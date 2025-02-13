@@ -27,7 +27,7 @@ try {
 
         if ($oper == 'add') {
             $id = $_POST['id_pedido'];
-            $id_sede = $_POST['id_txt_sede'];
+            $id_sede = $_POST['id_txt_nom_sed'];
             $fec_ped = $_POST['txt_fec_ped'];
             $hor_ped = $_POST['txt_hor_ped'];            
             $detalle = $_POST['txt_det_ped'];

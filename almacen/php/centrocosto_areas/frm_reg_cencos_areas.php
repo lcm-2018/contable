@@ -41,12 +41,14 @@ if (empty($obj)) {
         <div class="px-2">
             <form id="frm_reg_cencos_areas">
                 <input type="hidden" id="id_area" name="id_area" value="<?php echo $id ?>">
-                <div class=" form-row">                   
-                    <div class="form-group col-md-5">
-                        <label for="txt_nom_area" class="small">Nombre</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_nom_area" name="txt_nom_area" value="<?php echo $obj['nom_area'] ?>">
-                    </div>
+                <div class=" form-row">    
                     <div class="form-group col-md-4">
+                        <label for="sl_sede" class="small">Sede</label>
+                        <select class="form-control form-control-sm" id="sl_sede" name="sl_sede">
+                            <?php sedes($cmd, '', $obj['id_sede']) ?>   
+                        </select>
+                    </div> 
+                    <div class="form-group col-md-5">
                         <label for="sl_centrocosto" class="small">Centro Costo</label>
                         <select class="form-control form-control-sm" id="sl_centrocosto" name="sl_centrocosto">
                             <?php centros_costo($cmd, '', $obj['id_centrocosto']) ?>
@@ -57,20 +59,18 @@ if (empty($obj)) {
                         <select class="form-control form-control-sm" id="sl_tipo_area" name="sl_tipo_area">
                             <?php tipo_area($cmd, '', $obj['id_tipo_area']) ?>
                         </select>
-                    </div>                  
-                    <div class="form-group col-md-4">
+                    </div>             
+                    <div class="form-group col-md-6">
+                        <label for="txt_nom_area" class="small">Nombre Area</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_nom_area" name="txt_nom_area" value="<?php echo $obj['nom_area'] ?>">
+                    </div>           
+                    <div class="form-group col-md-6">
                         <label for="txt_responsable" class="small">Responsable</label>
                         <input type="text" class="form-control form-control-sm" id="txt_responsable" value="<?php echo $obj['usr_responsable'] ?>">
                         <input type="hidden" id="id_txt_responsable" name="id_txt_responsable" value="<?php echo $obj['id_responsable'] ?>">
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label for="sl_sede" class="small">Sede</label>
-                        <select class="form-control form-control-sm" id="sl_sede" name="sl_sede">
-                            <?php sedes($cmd, '', $obj['id_sede']) ?>   
-                        </select>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label for="sl_bodega" class="small">Bodega</label>
+                    </div>                    
+                    <div class="form-group col-md-4" hidden>
+                        <label for="sl_bodega" class="small">El Area es Bodega</label>
                         <select class="form-control form-control-sm" id="sl_bodega" name="sl_bodega">
                             <?php bodegas_sede($cmd, '', $obj['id_sede'], $obj['id_bodega']) ?>   
                         </select>

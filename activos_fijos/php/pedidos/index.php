@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -61,8 +61,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <div class="form-group col-md-2">
                                     <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
                                 </div>                                
-                                <div class="form-group col-md-2">
-                                    <select class="filtro form-control form-control-sm" id="sl_estado_filtro">
+                                <div class="form-group col-md-1">
+                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estados_pedidos('--Estado--') ?>
                                     </select>
                                 </div>
@@ -77,7 +77,6 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             </div>
 
                             <!--Lista de registros en la tabla-->
-                            <!--1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir-->
                             <?php
                             if (PermisosUsuario($permisos, 5702, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';

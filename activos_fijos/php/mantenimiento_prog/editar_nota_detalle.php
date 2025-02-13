@@ -44,6 +44,9 @@ try {
                         $id = $cmd->lastInsertId();
                         $res['id_nota'] = $id;                        
                         $res['mensaje'] = 'ok';
+                        // Inicia el mantenimiento del Activo
+                        $sql = "UPDATE acf_mantenimiento_detalle SET estado=2 WHERE id_mant_detalle=$id_md";
+                        $rs = $cmd->query($sql);
                     } else {
                         $res['mensaje'] = $sql->errorInfo()[2];
                     }
