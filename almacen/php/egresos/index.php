@@ -85,6 +85,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_area_filtro">
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_tipegr_filtro">
                                         <?php tipo_egreso($cmd,'--Tipo Egreso--') ?>
                                     </select>
@@ -120,20 +124,25 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <table id="tb_egresos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>
                                     <tr class="text-center centro-vertical">
-                                        <th>Id</th>
-                                        <th>No. Egreso</th>
-                                        <th>Fecha Egreso</th>
-                                        <th>Hora Egreso</th>
-                                        <th>Detalle</th>
-                                        <th>Tipo Egreso</th>
-                                        <th>Tercero</th>
-                                        <th>Dependencia</th>                                                                                
+                                        <th rowspan="2">Id</th>
+                                        <th rowspan="2">No. Egreso</th>
+                                        <th rowspan="2">Fecha Egreso</th>
+                                        <th rowspan="2">Hora Egreso</th>
+                                        <th rowspan="2">Detalle</th>
+                                        <th rowspan="2">Tipo Egreso</th>
+                                        <th colspan="2">Unidad Origen</th>
+                                        <th colspan="3">Unidad Destino</th>                                        
+                                        <th rowspan="2">Vr. Total</th>
+                                        <th rowspan="2">Id.Estado</th>
+                                        <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Acciones</th>
+                                    </tr>
+                                    <tr class="text-center centro-vertical">                                        
                                         <th>Sede</th>
                                         <th>Bodega</th>
-                                        <th>Vr. Total</th>
-                                        <th>Id.Estado</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
+                                        <th>Tercero</th>
+                                        <th>Dependencia</th>
+                                        <th>Area</th>                                         
                                     </tr>
                                 </thead>
                             </table>

@@ -100,17 +100,20 @@ try {
     <table style="width:100% !important">
         <thead style="font-size:80%">                
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
-                <th>Id</th>
-                <th>No. Pedido</th>
-                <th>Fecha Pedido</th>
-                <th>Hora Pedido</th>
-                <th>Detalle</th>
-                <th>Dependencia</th>
-                <th>Sede Proveedora</th>
-                <th>Bodega Proveedora</th>
-                <th>Valor Total</th>
-                <th>Estado</th>
+                <th rowspan="2">Id</th>
+                <th rowspan="2">No. Pedido</th>
+                <th rowspan="2">Fecha Pedido</th>
+                <th rowspan="2">Hora Pedido</th>
+                <th rowspan="2">Detalle</th>
+                <th rowspan="2">Dependencia</th>
+                <th colspan="2">Unidad Proveedora A donde se solicita</th>
+                <th rowspan="2">Valor Total</th>
+                <th rowspan="2">Estado</th>
             </tr>
+            <tr style="background-color:#CED3D3; color:#000000; text-align:center">
+                <th>Sede</th>
+                <th>Bodega</th>
+            </tr> 
         </thead>
         <tbody style="font-size: 60%;">
             <?php

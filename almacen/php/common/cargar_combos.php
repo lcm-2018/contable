@@ -424,7 +424,6 @@ function modulo_origen($titulo = '',$estado = -1)
     echo '<option value="0"' . $selected . '>ALMACEN</option>';
 }
 
-
 function tipo_area($cmd, $titulo ='', $id = 0)
 {
     try {
@@ -440,6 +439,28 @@ function tipo_area($cmd, $titulo ='', $id = 0)
             }
         }
         $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+function areas_centrocosto($cmd, $titulo = '', $idcec = 0, $id = -1)
+{
+    try {
+        echo '<option value="">' . $titulo . '</option>';
+        if ($idcec != 0) {
+            $sql = "SELECT id_area,nom_area FROM far_centrocosto_area WHERE id_centrocosto=$idcec";
+            $rs = $cmd->query($sql);
+            $objs = $rs->fetchAll();
+            foreach ($objs as $obj) {
+                if ($obj['id_area']  == $id) {
+                    echo '<option value="' . $obj['id_area'] . '" selected="selected">' . $obj['nom_area'] . '</option>';
+                } else {
+                    echo '<option value="' . $obj['id_area'] . '">' . $obj['nom_area'] . '</option>';
+                }
+            }
+            $cmd = null;
+        }    
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }

@@ -46,6 +46,9 @@ if (isset($_POST['id_tercero']) && $_POST['id_tercero']) {
 if (isset($_POST['id_cencost']) && $_POST['id_cencost']) {
     $where .= " AND far_orden_egreso.id_centrocosto=" . $_POST['id_cencost'] . "";
 }
+if (isset($_POST['id_area']) && $_POST['id_area']) {
+    $where .= " AND far_orden_egreso.id_area=" . $_POST['id_area'] . "";
+}
 if (isset($_POST['id_tipegr']) && $_POST['id_tipegr']) {
     $where .= " AND far_orden_egreso.id_tipo_egreso=" . $_POST['id_tipegr'] . "";
 }
@@ -74,7 +77,7 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_orden_egreso.id_egreso,far_orden_egreso.num_egreso,far_orden_egreso.fec_egreso,far_orden_egreso.hor_egreso,
-	            far_orden_egreso.detalle,tb_terceros.nom_tercero,tb_centrocostos.nom_centro,
+	            far_orden_egreso.detalle,tb_terceros.nom_tercero,tb_centrocostos.nom_centro,far_centrocosto_area.nom_area,
 	            far_orden_egreso_tipo.nom_tipo_egreso,far_orden_egreso.val_total,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
                 far_orden_egreso.estado,
 	            CASE far_orden_egreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
@@ -82,6 +85,7 @@ try {
             INNER JOIN far_orden_egreso_tipo ON (far_orden_egreso_tipo.id_tipo_egreso=far_orden_egreso.id_tipo_egreso)
             INNER JOIN tb_terceros ON (tb_terceros.id_tercero=far_orden_egreso.id_cliente)
             INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_orden_egreso.id_centrocosto)
+            INNER JOIN far_centrocosto_area ON (far_centrocosto_area.id_area=far_orden_egreso.id_area)
             INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_orden_egreso.id_sede)
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_egreso.id_bodega)
             $where_usr $where ORDER BY $col $dir $limit";
@@ -113,10 +117,11 @@ if (!empty($objs)) {
             "hor_egreso" => $obj['hor_egreso'],
             "detalle" => $obj['detalle'],
             "nom_tipo_egreso" => mb_strtoupper($obj['nom_tipo_egreso']),
-            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),
-            "nom_centro" => mb_strtoupper($obj['nom_centro']),                        
             "nom_sede" => mb_strtoupper($obj['nom_sede']),
             "nom_bodega" => mb_strtoupper($obj['nom_bodega']),
+            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),
+            "nom_centro" => mb_strtoupper($obj['nom_centro']),
+            "nom_area" => mb_strtoupper($obj['nom_area']),            
             "val_total" => formato_valor($obj['val_total']),
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],            

@@ -39,6 +39,7 @@
                     data.fec_fin = $('#txt_fecfin_filtro').val();
                     data.id_tercero = $('#sl_tercero_filtro').val();
                     data.id_cencost = $('#sl_centrocosto_filtro').val();
+                    data.id_area = $('#sl_area_filtro').val();
                     data.id_tipegr = $('#sl_tipegr_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
                     data.modulo = $('#sl_modulo_origen').val();
@@ -51,20 +52,21 @@
                 { 'data': 'hor_egreso' },
                 { 'data': 'detalle' },
                 { 'data': 'nom_tipo_egreso' },
-                { 'data': 'nom_tercero' },
-                { 'data': 'nom_centro' },
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_bodega' },
+                { 'data': 'nom_tercero' },
+                { 'data': 'nom_centro' },
+                { 'data': 'nom_area' },
                 { 'data': 'val_total' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4, 6, 7, 8, 9] },
-                { type: "numeric-comma", targets: 10 },
-                { visible: false, targets: 11 },
-                { orderable: false, targets: 13 }
+                { class: 'text-wrap', targets: [4, 6, 7, 8, 9, 10] },
+                { type: "numeric-comma", targets: 11 },
+                { visible: false, targets: 12 },
+                { orderable: false, targets: 14 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 1) {
@@ -91,6 +93,11 @@
         $('#sl_bodega_filtro').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), titulo: '--Bodega--' }, function() {});
     });
     $('#sl_sede_filtro').trigger('change');
+
+    $('#sl_centrocosto_filtro').on("change", function() {
+        $('#sl_area_filtro').load('../common/cargar_areas_centrocosto.php', { id_centrocosto: $(this).val(), titulo: '--Areas--' }, function() {});
+    });
+    $('#sl_centrocosto_filtro').trigger('change');
 
     //Buascar registros de Egresos
     $('#btn_buscar_filtro').on("click", function() {
@@ -182,6 +189,10 @@
 
     $('#divForms').on("change", "#sl_bodega_egr", function() {
         $('#id_bodega_egr').val($('#sl_bodega_egr').val());
+    });
+
+    $('#divForms').on("change", "#sl_centrocosto", function() {
+        $('#sl_area').load('../common/cargar_areas_centrocosto.php', { id_centrocosto: $(this).val() }, function() {});
     });
 
     //Editar un registro Orden Egreso
@@ -467,7 +478,8 @@
                 fec_ini: $('#txt_fecini_filtro').val(),
                 fec_fin: $('#txt_fecfin_filtro').val(),
                 id_tercero: $('#sl_tercero_filtro').val(),
-                id_depende: $('#sl_centrocosto_filtro').val(),
+                id_cencost: $('#sl_centrocosto_filtro').val(),
+                id_area: $('#sl_area_filtro').val(),
                 id_tipegr: $('#sl_tipegr_filtro').val(),
                 estado: $('#sl_estado_filtro').val()
             }, function(he) {

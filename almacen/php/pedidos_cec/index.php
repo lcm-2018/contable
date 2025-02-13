@@ -106,18 +106,21 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <table id="tb_pedidos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>                               
                                     <tr class="text-center centro-vertical">
-                                        <th>Id</th>
-                                        <th>No. Pedido</th>
-                                        <th>Fecha Pedido</th>
-                                        <th>Hora Pedido</th>
-                                        <th>Detalle</th>                                        
-                                        <th>Dependencia</th>
-                                        <th>Sede Proveedor</th>
-                                        <th>Bodega Proveedor</th>                                        
-                                        <th>Valor Total</th>
-                                        <th>Id.Estado</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
+                                        <th rowspan="2">Id</th>
+                                        <th rowspan="2">No. Pedido</th>
+                                        <th rowspan="2">Fecha Pedido</th>
+                                        <th rowspan="2">Hora Pedido</th>
+                                        <th rowspan="2">Detalle</th>                                        
+                                        <th rowspan="2">Dependencia</th>
+                                        <th colspan="2">Unidad Proveedora A donde se solicita</th> 
+                                        <th rowspan="2">Valor Total</th>
+                                        <th rowspan="2">Id.Estado</th>
+                                        <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Acciones</th>
+                                    </tr>
+                                    <tr class="text-center centro-vertical">
+                                        <th>Sede</th>
+                                        <th>Bodega</th>
                                     </tr>
                                 </thead>
                             </table>

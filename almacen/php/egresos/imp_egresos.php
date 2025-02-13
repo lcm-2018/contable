@@ -37,8 +37,11 @@ if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) &&
 if (isset($_POST['id_tercero']) && $_POST['id_tercero']) {
     $where .= " AND far_orden_egreso.id_cliente=" . $_POST['id_tercero'] . "";
 }
-if (isset($_POST['id_depende']) && $_POST['id_depende']) {
-    $where .= " AND far_orden_egreso.id_dependencia=" . $_POST['id_depende'] . "";
+if (isset($_POST['id_cencost']) && $_POST['id_cencost']) {
+    $where .= " AND far_orden_egreso.id_centrocosto=" . $_POST['id_cencost'] . "";
+}
+if (isset($_POST['id_area']) && $_POST['id_area']) {
+    $where .= " AND far_orden_egreso.id_area=" . $_POST['id_area'] . "";
 }
 if (isset($_POST['id_tipegr']) && $_POST['id_tipegr']) {
     $where .= " AND far_orden_egreso.id_tipo_egreso=" . $_POST['id_tipegr'] . "";
@@ -49,13 +52,14 @@ if (isset($_POST['estado']) && strlen($_POST['estado'])) {
 
 try {
     $sql = "SELECT far_orden_egreso.id_egreso,far_orden_egreso.num_egreso,far_orden_egreso.fec_egreso,far_orden_egreso.hor_egreso,
-                    far_orden_egreso.detalle,tb_terceros.nom_tercero,tb_centrocostos.nom_centro,
+                    far_orden_egreso.detalle,tb_terceros.nom_tercero,tb_centrocostos.nom_centro,far_centrocosto_area.nom_area,
                     far_orden_egreso_tipo.nom_tipo_egreso,far_orden_egreso.val_total,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
                     CASE far_orden_egreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
                     FROM far_orden_egreso
                     INNER JOIN far_orden_egreso_tipo ON (far_orden_egreso_tipo.id_tipo_egreso=far_orden_egreso.id_tipo_egreso)
                     INNER JOIN tb_terceros ON (tb_terceros.id_tercero=far_orden_egreso.id_cliente)
                     INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_orden_egreso.id_centrocosto)
+                    INNER JOIN far_centrocosto_area ON (far_centrocosto_area.id_area=far_orden_egreso.id_area)
                     INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_orden_egreso.id_sede)
                     INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_egreso.id_bodega) $where ORDER BY far_orden_egreso.id_egreso DESC";
     $res = $cmd->query($sql);
@@ -97,18 +101,23 @@ try {
     <table style="width:100% !important">
         <thead style="font-size:80%">                
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
-                <th>Id</th>
-                <th>No. Egreso</th>
-                <th>Fecha Egreso</th>
-                <th>Hora Egreso</th>
-                <th>Detalle</th>
-                <th>Tipo Egreso</th>
-                <th>Tercero</th>
-                <th>Dependencia</th>                                
+                <th rowspan="2">Id</th>
+                <th rowspan="2">No. Egreso</th>
+                <th rowspan="2">Fecha Egreso</th>
+                <th rowspan="2">Hora Egreso</th>
+                <th rowspan="2">Detalle</th>
+                <th rowspan="2">Tipo Egreso</th>
+                <th colspan="2">Unidad Origen</th>
+                <th colspan="3">Unidad Destino</th>                                
+                <th rowspan="2">Vr. Total</th>
+                <th rowspan="2">Estado</th>
+            </tr>    
+            <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>Sede</th>
                 <th>Bodega</th>
-                <th>Vr. Total</th>
-                <th>Estado</th>
+                <th>Tercero</th>
+                <th>Dependencia</th>                                
+                <th>Area</th>
             </tr>    
         </thead>
         <tbody style="font-size: 60%;">
@@ -122,10 +131,11 @@ try {
                         <td>' . $obj['hor_egreso'] . '</td>                  
                         <td style="text-align:left">' . $obj['detalle'] . '</td>                      
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_tipo_egreso']) . '</td>                           
-                        <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>   
-                        <td style="text-align:left">' . mb_strtoupper($obj['nom_centro']) . '</td>                                                 
                         <td>' . mb_strtoupper($obj['nom_sede']) . '</td>   
                         <td>' . mb_strtoupper($obj['nom_bodega']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_centro']) . '</td> 
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_area']) . '</td>                         
                         <td>' . formato_valor($obj['val_total']). '</td>                             
                         <td>' . $obj['nom_estado']. '</td></tr>';
             }

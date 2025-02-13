@@ -133,7 +133,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             <?php tipo_egreso($cmd, '', $obj['id_tipo_egreso']) ?>
                         </select>
                     </div>
-                    <div class="form-group col-md-5">
+                    <div class="form-group col-md-4">
                         <label for="sl_tercero" class="small">Tercero</label>
                         <select class="form-control form-control-sm" id="sl_tercero" name="sl_tercero">
                             <?php terceros($cmd, '', $obj['id_cliente']) ?>
@@ -143,6 +143,12 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <label for="sl_centrocosto" class="small">Dependencia</label>
                         <select class="form-control form-control-sm" id="sl_centrocosto" name="sl_centrocosto">
                             <?php centros_costo($cmd, '', $obj['id_centrocosto']) ?>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="sl_area" class="small">Area</label>
+                        <select class="form-control form-control-sm" id="sl_area" name="sl_area">
+                            <?php areas_centrocosto($cmd, '', $obj['id_centrocosto'], $obj['id_area']) ?>   
                         </select>
                     </div>
                     <div class="form-group col-md-12">
