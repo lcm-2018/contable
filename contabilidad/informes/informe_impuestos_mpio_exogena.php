@@ -5,29 +5,7 @@ if (!isset($_SESSION['user'])) {
     header("Location: ../../../index.php");
     exit();
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>CONTAFACIL</title>
-    <style>
-        .text {
-            mso-number-format: "\@"
-        }
-    </style>
-
-    <?php
-
-    header("Content-type: application/vnd.ms-excel charset=utf-8");
-    header("Content-Disposition: attachment; filename=Descuentos_municipio.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
-
-    ?>
-</head>
-<?php
 $vigencia = $_SESSION['vigencia'];
 // estraigo las variables que llegan por post en json
 $fecha_inicial = $_POST['fec_inicial'];
