@@ -296,8 +296,8 @@ $ver = 'readonly';
                                                     <div class="input-group input-group-sm">
                                                         <input type="text" name="arqueo_caja" id="arqueo_caja" value="<?php echo $valor_teso; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly>
                                                         <div class="input-group-append">
-                                                            <?php if ($datosDoc['estado'] == 1) { ?>
-                                                                <a class="btn btn-outline-success btn-sm" onclick="cargaArqueoCaja('<?php echo $id_cop; ?>')"><span class="fas fa-cash-register fa-lg"></span></a>
+                                                            <?php if ($datosDoc['estado'] == 1 || $tipo_dato == '9') { ?>
+                                                                <a class="btn btn-outline-success btn-sm" onclick="CargaArqueoCajaTes(<?= $id_doc_pag; ?>,0)"><span class="fas fa-cash-register fa-lg"></span></a>
                                                             <?php } ?>
                                                         </div>
                                                     </div>

@@ -221,18 +221,20 @@ try {
 if ($documento['id_tipo_doc'] == '9') {
     try {
         $sql = "SELECT
-                    `tes_causa_arqueo`.`id_causa_arqueo`
-                    , `tes_causa_arqueo`.`fecha`
-                    , `tes_causa_arqueo`.`id_tercero`
-                    , `tes_causa_arqueo`.`valor_arq`
-                    , `tes_causa_arqueo`.`valor_fac`
-                    , CONCAT(`tes_facturador`.`nom1`, ' ', `tes_facturador`.`nom2`, ' ', `tes_facturador`.`ape1`, ' ', `tes_facturador`.`ape2`) AS `facturador`
-                    , `tes_causa_arqueo`.`id_ctb_doc`
-                FROM
-                    `tes_facturador`
-                    INNER JOIN `tes_causa_arqueo` 
-                        ON (`tes_facturador`.`cc` = `tes_causa_arqueo`.`id_tercero`)
-                WHERE (`tes_causa_arqueo`.`id_ctb_doc` =$id_doc);";
+                `tes_causa_arqueo`.`id_causa_arqueo`
+                , `tes_causa_arqueo`.`fecha_ini`
+                , `tes_causa_arqueo`.`fecha_fin`
+                , `tes_causa_arqueo`.`id_tercero`
+                , `tes_causa_arqueo`.`valor_arq`
+                , `tes_causa_arqueo`.`valor_fac`
+                , `tes_causa_arqueo`.`observaciones`
+                , `tb_terceros`.`nom_tercero` AS `facturador`
+                , `tb_terceros`.`nit_tercero` AS `documento`
+            FROM
+                `tes_causa_arqueo`
+                INNER JOIN `tb_terceros` 
+                    ON (`tes_causa_arqueo`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE (`tes_causa_arqueo`.`id_ctb_doc` = $id_doc)";
         $res = $cmd->query($sql);
         $facturadores = $res->fetchAll();
     } catch (PDOException $e) {

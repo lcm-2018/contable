@@ -15,6 +15,8 @@ insert  into `tb_tipo_tercero`(`id_tipo`,`descripcion`) values (1,'OTRO'),(2,'PR
 
 insert  into `ctt_estado_adq`(`id`,`descripcion`) values (1,'INICIAL'),(2,'ORDENADA'),(3,'ENVIADA'),(4,'RECIBIDA'),(5,'SELECCIONADA'),(6,'ESTUDIOS PREVIOS'),(7,'CONTRATACIÓN INICIAL'),(8,'CONTRATO ENVIADO'),(9,'CONTRATO RECIBIDO'),(10,'DESIGNADO SUPERVISION'),(11,'RECIBIDO'),(99,'ANULADO');
 
+insert  into `ctt_tipo_novedad`(`id_novedad`,`descripcion`) values (1,'ADICIÓN'),(2,'PRORROGA'),(3,'ADICIÓN Y PRORROGA '),(4,'CESIÓN'),(5,'SUSPENSIÓN'),(6,'REINICIO'),(7,'TERMINACIÓN'),(8,'LIQUIDACIÓN');
+
 insert  into `tb_tipo_compra`(`id_tipo`,`tipo_compra`) values (1,'BIENES'),(2,'SERVICIOS'),(3,'PROYECTOS');
 
 insert  into `tb_tipo_contratacion`(`id_tipo`,`id_tipo_compra`,`tipo_contrato`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`) values (1,2,'PRESTACION DE SERVICIOS',NULL,NULL,NULL,NULL),(2,2,'OTROS SERVICIOS',NULL,NULL,NULL,NULL),(3,1,'SUMINISTRO',1,'2024-08-22 11:22:06',NULL,NULL);
