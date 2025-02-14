@@ -676,8 +676,12 @@
                 url: 'upempleado.php',
                 data: datos,
                 success: function (r) {
-                    if (r == '1') {
-                        $('#divModalupEmpHecho').modal('show');
+                    if (r == 'ok') {
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html("Empleado actualizado correctamente");
+                        setTimeout(function () {
+                            location.reload();
+                        }, 500);
                     } else {
                         $('#divModalError').modal('show');
                         $('#divMsgError').html(r);

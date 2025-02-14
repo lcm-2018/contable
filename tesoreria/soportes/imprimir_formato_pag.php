@@ -511,49 +511,53 @@ $meses = [
                 </tr>
             </table>
             </br>
-            <div class="row">
-                <div class="col-12">
-                    <div style="text-align: left">
-                        <div><strong>Datos de la factura: </strong></div>
+            <?php
+            if (!empty($data)) {
+            ?>
+                <div class="row">
+                    <div class="col-12">
+                        <div style="text-align: left">
+                            <div><strong>Datos de la factura: </strong></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <?php
-            $total_pto = 0;
-            ?>
+                <?php
+                $total_pto = 0;
+                ?>
 
-            <table class="table-bordered bg-light" style="width:100% !important;">
-                <tr>
-                    <td style="text-align: left">Causación</td>
-                    <td>Documento</td>
-                    <td>Número</td>
-                    <td>Fecha</td>
-                    <td>Vencimiento</td>
-                </tr>
-                <tr>
-                    <td><?php echo   $data['id_manu']; ?></td>
-                    <td><?php echo $data['tipo']; ?></td>
-                    <td><?php echo $data['num_doc']; ?></td>
-                    <td><?php echo date('Y-m-d', strtotime($data['fecha_fact'])); ?></td>
-                    <td><?php echo date('Y-m-d', strtotime($data['fecha_ven'])); ?></td>
-                </tr>
-                <tr>
-                    <td style="text-align: left">Valor factura</td>
-                    <td>Valor IVA</td>
-                    <td>Base</td>
-                    <td>Descuentos</td>
-                    <td>Neto</td>
-                </tr>
-                <tr>
-                    <td><?php echo number_format($data['valor_pago'], 2, ',', '.'); ?></td>
-                    <td><?php echo  number_format($data['valor_iva'], 2, ',', '.');; ?></td>
-                    <td><?php echo number_format($data['valor_base'], 2, ',', '.'); ?></td>
-                    <td><?php echo number_format($data['dcto'], 2, ',', '.'); ?></td>
-                    <td><?php echo number_format(($data['valor_pago'] - $data['dcto']), 2, ',', '.'); ?></td>
-                </tr>
-            </table>
-            </br>
+                <table class="table-bordered bg-light" style="width:100% !important;">
+                    <tr>
+                        <td style="text-align: left">Causación</td>
+                        <td>Documento</td>
+                        <td>Número</td>
+                        <td>Fecha</td>
+                        <td>Vencimiento</td>
+                    </tr>
+                    <tr>
+                        <td><?php echo   $data['id_manu']; ?></td>
+                        <td><?php echo $data['tipo']; ?></td>
+                        <td><?php echo $data['num_doc']; ?></td>
+                        <td><?php echo date('Y-m-d', strtotime($data['fecha_fact'])); ?></td>
+                        <td><?php echo date('Y-m-d', strtotime($data['fecha_ven'])); ?></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left">Valor factura</td>
+                        <td>Valor IVA</td>
+                        <td>Base</td>
+                        <td>Descuentos</td>
+                        <td>Neto</td>
+                    </tr>
+                    <tr>
+                        <td><?php echo number_format($data['valor_pago'], 2, ',', '.'); ?></td>
+                        <td><?php echo  number_format($data['valor_iva'], 2, ',', '.');; ?></td>
+                        <td><?php echo number_format($data['valor_base'], 2, ',', '.'); ?></td>
+                        <td><?php echo number_format($data['dcto'], 2, ',', '.'); ?></td>
+                        <td><?php echo number_format(($data['valor_pago'] - $data['dcto']), 2, ',', '.'); ?></td>
+                    </tr>
+                </table>
+                </br>
         <?php
+            }
         }
         ?>
         <?php if ($documento['id_tipo_doc'] == '9') { ?>

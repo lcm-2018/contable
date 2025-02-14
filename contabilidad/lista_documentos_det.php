@@ -136,7 +136,7 @@ $ver = 'readonly';
                                                     <div class="col"><span class="small">FECHA:</span></div>
                                                 </div>
                                                 <div class="col-10">
-                                                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datosDoc['fecha'])); ?>" min="<?= date('Y-m-d', strtotime($datosDoc['fecha_crp'])) ?>" max="<?= $_SESSION['vigencia'] . '-12-31' ?>" required>
+                                                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d'); ?>" min="<?= date('Y-m-d', strtotime($datosDoc['fecha_crp'])) ?>" max="<?= $_SESSION['vigencia'] . '-12-31' ?>" required>
                                                 </div>
                                             </div>
                                             <div class="row mb-1">
@@ -190,13 +190,19 @@ $ver = 'readonly';
                                                 </div>
                                                 <div class="form-control col-4" readonly id="valDescuentos"><?php echo pesos($datosDoc['val_retencion']); ?></div>
                                             </div>
-                                            <div class="text-center py-2">
-                                                <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoCxp();" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>
-                                                <button type="button" class="btn btn-warning btn-sm" onclick="" <?php echo $datosDoc['estado'] == '2' ? 'disabled' : '' ?> id="GuardaDocCtb" text="<?= $id_doc ?>">Guardar</button>
-                                            </div>
                                         <?php
                                         }
                                         ?>
+                                    </div>
+                                    <div class="text-center py-2">
+                                        <?php
+                                        if ($tipo_dato == '3') {
+                                        ?>
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoCxp();" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>
+                                        <?php
+                                        }
+                                        ?>
+                                        <button type="button" class="btn btn-warning btn-sm" onclick="" <?php echo $datosDoc['estado'] == '2' ? 'disabled' : '' ?> id="GuardaDocCtb" text="<?= $id_doc ?>">Guardar</button>
                                     </div>
                                 </div>
                                 <br>
