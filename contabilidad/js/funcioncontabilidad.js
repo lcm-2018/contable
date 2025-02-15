@@ -537,10 +537,6 @@ function GuardaDocCtb(id) {
 		$('#objeto').addClass('is-invalid');
 		$('#objeto').focus();
 		mjeError('El objeto no puede estar vacio');
-	} else if ($('#objeto').val().length > 200) {
-		$('#objeto').addClass('is-invalid');
-		$('#objeto').focus();
-		mjeError('El objeto no puede tener mas de 200 caracteres');
 	} else {
 		var datos = $('#formGetMvtoCtb').serialize() + '&id=' + id;
 		url = "datos/registrar/registrar_mvto_contable_doc.php";

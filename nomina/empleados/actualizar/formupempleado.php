@@ -128,7 +128,7 @@ function Municipios($iddpto)
                                             <?php
                                             foreach ($sedes as $se) {
                                                 $slc = $se['id_sede'] == $obj['sede_emp'] ? 'selected' : '';
-                                                if ($se['nombre'] != 'CONVENIOS') {
+                                                if ($se['nom_sede'] != 'CONVENIOS') {
                                                     echo '<option value="' . $se['id_sede'] . '" ' . $slc . '>' . $se['nom_sede'] . '</option>';
                                                 }
                                             }
@@ -354,6 +354,7 @@ function Municipios($iddpto)
                                             $id_sb =  '<input type="hidden" name="id_salario" value="' . $salarios[$empkey]['id_salario'] . '">';
                                         }
                                         ?>
+                                        <input type="hidden" name="salAnt" value="<?php echo $val ?>">
                                         <input type="text" class="form-control form-control-sm" id="numSalarioEmp" name="numSalarioEmp" value="<?php echo $val ?>">
                                         <?php echo $id_sb; ?>
                                     </div>

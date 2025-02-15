@@ -10,10 +10,8 @@ include '../financiero/consultas.php';
 include '../terceros.php';
 
 $id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no disponible');
-$id_cop = isset($_POST['id_cop']) ? $_POST['id_cop'] : 0;
-$valor_pago = isset($_POST['valor']) ? $_POST['valor'] : 0;
+$id_detalle = $_POST['id_detalle'] ?? 0;
 $fecha_doc = $_POST['fecha'] ?? '';
-$valor_descuento = 0;
 $vigencia = $_SESSION['vigencia'];
 // Consulta tipo de presupuesto
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -44,6 +42,20 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+
+try {
+    $sql = "SELECT
+                `id_ctb_doc`
+                , `estado`
+            FROM
+                `ctb_doc`
+            WHERE (`id_ctb_doc` = $id_doc)";
+    $rs = $cmd->query($sql);
+    $estado = $rs->fetch();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 $id_t = [];
 $terceros = [];
 if (!empty($facturador)) {
@@ -68,24 +80,41 @@ try {
 // Consultar los arqueos registrados en seg_tes_arqueo_caja
 try {
     $sql = "SELECT
-                `tes_causa_arqueo`.`id_ctb_doc`
-                , `tes_causa_arqueo`.`id_causa_arqueo`
-                , `tes_causa_arqueo`.`fecha`
+                `tes_causa_arqueo`.`id_causa_arqueo`
+                , `tes_causa_arqueo`.`fecha_ini`
+                , `tes_causa_arqueo`.`fecha_fin`
                 , `tes_causa_arqueo`.`id_tercero`
                 , `tes_causa_arqueo`.`valor_arq`
                 , `tes_causa_arqueo`.`valor_fac`
                 , `tes_causa_arqueo`.`observaciones`
+                , `tb_terceros`.`nom_tercero` AS `facturador`
+                , `tb_terceros`.`nit_tercero` AS `documento`
             FROM
-                `tes_facturador`
-                INNER JOIN `tes_causa_arqueo` 
-                    ON (`tes_facturador`.`id_tercero_api` = `tes_causa_arqueo`.`id_tercero`)
+                `tes_causa_arqueo`
+                INNER JOIN `tb_terceros` 
+                    ON (`tes_causa_arqueo`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE (`tes_causa_arqueo`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
-    $arqueos = $rs->fetchAll();
+    $arqueos = $rs->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-
+if ($id_detalle > 0) {
+    $detalle = array_values(array_filter($arqueos, function ($ar) use ($id_detalle) {
+        return $ar['id_causa_arqueo'] == $id_detalle;
+    }))[0];
+} else {
+    $detalle = [
+        'id_causa_arqueo' => 0,
+        'fecha_ini' => $fecha_doc,
+        'fecha_fin' => $fecha_doc,
+        'id_tercero' => 0,
+        'valor_arq' => 0,
+        'valor_fac' => 0,
+        'observaciones' => '',
+        'facturador' => ''
+    ];
+}
 
 $valor_pagar = 0;
 
@@ -128,49 +157,63 @@ $valor_pagar = 0;
             <h5 style="color: white;">LISTA DE ARQUEO DE CAJA POR FECHA</h5>
         </div>
         <div class="px-3 pt-2">
-            <form id="formAddFacturador">
-                <div class="form-row">
-                    <div class="form-group col-md-2">
-                        <label for="fecha_arqueo" class="small">FECHA:</label>
-                        <input type="date" name="fecha_arqueo" id="fecha_arqueo" class="form-control form-control-sm" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_doc; ?>">
-                        <input type="hidden" name="id_doc" id="id_doc" value="<?php echo $id_doc; ?>">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="id_facturador" class="small">FACTURADOR:</label>
-                        <div class="col" id="divBanco">
-                            <select name="id_facturador" id="id_facturador" class="form-control form-control-sm" required onchange="calcularCopagos2(this)">
-                                <option value="0">--Seleccione--</option>
-                                <?php foreach ($terceros as $tc) {
-                                    echo '<option value="' . $tc['id_tercero_api'] . '">' . $tc['nom_tercero'] . ' -> ' . $tc['nit_tercero'] . '</option>';
-                                }
-                                ?>
-                            </select>
+            <?php
+            if ($estado['estado'] == 1) {
+            ?>
+                <form id="formAddFacturador">
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="fecha_arqueo_ini" class="small">FECHA INICIAL</label>
+                            <input type="date" name="fecha_arqueo_ini" id="fecha_arqueo_ini" class="form-control form-control-sm" max="<?php echo $fecha_max; ?>" value="<?php echo $detalle['fecha_ini']; ?>">
+                            <input type="hidden" name="id_doc" id="id_doc" value="<?php echo $id_doc; ?>">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="fecha_arqueo_fin" class="small">FECHA FINAL</label>
+                            <input type="date" name="fecha_arqueo_fin" id="fecha_arqueo_fin" class="form-control form-control-sm" max="<?php echo $fecha_max; ?>" value="<?php echo $detalle['fecha_fin']; ?>">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="id_facturador" class="small">FACTURADOR:</label>
+                            <div class="col" id="divBanco">
+                                <select name="id_facturador" id="id_facturador" class="form-control form-control-sm" required onchange="calcularCopagos2(this)">
+                                    <option value="0">--Seleccione--</option>
+                                    <?php foreach ($terceros as $tc) {
+                                        $slc = $tc['id_tercero_api'] == $detalle['id_tercero'] ? 'selected' : '';
+                                        echo '<option value="' . $tc['id_tercero_api'] . '" ' . $slc . '>' . $tc['nom_tercero'] . ' -> ' . $tc['nit_tercero'] . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group col-md-2">
-                        <label for="valor_fact" class="small">VALOR FACTURADO:</label>
-                        <div class="col" id="divForma">
-                            <input type="text" name="valor_fact" id="valor_fact" class="form-control form-control-sm" value="<?php echo $valor_pagar; ?>" required style="text-align: right;" onkeyup="valorMiles(id)" readonly>
+                    <div class="form-row">
+                        <div class="form-group col-md-2">
+                            <label for="valor_fact" class="small">VALOR FACTURADO:</label>
+                            <div id="divForma">
+                                <input type="text" name="valor_fact" id="valor_fact" class="form-control form-control-sm" value="<?php echo $detalle['valor_fac']; ?>" required style="text-align: right;" onkeyup="valorMiles(id)" readonly>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label for="valor_arq" class="small">VALOR:</label>
+                            <div class="btn-group">
+                                <input type="text" name="valor_arq" id="valor_arq" class="form-control form-control-sm" value="<?php echo $detalle['valor_arq']; ?>" required style="text-align: right;" onkeyup="valorMiles(id)" ondblclick="copiarValor()" onchange="validarDiferencia()">
+                                <button type="submit" class="btn btn-primary btn-sm" id="registrarMvtoDetalle">+</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group col-md-2">
-                        <label for="valor_arq" class="small">VALOR:</label>
-                        <div class="btn-group">
-                            <input type="text" name="valor_arq" id="valor_arq" class="form-control form-control-sm" value="<?php echo $valor_pagar; ?>" required style="text-align: right;" onkeyup="valorMiles(id)" ondblclick="copiarValor()" onchange="validarDiferencia()">
-                            <button type="submit" class="btn btn-primary btn-sm" id="registrarMvtoDetalle">+</button>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <textarea class="form-control form-control-sm" name="observaciones" id="observaciones" rows="3" placeholder="OBSERVACIONES:"><?php echo $detalle['observaciones']; ?></textarea>
                         </div>
                     </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-12">
-                        <textarea class="form-control form-control-sm" name="observaciones" id="observaciones" rows="3" placeholder="OBSERVACIONES:"></textarea>
-                    </div>
-                </div>
-            </form>
+                </form>
+            <?php
+            }
+            ?>
             <table id="tableCausacionArqueo" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th class="w-10">Fecha</th>
+                        <th class="w-10">Fecha Inicio</th>
+                        <th class="w-10">Fecha Fin</th>
                         <th class="w-55">Facturador</th>
                         <th class="w-10">Documento</th>
                         <th class="w-10">Valor cobrado</th>
@@ -181,42 +224,45 @@ $valor_pagar = 0;
                 <tbody>
                     <div id="datostabla">
                         <?php
-                        foreach ($arqueos as $ce) {
-                            //$id_doc = $ce['id_ctb_doc'];
-                            $id = $ce['id_causa_arqueo'];
-                            if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
-                                $borrar = '<a value="' . $id_doc . '" onclick="eliminarRecaduoArqeuo(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-                                $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-                            ...
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a value="' . $id_doc . '" class="dropdown-item sombra carga" href="#">Historial</a>
-                            </div>';
-                            } else {
-                                $editar = null;
-                                $detalles = null;
+                        foreach ($arqueos as $ar) {
+                            $editar = $borrar = $detalles = NULL;
+                            $id = $ar['id_causa_arqueo'];
+                            if (PermisosUsuario($permisos, 5602, 1) || $id_rol == 1) {
+                                $detalles = '<a onclick="DetalleArqueoCaja(' . $id . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-list fa-lg"></span></a>';
                             }
-                            $fecha = date("Y-m-d", strtotime($ce['fecha']));
-                        ?>
-                            <tr id="<?php echo $id; ?>">
-                                <td><?php echo $fecha; ?></td>
-                                <td class="text-left"><?php echo $ce['facturador']; ?></td>
-                                <td> <?php echo $ce['id_tercero']; ?></td>
-                                <td> <?php echo number_format($ce['valor_fac'], 2, '.', ','); ?></td>
-                                <td> <?php echo number_format($ce['valor_arq'], 2, '.', ','); ?></td>
-                                <td> <?php echo $borrar .  $acciones; ?></td>
-
-                            </tr>
-                        <?php
+                            if (PermisosUsuario($permisos, 5602, 3) || $id_rol == 1) {
+                                $editar = '<a onclick="CargaArqueoCajaTes(' . $id_doc . ',' . $id . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+                            }
+                            if (PermisosUsuario($permisos, 5602, 4) || $id_rol == 1) {
+                                $borrar = '<a onclick="eliminarRecaduoArqeuo(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+                            }
+                            if ($estado['estado'] != 1) {
+                                $editar = $borrar = NULL;
+                            }
+                            echo '<tr class="text-left">
+                                    <td>' . $ar['fecha_ini'] . '</td>
+                                    <td>' . $ar['fecha_fin'] . '</td>
+                                    <td >' . $ar['facturador'] . '</td>
+                                    <td>' . $ar['documento'] . '</td>
+                                    <td class="text-right"> ' . number_format($ar['valor_fac'], 2, '.', ',') . '</td>
+                                    <td class="text-right"> ' . number_format($ar['valor_arq'], 2, '.', ',') . '</td>
+                                    <td class="text-center"> ' . $editar . $borrar . $detalles . '</td>
+                                </tr>';
                         }
                         ?>
                     </div>
                 </tbody>
             </table>
+            <div class="text-right py-3">
+                <?php
+                if ($estado['estado'] == 1) {
+                ?>
+                    <a type="button" class="btn btn-success btn-sm" onclick="GuardaMvtoDetalle(<?php echo $id_doc . ',' . $id_detalle ?>)">Guardar</a>
+                <?php
+                }
+                ?>
+                <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
+            </div>
         </div>
-        <div class="text-right py-3">
-            <a type="button" class="btn btn-success btn-sm" onclick="GuardaMvtoDetalle(<?php echo $id_doc ?>,0)">Guardar</a>
-            <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
-        </div>
-
     </div>
+</div>

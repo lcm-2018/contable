@@ -416,7 +416,7 @@ function CausaCENomina(boton) {
 	}
 	var cant = document.getElementById("total");
 	var valor = Number(cant.value);
-	var data = atob(boton.getAttribute("text"))+ "|" + fecha;
+	var data = atob(boton.getAttribute("text")) + "|" + fecha;
 	data = data.split("|");
 	var tipo = data[1];
 	var ruta = "";
@@ -467,7 +467,16 @@ let CargaArqueoCaja = function (dato) {
 		$("#divForms").html(he);
 	});
 };
-
+let CargaArqueoCajaTes = function (id, detalle) {
+	var fecha = $("#fecha").val();
+	$.post("lista_causacion_arqueo.php", { id_doc: id, id_detalle: detalle, fecha: fecha }, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-xl");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+};
 // Carga el listado de imputación presupuestal para ingresos
 let cargaPresupuestoIng = function (dato) {
 	let id_pto_do = id_ctb_doc.value;
@@ -1351,50 +1360,23 @@ let cargaFormaPago = (cop, detalle) => {
 };
 
 // ==========================================================  ARQUEO DE CAJA ============================================*/
-// Cargar lista de arqueo de caja para registro diario
-let cargaArqueoCaja = (datos) => {
-	let valor_pago = 0;
-	let id_docu = id_ctb_doc.value;
-	let id_cop = id_cop_pag.value;
-	let fecha_doc = fecha.value;
-	if (id_cop == 0) {
-		valor_pago = 1;
-	} else {
-		valor_pago = parseFloat(valor.value.replace(/\,/g, "", ""));
-	}
-
-	if (id_docu > 0) {
-		if (valor_pago != "") {
-			$.post("lista_causacion_arqueo.php", { id_doc: id_docu, id_cop: id_cop, valor: valor_pago, fecha: fecha_doc }, function (he) {
-				$("#divTamModalForms").removeClass("modal-sm");
-				$("#divTamModalForms").removeClass("modal-lg");
-				$("#divTamModalForms").removeClass("modal-3x");
-				$("#divTamModalForms").addClass("modal-xl");
-				$("#divModalForms").modal("show");
-				$("#divForms").html(he);
-			});
-		} else {
-			//document.querySelector("#valor").focus();
-			mjeError("No ha seleccionado un valor de la obligación");
-		}
-	} else {
-		mjeError("No puede causar centros de costo", "Primero guarde el documento");
-	}
-};
 
 // Calcular copagos por cajero
-const calcularCopagos2 = async (postData) => {
-	try {
-		const response = await fetch("datos/consultar/consulta_copagos.php", {
-			method: "POST",
-			body: JSON.stringify({ tercero: postData.value, fecha: fecha_arqueo.value }),
-		});
-		const data = await response.json();
-		valor_fact.value = data[0].valor;
-		console.log(data);
-	} catch (error) {
-		console.error(error);
-	}
+const calcularCopagos2 = (postData) => {
+	$.ajax({
+		type: "POST",
+		url: "datos/consultar/consulta_copagos.php",
+		data: { tercero: postData.value, fecha_ini: fecha_arqueo_ini.value, fecha_fin: fecha_arqueo_fin.value },
+		dataType: "json",
+		success: function (data) {
+			if (data.status == "ok") {
+				valor_fact.value = data.facturado;
+			} else {
+				mjeError("Sin valor facturado", "No se encontraron registros");
+				valor_fact.value = 0;
+			}
+		},
+	});
 };
 // validar diferencia de arqueo a consignación
 let validarDiferencia = () => {
@@ -1416,6 +1398,40 @@ let copiarValor = function () {
 };
 
 //Guarda el arqueo de caja
+function GuardaMvtoDetalle(id, op) {
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#id_facturador').val() == '0') {
+		$('#id_facturador').addClass('is-invalid');
+		$('#id_facturador').focus();
+		mjeError('Debe seleccionar un facturador');
+	} else if ($('#valor_fact').val() == '0') {
+		$('#valor_fact').addClass('is-invalid');
+		$('#valor_fact').focus();
+		mjeError('El valor facturado no puede ser cero');
+	} else if (Number($('#valor_arq').val()) <= 0) {
+		$('#valor_arq').addClass('is-invalid');
+		$('#valor_arq').focus();
+		mjeError('El valor del arqueo debe ser mayor a cero');
+	} else {
+		var data = $('#formAddFacturador').serialize() + '&id=' + id + '&op=' + op;
+		$.ajax({
+			type: 'POST',
+			url: 'datos/registrar/registrar_mvto_arqueo_caja.php',
+			data: data,
+			dataType: 'json',
+			success: function (r) {
+				if (r.status == 'ok') {
+					$('#arqueo_caja').val(r.valor);
+					CargaArqueoCajaTes($('#id_ctb_doc').val(), 0);
+					mje('Proceso realizado correctamente');
+				} else {
+					mjeError('Error:', r.msg);
+				}
+			}
+		});
+	}
+
+}
 document.addEventListener("submit", async (e) => {
 	e.preventDefault();
 	if (e.target.id == "formAddFacturador") {
@@ -1588,6 +1604,16 @@ var GuardaFormaPago = function () {
 		});
 
 	}
+};
+
+function DetalleArqueoCaja(id) {
+	$.post("datos/listar/datos_detalle_facturador.php", { id: id }, function (he) {
+		$("#divTamModalReg").removeClass("modal-sm");
+		$("#divTamModalReg").removeClass("modal-lg");
+		$("#divTamModalReg").addClass("modal-xl");
+		$("#divModalReg").modal("show");
+		$("#divFormsReg").html(he);
+	});
 };
 document.addEventListener("submit", (e) => {
 	e.preventDefault();

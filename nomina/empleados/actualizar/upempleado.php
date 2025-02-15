@@ -107,25 +107,8 @@ try {
         echo $sql->errorInfo()[2];
         exit();
     }
-    if (isset($_POST['id_salario'])) {
-        $id_salario = $_POST['id_salario'];
-        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "UPDATE nom_salarios_basico SET  salario_basico = ?  WHERE id_salario = ?";
-        $sql = $cmd->prepare($sql);
-        $sql->bindValue(1, $sal, PDO::PARAM_STR);
-        $sql->bindParam(2, $id_salario, PDO::PARAM_INT);
-        if (!($sql->execute())) {
-            echo $sql->errorInfo()[2];
-            exit();
-        } else {
-            if ($sql->rowCount() > 0) {
-                $upsalemp = 1;
-            } else {
-                $upsalemp = 0;
-            }
-        }
-    } else {
+    $upsalemp = 0;
+    if ($_POST['salAnt'] != $_POST['numSalarioEmp']) {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
         $sql = "INSERT INTO nom_salarios_basico (id_empleado, vigencia, salario_basico, fec_reg) VALUES (?, ?, ?, ?)";
@@ -180,7 +163,7 @@ try {
             $sql->bindParam(2, $id_salario, PDO::PARAM_INT);
             $sql->execute();
         }
-        echo '1';
+        echo 'ok';
     } else {
         echo 'No se ingresó ningún dato nuevo';
     }

@@ -221,18 +221,20 @@ try {
 if ($documento['id_tipo_doc'] == '9') {
     try {
         $sql = "SELECT
-                    `tes_causa_arqueo`.`id_causa_arqueo`
-                    , `tes_causa_arqueo`.`fecha`
-                    , `tes_causa_arqueo`.`id_tercero`
-                    , `tes_causa_arqueo`.`valor_arq`
-                    , `tes_causa_arqueo`.`valor_fac`
-                    , CONCAT(`tes_facturador`.`nom1`, ' ', `tes_facturador`.`nom2`, ' ', `tes_facturador`.`ape1`, ' ', `tes_facturador`.`ape2`) AS `facturador`
-                    , `tes_causa_arqueo`.`id_ctb_doc`
-                FROM
-                    `tes_facturador`
-                    INNER JOIN `tes_causa_arqueo` 
-                        ON (`tes_facturador`.`cc` = `tes_causa_arqueo`.`id_tercero`)
-                WHERE (`tes_causa_arqueo`.`id_ctb_doc` =$id_doc);";
+                `tes_causa_arqueo`.`id_causa_arqueo`
+                , `tes_causa_arqueo`.`fecha_ini`
+                , `tes_causa_arqueo`.`fecha_fin`
+                , `tes_causa_arqueo`.`id_tercero`
+                , `tes_causa_arqueo`.`valor_arq`
+                , `tes_causa_arqueo`.`valor_fac`
+                , `tes_causa_arqueo`.`observaciones`
+                , `tb_terceros`.`nom_tercero` AS `facturador`
+                , `tb_terceros`.`nit_tercero` AS `documento`
+            FROM
+                `tes_causa_arqueo`
+                INNER JOIN `tb_terceros` 
+                    ON (`tes_causa_arqueo`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE (`tes_causa_arqueo`.`id_ctb_doc` = $id_doc)";
         $res = $cmd->query($sql);
         $facturadores = $res->fetchAll();
     } catch (PDOException $e) {
@@ -509,49 +511,53 @@ $meses = [
                 </tr>
             </table>
             </br>
-            <div class="row">
-                <div class="col-12">
-                    <div style="text-align: left">
-                        <div><strong>Datos de la factura: </strong></div>
+            <?php
+            if (!empty($data)) {
+            ?>
+                <div class="row">
+                    <div class="col-12">
+                        <div style="text-align: left">
+                            <div><strong>Datos de la factura: </strong></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <?php
-            $total_pto = 0;
-            ?>
+                <?php
+                $total_pto = 0;
+                ?>
 
-            <table class="table-bordered bg-light" style="width:100% !important;">
-                <tr>
-                    <td style="text-align: left">Causación</td>
-                    <td>Documento</td>
-                    <td>Número</td>
-                    <td>Fecha</td>
-                    <td>Vencimiento</td>
-                </tr>
-                <tr>
-                    <td><?php echo   $data['id_manu']; ?></td>
-                    <td><?php echo $data['tipo']; ?></td>
-                    <td><?php echo $data['num_doc']; ?></td>
-                    <td><?php echo date('Y-m-d', strtotime($data['fecha_fact'])); ?></td>
-                    <td><?php echo date('Y-m-d', strtotime($data['fecha_ven'])); ?></td>
-                </tr>
-                <tr>
-                    <td style="text-align: left">Valor factura</td>
-                    <td>Valor IVA</td>
-                    <td>Base</td>
-                    <td>Descuentos</td>
-                    <td>Neto</td>
-                </tr>
-                <tr>
-                    <td><?php echo number_format($data['valor_pago'], 2, ',', '.'); ?></td>
-                    <td><?php echo  number_format($data['valor_iva'], 2, ',', '.');; ?></td>
-                    <td><?php echo number_format($data['valor_base'], 2, ',', '.'); ?></td>
-                    <td><?php echo number_format($data['dcto'], 2, ',', '.'); ?></td>
-                    <td><?php echo number_format(($data['valor_pago'] - $data['dcto']), 2, ',', '.'); ?></td>
-                </tr>
-            </table>
-            </br>
+                <table class="table-bordered bg-light" style="width:100% !important;">
+                    <tr>
+                        <td style="text-align: left">Causación</td>
+                        <td>Documento</td>
+                        <td>Número</td>
+                        <td>Fecha</td>
+                        <td>Vencimiento</td>
+                    </tr>
+                    <tr>
+                        <td><?php echo   $data['id_manu']; ?></td>
+                        <td><?php echo $data['tipo']; ?></td>
+                        <td><?php echo $data['num_doc']; ?></td>
+                        <td><?php echo date('Y-m-d', strtotime($data['fecha_fact'])); ?></td>
+                        <td><?php echo date('Y-m-d', strtotime($data['fecha_ven'])); ?></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left">Valor factura</td>
+                        <td>Valor IVA</td>
+                        <td>Base</td>
+                        <td>Descuentos</td>
+                        <td>Neto</td>
+                    </tr>
+                    <tr>
+                        <td><?php echo number_format($data['valor_pago'], 2, ',', '.'); ?></td>
+                        <td><?php echo  number_format($data['valor_iva'], 2, ',', '.');; ?></td>
+                        <td><?php echo number_format($data['valor_base'], 2, ',', '.'); ?></td>
+                        <td><?php echo number_format($data['dcto'], 2, ',', '.'); ?></td>
+                        <td><?php echo number_format(($data['valor_pago'] - $data['dcto']), 2, ',', '.'); ?></td>
+                    </tr>
+                </table>
+                </br>
         <?php
+            }
         }
         ?>
         <?php if ($documento['id_tipo_doc'] == '9') { ?>

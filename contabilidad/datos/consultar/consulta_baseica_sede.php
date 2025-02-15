@@ -3,6 +3,8 @@
 include '../../../conexion.php';
 include '../../../terceros.php';
 $_post = json_decode(file_get_contents('php://input'), true);
+$valores = explode('|', $_post['valores']);
+$base = $valores[0];
 function pesos($valor)
 {
     return '$ ' . number_format($valor, 2, '.', ',');
@@ -70,9 +72,9 @@ foreach ($retenciones as $ret) {
     if ($primero) {
         $response .= $lbl_mun;
     }
-    $response .= '<input type="hidden" name="base[]" value="' . $ret['base'] . '">';
+    $response .= '<input type="hidden" name="base[]" value="' . $base . '">';
     $response .= '<input type="hidden" name="id_rete_sede[]" value="' . $ret['id_municipio'] . '">';
-    $response .= '<div class="form-control form-control-sm text-left">' . $ret['nom_municipio'] . '->' . pesos($ret['base']) . '</div>';
+    $response .= '<div class="form-control form-control-sm text-left">' . $ret['nom_municipio'] . '->' . pesos($base) . '</div>';
     $response .= '</div>';
     $response .= '<div class="form-group col-md-2">';
     if ($primero) {
