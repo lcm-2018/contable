@@ -48,7 +48,7 @@ try {
                 , `tb_datos_ips`.`direccion`
                 , `tb_datos_ips`.`endpoint`
                 , `tb_datos_ips`.`tipo_organizacion`
-                , `tb_responsabilidad_fiscal`.`codigo` AS `resp_fiscal`
+                , `fac_e_responsabilidades`.`codigo` AS `resp_fiscal`
                 , `tb_datos_ips`.`reg_fiscal`
             FROM
                 `tb_datos_ips`
@@ -58,8 +58,8 @@ try {
                     ON (`tb_datos_ips`.`id_dpto` = `tb_departamentos`.`id_departamento`)
                 INNER JOIN `tb_municipios` 
                     ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departamento`) AND (`tb_datos_ips`.`id_ciudad` = `tb_municipios`.`id_municipio`)
-                INNER JOIN `tb_responsabilidad_fiscal` 
-                    ON (`tb_datos_ips`.`resp_fiscal` = `tb_responsabilidad_fiscal`.`id`) LIMIT 1";
+                INNER JOIN `fac_e_responsabilidades` 
+                    ON (`tb_datos_ips`.`resp_fiscal` = `fac_e_responsabilidades`.`id`) LIMIT 1";
     $rs = $cmd->query($sql);
     $empresa = $rs->fetch();
     $cmd = null;
@@ -78,8 +78,8 @@ try {
                 , `seg_terceros_noblig`.`procedencia`
                 , `seg_terceros_noblig`.`tipo_org`
                 , `seg_terceros_noblig`.`reg_fiscal`
-                , `tb_responsabilidad_fiscal`.`codigo` as `resp_fiscal`
-                , `tb_responsabilidad_fiscal`.`descripcion`
+                , `fac_e_responsabilidades`.`codigo` as `resp_fiscal`
+                , `fac_e_responsabilidades`.`descripcion`
                 , `seg_terceros_noblig`.`correo`
                 , `seg_terceros_noblig`.`telefono`
                 , `tb_paises`.`codigo_pais`
@@ -89,33 +89,33 @@ try {
                 , `tb_municipios`.`codigo_municipio`
                 , `tb_municipios`.`nom_municipio`
                 , `seg_terceros_noblig`.`direccion`
-                , `seg_fact_noobligado`.`fec_compra`
-                , `seg_fact_noobligado`.`fec_vence`
-                , `seg_fact_noobligado`.`met_pago`
+                , `ctt_fact_noobligado`.`fec_compra`
+                , `ctt_fact_noobligado`.`fec_vence`
+                , `ctt_fact_noobligado`.`met_pago`
                 , `nom_metodo_pago`.`codigo` as `form_pago`
                 , `nom_metodo_pago`.`metodo`
-                , `seg_fact_noobligado`.`val_retefuente`
-                , `seg_fact_noobligado`.`porc_retefuente`
-                , `seg_fact_noobligado`.`val_reteica`
-                , `seg_fact_noobligado`.`porc_reteica`
-                , `seg_fact_noobligado`.`val_reteiva`
-                , `seg_fact_noobligado`.`porc_reteiva`
-                , `seg_fact_noobligado`.`val_ic`
-                , `seg_fact_noobligado`.`porc_ic`
-                , `seg_fact_noobligado`.`val_ica`
-                , `seg_fact_noobligado`.`porc_ica`
-                , `seg_fact_noobligado`.`val_inc`
-                , `seg_fact_noobligado`.`porc_inc`
-                , `seg_fact_noobligado`.`observaciones`
-                , `seg_fact_noobligado`.`estado`
+                , `ctt_fact_noobligado`.`val_retefuente`
+                , `ctt_fact_noobligado`.`porc_retefuente`
+                , `ctt_fact_noobligado`.`val_reteica`
+                , `ctt_fact_noobligado`.`porc_reteica`
+                , `ctt_fact_noobligado`.`val_reteiva`
+                , `ctt_fact_noobligado`.`porc_reteiva`
+                , `ctt_fact_noobligado`.`val_ic`
+                , `ctt_fact_noobligado`.`porc_ic`
+                , `ctt_fact_noobligado`.`val_ica`
+                , `ctt_fact_noobligado`.`porc_ica`
+                , `ctt_fact_noobligado`.`val_inc`
+                , `ctt_fact_noobligado`.`porc_inc`
+                , `ctt_fact_noobligado`.`observaciones`
+                , `ctt_fact_noobligado`.`estado`
             FROM
-                `seg_fact_noobligado`
+                `ctt_fact_noobligado`
                 INNER JOIN `seg_terceros_noblig` 
-                    ON (`seg_fact_noobligado`.`id_tercero_no` = `seg_terceros_noblig`.`id_tercero`)
+                    ON (`ctt_fact_noobligado`.`id_tercero_no` = `seg_terceros_noblig`.`id_tercero`)
                 INNER JOIN `tb_tipos_documento` 
                     ON (`seg_terceros_noblig`.`id_tdoc` = `tb_tipos_documento`.`id_tipodoc`)
-                INNER JOIN `tb_responsabilidad_fiscal` 
-                    ON (`seg_terceros_noblig`.`resp_fiscal` = `tb_responsabilidad_fiscal`.`id`)
+                INNER JOIN `fac_e_responsabilidades` 
+                    ON (`seg_terceros_noblig`.`resp_fiscal` = `fac_e_responsabilidades`.`id`)
                 INNER JOIN `tb_paises` 
                     ON (`seg_terceros_noblig`.`id_pais` = `tb_paises`.`id_pais`)
                 INNER JOIN `tb_departamentos` 
@@ -123,8 +123,8 @@ try {
                 INNER JOIN `tb_municipios` 
                     ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departamento`) AND (`seg_terceros_noblig`.`id_municipio` = `tb_municipios`.`id_municipio`)
                 INNER JOIN `nom_metodo_pago` 
-                    ON (`seg_fact_noobligado`.`forma_pago` = `nom_metodo_pago`.`id_metodo_pago`)
-            WHERE `seg_fact_noobligado`.`id_facturano` = '$id_facno'";
+                    ON (`ctt_fact_noobligado`.`forma_pago` = `nom_metodo_pago`.`id_metodo_pago`)
+            WHERE `ctt_fact_noobligado`.`id_facturano` = '$id_facno'";
     $rs = $cmd->query($sql);
     $factura = $rs->fetch();
     $cmd = null;
@@ -137,7 +137,7 @@ try {
     $sql = "SELECT
                 `id_detail`, `id_fno`, `codigo`, `detalle`, `val_unitario`, `cantidad`, `p_iva`, `val_iva`, `p_dcto`, `val_dcto`
             FROM
-                `seg_fact_noobligado_det`
+                `ctt_fact_noobligado_det`
             WHERE `id_fno` = '$id_facno'";
     $rs = $cmd->query($sql);
     $detalles = $rs->fetchAll();

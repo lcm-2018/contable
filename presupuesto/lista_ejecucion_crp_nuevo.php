@@ -90,16 +90,19 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_pto`,`fecha`, `id_manu`,`objeto`, `id_tercero_api`, `num_contrato` FROM `pto_crp` WHERE `id_pto_crp` = $id_crp";
+    $sql = "SELECT `id_pto`,`fecha`, `id_manu`,`objeto`, `id_tercero_api`, `num_contrato`, `tesoreria` FROM `pto_crp` WHERE `id_pto_crp` = $id_crp";
     $rs = $cmd->query($sql);
     $datosCRP = $rs->fetch();
     if (empty($datosCRP)) {
-        $datosCRP['id_pto'] = '';
-        $datosCRP['fecha'] = date('Y-m-d');
-        $datosCRP['id_manu'] = $id_manu;
-        $datosCRP['objeto'] = $objeto;
-        $datosCRP['num_contrato'] = $num_contrato;
-        $datosCRP['id_tercero_api'] = 0;
+        $datosCRP = [
+            'tesoreria' => 0,
+            'id_pto' => '',
+            'fecha' => date('Y-m-d'),
+            'id_manu' => $id_manu,
+            'objeto' => $objeto,
+            'num_contrato' => $num_contrato,
+            'id_tercero_api' => 0
+        ];
     } else {
         $automatico = 'readonly';
     }
@@ -188,7 +191,12 @@ $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
                                             </div>
                                             <div class="col-6 pb-1"><input type="text" name="contrato" id="contrato" class="form-control form-control-sm" value="<?php echo $datosCRP['num_contrato']; ?>" <?php echo $automatico; ?>></div>
                                         </div>
-
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <div class="col"><label for="fecha" class="small" title="Marcar para enviar directamente a tesorería">TESORERÍA</label></div>
+                                            </div>
+                                            <div class="col-6 pb-1"><input type="checkbox" name="chDestTes" id="chDestTes" title="Marcar para enviar directamente a tesorería" <?= $datosCRP['tesoreria'] == 1 ? 'checked' : '' ?> <?php echo $automatico; ?>></div>
+                                        </div>
                                     </div>
                                 </div>
                                 <br>

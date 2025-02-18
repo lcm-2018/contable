@@ -51,7 +51,7 @@ try {
                 , `tb_datos_ips`.`direccion`
                 , `tb_datos_ips`.`endpoint`
                 , `tb_datos_ips`.`tipo_organizacion`
-                , `tb_responsabilidad_fiscal`.`codigo` AS `resp_fiscal`
+                , `fac_e_responsabilidades`.`codigo` AS `resp_fiscal`
                 , `tb_datos_ips`.`reg_fiscal`
                 , `tb_datos_ips`.`user_prov`
                 , `tb_datos_ips`.`pass_prov`
@@ -63,8 +63,8 @@ try {
                     ON (`tb_datos_ips`.`id_dpto` = `tb_departamentos`.`id_departameto`)
                 INNER JOIN `tb_municipios` 
                     ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departameto`) AND (`tb_datos_ips`.`id_ciudad` = `tb_municipios`.`id_municipio`)
-                INNER JOIN `tb_responsabilidad_fiscal` 
-                    ON (`tb_datos_ips`.`resp_fiscal` = `tb_responsabilidad_fiscal`.`id`)
+                INNER JOIN `fac_e_responsabilidades` 
+                    ON (`tb_datos_ips`.`resp_fiscal` = `fac_e_responsabilidades`.`id`)
             WHERE `tb_datos_ips`.`id_empresa` = '$id_empresa'";
     $rs = $cmd->query($sql);
     $empresa = $rs->fetch();
@@ -84,8 +84,8 @@ try {
                 , `tb_terceros_noblig`.`procedencia`
                 , `tb_terceros_noblig`.`tipo_org`
                 , `tb_terceros_noblig`.`reg_fiscal`
-                , `tb_responsabilidad_fiscal`.`codigo` as `resp_fiscal`
-                , `tb_responsabilidad_fiscal`.`descripcion`
+                , `fac_e_responsabilidades`.`codigo` as `resp_fiscal`
+                , `fac_e_responsabilidades`.`descripcion`
                 , `tb_terceros_noblig`.`correo`
                 , `tb_terceros_noblig`.`telefono`
                 , `tb_paises`.`codigo_pais`
@@ -117,8 +117,8 @@ try {
                     ON (`tb_facturas`.`id_tercero_no` = `tb_terceros_noblig`.`id_tercero`)
                 INNER JOIN `tb_tipos_documento` 
                     ON (`tb_terceros_noblig`.`id_tdoc` = `tb_tipos_documento`.`id_tipodoc`)
-                INNER JOIN `tb_responsabilidad_fiscal` 
-                    ON (`tb_terceros_noblig`.`resp_fiscal` = `tb_responsabilidad_fiscal`.`id`)
+                INNER JOIN `fac_e_responsabilidades` 
+                    ON (`tb_terceros_noblig`.`resp_fiscal` = `fac_e_responsabilidades`.`id`)
                 INNER JOIN `tb_paises` 
                     ON (`tb_terceros_noblig`.`id_pais` = `tb_paises`.`id_pais`)
                 INNER JOIN `tb_departamentos` 
