@@ -152,7 +152,7 @@ $ver = 'readonly';
                                                     <div class="col"><span class="small">OBJETO:</span></div>
                                                 </div>
                                                 <div class="col-10">
-                                                    <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-span="Default select example" rows="3" required="required"><?= substr($datosDoc['detalle'], 0, 200); ?></textarea>
+                                                    <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-span="Default select example" rows="3" required="required"><?= $datosDoc['detalle']; ?></textarea>
                                                 </div>
                                             </div>
                                         </form>

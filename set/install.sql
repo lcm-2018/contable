@@ -137,7 +137,7 @@ insert  into `ctb_tipo_doc`(`id_ctb_tipodoc`,`tipo`)
 values 
 (1,'FACTURA'),(2,'CUENTA DE COBRO'),(3,'DOCUMENTO EQUIVALENTE'),(4,'CAJA MENOR'),(5,'RESOLUCION'),(6,'OTROS');
 
-INSERT INTO `tb_responsabilidad_fiscal` (`id`, `codigo`, `descripcion`) VALUES
+INSERT INTO `fac_e_responsabilidades` (`id`, `codigo`, `descripcion`) VALUES
 (1, 'O-13', 'Gran contribuyente'),
 (2, 'O-15', 'Autorretenedor'),
 (3, 'O-23', 'Agente de retención IVA'),

@@ -551,6 +551,14 @@ function cargarListaDetallePago(id_cop, id_doc) {
 		'</form>').appendTo("body").submit();
 }
 
+function ListarDetallePago2(id_cop, id_doc, tipo_dato, tipo_movi) {
+	$('<form action="lista_documentos_pag.php" method="post">' +
+		'<input type="hidden" name="id_cop" value="' + id_cop + '" />' +
+		'<input type="hidden" name="id_doc" value="' + id_doc + '" />' +
+		'<input type="hidden" name="tipo_dato" value="' + tipo_dato + '" />' +
+		'<input type="hidden" name="tipo_var" value="' + tipo_movi + '" />' +
+		'</form>').appendTo("body").submit();
+}
 // Cargar lista de obligaciones para pagar
 function cargarListaArqueoConsignacion(id_doc) {
 	let tipo_dato = $("#id_ctb_tipo").val();
@@ -722,10 +730,7 @@ let rubrosaPagar = function (doc) {
 			}
 		});
 };
-
-// Procesar causación de cuentas por pagar con boton guardar
-$('#divModalForms').on('click', '#gestionarMvtoCtbPag', function () {
-	var id = $(this).attr('text');
+function GuardaDocPag(id) {
 	$('.is-invalid').removeClass('is-invalid');
 	if ($('#fecha').val() == '') {
 		$('#fecha').addClass('is-invalid');
@@ -761,13 +766,19 @@ $('#divModalForms').on('click', '#gestionarMvtoCtbPag', function () {
 				type: 'POST',
 				url: url,
 				data: datos,
+				dataType: 'json',
 				success: function (r) {
-					if (r == 'ok') {
+					if (r.status == 'ok') {
 						$('#divModalForms').modal('hide');
 						mje('Proceso realizado correctamente');
 						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+						if ($('#tableMvtoContableDetallePag').length) {
+							setTimeout(function () {
+								ListarDetallePago2(0, r.id, $('#tipodato').val(), 1);
+							}, 400);
+						}
 					} else {
-						mjeError('Error:', r);
+						mjeError('Error:', r.msg);
 					}
 
 				}
@@ -775,7 +786,15 @@ $('#divModalForms').on('click', '#gestionarMvtoCtbPag', function () {
 		}
 	}
 	return false;
-
+}
+// Procesar causación de cuentas por pagar con boton guardar
+$('#divModalForms').on('click', '#gestionarMvtoCtbPag', function () {
+	var id = $(this).attr('text');
+	GuardaDocPag(id);
+});
+$('#GuardaDocMvtoPag').on('click', function () {
+	var id = $(this).attr('text');
+	GuardaDocPag(id);
 });
 $('#divModalForms').on('click', '#gestionarMvtoCtbCaja', function () {
 	var id = $(this).attr('text');

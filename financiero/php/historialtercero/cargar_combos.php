@@ -204,9 +204,7 @@ function terceros($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT tb_terceros.id_tercero,tb_terceros.nom_tercero FROM tb_terceros 
-                INNER JOIN tb_rel_tercero ON (tb_rel_tercero.id_tercero_api=tb_terceros.id_tercero_api)
-                WHERE tb_terceros.id_tercero<>0 AND (tb_rel_tercero.id_tipo_tercero=2 OR tb_terceros.es_clinico=1)";
+        $sql = "SELECT id_tercero,nom_tercero FROM tb_terceros WHERE id_tercero<>0";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {

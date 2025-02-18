@@ -433,7 +433,7 @@ try {
                 }
                 $key = array_search('53', array_column($perm_modulos, 'id_modulo'));
                 if (false !== $key) {
-                    if (PermisosUsuario($permisos, 5301, 0) || PermisosUsuario($permisos, 5302, 0) || $id_rol == 1) {
+                    if (PermisosUsuario($permisos, 5301, 0) || PermisosUsuario($permisos, 5302, 0) || $id_rol == 1 || PermisosUsuario($permisos, 5303, 0)) {
                     ?>
                         <!--MODULO-->
                         <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapseContratacion" aria-expanded="false" aria-controls="collapseContratacion">
@@ -477,7 +477,7 @@ try {
                                         </div>
                                     </a>
                                 <?php }
-                                if (false) { ?>
+                                if (PermisosUsuario($permisos, 5303, 0) || $id_rol == 1) {                                 ?>
                                     <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contratacion/no_obligados/listar_facturas.php">
                                         <div class="form-row">
                                             <div class="div-icono">
@@ -668,6 +668,17 @@ try {
                                                     </div>
                                                     <div>
                                                         SubGrupos
+                                                    </div>
+                                                </a>
+                                            <?php }
+                                            if (PermisosUsuario($permisos, 5510, 0) || $id_rol == 1) {
+                                            ?>
+                                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/list_documentos_soporte.php">
+                                                    <div class="div-icono">
+                                                        <i class="fas fa-paste fa-sm" style="color: green;"></i>
+                                                    </div>
+                                                    <div>
+                                                        Doc. Soporte
                                                     </div>
                                                 </a>
                                             <?php }
@@ -879,6 +890,16 @@ try {
                                             </div>
                                         </a>
                                     <?php } ?>
+                                    <?php if (PermisosUsuario($permisos, 5002, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/financiero/php/historialtercero/index.php?var=3">
+                                            <div class="div-icono">
+                                                <i class="far fa-list-alt" style="color: #E74C3C;"></i>
+                                            </div>
+                                            <div>
+                                                Historial tercero
+                                            </div>
+                                        </a>
+                                    <?php } ?>
                                 </nav>
                             </div>
                             <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapsePedidos" aria-expanded="false" aria-controls="pagesCollapsePedidos">
@@ -1066,7 +1087,7 @@ try {
                                                     Inf. Personalizados
                                                 </div>
                                             </div>
-                                        </a>                                        
+                                        </a>
                                     <?php } ?>
                                 </nav>
                             </div>
@@ -1282,7 +1303,7 @@ try {
                                                     Inf. Personalizados
                                                 </div>
                                             </div>
-                                        </a>                                          
+                                        </a>
                                     <?php } ?>
                                 </nav>
                             </div>

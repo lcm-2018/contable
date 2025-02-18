@@ -130,6 +130,48 @@
 			}
 		});
 		$("#tableMvtoContable").wrap('<div class="overflow" />');
+		//  tabla de documentos soporte
+		var tableDocSoporte = $("#tableDocSoporte").DataTable({
+			dom: setdom,
+			buttons: [
+				{
+					text: ' <span class="fas fa-plus-circle fa-lg"></span>',
+					action: function (e, dt, node, config) {
+						$.post("datos/registrar/form_docs_soporte.php", function (he) {
+							$("#divTamModalForms").removeClass("modal-sm");
+							$("#divTamModalForms").removeClass("modal-lg");
+							$("#divTamModalForms").addClass("modal-xl");
+							$("#divModalForms").modal("show");
+							$("#divForms").html(he);
+						});
+					},
+				},
+			],
+			language: setIdioma,
+			ajax: {
+				url: "datos/listar/datos_doc_soporte.php",
+				type: "POST",
+				dataType: "json",
+			},
+			columns: [
+				{ data: "id" },
+				{ data: "ref" },
+				{ data: "inicia" },
+				{ data: "vence" },
+				{ data: "tipo_doc" },
+				{ data: "num_doc" },
+				{ data: "nombre" },
+				{ data: "botones" }
+			],
+			order: [[0, "asc"]],
+		});
+		$('#tableDocSoportee_filter input').unbind(); // Desvinculamos el evento por defecto
+		$('#tableDocSoportee_filter input').bind('keypress', function (e) {
+			if (e.keyCode == 13) { // Si se presiona Enter (código 13)
+				tableDocSoporte.search(this.value).draw(); // Realiza la búsqueda y actualiza la tabla
+			}
+		});
+		$("#tableDocSoportee").wrap('<div class="overflow" />');
 		// dataTable de movimientos contables
 		$("#tableMvtoContableDetalle").DataTable({
 			search: "false",
@@ -2350,28 +2392,6 @@ const EnviaDocumentoSoporte = (boton) => {
 	});
 
 	return false
-	fetch("soportes/equivalente/enviar_factura.php", {
-		method: "POST",
-		body: JSON.stringify({ id: id }),
-	})
-		.then((response) => response.json())
-		.then((response) => {
-			console.log(response);
-			if (response[0].value == "ok") {
-				boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
-				id = "tableMvtoContable";
-				reloadtable(id);
-				mje("Documento enviado correctamente");
-			} else {
-				boton.disabled = false;
-				boton.value = id;
-				boton.innerHTML = '<span class="fas fa-paper-plane fa-lg"></span>';
-				mjeError(response[0].msg);
-			}
-		})
-		.catch((error) => {
-			console.log("Error:");
-		});
 };
 const VerSoporteElectronico = (id) => {
 	fetch("soportes/equivalente/ver_html.php", {

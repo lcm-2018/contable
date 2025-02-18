@@ -22,9 +22,7 @@ $vigencia = $_SESSION['vigencia'];
 <html lang="es">
 <?php include '../../head.php' ?>
 
-<body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] == '1') {
-                                echo 'sb-sidenav-toggled';
-                            } ?>">
+<body class="sb-nav-fixed <?= $_SESSION['navarlat'] == '1' ? 'sb-sidenav-toggled' : ''; ?>">
     <?php include '../../navsuperior.php' ?>
     <div id="layoutSidenav">
         <?php include '../../navlateral.php' ?>
@@ -41,16 +39,22 @@ $vigencia = $_SESSION['vigencia'];
                             </div>
                         </div>
                         <div class="card-body" id="divCuerpoPag">
-                            <input type="hidden" id="peReg" value="<?php echo $permisos['registrar'] ?>">
+                        <?php
+                                if (PermisosUsuario($permisos, 5301, 2) || $id_rol == 1) {
+                                    echo '<input type="hidden" id="peReg" value="1">';
+                                } else {
+                                    echo '<input type="hidden" id="peReg" value="0">';
+                                }
+                                ?>
                             <table id="tableFacurasNoObligados" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                                 <thead>
                                     <tr class="text-center">
                                         <th>ID</th>
                                         <th>Fecha Compra</th>
-                                        <th>Fecha Vencimimiento</th>
+                                        <th>Vence</th>
                                         <th>Método Pago</th>
                                         <th>Forma Pago</th>
-                                        <th>Tipo Documento</th>
+                                        <th>Tipo</th>
                                         <th>No. Documento</th>
                                         <th>Nombre y/o Razón social</th>
                                         <th>Detalles</th>

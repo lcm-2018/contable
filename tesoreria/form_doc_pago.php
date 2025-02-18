@@ -125,6 +125,7 @@ if (empty($datos)) {
     $tercero = ltrim($terceros[0]['nom_tercero']);
 }
 $cero = isset($datos['id_caja']) ? $datos['id_caja'] : 0;
+$tam = $id_ctb_doc == '9' ? 4 : 6;
 ?>
 <div class="px-0">
     <div class="shadow">
@@ -134,25 +135,27 @@ $cero = isset($datos['id_caja']) ? $datos['id_caja'] : 0;
         <form id="formGetMvtoTes">
             <input type="hidden" name="id_ctb_doc" value="<?php echo $id_ctb_doc; ?>">
             <div class="form-row px-4 pt-2">
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-<?= $tam ?>">
                     <label for="fecha" class="small">FECHA</label>
                     <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datos['fecha'])); ?>" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>">
                 </div>
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-<?= $tam ?>">
                     <label for="numDoc" class="small">NUMERO</label>
-                    <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" readonly value="<?php echo $datos['id_manu'] ?>">
+                    <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $datos['id_manu'] ?>">
                 </div>
-                <div class="form-group col-md-4">
-                    <label for="numDoc" class="small">&nbsp;</label>
-                    <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">
-                                <input type="checkbox" name="chDocSoporte" id="chDocSoporte" <?php echo $datos['check'] == 0 ? '' : 'checked'; ?>>
+                <?php if ($id_ctb_doc == '9') { ?>
+                    <div class="form-group col-md-4">
+                        <label for="numDoc" class="small">&nbsp;</label>
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="checkbox" name="chDocSoporte" id="chDocSoporte" <?php echo $datos['check'] == 0 ? '' : 'checked'; ?>>
+                                </div>
                             </div>
+                            <input type="text" class="form-control" disabled value="DOC. SOPORTE">
                         </div>
-                        <input type="text" class="form-control" disabled value="DOC. SOPORTE">
                     </div>
-                </div>
+                <?php } ?>
             </div>
             <?php if ($id_ctb_doc == '14') { ?>
                 <div class="form-row px-4">

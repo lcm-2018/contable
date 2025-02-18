@@ -10,14 +10,14 @@ $id_fno = isset($_POST['id']) ?  $_POST['id'] : exit('Acción no permitida');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "DELETE FROM `seg_fact_noobligado`  WHERE `id_facturano`  = ?";
+    $sql = "DELETE FROM `ctt_fact_noobligado`  WHERE `id_facturano`  = ?";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_fno, PDO::PARAM_INT);
     $sql->execute();
     if (!($sql->rowCount() > 0)) {
         echo $sql->errorInfo()[2];
     } else {
-        echo 1;
+        echo 'ok';
     }
     $cmd = null;
 } catch (PDOException $e) {

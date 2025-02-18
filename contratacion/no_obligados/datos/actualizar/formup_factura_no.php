@@ -12,7 +12,7 @@ try {
     $sql = "SELECT
                 `id_facturano`, `fec_compra`, `met_pago`, `forma_pago`, `procede`, `tipo_org`, `reg_fiscal`, `tipo_doc`, `no_doc`, `resp_fiscal`, `nombre`, `correo`, `telefono`, `pais`, `dpto`, `ciudad`, `direccion`, `codigo`, `valbase`, `val_iva`, `porc_iva`, `val_retefuente`, `porc_retefuente`, `val_reteica`, `porc_reteica`, `val_reteiva`, `porc_reteiva`, `val_ic`, `porc_ic`, `val_ica`, `porc_ica`, `val_inc`, `porc_inc`
             FROM
-                `seg_fact_noobligado`
+                `ctt_fact_noobligado`
             WHERE `id_facturano` = '$id_fno'";
     $rs = $cmd->query($sql);
     $fact_no = $rs->fetch();
@@ -26,7 +26,7 @@ try {
     $sql = "SELECT
                 `id_detail`, `id_fno`, `detalle`
             FROM
-                `seg_fact_noobligado_det`
+                `ctt_fact_noobligado_det`
             WHERE `id_fno` = '$id_fno'";
     $rs = $cmd->query($sql);
     $detailsfno = $rs->fetchAll();
@@ -53,7 +53,7 @@ try {
     $sql = "SELECT
                 `id`, `descripcion`
             FROM
-                `tb_responsabilidad_fiscal` ORDER BY `descripcion` ASC";
+                `fac_e_responsabilidades` ORDER BY `descripcion` ASC";
     $rs = $cmd->query($sql);
     $rep_fiscal = $rs->fetchAll();
     $cmd = null;
