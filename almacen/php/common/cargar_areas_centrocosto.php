@@ -14,10 +14,12 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     
     echo '<option value="">' . $titulo . '</option>';    
-    if ($todas){
-        $sql = "SELECT id_area,nom_area FROM far_centrocosto_area WHERE id_area<>0";
+    if ($todas){        
+        $sql = "SELECT id_area,CONCAT_WS(' - ',nom_area,nom_sede) AS nom_area FROM far_centrocosto_area 
+                INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_centrocosto_area.id_sede) WHERE id_area<>0";
     } else {    
-        $sql = "SELECT id_area,nom_area FROM far_centrocosto_area WHERE id_centrocosto=$idcec";
+        $sql = "SELECT id_area,CONCAT_WS(' - ',nom_area,nom_sede) AS nom_area FROM far_centrocosto_area 
+                INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_centrocosto_area.id_sede) WHERE id_centrocosto=$idcec";
     }
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
