@@ -11,11 +11,13 @@ if ($key === false) {
     echo 'Usuario no autorizado';
     exit();
 }
-$id_fno = isset($_POST['id']) ?  $_POST['id'] : exit('Acción no permitida');
 function pesos($valor)
 {
+    $valor = floatval($valor);
     return '$' . number_format($valor, 2, ",", ".");
 }
+$id_fno = isset($_POST['id']) ?  $_POST['id'] : exit('Acción no permitida');
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -581,8 +583,8 @@ try {
                                     <b>TOTAL A PAGAR</b>
                                 </td>
                                 <td colspan="6" class="border">
-                                    <div class="form-control form-control-sm bg-plain text-right  valfac"><b><?php echo pesos($subtotal + $v_iva - $factura['val_retefuente'] - $factura['val_reteiva'] - $v_dcto) ?></b></div>
-                                    <input type="hidden" name="valfac" value="<?php echo $subtotal + $v_iva - $factura['val_retefuente'] - $factura['val_reteiva'] - $v_dcto ?>">
+                                    <div class="form-control form-control-sm bg-plain text-right  valfac"><b><?php echo pesos(floatval($subtotal) + floatval($v_iva) - floatval($factura['val_retefuente']) - floatval($factura['val_reteiva']) - floatval($v_dcto)) ?></b></div>
+                                    <input type="hidden" name="valfac" value="<?php echo floatval($subtotal) + floatval($v_iva) - floatval($factura['val_retefuente']) - floatval($factura['val_reteiva']) - floatval($v_dcto) ?>">
                                 </td>
                             </tr>
                         </tfoot>
