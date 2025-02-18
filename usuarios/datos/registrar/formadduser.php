@@ -6,12 +6,16 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../financiero/php/historialtercero/cargar_combos.php';
+
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
 if ($id_rol != 1) {
     exit('Usuario no autorizado');
 }
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
     $sql = "SELECT
                 `id_rol`, `nom_rol` AS `nombre`
             FROM
@@ -19,10 +23,11 @@ try {
             ORDER BY `nombre` ASC";
     $rs = $cmd->query($sql);
     $roles = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
+    //$cmd = null;  /// este select colocarlo en comunes como drilocoquito, es para los roles de los usuarios
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
 ?>
 <div class="px-0">
     <div class="shadow">
@@ -32,7 +37,14 @@ try {
         <div class="px-4">
             <form id="formAddUser">
                 <div class="form-row">
-                    <div class="form-group col-md-12">
+                    <div class="form-group col-md-4">
+                        <label for="sl_tipoDocumento" class="small">Tipo documento</label>
+                        <select class="form-control form-control-sm" id="sl_tipoDocumento" name="sl_tipoDocumento">
+                            <?php tipoDocumento($cmd, '', 0) ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-6">
                         <label class="small" for="txtCCuser">Número de documento</label>
                         <input type="number" class="form-control form-control-sm" id="txtCCuser" name="txtCCuser" placeholder="Identificación">
                     </div>

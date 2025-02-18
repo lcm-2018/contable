@@ -467,3 +467,25 @@ function areas_centrocosto($cmd, $titulo = '', $idcec = 0, $id = -1)
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
 }
+
+//tipos de documentos
+function tipoDocumento($cmd, $titulo = '', $id = 0)
+{
+    try {
+        echo '<option value="">' . $titulo . '</option>';
+        $sql = "SELECT tb_tipo_documento.id_tipo_doc,tb_tipo_documento.tipo_doc FROM tb_tipo_documento";
+        $rs = $cmd->query($sql);
+        $objs = $rs->fetchAll();
+        foreach ($objs as $obj) {
+            if ($obj['id_tipo_documento']  == $id) {
+                echo '<option value="' . $obj['id_tipo_documento'] . '" selected="selected">' . $obj['tipo_doc'] . '</option>';
+            } else {
+                echo '<option value="' . $obj['id_tipo_documento'] . '">' . $obj['tipo_doc'] . '</option>';
+            }
+        }
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
