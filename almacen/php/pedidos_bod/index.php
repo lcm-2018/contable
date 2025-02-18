@@ -91,7 +91,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 </div>
                                 <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_modulo_origen">
-                                        <?php modulo_origen('--Origen--') ?>
+                                        <?php modulo_origen('--Origen--',0) ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
