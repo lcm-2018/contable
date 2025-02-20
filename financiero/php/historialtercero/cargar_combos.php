@@ -489,3 +489,24 @@ function tipoDocumento($cmd, $titulo = '', $id = 0)
     }
 }
 
+//roles
+function roles($cmd, $titulo = '', $id = 0)
+{
+    try {
+        echo '<option value="">' . $titulo . '</option>';
+        $sql = "SELECT `id_rol`, `nom_rol` AS `nombre` FROM `seg_rol` ORDER BY `nombre` ASC";
+        $rs = $cmd->query($sql);
+        $roles = $rs->fetchAll();
+        foreach($roles as $obj){
+            if($obj['id_rol'] == $id){
+                echo '<option value="' . $obj['id_rol'] . '" selected="selected">' . $obj['nombre'] . '</option>';
+            }
+            else{
+                echo '<option value="' . $obj['id_rol'] . '">' . $obj['nombre'] . '</option>';
+            }
+        }
+        $cmd = null;  
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}

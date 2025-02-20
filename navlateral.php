@@ -896,7 +896,7 @@ try {
                                                 <i class="far fa-list-alt" style="color: #E74C3C;"></i>
                                             </div>
                                             <div>
-                                                Historial tercero
+                                                Historial tercero 
                                             </div>
                                         </a>
                                     <?php } ?>
