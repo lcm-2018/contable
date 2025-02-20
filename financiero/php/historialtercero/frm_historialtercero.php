@@ -5,6 +5,7 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
+include '../../../terceros.php';
 include 'cargar_combos.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -46,8 +47,8 @@ if (empty($obj)) {
                 <div class=" form-row">
                     <div class="form-group col-md-4">
                         <label for="txt_tercero_filtro" class="small">Tercero</label>
-                        <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" placeholder="Tercero">
-                        <!--<input type="hidden" id="id_txt_tercero" name="id_txt_tercero" value="<?php echo $obj['id_tercero'] ?>">-->
+                        <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" name="txt_tercero_filtro" placeholder="Tercero" value="">
+                        <input type="hidden" id="id_txt_tercero" name="id_txt_tercero" class="form-control form-control-sm" value="0">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="txt_nrodisponibilidad_filtro" class="small">Nro Disponibilidad</label>
@@ -55,11 +56,11 @@ if (empty($obj)) {
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_fecini_filtro" class="small">Fecha inicial</label>
-                        <input type="date" class="form-control form-control-sm" id="txt_fecini_filtro" name="txt_fecini_filtro" placeholder="Fecha Inicial">
+                        <input type="date" class="form-control form-control-sm" id="txt_fecini_filtro" name="txt_fecini_filtro" placeholder="Fecha Inicial" value="<?php echo $_SESSION['vigencia'] ?>-01-01">
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_fecfin_filtro" class="small">Fecha final</label>
-                        <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha final">
+                        <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha final" value="<?php echo $_SESSION['vigencia'] ?>-12-31">
                     </div>
                     <div class="form-group col-md-1">
                         <label for="btn_buscar_filtro" class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
@@ -84,7 +85,7 @@ if (empty($obj)) {
                         </thead>
                         <tbody class="text-left centro-vertical"></tbody>
                     </table>
-                </div>                
+                </div>
             </form>
 
             <!--Tabs-->
@@ -99,7 +100,7 @@ if (empty($obj)) {
                 </nav>
 
                 <div class="tab-content pt-2" id="nav-tabContent">
-                    <!--Lista de CUMS-->
+                    <!--Lista de contratacion-->
                     <div class="tab-pane fade show active" id="nav_lista_contratacion" role="tabpanel" aria-labelledby="nav_lista_contratacion-tab">
                         <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
@@ -116,7 +117,7 @@ if (empty($obj)) {
                         </table>
                     </div>
 
-                    <!--Lista de LOTES-->
+                    <!--Lista de reg presupuestal-->
                     <div class="tab-pane fade" id="nav_lista_regpresupuestal" role="tabpanel" aria-labelledby="nav_lista_regpresupuestal-tab">
                         <!--<table id="tb_articulos_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
