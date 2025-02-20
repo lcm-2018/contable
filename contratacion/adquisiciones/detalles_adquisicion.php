@@ -173,6 +173,7 @@ try {
                     , `ctt_orden_compra_detalle`.`cantidad`
                     , `ctt_orden_compra_detalle`.`val_unid`
                     , `ctt_orden_compra_detalle`.`id_detalle`
+                    , '0' AS `iva`
                 FROM
                     `ctt_orden_compra_detalle`
                     INNER JOIN `ctt_orden_compra` 
@@ -186,6 +187,7 @@ try {
                     , `far_medicamentos`.`nom_medicamento` AS `bien_servicio`
                     , `far_alm_pedido_detalle`.`cantidad`
                     , `far_alm_pedido_detalle`.`valor` AS `val_unid`
+                    , `far_alm_pedido_detalle`.`iva`
                     , `far_alm_pedido_detalle`.`aprobado`
                 FROM
                     `far_alm_pedido_detalle`
@@ -683,31 +685,40 @@ if (!empty($adquisicion)) {
                                                                     <tr class="text-center">
                                                                         <th>TERCERO:</th>
                                                                         <th colspan="4"><?php echo  $adquisicion['nom_tercero']; ?></th>
-                                                                        <th><?php echo  $adquisicion['nit_tercero']; ?></th>
+                                                                        <th colspan="2"><?php echo  $adquisicion['nit_tercero']; ?></th>
                                                                     </tr>
                                                                     <tr class="text-center">
                                                                         <th>#</th>
                                                                         <th>Bien o Servicio</th>
                                                                         <th><?php echo $adquisicion['id_orden'] > 0 ? 'Solicita/Ordena' : 'Cantidad'; ?></th>
                                                                         <th>Val. Unidad</th>
+                                                                        <th>IVA</th>
                                                                         <th>Total</th>
                                                                         <th><?php echo $adquisicion['id_orden'] == '' ? 'Acciones' : '<input type="checkbox" id="selectAll" title="Desmarcar todos" checked>'; ?></th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody class="modificarCotizaciones">
                                                                     <?php
+                                                                    $total_compra = 0;
+                                                                    $fila = '';
                                                                     foreach ($detalles_orden as $dc) {
                                                                         if ($adquisicion['id_orden'] > 0 && $adquisicion['estado'] < 5) {
                                                                             $aprobado = $dc['aprobado'] > 0 ? $dc['aprobado'] : $dc['cantidad'];
                                                                             $val_unid = '<input type="number" name="val_unid[' . $dc['id_detalle'] . ']" class="form-control form-control-sm text-right" value="' . $dc['val_unid'] . '">';
+                                                                            $iva = '<select name="iva[' . $dc['id_detalle'] . ']" class="form-control form-control-sm">
+                                                                                        <option value="0" ' . ($dc['iva'] == 0 ? 'selected' : '') . '>0%</option>
+                                                                                        <option value="5" ' . ($dc['iva'] == 5 ? 'selected' : '') . '>5%</option>
+                                                                                        <option value="19" ' . ($dc['iva'] == 19 ? 'selected' : '') . '>19%</option>
+                                                                                    </select>';
                                                                             $cantidad = '<div class="input-group input-group-sm">
                                                                                         <div class="input-group-prepend">
-                                                                                            <span class="input-group-text">' . $dc['cantidad'] . '</span>
+                                                                                            <span class="input-group-text d-flex justify-content-end" style="min-width: 70px;">' . $dc['cantidad'] . '</span>
                                                                                         </div>
-                                                                                        <input type="number" class="form-control" name="cantidad[' . $dc['id_detalle'] . ']" value="' . $aprobado . '" max="' . $dc['cantidad'] . '">
+                                                                                        <input type="number" class="form-control text-right" name="cantidad[' . $dc['id_detalle'] . ']" value="' . $aprobado . '" max="' . $dc['cantidad'] . '">
                                                                                     </div>';
                                                                         } else {
                                                                             $val_unid = pesos($dc['val_unid']);
+                                                                            $iva = $dc['iva'] . '%';
                                                                             $cantidad = isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad'];
                                                                         }
                                                                     ?>
@@ -716,9 +727,15 @@ if (!empty($adquisicion)) {
                                                                             <td><?php echo $dc['bien_servicio'] ?></td>
                                                                             <td><?php echo $cantidad ?></td>
                                                                             <td class="text-right"><?php echo $val_unid ?></td>
+                                                                            <td> <?= $iva ?></td>
                                                                             <td class="text-right">
-                                                                                <?php echo pesos($dc['val_unid'] * (isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad'])) ?>
-                                                                                <input type="hidden" name="total[]" class="sumTotal" value="<?php echo $dc['val_unid'] * (isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad']) ?>">
+                                                                                <?php
+                                                                                $tot_l = $dc['val_unid'] * (isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad']);
+                                                                                $tot_con_iva = $tot_l + ($tot_l * $dc['iva'] / 100);
+                                                                                $total_compra += $tot_con_iva;
+                                                                                echo pesos($tot_con_iva);
+                                                                                ?>
+                                                                                <input type="hidden" name="total[]" class="sumTotal" value="<?php echo $tot_con_iva; ?>">
                                                                             </td>
                                                                             <td class="text-center">
                                                                                 <?php
@@ -730,12 +747,18 @@ if (!empty($adquisicion)) {
                                                                                 } else {
                                                                                     if ($adquisicion['estado'] < 5) {
                                                                                         echo '<input type="checkbox" class="aprobado" name="aprobado[' . $dc['id_detalle'] . ']" checked>';
+                                                                                    } else {
+                                                                                        $fila = '<tr>
+                                                                                                    <th colspan="5" class="text-center">TOTAL</th>
+                                                                                                    <th colspan="2" class="text-center">' . pesos($total_compra) . '</th>
+                                                                                                </tr>';
                                                                                     }
                                                                                 } ?>
                                                                             </td>
                                                                         </tr>
                                                                     <?php
                                                                     }
+                                                                    echo $fila;
                                                                     ?>
                                                                 </tbody>
                                                             </table>

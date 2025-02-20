@@ -43,6 +43,7 @@ try {
         if (!move_uploaded_file($file_tmp, $file_dest)) {
             exit('Error al mover el archivo');
         } else {
+            chmod($file_dest, 0777);
             echo 'ok';
         }
     } else {

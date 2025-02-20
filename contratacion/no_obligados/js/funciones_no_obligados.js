@@ -112,7 +112,7 @@
                 [0, "desc"]
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4] },
+                { class: 'text-wrap', targets: [4, 8] },
             ],
             "lengthMenu": [
                 [10, 25, 50, -1],
@@ -475,24 +475,6 @@
         });
         return false;
     });
-    $('#tableFacurasNoObligados').on('click', '.verSoporte', function () {
-        var id = $(this).attr('value');
-        $.ajax({
-            type: 'POST',
-            url: 'datos/soporte/ver_html.php',
-            dataType: 'json',
-            data: { id: id },
-            success: function (r) {
-                if (r.status == '1') {
-                    window.open(r.msg, '_blank');
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r.msg);
-                }
-            }
-        });
-        return false;
-    });
     // Agregar fila a la tabla de facturas no obligados
     $('#divModalForms').on('click', '#btnAddRowFNO', function () {
         let id = 'tableFacNoObliga';
@@ -788,4 +770,26 @@ function EnviaDocSoporte2(boton) {
             $('#divBtnsModalDel').html('<div class="text-center w-100"><button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button></div>');
         }
     });
+};
+
+const VerSoporteElectronico2 = (id) => {
+    fetch("datos/soporte/ver_html.php", {
+        method: "POST",
+        body: JSON.stringify({ id: id }),
+    })
+        .then((response) => response.json())
+        .then((response) => {
+            console.log(response);
+            if (response[0].value == "ok") {
+                var url = "https://api.taxxa.co/documentGet.dhtml?hash=" + response[0].msg;
+                url = url.replace(/["']/g, "");
+                var win = window.open(url, "_blank");
+                win.focus();
+            } else {
+                mjeError(response[0].msg);
+            }
+        })
+        .catch((error) => {
+            console.log("Error:");
+        });
 };

@@ -40,7 +40,7 @@ $vigencia = $_SESSION['vigencia'];
                         </div>
                         <div class="card-body" id="divCuerpoPag">
                         <?php
-                                if (PermisosUsuario($permisos, 5301, 2) || $id_rol == 1) {
+                                if (PermisosUsuario($permisos, 5303, 2) || $id_rol == 1) {
                                     echo '<input type="hidden" id="peReg" value="1">';
                                 } else {
                                     echo '<input type="hidden" id="peReg" value="0">';
