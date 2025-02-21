@@ -6,7 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
-include '../../../financiero/php/historialtercero/cargar_combos.php';
+include '../../../terceros/php/historialtercero/cargar_combos.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

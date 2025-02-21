@@ -100,6 +100,7 @@ $vigencia = $_SESSION['vigencia'];
         <?php include '../../modales.php' ?>
     </div>
     <?php include '../../scripts.php' ?>
+    <script type="text/javascript" src="../../terceros/js/historialtercero/historialtercero.js?v=<?php echo date('YmdHis') ?>"></script>
 </body>
 
 </html>

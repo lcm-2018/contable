@@ -483,6 +483,7 @@
             $('#slcActEcon').focus();
         });
     });
+
     //Agregar Actividad Economica
     $('#divForms').on('click', '#btnAddActvEcon', function () {
         if ($('#slcActvEcon').val() === '0') {
@@ -513,6 +514,21 @@
         }
         return false;
     });
+
+    //-------------- historial terceros
+    $('#modificarTerceros').on('click', '.historial', function () {
+        let idt = $(this).attr('value');
+        $.post("../php/historialtercero/frm_historialtercero.php", { idt: idt }, function (he) {
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-xl');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+            $('#slcActEcon').focus();
+        });
+    });
+    //-----------------------------------------------------
+    
     //descargar documento PDF
     $('#modificarDocs').on('click', '.descargar', function () {
         let id_doc = $(this).attr('value');

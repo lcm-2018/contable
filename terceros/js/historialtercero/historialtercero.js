@@ -75,13 +75,13 @@
         }
     });*/
 
-    //buscar con 2 letras nombre tercero
-    document.addEventListener("keyup", (e) => {
+    //buscar con 2 letras nombre tercero _----- esto si lo voy a usar, asi funciona para buscar por dos letras
+    /*document.addEventListener("keyup", (e) => {
         if (e.target.id == "txt_tercero_filtro") {
             $("#txt_tercero_filtro").autocomplete({
                 source: function (request, response) {
                     $.ajax({
-                        url: "../historialtercero/buscar_terceros.php",
+                        url: "../php/historialtercero/buscar_terceros.php",
                         type: "POST",
                         dataType: "json",
                         data: {
@@ -103,7 +103,7 @@
                 },
             });
         }
-    });
+    });*/
 
     // Autocompletar Usuarios reposnables
     $('#divForms').on("input", "#txt_tercero_filtro", function () {
