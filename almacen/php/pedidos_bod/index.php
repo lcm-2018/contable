@@ -86,7 +86,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 </div>                              
                                 <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_estado_filtro">
-                                        <?php estados_movimientos('--Estado--') ?>
+                                        <?php estados_pedidos_2('--Estado--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
@@ -121,7 +121,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th rowspan="2">Hora Pedido</th>
                                         <th rowspan="2">Detalle</th>                                        
                                         <th colspan="2">Unidad DE donde se solicita</th>
-                                        <th colspan="2">Unidad Proveedora A donde se solicita</th>                                       
+                                        <th colspan="2">Unidad Proveedora</th>                                       
                                         <th rowspan="2">Valor Total</th>
                                         <th rowspan="2">Id.Estado</th>
                                         <th rowspan="2">Estado</th>
@@ -138,7 +138,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <table class="table-bordered table-sm col-md-2">
                                 <tr>
                                     <td style="background-color:yellow">Pendiente</td>
-                                    <td>Cerrado</td>
+                                    <td style="background-color:PaleTurquoise">Confirmado</td>
+                                    <td>Finalizado</td>
                                     <td style="background-color:gray">Anulado</td>
                                 </tr>
                             </table>

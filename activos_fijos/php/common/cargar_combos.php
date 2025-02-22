@@ -94,7 +94,10 @@ function terceros($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_tercero,nom_tercero FROM tb_terceros WHERE id_tercero<>0";
+        $sql = "SELECT tb_terceros.id_tercero,tb_terceros.nom_tercero 
+                FROM tb_terceros
+                WHERE tb_terceros.id_tercero<>0 AND 
+                    (tb_terceros.id_tercero_api IN (SELECT id_tercero_api FROM tb_rel_tercero) OR tb_terceros.es_clinico=1)";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {

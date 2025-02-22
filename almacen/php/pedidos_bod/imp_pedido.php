@@ -17,8 +17,8 @@ try {
     $sql = "SELECT far_pedido.id_pedido,far_pedido.num_pedido,far_pedido.fec_pedido,far_pedido.hor_pedido,far_pedido.detalle,far_pedido.val_total,
             ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
             sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
-            CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
-            CASE far_pedido.estado WHEN 0 THEN far_pedido.fec_anulacion WHEN 1 THEN far_pedido.fec_creacion WHEN 2 THEN far_pedido.fec_cierre END AS fec_estado,
+            CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS estado,
+            CASE far_pedido.estado WHEN 0 THEN far_pedido.fec_anulacion WHEN 1 THEN far_pedido.fec_creacion ELSE far_pedido.fec_cierre END AS fec_estado,
             CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
             usr.descripcion AS usr_perfil,usr.nom_firma
         FROM far_pedido             
@@ -94,7 +94,7 @@ try {
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td colspan="3">Sede y Bodega DE donde se solicita</td>
-            <td colspan="3">Sede y Bodega Proveedora A donde se solicita</td>
+            <td colspan="3">Sede y Bodega Proveedora</td>
         </tr>
         <tr>
             <td colspan="2"><?php echo $obj_e['nom_sede_solicita']; ?></td>

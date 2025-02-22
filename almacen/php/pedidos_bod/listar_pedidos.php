@@ -75,7 +75,7 @@ try {
                 ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
                 sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
                 far_pedido.val_total,far_pedido.estado,
-                CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
+                CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS nom_estado 
             FROM far_pedido             
             INNER JOIN tb_sedes AS ss ON (ss.id_sede = far_pedido.id_sede_destino)
             INNER JOIN far_bodegas AS bs ON (bs.id_bodega = far_pedido.id_bodega_destino)           

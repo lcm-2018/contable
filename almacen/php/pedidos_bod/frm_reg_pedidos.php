@@ -13,7 +13,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT far_pedido.*,                    
-            CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
+            CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS nom_estado 
         FROM far_pedido                     
         WHERE id_pedido=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
@@ -38,7 +38,8 @@ if (empty($obj)) {
     $obj['hor_pedido'] = $fecha['hora'];
 }
 $guardar = in_array($obj['estado'],[1]) ? '' : 'disabled="disabled"';
-$cerrar = in_array($obj['estado'],[1]) && $id != -1 ? '' : 'disabled="disabled"';
+$confirmar = in_array($obj['estado'],[1]) && $id != -1 ? '' : 'disabled="disabled"';
+$finalizar = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
 $anular = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
 $imprimir = $id != -1 ? '' : 'disabled="disabled"';
 
@@ -89,13 +90,13 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="sl_sede_proveedor" class="small">Sede Proveedora A donde se solicita</label>
+                        <label for="sl_sede_proveedor" class="small">Sede Proveedora</label>
                         <select class="form-control form-control-sm" id="sl_sede_proveedor" name="sl_sede_proveedor">
                             <?php sedes($cmd, '', $obj['id_sede_origen']) ?>   
                         </select>
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="sl_bodega_proveedor" class="small">Bodega Proveedora A donde se solicita</label>
+                        <label for="sl_bodega_proveedor" class="small">Bodega Proveedora</label>
                         <select class="form-control form-control-sm" id="sl_bodega_proveedor" name="sl_bodega_proveedor"> 
                             <?php bodegas_sede($cmd, '', $obj['id_sede_origen'], $obj['id_bodega_origen']) ?>   
                         </select>
@@ -133,7 +134,8 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
     </div>
     <div class="text-center pt-3">
         <button type="button" class="btn btn-primary btn-sm" id="btn_guardar" <?php echo $guardar ?>>Guardar</button>
-        <button type="button" class="btn btn-primary btn-sm" id="btn_cerrar" <?php echo $cerrar ?>>Cerrar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_confirmar" <?php echo $confirmar ?>>Confirmar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_finalizar" <?php echo $finalizar ?>>Finalizar</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_anular" <?php echo $anular ?>>Anular</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir" <?php echo $imprimir ?>>Imprimir</button>
         <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>

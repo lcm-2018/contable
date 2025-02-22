@@ -15,7 +15,7 @@ $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT far_alm_pedido.*,
             far_bodegas.nombre AS nom_bodega,
             CASE far_alm_pedido.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' 
-                                            WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'CERRADO'
+                                            WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'FINALIZADO'
                                             WHEN 0 THEN 'ANULADO' END AS nom_estado
         FROM far_alm_pedido 
         INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_alm_pedido.id_bodega)
@@ -46,7 +46,7 @@ if (empty($obj)) {
 }
 $guardar = in_array($obj['estado'],[1]) ? '' : 'disabled="disabled"';
 $confirmar = in_array($obj['estado'],[1]) && $id != -1 ? '' : 'disabled="disabled"';
-$cerrar = in_array($obj['estado'],[3]) ? '' : 'disabled="disabled"';
+$finalizar = in_array($obj['estado'],[3]) ? '' : 'disabled="disabled"';
 $anular = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
 $imprimir = $id != -1 ? '' : 'disabled="disabled"';
 
@@ -126,7 +126,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
     <div class="text-center pt-3">
         <button type="button" class="btn btn-primary btn-sm" id="btn_guardar" <?php echo $guardar ?>>Guardar</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_confirmar" <?php echo $confirmar ?>>Confirmar</button>
-        <button type="button" class="btn btn-primary btn-sm" id="btn_cerrar" <?php echo $cerrar ?>>Cerrar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_finalizar" <?php echo $finalizar ?>>finalizar</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_anular" <?php echo $anular ?>>Anular</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir" <?php echo $imprimir ?>>Imprimir</button>
         <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>

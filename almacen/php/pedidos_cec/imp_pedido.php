@@ -16,8 +16,8 @@ $id = isset($_POST['id']) ? $_POST['id'] : -1;
 try {
     $sql = "SELECT far_cec_pedido.id_pedido,far_cec_pedido.num_pedido,far_cec_pedido.fec_pedido,far_cec_pedido.hor_pedido,far_cec_pedido.detalle,far_cec_pedido.val_total,
             tb_centrocostos.nom_centro,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,            
-            CASE far_cec_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
-            CASE far_cec_pedido.estado WHEN 0 THEN far_cec_pedido.fec_anulacion WHEN 1 THEN far_cec_pedido.fec_creacion WHEN 2 THEN far_cec_pedido.fec_cierre END AS fec_estado,
+            CASE far_cec_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS estado,
+            CASE far_cec_pedido.estado WHEN 0 THEN far_cec_pedido.fec_anulacion WHEN 1 THEN far_cec_pedido.fec_creacion ELSE far_cec_pedido.fec_cierre END AS fec_estado,
             CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
             usr.descripcion AS usr_perfil,usr.nom_firma
         FROM far_cec_pedido

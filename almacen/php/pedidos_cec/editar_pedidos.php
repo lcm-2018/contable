@@ -18,11 +18,12 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-    if ((PermisosUsuario($permisos, 5004, 2) && $oper == 'add' && $_POST['id_pedido'] == -1) ||
-        (PermisosUsuario($permisos, 5004, 3) && $oper == 'add' && $_POST['id_pedido'] != -1) ||
-        (PermisosUsuario($permisos, 5004, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5004, 3) && $oper == 'close') ||
-        (PermisosUsuario($permisos, 5004, 5) && $oper == 'annul' || $id_rol == 1)
+    if ((PermisosUsuario($permisos, 5003, 2) && $oper == 'add' && $_POST['id_pedido'] == -1) ||
+        (PermisosUsuario($permisos, 5003, 3) && $oper == 'add' && $_POST['id_pedido'] != -1) ||
+        (PermisosUsuario($permisos, 5003, 4) && $oper == 'del') ||
+        (PermisosUsuario($permisos, 5005, 3) && $oper == 'conf') ||
+        (PermisosUsuario($permisos, 5003, 3) && $oper == 'close') ||
+        (PermisosUsuario($permisos, 5003, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
 
         if ($oper == 'add') {
@@ -101,7 +102,7 @@ try {
             }
         }
 
-        if ($oper == 'close') {
+        if ($oper == 'conf') {
             $id = $_POST['id'];
 
             $sql = 'SELECT estado FROM far_cec_pedido WHERE id_pedido=' . $id . ' LIMIT 1';
@@ -141,10 +142,32 @@ try {
                 }
             } else {
                 if ($estado != 1) {
-                    $res['mensaje'] = 'Solo puede Cerrar Pedidos en estado Pendiente';
+                    $res['mensaje'] = 'Solo puede Confirmar Pedidos en estado Pendiente';
                 } else if ($num_detalles == 0) {
                     $res['mensaje'] = 'El Pedido no tiene detalles';
                 }
+            }
+        }
+
+        if ($oper == 'close') {
+            $id = $_POST['id'];
+
+            $sql = 'SELECT estado FROM far_cec_pedido WHERE id_pedido=' . $id . ' LIMIT 1';
+            $rs = $cmd->query($sql);
+            $obj_pedido = $rs->fetch();
+            $estado = $obj_pedido['estado'];
+
+            if ($obj_pedido['estado'] == 2) {
+                $sql = "UPDATE far_cec_pedido SET id_usr_cierre=$id_usr_ope,fec_cierre='$fecha_ope',estado=3 WHERE id_pedido=$id";
+                $rs = $cmd->query($sql);
+                if ($rs == false) {
+                    $error = $cmd->errorInfo();
+                    $res['mensaje'] = 'Error en base de datos-far_cec_pedido:' . $error[2];
+                } else {
+                    $res['mensaje'] = 'ok';
+                }
+            } else {
+                $res['mensaje'] = 'Solo se puede Finalizar Pedidos en estado Confirmado.<br/>';
             }
         }
 

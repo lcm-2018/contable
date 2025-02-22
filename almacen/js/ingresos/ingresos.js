@@ -143,6 +143,16 @@
         $('#divModalBus').modal('hide');
     });
 
+    $('#divForms').on("click", "#btn_cancelar_pedido", function() {
+        let table = $('#tb_ingresos_detalles').DataTable();
+        let filas = table.rows().count();
+        if (filas == 0) {
+            $('#txt_id_pedido').val('');
+            $('#txt_des_pedido').val('');
+        }
+    });
+
+
     $('#divModalBus').on('click', '#tb_pedidos_ing .btn_imprimir', function() {
         let id = $(this).attr('value');
         $.post("../pedidos_alm/imp_pedido.php", { id: id }, function(he) {

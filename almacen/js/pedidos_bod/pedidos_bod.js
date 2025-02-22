@@ -67,6 +67,8 @@
             rowCallback: function(row, data) {
                 if (data.estado == 1) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
+                } else if (data.estado == 2) {
+                    $($(row).find("td")[0]).css("background-color", "PaleTurquoise");
                 } else if (data.estado == 0) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
@@ -155,7 +157,7 @@
                         $('#id_pedido').val(r.id);
                         $('#txt_ide').val(r.id);
 
-                        $('#btn_cerrar').prop('disabled', false);
+                        $('#btn_confirmar').prop('disabled', false);
                         $('#btn_imprimir').prop('disabled', false);
 
                         $('#divModalDone').modal('show');
@@ -199,12 +201,49 @@
         });
     });
 
-    //Cerrar un registro Pedido
-    $('#divForms').on("click", "#btn_cerrar", function() {
+    //confirmar un registro Pedido
+    $('#divForms').on("click", "#btn_confirmar", function() {
         let id = $(this).attr('value');
-        confirmar_proceso('pedidos_close', id);
+        confirmar_proceso('pedidos_conf', id);
     });
-    $('#divModalConfDel').on("click", "#pedidos_close", function() {
+    $('#divModalConfDel').on("click", "#pedidos_conf", function() {
+        var id = $(this).attr('value');
+        $.ajax({
+            type: 'POST',
+            url: 'editar_pedidos.php',
+            dataType: 'json',
+            data: { id: $('#id_pedido').val(), oper: 'conf' }
+        }).done(function(r) {
+            $('#divModalConfDel').modal('hide');
+            if (r.mensaje == 'ok') {
+                let pag = $('#tb_pedidos').DataTable().page.info().page;
+                reloadtable('tb_pedidos', pag);
+
+                $('#txt_num_pedido').val(r.num_pedido);
+                $('#txt_est_pedido').val('CONFIRMADO');
+
+                $('#btn_guardar').prop('disabled', true);
+                $('#btn_confirmar').prop('disabled', true);
+                $('#btn_finalizar').prop('disabled', false);
+                $('#btn_anular').prop('disabled', false);
+
+                $('#divModalDone').modal('show');
+                $('#divMsgDone').html("Proceso realizado con éxito");
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function() {}).fail(function() {
+            alert('Ocurrió un error');
+        });
+    });
+
+    //finalizar un registro Pedido
+    $('#divForms').on("click", "#btn_finalizar", function() {
+        let id = $(this).attr('value');
+        confirmar_proceso('pedidos_finalizar', id);
+    });
+    $('#divModalConfDel').on("click", "#pedidos_finalizar", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
@@ -217,12 +256,12 @@
                 let pag = $('#tb_pedidos').DataTable().page.info().page;
                 reloadtable('tb_pedidos', pag);
 
-                $('#txt_num_pedido').val(r.num_pedido);
-                $('#txt_est_pedido').val('CERRADO');
+                $('#txt_est_pedido').val('FINALIZADO');
 
                 $('#btn_guardar').prop('disabled', true);
-                $('#btn_cerrar').prop('disabled', true);
-                $('#btn_anular').prop('disabled', false);
+                $('#btn_confirmar').prop('disabled', true);
+                $('#btn_finalizar').prop('disabled', true);
+                $('#btn_anular').prop('disabled', true);
 
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
@@ -256,7 +295,8 @@
                 $('#txt_est_pedido').val('ANULADO');
 
                 $('#btn_guardar').prop('disabled', true);
-                $('#btn_cerrar').prop('disabled', true);
+                $('#btn_confirmar').prop('disabled', true);
+                $('#btn_finalizar').prop('disabled', true);
                 $('#btn_anular').prop('disabled', true);
 
                 $('#divModalDone').modal('show');

@@ -78,7 +78,7 @@ try {
                 tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,                    
                 far_cec_pedido.val_total,far_cec_pedido.detalle,  
                 far_cec_pedido.estado,
-                CASE far_cec_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
+                CASE far_cec_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS nom_estado 
             FROM far_cec_pedido       
             INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro = far_cec_pedido.id_cencosto)      
             INNER JOIN tb_sedes ON (tb_sedes.id_sede = far_cec_pedido.id_sede)

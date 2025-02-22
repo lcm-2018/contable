@@ -161,8 +161,13 @@ try {
                         }
                     }
 
-                    $sql = "UPDATE far_orden_egresso SET val_total=(SELECT SUM(valor*cantidad) FROM far_orden_egreso_detalle WHERE id_egreso=$id_egreso) WHERE id_egreso=$id_egreso";
+                    $sql = "UPDATE far_orden_egreso SET val_total=(SELECT SUM(valor*cantidad) FROM far_orden_egreso_detalle WHERE id_egreso=$id_egreso) WHERE id_egreso=$id_egreso";
                     $rs = $cmd->query($sql);
+
+                    $sql = "SELECT val_total FROM far_orden_egreso WHERE id_egreso=" . $id_egreso;
+                    $rs = $cmd->query($sql);
+                    $obj_egreso = $rs->fetch();
+                    $res['val_total'] = formato_valor($obj_egreso['val_total']);
                 }    
             }
 

@@ -18,22 +18,18 @@ $dir = $_POST['order'][0]['dir'];
 $idusr = $_SESSION['id_user'];
 $idrol = $_SESSION['rol'];
 
-$where_usr = " WHERE PP.estado=2";
-$where_usr.= " AND PP.id_pedido NOT IN 
-                    (SELECT PD.id_pedido FROM far_pedido_detalle AS PD 
-                    INNER JOIN far_traslado_detalle AS TD ON (TD.id_ped_detalle=PD.id_ped_detalle)
-                    INNER JOIN far_traslado AS TT ON (TT.id_traslado=TD.id_traslado)
-                    WHERE TT.estado<>0)";
+$where_usr = " WHERE OI.estado=2";
+$where_usr.= " AND OI.id_ingreso NOT IN (SELECT id_ingreso FROM far_traslado WHERE id_ingreso IS NOT NULL AND estado<>0)";
 if($idrol !=1){
-    $where_usr .= " AND PP.id_bodega_origen IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
+    $where_usr .= " AND OI.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
 
 $where = $where_usr;
-if (isset($_POST['num_pedido']) && $_POST['num_pedido']) {
-    $where .= " AND PP.num_pedido='" . $_POST['num_pedido'] . "'";
+if (isset($_POST['num_ingreso']) && $_POST['num_ingreso']) {
+    $where .= " AND OI.num_ingreso='" . $_POST['num_ingreso'] . "'";
 }
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
-    $where .= " AND PP.fec_pedido BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+    $where .= " AND OI.fec_ingreso BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
 }
 
 try {
@@ -41,26 +37,24 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
        
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM far_pedido AS PP" . $where_usr;
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_ingreso AS OI" . $where_usr;
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(*) AS total FROM far_pedido AS PP" . $where;
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_ingreso AS OI" . $where;
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT PP.*,
-                SS.nom_sede AS nom_sede_solicita,BS.nombre AS nom_bodega_solicita,                    
-                SP.nom_sede AS nom_sede_provee,BP.nombre AS nom_bodega_provee                    
-            FROM far_pedido AS PP
-            INNER JOIN tb_sedes AS SS ON (SS.id_sede = PP.id_sede_destino)
-            INNER JOIN far_bodegas AS BS ON (BS.id_bodega = PP.id_bodega_destino)           
-            INNER JOIN tb_sedes AS SP ON (SP.id_sede = PP.id_sede_origen)
-            INNER JOIN far_bodegas AS BP ON (BP.id_bodega = PP.id_bodega_origen)"
+    $sql = "SELECT OI.*,
+                SO.id_sede AS id_sede_origen,SO.nom_sede AS nom_sede_origen,
+                BO.id_bodega AS id_bodega_origen,BO.nombre AS nom_bodega_origen
+            FROM far_orden_ingreso AS OI
+            INNER JOIN tb_sedes AS SO ON (SO.id_sede = OI.id_sede)
+            INNER JOIN far_bodegas AS BO ON (BO.id_bodega = OI.id_bodega)"
             . $where . " ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
@@ -72,21 +66,17 @@ try {
 $data = [];
 if (!empty($objs)) {
     foreach ($objs as $obj) {
-        $id = $obj['id_pedido'];
+        $id = $obj['id_ingreso'];
         $imprimir =  '<a value="' . $id . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_imprimir" title="imprimir"><span class="fas fa-print fa-lg"></span></a>';
         $data[] = [
-            "id_pedido" => $id,
-            "num_pedido" => $obj['num_pedido'],
-            "fec_pedido" => $obj['fec_pedido'],
+            "id_ingreso" => $id,
+            "num_ingreso" => $obj['num_ingreso'],
+            "fec_ingreso" => $obj['fec_ingreso'],
             "detalle" => $obj['detalle'],
             "id_sede_origen" => $obj['id_sede_origen'],
-            "nom_sede_provee" => $obj['nom_sede_provee'],
+            "nom_sede_origen" => $obj['nom_sede_origen'],
             "id_bodega_origen" => $obj['id_bodega_origen'],
-            "nom_bodega_provee" => $obj['nom_bodega_provee'],
-            "id_sede_destino" => $obj['id_sede_destino'],
-            "nom_sede_solicita" => $obj['nom_sede_solicita'],
-            "id_bodega_destino" => $obj['id_bodega_destino'],
-            "nom_bodega_solicita" => $obj['nom_bodega_solicita'],
+            "nom_bodega_origen" => $obj['nom_bodega_origen'],
             "botones" => '<div class="text-center centro-vertical">' . $imprimir . '</div>'
         ];
     }

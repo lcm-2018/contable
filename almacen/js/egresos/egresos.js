@@ -207,23 +207,6 @@
 
     //Guardar registro Egreso
     $('#divForms').on("click", "#btn_guardar", function() {
-        let table = $('#tb_egresos_detalles').DataTable();
-        let filas = table.rows().count();
-        let id_pedido = $('#txt_id_pedido').val();
-
-        if (id_pedido && filas == 0) {
-            confirmar_proceso_msg('egreso_pedido', 'Desea Generar el Egreso en base al Pedido ' + id_pedido);
-        } else {
-            guardar_egreso(0);
-        }
-    });
-
-    $('#divModalConfDel').on("click", "#egreso_pedido", function() {
-        $('#divModalConfDel').modal('hide');
-        guardar_egreso(1);
-    });
-
-    function guardar_egreso(generar_egreso) {
         $('.is-invalid').removeClass('is-invalid');
         var error = verifica_vacio($('#sl_sede_egr'));
         error += verifica_vacio($('#sl_bodega_egr'));
@@ -233,42 +216,60 @@
         } else {
             error += verifica_vacio($('#sl_centrocosto'));
         }
-
         error += verifica_vacio($('#txt_det_egr'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Los datos resaltados son obligatorios');
         } else {
-            var data = $('#frm_reg_orden_egreso').serialize();
-            $.ajax({
-                type: 'POST',
-                url: 'editar_egresos.php',
-                dataType: 'json',
-                data: data + "&oper=add" + '&generar_egreso=' + generar_egreso
-            }).done(function(r) {
-                if (r.mensaje == 'ok') {
-                    let pag = ($('#id_egreso').val() == -1) ? 0 : $('#tb_egresos').DataTable().page.info().page;
-                    reloadtable('tb_egresos', pag);
+            let table = $('#tb_egresos_detalles').DataTable();
+            let filas = table.rows().count();
+            let id_pedido = $('#txt_id_pedido').val();
 
-                    if (generar_egreso == 1) reloadtable('tb_egresos_detalles');
-
-                    $('#id_egreso').val(r.id);
-                    $('#txt_ide').val(r.id);
-
-                    $('#btn_cerrar').prop('disabled', false);
-                    $('#btn_imprimir').prop('disabled', false);
-
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html("Proceso realizado con éxito");
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r.mensaje);
-                }
-            }).always(function() {}).fail(function() {
-                alert('Ocurrió un error');
-            });
+            if (id_pedido && filas == 0) {
+                confirmar_proceso_msg('egreso_pedido', 'Desea Generar el Egreso en base al Pedido ' + id_pedido);
+            } else {
+                guardar_egreso(0);
+            }
         }
+    });
+
+    $('#divModalConfDel').on("click", "#egreso_pedido", function() {
+        $('#divModalConfDel').modal('hide');
+        guardar_egreso(1);
+    });
+
+    function guardar_egreso(generar_egreso) {
+        var data = $('#frm_reg_orden_egreso').serialize();
+        $.ajax({
+            type: 'POST',
+            url: 'editar_egresos.php',
+            dataType: 'json',
+            data: data + "&oper=add" + '&generar_egreso=' + generar_egreso
+        }).done(function(r) {
+            if (r.mensaje == 'ok') {
+                let pag = ($('#id_egreso').val() == -1) ? 0 : $('#tb_egresos').DataTable().page.info().page;
+                reloadtable('tb_egresos', pag);
+
+                if (generar_egreso == 1) {
+                    reloadtable('tb_egresos_detalles');
+                    $('#txt_val_tot').val(r.val_total);
+                }
+                $('#id_egreso').val(r.id);
+                $('#txt_ide').val(r.id);
+
+                $('#btn_cerrar').prop('disabled', false);
+                $('#btn_imprimir').prop('disabled', false);
+
+                $('#divModalDone').modal('show');
+                $('#divMsgDone').html("Proceso realizado con éxito");
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function() {}).fail(function() {
+            alert('Ocurrió un error');
+        });
     };
 
     //Borrar un registro Orden Egreso

@@ -204,9 +204,10 @@ function terceros($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT tb_terceros.id_tercero,tb_terceros.nom_tercero FROM tb_terceros 
-                INNER JOIN tb_rel_tercero ON (tb_rel_tercero.id_tercero_api=tb_terceros.id_tercero_api)
-                WHERE tb_terceros.id_tercero<>0 AND (tb_rel_tercero.id_tipo_tercero=2 OR tb_terceros.es_clinico=1)";
+        $sql = "SELECT tb_terceros.id_tercero,tb_terceros.nom_tercero 
+                FROM tb_terceros
+                WHERE tb_terceros.id_tercero<>0 AND 
+                    (tb_terceros.id_tercero_api IN (SELECT id_tercero_api FROM tb_rel_tercero) OR tb_terceros.es_clinico=1)";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
@@ -264,7 +265,20 @@ function estados_pedidos($titulo = '', $estado = -1)
     $selected = ($estado == 3) ? 'selected="selected"' : '';
     echo '<option value="3"' . $selected . '>ACEPTADO</option>';
     $selected = ($estado == 4) ? 'selected="selected"' : '';
-    echo '<option value="4"' . $selected . '>CERRADO</option>';
+    echo '<option value="4"' . $selected . '>FINALIZADO</option>';
+    $selected = ($estado == 0) ? 'selected="selected"' : '';
+    echo '<option value="0"' . $selected . '>ANULADO</option>';
+}
+
+function estados_pedidos_2($titulo = '', $estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>PENDIENTE</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>CONFIRMADO</option>';
+    $selected = ($estado == 3) ? 'selected="selected"' : '';
+    echo '<option value="4"' . $selected . '>FINALIZADO</option>';
     $selected = ($estado == 0) ? 'selected="selected"' : '';
     echo '<option value="0"' . $selected . '>ANULADO</option>';
 }
@@ -425,6 +439,15 @@ function modulo_origen($titulo = '',$estado = -1)
     $selected = ($estado == 0) ? 'selected="selected"' : '';
     echo '<option value="0"' . $selected . '>ALMACEN</option>';
 }
+function tipo_traslado($titulo = '',$estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>TRASLADO EN BASE A UN PEDIDO</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>TRASLADO TOTAL DE UN INGRESO</option>';
+}
+
 
 function tipo_area($cmd, $titulo ='', $id = 0)
 {

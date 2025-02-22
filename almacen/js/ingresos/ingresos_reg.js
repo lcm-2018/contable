@@ -76,9 +76,11 @@
             if (rows > 0) {
                 $('#sl_tip_ing').prop('disabled', true);
                 $('#txt_des_pedido').prop('disabled', true);
+                $('#btn_cancelar_pedido').prop('disabled', true);
             } else {
                 $('#sl_tip_ing').prop('disabled', false);
                 $('#txt_des_pedido').prop('disabled', false);
+                $('#btn_cancelar_pedido').prop('disabled', false);
             }
         });
 

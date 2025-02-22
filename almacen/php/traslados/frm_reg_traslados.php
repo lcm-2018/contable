@@ -14,8 +14,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT TT.*,            
             CASE TT.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado,
-            PEDIDO.id_pedido,PEDIDO.des_pedido 
+            PEDIDO.id_pedido,PEDIDO.des_pedido, 
+            OI.id_ingreso,OI.detalle AS des_ingreso 
         FROM far_traslado AS TT
+        LEFT JOIN far_orden_ingreso AS OI ON (OI.id_ingreso=TT.id_ingreso)
         LEFT JOIN (SELECT TD.id_traslado,PD.id_pedido,PP.detalle AS des_pedido 
                     FROM far_traslado_detalle AS TD 
                     INNER JOIN far_pedido_detalle AS PD ON (PD.id_ped_detalle=TD.id_ped_detalle)
@@ -82,8 +84,16 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <label for="txt_est_traslado" class="small">Estado traslado</label>
                         <input type="text" class="form-control form-control-sm" id="txt_est_traslado" name="txt_est_traslado" class="small" value="<?php echo $obj['nom_estado'] ?>" readonly="readonly">
                     </div>
+                    <div class="form-group col-md-3">
+                        <label for="sl_tip_traslado" class="small" required>Tipo Traslado</label>
+                        <select class="form-control form-control-sm" id="sl_tip_traslado" name="sl_tip_traslado">
+                            <?php tipo_traslado('', $obj['tipo']) ?>
+                        </select>
+                        <input type="hidden" id="id_tip_traslado" name="id_tip_traslado" value="<?php echo $obj['tipo'] ?>">
+                    </div>
                 </div>
-                <div class="form-row">  
+
+                <div class="form-row" id="divPedido" <?php echo $obj['tipo'] == 1 ? '' : 'style="display: none;"' ?>>
                     <div class="form-group col-md-1">
                         <label for="txt_id_pedido" class="small">Id. Pedido</label>
                         <input type="text" class="form-control form-control-sm" id="txt_id_pedido" name="txt_id_pedido" class="small" value="<?php echo $obj['id_pedido'] ?>" readonly="readonly">
@@ -108,7 +118,34 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             </div>
                         </div>
                     </div>        
-                </div>    
+                </div>   
+                <div class="form-row" id="divIngreso" <?php echo $obj['tipo'] == 2 ? '' : 'style="display: none;"' ?>>
+                    <div class="form-group col-md-1">
+                        <label for="txt_id_ingreso" class="small">Id. Ingreso</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_id_ingreso" name="txt_id_ingreso" class="small" value="<?php echo $obj['id_ingreso'] ?>" readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <div class="form-row">
+                            <div class="form-group col-md-10">
+                                <label for="txt_des_ingreso" class="small">Ingreso de Almacen</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_des_ingreso" name="txt_des_ingreso" class="small" value="<?php echo $obj['des_ingreso'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Ingreso">
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_imprime_ingreso" class="btn btn-outline-success btn-sm" title="Imprimir Ingreso Seleccionado">
+                                    <span class="fas fa-print" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_cancelar_ingreso" class="btn btn-outline-success btn-sm" title="Cancelar Selección">
+                                    <span class="fas fa-ban" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                        </div>
+                    </div>        
+                </div> 
+
                 <div class="form-row">                    
                     <div class="form-group col-md-3">
                         <label for="sl_sede_origen" class="small">Sede Origen</label>
