@@ -5,13 +5,72 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../conexion.php';
+include '../../financiero/consultas.php';
 $vigencia = $_SESSION['vigencia'];
 $id_vigencia = $_SESSION['id_vigencia'];
 $data = explode('|', file_get_contents("php://input"));
 $idNomina = $data[0];
 $tipo_nomina = $data[1];
 $fec_doc = $data[2];
-
+//validar si hay saldo para los rubros 
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT
+                `nom_cdp_empleados`.`rubro`
+                , `nom_cdp_empleados`.`valor`
+                , `pto_cargue`.`cod_pptal`
+            FROM
+                `nom_cdp_empleados`
+                INNER JOIN `pto_cargue` 
+                    ON (`nom_cdp_empleados`.`rubro` = `pto_cargue`.`id_cargue`)
+            WHERE (`nom_cdp_empleados`.`id_nomina` = $idNomina AND `nom_cdp_empleados`.`tipo` = '$tipo_nomina')";
+    $rs = $cmd->query($sql);
+    $valxrubro = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+if (empty($valxrubro)) {
+    echo 'No se ha generado una solicitud de CDP para esta nómina';
+    exit();
+} else {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $valida = false;
+    $tabla = '<table class="table table-bordered table-striped table-hover table-sm" style="font-size: 12px; width: 100%">
+                <thead>
+                    <tr>
+                        <th>Rubro</th>
+                        <th>Valor</th>
+                        <th>Saldo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>';
+    foreach ($valxrubro as $vr) {
+        $rubro = $vr['rubro'];
+        $valor = $vr['valor'];
+        $cod_rubro = $vr['cod_pptal'];
+        $respuesta = SaldoRubro($cmd, $rubro, $fec_doc, 0);
+        $saldo = $respuesta['valor_aprobado'] - $respuesta['debito_cdp'] + $respuesta['credito_cdp'] + $respuesta['debito_mod'] - $respuesta['credito_mod'];
+        $estado = $saldo >= $valor ? '<span class="badge badge-success">Disponible</span>' : '<span class="badge badge-danger">Sin Saldo</span>';
+        if ($saldo < $valor) {
+            $valida = true;
+            $tabla .= '<tr>
+                        <td>' . $cod_rubro . '</td>
+                        <td class="text-right">$ ' . number_format($valor, 2, ',', '.') . '</td>
+                        <td class="text-right">$ ' . number_format($saldo, 2, ',', '.') . '</td>
+                        <td>' . $estado . '</td>
+                    </tr>';
+        }
+    }
+    $tabla .= '</tbody></table>';
+    if ($valida) {
+        echo $tabla;
+        exit();
+    }
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);

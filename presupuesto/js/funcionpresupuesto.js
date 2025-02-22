@@ -1315,13 +1315,14 @@ $("#divCuerpoPag").on("click", "#btnPtoNomina", function () {
 function CofirmaCdpRp(boton) {
     var fila = boton.parentNode.parentNode;
     var fecha = fila.querySelector("input[name='fec_doc[]']").value;
-    if(fecha == ""){
+    if (fecha == "") {
         mjeError("La fecha no puede estar vacia");
         return false;
     }
     var cant = document.getElementById("cantidad");
     var valor = Number(cant.value);
     var data = boton.value;
+    var val = data;
     data = data + "|" + fecha;
     var datos = data.split("|");
     var tipo = datos[1];
@@ -1343,6 +1344,7 @@ function CofirmaCdpRp(boton) {
         if (result.isConfirmed) {
             boton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
             boton.disabled = true;
+            boton.value = "";
             fetch(ruta, {
                 method: "POST",
                 body: data,
@@ -1353,12 +1355,21 @@ function CofirmaCdpRp(boton) {
                         boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
                         cant.value = valor - 1;
                         document.getElementById("nCant").innerHTML = valor - 1;
-                        let tabla = "tableEjecPresupuesto";
-                        reloadtable(tabla);
+                        $('#tableEjecPresupuesto').DataTable().ajax.reload();
                         $("#divModalForms").modal("hide");
                         mje("Registro exitoso");
                     } else {
-                        mjeError("Error: " + response);
+                        boton.innerHTML = '<span class="fas fa-check-square fa-lg"></span>';
+                        boton.disabled = false;
+                        boton.value = val;
+                        function mjeError(titulo, mensaje) {
+                            Swal.fire({
+                                title: titulo,
+                                html: mensaje, // Renderiza el HTML en el mensaje
+                                icon: "error"
+                            });
+                        }
+                        mjeError('', response);
                     }
                 });
         }

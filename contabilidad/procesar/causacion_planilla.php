@@ -38,6 +38,7 @@ try {
                 (SELECT
                     `nom_empleado`.`id_empleado`
                     ,`nom_empleado`.`tipo_cargo`
+                    , `nom_ccosto_empleado`.`id_ccosto`
                     , `nom_liq_segsocial_empdo`.`id_eps`
                     , `nom_liq_segsocial_empdo`.`id_arl`
                     , `nom_liq_segsocial_empdo`.`id_afp`
@@ -60,6 +61,8 @@ try {
                         ON (`nom_liq_segsocial_empdo`.`id_arl` = `nom_arl`.`id_arl`)
                     INNER JOIN `nom_afp` 
                         ON (`nom_liq_segsocial_empdo`.`id_afp` = `nom_afp`.`id_afp`)
+                    LEFT JOIN `nom_ccosto_empleado`
+                        ON (`nom_empleado`.`id_empleado` = `nom_ccosto_empleado`.`id_empleado`)
                 WHERE  `nom_liq_segsocial_empdo`.`id_nomina` = $id_nomina) AS `t1`
             LEFT JOIN 
                 (SELECT 
@@ -71,7 +74,8 @@ try {
                 FROM 
                     `nom_liq_parafiscales`
                 WHERE `id_nomina` =  $id_nomina) AS `t2`
-            ON (`t1`.`id_empleado` = `t2`.`id_empleado`)";
+            ON (`t1`.`id_empleado` = `t2`.`id_empleado`)
+            ORDER BY `t1`.`id_ccosto` ASC";
     $rs = $cmd->query($sql);
     $patronales = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -79,23 +83,25 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 $totales = [];
-$totales['comfam'] = 0;
-$totales['icbf'] = 0;
-$totales['sena'] = 0;
 foreach ($patronales as $p) {
+    $ccosto = $p['id_ccosto'];
     $id_eps = $p['id_eps'];
     $id_arl = $p['id_arl'];
     $id_afp = $p['id_afp'];
-    $totales['comfam'] += $p['val_comfam'];
-    $totales['icbf'] += $p['val_icbf'];
-    $totales['sena'] += $p['val_sena'];
-    $valeps = isset($totales['eps'][$id_eps]) ? $totales['eps'][$id_eps] : 0;
-    $valarl = isset($totales['arl'][$id_arl]) ? $totales['arl'][$id_arl] : 0;
-    $valafp = isset($totales['afp'][$id_afp]) ? $totales['afp'][$id_afp] : 0;
-    $totales['eps'][$id_eps] = $p['aporte_salud_empresa'] + $valeps;
-    $totales['arl'][$id_arl] = $p['aporte_rieslab'] + $valarl;
-    $totales['afp'][$id_afp] = $p['aporte_pension_empresa'] + $valafp;
+    $val_caja = isset($totales[$ccosto]['comfam']) ? $totales[$ccosto]['comfam'] : 0;
+    $val_icbf = isset($totales[$ccosto]['icbf']) ? $totales[$ccosto]['icbf'] : 0;
+    $val_sena = isset($totales[$ccosto]['sena']) ? $totales[$ccosto]['sena'] : 0;
+    $totales[$ccosto]['comfam'] = $p['val_comfam'] + $val_caja;
+    $totales[$ccosto]['icbf'] = $p['val_icbf'] + $val_icbf;
+    $totales[$ccosto]['sena'] = $p['val_sena'] + $val_sena;
+    $valeps = isset($totales[$ccosto]['eps'][$id_eps]) ? $totales[$ccosto]['eps'][$id_eps] : 0;
+    $valarl = isset($totales[$ccosto]['arl'][$id_arl]) ? $totales[$ccosto]['arl'][$id_arl] : 0;
+    $valafp = isset($totales[$ccosto]['afp'][$id_afp]) ? $totales[$ccosto]['afp'][$id_afp] : 0;
+    $totales[$ccosto]['eps'][$id_eps] = $p['aporte_salud_empresa'] + $valeps;
+    $totales[$ccosto]['arl'][$id_arl] = $p['aporte_rieslab'] + $valarl;
+    $totales[$ccosto]['afp'][$id_afp] = $p['aporte_pension_empresa'] + $valafp;
 }
+
 $descuentos = [];
 foreach ($patronales as $p) {
     $id_eps = $p['id_eps'];
@@ -128,6 +134,7 @@ foreach ($patronales as $p) {
     $valores[$tipo]['arl'][$id_arl] = $p['aporte_rieslab'] + $valarl;
     $valores[$tipo]['afp'][$id_afp] = $p['aporte_pension_empresa'] + $valafp;
 }
+
 $administrativo = isset($valores['administrativo']) ? $valores['administrativo'] : [];
 $operativo = isset($valores['operativo']) ? $valores['operativo'] : [];
 $idsTercer = [];
@@ -182,73 +189,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$cuentas = [];
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'ADMIN'";
-    $rs = $cmd->query($sql);
-    $cAdmin = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-$cuentas['admin'] = $cAdmin;
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'URG'";
-    $rs = $cmd->query($sql);
-    $cUrg = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-$cuentas['urg'] = $cUrg;
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'PASIVO'";
-    $rs = $cmd->query($sql);
-    $cPasivo = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-$cuentas['pasivo'] = $cPasivo;
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -581,6 +522,7 @@ try {
 }
 //LIBRO AUXILIAR
 try {
+    $vPasivos = [];
     $credito = 0;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -594,196 +536,127 @@ try {
     $query->bindParam(5, $credito, PDO::PARAM_STR);
     $query->bindParam(6, $iduser, PDO::PARAM_INT);
     $query->bindParam(7, $fecha2);
-    foreach ($cuentas['admin'] as $ca) {
-        $tipo = $ca['id_tipo'];
-        $cuenta = $ca['cuenta'];
-        $valor = 0;
-        switch ($tipo) {
-            case 11:
-                $valor = isset($administrativo['comfam']) && $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
-                $id_tercero = $id_api_comfam;
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
+    foreach ($totales as $tt => $t) {
+        $filtro = [];
+        $filtro = array_filter($cuentas_causacion, function ($cuentas_causacion) use ($tt) {
+            return $cuentas_causacion["centro_costo"] == $tt;
+        });
+        foreach ($filtro as $ca) {
+            $tipo = $ca['id_tipo'];
+            $cuenta = $ca['cuenta'];
+            $valor = 0;
+            switch ($tipo) {
+                case 11:
+                    $valor = isset($t['comfam']) && $t['comfam'] > 0 ? $t['comfam'] : 0;
+                    $val_pas = isset($vPasivos['comfam']) ? $vPasivos['comfam'] : 0;
+                    $vPasivos['comfam'] = $valor + $val_pas;
+                    $id_tercero = $id_api_comfam;
+                    if ($valor > 0) {
+                        $query->execute();
+                        if (!($cmd->lastInsertId() > 0)) {
+                            echo $query->errorInfo()[2];
+                            exit();
+                        }
                     }
-                }
-                break;
-            case 12:
-                if (!empty($administrativo['eps'])) {
-                    $epss = $administrativo['eps'];
-                    foreach ($epss as $key => $value) {
-                        $id_tercero = $idsTercer['eps'][$key];
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
+                    break;
+                case 12:
+                    if (!empty($t['eps'])) {
+                        $epss = $t['eps'];
+                        foreach ($epss as $key => $value) {
+                            $id_tercero = $idsTercer['eps'][$key];
+                            $valor = $value;
+                            $val_pas = isset($vPasivos['eps'][$key]) ? $vPasivos['eps'][$key] : 0;
+                            $vPasivos['eps'][$key] = $valor + $val_pas;
+                            if ($valor > 0) {
+                                $query->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $query->errorInfo()[2];
+                                    exit();
+                                }
                             }
                         }
                     }
-                }
-                break;
-            case 13:
-                if (!empty($administrativo['arl'])) {
-                    $arls = $administrativo['arl'];
-                    foreach ($arls as $key => $value) {
-                        $id_tercero = $idsTercer['arl'][$key];
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
+                    break;
+                case 13:
+                    if (!empty($t['arl'])) {
+                        $arls = $t['arl'];
+                        foreach ($arls as $key => $value) {
+                            $id_tercero = $idsTercer['arl'][$key];
+                            $valor = $value;
+                            $val_pas = isset($vPasivos['arl'][$key]) ? $vPasivos['arl'][$key] : 0;
+                            $vPasivos['arl'][$key] = $valor + $val_pas;
+                            if ($valor > 0) {
+                                $query->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $query->errorInfo()[2];
+                                    exit();
+                                }
                             }
                         }
                     }
-                }
-                break;
-            case 14:
-                if (!empty($administrativo['afp'])) {
-                    $afps = $administrativo['afp'];
-                    foreach ($afps as $key => $value) {
-                        $id_tercero = $idsTercer['afp'][$key];
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
+                    break;
+                case 14:
+                    if (!empty($t['afp'])) {
+                        $afps = $t['afp'];
+                        foreach ($afps as $key => $value) {
+                            $id_tercero = $idsTercer['afp'][$key];
+                            $valor = $value;
+                            $val_pas = isset($vPasivos['afp'][$key]) ? $vPasivos['afp'][$key] : 0;
+                            $vPasivos['afp'][$key] = $valor + $val_pas;
+                            if ($valor > 0) {
+                                $query->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $query->errorInfo()[2];
+                                    exit();
+                                }
                             }
                         }
                     }
-                }
-                break;
-            case 15:
-                $valor = isset($administrativo['icbf']) && $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
-                $id_tercero = $id_api_icbf;
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
+                    break;
+                case 15:
+                    $valor = isset($t['icbf']) && $t['icbf'] > 0 ? $t['icbf'] : 0;
+                    $val_pas = isset($vPasivos['icbf']) ? $vPasivos['icbf'] : 0;
+                    $vPasivos['icbf'] = $valor + $val_pas;
+                    $id_tercero = $id_api_icbf;
+                    if ($valor > 0) {
+                        $query->execute();
+                        if (!($cmd->lastInsertId() > 0)) {
+                            echo $query->errorInfo()[2];
+                            exit();
+                        }
                     }
-                }
-                break;
-            case 16:
-                $valor = isset($administrativo['sena']) && $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
-                $id_tercero = $id_api_sena;
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
+                    break;
+                case 16:
+                    $valor = isset($t['sena']) && $t['sena'] > 0 ? $t['sena'] : 0;
+                    $val_pas = isset($vPasivos['sena']) ? $vPasivos['sena'] : 0;
+                    $vPasivos['sena'] = $valor + $val_pas;
+                    $id_tercero = $id_api_sena;
+                    if ($valor > 0) {
+                        $query->execute();
+                        if (!($cmd->lastInsertId() > 0)) {
+                            echo $query->errorInfo()[2];
+                            exit();
+                        }
                     }
-                }
-                break;
-            default:
-                $valor = 0;
-                break;
+                    break;
+                default:
+                    $valor = 0;
+                    break;
+            }
         }
     }
-    foreach ($cuentas['urg'] as $cu) {
-        $tipo = $cu['id_tipo'];
-        $cuenta = $cu['cuenta'];
-        $valor = 0;
-        switch ($tipo) {
-            case 11:
-                $valor = isset($operativo['comfam']) && $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
-                $id_tercero = $id_api_comfam;
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
-                    }
-                }
-                break;
-            case 12:
-                if (!empty($operativo['eps'])) {
-                    $epss = $operativo['eps'];
-                    foreach ($epss as $key => $value) {
-                        $id_tercero = $idsTercer['eps'][$key];
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
-                            }
-                        }
-                    }
-                }
-                break;
-            case 13:
-                if (!empty($operativo['arl'])) {
-                    $arls = $operativo['arl'];
-                    foreach ($arls as $key => $value) {
-                        $id_tercero = $idsTercer['arl'][$key];
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
-                            }
-                        }
-                    }
-                }
-                break;
-            case 14:
-                if (!empty($operativo['afp'])) {
-                    $afps = $operativo['afp'];
-                    foreach ($afps as $key => $value) {
-                        $id_tercero = $idsTercer['afp'][$key];
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
-                            }
-                        }
-                    }
-                }
-                break;
-            case 15:
-                $valor = isset($operativo['icbf']) && $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
-                $id_tercero = $id_api_icbf;
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
-                    }
-                }
-                break;
-            case 16:
-                $valor = isset($operativo['sena']) && $operativo['sena'] > 0 ? $operativo['sena'] : 0;
-                $id_tercero = $id_api_sena;
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
-                    }
-                }
-                break;
-            default:
-                $valor = 0;
-                break;
-        }
-    }
+    $cPasivo = [];
+    $cPasivo = array_filter($cuentas_causacion, function ($cuentas_causacion) use ($ccosto) {
+        return $cuentas_causacion["es_pasivo"] == 1;
+    });
     $valor = 0;
-    foreach ($cuentas['pasivo'] as $cp) {
+    foreach ($cPasivo as $cp) {
         $tipo = $cp['id_tipo'];
         $cuenta = $cp['cuenta'];
         $credito = 0;
         switch ($tipo) {
             case 11:
-                $credito = $totales['comfam'] > 0 ? $totales['comfam'] : 0;
+                $credito = $vPasivos['comfam'] > 0 ? $vPasivos['comfam'] : 0;
                 $id_tercero = $id_api_comfam;
                 if ($credito > 0) {
                     $query->execute();
@@ -794,8 +667,8 @@ try {
                 }
                 break;
             case 12:
-                if (!empty($totales['eps'])) {
-                    $epss = $totales['eps'];
+                if (!empty($vPasivos['eps'])) {
+                    $epss = $vPasivos['eps'];
                     foreach ($epss as $key => $value) {
                         $id_tercero = $idsTercer['eps'][$key];
                         $credito = $value;
@@ -810,8 +683,8 @@ try {
                 }
                 break;
             case 13:
-                if (!empty($totales['arl'])) {
-                    $arls = $totales['arl'];
+                if (!empty($vPasivos['arl'])) {
+                    $arls = $vPasivos['arl'];
                     foreach ($arls as $key => $value) {
                         $id_tercero = $idsTercer['arl'][$key];
                         $credito = $value;
@@ -826,8 +699,8 @@ try {
                 }
                 break;
             case 14:
-                if (!empty($totales['afp'])) {
-                    $afps = $totales['afp'];
+                if (!empty($vPasivos['afp'])) {
+                    $afps = $vPasivos['afp'];
                     foreach ($afps as $key => $value) {
                         $id_tercero = $idsTercer['afp'][$key];
                         $credito = $value;
@@ -842,7 +715,7 @@ try {
                 }
                 break;
             case 15:
-                $credito = $totales['icbf'] > 0 ? $totales['icbf'] : 0;
+                $credito = $vPasivos['icbf'] > 0 ? $vPasivos['icbf'] : 0;
                 $id_tercero = $id_api_icbf;
                 if ($credito > 0) {
                     $query->execute();
@@ -853,7 +726,7 @@ try {
                 }
                 break;
             case 16:
-                $credito = $totales['sena'] > 0 ? $totales['sena'] : 0;
+                $credito = $vPasivos['sena'] > 0 ? $vPasivos['sena'] : 0;
                 $id_tercero = $id_api_sena;
                 if ($credito > 0) {
                     $query->execute();
@@ -872,6 +745,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
 try {
     $estado = 4;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

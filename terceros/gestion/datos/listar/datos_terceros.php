@@ -101,9 +101,11 @@ if (!empty($id_t)) {
             if (PermisosUsuario($permisos, 5201, 2) || $id_rol == 1) {
                 $addresponsabilidad = '<a value="' . $idT . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb responsabilidad" title="+ Responsabilidad Económica"><span class="fas fa-hand-holding-usd fa-lg"></span></a>';
                 $addactividad = '<a value="' . $idT . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb actividad" title="+ Actividad Económica"><span class="fas fa-donate fa-lg"></span></a>';
+                $histtecero = '<a value="' . $idT . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb historial" title="+ historial tercero"><span class="fas fa-history fa-lg"></span></a>';
             } else {
                 $addresponsabilidad = null;
                 $addactividad = null;
+                $histtecero = null;
             }
             $editar = null;
             if (PermisosUsuario($permisos, 5201, 3) || $id_rol == 1) {
@@ -132,7 +134,7 @@ if (!empty($id_t)) {
                 'telefono' => $terceros[$key]['telefono'],
                 'correo' => $terceros[$key]['correo'],
                 'estado' => '<div class="text-center">' . $estado . '</div>',
-                'botones' => '<div class="text-center">' . $editar  . $addresponsabilidad . $addactividad . $detalles . $borrar . '</div>',
+                'botones' => '<div class="text-center">' . $editar  . $addresponsabilidad . $addactividad . $detalles . $histtecero . $borrar . '</div>',
             ];
         }
     }

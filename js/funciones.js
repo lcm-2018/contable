@@ -1,4 +1,4 @@
-let timeout;
+/*let timeout;
 let actual = "EAC" + window.location + 'II';
 let esta = actual.indexOf('index')
 if (esta === -1) {
@@ -15,7 +15,7 @@ if (esta === -1) {
             });
         }, 900000); // 15 minutos
     }
-}
+}*/
 (function($) {
     /*$(document).ready(function () {
         $("body").on("contextmenu", function (e) {

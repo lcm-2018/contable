@@ -56,7 +56,7 @@
                     $.post("datos/registrar/formadduser.php", function (he) {
                         $('#divTamModalForms').removeClass('modal-xl');
                         $('#divTamModalForms').removeClass('modal-sm');
-                        $('#divTamModalForms').addClass('modal-lg');
+                        $('#divTamModalForms').addClass('modal-xl');
                         $('#divModalForms').modal('show');
                         $("#divForms").html(he);
                     });
@@ -355,4 +355,10 @@
             $("#icon").css("color", "#2ECC71");
         }
     });
+
+    //-----------------------------------------------
+    $('#divForms').on("change", "#sl_centroCosto", function() {
+        $('#sl_areaCentroCosto').load('../usuarios/common/listar_areas_centroCosto.php', { id_centroCosto: $(this).val(), titulo: '', todas: true }, function() {});
+    });
+    //$('#sl_centroCosto').trigger('change');
 })(jQuery);

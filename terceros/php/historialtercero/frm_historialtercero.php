@@ -5,35 +5,22 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
+include '../../../terceros.php';
 include 'cargar_combos.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$id = isset($_POST['id']) ? $_POST['id'] : -1;
-/*
-$sql = "SELECT far_centrocosto_area.*,
-            CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_responsable
-        FROM far_centrocosto_area 
-        INNER JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_centrocosto_area.id_responsable) 
-        WHERE far_centrocosto_area.id_area=" . $id . " LIMIT 1";
+$id_tercero = isset($_POST['idt']) ? $_POST['idt'] : -1;
+
+/////drilocoquito vuelve a consultar los datos del tercero con el id que viene del boton
+//------------------------------------
+$sql = "SELECT tb_terceros.id_tercero_api,tb_terceros.nom_tercero
+        FROM tb_terceros 
+        WHERE id_tercero_api= $id_tercero LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
-
-if (empty($obj)) {
-    $n = $rs->columnCount();
-    for ($i = 0; $i < $n; $i++) :
-        $col = $rs->getColumnMeta($i);
-        $name = $col['name'];
-        $obj[$name] = NULL;
-    endfor;
-    //Inicializa variable por defecto
-    $obj['id_centrocosto'] = 0;
-    $obj['id_tipo_area'] = 0;
-    $obj['id_sede'] = 0;
-}
-*/
-
+//---------------------------------------------------
 ?>
 <div class="px-0">
     <div class="shadow">
@@ -42,12 +29,12 @@ if (empty($obj)) {
         </div>
         <div class="px-2">
             <form id="frm_historialtercero">
-                <input type="hidden" id="id_area" name="id_area" value="<?php echo $id ?>">
+                <input type="hidden" id="id_tercero" name="id_tercero" value="<?php echo $id_tercero ?>">
                 <div class=" form-row">
                     <div class="form-group col-md-4">
                         <label for="txt_tercero_filtro" class="small">Tercero</label>
-                        <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" placeholder="Tercero">
-                        <!--<input type="hidden" id="id_txt_tercero" name="id_txt_tercero" value="<?php echo $obj['id_tercero'] ?>">-->
+                        <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" name="txt_tercero_filtro" readonly="true" value="<?php echo $obj['nom_tercero']?>">
+                        <input type="hidden" id="id_txt_tercero" name="id_txt_tercero" class="form-control form-control-sm" value="<?php echo $id_tercero ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="txt_nrodisponibilidad_filtro" class="small">Nro Disponibilidad</label>
@@ -55,11 +42,11 @@ if (empty($obj)) {
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_fecini_filtro" class="small">Fecha inicial</label>
-                        <input type="date" class="form-control form-control-sm" id="txt_fecini_filtro" name="txt_fecini_filtro" placeholder="Fecha Inicial">
+                        <input type="date" class="form-control form-control-sm" id="txt_fecini_filtro" name="txt_fecini_filtro" placeholder="Fecha Inicial" value="<?php echo $_SESSION['vigencia'] ?>-01-01">
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_fecfin_filtro" class="small">Fecha final</label>
-                        <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha final">
+                        <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha final" value="<?php echo $_SESSION['vigencia'] ?>-12-31">
                     </div>
                     <div class="form-group col-md-1">
                         <label for="btn_buscar_filtro" class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
@@ -84,7 +71,7 @@ if (empty($obj)) {
                         </thead>
                         <tbody class="text-left centro-vertical"></tbody>
                     </table>
-                </div>                
+                </div>
             </form>
 
             <!--Tabs-->
@@ -99,7 +86,7 @@ if (empty($obj)) {
                 </nav>
 
                 <div class="tab-content pt-2" id="nav-tabContent">
-                    <!--Lista de CUMS-->
+                    <!--Lista de contratacion-->
                     <div class="tab-pane fade show active" id="nav_lista_contratacion" role="tabpanel" aria-labelledby="nav_lista_contratacion-tab">
                         <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
@@ -116,8 +103,52 @@ if (empty($obj)) {
                         </table>
                     </div>
 
-                    <!--Lista de LOTES-->
+                    <!--Lista de reg presupuestal-->
                     <div class="tab-pane fade" id="nav_lista_regpresupuestal" role="tabpanel" aria-labelledby="nav_lista_regpresupuestal-tab">
+                        <!--<table id="tb_articulos_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <thead>
+                                <tr class="text-center centro-vertical">
+                                    <th>Id</th>
+                                    <th>Lote</th>
+                                    <th>Principal</th>                                    
+                                    <th>Fecha<br>Vencimiento</th>                                    
+                                    <th>Presentación del Lote</th>
+                                    <th>Unidades en UMPL</th>
+                                    <th>Existencia</th>
+                                    <th>CUM</th>
+                                    <th>Bodega</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-left centro-vertical"></tbody>
+                        </table>-->
+                    </div>
+
+                    <!--Lista de obligaciones-->
+                    <div class="tab-pane fade" id="nav_lista_obligaciones" role="tabpanel" aria-labelledby="nav_lista_obligaciones-tab">
+                        <!--<table id="tb_articulos_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <thead>
+                                <tr class="text-center centro-vertical">
+                                    <th>Id</th>
+                                    <th>Lote</th>
+                                    <th>Principal</th>                                    
+                                    <th>Fecha<br>Vencimiento</th>                                    
+                                    <th>Presentación del Lote</th>
+                                    <th>Unidades en UMPL</th>
+                                    <th>Existencia</th>
+                                    <th>CUM</th>
+                                    <th>Bodega</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-left centro-vertical"></tbody>
+                        </table>-->
+                    </div>
+
+                    <!--Lista de pagos-->
+                    <div class="tab-pane fade" id="nav_lista_pagos" role="tabpanel" aria-labelledby="nav_lista_pagos-tab">
                         <!--<table id="tb_articulos_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
@@ -148,6 +179,5 @@ if (empty($obj)) {
     </div>
 </div>
 
-<?php include '../../../scripts.php' ?>
-<script type="text/javascript" src="../../js/historialtercero/historialtercero.js?v=<?php echo date('YmdHis') ?>"></script>
-<script type="text/javascript" src="../../js/historialtercero/historialtercero_reg.js?v=<?php echo date('YmdHis') ?>"></script>
+<script type="text/javascript" src="../../terceros/js/historialtercero/historialtercero.js?v=<?php echo date('YmdHis') ?>"></script>
+<script type="text/javascript" src="../../terceros/js/historialtercero/historialtercero_reg.js?v=<?php echo date('YmdHis') ?>"></script>

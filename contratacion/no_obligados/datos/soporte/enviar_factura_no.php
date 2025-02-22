@@ -392,8 +392,8 @@ $jDocument = [
     'rdocumenttemplate' => 30884303,
     'tissuedate' => $hoy . 'T' . date('H:i:s', strtotime('-5 hour', strtotime(date('H:i:s')))),
     'tduedate' => $factura['fec_vence'],
-    //'wpaymentmeans' => $factura['met_pago'],
-    //'wpaymentmethod' => $factura['form_pago'],
+    'wpaymentmeans' => $factura['met_pago'],
+    'wpaymentmethod' => $factura['form_pago'],
     //'wbusinessregimen' => $factura['reg_fiscal'],
     //'woperationtype' => $factura['procedencia'],
     //'sorderreference' => '',
@@ -503,7 +503,7 @@ $factura = [
 $json_string = json_encode($factura);
 $file = 'factura.json';
 file_put_contents($file, $json_string);
-exit;
+
 //chmod($file, 0777);
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -520,6 +520,7 @@ $procesado = 0;
 
 
 $err = '';
+$tipo = 1;
 try {
     $hoy = date('Y-m-d');
     $iduser = $_SESSION['id_user'];
@@ -527,11 +528,11 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     if ($new) {
-        $sql = "INSERT INTO `seg_soporte_fno` (`id_factura_no`, `shash`, `referencia`, `fecha`, `id_user_reg`, `fec_reg`) 
-            VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO `seg_soporte_fno` (`id_factura_no`, `shash`, `referencia`, `fecha`, `id_user_reg`, `fec_reg`,`tipo`) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)";
     } else {
         $sql = "UPDATE `seg_soporte_fno` 
-                    SET `id_factura_no` = ?,`shash` = ?, `referencia` = ?, `fecha` = ?, `id_user_reg` = ?, `fec_reg` = ? 
+                    SET `id_factura_no` = ?,`shash` = ?, `referencia` = ?, `fecha` = ?, `id_user_reg` = ?, `fec_reg` = ?, `tipo` = ?
                 WHERE `id_soporte` = ?";
     }
     $sql = $cmd->prepare($sql);
@@ -541,6 +542,7 @@ try {
     $sql->bindParam(4, $hoy, PDO::PARAM_STR);
     $sql->bindParam(5, $iduser, PDO::PARAM_INT);
     $sql->bindValue(6, $date->format('Y-m-d H:i:s'));
+    $sql->bindParam(7, $tipo, PDO::PARAM_INT);
     if (!$new) {
         $sql->bindParam(7, $id_soporte, PDO::PARAM_INT);
     }

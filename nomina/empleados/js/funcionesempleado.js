@@ -3500,6 +3500,37 @@
             "pageLength": -1
         });
         $('#tableOtroDcto').wrap('<div class="overflow" />');
+        $('#tableIntVivienda').DataTable({
+            dom: setdom,
+            buttons: [{
+                action: function (e, dt, node, config) {
+                    FormIntVivienda(0);
+
+                }
+            }],
+            language: setIdioma,
+            "ajax": {
+                url: 'datos/listar/interes_vivienda.php',
+                type: 'POST',
+                data: { id: id },
+                dataType: 'json',
+            },
+            "columns": [
+                { 'data': 'id' },
+                { 'data': 'fecha' },
+                { 'data': 'valor' },
+                { 'data': 'botones' },
+            ],
+            "order": [
+                [0, "desc"]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
+        });
+        $('#tableIntVivienda').wrap('<div class="overflow" />');
     });
     //contratacion empleados
     //Nuevo contrato
@@ -3836,4 +3867,65 @@
         });
         return false;
     });
+
 })(jQuery);
+function FormIntVivienda(id) {
+    $.post("datos/registrar/form_add_intvivienda.php", { id: id }, function (he) {
+        $('#divTamModalForms').removeClass('modal-xl');
+        $('#divTamModalForms').removeClass('modal-lg');
+        $('#divTamModalForms').removeClass('modal-sm');
+        $('#divModalForms').modal('show');
+        $("#divForms").html(he);
+    });
+}
+function btnGuardaIntVivienda() {
+    if (($('#valIntViv').val()) <= '0') {
+        $('#valIntViv').addClass('is-invalid');
+        $('#valIntViv').focus();
+        mjeError("Debe ingresar un valor mayor a cero");
+    } else {
+        var data = $('#formIntVivienda').serialize() + '&idEmp=' + $('#idEmpNovEps').val();
+
+        $.ajax({
+            type: 'POST',
+            url: 'registrar/new_intvivienda.php',
+            data: data,
+            success: function (r) {
+                if (r.trim() === 'ok') {
+                    $('#tableIntVivienda').DataTable().ajax.reload();
+                    $('#divModalForms').modal('hide');
+                    mje("Proceso realizado correctamente");
+                } else {
+                    mjeError(r);
+                }
+            }
+        });
+    }
+}
+function EliminarIntVivienda(id) {
+    Swal.fire({
+        title: "¿Confirma eliminar?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00994C",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si!",
+        cancelButtonText: "NO",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: 'POST',
+                url: 'eliminar/delintvivienda.php',
+                data: { id: id },
+                success: function (r) {
+                    if (r == 'ok') {
+                        $('#tableIntVivienda').DataTable().ajax.reload();
+                        mje("Eliminado correctamente");
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
+}

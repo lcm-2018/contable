@@ -18,7 +18,7 @@ try {
                 `id_soporte`, `id_factura_no`, `shash`
             FROM
                 `seg_soporte_fno`
-            WHERE `id_soporte` = '$id_soporte'";
+            WHERE `id_soporte` = '$id_soporte' AND `tipo` = 0";
     $rs = $cmd->query($sql);
     $soporte = $rs->fetch();
     if ($soporte['id_soporte'] == '') {

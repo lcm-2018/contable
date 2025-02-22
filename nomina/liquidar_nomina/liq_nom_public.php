@@ -430,7 +430,22 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT 
+                `id_empleado`,`valor`
+            FROM `nom_intereses_vivienda` 
+            WHERE `id_intv` IN 
+                (SELECT MAX(`id_intv`) 
+                FROM `nom_intereses_vivienda` 
+                GROUP BY `id_empleado`)";
+    $rs = $cmd->query($sql);
+    $vivienda = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 $dossml = $smmlv * 2;
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $mesliq = 0;
@@ -1473,7 +1488,8 @@ if (isset($_POST['check'])) {
                 }
             }
             $valincap = $val_real_inc;
-            $base_descuentos = $devhe + (($salbase / 30) * $diaslab) + $auxt + $auxali + $vallic + $vallcluto + $valincap + $bsp_salarial + $vacacionsalario + $primavacnsalario + $bonrecreacionsalario + $gasrep + $valindem;
+            $base_descuentos = $devhe + (($salbase / 30) * $diaslab) + $auxt + $auxali + $vallic + $vallcluto + $valincap + $bsp_salarial + $vacacionsalario + $primavacnsalario + $bonrecreacionsalario + $gasrep + $valindem - $saludempleado - $pensionempleado - $solidpension;
+            $base_valida = $base_descuentos;
             //liquidar Embargos
             if (true) {
                 try {
@@ -1494,7 +1510,8 @@ if (isset($_POST['check'])) {
             if (!empty($tienembg)) {
                 foreach ($tienembg as $te) {
                     $dctoemb = $te['valor_mes'];
-                    if ($base_descuentos > $dctoemb && $base_descuentos > $smmlv) {
+                    $base_valida -= $dctoemb;
+                    if ($base_valida > $dctoemb && $base_valida > $smmlv) {
                         $id_embargo = $te['id_embargo'];
                         try {
                             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -1564,7 +1581,9 @@ if (isset($_POST['check'])) {
                 $idcuotsind = 0;
                 $valcuotsind = 0;
             }
-            if ($base_descuentos > $valcuotsind && $base_descuentos > $smmlv) {
+            $base_valida = $base_descuentos;
+            $base_valida -= $valcuotsind;
+            if ($base_valida > $valcuotsind && $base_valida > $smmlv) {
                 if ($idcuotsind != 0) {
                     try {
                         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -1592,7 +1611,9 @@ if (isset($_POST['check'])) {
                 foreach ($libranzas as $libranza) {
                     $idlib = $libranza['id_libranza'];
                     $abonolib = $libranza['val_mes'];
-                    if ($base_descuentos > $abonolib && $base_descuentos > $smmlv) {
+                    $base_valida = $base_descuentos;
+                    $base_valida -= $abonolib;
+                    if ($base_valida > $abonolib && $base_valida > $smmlv) {
                         try {
                             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -1627,7 +1648,9 @@ if (isset($_POST['check'])) {
                     $pagoxdependiente = $maxpagoxdependiente;
                 }
             }
-            $valrf = $valdiaslab + $bsp_salarial + $devhe + $vacacionsalario + $primavacnsalario + $bonrecreacionsalario + $gasrep + $valindem + $vallcluto - $saludempleado - $pensionempleado - $solidpension - $pagoxdependiente;
+            $keyviv = array_search($i, array_column($vivienda, 'id_empleado'));
+            $valIntViv = $keyviv !== false ? $vivienda[$keyviv]['valor'] : 0;
+            $valrf = $valdiaslab + $bsp_salarial + $devhe + $vacacionsalario + $primavacnsalario + $bonrecreacionsalario + $gasrep + $valindem + $vallcluto - $saludempleado - $pensionempleado - $solidpension - $pagoxdependiente - $valIntViv;
             $valdpurado =  $valrf - ($valrf * 0.25);
             if ($sal_integ == 1) {
                 $inglabuvt = ((($salbase / 30) * $diaslab) * 0.75) / $uvt;
@@ -1683,24 +1706,30 @@ if (isset($_POST['check'])) {
                 });
             }
             if (!empty($filtro)) {
+                $base_valida = $base_descuentos;
                 foreach ($filtro as $dcto) {
                     try {
-                        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                        $sql = "INSERT INTO `nom_liq_descuento`
+                        $id_dcto2 = $dcto['id_dcto'];
+                        $val_dcto2 = $dcto['valor'];
+                        $base_valida -= $val_dcto2;
+                        if ($base_valida > $val_dcto2 && $base_valida > $smmlv) {
+                            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                            $sql = "INSERT INTO `nom_liq_descuento`
                                     (`id_dcto`,`valor`,`id_nomina`,`id_user_reg`,`fec_reg`)
                                 VALUES (?, ?, ?, ?, ?)";
-                        $sql = $cmd->prepare($sql);
-                        $sql->bindParam(1, $dcto['id_dcto'], PDO::PARAM_INT);
-                        $sql->bindParam(2, $dcto['valor'], PDO::PARAM_STR);
-                        $sql->bindParam(3, $id_nomina, PDO::PARAM_INT);
-                        $sql->bindParam(4, $id_user, PDO::PARAM_INT);
-                        $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
-                        $sql->execute();
-                        if (!($cmd->lastInsertId() > 0)) {
-                            echo $sql->errorInfo()[2] . 'DCTO';
-                        } else {
-                            $otros_dctos += $dcto['valor'];
+                            $sql = $cmd->prepare($sql);
+                            $sql->bindParam(1, $id_dcto, PDO::PARAM_INT);
+                            $sql->bindParam(2, $val_dcto2, PDO::PARAM_STR);
+                            $sql->bindParam(3, $id_nomina, PDO::PARAM_INT);
+                            $sql->bindParam(4, $id_user, PDO::PARAM_INT);
+                            $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
+                            $sql->execute();
+                            if (!($cmd->lastInsertId() > 0)) {
+                                echo $sql->errorInfo()[2] . 'DCTO';
+                            } else {
+                                $otros_dctos += $val_dcto2;
+                            }
                         }
                     } catch (PDOException $e) {
                         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();

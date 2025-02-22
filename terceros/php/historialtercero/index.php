@@ -57,6 +57,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 echo '<input type="hidden" id="peReg" value="0">';
                             }
                             ?>
+
                             <table id="tb_cencos_areas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>
                                     <tr class="text-center centro-vertical">

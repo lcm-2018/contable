@@ -866,6 +866,42 @@ if ($_SESSION['navarlat'] == '1') {
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <!--parte-->
+                                                <div class="card">
+                                                    <div class="card-header card-header-detalles py-0 headings" id="IntVivienda">
+                                                        <h5 class="mb-0">
+                                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapseIntVivienda" aria-expanded="false" aria-controls="collapseIntVivienda">
+                                                                <div class="form-row">
+                                                                    <div class="div-icono">
+                                                                        <span class="fas fa-home fa-lg" style="color:rgb(7, 234, 250) ;"></span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <?php echo $contador . '.' . $decimal . '.';
+                                                                        $decimal++ ?> INTERESES DE VIVIENDA
+                                                                    </div>
+                                                                </div>
+                                                            </a>
+                                                        </h5>
+                                                    </div>
+                                                    <div id="collapseIntVivienda" class="collapse" aria-labelledby="IntVivienda">
+                                                        <div class="card-body">
+                                                            <div>
+                                                                <table id="tableIntVivienda" class="table table-striped table-bordered table-sm display table-hover table-hover shadow" style="width:100%">
+                                                                    <thead>
+                                                                        <tr class="text-center">
+                                                                            <th>ID</th>
+                                                                            <th>Fecha</th>
+                                                                            <th>Valor</th>
+                                                                            <th>Acciones</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody id="modificaIntVivienda">
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

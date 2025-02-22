@@ -134,6 +134,22 @@ if ($id_fno > 0) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
 }
+if (empty($detalles)) {
+    $detalles = [
+        '0' => [
+            'id_detail' => 0,
+            'id_fno' => 0,
+            'codigo' => '',
+            'detalle' => '',
+            'val_unitario' => 0,
+            'cantidad' => 0,
+            'p_iva' => '0.00',
+            'val_iva' => 0,
+            'p_dcto' => 0,
+            'val_dcto' => 0
+        ]
+    ];
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
