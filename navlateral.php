@@ -889,9 +889,8 @@ try {
                                                 Articulos
                                             </div>
                                         </a>
-                                    <?php } ?>
-<<<<<<< HEAD
-                                    <?php if (PermisosUsuario($permisos, 9999, 1) || $id_rol == 1) { ?>
+                                    <?php } ?>                                    
+                                    <?php if ((PermisosUsuario($permisos, 5002, 1) || $id_rol == 1) && 2 == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/financiero/php/historialtercero/index.php?var=3">
                                             <div class="div-icono">
                                                 <i class="far fa-list-alt" style="color: #E74C3C;"></i>
@@ -901,8 +900,6 @@ try {
                                             </div>
                                         </a>
                                     <?php } ?>
-=======
->>>>>>> ac4c7c4f60b991b7e9c9217f7165669e2933e98f
                                 </nav>
                             </div>
                             <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapsePedidos" aria-expanded="false" aria-controls="pagesCollapsePedidos">

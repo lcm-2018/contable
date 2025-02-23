@@ -162,7 +162,7 @@ function area_principal($cmd){
                     CONCAT_WS(' ',usr.apellido1,usr.apellido2,usr.nombre1,usr.nombre2) AS nom_responsable
                 FROM far_centrocosto_area 
                 INNER JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_centrocosto_area.id_responsable)
-                WHERE far_centrocosto_area.id_area = 1";
+                WHERE far_centrocosto_area.es_almacen=1";
         $rs = $cmd->query($sql);
         $obj = $rs->fetch();
   
