@@ -11,8 +11,8 @@ function fechaCierre($vigencia, $modulo, $cmd)
         $sql = "SELECT MAX(`mes`) AS `mes`  FROM `tb_fin_periodos` WHERE `id_modulo` = '$modulo' AND `vigencia` = '$vigencia'";
         $rs = $cmd->query($sql);
         $cierre = $rs->fetch();
-        if (empty($cierre)) {
-            $fecha_cierre = $date->format('Y-m-d');
+        if (empty($cierre) || $cierre['mes'] == '') {
+            $fecha_cierre = date('Y-m-d', strtotime($vigencia . '-01-01'));
         } else {
             $fecha_cierre = date('Y-m-d', strtotime($vigencia . '-' . $cierre['mes'] . '-' . ultimoDiaMes($cierre['mes'], $vigencia)));
         }

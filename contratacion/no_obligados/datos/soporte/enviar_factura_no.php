@@ -544,7 +544,7 @@ try {
     $sql->bindValue(6, $date->format('Y-m-d H:i:s'));
     $sql->bindParam(7, $tipo, PDO::PARAM_INT);
     if (!$new) {
-        $sql->bindParam(7, $id_soporte, PDO::PARAM_INT);
+        $sql->bindParam(8, $id_soporte, PDO::PARAM_INT);
     }
     if ($resnom['rerror'] == 0) {
         $shash = $resnom['jret']['scufe'];
@@ -552,7 +552,16 @@ try {
     } else {
         $shash = NULL;
         $sreference = $pref . '-' . $secuenciaf;
-        $err .= $resnom['smessage'];
+        $err .= '<table>';
+        $filas = count($resnom['smessage']);
+        if ($filas == 1) {
+            $err .= '<tr><td>' . $resnom['smessage']['string'] . '</td></tr>';
+        } else {
+            foreach ($resnom['smessage']['string'] as $data) {
+                $err .= '<tr><td>' . $data . '</td></tr>';
+            }
+        }
+        $err .= '</table>';
     }
     $sql->execute();
     if ($new) {
@@ -593,7 +602,7 @@ if ($new) {
 if ($procesado > 0) {
     $response[] = array("value" => "ok", "msg" => json_encode('Documento enviado correctamente'));
 } else {
-    $response[] = array("value" => "Error", "msg" => json_encode($err));
+    $response[] = array("value" => "Error", "msg" => $err);
 }
 echo json_encode($response);
 exit;

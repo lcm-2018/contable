@@ -154,7 +154,7 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `id_metodo_pago`, `metodo`
+                `codigo` AS `id_metodo_pago`, `metodo`
             FROM
                 `nom_metodo_pago` ORDER BY `metodo` ASC";
     $rs = $cmd->query($sql);

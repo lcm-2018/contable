@@ -161,6 +161,7 @@ if (!empty($listappto)) {
             $borrar = null;
             $editar = null;
         }
+        $historial = null;
         $data[] = [
             'numero' => $lp['id_manu'],
             'fecha' => $fecha,

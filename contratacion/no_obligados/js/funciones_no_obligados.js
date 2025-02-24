@@ -98,6 +98,8 @@
             },
             "columns": [
                 { 'data': 'id_facturano' },
+                { 'data': 'tipo' },
+                { 'data': 'estado' },
                 { 'data': 'fec_compra' },
                 { 'data': 'fec_vence' },
                 { 'data': 'metodo' },
@@ -426,6 +428,14 @@
         var id = $(this).attr('value');
         FormDocSoporte(id);
     });
+    $('#tableFacurasNoObligados').on('click', '.verDocumento', function () {
+        var id = $(this).attr('value');
+        FormDocSoporte(id);
+        $('#divModalForms').on('shown.bs.modal', function () {
+            $('#btnFacturaNO').remove();
+
+        });
+    });
     $('#tableFacurasNoObligados').on('click', '.borrar', function () {
         var id = $(this).attr('value');
         Swal.fire({
@@ -727,14 +737,19 @@
     });
 })(jQuery);
 
-function EnviaDocSoporte2(boton) {
+function EnviaDocSoporte2(boton, tipo) {
     var id = boton.value;
     boton.disabled = true;
     boton.value = "";
     boton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+    if (tipo == '1') {
+        url = 'datos/soporte/anula_factura_no.php';
+    } else {
+        url = 'datos/soporte/enviar_factura_no.php';
+    }
     $.ajax({
         type: "POST",
-        url: 'datos/soporte/enviar_factura_no.php',
+        url: url,
         data: { id: id },
         dataType: "json",
         success: function (response) {
@@ -746,7 +761,14 @@ function EnviaDocSoporte2(boton) {
                 boton.disabled = false;
                 boton.value = id;
                 boton.innerHTML = '<span class="fas fa-paper-plane fa-lg"></span>';
-                mjeError(response.msg);
+                function mjeError(titulo, mensaje) {
+                    Swal.fire({
+                        title: titulo,
+                        html: mensaje, // Renderiza el HTML en el mensaje
+                        icon: "error"
+                    });
+                }
+                mjeError('', response[0].msg);
             }
         },
         error: function (xhr, status, error) {
@@ -755,21 +777,6 @@ function EnviaDocSoporte2(boton) {
     });
 
     return false
-    $('#divModalProcess').modal('show');
-    $.ajax({
-        type: 'POST',
-        url: 'datos/soporte/enviar_factura_no.php',
-        dataType: 'json',
-        data: { id: id },
-        success: function (r) {
-            let id = 'tableFacurasNoObligados';
-            reloadtable(id);
-            $('#divModalProcess').modal('hide');
-            $('#divModalConfDel').modal('show');
-            $('#divMsgConfdel').html('PROCESADO:<br>' + r.procesados + 'ERROR(ES):<br>' + r.error);
-            $('#divBtnsModalDel').html('<div class="text-center w-100"><button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button></div>');
-        }
-    });
 };
 
 const VerSoporteElectronico2 = (id) => {
@@ -792,4 +799,33 @@ const VerSoporteElectronico2 = (id) => {
         .catch((error) => {
             console.log("Error:");
         });
+};
+
+const AnulaDocSoporte = (id) => {
+    //confimar anulación de documento
+    Swal.fire({
+        title: "¿Confirma anulación de documento?, Esta acción no se puede deshacer",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00994C",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si!",
+        cancelButtonText: "NO",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: "POST",
+                url: "registrar/new_facno_anula.php",
+                data: { id: id },
+                success: function (r) {
+                    if (r == 'ok') {
+                        $('#tableFacurasNoObligados').DataTable().ajax.reload();
+                        mje('Documento Anulado correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
 };

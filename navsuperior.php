@@ -54,7 +54,7 @@ $url = $_SESSION['urlin'];
         </li>
     </ul>
 </nav>
-<div class="modal fade" id="divModalPermisos" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+<div class="modal fade" id="divModalPermisos" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="false" data-backdrop="static" data-keyboard="false">
     <div id="divTamModalPermisos" class="modal-dialog modal-dialog-centered text-center" role="document">
         <div class="modal-content">
             <div class="modal-body text-center" id="divTablePermisos">

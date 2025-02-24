@@ -64,7 +64,9 @@ try {
                         ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
                     INNER JOIN `ctb_doc` 
                         ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                WHERE (`ctb_doc`.`estado` > 0)
+                    INNER JOIN `ctb_fuente` 
+                            ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                WHERE (`ctb_doc`.`estado` > 0 AND `ctb_fuente`.`cod` <> 'CXPA' )
                 GROUP BY `pto_crp_detalle`.`id_pto_crp`) AS `cop`
                 ON (`pto_crp`.`id_pto_crp` = `cop`.`id_pto_crp`)
             LEFT JOIN `tb_terceros`
@@ -92,7 +94,7 @@ $cmd = null;
 if (!empty($listappto)) {
     foreach ($listappto as $lp) {
         $id_pto = $lp['id_pto_crp'];
-        $anular = $dato = $borrar = $imprimir = $detalles = null;
+        $anular = $dato = $borrar = $imprimir = $detalles = $abrir = null;
         // Sumar el valor del crp de la tabla id_pto_mtvo
         $valor_crp = $lp['debito'] - $lp['credito'];
         $valor_crp = number_format($valor_crp, 2, ',', '.');
@@ -104,28 +106,28 @@ if (!empty($listappto)) {
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
         // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
         $info = base64_encode($id_pto . '|crp');
-        if (!($fecha <= $fecha_cierre) && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1)) {
-            $anular = '<button text="' . $info . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Anular" onclick="anulacionPto(this);"><span class="fas fa-ban fa-lg"></span></button>';
-        }
-        if ($lp['saldo'] > 0) {
-            $anular = null;
-        }
         $id_cdp = $lp['id_cdp'];
+        if (PermisosUsuario($permisos, 5401, 1) || $id_rol == 1) {
+            $detalles = '<a value="' . $id_pto . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" onclick="CargarListadoCrpp(' . $id_pto . ')" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
+        }
         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id_pto . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
-            $detalles = '<a value="' . $id_pto . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" onclick="CargarListadoCrpp(' . $id_pto . ')" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
-            $imprimir = '<a value="' . $id_pto . '" onclick="imprimirFormatoCrp(' . $id_pto . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-print fa-lg" ></span></a>';
-            $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-            ...
-            </button>
-            
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            ' . $anular . '
-            <a value="' . $id_pto . '" class="dropdown-item sombra " href="#">Ver historial</a>
-            </div>';
         }
         if (PermisosUsuario($permisos, 5401, 4) || $id_rol == 1) {
             $borrar = '<a value="' . $id_pto . '" onclick="eliminarCrpp(' . $id_pto . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Registrar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+        }
+        if ($fecha > $fecha_cierre && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1)) {
+            $anular = '<button text="' . $info . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Anular" onclick="anulacionPto(this);"><span class="fas fa-ban fa-lg"></span></button>';
+        }
+        if ($fecha > $fecha_cierre && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1) && $lp['estado'] == 2) {
+            $abrir = '<a onclick="abrirCrp(' . $id_pto . ')" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb " title="Abrir Registro Presupuestal"><span class="fas fa-lock fa-lg"></span></a>';
+        }
+        if ($lp['saldo'] > 0) {
+            $anular = null;
+            $abrir = null;
+        }
+        if (PermisosUsuario($permisos, 5401, 6) || $id_rol == 1) {
+            $imprimir = '<a value="' . $id_pto . '" onclick="imprimirFormatoCrp(' . $id_pto . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-print fa-lg" ></span></a>';
         }
         // si estado es 0 quiere decir que el crp esta anulado
         if ($lp['estado'] == 0) {
@@ -133,6 +135,7 @@ if (!empty($listappto)) {
             $editar = null;
             $anular = null;
             $detalles = null;
+            $abrir = null;
             $dato = '<span class="badge badge-pill badge-secondary">Anulado</span>';
         }
         if ($lp['estado'] >= 2) {
@@ -147,7 +150,7 @@ if (!empty($listappto)) {
             'ccnit' => $ccnit,
             'tercero' => $tercero,
             'valor' =>  '<div class="text-right">' . $valor_crp . '</div>',
-            'botones' => '<div class="text-center">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . '</div>',
+            'botones' => '<div class="text-center">' . $editar . $detalles . $imprimir . $abrir . $anular . $borrar . $dato . '</div>',
 
         ];
     }

@@ -50,7 +50,9 @@ $vigencia = $_SESSION['vigencia'];
                                 <thead>
                                     <tr class="text-center">
                                         <th>ID</th>
-                                        <th>Fecha Compra</th>
+                                        <th>Tipo</th>
+                                        <th>Estado</th>
+                                        <th>Fecha</th>
                                         <th>Vence</th>
                                         <th>Método Pago</th>
                                         <th>Forma Pago</th>

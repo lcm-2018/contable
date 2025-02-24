@@ -576,7 +576,7 @@
             $("#dateFecha").addClass('is-invalid');
             $("#divModalError").modal("show");
             $("#divMsgError").html("¡La fecha no puede estar vacio!");
-        } else if ($("#dateFecha").val() <= $('#fec_cierre').val()) {
+        } else if ($('#fec_cierre').val() >= $("#dateFecha").val()) {
             $("#dateFecha").focus();
             $("#dateFecha").addClass('is-invalid');
             $("#divModalError").modal("show");
@@ -1948,6 +1948,21 @@ function abrirCdp(id) {
         },
     });
 };
+function abrirCrp(id) {
+    $.ajax({
+        type: "POST",
+        url: "datos/actualizar/abrir_crp.php",
+        data: { id: id },
+        success: function (res) {
+            if (res == 'ok') {
+                mje("Documento abierto");
+                $('#tableEjecPresupuestoCrp').DataTable().ajax.reload();
+            } else {
+                mjeError("Documento no abierto", res);
+            }
+        },
+    });
+};
 let abrirDocumentoMod = function (dato) {
     let doc = id_pto_doc.value;
     fetch("datos/consultar/consultaAbrir.php", {
@@ -2377,29 +2392,45 @@ $("#divForms").on("click", "#btnGestionCRP", function () {
     if ($("#dateFecha").val() === "") {
         $("#dateFecha").focus();
         $("#dateFecha").addClass('is-invalid');
-        $("#divModalError").modal("show");
-        $("#divMsgError").html("¡La fecha no puede estar vacio!");
+        mjeError("¡La fecha no puede estar vacio!");
+    } else if ($("#dateFecha").val() < $("#dateFecha").attr("min") || $("#dateFecha").val() > $("#dateFecha").attr("max")) {
+        $("#dateFecha").focus();
+        $("#dateFecha").addClass('is-invalid');
+        mjeError("¡La fecha debe estar entre " + $("#dateFecha").attr("min") + " y " + $("#dateFecha").attr("max") + "!");
     } else if ($("#id_manu").val() === "") {
         $("#id_manu").focus();
         $("#id_manu").addClass('is-invalid');
-        $("#divModalError").modal("show");
-        $("#divMsgError").html("¡El numero de CRP no puede estar vacio!");
+        mjeError("¡El numero de maniobra no puede estar vacio!");
     } else if ($("#txtContrato").val() === "") {
         $("#txtContrato").focus();
         $("#txtContrato").addClass('is-invalid');
-        $("#divModalError").modal("show");
-        $("#divMsgError").html("¡El numero de contrato no puede estar vacio!");
+        mjeError("¡El numero de contrato no puede estar vacio!");
     } else if ($("#id_tercero").val() === "0") {
         $("#id_tercero").focus();
         $("#id_tercero").addClass('is-invalid');
-        $("#divModalError").modal("show");
-        $("#divMsgError").html("¡Debe elegir un tercero!");
+        mjeError("¡Debe elegir un tercero!");
     } else if ($("#txtObjeto").val() === "") {
         $("#txtObjeto").focus();
         $("#txtObjeto").addClass('is-invalid');
-        $("#divModalError").modal("show");
-        $("#divMsgError").html("¡El objeto no puede ser vacio!");
+        mjeError("¡El objeto no puede estar vacio!");
     } else {
+        function EnviaData(url, datos) {
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: datos,
+                dataType: "json",
+                success: function (r) {
+                    if (r.status === "ok") {
+                        $('#tableEjecPresupuestoCrp').DataTable().ajax.reload();
+                        $("#divModalForms").modal("hide");
+                        mje("Proceso realizado correctamente");
+                    } else {
+                        mjeError(r.msg);
+                    }
+                },
+            });
+        }
         var datos, url;
         if (op == 1) {
             datos = $("#formAddCRP").serialize()
@@ -2408,23 +2439,23 @@ $("#divForms").on("click", "#btnGestionCRP", function () {
             datos = $("#formUpCRP").serialize()
             url = "datos/actualizar/up_ejecucion_presupuesto_crp.php";
         }
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: datos,
-            dataType: "json",
-            success: function (r) {
-                if (r.status === "ok") {
-                    $('#tableEjecPresupuestoCrp').DataTable().ajax.reload();
-                    $("#divModalForms").modal("hide");
-                    $("#divModalDone").modal("show");
-                    $("#divMsgDone").html("Proceso realizado correctamente...");
-                } else {
-                    $("#divModalError").modal("show");
-                    $("#divMsgError").html(r.msg);
+        if ($("#id_tercero").val() != $('#id_teractual').val() && $('#id_adq').val() > '0') {
+            Swal.fire({
+                title: "El tercero está asociada a un contrato, Se modificará el tercero en el contrato)",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#00994C",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Si!",
+                cancelButtonText: "NO",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    EnviaData(url, datos);
                 }
-            },
-        });
+            });
+        } else {
+            EnviaData(url, datos);
+        }
     }
     return false;
 });

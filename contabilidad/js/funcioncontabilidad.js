@@ -2383,7 +2383,14 @@ const EnviaDocumentoSoporte = (boton) => {
 				boton.disabled = false;
 				boton.value = id;
 				boton.innerHTML = '<span class="fas fa-paper-plane fa-lg"></span>';
-				mjeError(response.msg);
+				function mjeError(titulo, mensaje) {
+					Swal.fire({
+						title: titulo,
+						html: mensaje, // Renderiza el HTML en el mensaje
+						icon: "error"
+					});
+				}
+				mjeError('', response[0].msg);
 			}
 		},
 		error: function (xhr, status, error) {

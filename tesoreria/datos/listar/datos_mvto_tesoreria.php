@@ -24,6 +24,16 @@ $dato = null;
 $where = $_POST['search']['value'] != '' ? "AND (`ctb_doc`.`fecha` LIKE '%{$_POST['search']['value']}%' OR `ctb_doc`.`id_manu` LIKE '%{$_POST['search']['value']}%' OR  `tb_terceros`.`nom_tercero` LIKE '%{$_POST['search']['value']}%' OR `tb_terceros`.`nit_tercero` LIKE '%{$_POST['search']['value']}%')" : '';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+$erp = [];
+if ($id_ctb_doc == '6') {
+    try {
+        $sql = "SELECT `id_transaccion` FROM `fac_pagos_erp`";
+        $rs = $cmd->query($sql);
+        $erp = $rs->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+}
 try {
     $sql = "SELECT `fecha_cierre` FROM `tb_fin_periodos` WHERE `id_modulo` = 56";
     $rs = $cmd->query($sql);
@@ -196,7 +206,8 @@ if (!empty($listappto)) {
                 $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" onclick="abrirDocumentoTes(' . $id_ctb . ')" title="Abrir"><span class="fas fa-unlock fa-lg"></span></a>';
             }
             $anular = '<a value="' . $id_ctb . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" onclick="anularDocumentoTes(' . $id_ctb . ')" title="Anular"><span class="fas fa-ban fa-lg"></span></a>';
-            if ($fecha >= $fecha_cierre) {
+            $key = array_search($id_ctb, array_column($erp, 'id_transaccion'));
+            if ($fecha >= $fecha_cierre || $key !== false) {
                 $anular = null;
                 $cerrar = null;
             }

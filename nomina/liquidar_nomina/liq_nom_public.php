@@ -1559,7 +1559,7 @@ if (isset($_POST['check'])) {
                 }
                 //$valcuotsind = $devtotal * $_POST['txtPorcCuotaSind_' . $i];
                 $porcsind = $status_sind['porcentaje_cuota'] > 0 ? $status_sind['porcentaje_cuota'] : 0;
-                $valcuotsind = redondeoSind($salbase * $porcsind / 100, -2);
+                $valcuotsind = round($salbase * $porcsind / 100);
                 if ($status_sind['estado'] == 1) {
                     $valcuotsind = $valcuotsind + $status_sind['val_sidicalizacion'];
                     $estado = 2;
