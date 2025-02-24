@@ -48,6 +48,12 @@ function formato_valor($valor){
     return '$' . number_format($valor, 2, ",", ".");    
 }
 
+//FUNCION PARA DAR FORMATO A LOS VALORES CON DECIMALES
+function formato_decimal($num) {
+    $num = rtrim(rtrim($num, '0'), '.');  
+    return $num;
+}
+
 //FUNCION QUE RETORNAR LOS DATOS DE UN LOTE
 function datos_lote($cmd, $id_lote){
     try {

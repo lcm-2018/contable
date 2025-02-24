@@ -16,6 +16,11 @@ if ($length != -1) {
 $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 
+/*Listar los Articulos Activos y que tengan lotes activos de una Bodega específica
+  Totalizado la cantidad por articuoo
+  Utilizado en: Pedidos de Bodega, Pedidos de Dependencia
+*/
+
 $id_bodega = $_POST['id_bodega'];
 $where_gen = " WHERE far_medicamento_lote.id_bodega=$id_bodega AND far_medicamento_lote.estado=1 AND far_medicamentos.estado=1";
 

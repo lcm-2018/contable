@@ -101,7 +101,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-6">
                         <div class="form-row">
                             <div class="form-group col-md-10">
-                                <label for="txt_des_pedido" class="small">Pedido de una Bodega</label>
+                                <label for="txt_des_pedido" class="small">Pedido de una Bodega para el Traslado</label>
                                 <input type="text" class="form-control form-control-sm" id="txt_des_pedido" name="txt_des_pedido" class="small" value="<?php echo $obj['des_pedido'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Pedido">
                             </div>
                             <div class="form-group col-md-1">            
@@ -127,7 +127,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-6">
                         <div class="form-row">
                             <div class="form-group col-md-10">
-                                <label for="txt_des_ingreso" class="small">Ingreso de Almacen</label>
+                                <label for="txt_des_ingreso" class="small">Ingreso de Almacen A Trasladar</label>
                                 <input type="text" class="form-control form-control-sm" id="txt_des_ingreso" name="txt_des_ingreso" class="small" value="<?php echo $obj['des_ingreso'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Ingreso">
                             </div>
                             <div class="form-group col-md-1">            

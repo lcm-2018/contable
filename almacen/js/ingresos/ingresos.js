@@ -152,7 +152,6 @@
         }
     });
 
-
     $('#divModalBus').on('click', '#tb_pedidos_ing .btn_imprimir', function() {
         let id = $(this).attr('value');
         $.post("../pedidos_alm/imp_pedido.php", { id: id }, function(he) {
@@ -377,6 +376,9 @@
             $('#txt_pre_lot').val(lote.attr('data-nom_presentacion'));
             $('#id_txt_pre_lot').val(lote.attr('data-id_presentacion'));
             $('#txt_can_lot').val(lote.attr('data-cantidad_umpl'));
+            if ($('#sl_tip_ing').find('option:selected').attr('data-fianza') == 1) {
+                $('#txt_val_uni').val(lote.attr('data-val_promedio'));
+            }
         }
     });
 
@@ -411,7 +413,7 @@
         });
     });
 
-    $('#divModalReg').on('input', '#txt_val_uni, #sl_por_iva', function() {
+    $('#divModalReg').on('input', '#txt_can_ing, #txt_val_uni, #sl_por_iva', function() {
         var valor = $('#txt_val_uni').val() ? $('#txt_val_uni').val() : 0,
             iva = $('#sl_por_iva').val() ? $('#sl_por_iva').val() : 0;
         $('#txt_val_cos').val(parseFloat(valor) + parseFloat(valor) * parseFloat(iva) / 100);

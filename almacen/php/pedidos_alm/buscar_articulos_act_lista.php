@@ -16,8 +16,9 @@ if ($length != -1) {
 $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 
-$where_gen = " WHERE far_medicamentos.estado=1 AND far_subgrupos.id_grupo IN (1,2)";
+/*Listar los Articulos Activos con o sin Lotes */
 
+$where_gen = " WHERE far_medicamentos.estado=1 AND far_subgrupos.id_grupo IN (1,2)";
 $where = $where_gen;
 if (isset($_POST['id_subgrupo']) && $_POST['id_subgrupo']) {
     $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];

@@ -79,8 +79,8 @@ if (empty($obj)) {
                         <input type="number" class="form-control form-control-sm numberint" id="txt_can_ing" name="txt_can_ing" required value="<?php echo $obj['cantidad'] ?>">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="txt_val_uni" class="small">Vr. Unitarioo</label>
-                        <input type="text" class="form-control form-control-sm numberfloat" id="txt_val_uni" name="txt_val_uni" required value="<?php echo $obj['valor_sin_iva'] ?>">
+                        <label for="txt_val_uni" class="small">Vr. Unitario</label>
+                        <input type="text" class="form-control form-control-sm numberfloat" id="txt_val_uni" name="txt_val_uni" required value="<?php echo formato_decimal($obj['valor_sin_iva']) ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_por_iva" class="small">% IVA</label>

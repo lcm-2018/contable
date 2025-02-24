@@ -16,6 +16,10 @@ if ($length != -1) {
 $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 
+/*Listar los Lostes Activos que pertenezcan a Articulos Activos de una bodega específica
+  Presentando la cantidad por lote.
+  Utilizado en: Orden de Ingreso, Ordenes de Egreso, Traslados.
+*/
 $id_bodega = $_POST['id_bodega'];
 $where_gen = " WHERE far_medicamento_lote.id_bodega=$id_bodega AND far_medicamento_lote.estado=1 AND far_medicamentos.estado=1";
 

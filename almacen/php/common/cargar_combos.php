@@ -182,11 +182,13 @@ function tipo_egreso($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_tipo_egreso,nom_tipo_egreso,es_int_ext FROM far_orden_egreso_tipo WHERE id_tipo_egreso NOT IN (1,2)";
+        $sql = "SELECT id_tipo_egreso,nom_tipo_egreso,es_int_ext,con_pedido,fianza,dev_fianza
+                FROM far_orden_egreso_tipo WHERE id_tipo_egreso NOT IN (1,2)";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
-            $dtad = 'data-intext="' . $obj['es_int_ext'] . '"';
+            $dtad = 'data-intext="' . $obj['es_int_ext'] . '"' . 'data-conpedido="' . $obj['con_pedido'] . '"';
+            $dtad .= 'data-fianza="' . $obj['fianza'] . '"' . 'data-devfianza="' . $obj['dev_fianza'] . '"';
             if ($obj['id_tipo_egreso']  == $id) {
                 echo '<option value="' . $obj['id_tipo_egreso'] . '"' . $dtad . ' selected="selected">' . $obj['nom_tipo_egreso'] . '</option>';
             } else {
@@ -227,11 +229,12 @@ function tipo_ingreso($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,es_int_ext,orden_compra FROM far_orden_ingreso_tipo";
+        $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,es_int_ext,orden_compra,fianza,dev_fianza FROM far_orden_ingreso_tipo";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
             $dtad = 'data-intext="' . $obj['es_int_ext'] . '"' . 'data-ordcom="' . $obj['orden_compra'] . '"';
+            $dtad .= 'data-fianza="' . $obj['fianza'] . '"' . 'data-devfianza="' . $obj['dev_fianza'] . '"';
             if ($obj['id_tipo_ingreso']  == $id) {
                 echo '<option value="' . $obj['id_tipo_ingreso'] . '"' . $dtad . ' selected="selected">' . $obj['nom_tipo_ingreso'] . '</option>';
             } else {
@@ -386,7 +389,8 @@ function lotes_articulo($cmd, $id_bodega, $id_articulo, $id = 0)
         $sql = "SELECT far_medicamento_lote.id_lote,IF(fec_vencimiento='3000-01-01',lote,CONCAT(lote,'[',fec_vencimiento,']')) AS nom_lote,
                     far_medicamentos.nom_medicamento AS nom_articulo,
                     far_medicamento_lote.id_presentacion,far_presentacion_comercial.nom_presentacion,
-                    IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl
+                    IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl,
+                    far_medicamentos.val_promedio
                 FROM far_medicamento_lote
                 INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
                 INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
@@ -399,7 +403,8 @@ function lotes_articulo($cmd, $id_bodega, $id_articulo, $id = 0)
             $dtad = $dtad = 'data-nom_articulo="' . $obj['nom_articulo'] . '"' . 
                     'data-id_presentacion="' . $obj['id_presentacion'] . '"' .
                     'data-nom_presentacion="' . $obj['nom_presentacion'] . '"' .
-                    'data-cantidad_umpl="' . $obj['cantidad_umpl'] . '"';
+                    'data-cantidad_umpl="' . $obj['cantidad_umpl'] . '"' .
+                    'data-val_promedio="' . formato_decimal($obj['val_promedio']) . '"';
             if ($obj['id_lote']  == $id) {                
                 echo '<option value="' . $obj['id_lote'] . '"' . $dtad . ' selected="selected">' . $obj['nom_lote'] . '</option>';
             } else {
