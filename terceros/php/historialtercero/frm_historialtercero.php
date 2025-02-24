@@ -13,7 +13,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_tercero = isset($_POST['idt']) ? $_POST['idt'] : -1;
 
-/////drilocoquito vuelve a consultar los datos del tercero con el id que viene del boton
+// se vuelve a consultar los datos del tercero con el id que viene del boton
 //------------------------------------
 $sql = "SELECT tb_terceros.id_tercero_api,tb_terceros.nom_tercero
         FROM tb_terceros 
@@ -56,20 +56,20 @@ $obj = $rs->fetch();
                     </div>
                 </div>
 
-                <div class=" form-row">
-                    <table id="tb_terceros" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                <div class=" w-100 text-left">
+                    <table id="tb_cdps" class="table table-striped table-bordered table-sm nowrap table-hover shadow w-100" style="width:100%; font-size:80%">
                         <thead>
                             <tr class="text-center centro-vertical">
-                                <th>Id</th>
-                                <th>Numero</th>
-                                <th>Rp</th>
+                                <th>Id CDP</th>
+                                <th>Documento</th>
                                 <th>Fecha</th>
-                                <th>Tercero</th>
-                                <th>Valor</th>
+                                <th style="min-width: 70%;">Objeto</th>
+                                <th>Valor CDP</th>
+                                <th>Saldo</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="text-left centro-vertical"></tbody>
+                        <tbody class="text-left centro-vertical" id="body_tb_cdps"></tbody>
                     </table>
                 </div>
             </form>
@@ -85,18 +85,19 @@ $obj = $rs->fetch();
                     </div>
                 </nav>
 
-                <div class="tab-content pt-2" id="nav-tabContent">
+                <div class="tab-content pt-2 w-100 text-left" id="nav-tabContent">
                     <!--Lista de contratacion-->
                     <div class="tab-pane fade show active" id="nav_lista_contratacion" role="tabpanel" aria-labelledby="nav_lista_contratacion-tab">
-                        <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                        <table id="tb_contratos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
-                                    <th>Id</th>
-                                    <th>Cuenta contable</th>
-                                    <th>Fecha inicio de vigencia</th>
-                                    <th>Cuenta vigente</th>
+                                    <th>No Contrato</th>
+                                    <th>Fecha Ini</th>
+                                    <th>Fecha fin</th>
+                                    <th>Valor contrato</th>
+                                    <th>Adiciones</th>
+                                    <th>Reducciones</th>
                                     <th>Estado</th>
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
