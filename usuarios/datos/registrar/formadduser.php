@@ -103,16 +103,17 @@ if ($id_rol != 1) {
                 </div>
                 <div class="form-row">
                     <label style="width:50%; font-size:80%">Sedes</label>
+                    <label style="width:50%; font-size:80%">Bodegas</label>
                 </div>
                 <div class="form-row">
                     <!--Lista de sedes-->
-                    <form id="frm_sedes">
-                        <table id="tb_sedes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:50%; font-size:80%">
+                    <div style="width: 48%;">
+                        <table id="tb_sedes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
                                     <th>
-                                        <label for="chk_sel_filtri">Sel.</label>
-                                        <input type="checkbox" id="chk_sel_filtro">
+                                        <label for="chk_sel_filtro_sedes">Sel.</label>
+                                        <input type="checkbox" id="chk_sel_filtro_sedes">
                                     </th>
                                     <th>Id.</th>
                                     <th>Sede</th>
@@ -121,7 +122,24 @@ if ($id_rol != 1) {
                                 </tr>
                             </thead>
                         </table>
-                    </form>
+                    </div>
+                    <div style="width: 4%;"></div>
+                    <div style="width: 48%;">
+                        <table id="tb_bodegas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <thead>
+                                <tr class="text-center centro-vertical">
+                                    <th>
+                                        <label for="chk_sel_filtro_bodegas">Sel.</label>
+                                        <input type="checkbox" id="chk_sel_filtro_bodegas">
+                                    </th>
+                                    <th>Id.</th>
+                                    <th>Bodega</th>
+                                    <th>Tipo</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
             </form>
         </div>

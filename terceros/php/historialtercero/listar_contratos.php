@@ -32,8 +32,6 @@ try {
             , ctt_novedad_adicion_prorroga.val_adicion
             , ctt_novedad_liquidacion.val_cte
             , CASE ctt_novedad_liquidacion.estado WHEN 1 THEN 'Liquidado' ELSE 'En ejecucion' END AS estado
-            , ctt_novedad_liquidacion.estado
-            , ctt_contratos.id_contrato_compra
         FROM
             ctt_contratos
             INNER JOIN ctt_adquisiciones ON (ctt_contratos.id_compra = ctt_adquisiciones.id_adquisicion)
@@ -60,19 +58,13 @@ if (!empty($objs)) {
         $totalRecordsFilter=$obj['filas'];
 
         $data[] = [
-            "id_tercero_api" => $obj['id_tercero_api'],          
-            "nit_tercero" => $obj['nit_tercero'],             
-            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),             
-            "id_manu" => $obj['id_manu'], 
-            "id_pto_cdp" => $id_cdp, 
-            "fecha" => $obj['fecha'], 
-            "objeto" => mb_strtoupper($obj['objeto']),
-            "valor_cdp" => $obj['valor_cdp'],
-            "valor_cdp_liberado" => $obj['valor_cdp_liberado'],
-            "valor_crp" => $obj['valor_crp'],
-            "valor_crp_liberado" => $obj['valor_crp_liberado'],
-            "saldo" => $obj['saldo'],
-            "botones" => '<div class="text-center centro-vertical">' . $listar .'</div>',
+            "num_contrato" => $obj['num_contrato'],             
+            "fec_ini" => $obj['fec_ini'],             
+            "fec_fin" => $obj['fec_fin'], 
+            "val_contrato" => $obj['val_contrato'], 
+            "val_adicion" => $obj['val_adicion'], 
+            "val_cte" => $obj['val_cte'],
+            "estado" => $obj['estado'],
         ];
     }
 }

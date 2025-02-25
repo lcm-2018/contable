@@ -106,68 +106,53 @@ $obj = $rs->fetch();
 
                     <!--Lista de reg presupuestal-->
                     <div class="tab-pane fade" id="nav_lista_regpresupuestal" role="tabpanel" aria-labelledby="nav_lista_regpresupuestal-tab">
-                        <!--<table id="tb_articulos_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                        <table id="tb_reg_presupuestal" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
-                                    <th>Id</th>
-                                    <th>Lote</th>
-                                    <th>Principal</th>                                    
-                                    <th>Fecha<br>Vencimiento</th>                                    
-                                    <th>Presentación del Lote</th>
-                                    <th>Unidades en UMPL</th>
-                                    <th>Existencia</th>
-                                    <th>CUM</th>
-                                    <th>Bodega</th>
+                                    <th>No Registro</th>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>   
+                                    <th>No Contrato</th>                                 
+                                    <th>Valor registro</th>                                    
+                                    <th>Saldo</th>
                                     <th>Estado</th>
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
-                        </table>-->
+                        </table>
                     </div>
 
                     <!--Lista de obligaciones-->
                     <div class="tab-pane fade" id="nav_lista_obligaciones" role="tabpanel" aria-labelledby="nav_lista_obligaciones-tab">
-                        <!--<table id="tb_articulos_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                        <table id="tb_obligaciones" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
-                                    <th>Id</th>
-                                    <th>Lote</th>
-                                    <th>Principal</th>                                    
-                                    <th>Fecha<br>Vencimiento</th>                                    
-                                    <th>Presentación del Lote</th>
-                                    <th>Unidades en UMPL</th>
-                                    <th>Existencia</th>
-                                    <th>CUM</th>
-                                    <th>Bodega</th>
+                                    <th>No causacion</th>
+                                    <th>Fecha</th>
+                                    <th>Soporte</th>                                    
+                                    <th>Valor causado</th>                                    
+                                    <th>Descuentos</th>
+                                    <th>Neto</th>
                                     <th>Estado</th>
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
-                        </table>-->
+                        </table>
                     </div>
 
                     <!--Lista de pagos-->
                     <div class="tab-pane fade" id="nav_lista_pagos" role="tabpanel" aria-labelledby="nav_lista_pagos-tab">
-                        <!--<table id="tb_articulos_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                        <table id="tb_pagos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
-                                    <th>Id</th>
-                                    <th>Lote</th>
-                                    <th>Principal</th>                                    
-                                    <th>Fecha<br>Vencimiento</th>                                    
-                                    <th>Presentación del Lote</th>
-                                    <th>Unidades en UMPL</th>
-                                    <th>Existencia</th>
-                                    <th>CUM</th>
-                                    <th>Bodega</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th>Consecutivo</th>
+                                    <th>Fecha</th>
+                                    <th style="min-width: 70%;">Detalle</th>                                    
+                                    <th>Valor pagado</th>                                    
                                 </tr>
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
-                        </table>-->
+                        </table>
                     </div>
                 </div>
             </div>

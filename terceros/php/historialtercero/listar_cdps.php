@@ -18,8 +18,25 @@ if ($length != -1){
 $col = $_POST['order'][0]['column']+1;
 $dir = $_POST['order'][0]['dir'];
 
+$and_where = "";
 //estos where modificarlos con el filtro para buscar por disponibilidad y rango de fechas
-/*$where = "WHERE far_centrocosto_area.id_area<>0";
+/*
+$where = "";
+if (isset($_POST['codigo']) && $_POST['codigo']) {
+    $where .= " AND far_medicamentos.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";
+}
+if (isset($_POST['nombre']) && $_POST['nombre']) {
+    $where .= " AND far_medicamentos.nom_medicamento LIKE '%" . $_POST['nombre'] . "%'";
+}
+if (isset($_POST['subgrupo']) && $_POST['subgrupo']) {
+    $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['subgrupo'];
+}
+if (isset($_POST['estado']) && strlen($_POST['estado'])) {
+    $where .= " AND far_medicamentos.estado=" . $_POST['estado'];
+}
+
+//----------------------------------------------
+$where = "WHERE far_centrocosto_area.id_area<>0";
 if (isset($_POST['nom_area']) && $_POST['nom_area']) {
     $where .= " AND far_centrocosto_area.nom_area LIKE '" . $_POST['nom_area'] . "%'";
 }
