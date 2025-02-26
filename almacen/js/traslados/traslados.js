@@ -157,6 +157,7 @@
         $('#divModalBus').modal('hide');
     });
 
+    //Imprimit el Pedido desde la datatable
     $('#divModalBus').on('click', '#tb_pedidos_tra .btn_imprimir', function() {
         let id = $(this).attr('value');
         $.post("../pedidos_bod/imp_pedido.php", { id: id }, function(he) {
@@ -182,7 +183,7 @@
         }
     });
 
-    //Imprimit el Pedido
+    //Imprimit el Pedido desde el formulario
     $('#divForms').on("click", "#btn_imprime_pedido", function() {
         let id = $('#txt_id_pedido').val();
         if (id) {
@@ -227,6 +228,7 @@
         $('#divModalBus').modal('hide');
     });
 
+    //Imprimit el Ingreso desde el datatable
     $('#divModalBus').on('click', '#tb_ingresos_tra .btn_imprimir', function() {
         let id = $(this).attr('value');
         $.post("../ingresos/imp_ingreso.php", { id: id }, function(he) {
@@ -252,7 +254,7 @@
         }
     });
 
-    //Imprimit el Ingreso
+    //Imprimit el Ingreso desde el formulario
     $('#divForms').on("click", "#btn_imprime_ingreso", function() {
         let id = $('#txt_id_ingreso').val();
         if (id) {
@@ -304,11 +306,12 @@
     //Guardar registro Traslado
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
-        var error = 0;
-        if ($('#sl_tip_traslado').val() == 1) {
+        let tipo = $('#sl_tip_traslado').val();
+        let error = 0;
+        if (tipo == 1) {
             error += verifica_vacio($('#txt_des_pedido'));
         }
-        if ($('#sl_tip_traslado').val() == 2) {
+        if (tipo == 2) {
             error += verifica_vacio($('#txt_des_ingreso'));
         }
         error += verifica_vacio($('#sl_sede_origen'));
@@ -327,14 +330,12 @@
             } else {
                 let table = $('#tb_traslados_detalles').DataTable();
                 let filas = table.rows().count();
-                let tipo = $('#sl_tip_traslado').val();
                 let id_pedido = $('#txt_id_pedido').val();
                 let id_ingreso = $('#txt_id_ingreso').val();
-
                 if (tipo == 1 && filas == 0 && id_pedido) {
-                    confirmar_proceso_msg('traslados_pedido', 'Desea Generar el Traslado en base al Pedido ' + id_pedido);
+                    confirmar_proceso_msg('traslados_gen', 'Desea Generar el Traslado en base al Pedido ' + id_pedido);
                 } else if (tipo == 2 && filas == 0 && id_ingreso) {
-                    confirmar_proceso_msg('traslados_pedido', 'Desea Generar el Traslado en base a la Orden de Ingreso ' + id_ingreso);
+                    confirmar_proceso_msg('traslados_gen', 'Desea Generar el Traslado en base a la Orden de Ingreso ' + id_ingreso);
                 } else {
                     guardar_traslado(0);
                 }
@@ -342,7 +343,7 @@
         }
     });
 
-    $('#divModalConfDel').on("click", "#traslados_pedido", function() {
+    $('#divModalConfDel').on("click", "#traslados_gen", function() {
         $('#divModalConfDel').modal('hide');
         let tipo = $('#sl_tip_traslado').val();
         guardar_traslado(tipo);

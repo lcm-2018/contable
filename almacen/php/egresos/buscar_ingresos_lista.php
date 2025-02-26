@@ -18,8 +18,8 @@ $dir = $_POST['order'][0]['dir'];
 $idusr = $_SESSION['id_user'];
 $idrol = $_SESSION['rol'];
 
-$where_usr = " WHERE OI.estado=2";
-$where_usr.= " AND OI.id_ingreso NOT IN (SELECT id_ingreso FROM far_traslado WHERE id_ingreso IS NOT NULL AND estado<>0)";
+$where_usr = " WHERE OI.estado=2 AND OITP.fianza=1";
+$where_usr.= " AND OI.id_ingreso NOT IN (SELECT id_ingreso_fz FROM far_orden_egreso WHERE id_ingreso_fz IS NOT NULL AND estado<>0)";
 if($idrol !=1){
     $where_usr .= " AND OI.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
@@ -37,23 +37,25 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
        
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM far_orden_ingreso AS OI" . $where_usr;
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_ingreso AS OI
+            INNER JOIN far_orden_ingreso_tipo AS OITP ON (OITP.id_tipo_ingreso=OI.id_tipo_ingreso)" . $where_usr;
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(*) AS total FROM far_orden_ingreso AS OI" . $where;
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_ingreso AS OI
+            INNER JOIN far_orden_ingreso_tipo AS OITP ON (OITP.id_tipo_ingreso=OI.id_tipo_ingreso)" . $where;
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT OI.*,TE.nom_tercero,
-                SO.id_sede AS id_sede_origen,SO.nom_sede AS nom_sede_origen,
-                BO.id_bodega AS id_bodega_origen,BO.nombre AS nom_bodega_origen
+                SO.nom_sede,BO.nombre AS nom_bodega
             FROM far_orden_ingreso AS OI
             INNER JOIN tb_terceros AS TE ON (TE.id_tercero = OI.id_provedor)
+            INNER JOIN far_orden_ingreso_tipo AS OITP ON (OITP.id_tipo_ingreso=OI.id_tipo_ingreso)
             INNER JOIN tb_sedes AS SO ON (SO.id_sede = OI.id_sede)
             INNER JOIN far_bodegas AS BO ON (BO.id_bodega = OI.id_bodega)"
             . $where . " ORDER BY $col $dir $limit";
@@ -74,11 +76,12 @@ if (!empty($objs)) {
             "num_ingreso" => $obj['num_ingreso'],
             "fec_ingreso" => $obj['fec_ingreso'],
             "detalle" => $obj['detalle'],
+            "id_provedor" => $obj['id_provedor'],
             "nom_tercero" => $obj['nom_tercero'],
-            "id_sede_origen" => $obj['id_sede_origen'],
-            "nom_sede_origen" => $obj['nom_sede_origen'],
-            "id_bodega_origen" => $obj['id_bodega_origen'],
-            "nom_bodega_origen" => $obj['nom_bodega_origen'],
+            "id_sede" => $obj['id_sede'],
+            "nom_sede" => $obj['nom_sede'],
+            "id_bodega" => $obj['id_bodega'],
+            "nom_bodega" => $obj['nom_bodega'],
             "botones" => '<div class="text-center centro-vertical">' . $imprimir . '</div>'
         ];
     }

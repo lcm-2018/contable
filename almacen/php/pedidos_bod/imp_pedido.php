@@ -94,7 +94,7 @@ try {
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td colspan="3">Sede y Bodega DE donde se solicita</td>
-            <td colspan="3">Sede y Bodega Proveedora</td>
+            <td colspan="3">Sede y Bodega Proveedor</td>
         </tr>
         <tr>
             <td colspan="2"><?php echo $obj_e['nom_sede_solicita']; ?></td>

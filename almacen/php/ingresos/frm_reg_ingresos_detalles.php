@@ -55,16 +55,24 @@ if (empty($obj)) {
             <form id="frm_reg_ingresos_detalles">
                 <input type="hidden" id="id_detalle" name="id_detalle" value="<?php echo $id ?>">
                 <div class=" form-row">
-                    <div class="form-group col-md-9">
+                    <div class="form-group col-md-8">
                         <label for="txt_nom_art" class="small">Articulo</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly">
+                        <input type="text" id="id_txt_nom_art" name="id_txt_nom_art" value="<?php echo $obj['id_med'] ?>">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label for="sl_lote_art" class="small">Lote</label>
-                        <select class="form-control form-control-sm" id="sl_lote_art" name="sl_lote_art">
-                            <?php lotes_articulo($cmd, $id_bodega, $obj['id_med'], $obj['id_lote']) ?>
-                        </select>
-                    </div>
+                        <div class=" form-row">
+                            <div class="form-group col-md-9">
+                                <select class="form-control form-control-sm" id="sl_lote_art" name="sl_lote_art">
+                                    <?php lotes_articulo($cmd, $id_bodega, $obj['id_med'], $obj['id_lote']) ?>
+                                </select>                    
+                                </div>                                    
+                            <div class="form-group col-md-3">    
+                                <button type="button" class="btn btn-primary btn-sm" id="btn_nuevo_lote">Nuevo</button>                        
+                            </div>    
+                        </div>
+                    </div>    
                     <div class="form-group col-md-10">
                         <label for="txt_pre_lot" class="small">Unidad de Medida de Presentación del Lote</label>
                         <input type="text" class="form-control form-control-sm" id="txt_pre_lot" value="<?php echo $obj['nom_presentacion'] ?>">

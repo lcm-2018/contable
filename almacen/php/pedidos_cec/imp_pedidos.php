@@ -106,7 +106,7 @@ try {
                 <th rowspan="2">Hora Pedido</th>
                 <th rowspan="2">Detalle</th>
                 <th rowspan="2">Dependencia</th>
-                <th colspan="2">Unidad Proveedora A donde se solicita</th>
+                <th colspan="2">Unidad Proveedor</th>
                 <th rowspan="2">Valor Total</th>
                 <th rowspan="2">Estado</th>
             </tr>

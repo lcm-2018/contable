@@ -351,7 +351,7 @@
             $('#divMsgError').html('Los datos resaltados son obligatorios');
         } else {
 
-            if (!verifica_valmin($('#txt_can_gru'), 2, "El valor de la Cantidad en la Unidad debe ser mayor a 1")) {
+            if (!verifica_valmin($('#txt_can_lote'), 1, "El valor de la Cantidad en la Unidad debe ser mayor a 1")) {
 
                 var data = $('#frm_reg_articulos_lotes').serialize();
                 $.ajax({

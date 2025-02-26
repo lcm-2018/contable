@@ -14,7 +14,7 @@ $fecha_sis = date('Y-m-d');
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h7 style="color: white;">INGRESOS DE ALMACEN</h7>
+            <h7 style="color: white;">INGRESOS DE ALMACEN POR FIANZA</h7>
         </div>
         <div class="px-2">
 
@@ -38,13 +38,14 @@ $fecha_sis = date('Y-m-d');
                 </div>
             </form>
             <div style="height:400px" class="overflow-auto"> 
-                <table id="tb_ingresos_tra" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                <table id="tb_ingresos_fz" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                     <thead>
                         <tr class="text-center centro-vertical">
                             <th>Id</th>
                             <th>No. Ingreso</th>
                             <th>Fecha Ingreso</th>
                             <th>Detalle</th> 
+                            <th>Id.Proveedor</th> 
                             <th>Proveedor</th> 
                             <th>Id.Sede</th>
                             <th>Sede</th>
@@ -66,7 +67,7 @@ $fecha_sis = date('Y-m-d');
 <script>
     (function($) {
         $(document).ready(function() {
-            $('#tb_ingresos_tra').DataTable({
+            $('#tb_ingresos_fz').DataTable({
                 language: setIdioma,
                 processing: true,
                 serverSide: true,
@@ -87,18 +88,19 @@ $fecha_sis = date('Y-m-d');
                     { 'data': 'num_ingreso' },
                     { 'data': 'fec_ingreso' },                    
                     { 'data': 'detalle'  },
+                    { 'data': 'id_provedor'  },
                     { 'data': 'nom_tercero'  },
-                    { 'data': 'id_sede_origen'  },
-                    { 'data': 'nom_sede_origen'  },
-                    { 'data': 'id_bodega_origen'  },
-                    { 'data': 'nom_bodega_origen'  },
+                    { 'data': 'id_sede'  },
+                    { 'data': 'nom_sede'  },
+                    { 'data': 'id_bodega'  },
+                    { 'data': 'nom_bodega'  },
                     { 'data': 'botones'  }
                 ],
                 columnDefs: [
-                    { class: 'text-wrap', targets: [3,4] },
-                    { width: '5%', targets: [0,1,2,6,8] },
-                    { visible: false, targets: [5,7] },
-                    { orderable: false, targets: 9 }
+                    { class: 'text-wrap', targets: [3,5] },
+                    { width: '5%', targets: [0,1,2,7,9] },
+                    { visible: false, targets: [4,6,8] },
+                    { orderable: false, targets: 10 }
                 ],
                 order: [
                     [0, "desc"]
@@ -114,17 +116,17 @@ $fecha_sis = date('Y-m-d');
 
     //Buascar registros de articulos 
     $('#btn_buscar_ing_fil').on("click", function() {
-        reloadtable('tb_ingresos_tra');
+        reloadtable('tb_ingresos_fz');
     });
 
     $('.filtro_ing').keypress(function(e) {
         if (e.keyCode == 13) {
-            reloadtable('tb_ingresos_tra');
+            reloadtable('tb_ingresos_fz');
         }
     });
 
     $('.filtro_ing').mouseup(function(e) {
-        reloadtable('tb_ingresos_tra');
+        reloadtable('tb_ingresos_fz');
     });
     
 </script>

@@ -97,16 +97,6 @@ try {
                     } else {
                         $res['mensaje'] = $cmd->errorInfo()[2];
                     }
-                    
-                    if ($res['mensaje'] == 'ok'){
-                        $sql = "SELECT COUNT(*) AS total  FROM far_traslado_detalle WHERE id_traslado=$id_traslado";
-                        $rs = $cmd->query($sql);
-                        $obj_det = $rs->fetch();
-                        if ($obj_det['total'] == 0){
-                            $sql = "UPDATE far_traslado SET id_ingreso=NULL WHERE id_traslado=$id_traslado";
-                            $rs = $cmd->query($sql);
-                        }
-                    }
                 }    
 
                 if ($res['mensaje'] == 'ok') {

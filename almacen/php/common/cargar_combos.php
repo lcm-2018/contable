@@ -396,11 +396,12 @@ function lotes_articulo($cmd, $id_bodega, $id_articulo, $id = 0)
                 INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
                 WHERE (far_medicamento_lote.id_med=$id_articulo AND far_medicamento_lote.id_bodega=$id_bodega AND 
                         far_medicamento_lote.estado=1 AND far_medicamentos.estado=1 AND
-                        far_medicamento_lote.fec_vencimiento>='" . date('Y-m-d') . "') OR far_medicamento_lote.id_lote=$id";
+                        far_medicamento_lote.fec_vencimiento>='" . date('Y-m-d') . "') OR far_medicamento_lote.id_lote=$id
+                ORDER BY far_medicamento_lote.id_lote DESC";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();        
         foreach ($objs as $obj) {
-            $dtad = $dtad = 'data-nom_articulo="' . $obj['nom_articulo'] . '"' . 
+            $dtad = 'data-nom_articulo="' . $obj['nom_articulo'] . '"' . 
                     'data-id_presentacion="' . $obj['id_presentacion'] . '"' .
                     'data-nom_presentacion="' . $obj['nom_presentacion'] . '"' .
                     'data-cantidad_umpl="' . $obj['cantidad_umpl'] . '"' .

@@ -7,11 +7,20 @@
                     let id_egreso = $('#id_egreso').val();
                     let table = $('#tb_egresos_detalles').DataTable();
                     let filas = table.rows().count();
+                    let es_conpedido = $('#sl_tip_egr').find('option:selected').attr('data-conpedido');
+                    let es_devfianza = $('#sl_tip_egr').find('option:selected').attr('data-devfianza');
                     let id_pedido = $('#txt_id_pedido').val();
+                    let id_ingreso = $('#txt_id_ingreso').val();
 
-                    if (id_egreso == -1 || id_pedido && filas == 0) {
+                    if (id_egreso == -1 || es_conpedido == 1 && filas == 0 && id_pedido || es_devfianza == 1 && filas == 0 && id_ingreso) {
                         $('#divModalError').modal('show');
                         $('#divMsgError').html('Primero debe guardar la Orden de Egreso');
+                    } else if (es_conpedido == 1 && !id_pedido) {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html('Debe seleccionar un Número de Pedido');
+                    } else if (es_devfianza == 1 && !id_ingreso) {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html('Debe seleccionar un Número de Orden de Ingreso Fianza');
                     } else {
                         $.post("../common/buscar_lotes_frm.php", {
                             id_sede: $('#sl_sede_egr').val(),
@@ -65,16 +74,26 @@
         }).on('draw', function() {
             let table = $('#tb_egresos_detalles').DataTable();
             let rows = table.rows({ filter: 'applied' }).count();
+            let es_conpedido = $('#sl_tip_egr').find('option:selected').attr('data-conpedido');
+            let es_devfianza = $('#sl_tip_egr').find('option:selected').attr('data-devfianza');
             if (rows > 0) {
                 $('#sl_sede_egr').prop('disabled', true);
                 $('#sl_bodega_egr').prop('disabled', true);
                 $('#txt_des_pedido').prop('disabled', true);
                 $('#btn_cancelar_pedido').prop('disabled', true);
+                $('#txt_des_ingreso').prop('disabled', true);
+                $('#btn_cancelar_ingreso').prop('disabled', true);
+                $('#sl_tip_egr').prop('disabled', true);
             } else {
-                $('#sl_sede_egr').prop('disabled', false);
-                $('#sl_bodega_egr').prop('disabled', false);
                 $('#txt_des_pedido').prop('disabled', false);
                 $('#btn_cancelar_pedido').prop('disabled', false);
+                $('#txt_des_ingreso').prop('disabled', false);
+                $('#btn_cancelar_ingreso').prop('disabled', false);
+                if (es_conpedido != 1 && es_devfianza != 1 || es_conpedido == 1 && $('#txt_id_pedido').val() == '' || es_devfianza == 1 && $('#txt_id_ingreso').val() == '') {
+                    $('#sl_sede_egr').prop('disabled', false);
+                    $('#sl_bodega_egr').prop('disabled', false);
+                    $('#sl_tip_egr').prop('disabled', false);
+                }
             }
         });
 

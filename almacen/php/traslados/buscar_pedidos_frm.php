@@ -28,7 +28,7 @@ $fecha_sis = date('Y-m-d');
                         <input type="date" class="filtro_ped form-control form-control-sm" id="txt_fecini_fil" name="txt_fecini_fil" placeholder="Fecha Inicial">
                     </div>
                     <div class="form-group col-md-3">
-                        <input type="date" class="filtro_ped form-control form-control-sm" id="txt_fecfin_fil" name="txt_fecfin_fil" placeholder="Fecha Final" value="<?php echo $fecha_sis ?>">
+                        <input type="date" class="filtro_ped form-control form-control-sm" id="txt_fecfin_fil" name="txt_fecfin_fil" placeholder="Fecha Final">
                     </div> 
                     <div class="form-group col-md-2">
                         <a type="button" id="btn_buscar_ped_fil" class="btn btn-outline-success btn-sm" title="Filtrar">

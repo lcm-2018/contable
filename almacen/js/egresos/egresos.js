@@ -112,9 +112,23 @@
     });
 
     /* ---------------------------------------------------
-    EGRESO EN BASE A UN PEDIDO
+    EGRESO EN BASE A UN PEDIDO O EN BASE A UN INGRESO
     -----------------------------------------------------*/
-    //Seleccionar un Pedido para hacer el traslado
+    // Selecciono el tipo de Egreso
+    $('#divForms').on("change", "#sl_tip_egr", function() {
+        let es_conpedido = $('#sl_tip_egr').find('option:selected').attr('data-conpedido');
+        let es_devfianza = $('#sl_tip_egr').find('option:selected').attr('data-devfianza');
+        $('#divConPedido').hide();
+        $('#divDevFianza').hide();
+        if (es_conpedido == 1) {
+            $('#divConPedido').show();
+        } else if (es_devfianza == 1) {
+            $('#divDevFianza').show();
+        }
+    });
+
+    //--------------------------------------------------------
+    //Seleccionar un Pedido para hacer el egreso
     $('#divForms').on("dblclick", "#txt_des_pedido", function() {
         $.post("buscar_pedidos_frm.php", function(he) {
             $('#divTamModalBus').removeClass('modal-sm');
@@ -131,6 +145,7 @@
         $('#txt_des_pedido').val(data.detalle + '(' + data.fec_pedido + ')');
 
         if (data.id_pedido) {
+            $('#sl_tip_egr').prop('disabled', true);
             $('#sl_sede_egr').val(data.id_sede).prop('disabled', true);
             $('#id_sede_egr').val(data.id_sede);
             $('#sl_bodega_egr').load('../common/cargar_bodegas_usuario.php', { id_sede: data.id_sede }, function() {
@@ -142,6 +157,7 @@
         $('#divModalBus').modal('hide');
     });
 
+    //Imprimit el Pedido desde la datatable
     $('#divModalBus').on('click', '#tb_pedidos_egr .btn_imprimir', function() {
         let id = $(this).attr('value');
         $.post("../pedidos_cec/imp_pedido.php", { id: id }, function(he) {
@@ -157,6 +173,7 @@
         let table = $('#tb_egresos_detalles').DataTable();
         let filas = table.rows().count();
         if (filas == 0) {
+            $('#sl_tip_egr').prop('disabled', false);
             $('#txt_id_pedido').val('');
             $('#txt_des_pedido').val('');
             $('#sl_sede_egr').prop('disabled', false);
@@ -164,11 +181,79 @@
         }
     });
 
-    //Imprimit el Pedido
+    //Imprimit el Pedido desde el formulario 
     $('#divForms').on("click", "#btn_imprime_pedido", function() {
         let id = $('#txt_id_pedido').val();
         if (id) {
             $.post("../pedidos_cec/imp_pedido.php", { id: id }, function(he) {
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
+            });
+        }
+    });
+
+    //--------------------------------------------------------
+    //Seleccionar un Ingreso Fianza para hacer el egreso
+    $('#divForms').on("dblclick", "#txt_des_ingreso", function() {
+        $.post("buscar_ingresos_frm.php", function(he) {
+            $('#divTamModalBus').removeClass('modal-sm');
+            $('#divTamModalBus').removeClass('modal-lg');
+            $('#divTamModalBus').addClass('modal-xl');
+            $('#divModalBus').modal('show');
+            $("#divFormsBus").html(he);
+        });
+    });
+
+    $('#divModalBus').on('dblclick', '#tb_ingresos_fz tr', function() {
+        let data = $('#tb_ingresos_fz').DataTable().row(this).data();
+        $('#txt_id_ingreso').val(data.id_ingreso);
+        $('#txt_des_ingreso').val(data.detalle + '(' + data.fec_ingreso + ')');
+
+        if (data.id_ingreso) {
+            $('#sl_tip_egr').prop('disabled', true);
+            $('#sl_sede_egr').val(data.id_sede).prop('disabled', true);
+            $('#id_sede_egr').val(data.id_sede);
+            $('#sl_bodega_egr').load('../common/cargar_bodegas_usuario.php', { id_sede: data.id_sede }, function() {
+                $(this).val(data.id_bodega).prop('disabled', true);
+                $('#id_bodega_egr').val(data.id_bodega);
+            });
+            $('#sl_tercero').val(data.id_provedor);
+        }
+        $('#divModalBus').modal('hide');
+    });
+
+    //Imprimit el Ingreso desde la datatable
+    $('#divModalBus').on('click', '#tb_ingresos_fz .btn_imprimir', function() {
+        let id = $(this).attr('value');
+        $.post("../ingresos/imp_ingreso.php", { id: id }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
+
+    $('#divForms').on("click", "#btn_cancelar_ingreso", function() {
+        let table = $('#tb_egresos_detalles').DataTable();
+        let filas = table.rows().count();
+        if (filas == 0) {
+            $('#sl_tip_egr').prop('disabled', false);
+            $('#txt_id_ingreso').val('');
+            $('#txt_des_ingreso').val('');
+            $('#sl_sede_egr').prop('disabled', false);
+            $('#sl_bodega_egr').prop('disabled', false);
+        }
+    });
+
+    //Imprimit el Ingreso desde el formulario 
+    $('#divForms').on("click", "#btn_imprime_ingreso", function() {
+        let id = $('#txt_id_ingreso').val();
+        if (id) {
+            $.post("../ingresos/imp_ingreso.php", { id: id }, function(he) {
                 $('#divTamModalImp').removeClass('modal-sm');
                 $('#divTamModalImp').removeClass('modal-lg');
                 $('#divTamModalImp').addClass('modal-xl');
@@ -191,6 +276,10 @@
         $('#id_bodega_egr').val($('#sl_bodega_egr').val());
     });
 
+    $('#divForms').on("change", "#sl_tip_egr", function() {
+        $('#id_tip_egr').val($('#sl_tip_egr').val());
+    });
+
     $('#divForms').on("change", "#sl_centrocosto", function() {
         $('#sl_area').load('../common/cargar_areas_centrocosto.php', { id_centrocosto: $(this).val() }, function() {});
     });
@@ -208,10 +297,21 @@
     //Guardar registro Egreso
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
-        var error = verifica_vacio($('#sl_sede_egr'));
+        let es_conpedido = $('#sl_tip_egr').find('option:selected').attr('data-conpedido');
+        let es_devfianza = $('#sl_tip_egr').find('option:selected').attr('data-devfianza');
+        let es_intext = $('#sl_tip_egr').find('option:selected').attr('data-intext');
+
+        let error = verifica_vacio($('#sl_sede_egr'));
+
         error += verifica_vacio($('#sl_bodega_egr'));
         error += verifica_vacio($('#sl_tip_egr'));
-        if ($('#sl_tip_egr').find('option:selected').attr('data-intext') == 2) {
+        if (es_conpedido == 1) {
+            error += verifica_vacio($('#txt_des_pedido'));
+        }
+        if (es_devfianza == 1) {
+            error += verifica_vacio($('#txt_des_ingreso'));
+        }
+        if (es_intext == 2) {
             error += verifica_vacio($('#sl_tercero'));
         } else {
             error += verifica_vacio($('#sl_centrocosto'));
@@ -225,18 +325,29 @@
             let table = $('#tb_egresos_detalles').DataTable();
             let filas = table.rows().count();
             let id_pedido = $('#txt_id_pedido').val();
+            let id_ingreso = $('#txt_id_ingreso').val();
 
-            if (id_pedido && filas == 0) {
-                confirmar_proceso_msg('egreso_pedido', 'Desea Generar el Egreso en base al Pedido ' + id_pedido);
+            if (es_conpedido == 1 && filas == 0 && id_pedido) {
+                confirmar_proceso_msg('egreso_gen', 'Desea Generar el Egreso en base al Pedido ' + id_pedido);
+            } else if (es_devfianza == 1 && filas == 0 && id_ingreso) {
+                confirmar_proceso_msg('egreso_gen', 'Desea Generar el Egreso en base a la Orden de Ingreso Fianza ' + id_ingreso);
             } else {
                 guardar_egreso(0);
             }
         }
     });
 
-    $('#divModalConfDel').on("click", "#egreso_pedido", function() {
+    $('#divModalConfDel').on("click", "#egreso_gen", function() {
         $('#divModalConfDel').modal('hide');
-        guardar_egreso(1);
+        let es_conpedido = $('#sl_tip_egr').find('option:selected').attr('data-conpedido');
+        let es_devfianza = $('#sl_tip_egr').find('option:selected').attr('data-devfianza');
+        let generar = 0;
+        if (es_conpedido == 1) {
+            generar = 1;
+        } else if (es_devfianza == 1) {
+            generar = 2;
+        }
+        guardar_egreso(generar);
     });
 
     function guardar_egreso(generar_egreso) {
@@ -251,7 +362,7 @@
                 let pag = ($('#id_egreso').val() == -1) ? 0 : $('#tb_egresos').DataTable().page.info().page;
                 reloadtable('tb_egresos', pag);
 
-                if (generar_egreso == 1) {
+                if (generar_egreso == 1 || generar_egreso == 2) {
                     reloadtable('tb_egresos_detalles');
                     $('#txt_val_tot').val(r.val_total);
                 }

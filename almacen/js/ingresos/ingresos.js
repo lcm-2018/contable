@@ -180,6 +180,11 @@
     /* ---------------------------------------------------
     ENCABEZADO DE UN INGRESO
     -----------------------------------------------------*/
+
+    $('#divForms').on("change", "#sl_tip_ing", function() {
+        $('#id_tip_ing').val($('#sl_tip_ing').val());
+    });
+
     //Editar un registro Orden Ingreso
     $('#tb_ingresos').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');
@@ -203,7 +208,7 @@
             error += verifica_vacio($('#sl_tercero'));
         }
         if ($('#sl_tip_ing').find('option:selected').attr('data-ordcom') == 1) {
-            error += verifica_vacio($('#txt_id_pedido'));
+            error += verifica_vacio($('#txt_des_pedido'));
         }
 
         error += verifica_vacio($('#txt_det_ing'));
@@ -493,7 +498,83 @@
         });
     });
 
-    //Imprimir listado de registros
+    /* ---------------------------------------------------
+    CREAR UN NUEVO LOTE
+    -----------------------------------------------------*/
+    $('#divFormsReg').on("click", "#btn_nuevo_lote", function() {
+        $.post("../articulos/frm_reg_articulos_lotes.php", { id_articulo: $('#id_txt_nom_art').val() }, function(he) {
+            $('#divTamModalAux').removeClass('modal-xl');
+            $('#divTamModalAux').removeClass('modal-sm');
+            $('#divTamModalAux').addClass('modal-lg');
+            $('#divModalAux').modal('show');
+            $("#divFormsAux").html(he);
+        });
+    })
+
+    // Autocompletar Presentacion de Lote
+    $('#divFormsAux').on("input", "#txt_pre_lote", function() {
+        $(this).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "../common/cargar_prescomercial_ls.php",
+                    dataType: "json",
+                    type: 'POST',
+                    data: { term: request.term }
+                }).done(function(data) {
+                    response(data);
+                });
+            },
+            minLength: 2,
+            select: function(event, ui) {
+                $('#id_txt_pre_lote').val(ui.item.id);
+                $('#txt_can_lote').val(ui.item.cantidad);
+            }
+        });
+    });
+
+    //Guardar registro LOTE
+    $('#divFormsAux').on("click", "#btn_guardar_lote", function() {
+        $('.is-invalid').removeClass('is-invalid');
+
+        var error = verifica_vacio_2($('#id_txt_nom_bod'), $('#txt_nom_bod'));
+        error += verifica_vacio($('#txt_num_lot'));
+        error += verifica_vacio($('#txt_fec_ven'));
+        error += verifica_vacio($('#sl_estado_lot'));
+
+        if (error >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Los datos resaltados son obligatorios');
+        } else if (!verifica_valmin($('#txt_can_lote'), 1, "El valor de la Cantidad en la Unidad debe ser mayor a 1")) {
+            var data = $('#frm_reg_articulos_lotes').serialize();
+            $.ajax({
+                url: '../articulos/editar_articulos_lotes.php',
+                type: 'POST',
+                dataType: 'json',
+                data: data + "&id_articulo=" + $('#id_txt_nom_art').val() + "&oper=add"
+            }).done(function(r) {
+                if (r.mensaje == 'ok') {
+                    $('#sl_lote_art').load('../common/cargar_lotes_articulo.php', {
+                        id_articulo: $('#id_txt_nom_art').val(),
+                        id_bodega: $('#id_txt_nom_bod').val()
+                    }, function() {});
+
+                    $('#divModalAux').modal('hide');
+                    $('#divModalDone').modal('show');
+                    $('#divMsgDone').html("Proceso realizado con éxito");
+                } else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r.mensaje);
+                }
+            }).always(function() {}).fail(function() {
+                alert('Ocurrió un error');
+            });
+        }
+    });
+
+    /* ---------------------------------------------------
+    IMPRIMIR REGISTROS
+    -----------------------------------------------------*/
+    //Imprimir los registros filtrados
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_ingresos');
         $('.is-invalid').removeClass('is-invalid');
@@ -522,7 +603,7 @@
         }
     });
 
-    //Imprimit una Orden de Ingreso
+    //Imprimit un registro 
     $('#divForms').on("click", "#btn_imprimir", function() {
         $.post("imp_ingreso.php", {
             id: $('#id_ingreso').val()

@@ -13,7 +13,7 @@
 
                     if (id_traslado == -1 || tipo == 1 && filas == 0 && id_pedido || tipo == 2 && filas == 0 && id_ingreso) {
                         $('#divModalError').modal('show');
-                        $('#divMsgError').html('Primero debe guardar la Orden de Egreso');
+                        $('#divMsgError').html('Primero debe guardar el Traslado');
                     } else if (tipo == 1 && !id_pedido) {
                         $('#divModalError').modal('show');
                         $('#divMsgError').html('Debe seleccionar un Número de Pedido');
@@ -84,12 +84,12 @@
                 $('#sl_sede_destino').prop('disabled', true);
                 $('#sl_bodega_destino').prop('disabled', true);
             } else {
-                $('#sl_tip_traslado').prop('disabled', false);
                 $('#txt_des_pedido').prop('disabled', false);
                 $('#btn_cancelar_pedido').prop('disabled', false);
                 $('#txt_des_ingreso').prop('disabled', false);
                 $('#btn_cancelar_ingreso').prop('disabled', false);
                 if (!$('#sl_tip_traslado').val() || $('#sl_tip_traslado').val() == 1 && $('#txt_id_pedido').val() == '' || $('#sl_tip_traslado').val() == 2 && $('#txt_id_ingreso').val() == '') {
+                    $('#sl_tip_traslado').prop('disabled', false);
                     $('#sl_sede_origen').prop('disabled', false);
                     $('#sl_bodega_origen').prop('disabled', false);
                     $('#sl_sede_destino').prop('disabled', false);

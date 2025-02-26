@@ -32,22 +32,13 @@ try {
             $id_sede = $_POST['id_txt_sede'];
             $fec_ing = $_POST['txt_fec_ing'];
             $hor_ing = $_POST['txt_hor_ing'];
+            $id_tiping = $_POST['id_tip_ing'];
+            $id_pedido = $_POST['txt_id_pedido'];        
             $num_fac = $_POST['txt_num_fac'];
-            $fec_fac = $_POST['txt_fec_fac'];            
+            $fec_fac = $_POST['txt_fec_fac'];                  
             $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;            
             $detalle = $_POST['txt_det_ing'];
 
-            //Verifica si los datos estas activos o bloqueados en el formulario
-            if (isset($_POST['sl_tip_ing'])){
-                $id_tiping = $_POST['sl_tip_ing'];
-                $id_pedido = $_POST['txt_id_pedido'];    
-            }else{
-                $sql = "SELECT id_tipo_ingreso,id_pedido FROM far_orden_ingreso WHERE id_ingreso=" . $id;
-                $rs = $cmd->query($sql);
-                $obj_ingreso = $rs->fetch();
-                $id_tiping = $obj_ingreso['id_tipo_ingreso'];
-                $id_pedido = $obj_ingreso['id_pedido'];    
-            }
             $sql = "SELECT orden_compra FROM far_orden_ingreso_tipo WHERE id_tipo_ingreso=" . $id_tiping;
             $rs = $cmd->query($sql);
             $obj_tiping = $rs->fetch();

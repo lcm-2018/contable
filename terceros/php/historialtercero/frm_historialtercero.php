@@ -13,7 +13,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_tercero = isset($_POST['idt']) ? $_POST['idt'] : -1;
 
-/////drilocoquito vuelve a consultar los datos del tercero con el id que viene del boton
+// se vuelve a consultar los datos del tercero con el id que viene del boton
 //------------------------------------
 $sql = "SELECT tb_terceros.id_tercero_api,tb_terceros.nom_tercero
         FROM tb_terceros 
@@ -30,6 +30,7 @@ $obj = $rs->fetch();
         <div class="px-2">
             <form id="frm_historialtercero">
                 <input type="hidden" id="id_tercero" name="id_tercero" value="<?php echo $id_tercero ?>">
+                <input type="hidden" id="id_cdp" name="id_cdp">
                 <div class=" form-row">
                     <div class="form-group col-md-4">
                         <label for="txt_tercero_filtro" class="small">Tercero</label>
@@ -56,20 +57,20 @@ $obj = $rs->fetch();
                     </div>
                 </div>
 
-                <div class=" form-row">
-                    <table id="tb_terceros" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                <div class=" w-100 text-left">
+                    <table id="tb_cdps" class="table table-striped table-bordered table-sm nowrap table-hover shadow w-100" style="width:100%; font-size:80%">
                         <thead>
                             <tr class="text-center centro-vertical">
-                                <th>Id</th>
-                                <th>Numero</th>
-                                <th>Rp</th>
+                                <th>Id CDP</th>
+                                <th>Documento</th>
                                 <th>Fecha</th>
-                                <th>Tercero</th>
-                                <th>Valor</th>
+                                <th style="min-width: 70%;">Objeto</th>
+                                <th>Valor CDP</th>
+                                <th>Saldo</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="text-left centro-vertical"></tbody>
+                        <tbody class="text-left centro-vertical" id="body_tb_cdps"></tbody>
                     </table>
                 </div>
             </form>
@@ -85,18 +86,19 @@ $obj = $rs->fetch();
                     </div>
                 </nav>
 
-                <div class="tab-content pt-2" id="nav-tabContent">
+                <div class="tab-content pt-2 w-100 text-left" id="nav-tabContent">
                     <!--Lista de contratacion-->
                     <div class="tab-pane fade show active" id="nav_lista_contratacion" role="tabpanel" aria-labelledby="nav_lista_contratacion-tab">
-                        <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                        <table id="tb_contratos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
-                                    <th>Id</th>
-                                    <th>Cuenta contable</th>
-                                    <th>Fecha inicio de vigencia</th>
-                                    <th>Cuenta vigente</th>
+                                    <th>No Contrato</th>
+                                    <th>Fecha Ini</th>
+                                    <th>Fecha fin</th>
+                                    <th>Valor contrato</th>
+                                    <th>Adiciones</th>
+                                    <th>Reducciones</th>
                                     <th>Estado</th>
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
@@ -105,68 +107,53 @@ $obj = $rs->fetch();
 
                     <!--Lista de reg presupuestal-->
                     <div class="tab-pane fade" id="nav_lista_regpresupuestal" role="tabpanel" aria-labelledby="nav_lista_regpresupuestal-tab">
-                        <!--<table id="tb_articulos_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                        <table id="tb_reg_presupuestal" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
-                                    <th>Id</th>
-                                    <th>Lote</th>
-                                    <th>Principal</th>                                    
-                                    <th>Fecha<br>Vencimiento</th>                                    
-                                    <th>Presentación del Lote</th>
-                                    <th>Unidades en UMPL</th>
-                                    <th>Existencia</th>
-                                    <th>CUM</th>
-                                    <th>Bodega</th>
+                                    <th>No Registro</th>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>   
+                                    <th>No Contrato</th>                                 
+                                    <th>Valor registro</th>                                    
+                                    <th>Saldo</th>
                                     <th>Estado</th>
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
-                        </table>-->
+                        </table>
                     </div>
 
                     <!--Lista de obligaciones-->
                     <div class="tab-pane fade" id="nav_lista_obligaciones" role="tabpanel" aria-labelledby="nav_lista_obligaciones-tab">
-                        <!--<table id="tb_articulos_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                        <table id="tb_obligaciones" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
-                                    <th>Id</th>
-                                    <th>Lote</th>
-                                    <th>Principal</th>                                    
-                                    <th>Fecha<br>Vencimiento</th>                                    
-                                    <th>Presentación del Lote</th>
-                                    <th>Unidades en UMPL</th>
-                                    <th>Existencia</th>
-                                    <th>CUM</th>
-                                    <th>Bodega</th>
+                                    <th>No causacion</th>
+                                    <th>Fecha</th>
+                                    <th>Soporte</th>                                    
+                                    <th>Valor causado</th>                                    
+                                    <th>Descuentos</th>
+                                    <th>Neto</th>
                                     <th>Estado</th>
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
-                        </table>-->
+                        </table>
                     </div>
 
                     <!--Lista de pagos-->
                     <div class="tab-pane fade" id="nav_lista_pagos" role="tabpanel" aria-labelledby="nav_lista_pagos-tab">
-                        <!--<table id="tb_articulos_lotes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                        <table id="tb_pagos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
-                                    <th>Id</th>
-                                    <th>Lote</th>
-                                    <th>Principal</th>                                    
-                                    <th>Fecha<br>Vencimiento</th>                                    
-                                    <th>Presentación del Lote</th>
-                                    <th>Unidades en UMPL</th>
-                                    <th>Existencia</th>
-                                    <th>CUM</th>
-                                    <th>Bodega</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th>Consecutivo</th>
+                                    <th>Fecha</th>
+                                    <th style="min-width: 70%;">Detalle</th>                                    
+                                    <th>Valor pagado</th>                                    
                                 </tr>
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
-                        </table>-->
+                        </table>
                     </div>
                 </div>
             </div>
@@ -174,7 +161,7 @@ $obj = $rs->fetch();
         </div>
     </div>
     <div class="text-center pt-3">
-        <button type="button" class="btn btn-primary btn-sm" id="btn_guardar">Guardar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir">Imprimir</button>
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>

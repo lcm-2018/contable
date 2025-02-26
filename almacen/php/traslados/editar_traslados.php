@@ -103,8 +103,8 @@ try {
                                 WHERE id_med=:id_med AND existencia>=0 AND id_bodega=$id_bodega_origen AND estado=1 AND fec_vencimiento>='$fec_actual' 
                                 ORDER BY fec_vencimiento,existencia";
                         $rs1 = $cmd->prepare($sql);
-                        $lotes = array();
 
+                        $lotes = array();
                         foreach ($objs as $obj) {
                             $rs1->bindParam(':id_med', $obj['id_medicamento']);
                             $rs1->execute();
@@ -165,9 +165,9 @@ try {
                             }    
                         }  
 
-                    } if($generar_traslado == 2){
-                        $id_ingreso = $_POST['txt_id_ingreso'];
+                    } else if($generar_traslado == 2){
 
+                        $id_ingreso = $_POST['txt_id_ingreso'];
                         $sql = "INSERT INTO far_traslado_detalle(id_traslado,id_lote_origen,cantidad,valor) 
                                 SELECT $id_traslado,ID.id_lote,ID.cantidad,FM.val_promedio
                                 FROM far_orden_ingreso_detalle AS ID
