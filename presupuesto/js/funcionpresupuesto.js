@@ -607,7 +607,7 @@
                 dataType: "json",
                 success: function (r) {
                     if (r.status === "ok") {
-                        $('#tableEjecPresupuesto').DataTable().ajax.reload();
+                        $('#tableEjecPresupuesto').DataTable().ajax.reload(null, false);
                         $("#divModalForms").modal("hide");
                         $("#divModalDone").modal("show");
                         $("#divMsgDone").html("Proceso realizado correctamente...");
@@ -1289,7 +1289,7 @@ $('#divModalForms').on('click', '#registrarModificaPto', function () {
             data: datos,
             success: function (r) {
                 if (r == 'ok') {
-                    $('#tableModPresupuesto').DataTable().ajax.reload();
+                    $('#tableModPresupuesto').DataTable().ajax.reload(null, false);
                     $('#divModalForms').modal('hide');
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html('Registrado correctamente');
@@ -1355,7 +1355,7 @@ function CofirmaCdpRp(boton) {
                         boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
                         cant.value = valor - 1;
                         document.getElementById("nCant").innerHTML = valor - 1;
-                        $('#tableEjecPresupuesto').DataTable().ajax.reload();
+                        $('#tableEjecPresupuesto').DataTable().ajax.reload(null, false);
                         $("#divModalForms").modal("hide");
                         mje("Registro exitoso");
                     } else {
@@ -1564,7 +1564,7 @@ function eliminarCrpp(id) {
                 .then((response) => {
                     if (response == "ok") {
                         // Reonlidar la tabla
-                        $("#tableEjecPresupuestoCrp").DataTable().ajax.reload();
+                        $("#tableEjecPresupuestoCrp").DataTable().ajax.reload(null, false);
                         mje("Registro eliminado");
                     } else {
                         mjeError(response);
@@ -1715,7 +1715,7 @@ function RegDetalleMod(boton) {
             .then((response) => response.text())
             .then((response) => {
                 if (response == "ok") {
-                    $('#tableModDetalle').DataTable().ajax.reload();
+                    $('#tableModDetalle').DataTable().ajax.reload(null, false);
                     mje("Proceso realizado correctamente");
                 } else {
                     mjeError(response, "Verifique la información ingresada");
@@ -1797,7 +1797,7 @@ function RegDetalleCDPs(boton) {
                 if (response.status == "ok") {
                     mje("Proceso realizado correctamente");
                     if (opcion == 0) {
-                        $('#tableEjecCdp').DataTable().ajax.reload();
+                        $('#tableEjecCdp').DataTable().ajax.reload(null, false);
                     } else {
                         let id_pto_mod = opcion.split("|")[0];
                         let id_cdp = opcion.split("|")[1];
@@ -1857,7 +1857,7 @@ $('#modificarEjecCdp').on('click', '.borrar', function () {
                 success: function (res) {
                     if (res == 'ok') {
                         mje("Registro eliminado correctamente");
-                        $('#tableEjecCdp').DataTable().ajax.reload();
+                        $('#tableEjecCdp').DataTable().ajax.reload(null, false);
                     } else {
                         mjeError(res, "Error");
                     }
@@ -1908,8 +1908,8 @@ var cerrarMod = function (dato) {
         .then((response) => response.json())
         .then((response) => {
             if (response.status == "ok") {
-                $("#tableModPresupuesto").DataTable().ajax.reload();
-                $("#tableModDetalle").DataTable().ajax.reload();
+                $("#tableModPresupuesto").DataTable().ajax.reload(null, false);
+                $("#tableModDetalle").DataTable().ajax.reload(null, false);
             } else {
                 mjeError("No se puede cerrar documento actual", "--");
             }
@@ -1941,7 +1941,7 @@ function abrirCdp(id) {
         success: function (res) {
             if (res == 'ok') {
                 mje("Documento abierto");
-                $('#tableEjecPresupuesto').DataTable().ajax.reload();
+                $('#tableEjecPresupuesto').DataTable().ajax.reload(null, false);
             } else {
                 mjeError("Documento no abierto", res);
             }
@@ -1956,7 +1956,7 @@ function abrirCrp(id) {
         success: function (res) {
             if (res == 'ok') {
                 mje("Documento abierto");
-                $('#tableEjecPresupuestoCrp').DataTable().ajax.reload();
+                $('#tableEjecPresupuestoCrp').DataTable().ajax.reload(null, false);
             } else {
                 mjeError("Documento no abierto", res);
             }
@@ -2026,7 +2026,7 @@ $('#modificarModDetalle').on('click', '.borrar', function () {
                 .then((response) => {
                     console.log(response);
                     if (response[0].value == "ok") {
-                        $('#tableModDetalle').DataTable().ajax.reload();
+                        $('#tableModDetalle').DataTable().ajax.reload(null, false);
                         mje("Registro eliminado");
                     } else {
                         mjeError("No se puede eliminar el registro");
@@ -2422,7 +2422,7 @@ $("#divForms").on("click", "#btnGestionCRP", function () {
                 dataType: "json",
                 success: function (r) {
                     if (r.status === "ok") {
-                        $('#tableEjecPresupuestoCrp').DataTable().ajax.reload();
+                        $('#tableEjecPresupuestoCrp').DataTable().ajax.reload(null, false);
                         $("#divModalForms").modal("hide");
                         mje("Proceso realizado correctamente");
                     } else {
@@ -2533,7 +2533,7 @@ $('#registrarMovDetalle').on('click', function () {
 $('.btnOptionPto').on('click', function () {
     var id_pto = $(this).attr('value');
     $('#id_pto_movto').val(id_pto);
-    $('#tableModDetalle').DataTable().ajax.reload();
+    $('#tableModDetalle').DataTable().ajax.reload(null, false);
 });
 // Ver historial de CDP para liquidación de saldos sin ejecutar
 const verLiquidarCdp = (id) => {
@@ -2864,7 +2864,7 @@ function changeEstadoAnulacion() {
                                 tabla = "tableEjecPresupuestoCrp";
                             }
                             $('#divModalForms').modal('hide');
-                            $('#' + tabla).DataTable().ajax.reload();
+                            $('#' + tabla).DataTable().ajax.reload(null, false);
                             mje('Proceso realizado correctamente');
                         } else {
                             mjeError('Error:', r);

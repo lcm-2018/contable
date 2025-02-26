@@ -143,7 +143,7 @@
                 success: function (r) {
                     if (r == 'ok') {
                         $('#divModalForms').modal('hide');
-                        $('#tableTipoRetencion').DataTable().ajax.reload();
+                        $('#tableTipoRetencion').DataTable().ajax.reload(null, false);
                         mje('Tipo de retención guardada correctamente');
                     } else {
                         mjeError(r);
@@ -179,7 +179,7 @@
                 success: function (r) {
                     if (r == 'ok') {
                         $('#divModalForms').modal('hide');
-                        $('#tableRetenciones').DataTable().ajax.reload();
+                        $('#tableRetenciones').DataTable().ajax.reload(null, false);
                         mje('Retención guardada correctamente');
                     } else {
                         mjeError(r);
@@ -215,7 +215,7 @@
                 success: function (r) {
                     if (r == 'ok') {
                         $('#divModalForms').modal('hide');
-                        $('#tableRangoRet').DataTable().ajax.reload();
+                        $('#tableRangoRet').DataTable().ajax.reload(null, false);
                         mje('Rango guardado correctamente');
                     } else {
                         mjeError(r);
@@ -244,7 +244,7 @@
             data: { data: data },
             success: function (r) {
                 if (r == 'ok') {
-                    $('#tableTipoRetencion').DataTable().ajax.reload();
+                    $('#tableTipoRetencion').DataTable().ajax.reload(null, false);
                 } else {
                     mjeError(r);
                 }
@@ -259,7 +259,7 @@
             data: { data: data },
             success: function (r) {
                 if (r == 'ok') {
-                    $('#tableRetenciones').DataTable().ajax.reload();
+                    $('#tableRetenciones').DataTable().ajax.reload(null, false);
                 } else {
                     mjeError(r);
                 }
@@ -273,7 +273,7 @@
             data: { data: data },
             success: function (r) {
                 if (r == 'ok') {
-                    $('#tableRangoRet').DataTable().ajax.reload();
+                    $('#tableRangoRet').DataTable().ajax.reload(null, false);
                 } else {
                     mjeError(r);
                 }
@@ -298,7 +298,7 @@
                     data: { id: id },
                     success: function (r) {
                         if (r == 'ok') {
-                            $('#tableTipoRetencion').DataTable().ajax.reload();
+                            $('#tableTipoRetencion').DataTable().ajax.reload(null, false);
                             mje('Registro eliminado correctamente');
                         } else {
                             mjeError(r);
@@ -326,7 +326,7 @@
                     data: { id: id },
                     success: function (r) {
                         if (r == 'ok') {
-                            $('#tableRetenciones').DataTable().ajax.reload();
+                            $('#tableRetenciones').DataTable().ajax.reload(null, false);
                             mje('Registro eliminado correctamente');
                         } else {
                             mjeError(r);
@@ -354,7 +354,7 @@
                     data: { id: id },
                     success: function (r) {
                         if (r == 'ok') {
-                            $('#tableRangoRet').DataTable().ajax.reload();
+                            $('#tableRangoRet').DataTable().ajax.reload(null, false);
                             mje('Registro eliminado correctamente');
                         } else {
                             mjeError(r);

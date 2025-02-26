@@ -40,6 +40,38 @@ try {
             WHERE (`ctb_factura`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
     $facturas = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `far_orden_ingreso`.`id_ingreso`
+                , SUM(`far_orden_ingreso_detalle`.`cantidad` * `far_orden_ingreso_detalle`.`valor_sin_iva`) AS `val_base`
+                , SUM((`far_orden_ingreso_detalle`.`valor_sin_iva` * `far_orden_ingreso_detalle`.`iva`/100)* `far_orden_ingreso_detalle`.`cantidad`) AS `val_iva`
+                , `far_orden_ingreso`.`id_ctb_doc`
+            FROM
+                `ctb_doc`
+                INNER JOIN `pto_crp` 
+                ON (`ctb_doc`.`id_crp` = `pto_crp`.`id_pto_crp`)
+                INNER JOIN `ctt_adquisiciones` 
+                ON (`pto_crp`.`id_cdp` = `ctt_adquisiciones`.`id_cdp`)
+                INNER JOIN `tb_tipo_bien_servicio` 
+                ON (`ctt_adquisiciones`.`id_tipo_bn_sv` = `tb_tipo_bien_servicio`.`id_tipo_b_s`)
+                INNER JOIN `far_alm_pedido` 
+                ON (`ctt_adquisiciones`.`id_orden` = `far_alm_pedido`.`id_pedido`)
+                INNER JOIN `far_orden_ingreso` 
+                ON (`far_orden_ingreso`.`id_pedido` = `far_alm_pedido`.`id_pedido`)
+                INNER JOIN `far_orden_ingreso_detalle` 
+                ON (`far_orden_ingreso_detalle`.`id_ingreso` = `far_orden_ingreso`.`id_ingreso`)
+            WHERE `ctb_doc`.`id_ctb_doc` = $id_doc AND `far_orden_ingreso`.`estado` = 2
+                AND (`tb_tipo_bien_servicio`.`filtro_adq` = 1 OR `tb_tipo_bien_servicio`.`filtro_adq` = 2)
+            GROUP BY `far_orden_ingreso`.`id_ingreso`";
+    $rs = $cmd->query($sql);
+    $ingresos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -135,7 +167,42 @@ if (empty($detalle)) {
             <h5 style="color: white;">LISTA DE FACTURAS DE CUENTA POR PAGAR </h5>
         </div>
         <div class="px-3 py-2">
-            <input type="hidden" id="totFactura" value="<?php echo '15000' ?>">
+            <input type="hidden" id="totFactura" value="<?php echo '0' ?>">
+            <?php
+            if (!empty($ingresos)) {
+            ?>
+                <form id="formIngCausa">
+                    <table id="tableIngresosCausa" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 50%;">
+                        <thead>
+                            <tr>
+                                <th>INGRESO</th>
+                                <th>VALOR BASE</th>
+                                <th>VALOR IVA</th>
+                                <th>VALOR TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            foreach ($ingresos as $ingreso) {
+                                if ($ingreso['id_ctb_doc'] == $id_doc || $ingreso['id_ctb_doc'] == '') {
+                                    $checked = $ingreso['id_ctb_doc'] == $id_doc ? 'checked' : '';
+                                    echo '<tr>';
+                                    echo '<td>
+                                            <input type="checkbox" name="ingreso[]" onclick="PasaValoresFactura(this)"  value="' . $ingreso['id_ingreso'] . '" ' . $checked . '>
+                                        </td>';
+                                    echo '<td class="text-right base">' . pesos($ingreso['val_base']) . '</td>';
+                                    echo '<td class="text-right iva">' . pesos($ingreso['val_iva']) . '</td>';
+                                    echo '<td class="text-right total">' . pesos($ingreso['val_base'] + $ingreso['val_iva']) . '</td>';
+                                    echo '</tr>';
+                                }
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </form>
+            <?php
+            }
+            ?>
             <form id="formFacturaCXP">
                 <input type="hidden" name="id_cta_factura" id="id_cta_factura" value="<?php echo $detalle['id_cta_factura'] ?>">
                 <div class="form-row">

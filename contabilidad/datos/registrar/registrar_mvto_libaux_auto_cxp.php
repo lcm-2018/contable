@@ -167,6 +167,43 @@ try {
                 )";
     $rs = $cmd->query($sqln);
     $ctas_ret = $rs->fetchAll();
+    $sqla = "SELECT
+                SUM(`vl`.`cantidad` * `vl`.`valor_sin_iva`) AS `base`
+                , SUM(`vl`.`cantidad`*`vl`.`valor_sin_iva` * `vl`.`iva`/100) AS `iva`
+                , `vl`.`id_cuenta` 
+            FROM	
+                (SELECT
+                    `far_orden_ingreso_detalle`.`cantidad`
+                    ,`far_orden_ingreso_detalle`.`valor_sin_iva`
+                    , `far_orden_ingreso_detalle`.`iva`
+                    , `far_orden_ingreso_detalle`.`id_ingreso`
+                    , `taux`.`id_cuenta`
+                FROM
+                    `far_orden_ingreso_detalle`
+                    INNER JOIN `far_orden_ingreso` 
+                        ON (`far_orden_ingreso_detalle`.`id_ingreso` = `far_orden_ingreso`.`id_ingreso`)
+                    INNER JOIN `far_medicamento_lote` 
+                        ON (`far_orden_ingreso_detalle`.`id_lote` = `far_medicamento_lote`.`id_lote`)
+                    INNER JOIN `far_medicamentos` 
+                        ON (`far_medicamento_lote`.`id_med` = `far_medicamentos`.`id_med`)
+                    LEFT JOIN `far_subgrupos` 
+                        ON (`far_medicamentos`.`id_subgrupo` = `far_subgrupos`.`id_subgrupo`)
+                    LEFT JOIN
+                        (SELECT 
+                            `id_subgrupo`,`id_cuenta`
+                        FROM `far_subgrupos_cta`
+                        WHERE `id_subgrupo_cta` IN 
+                            (SELECT 
+                                MAX(`id_subgrupo_cta`) 
+                            FROM `far_subgrupos_cta` 
+                            WHERE `fecha_vigencia` <= DATE_FORMAT(NOW(), '%Y-%m-%d') 
+                            GROUP BY `id_subgrupo`)
+                        ) AS `taux`
+                    ON (`taux`.`id_subgrupo` = `far_subgrupos`.`id_subgrupo`)
+                WHERE (`far_orden_ingreso`.`id_ctb_doc` = $id_doc)) AS `vl`
+            GROUP BY `vl`.`id_cuenta`";
+    $rs = $cmd->query($sqla);
+    $ingresos = $rs->fetchAll(PDO::FETCH_ASSOC);
     $credito = 0;
     $acumulador = 0;
     $ref = 0;
@@ -184,17 +221,31 @@ try {
     $query->bindParam(8, $ref, PDO::PARAM_INT);
     $total_debito = 0;
     $total_credito = 0;
-    foreach ($datoscostos as $dc) {
-        $id_tipo_bn_sv = $dc['id_tipo_bn_sv'];
-        $key = array_search($id_tipo_bn_sv, array_column($ctas_debito, 'id_tipo_bn_sv'));
-        $id_cuenta = $key !== false ? $ctas_debito[$key]['id_cuenta'] : NULL;
-        $debito = $dc['valor'];
-        $query->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $total_debito += $debito;
-            $acumulador++;
-        } else {
-            $response['msg'] = $query->errorInfo()[2];
+    if (empty($ingresos)) {
+        foreach ($datoscostos as $dc) {
+            $id_tipo_bn_sv = $dc['id_tipo_bn_sv'];
+            $key = array_search($id_tipo_bn_sv, array_column($ctas_debito, 'id_tipo_bn_sv'));
+            $id_cuenta = $key !== false ? $ctas_debito[$key]['id_cuenta'] : NULL;
+            $debito = $dc['valor'];
+            $query->execute();
+            if ($cmd->lastInsertId() > 0) {
+                $total_debito += $debito;
+                $acumulador++;
+            } else {
+                $response['msg'] = $query->errorInfo()[2];
+            }
+        }
+    } else {
+        foreach ($ingresos as $ingreso) {
+            $id_cuenta = $ingreso['id_cuenta'];
+            $debito = $ingreso['base'] + $ingreso['iva'];
+            $query->execute();
+            if ($cmd->lastInsertId() > 0) {
+                $total_debito += $debito;
+                $acumulador++;
+            } else {
+                $response['msg'] = $query->errorInfo()[2];
+            }
         }
     }
     $debito = 0;
@@ -212,10 +263,23 @@ try {
             $response['msg'] = $query->errorInfo()[2];
         }
     }
-    foreach ($datoscostos as $dc) {
-        $id_tipo_bn_sv = $dc['id_tipo_bn_sv'];
-        $key = array_search($id_tipo_bn_sv, array_column($ctas_credito, 'id_tipo_bn_sv'));
-        $id_cuenta = $key !== false ? $ctas_credito[$key]['id_cuenta'] : NULL;
+    if (empty($ingresos)) {
+        foreach ($datoscostos as $dc) {
+            $id_tipo_bn_sv = $dc['id_tipo_bn_sv'];
+            $key = array_search($id_tipo_bn_sv, array_column($ctas_credito, 'id_tipo_bn_sv'));
+            $id_cuenta = $key !== false ? $ctas_credito[$key]['id_cuenta'] : NULL;
+            $credito = $total_debito - $total_credito;
+            $id_tercero = $id_tercero_ant;
+            $ref = 1;
+            $query->execute();
+            if ($cmd->lastInsertId() > 0) {
+                $acumulador++;
+            } else {
+                $response['msg'] = $query->errorInfo()[2];
+            }
+            break;
+        }
+    } else {
         $credito = $total_debito - $total_credito;
         $id_tercero = $id_tercero_ant;
         $ref = 1;
@@ -225,7 +289,6 @@ try {
         } else {
             $response['msg'] = $query->errorInfo()[2];
         }
-        break;
     }
 } catch (PDOException $e) {
     $response['msg'] = $e->getMessage();

@@ -46,12 +46,14 @@ try {
 try {
     $sql = "SELECT
                 `ctb_causa_costos`.`valor`
-                , `far_centrocosto_area`.`nom_area`
+                , `tb_centrocostos`.`nom_centro` AS `nom_area`
                 , `tb_municipios`.`nom_municipio`
             FROM
                 `ctb_causa_costos`
                 INNER JOIN `far_centrocosto_area` 
                     ON (`ctb_causa_costos`.`id_area_cc` = `far_centrocosto_area`.`id_area`)
+                INNER JOIN `tb_centrocostos`
+		            ON (`tb_centrocostos`.`id_centro` = `far_centrocosto_area`.`id_centrocosto`)
                 INNER JOIN `tb_sedes` 
                     ON (`far_centrocosto_area`.`id_sede` = `tb_sedes`.`id_sede`)
                 INNER JOIN `tb_municipios` 
@@ -450,12 +452,12 @@ $meses = [
                         $key = array_search($rp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
                         if ($rp['tipo_mov'] == 'COP') {
                             echo "<tr>
-                    <td class='text-left' style='border: 1px solid black '>" . $rp['id_manu'] . "</td>
-                    <td class='text-left' style='border: 1px solid black '>" . $terceros[$key]['nit_tercero'] . "</td>
-                    <td class='text-left' style='border: 1px solid black '>" . $rp['rubro'] . "</td>
-                    <td class='text-left' style='border: 1px solid black '>" . $rp['nom_rubro'] . "</td>
-                    <td class='text-right' style='border: 1px solid black; text-align: right'>" . number_format($rp['valor'], 2, ",", ".")  . "</td>
-                    </tr>";
+                                    <td class='text-left' style='border: 1px solid black '>" . $rp['id_manu'] . "</td>
+                                    <td class='text-left' style='border: 1px solid black '>" . $terceros[$key]['nit_tercero'] . "</td>
+                                    <td class='text-left' style='border: 1px solid black '>" . $rp['rubro'] . "</td>
+                                    <td class='text-left' style='border: 1px solid black '>" . $rp['nom_rubro'] . "</td>
+                                    <td class='text-right' style='border: 1px solid black; text-align: right'>" . number_format($rp['valor'], 2, ",", ".")  . "</td>
+                                </tr>";
                             $total_pto += $rp['valor'];
                         }
                     }
@@ -463,11 +465,11 @@ $meses = [
                     foreach ($rubros as $rp) {
                         if ($rp['tipo_mov'] == 'COP') {
                             echo "<tr>
-                    <td class='text-left' style='border: 1px solid black '>" . $rp['id_manu'] . "</td>
-                    <td class='text-left' style='border: 1px solid black '>" . $rp['rubro'] . "</td>
-                    <td class='text-left' style='border: 1px solid black '>" . $rp['nom_rubro'] . "</td>
-                    <td class='text-right' style='border: 1px solid black; text-align: right'>" . number_format($rp['valor'], 2, ",", ".")  . "</td>
-                    </tr>";
+                                    <td class='text-left' style='border: 1px solid black '>" . $rp['id_manu'] . "</td>
+                                    <td class='text-left' style='border: 1px solid black '>" . $rp['rubro'] . "</td>
+                                    <td class='text-left' style='border: 1px solid black '>" . $rp['nom_rubro'] . "</td>
+                                    <td class='text-right' style='border: 1px solid black; text-align: right'>" . number_format($rp['valor'], 2, ",", ".")  . "</td>
+                                </tr>";
                             $total_pto += $rp['valor'];
                         }
                     }

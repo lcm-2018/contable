@@ -385,7 +385,7 @@ var tabla;
 /*========================================================================== Utilitarios ========================================*/
 //Recargar consiliación bancaria
 function recargarConciliacion() {
-	$('#tableConcBancaria').DataTable().ajax.reload();
+	$('#tableConcBancaria').DataTable().ajax.reload(null, false);
 };
 // Cargar lista de registros para obligar en contabilidad de
 let CargaObligaPago = function (dato) {
@@ -447,7 +447,7 @@ function CausaCENomina(boton) {
 						cant.value = valor - 1;
 						document.getElementById("totalCausa").innerHTML = valor - 1;
 						boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
-						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
 						$("#divModalForms").modal("hide");
 						mje("Registro exitoso");
 					} else {
@@ -771,7 +771,7 @@ function GuardaDocPag(id) {
 					if (r.status == 'ok') {
 						$('#divModalForms').modal('hide');
 						mje('Proceso realizado correctamente');
-						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
 						if ($('#tableMvtoContableDetallePag').length) {
 							setTimeout(function () {
 								ListarDetallePago2(0, r.id, $('#tipodato').val(), 1);
@@ -846,7 +846,7 @@ $('#divModalForms').on('click', '#gestionarMvtoCtbCaja', function () {
 				if (r == 'ok') {
 					$('#divModalForms').modal('hide');
 					mje('Proceso realizado correctamente');
-					$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+					$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
 				} else {
 					mjeError('Error:', r);
 				}
@@ -1122,7 +1122,7 @@ const eliminarRegistroTec = (id) => {
 				.then((response) => {
 					if (response.status == "ok") {
 						mje("Registro eliminado");
-						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
 					} else {
 						mjeError("Error al eliminar: " + response.msg);
 					}
@@ -1154,7 +1154,7 @@ const eliminarRegistroCaja = (id) => {
 				.then((response) => {
 					if (response.status == "ok") {
 						mje("Registro eliminado");
-						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
 					} else {
 						mjeError("Error al eliminar: " + response.msg);
 					}
@@ -1936,7 +1936,7 @@ let abrirDocumentoTes = function (id) {
 		.then((response) => {
 			if (response == "ok") {
 				mje("Documento abierto");
-				$("#tableMvtoTesoreriaPagos").DataTable().ajax.reload();
+				$("#tableMvtoTesoreriaPagos").DataTable().ajax.reload(null, false);
 			} else {
 				mjeError("Error al abrir documento: " + response);
 			}
@@ -2081,7 +2081,7 @@ function changeEstadoAnulacionTes() {
 			success: function (r) {
 				if (r.status == 'ok') {
 					$('#divModalForms').modal('hide');
-					$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+					$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
 					mje('Documento anulado correctamente');
 				} else {
 					mjeError('Error: ' + r.msg);
@@ -2133,7 +2133,7 @@ const GuardarChequera = () => {
 			success: function (r) {
 				if (r.status == 'ok') {
 					$('#divModalForms').modal('hide');
-					$('#tableFinChequeras').DataTable().ajax.reload();
+					$('#tableFinChequeras').DataTable().ajax.reload(null, false);
 					mje('Chequera guardada con  éxito...');
 				} else {
 					mjeError('Error: ' + r.msg);
@@ -2211,7 +2211,7 @@ const eliminarChequera = (id) => {
 				.then((response) => {
 					console.log(response);
 					if (response.status == "ok") {
-						$('#tableFinChequeras').DataTable().ajax.reload();
+						$('#tableFinChequeras').DataTable().ajax.reload(null, false);
 						mje("Registro eliminado");
 					} else {
 						mjeError("Error:" + response.msg);
@@ -2276,7 +2276,7 @@ const guardarCuentaBanco = () => {
 					data: data,
 					success: function (r) {
 						if (r.status == 'ok') {
-							$("#tableCuentasBanco").DataTable().ajax.reload();
+							$("#tableCuentasBanco").DataTable().ajax.reload(null, false);
 							mje("Proceso realizado con  éxito.");
 							$("#divModalForms").modal("hide");
 						} else {
@@ -2320,7 +2320,7 @@ const eliminarCuentaBancaria = (comp) => {
 				.then((response) => response.json())
 				.then((response) => {
 					if (response.status == "ok") {
-						$('#tableCuentasBanco').DataTable().ajax.reload();
+						$('#tableCuentasBanco').DataTable().ajax.reload(null, false);
 						mje("Registro eliminado");
 					} else {
 						mjeError("Error: ", response.msg);
@@ -2616,7 +2616,7 @@ function GuardaDetalleConciliacion(check) {
 					let salLib = $('#salLib').val();
 					var valor = Number(salLib) + Number(r.debito) - Number(r.credito);
 					$('#saldoConcilia').val(valor.toLocaleString('es-MX'));
-					$('#tableDetConciliacion').DataTable().ajax.reload();
+					$('#tableDetConciliacion').DataTable().ajax.reload(null, false);
 					mje('Proceso realizado correctamente');
 				} else {
 					mjeError('Error:', r.msg);

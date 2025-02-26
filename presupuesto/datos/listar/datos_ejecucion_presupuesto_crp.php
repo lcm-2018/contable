@@ -15,7 +15,7 @@ $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
 $search_value = isset($_POST['search']) ? $_POST['search'] : '';
 // Verifico si serach_value tiene datos para buscar
 if (!empty($search_value)) {
-    $buscar = "AND (`pto_crp`.`id_manu` LIKE '%$search_value%' OR `pto_crp`.`objeto` LIKE '%$search_value%' OR `pto_crp`.`fecha` LIKE '%$search_value%' OR `pto_crp`.`num_contrato` LIKE '%$search_value%' OR `tb_terceros`.`nom_tercero` LIKE '%$search_value%' OR `tb_terceros`.`nit_tercero` LIKE '%$search_value%')";
+    $buscar = "AND (`pto_crp`.`id_manu` LIKE '%$search_value%' OR `detalle`.`id_cdp` LIKE '%$search_value%' OR `pto_crp`.`objeto` LIKE '%$search_value%' OR `pto_crp`.`fecha` LIKE '%$search_value%' OR `pto_crp`.`num_contrato` LIKE '%$search_value%' OR `tb_terceros`.`nom_tercero` LIKE '%$search_value%' OR `tb_terceros`.`nit_tercero` LIKE '%$search_value%')";
 } else {
     $buscar = '';
 }

@@ -107,7 +107,7 @@ if (!empty($listappto)) {
 }
 $debe = number_format($totDebito, 2, '.', ',');
 $haber = number_format($totCredito, 2, '.', ',');
-$valor = $totDebito - $totCredito;
+$valor = number_format($totDebito, 2, '.', '') - number_format($totCredito, 2, '.', '');
 $msg = $valor == 0 ? '<span class="badge badge-success">Correcto</span>' : '<span class="badge badge-danger">Incorrecto</span>';
 $tfoot = [
     'cuenta' => '1',

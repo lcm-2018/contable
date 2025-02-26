@@ -2303,10 +2303,16 @@
             if (result.isConfirmed) {
                 var id_orden = $('#id_orden').val();
                 var id_adq = $('#id_compra').val();
+                let suma = 0;
+                if ($('.sumTotal').length) {
+                    $('.sumTotal').each(function () {
+                        suma += Number($(this).val());
+                    });
+                }
                 $.ajax({
                     type: 'POST',
                     url: 'actualizar/up_cerrar_orden.php',
-                    data: { id_orden: id_orden, id_adq: id_adq },
+                    data: { id_orden: id_orden, id_adq: id_adq, suma: suma },
                     success: function (r) {
                         if (r == 'ok') {
                             location.reload();

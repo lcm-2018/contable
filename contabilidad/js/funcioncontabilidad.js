@@ -589,7 +589,7 @@ function GuardaDocCtb(id) {
 			dataType: 'json',
 			success: function (r) {
 				if (r.status == 'ok') {
-					$('#tableMvtoContable').DataTable().ajax.reload();
+					$('#tableMvtoContable').DataTable().ajax.reload(null, false);
 					$('#divModalForms').modal('hide');
 					mje('Proceso realizado correctamente');
 					setTimeout(() => {
@@ -857,8 +857,8 @@ let cerrarDocumentoCtb = function (dato) {
 		.then((response) => response.json())
 		.then((response) => {
 			if (response.status == "ok") {
-				$('#tableMvtoContable').DataTable().ajax.reload();
-				$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload();
+				$('#tableMvtoContable').DataTable().ajax.reload(null, false);
+				$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
 			} else {
 				mjeError("Documento no cerrado", "Verifique información ingresada" + response.msg);
 			}
@@ -875,8 +875,7 @@ let abrirDocumentoCtb = function (dato) {
 		.then((response) => {
 			if (response == "ok") {
 				mje("Documento abierto");
-				let id = "tableMvtoContable";
-				reloadtable(id);
+				$('#tableMvtoContable').DataTable().ajax.reload(null, false);
 			} else {
 				mjeError("Error:", response);
 			}
@@ -986,7 +985,7 @@ function CausaNomina(boton) {
 				.then((response) => response.text())
 				.then((response) => {
 					if (response == "ok") {
-						$('#tableMvtoContable').DataTable().ajax.reload();
+						$('#tableMvtoContable').DataTable().ajax.reload(null, false);
 						cant.value = valor - 1;
 						document.getElementById("totalCausa").innerHTML = valor - 1;
 						boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
@@ -1453,7 +1452,41 @@ const eliminarCentroCosto = (dato) => {
 
 
 };
-
+const PasaValoresFactura = (elemento) => {
+	let ingreso = elemento.value;
+	let fila = elemento.closest('tr');
+	let base = fila.querySelector('.base').textContent.replace(/\,/g, "", "");
+	let iva = fila.querySelector('.iva').textContent.replace(/\,/g, "", "");
+	let baseFac = parseFloat(valor_base.value.replace(/\,/g, "", ""));
+	let ivaFac = parseFloat(valor_iva.value.replace(/\,/g, "", ""));
+	let sum_base = 0;
+	let sum_iva = 0;
+	if (elemento.checked) {
+		sum_base = baseFac + parseFloat(base);
+		sum_iva = ivaFac + parseFloat(iva);
+		AfectaIngreso(ingreso, $('#id_ctb_doc').val());
+	} else {
+		sum_base = baseFac - parseFloat(base);
+		sum_iva = ivaFac - parseFloat(iva);
+		AfectaIngreso(ingreso, 0);
+	}
+	valor_base.value = sum_base.toLocaleString("es-MX");
+	valor_iva.value = sum_iva.toLocaleString("es-MX");
+	valor_pagar.value = (sum_base + sum_iva).toLocaleString("es-MX");
+}
+function AfectaIngreso(ingreso, id_doc) {
+	$.ajax({
+		type: 'POST',
+		dataType: 'json',
+		url: 'datos/registrar/afecta_ingreso.php',
+		data: { ingreso: ingreso, id_doc: id_doc },
+		success: function (r) {
+			if (!(r == 'ok')) {
+				mjeError('Error:', r);
+			}
+		}
+	});
+}
 // Ajustar causación de centros de costo por cambio en el valor a pagar
 const ajustarCausacionCostos = (dato) => {
 	let valor_pago = parseFloat(valor.value.replace(/\,/g, "", ""));
@@ -2197,7 +2230,7 @@ const eliminarRegistroDoc = (id) => {
 					console.log(response);
 					if (response == "ok") {
 						mje("Registro eliminado");
-						$('#tableMvtoContable').DataTable().ajax.reload();
+						$('#tableMvtoContable').DataTable().ajax.reload(null, false);
 					} else {
 						mjeError("Error al eliminar: " + response);
 					}
@@ -2377,7 +2410,7 @@ const EnviaDocumentoSoporte = (boton) => {
 		success: function (response) {
 			if (response[0].value == "ok") {
 				boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
-				$('#tableMvtoContable').DataTable().ajax.reload();
+				$('#tableMvtoContable').DataTable().ajax.reload(null, false);
 				mje("Documento enviado correctamente");
 			} else {
 				boton.disabled = false;
@@ -2644,7 +2677,7 @@ const guardarPlanCuentas = async () => {
 		console.log(data);
 		if (data.value == "ok") {
 			$("#divModalForms").modal("hide");
-			$('#tablePlanCuentas').DataTable().ajax.reload();
+			$('#tablePlanCuentas').DataTable().ajax.reload(null, false);
 			mje("Proceso realiado con  éxito...");
 		} else {
 			mjeError("Error:" + data.msg);
@@ -2675,7 +2708,7 @@ let cerrarCuentaPlan = function (dato) {
 		.then((response) => response.json())
 		.then((response) => {
 			if (response.value == "ok") {
-				$('#tablePlanCuentas').DataTable().ajax.reload();
+				$('#tablePlanCuentas').DataTable().ajax.reload(null, false);
 				mje("Documento cerrado");
 			} else {
 				mjeError("Error: " + response.msg, "Verificar");
@@ -2693,7 +2726,7 @@ let abrirCuentaPlan = function (dato) {
 		.then((response) => {
 			if (response.value == "ok") {
 				mje("Documento activado");
-				$('#tablePlanCuentas').DataTable().ajax.reload();
+				$('#tablePlanCuentas').DataTable().ajax.reload(null, false);
 			} else {
 				mjeError("Error: " + response.msg);
 			}
@@ -2721,7 +2754,7 @@ const eliminarCuentaContable = (comp) => {
 				.then((response) => {
 					console.log(response);
 					if (response.value == "ok") {
-						$('#tablePlanCuentas').DataTable().ajax.reload();
+						$('#tablePlanCuentas').DataTable().ajax.reload(null, false);
 						mje("Registro eliminado");
 					} else {
 						mjeError("Error: " + response.msg, "Verifique si la cuenta tiene movimientos asociados o cuentas dependientes");
@@ -2761,7 +2794,7 @@ const guardarDocFuente = async () => {
 		console.log(data);
 		if (data.value == "ok") {
 			$("#divModalForms").modal("hide");
-			$('#tableDocumentosFuente').DataTable().ajax.reload();
+			$('#tableDocumentosFuente').DataTable().ajax.reload(null, false);
 			mje("Proceso realiado con  éxito...");
 		} else {
 			mjeError("Error:" + data.msg);
@@ -2801,7 +2834,7 @@ const eliminarDocFuente = (comp) => {
 				.then((response) => {
 					console.log(response);
 					if (response.value == "ok") {
-						$('#tableDocumentosFuente').DataTable().ajax.reload();
+						$('#tableDocumentosFuente').DataTable().ajax.reload(null, false);
 						mje("Registro eliminado");
 					} else {
 						mjeError("Error: " + response.msg, "Verifique si la cuenta tiene movimientos asociados o cuentas dependientes");
@@ -2821,7 +2854,7 @@ function EstadoDocFuente(id, estado) {
 		.then((response) => response.json())
 		.then((response) => {
 			if (response.value == "ok") {
-				$('#tableDocumentosFuente').DataTable().ajax.reload();
+				$('#tableDocumentosFuente').DataTable().ajax.reload(null, false);
 				mje(response.msg, "Proceso realizado con éxito...");
 			} else {
 				mjeError("Error: " + response.msg, "Verificar");
@@ -2866,7 +2899,7 @@ function changeEstadoAnulaCtb() {
 			success: function (r) {
 				if (r.status == 'ok') {
 					$('#divModalForms').modal('hide');
-					$('#tableMvtoContable').DataTable().ajax.reload();
+					$('#tableMvtoContable').DataTable().ajax.reload(null, false);
 					mje('Documento anulado correctamente');
 				} else {
 					mjeError('Error: ' + r.msg);

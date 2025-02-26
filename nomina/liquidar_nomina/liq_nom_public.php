@@ -1719,7 +1719,7 @@ if (isset($_POST['check'])) {
                                     (`id_dcto`,`valor`,`id_nomina`,`id_user_reg`,`fec_reg`)
                                 VALUES (?, ?, ?, ?, ?)";
                             $sql = $cmd->prepare($sql);
-                            $sql->bindParam(1, $id_dcto, PDO::PARAM_INT);
+                            $sql->bindParam(1, $id_dcto2, PDO::PARAM_INT);
                             $sql->bindParam(2, $val_dcto2, PDO::PARAM_STR);
                             $sql->bindParam(3, $id_nomina, PDO::PARAM_INT);
                             $sql->bindParam(4, $id_user, PDO::PARAM_INT);
