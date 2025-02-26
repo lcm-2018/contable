@@ -180,6 +180,11 @@
     /* ---------------------------------------------------
     ENCABEZADO DE UN INGRESO
     -----------------------------------------------------*/
+
+    $('#divForms').on("change", "#sl_tip_ing", function() {
+        $('#id_tip_ing').val($('#sl_tip_ing').val());
+    });
+
     //Editar un registro Orden Ingreso
     $('#tb_ingresos').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');
@@ -203,7 +208,7 @@
             error += verifica_vacio($('#sl_tercero'));
         }
         if ($('#sl_tip_ing').find('option:selected').attr('data-ordcom') == 1) {
-            error += verifica_vacio($('#txt_id_pedido'));
+            error += verifica_vacio($('#txt_des_pedido'));
         }
 
         error += verifica_vacio($('#txt_det_ing'));

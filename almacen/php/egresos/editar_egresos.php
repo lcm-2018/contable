@@ -30,7 +30,8 @@ try {
             $id = $_POST['id_egreso'];            
             $fec_egr = $_POST['txt_fec_egr'];
             $hor_egr = $_POST['txt_hor_egr'];
-            $id_tipegr = $_POST['sl_tip_egr'];
+            $id_tipegr = $_POST['id_tip_egr'];
+            $id_ingreso_fz = $_POST['txt_id_ingreso'] ? $_POST['txt_id_ingreso'] : 'NULL';
             $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;
             $id_cencosto = $_POST['sl_centrocosto'] ? $_POST['sl_centrocosto'] : 0;
             $id_area = $_POST['sl_area'] ? $_POST['sl_area'] : 0;
@@ -41,9 +42,9 @@ try {
             $cmd->beginTransaction();
 
             if ($id == -1) {
-                $sql = "INSERT INTO far_orden_egreso(fec_egreso,hor_egreso,id_tipo_egreso,
+                $sql = "INSERT INTO far_orden_egreso(fec_egreso,hor_egreso,id_tipo_egreso,id_ingreso_fz,
                         id_cliente,id_centrocosto,id_area,detalle,val_total,id_sede,id_bodega,id_usr_crea,fec_creacion,creado_far,estado)
-                    VALUES('$fec_egr','$hor_egr',$id_tipegr,
+                    VALUES('$fec_egr','$hor_egr',$id_tipegr,$id_ingreso_fz,
                         $id_tercero,$id_cencosto,$id_area,'$detalle',0,$id_sede,$id_bodega,$id_usr_ope,'$fecha_ope',0,1)";
                 $rs = $cmd->query($sql);
 
@@ -63,7 +64,8 @@ try {
 
                 if ($obj_egreso['estado'] == 1) {
                     $sql = "UPDATE far_orden_egreso 
-                        SET id_tipo_egreso=$id_tipegr,id_cliente=$id_tercero,id_centrocosto=$id_cencosto,id_area=$id_area,detalle='$detalle',id_sede=$id_sede,id_bodega=$id_bodega
+                        SET id_tipo_egreso=$id_tipegr,id_ingreso_fz=$id_ingreso_fz,
+                            id_cliente=$id_tercero,id_centrocosto=$id_cencosto,id_area=$id_area,detalle='$detalle',id_sede=$id_sede,id_bodega=$id_bodega
                         WHERE id_egreso=" . $id;
                     $rs = $cmd->query($sql);
 
@@ -78,19 +80,31 @@ try {
                 }
             }
 
-            //Generar el traslado en base al pedido
+            //Generar el egreso en base al pedido o al ingreso fianza 1-Pedido, 2-Ingrso Fianza
             $generar_egreso = $_POST['generar_egreso'];                
 
-            if ($res['mensaje'] == 'ok' && $generar_egreso == 1){
+            if ($res['mensaje'] == 'ok' && ($generar_egreso == 1 || $generar_egreso == 2)){
 
-                $id_pedido = $_POST['txt_id_pedido'];
                 $id_egreso = $res['id'];
+                $sql = '';
 
-                $sql = 'SELECT PD.id_ped_detalle,PD.id_medicamento,PD.cantidad,
-                            FM.val_promedio,FM.cod_medicamento,FM.nom_medicamento
-                        FROM far_cec_pedido_detalle AS PD
-                        INNER JOIN far_medicamentos AS FM ON (FM.id_med = PD.id_medicamento) 
-                        WHERE PD.id_pedido=' . $id_pedido;
+                if ($generar_egreso == 1){                    
+                    $id_pedido = $_POST['txt_id_pedido'];                
+                    $sql = "SELECT PD.id_ped_detalle,PD.id_medicamento,PD.cantidad,
+                                FM.val_promedio,FM.cod_medicamento,FM.nom_medicamento
+                            FROM far_cec_pedido_detalle AS PD
+                            INNER JOIN far_medicamentos AS FM ON (FM.id_med = PD.id_medicamento) 
+                            WHERE PD.id_pedido=" . $id_pedido;
+                } else if ($generar_egreso == 2){
+                    $id_ingreso = $_POST['txt_id_ingreso'];                
+                    $sql = "SELECT ME.id_med AS id_medicamento,SUM(EE_D.cantidad) AS cantidad,
+                                ME.val_promedio,ME.cod_medicamento,ME.nom_medicamento
+                            FROM far_orden_ingreso_detalle AS EE_D
+                            INNER JOIN far_medicamento_lote AS ME_L ON (ME_L.id_lote=EE_D.id_lote)
+                            INNER JOIN far_medicamentos AS ME ON (ME.id_med = ME_L.id_med) 
+                            WHERE EE_D.id_ingreso=$id_ingreso 
+                            GROUP BY ME.id_med";
+                }
                 $rs = $cmd->query($sql);
                 $objs = $rs->fetchAll();
 
@@ -100,15 +114,15 @@ try {
                         WHERE id_med=:id_med AND existencia>=0 AND id_bodega=$id_bodega AND estado=1 AND fec_vencimiento>='$fec_actual' 
                         ORDER BY fec_vencimiento,existencia";
                 $rs1 = $cmd->prepare($sql);
-                $lotes = array();
 
+                $lotes = array();
                 foreach ($objs as $obj) {
                     $rs1->bindParam(':id_med', $obj['id_medicamento']);
                     $rs1->execute();
                     $obj_lotes = $rs1->fetchAll();
                     $cantidad = $obj['cantidad'];
                     $val_promedio = $obj['val_promedio'];
-                    $id_detalle = $obj['id_ped_detalle'];
+                    $id_detalle = isset($obj['id_ped_detalle']) ? $obj['id_ped_detalle'] : NULL;
 
                     if (count($obj_lotes) >= 1) {
                         $i = 0;
@@ -159,16 +173,16 @@ try {
                             $rs2->bindParam(':id_detalle', $lt['id_detalle']);
                             $rs2->execute();
                         }
-                    }
+                    }                    
+                }
 
-                    $sql = "UPDATE far_orden_egreso SET val_total=(SELECT SUM(valor*cantidad) FROM far_orden_egreso_detalle WHERE id_egreso=$id_egreso) WHERE id_egreso=$id_egreso";
-                    $rs = $cmd->query($sql);
+                $sql = "UPDATE far_orden_egreso SET val_total=(SELECT SUM(valor*cantidad) FROM far_orden_egreso_detalle WHERE id_egreso=$id_egreso) WHERE id_egreso=$id_egreso";
+                $rs = $cmd->query($sql);
 
-                    $sql = "SELECT val_total FROM far_orden_egreso WHERE id_egreso=" . $id_egreso;
-                    $rs = $cmd->query($sql);
-                    $obj_egreso = $rs->fetch();
-                    $res['val_total'] = formato_valor($obj_egreso['val_total']);
-                }    
+                $sql = "SELECT val_total FROM far_orden_egreso WHERE id_egreso=" . $id_egreso;
+                $rs = $cmd->query($sql);
+                $obj_egreso = $rs->fetch();
+                $res['val_total'] = formato_valor($obj_egreso['val_total']);                
             }
 
             if ($res['mensaje'] == 'ok'){

@@ -12,11 +12,16 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT EE.*,
+$sql = "SELECT EE.fec_egreso,EE.hor_egreso,EE.num_egreso,EE.id_sede,EE.id_bodega,EE.id_tipo_egreso,
+            EE.id_cliente,EE.id_centrocosto,EE.id_area,EE.estado,EE.detalle,EE.val_total,
             CASE EE.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado,
-            EGRESO.id_pedido,EGRESO.des_pedido 
+            EGRESO.id_pedido,CONCAT(EGRESO.detalle,'(',EGRESO.fec_pedido,')') AS des_pedido,
+            II.id_ingreso,CONCAT(II.detalle,'(',II.fec_ingreso,')') AS des_ingreso,
+            EETP.con_pedido,EETP.dev_fianza    
         FROM far_orden_egreso AS EE
-        LEFT JOIN (SELECT ED.id_egreso,PD.id_pedido,PP.detalle AS des_pedido 
+        INNER JOIN far_orden_egreso_tipo AS EETP ON (EETP.id_tipo_egreso=EE.id_tipo_egreso)
+        LEFT JOIN far_orden_ingreso AS II ON (II.id_ingreso=EE.id_ingreso_fz)
+        LEFT JOIN (SELECT ED.id_egreso,PD.id_pedido,PP.detalle,PP.fec_pedido
                     FROM far_orden_egreso_detalle AS ED 
                     INNER JOIN far_cec_pedido_detalle AS PD ON (PD.id_ped_detalle=ED.id_ped_detalle)
                     INNER JOIN far_cec_pedido AS PP ON (PP.id_pedido=PD.id_pedido)
@@ -99,8 +104,34 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             </div>
                         </div>    
                     </div>
+                    <div class="form-group col-md-2">
+                        <label for="sl_tip_egr" class="small" required>Tipo egreso</label>
+                        <select class="form-control form-control-sm" id="sl_tip_egr" name="sl_tip_egr" <?php echo $editar ?>>
+                            <?php tipo_egreso($cmd, '', $obj['id_tipo_egreso']) ?>
+                        </select>
+                        <input type="hidden" id="id_tip_egr" name="id_tip_egr" value="<?php echo $obj['id_tipo_egreso'] ?>">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="sl_tercero" class="small">Tercero</label>
+                        <select class="form-control form-control-sm" id="sl_tercero" name="sl_tercero">
+                            <?php terceros($cmd, '', $obj['id_cliente']) ?>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="sl_centrocosto" class="small">Dependencia</label>
+                        <select class="form-control form-control-sm" id="sl_centrocosto" name="sl_centrocosto">
+                            <?php centros_costo($cmd, '', $obj['id_centrocosto']) ?>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="sl_area" class="small">Area</label>
+                        <select class="form-control form-control-sm" id="sl_area" name="sl_area">
+                            <?php areas_centrocosto($cmd, '', $obj['id_centrocosto'], $obj['id_area']) ?>   
+                        </select>
+                    </div>                    
                 </div>    
-                <div class="form-row">  
+                
+                <div class="form-row" id="divConPedido" <?php echo $obj['con_pedido'] == 1 ? '' : 'style="display: none;"' ?>>
                     <div class="form-group col-md-1">
                         <label for="txt_id_pedido" class="small">Id. Pedido</label>
                         <input type="text" class="form-control form-control-sm" id="txt_id_pedido" name="txt_id_pedido" class="small" value="<?php echo $obj['id_pedido'] ?>" readonly="readonly">
@@ -126,36 +157,38 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </div>
                     </div>        
                 </div> 
-                <div class="form-row">  
-                    <div class="form-group col-md-2">
-                        <label for="sl_tip_egr" class="small" required>Tipo egreso</label>
-                        <select class="form-control form-control-sm" id="sl_tip_egr" name="sl_tip_egr">
-                            <?php tipo_egreso($cmd, '', $obj['id_tipo_egreso']) ?>
-                        </select>
+                <div class="form-row" id="divDevFianza" <?php echo $obj['dev_fianza'] == 1 ? '' : 'style="display: none;"' ?>>
+                    <div class="form-group col-md-1">
+                        <label for="txt_id_ingreso" class="small">Id. Ingreso</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_id_ingreso" name="txt_id_ingreso" class="small" value="<?php echo $obj['id_ingreso'] ?>" readonly="readonly">
                     </div>
-                    <div class="form-group col-md-4">
-                        <label for="sl_tercero" class="small">Tercero</label>
-                        <select class="form-control form-control-sm" id="sl_tercero" name="sl_tercero">
-                            <?php terceros($cmd, '', $obj['id_cliente']) ?>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <label for="sl_centrocosto" class="small">Dependencia</label>
-                        <select class="form-control form-control-sm" id="sl_centrocosto" name="sl_centrocosto">
-                            <?php centros_costo($cmd, '', $obj['id_centrocosto']) ?>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <label for="sl_area" class="small">Area</label>
-                        <select class="form-control form-control-sm" id="sl_area" name="sl_area">
-                            <?php areas_centrocosto($cmd, '', $obj['id_centrocosto'], $obj['id_area']) ?>   
-                        </select>
-                    </div>
-                    <div class="form-group col-md-12">
+                    <div class="form-group col-md-6">
+                        <div class="form-row">
+                            <div class="form-group col-md-10">
+                                <label for="txt_des_ingreso" class="small">ingreso de Almacen con Fianza</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_des_ingreso" name="txt_des_ingreso" class="small" value="<?php echo $obj['des_ingreso'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Ingreso Fianza">
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_imprime_ingreso" class="btn btn-outline-success btn-sm" title="Imprimir Ingreso Seleccionado">
+                                    <span class="fas fa-print" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_cancelar_ingreso" class="btn btn-outline-success btn-sm" title="Cancelar Selección">
+                                    <span class="fas fa-ban" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                        </div>
+                    </div>        
+                </div> 
+                <div class="form-row">
+                <div class="form-group col-md-12">
                         <label for="txt_det_egr" class="small">Detalle</label>                   
                         <textarea class="form-control" id="txt_det_egr" name="txt_det_egr" rows="2"><?php echo $obj['detalle'] ?></textarea>
                     </div>
-                </div>
+                </div>    
             </form>    
             <table id="tb_egresos_detalles" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                 <thead>

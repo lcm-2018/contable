@@ -12,13 +12,15 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT TT.*,            
+$sql = "SELECT TT.fec_traslado,TT.hor_traslado,TT.num_traslado,TT.tipo,
+            TT.id_sede_origen,TT.id_bodega_origen,TT.id_sede_destino,TT.id_bodega_destino,
+            TT.estado,TT.detalle,TT.val_total,
             CASE TT.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado,
-            PEDIDO.id_pedido,PEDIDO.des_pedido, 
-            OI.id_ingreso,OI.detalle AS des_ingreso 
+            PEDIDO.id_pedido,CONCAT(PEDIDO.detalle,'(',PEDIDO.fec_pedido,')') AS des_pedido,
+            OI.id_ingreso,CONCAT(OI.detalle,'(',OI.fec_ingreso,')') AS des_ingreso 
         FROM far_traslado AS TT
         LEFT JOIN far_orden_ingreso AS OI ON (OI.id_ingreso=TT.id_ingreso)
-        LEFT JOIN (SELECT TD.id_traslado,PD.id_pedido,PP.detalle AS des_pedido 
+        LEFT JOIN (SELECT TD.id_traslado,PD.id_pedido,PP.detalle,PP.fec_pedido
                     FROM far_traslado_detalle AS TD 
                     INNER JOIN far_pedido_detalle AS PD ON (PD.id_ped_detalle=TD.id_ped_detalle)
                     INNER JOIN far_pedido AS PP ON (PP.id_pedido=PD.id_pedido)
@@ -86,7 +88,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_tip_traslado" class="small" required>Tipo Traslado</label>
-                        <select class="form-control form-control-sm" id="sl_tip_traslado" name="sl_tip_traslado">
+                        <select class="form-control form-control-sm" id="sl_tip_traslado" name="sl_tip_traslado" <?php echo $editar ?>>
                             <?php tipo_traslado('', $obj['tipo']) ?>
                         </select>
                         <input type="hidden" id="id_tip_traslado" name="id_tip_traslado" value="<?php echo $obj['tipo'] ?>">

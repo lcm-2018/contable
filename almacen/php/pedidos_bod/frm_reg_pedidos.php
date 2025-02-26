@@ -90,13 +90,13 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="sl_sede_proveedor" class="small">Sede Proveedora</label>
+                        <label for="sl_sede_proveedor" class="small">Sede Proveedor</label>
                         <select class="form-control form-control-sm" id="sl_sede_proveedor" name="sl_sede_proveedor">
                             <?php sedes($cmd, '', $obj['id_sede_origen']) ?>   
                         </select>
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="sl_bodega_proveedor" class="small">Bodega Proveedora</label>
+                        <label for="sl_bodega_proveedor" class="small">Bodega Proveedor</label>
                         <select class="form-control form-control-sm" id="sl_bodega_proveedor" name="sl_bodega_proveedor"> 
                             <?php bodegas_sede($cmd, '', $obj['id_sede_origen'], $obj['id_bodega_origen']) ?>   
                         </select>

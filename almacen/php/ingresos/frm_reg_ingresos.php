@@ -12,15 +12,16 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT far_orden_ingreso.*,
-            far_bodegas.nombre AS nom_bodega,
-            CASE far_orden_ingreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado,
-            CONCAT(far_alm_pedido.detalle,'(',far_alm_pedido.fec_pedido,')') AS des_pedido,
-            far_orden_ingreso_tipo.orden_compra
-        FROM far_orden_ingreso 
-        INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_ingreso.id_bodega)
-        INNER JOIN far_orden_ingreso_tipo ON (far_orden_ingreso_tipo.id_tipo_ingreso=far_orden_ingreso.id_tipo_ingreso)
-        LEFT JOIN far_alm_pedido ON (far_alm_pedido.id_pedido=far_orden_ingreso.id_pedido)
+$sql = "SELECT II.fec_ingreso,II.hor_ingreso,II.num_ingreso,II.id_sede,II.id_bodega,II.id_tipo_ingreso,
+            II.num_factura,II.fec_factura,II.id_provedor,II.estado,II.detalle,II.val_total,II.id_pedido,
+            BO.nombre AS nom_bodega,
+            CASE II.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado,
+            CONCAT(PP.detalle,'(',PP.fec_pedido,')') AS des_pedido,
+            IITP.orden_compra
+        FROM far_orden_ingreso AS II
+        INNER JOIN far_bodegas AS BO ON (BO.id_bodega=II.id_bodega)
+        INNER JOIN far_orden_ingreso_tipo AS IITP ON (IITP.id_tipo_ingreso=II.id_tipo_ingreso)
+        LEFT JOIN far_alm_pedido AS PP ON (PP.id_pedido=II.id_pedido)
         WHERE id_ingreso=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
@@ -88,6 +89,13 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-2">
                         <label for="txt_est_ing" class="small">Estado Ingreso</label>
                         <input type="text" class="form-control form-control-sm" id="txt_est_ing" name="txt_est_ing" class="small" value="<?php echo $obj['nom_estado'] ?>" readonly="readonly">
+                    </div>                    
+                    <div class="form-group col-md-2">
+                        <label for="sl_tip_ing" class="small" required>Tipo Ingreso</label>
+                        <select class="form-control form-control-sm" id="sl_tip_ing" name="sl_tip_ing">
+                            <?php tipo_ingreso($cmd, '', $obj['id_tipo_ingreso']) ?>
+                        </select>
+                        <input type="hidden" id="id_tip_ing" name="id_tip_ing" value="<?php echo $obj['id_tipo_ingreso'] ?>">
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_num_fac" class="small">No. Acta y/o Remisión</label>
@@ -96,12 +104,6 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-2">
                         <label for="txt_fec_fac" class="small">Fecha Acta y/o Remisión</label>
                         <input type="date" class="form-control form-control-sm" id="txt_fec_fac" name="txt_fec_fac" class="small" value="<?php echo $obj['fec_factura'] ?>">
-                    </div>
-                    <div class="form-group col-md-2">
-                        <label for="sl_tip_ing" class="small" required>Tipo Ingreso</label>
-                        <select class="form-control form-control-sm" id="sl_tip_ing" name="sl_tip_ing">
-                            <?php tipo_ingreso($cmd, '', $obj['id_tipo_ingreso']) ?>
-                        </select>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="sl_tercero" class="small">Tercero</label>
