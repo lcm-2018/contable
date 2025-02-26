@@ -58,7 +58,6 @@
                         $('#divTamModalReg').addClass('modal-lg');
                         $('#divModalReg').modal('show');
                         $("#divFormsReg").html(he);
-
                     });
                 }
             }],

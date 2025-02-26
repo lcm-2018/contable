@@ -117,3 +117,14 @@
     </div>
 </div>
 <!-- Modal -->
+<!-- Modal -->
+<div class="modal fade" id="divModalAux" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" data-backdrop="static" data-keyboard="false">
+    <div id="divTamModalAux" class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center" id="divFormsAux">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
