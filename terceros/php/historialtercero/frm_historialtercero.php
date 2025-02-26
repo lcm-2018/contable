@@ -30,6 +30,7 @@ $obj = $rs->fetch();
         <div class="px-2">
             <form id="frm_historialtercero">
                 <input type="hidden" id="id_tercero" name="id_tercero" value="<?php echo $id_tercero ?>">
+                <input type="hidden" id="id_cdp" name="id_cdp">
                 <div class=" form-row">
                     <div class="form-group col-md-4">
                         <label for="txt_tercero_filtro" class="small">Tercero</label>
@@ -160,7 +161,7 @@ $obj = $rs->fetch();
         </div>
     </div>
     <div class="text-center pt-3">
-        <button type="button" class="btn btn-primary btn-sm" id="btn_guardar">Guardar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir">Imprimir</button>
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>
