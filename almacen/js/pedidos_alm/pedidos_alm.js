@@ -49,6 +49,7 @@
                 { 'data': 'val_total' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
+                { 'data': 'ingresos' },
                 { 'data': 'botones' }
             ],
             columnDefs: [

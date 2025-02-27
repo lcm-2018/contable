@@ -83,6 +83,18 @@ try {
                     $id = $_POST['id'];
                     $sql = "DELETE FROM far_orden_egreso_detalle WHERE id_egr_detalle=" . $id;
                     $rs = $cmd->query($sql);
+
+                    if ($rs){
+                        $sql = "SELECT COUNT(*) AS detalles FROM far_orden_egreso_detalle WHERE id_egreso=" . $id_egreso;
+                        $rs = $cmd->query($sql);
+                        $obj = $rs->fetch();
+
+                        if($obj['detalles'] == 0){
+                            $sql = "UPDATE far_orden_egreso SET id_ingreso_fz=NULL WHERE id_egreso=" . $id_egreso;
+                            $rs = $cmd->query($sql);
+                        }
+                    }
+
                     if ($rs) {
                         $res['mensaje'] = 'ok';
                     } else {

@@ -81,6 +81,7 @@ try {
                 }  
 
                 //Generar el traslado en base al pedido o el ingreso
+                //1-Traslado en base a un pedido de bodega, 2-Traslado total del una orden de ingreso
                 $generar_traslado = $_POST['generar_traslado'];                
 
                 if ($res['mensaje'] == 'ok' && ($generar_traslado == 1 || $generar_traslado == 2)){
@@ -90,10 +91,19 @@ try {
                     if ($generar_traslado == 1){
 
                         $id_pedido = $_POST['txt_id_pedido'];
-                        $sql = 'SELECT PD.id_ped_detalle,PD.id_medicamento,PD.cantidad,FM.val_promedio,FM.cod_medicamento,FM.nom_medicamento
-                                FROM far_pedido_detalle AS PD
-                                INNER JOIN far_medicamentos AS FM ON (FM.id_med = PD.id_medicamento) 
-                                WHERE PD.id_pedido=' . $id_pedido;
+                        $sql = "SELECT far_pedido_detalle.id_ped_detalle,far_pedido_detalle.id_medicamento,
+                                        far_pedido_detalle.cantidad-IFNULL(TRASLADO.cantidad,0) AS cantidad,
+                                        far_medicamentos.val_promedio,
+                                        far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento	
+                                    FROM far_pedido_detalle 
+                                    INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_pedido_detalle.id_medicamento) 
+                                    LEFT JOIN (SELECT TRD.id_ped_detalle,SUM(TRD.cantidad) AS cantidad     
+                                            FROM far_traslado_detalle AS TRD
+                                            INNER JOIN far_traslado AS TR ON (TR.id_traslado=TRD.id_traslado)
+                                            WHERE TR.estado<>0 AND TRD.id_ped_detalle IS NOT NULL
+                                            GROUP BY TRD.id_ped_detalle
+                                        ) AS TRASLADO ON (TRASLADO.id_ped_detalle=far_pedido_detalle.id_ped_detalle) 
+                                    WHERE far_pedido_detalle.cantidad>IFNULL(TRASLADO.cantidad,0) AND far_pedido_detalle.id_pedido=" . $id_pedido;
                         $rs = $cmd->query($sql);
                         $objs = $rs->fetchAll();
 

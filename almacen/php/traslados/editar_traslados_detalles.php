@@ -92,6 +92,18 @@ try {
                     $id = $_POST['id'];
                     $sql = "DELETE FROM far_traslado_detalle WHERE id_tra_detalle=" . $id;
                     $rs = $cmd->query($sql);
+
+                    if ($rs){
+                        $sql = "SELECT COUNT(*) AS detalles FROM far_traslado_detalle WHERE id_traslado=" . $id_traslado;
+                        $rs = $cmd->query($sql);
+                        $obj = $rs->fetch();
+
+                        if($obj['detalles'] == 0){
+                            $sql = "UPDATE far_traslado SET id_ingreso=NULL WHERE id_traslado=" . $id_traslado;
+                            $rs = $cmd->query($sql);
+                        }
+                    }
+
                     if ($rs) {
                         $res['mensaje'] = 'ok';
                     } else {

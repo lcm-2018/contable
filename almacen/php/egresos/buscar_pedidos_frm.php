@@ -23,11 +23,17 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     <div class="form-group col-md-2">
                         <input type="text" class="filtro_ped form-control form-control-sm" id="txt_num_ped_fil" placeholder="No. Pedido">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <input type="date" class="filtro_ped form-control form-control-sm" id="txt_fecini_fil" name="txt_fecini_fil" placeholder="Fecha Inicial">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <input type="date" class="filtro_ped form-control form-control-sm" id="txt_fecfin_fil" name="txt_fecfin_fil" placeholder="Fecha Final">
+                    </div> 
+                    <div class="form-group col-md-4">
+                        <div class="form-control form-control-sm">
+                            <input class="filtro_ped form-check-input" type="checkbox" id="chk_pedpar_fil">
+                            <label class="filtro_ped form-check-label small" for="chk_pedpar_fil">Incluir Pedidos Con Entrega Incompleta</label>
+                        </div>
                     </div> 
                     <div class="form-group col-md-2">
                         <a type="button" id="btn_buscar_ped_fil" class="btn btn-outline-success btn-sm" title="Filtrar">
@@ -79,7 +85,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     data: function(data) {
                         data.num_pedido = $('#txt_num_ped_fil').val();
                         data.fec_ini = $('#txt_fecini_fil').val();
-                        data.fec_fin = $('#txt_fecfin_fil').val()
+                        data.fec_fin = $('#txt_fecfin_fil').val();
+                        data.ped_parcial = $('#chk_pedpar_fil').is(':checked') ? 1 : 0;
                     }
                 },
                 columns: [

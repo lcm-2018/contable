@@ -78,11 +78,19 @@ try {
                 tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,                    
                 far_cec_pedido.val_total,far_cec_pedido.detalle,  
                 far_cec_pedido.estado,
-                CASE far_cec_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS nom_estado 
+                CASE far_cec_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS nom_estado,
+                PEDIDO.egresos
             FROM far_cec_pedido       
             INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro = far_cec_pedido.id_cencosto)      
             INNER JOIN tb_sedes ON (tb_sedes.id_sede = far_cec_pedido.id_sede)
-            INNER JOIN far_bodegas ON (far_bodegas.id_bodega = far_cec_pedido.id_bodega)           
+            INNER JOIN far_bodegas ON (far_bodegas.id_bodega = far_cec_pedido.id_bodega)   
+            LEFT JOIN (SELECT PPD.id_pedido,GROUP_CONCAT(DISTINCT EE.id_egreso) AS egresos
+                        FROM far_orden_egreso_detalle AS EED
+                        INNER JOIN far_orden_egreso AS EE ON (EE.id_egreso=EED.id_egreso)
+                        INNER JOIN far_cec_pedido_detalle AS PPD ON (PPD.id_ped_detalle=EED.id_ped_detalle)
+                        WHERE EE.estado<>0 
+                        GROUP BY PPD.id_pedido
+                        ) AS PEDIDO ON (PEDIDO.id_pedido=far_cec_pedido.id_pedido)
             $where_usr $where ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -117,6 +125,7 @@ if (!empty($objs)) {
             "val_total" => formato_valor($obj['val_total']),  
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
+            "egresos" => $obj['egresos'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }

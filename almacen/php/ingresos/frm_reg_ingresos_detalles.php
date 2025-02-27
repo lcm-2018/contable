@@ -58,7 +58,7 @@ if (empty($obj)) {
                     <div class="form-group col-md-8">
                         <label for="txt_nom_art" class="small">Articulo</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly">
-                        <input type="text" id="id_txt_nom_art" name="id_txt_nom_art" value="<?php echo $obj['id_med'] ?>">
+                        <input type="hidden" id="id_txt_nom_art" name="id_txt_nom_art" value="<?php echo $obj['id_med'] ?>">
                     </div>
                     <div class="form-group col-md-4">
                         <label for="sl_lote_art" class="small">Lote</label>

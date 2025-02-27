@@ -97,6 +97,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Vr. Total</th>
                                         <th>Id.Estado</th>
                                         <th>Estado</th>
+                                        <th>Ids Ingresos</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>

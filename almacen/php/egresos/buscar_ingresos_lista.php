@@ -19,7 +19,24 @@ $idusr = $_SESSION['id_user'];
 $idrol = $_SESSION['rol'];
 
 $where_usr = " WHERE OI.estado=2 AND OITP.fianza=1";
-$where_usr.= " AND OI.id_ingreso NOT IN (SELECT id_ingreso_fz FROM far_orden_egreso WHERE id_ingreso_fz IS NOT NULL AND estado<>0)";
+
+$where_usr.= " AND OI.id_ingreso NOT IN (
+                    SELECT INGRESO.id_ingreso
+                    FROM 	(SELECT far_orden_ingreso_detalle.id_ingreso,far_medicamento_lote.id_med,
+                                SUM(far_orden_ingreso_detalle.cantidad) AS cantidad
+                            FROM far_orden_ingreso_detalle
+                            INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_ingreso_detalle.id_lote)
+                            GROUP BY far_orden_ingreso_detalle.id_ingreso,far_medicamento_lote.id_med) AS INGRESO        
+                    LEFT JOIN (SELECT far_orden_egreso.id_ingreso_fz,far_medicamento_lote.id_med,
+                            SUM(far_orden_egreso_detalle.cantidad) AS cantidad
+                            FROM far_orden_egreso_detalle
+                            INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_egreso_detalle.id_lote)
+                            INNER JOIN far_orden_egreso ON (far_orden_egreso.id_egreso=far_orden_egreso_detalle.id_egreso)
+                            WHERE far_orden_egreso.estado<>0
+                            GROUP BY far_orden_egreso.id_ingreso_fz,far_medicamento_lote.id_med) AS EGRESO
+                        ON (INGRESO.id_ingreso=EGRESO.id_ingreso_fz AND INGRESO.id_med=EGRESO.id_med)
+                    GROUP BY INGRESO.id_ingreso
+                    HAVING SUM(IF(INGRESO.cantidad>IFNULL(EGRESO.cantidad,0),1,0))=0)";
 if($idrol !=1){
     $where_usr .= " AND OI.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
