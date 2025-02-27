@@ -91,12 +91,16 @@ if ($id_rol != 1) {
                 <input type="number" name="numEstUser" value="1" hidden="true">
                 <div class="form-row">
                     <div class="form-group col-md-3">
+                        <label class="small" for="txt_cargo">Cargo</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_cargo" name="txt_cargo" placeholder="Cargo">
+                    </div>
+                    <div class="form-group col-md-3">
                         <label class="small" for="sl_centroCosto">Centro de costo - Dependencia</label>
                         <select class="form-control form-control-sm" id="sl_centroCosto" name="sl_centroCosto">
                             <?php centros_costo($cmd, '', 0) ?>
                         </select>
                     </div>
-                    <div class="form-group col-md-5">
+                    <div class="form-group col-md-6">
                         <label class="small" for="sl_areaCentroCosto">Area</label>
                         <select class="form-control form-control-sm" id="sl_areaCentroCosto" name="sl_areaCentroCosto"></select>
                     </div>
@@ -149,3 +153,5 @@ if ($id_rol != 1) {
     <button id="btnAddUser" type="button" class="btn btn-primary btn-sm">Registrar</button>
     <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
 </div>
+
+<script type="text/javascript" src="js/funcionesusuario_reg.js?v=<?php echo date('YmdHis') ?>"></script>

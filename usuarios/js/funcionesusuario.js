@@ -361,4 +361,73 @@
         $('#sl_areaCentroCosto').load('../usuarios/common/listar_areas_centroCosto.php', { id_centroCosto: $(this).val(), titulo: '', todas: true }, function() {});
     });
     //$('#sl_centroCosto').trigger('change');
+
+    //---------------------------------
+    $('#body_tb_sedes').on('click', 'input[type="checkbox"]', function () {
+        let id_sede = $(this).attr('value');
+        alert(id_sede);
+        //$('#id_cdp').val(id_cdp);
+        //----------esto pa cargar modal con clic en el boton
+        //$.post("../php/historialtercero/frm_historialtercero.php", { idt: idt }, function (he) {
+        //    $('#divTamModalForms').removeClass('modal-lg');
+        //   $('#divTamModalForms').removeClass('modal-sm');
+        //    $('#divTamModalForms').addClass('modal-xl');
+        //    $('#divModalForms').modal('show');
+        //    $("#divForms").html(he);
+        //    $('#slcActEcon').focus();
+        //});
+
+        //------------ cargar la tabla contratos
+        /*if ($.fn.DataTable.isDataTable('#tb_contratos')) {
+            $('#tb_contratos').DataTable().destroy();
+        }
+
+        $('#tb_contratos').DataTable({
+            dom: setdom = "<'row'<'col-md-6'l><'col-md-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            buttons: [{
+                action: function (e, dt, node, config) {
+                    $.post("", { id_cdp: id_cdp }, function (he) {
+                        $('#divTamModalReg').removeClass('modal-xl');
+                        $('#divTamModalReg').removeClass('modal-sm');
+                        $('#divTamModalReg').addClass('modal-lg');
+                        $('#divModalReg').modal('show');
+                        $("#divFormsReg").html(he);
+                    });
+                }
+            }],
+            language: setIdioma,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            ajax: {
+                url: window.urlin + '/terceros/php/historialtercero/listar_contratos.php',
+                type: 'POST',
+                dataType: 'json',
+                data: function (data) {
+                    data.id_cdp = id_cdp;
+                }
+            },
+            columns: [
+                { 'data': 'num_contrato' },
+                { 'data': 'fec_ini' },
+                { 'data': 'fec_fin' },
+                { 'data': 'val_contrato' },
+                { 'data': 'val_adicion' },
+                { 'data': 'val_cte' },
+                { 'data': 'estado' }
+            ],
+            columnDefs: [
+                { class: 'text-wrap', targets: [3] }
+            ],
+            order: [
+                [0, "desc"]
+            ],
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+        });
+        $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
+        $('#tb_contratos').wrap('<div class="overflow"/>');*/
+    });
 })(jQuery);
