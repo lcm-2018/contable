@@ -52,7 +52,7 @@ if (!empty($objs)) {
     foreach ($objs as $obj) {
         $id = $obj['id_sede'];
         $data[] = [
-            "select" => '<input type="checkbox" name="sed[]" value="' . $id . '" ' . $checked . '>',
+            "select" => '<input type="checkbox" name="sed[]" value="' . $id . '" ' . $checked . ' class="chk_sedes">',
             "id_sede" => $id,
             "nom_sede" => mb_strtoupper($obj['nom_sede']),            
             "dir_sede" => mb_strtoupper($obj['dir_sede']),

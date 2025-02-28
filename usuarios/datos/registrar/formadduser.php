@@ -112,7 +112,7 @@ if ($id_rol != 1) {
                 <div class="form-row">
                     <!--Lista de sedes-->
                     <div style="width: 48%;">
-                        <table id="tb_sedes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                        <table id="tb_sedes" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%;">
                             <thead>
                                 <tr class="text-center centro-vertical">
                                     <th>
