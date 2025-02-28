@@ -56,13 +56,14 @@
                 { 'data': 'val_total' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
+                { 'data': 'traslados' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [4, 5, 6, 7, 8] },
                 { type: "numeric-comma", targets: 9 },
                 { visible: false, targets: 10 },
-                { orderable: false, targets: 12 }
+                { orderable: false, targets: 13 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 1) {

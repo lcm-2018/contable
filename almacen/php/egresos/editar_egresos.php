@@ -89,21 +89,46 @@ try {
                 $sql = '';
 
                 if ($generar_egreso == 1){                    
+                    
                     $id_pedido = $_POST['txt_id_pedido'];                
-                    $sql = "SELECT PD.id_ped_detalle,PD.id_medicamento,PD.cantidad,
-                                FM.val_promedio,FM.cod_medicamento,FM.nom_medicamento
-                            FROM far_cec_pedido_detalle AS PD
-                            INNER JOIN far_medicamentos AS FM ON (FM.id_med = PD.id_medicamento) 
-                            WHERE PD.id_pedido=" . $id_pedido;
+                    $sql = "SELECT far_cec_pedido_detalle.id_ped_detalle,far_cec_pedido_detalle.id_medicamento,
+                                far_cec_pedido_detalle.cantidad-IFNULL(EGRESO.cantidad,0) AS cantidad,
+                                far_medicamentos.val_promedio,
+                                far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento	
+                            FROM far_cec_pedido_detalle 
+                            INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_cec_pedido_detalle.id_medicamento) 
+                            LEFT JOIN (SELECT EED.id_ped_detalle,SUM(EED.cantidad) AS cantidad     
+                                    FROM far_orden_egreso_detalle AS EED
+                                    INNER JOIN far_orden_egreso AS EE ON (EE.id_egreso=EED.id_egreso)
+                                    WHERE EE.estado<>0 AND EED.id_ped_detalle IS NOT NULL
+                                    GROUP BY EED.id_ped_detalle
+                                ) AS EGRESO ON (EGRESO.id_ped_detalle=far_cec_pedido_detalle.id_ped_detalle) 
+                            WHERE far_cec_pedido_detalle.cantidad>IFNULL(EGRESO.cantidad,0) AND far_cec_pedido_detalle.id_pedido=" . $id_pedido;
+                
                 } else if ($generar_egreso == 2){
+
                     $id_ingreso = $_POST['txt_id_ingreso'];                
-                    $sql = "SELECT ME.id_med AS id_medicamento,SUM(EE_D.cantidad) AS cantidad,
-                                ME.val_promedio,ME.cod_medicamento,ME.nom_medicamento
-                            FROM far_orden_ingreso_detalle AS EE_D
-                            INNER JOIN far_medicamento_lote AS ME_L ON (ME_L.id_lote=EE_D.id_lote)
-                            INNER JOIN far_medicamentos AS ME ON (ME.id_med = ME_L.id_med) 
-                            WHERE EE_D.id_ingreso=$id_ingreso 
-                            GROUP BY ME.id_med";
+                    $sql = "SELECT INGRESO.id_med AS id_medicamento,
+                                INGRESO.cantidad-IFNULL(EGRESO.cantidad,0) AS cantidad,
+                                INGRESO.val_promedio,
+                                INGRESO.cod_medicamento,INGRESO.nom_medicamento
+                            FROM 	
+                                (SELECT far_medicamentos.id_med,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
+                                    far_medicamentos.val_promedio,SUM(far_orden_ingreso_detalle.cantidad) AS cantidad
+                                FROM far_orden_ingreso_detalle
+                                INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_ingreso_detalle.id_lote)
+                                INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_medicamento_lote.id_med)
+                                WHERE far_orden_ingreso_detalle.id_ingreso=$id_ingreso
+                                GROUP BY far_medicamentos.id_med) AS INGRESO
+                            LEFT JOIN (SELECT far_medicamento_lote.id_med,
+                                    SUM(far_orden_egreso_detalle.cantidad) AS cantidad
+                                FROM far_orden_egreso_detalle
+                                INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_egreso_detalle.id_lote)
+                                INNER JOIN far_orden_egreso ON (far_orden_egreso.id_egreso=far_orden_egreso_detalle.id_egreso)
+                                WHERE far_orden_egreso.estado<>0 AND far_orden_egreso.id_ingreso_fz=$id_ingreso
+                                GROUP BY far_medicamento_lote.id_med) AS EGRESO
+                            ON (INGRESO.id_med=EGRESO.id_med)
+                            WHERE INGRESO.cantidad>IFNULL(EGRESO.cantidad,0)";
                 }
                 $rs = $cmd->query($sql);
                 $objs = $rs->fetchAll();

@@ -19,11 +19,27 @@ $idusr = $_SESSION['id_user'];
 $idrol = $_SESSION['rol'];
 
 $where_usr = " WHERE PP.estado=2";
-$where_usr.= " AND PP.id_pedido NOT IN 
+
+if (isset($_POST['ped_parcial']) && $_POST['ped_parcial']) {
+    $where_usr.= " AND PP.id_pedido NOT IN 
+                    (SELECT far_cec_pedido_detalle.id_pedido
+                    FROM far_cec_pedido_detalle
+                    LEFT JOIN (SELECT EED.id_ped_detalle,SUM(EED.cantidad) AS cantidad     
+                            FROM far_orden_egreso_detalle AS EED
+                            INNER JOIN far_orden_egreso AS EE ON (EE.id_egreso=EED.id_egreso)
+                            WHERE EE.estado<>0 AND EED.id_ped_detalle IS NOT NULL
+                            GROUP BY EED.id_ped_detalle
+                        ) AS EGRESO ON (EGRESO.id_ped_detalle=far_cec_pedido_detalle.id_ped_detalle)
+                    GROUP BY far_cec_pedido_detalle.id_pedido
+                    HAVING SUM(IF(far_cec_pedido_detalle.cantidad>IFNULL(EGRESO.cantidad,0),1,0))=0)";    
+} else {
+    $where_usr.= " AND PP.id_pedido NOT IN 
                     (SELECT PD.id_pedido FROM far_cec_pedido_detalle AS PD 
                     INNER JOIN far_orden_egreso_detalle AS ED ON (ED.id_ped_detalle=PD.id_ped_detalle)
                     INNER JOIN far_orden_egreso AS EE ON (EE.id_egreso=ED.id_egreso)
                     WHERE EE.estado<>0)";
+}
+
 if($idrol !=1){
     $where_usr .= " AND PP.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }

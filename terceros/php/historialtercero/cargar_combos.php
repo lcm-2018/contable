@@ -477,10 +477,10 @@ function tipoDocumento($cmd, $titulo = '', $id = 0)
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
-            if ($obj['id_tipo_documento']  == $id) {
-                echo '<option value="' . $obj['id_tipo_documento'] . '" selected="selected">' . $obj['tipo_doc'] . '</option>';
+            if ($obj['id_tipo_doc']  == $id) {
+                echo '<option value="' . $obj['id_tipo_doc'] . '" selected="selected">' . $obj['tipo_doc'] . '</option>';
             } else {
-                echo '<option value="' . $obj['id_tipo_documento'] . '">' . $obj['tipo_doc'] . '</option>';
+                echo '<option value="' . $obj['id_tipo_doc'] . '">' . $obj['tipo_doc'] . '</option>';
             }
         }
         $cmd = null;

@@ -328,8 +328,59 @@
     });
 
     //-----------------------------------------------
-    $('#divForms').on("change", "#sl_centroCosto", function() {
-        $('#sl_areaCentroCosto').load('../usuarios/common/listar_areas_centroCosto.php', { id_centroCosto: $(this).val(), titulo: '', todas: true }, function() {});
+    $('#divForms').on("change", "#sl_centroCosto", function () {
+        $('#sl_areaCentroCosto').load('../usuarios/common/listar_areas_centroCosto.php', { id_centroCosto: $(this).val(), titulo: '', todas: true }, function () { });
     });
     //$('#sl_centroCosto').trigger('change');
+
+    //---------------------------------
+    $('#divModalForms').on('click', '.chk_sedes', function () {
+        let id_sede = $(this).attr('value');
+
+        var sedesSeleccionadas = [];
+
+        $(".chk_sedes:checked").each(function () {
+            sedesSeleccionadas.push($(this).val()); // Guarda los valores de las checkboxes marcadas
+        });
+
+        //var data = $('#formAddUser').serialize();
+        var data = {sed:sedesSeleccionadas};
+
+        if ($.fn.DataTable.isDataTable('#tb_bodegas')) {
+            $('#tb_bodegas').DataTable().destroy();
+        }
+        $('#tb_bodegas').DataTable({
+            language: setIdioma,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            ajax: {
+                url: 'datos/listar/listar_bodegas.php',
+                type: 'POST',
+                dataType: 'json',
+                data: data
+            },
+            columns: [
+                { 'data': 'select' },
+                { 'data': 'id_bodega' }, //Index=1
+                { 'data': 'nombre' },
+                { 'data': 'tipo' },
+                { 'data': 'estado' },
+            ],
+            columnDefs: [
+                { orderable: false, targets: [0] },
+                { class: 'text-wrap', targets: [] }
+            ],
+            order: [
+                [0, "desc"]
+            ],
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+        });
+        $('#tb_bodegas').wrap('<div class="overflow"/>');
+    });
+
+    
 })(jQuery);

@@ -54,10 +54,16 @@ try {
                 tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,far_alm_pedido.estado,
 	            CASE far_alm_pedido.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' 
                                             WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'FINALIZADO'
-                                            WHEN 0 THEN 'ANULADO' END AS nom_estado
+                                            WHEN 0 THEN 'ANULADO' END AS nom_estado,
+                PEDIDO.ingresos
             FROM far_alm_pedido
             INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_alm_pedido.id_sede)
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_alm_pedido.id_bodega)
+            LEFT JOIN (SELECT id_pedido,GROUP_CONCAT(id_ingreso) AS ingresos 
+                        FROM far_orden_ingreso
+                        WHERE id_pedido IS NOT NULL
+                        GROUP BY id_pedido
+                        ) AS PEDIDO ON (PEDIDO.id_pedido=far_alm_pedido.id_pedido)
             $where ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -91,6 +97,7 @@ if (!empty($objs)) {
             "val_total" => formato_valor($obj['val_total']),
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
+            "ingresos" => $obj['ingresos'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }

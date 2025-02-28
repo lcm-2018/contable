@@ -72,15 +72,23 @@ try {
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_pedido.id_pedido,far_pedido.num_pedido,
                 far_pedido.fec_pedido,far_pedido.hor_pedido,far_pedido.detalle,                    
-                ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
-                sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
+                SSOL.nom_sede AS nom_sede_solicita,BSOL.nombre AS nom_bodega_solicita,                    
+                SPRO.nom_sede AS nom_sede_provee,BPRO.nombre AS nom_bodega_provee,                    
                 far_pedido.val_total,far_pedido.estado,
-                CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS nom_estado 
+                CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS nom_estado,
+                PEDIDO.traslados
             FROM far_pedido             
-            INNER JOIN tb_sedes AS ss ON (ss.id_sede = far_pedido.id_sede_destino)
-            INNER JOIN far_bodegas AS bs ON (bs.id_bodega = far_pedido.id_bodega_destino)           
-            INNER JOIN tb_sedes AS sp ON (sp.id_sede = far_pedido.id_sede_origen)
-            INNER JOIN far_bodegas AS bp ON (bp.id_bodega = far_pedido.id_bodega_origen)
+            INNER JOIN tb_sedes AS SSOL ON (SSOL.id_sede = far_pedido.id_sede_destino)
+            INNER JOIN far_bodegas AS BSOL ON (BSOL.id_bodega = far_pedido.id_bodega_destino)           
+            INNER JOIN tb_sedes AS SPRO ON (SPRO.id_sede = far_pedido.id_sede_origen)
+            INNER JOIN far_bodegas AS BPRO ON (BPRO.id_bodega = far_pedido.id_bodega_origen)
+            LEFT JOIN (SELECT PPD.id_pedido,GROUP_CONCAT(DISTINCT TT.id_traslado) AS traslados
+                        FROM far_traslado_detalle AS TTD
+                        INNER JOIN far_traslado AS TT ON (TT.id_traslado=TTD.id_traslado)
+                        INNER JOIN far_pedido_detalle AS PPD ON (PPD.id_ped_detalle=TTD.id_ped_detalle)
+                        WHERE TT.estado<>0 
+                        GROUP BY PPD.id_pedido
+                        ) AS PEDIDO ON (PEDIDO.id_pedido=far_pedido.id_pedido)
             $where_usr $where ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -116,6 +124,7 @@ if (!empty($objs)) {
             "val_total" => formato_valor($obj['val_total']),  
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
+            "traslados" => $obj['traslados'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }

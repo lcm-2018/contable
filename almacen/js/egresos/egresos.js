@@ -160,7 +160,7 @@
     //Imprimit el Pedido desde la datatable
     $('#divModalBus').on('click', '#tb_pedidos_egr .btn_imprimir', function() {
         let id = $(this).attr('value');
-        $.post("../pedidos_cec/imp_pedido.php", { id: id }, function(he) {
+        $.post("imp_pedido.php", { id: id }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');
             $('#divTamModalImp').addClass('modal-xl');
@@ -185,7 +185,7 @@
     $('#divForms').on("click", "#btn_imprime_pedido", function() {
         let id = $('#txt_id_pedido').val();
         if (id) {
-            $.post("../pedidos_cec/imp_pedido.php", { id: id }, function(he) {
+            $.post("imp_pedido.php", { id: id }, function(he) {
                 $('#divTamModalImp').removeClass('modal-sm');
                 $('#divTamModalImp').removeClass('modal-lg');
                 $('#divTamModalImp').addClass('modal-xl');
@@ -228,7 +228,7 @@
     //Imprimit el Ingreso desde la datatable
     $('#divModalBus').on('click', '#tb_ingresos_fz .btn_imprimir', function() {
         let id = $(this).attr('value');
-        $.post("../ingresos/imp_ingreso.php", { id: id }, function(he) {
+        $.post("imp_ingreso.php", { id: id }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');
             $('#divTamModalImp').addClass('modal-xl');
@@ -253,7 +253,7 @@
     $('#divForms').on("click", "#btn_imprime_ingreso", function() {
         let id = $('#txt_id_ingreso').val();
         if (id) {
-            $.post("../ingresos/imp_ingreso.php", { id: id }, function(he) {
+            $.post("imp_ingreso.php", { id: id }, function(he) {
                 $('#divTamModalImp').removeClass('modal-sm');
                 $('#divTamModalImp').removeClass('modal-lg');
                 $('#divTamModalImp').addClass('modal-xl');

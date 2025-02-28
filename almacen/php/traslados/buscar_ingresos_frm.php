@@ -24,10 +24,10 @@ $fecha_sis = date('Y-m-d');
                     <div class="form-group col-md-2">
                         <input type="text" class="filtro_ing form-control form-control-sm" id="txt_num_ing_fil" placeholder="No. Ingreso">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <input type="date" class="filtro_ing form-control form-control-sm" id="txt_fecini_fil" name="txt_fecini_fil" placeholder="Fecha Inicial" value="<?php echo $fecha_sis ?>">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <input type="date" class="filtro_ing form-control form-control-sm" id="txt_fecfin_fil" name="txt_fecfin_fil" placeholder="Fecha Final" value="<?php echo $fecha_sis ?>">
                     </div> 
                     <div class="form-group col-md-2">

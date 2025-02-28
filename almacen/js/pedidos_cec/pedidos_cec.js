@@ -53,13 +53,14 @@
                 { 'data': 'val_total' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
+                { 'data': 'egresos' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [4, 5, 6, 7] },
                 { type: "numeric-comma", targets: 8 },
                 { visible: false, targets: 9 },
-                { orderable: false, targets: 11 }
+                { orderable: false, targets: 12 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 1) {
