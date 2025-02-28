@@ -2645,18 +2645,16 @@
         return false;
     });
     //cambiar estado empleado
-    $("#tdEstado button").click(function () {
+    $("#modificarEmpleados").on('click', '.estado', function () {
         let idemp = $(this).val();
-        let divestM = "divIconoshow" + idemp;
-        let divestO = "divIcono" + idemp;
-        $('#' + divestM).hide();
         $.ajax({
             type: 'POST',
             url: 'actualizar/upestado.php',
             data: { idemp: idemp },
             success: function (r) {
-                $('#' + divestO).html(r);
-                $('#' + divestO).show();
+                if (r == 'ok') {
+                    $('#tableListEmpleados').DataTable().ajax.reload(null, false);
+                }
             }
         });
         return false;
@@ -2812,36 +2810,6 @@
             table.ajax.reload();
         });
     };
-    var setIdioma = {
-        "decimal": "",
-        "emptyTable": "No hay información",
-        "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-        "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-        "infoPostFix": "",
-        "thousands": ",",
-        "lengthMenu": "Ver _MENU_ Filas",
-        "loadingRecords": "Cargando...",
-        "processing": "Procesando...",
-        "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-        "zeroRecords": "No se encontraron registros",
-        "paginate": {
-            "first": "&#10096&#10096",
-            "last": "&#10097&#10097",
-            "next": "&#10097",
-            "previous": "&#10096"
-        }
-    };
-    var setdom;
-    if ($("#peReg").val() === '1') {
-        setdom = "<'row'<'col-md-5'l><'bttn-plus-dt col-md-2'B><'col-md-5'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-    } else {
-        setdom = "<'row'<'col-md-6'l><'col-md-6'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-    }
     $(document).ready(function () {
         var id = $('#idEmpNovEps').val();
         $('#dataTable').DataTable({
@@ -2868,7 +2836,27 @@
                 [10, 25, 50, -1],
                 [10, 25, 50, 'TODO'],
             ],
+            "columns": [
+                { 'data': 'id' },
+                { 'data': 'doc' },
+                { 'data': 'nombre' },
+                { 'data': 'correo' },
+                { 'data': 'tel' },
+                { 'data': 'salario' },
+                { 'data': 'estado' },
+                { 'data': 'opciones' },
+            ],
+            "ajax": {
+                url: 'datos/listar/datos_empleados.php',
+                type: 'POST',
+                dataType: 'json',
+                data: function (d) {
+                    d.anulados = $('#verAnulados').is(':checked') ? 1 : 0;
+                    return d;
+                },
+            },
             "pageLength": -1
+
         });
         $('#tableListEmpleados').wrap('<div class="overflow" />');
         //dataTable lista de empleados

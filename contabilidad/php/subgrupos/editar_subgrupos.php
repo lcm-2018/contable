@@ -20,7 +20,8 @@ try {
 
     if ((PermisosUsuario($permisos, 5509, 2) && $oper == 'add' && $_POST['id_subgrupo'] == -1) ||
         (PermisosUsuario($permisos, 5509, 3) && $oper == 'add' && $_POST['id_subgrupo'] != -1) ||
-        (PermisosUsuario($permisos, 5509, 4) && $oper == 'del') || $id_rol == 1) {
+        (PermisosUsuario($permisos, 5509, 4) && $oper == 'del') || $id_rol == 1
+    ) {
 
         if ($oper == 'add') {
             $id = $_POST['id_subgrupo'];
@@ -64,6 +65,10 @@ try {
             $sql = "DELETE FROM far_subgrupos WHERE id_subgrupo=" . $id;
             $rs = $cmd->query($sql);
             if ($rs) {
+                include '../../../financiero/reg_logs.php';
+                $ruta = '../../../log';
+                $consulta = "DELETE FROM far_subgrupos WHERE id_subgrupo = $id";
+                RegistraLogs($ruta, $consulta);
                 $res['mensaje'] = 'ok';
             } else {
                 $res['mensaje'] = $cmd->errorInfo()[2];

@@ -216,7 +216,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_nomina` FROM `nom_cdp_empleados` WHERE (`id_nomina` = $id_nomina AND `tipo` = 'P')";
+    $sql = "SELECT `id_nomina` FROM `nom_cdp_empleados` WHERE (`id_nomina` = $id_nomina AND `tipo` = 'PL')";
     $rs = $cmd->query($sql);
     $val_cdp = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -280,7 +280,7 @@ $iduser = $_SESSION['id_user'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "DELETE FROM `nom_cdp_empleados` WHERE (`id_nomina` = $id_nomina AND `tipo` = 'P')";
+    $sql = "DELETE FROM `nom_cdp_empleados` WHERE (`id_nomina` = $id_nomina AND `tipo` = 'PL')";
     $sql = $cmd->prepare($sql);
     $sql->execute();
     $cmd = null;
@@ -289,7 +289,7 @@ try {
 }
 if (true) {
     try {
-        $carcater = 'P';
+        $carcater = 'PL';
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
         $query = "INSERT INTO `nom_cdp_empleados` (`rubro`, `valor`, `id_nomina`, `tipo`) 
@@ -478,7 +478,7 @@ try {
                 `pto_cargue`
                 INNER JOIN `nom_cdp_empleados` 
                     ON (`pto_cargue`.`id_cargue` = `nom_cdp_empleados`.`rubro`)
-            WHERE (`nom_cdp_empleados`.`id_nomina` = $id_nomina AND `nom_cdp_empleados`.`tipo` = 'P')";
+            WHERE (`nom_cdp_empleados`.`id_nomina` = $id_nomina AND `nom_cdp_empleados`.`tipo` = 'PL')";
     $res = $cmd->query($sql);
     $rubros = $res->fetchAll();
 } catch (PDOException $e) {

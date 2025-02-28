@@ -16,6 +16,10 @@ try {
     $query->bindParam(1, $data);
     $query->execute();
     if ($query->rowCount() > 0) {
+        include '../../../financiero/reg_logs.php';
+            $ruta = '../../../log';
+            $consulta = "DELETE FROM `pto_cdp_detalle` WHERE `id_pto_cdp_det` = $data";
+            RegistraLogs($ruta, $consulta);
         echo "ok";
     } else {
         echo $query->errorInfo()[2];

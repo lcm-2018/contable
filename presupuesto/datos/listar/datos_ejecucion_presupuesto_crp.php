@@ -13,11 +13,17 @@ $id_pto_presupuestos = $_POST['id_ejec'];
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
 $search_value = isset($_POST['search']) ? $_POST['search'] : '';
+$anulados = isset($_POST['anulados']) ? $_POST['anulados'] : 0;
 // Verifico si serach_value tiene datos para buscar
 if (!empty($search_value)) {
     $buscar = "AND (`pto_crp`.`id_manu` LIKE '%$search_value%' OR `detalle`.`id_cdp` LIKE '%$search_value%' OR `pto_crp`.`objeto` LIKE '%$search_value%' OR `pto_crp`.`fecha` LIKE '%$search_value%' OR `pto_crp`.`num_contrato` LIKE '%$search_value%' OR `tb_terceros`.`nom_tercero` LIKE '%$search_value%' OR `tb_terceros`.`nit_tercero` LIKE '%$search_value%')";
 } else {
     $buscar = '';
+}
+if ($anulados == 1 || !empty($search_value)) {
+    $buscar .= " AND `pto_crp`.`estado` >= 0";
+} else {
+    $buscar .= " AND `pto_crp`.`estado` > 0";
 }
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -119,8 +125,12 @@ if (!empty($listappto)) {
         if ($fecha > $fecha_cierre && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1)) {
             $anular = '<button text="' . $info . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Anular" onclick="anulacionPto(this);"><span class="fas fa-ban fa-lg"></span></button>';
         }
-        if ($fecha > $fecha_cierre && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1) && $lp['estado'] == 2) {
-            $abrir = '<a onclick="abrirCrp(' . $id_pto . ')" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb " title="Abrir Registro Presupuestal"><span class="fas fa-lock fa-lg"></span></a>';
+        if ($fecha > $fecha_cierre && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1)) {
+            if ($lp['estado'] == 2) {
+                $abrir = '<a onclick="abrirCrp(' . $id_pto . ')" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb " title="Abrir Registro Presupuestal"><span class="fas fa-lock fa-lg"></span></a>';
+            } else {
+                $abrir = '<a onclick="CierraCrp(' . $id_pto . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb " title="Cerrar Registro Presupuestal"><span class="fas fa-lock-open fa-lg"></span></a>';
+            }
         }
         if ($lp['saldo'] > 0) {
             $anular = null;

@@ -19,15 +19,16 @@ try {
 
     if ((PermisosUsuario($permisos, 5508, 2) && $oper == 'add' && $_POST['id_cec_sg'] == -1) ||
         (PermisosUsuario($permisos, 5508, 3) && $oper == 'add' && $_POST['id_cec_sg'] != -1) ||
-        (PermisosUsuario($permisos, 5508, 4) && $oper == 'del') || $id_rol == 1) {
+        (PermisosUsuario($permisos, 5508, 4) && $oper == 'del') || $id_rol == 1
+    ) {
 
         $id_cencos = $_POST['id_cencos'];
 
         if ($id_cencos > 0) {
             if ($oper == 'add') {
                 $id = $_POST['id_cec_sg'];
-                $fec_vig = $_POST['txt_fec_vig'] ? "'".$_POST['txt_fec_vig']."'" : 'NULL';
-                $estado = $_POST['sl_estado_cta'];                
+                $fec_vig = $_POST['txt_fec_vig'] ? "'" . $_POST['txt_fec_vig'] . "'" : 'NULL';
+                $estado = $_POST['sl_estado_cta'];
 
                 if ($id == -1) {
                     $sql = "INSERT INTO tb_centrocostos_subgr_cta(id_cencos,fecha_vigencia,estado,id_usr_crea,fec_creacion)  
@@ -63,6 +64,10 @@ try {
                 $sql = "DELETE FROM tb_centrocostos_subgr_cta WHERE id_cecsubgrp=" . $id;
                 $rs = $cmd->query($sql);
                 if ($rs) {
+                    include '../../../financiero/reg_logs.php';
+                    $ruta = '../../../log';
+                    $consulta = "DELETE FROM tb_centrocostos_subgr_cta WHERE id_cecsubgrp = $id";
+                    RegistraLogs($ruta, $consulta);
                     $res['mensaje'] = 'ok';
                 } else {
                     $res['mensaje'] = $cmd->errorInfo()[2];

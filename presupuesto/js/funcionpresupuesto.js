@@ -144,32 +144,7 @@
             },
         });
     });
-    var setIdioma = {
-        decimal: "",
-        emptyTable: "No hay información",
-        info: "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-        infoEmpty: "Mostrando 0 to 0 of 0 Entradas",
-        infoFiltered: "",
-        infoPostFix: "",
-        thousands: ",",
-        lengthMenu: "Ver _MENU_ Filas",
-        loadingRecords: "Cargando...",
-        processing: "Procesando...",
-        search: '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-        zeroRecords: "No se encontraron registros",
-        paginate: {
-            first: "&#10096&#10096",
-            last: "&#10097&#10097",
-            next: "&#10097",
-            previous: "&#10096",
-        },
-    };
-    var setdom;
-    if ($("#peReg").val() === "1") {
-        setdom = "<'row'<'col-md-5'l><'bttn-plus-dt col-md-2'B><'col-md-5'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-    } else {
-        setdom = "<'row'<'col-md-6'l><'col-md-6'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-    }
+
     $(document).ready(function () {
         let id_t = $("#id_ptp").val();
         //================================================================================ DATA TABLES ========================================
@@ -260,6 +235,7 @@
                     d.start = d.start || 0; // inicio de la página
                     d.length = d.length || 50; // tamaño de la página
                     d.search = $("#tableEjecPresupuesto_filter input").val();
+                    d.anulados = $('#verAnulados').is(':checked') ? 1 : 0;
                     return d;
                 },
                 type: "POST",
@@ -335,6 +311,7 @@
                     d.start = d.start || 0; // inicio de la página
                     d.length = d.length || 50; // tamaño de la página
                     d.search = $("#tableEjecPresupuestoCrp_filter input").val();
+                    d.anulados = $('#verAnulados').is(':checked') ? 1 : 0;
                     return d;
                 },
                 type: "POST",
@@ -1034,6 +1011,10 @@ function imprSelecCrp(nombre, id) {
     ventimp.close();
 }
 
+function CierraCrp(id) {
+    cerrarCRP(id);
+    mje("Cerrado correctamente");
+}
 var reloadtable = function (nom) {
     $(document).ready(function () {
         var table = $("#" + nom).DataTable();
@@ -1891,10 +1872,8 @@ var cerrarCDP = function (dato) {
         .then((response) => response.json())
         .then((response) => {
             if (response.status == "ok") {
-                let id = "tableEjecPresupuesto";
-                reloadtable(id);
-                id = "tableEjecCdp";
-                reloadtable(id);
+                $('#tableEjecPresupuesto').DataTable().ajax.reload(null, false);
+                $('#tableEjecCdp').DataTable().ajax.reload(null, false);
             } else {
                 mjeError("No se puede cerrar documento actual", "--");
             }
@@ -1923,10 +1902,8 @@ var cerrarCRP = function (dato) {
         .then((response) => response.json())
         .then((response) => {
             if (response.status == "ok") {
-                let id = "tableEjecPresupuestoCrp";
-                reloadtable(id);
-                id = "tableEjecCrpNuevo";
-                reloadtable(id);
+                $("#tableEjecPresupuestoCrp").DataTable().ajax.reload(null, false);
+                $("#tableEjecCrpNuevo").DataTable().ajax.reload(null, false);
             } else {
                 mjeError("No se puede cerrar documento actual", "--");
             }
@@ -1947,6 +1924,10 @@ function abrirCdp(id) {
             }
         },
     });
+};
+function cerrarCdp(id) {
+    cerrarCDP(id);
+    mje("Documento cerrado");
 };
 function abrirCrp(id) {
     $.ajax({

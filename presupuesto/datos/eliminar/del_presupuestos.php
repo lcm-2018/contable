@@ -26,6 +26,10 @@ try {
         $sql->bindParam(1, $idpto, PDO::PARAM_INT);
         $sql->execute();
         if ($sql->rowCount() > 0) {
+            include '../../../financiero/reg_logs.php';
+            $ruta = '../../../log';
+            $consulta = "DELETE FROM `pto_presupuestos` WHERE `id_pto` = $idpto";
+            RegistraLogs($ruta, $consulta);
             echo 'ok';
         } else {
             echo $sql->errorInfo()[2];

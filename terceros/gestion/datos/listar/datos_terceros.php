@@ -8,6 +8,7 @@ include '../../../../conexion.php';
 include '../../../../permisos.php';
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+$anulados = isset($_POST['anulados']) ? $_POST['anulados'] : 0;
 $limit = "";
 if ($length != -1) {
     $limit = "LIMIT $start, $length";
@@ -15,7 +16,12 @@ if ($length != -1) {
 $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 $dato = null;
-$where = $_POST['search']['value'] != '' ? "WHERE `tb_terceros`.`nit_tercero` LIKE '%{$_POST['search']['value']}%' OR `tb_terceros`.`nom_tercero` LIKE '%{$_POST['search']['value']}%'" : '';
+if ($anulados == 1 || $_POST['search']['value'] != '') {
+    $where = '>= 0 ';
+} else {
+    $where = '> 0 ';
+}
+$where .= $_POST['search']['value'] != '' ? "AND (`tb_terceros`.`nit_tercero` LIKE '%{$_POST['search']['value']}%' OR `tb_terceros`.`nom_tercero` LIKE '%{$_POST['search']['value']}%')" : '';
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -33,11 +39,10 @@ try {
                     ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
                 LEFT JOIN `tb_tipo_tercero` 
                     ON (`tb_rel_tercero`.`id_tipo_tercero` = `tb_tipo_tercero`.`id_tipo`)
-            $where
+            WHERE `tb_terceros`.`estado` $where
             GROUP BY
                 `tb_terceros`.`id_tercero_api`
             ORDER BY $col $dir $limit";
-    //echo $sql;
     $rs = $cmd->query($sql);
     $terEmpr = $rs->fetchAll();
     $cmd = null;
@@ -65,7 +70,7 @@ try {
                 COUNT(*) AS `total`
             FROM
                 `tb_terceros`
-            $where";
+            WHERE `tb_terceros`.`estado` $where";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
@@ -123,6 +128,9 @@ if (!empty($id_t)) {
             } else {
                 $borrar = null;
             }
+            if ($t['estado'] == '0') {
+                $editar = $addresponsabilidad = $addactividad = $borrar = null;
+            }
             $detalles = '<a class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" value="' . $idT . '" title="Detalles"><span class="far fa-eye fa-lg"></span></a>';
             $data[] = [
                 'cc_nit' => $terceros[$key]['cc_nit'],
@@ -134,7 +142,7 @@ if (!empty($id_t)) {
                 'telefono' => $terceros[$key]['telefono'],
                 'correo' => $terceros[$key]['correo'],
                 'estado' => '<div class="text-center">' . $estado . '</div>',
-                'botones' => '<div class="text-center">' . $editar  . $addresponsabilidad . $addactividad . $detalles . $histtecero . $borrar . '</div>',
+                'botones' => '<div class="text-center">' . $editar . $addresponsabilidad . $addactividad . $detalles . $histtecero . $borrar . '</div>',
             ];
         }
     }

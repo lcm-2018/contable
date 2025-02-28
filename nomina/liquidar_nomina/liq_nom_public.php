@@ -69,6 +69,9 @@ foreach ($valxvig as $vxv) {
         $basealim = floatval($vxv['valor']);
     }
 }
+$key = array_search('10', array_column($valxvig, 'id_concepto'));
+$minvit = false !== $key ? $valxvig[$key]['valor'] : $smmlv;
+exit($minvit);
 $dia = '01';
 $mes = $_POST['slcMesLiqNom'];
 $id_user = $_SESSION['id_user'];
@@ -1511,7 +1514,7 @@ if (isset($_POST['check'])) {
                 foreach ($tienembg as $te) {
                     $dctoemb = $te['valor_mes'];
                     $base_valida -= $dctoemb;
-                    if ($base_valida > $dctoemb && $base_valida > $smmlv) {
+                    if ($base_valida > $dctoemb && $base_valida > $minvit) {
                         $id_embargo = $te['id_embargo'];
                         try {
                             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -1583,7 +1586,7 @@ if (isset($_POST['check'])) {
             }
             $base_valida = $base_descuentos;
             $base_valida -= $valcuotsind;
-            if ($base_valida > $valcuotsind && $base_valida > $smmlv) {
+            if ($base_valida > $valcuotsind && $base_valida > $minvit) {
                 if ($idcuotsind != 0) {
                     try {
                         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -1613,7 +1616,7 @@ if (isset($_POST['check'])) {
                     $abonolib = $libranza['val_mes'];
                     $base_valida = $base_descuentos;
                     $base_valida -= $abonolib;
-                    if ($base_valida > $abonolib && $base_valida > $smmlv) {
+                    if ($base_valida > $abonolib && $base_valida > $minvit) {
                         try {
                             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -1712,7 +1715,7 @@ if (isset($_POST['check'])) {
                         $id_dcto2 = $dcto['id_dcto'];
                         $val_dcto2 = $dcto['valor'];
                         $base_valida -= $val_dcto2;
-                        if ($base_valida > $val_dcto2 && $base_valida > $smmlv) {
+                        if ($base_valida > $val_dcto2 && $base_valida > $minvit) {
                             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
                             $sql = "INSERT INTO `nom_liq_descuento`

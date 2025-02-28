@@ -19,7 +19,8 @@ try {
 
     if ((PermisosUsuario($permisos, 5508, 2) && $oper == 'add' && $_POST['id_cec_sgcta'] == -1) ||
         (PermisosUsuario($permisos, 5508, 3) && $oper == 'add' && $_POST['id_cec_sgcta'] != -1) ||
-        (PermisosUsuario($permisos, 5508, 4) && $oper == 'del') || $id_rol == 1) {
+        (PermisosUsuario($permisos, 5508, 4) && $oper == 'del') || $id_rol == 1
+    ) {
 
         $id_cec_sg = $_POST['id_cec_sg'];
 
@@ -63,6 +64,10 @@ try {
                 $sql = "DELETE FROM tb_centrocostos_subgr_cta_detalle WHERE id_cecsubgrp_det=" . $id;
                 $rs = $cmd->query($sql);
                 if ($rs) {
+                    include '../../../financiero/reg_logs.php';
+                    $ruta = '../../../log';
+                    $consulta = "DELETE FROM tb_centrocostos_subgr_cta_detalle WHERE id_cecsubgrp_det = $id";
+                    RegistraLogs($ruta, $consulta);
                     $res['mensaje'] = 'ok';
                 } else {
                     $res['mensaje'] = $cmd->errorInfo()[2];

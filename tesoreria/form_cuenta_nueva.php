@@ -53,6 +53,42 @@ if ($id_tes_cuenta > 0) {
     $estado = 0;
 }
 // Consultar el listado de bancos de la tabla tb_bancos
+$cuentas = [];
+if ($id_tes_cuenta  > 0) {
+    try {
+        $sql = "SELECT
+                `ctb_pgcp`.`id_pgcp`
+                , `ctb_pgcp`.`cuenta`
+                , `ctb_pgcp`.`nombre`
+                , `tb_bancos`.`id_banco`
+                , `tes_cuentas`.`id_tes_cuenta`
+            FROM
+                `ctb_pgcp`
+                LEFT JOIN `tes_cuentas` 
+                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                LEFT JOIN `tb_bancos` 
+                    ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
+            WHERE (`ctb_pgcp`.`cuenta` LIKE '1110%' OR `ctb_pgcp`.`cuenta` LIKE '1132%')
+                AND `ctb_pgcp`.`tipo_dato` = 'D'
+                AND `tes_cuentas`.`id_tes_cuenta` IS NULL
+            UNION ALL
+            SELECT
+                `ctb_pgcp`.`id_pgcp`
+                , `ctb_pgcp`.`cuenta`
+                , `ctb_pgcp`.`nombre`
+                , `tes_cuentas`.`id_banco`
+                , `tes_cuentas`.`id_tes_cuenta`
+            FROM
+                `tes_cuentas`
+                INNER JOIN `ctb_pgcp` 
+                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_tes_cuenta)";
+        $rs = $cmd->query($sql);
+        $cuentas = $rs->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+}
 try {
     $sql = "SELECT `id_banco`, `nom_banco` FROM `tb_bancos` ORDER BY `nom_banco` ASC";
     $rs = $cmd->query($sql);
@@ -100,7 +136,14 @@ try {
                     <div class="col-9">
                         <div id="divBanco">
                             <select id="cuentas" name="cuentas" class="form-control form-control-sm">
-                                <option value="0">--Seleccione--</option>
+                                <option value="0">-- Seleccionar --</option>
+                                <?php
+                                foreach ($cuentas as $cuenta) {
+                                    $value = base64_encode($cuenta['id_pgcp'] . '|' . $cuenta['nombre']);
+                                    $selected = $cuenta['id_tes_cuenta'] == $id_tes_cuenta ? 'selected' : '';
+                                    echo '<option value="' . $value . '" ' . $selected . '>' . $cuenta['cuenta'] . ' | ' . $cuenta['nombre'] . '</option>';
+                                }
+                                ?>
                             </select>
                         </div>
                     </div>

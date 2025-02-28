@@ -34,6 +34,7 @@ try {
                 , `seg_usuarios_sistema_1`.`apellido2`) AS `usuario_act`
                 , `pto_cdp`.`id_manu` AS `num_cdp`
                 , `tb_terceros`.`nit_tercero` AS `no_doc`
+                , `seg_usuarios_sistema`.`descripcion` AS `cargo`
             FROM
                 `pto_crp`
                 INNER JOIN `seg_usuarios_sistema` 
@@ -208,7 +209,7 @@ $id_crp = $crp['estado'] == '0' ? 0 : $id_crp;
                                     ?>
                                 </table>
                             </div>
-                            <div style="text-align: center; padding-top: 60px;">
+                            <div style="text-align: center; padding-top: 60px; font-size: 13px;">
                                 <div>___________________________________</div>
                                 <div><?= $nom_respon; ?> </div>
                                 <div><?= $cargo_respon; ?> </div>
@@ -231,7 +232,10 @@ $id_crp = $crp['estado'] == '0' ? 0 : $id_crp;
                                         </tr>
                                         <tr style="text-align:center">
                                             <td>
+                                                <br><br>
                                                 <?= trim($crp['usuario_act']) == '' ? $crp['usuario'] : $crp['usuario_act'] ?>
+                                                <br>
+                                                <?= $crp['cargo'] ?>
                                             </td>
                                             <td>
                                                 <br><br>

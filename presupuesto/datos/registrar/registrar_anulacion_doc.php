@@ -27,6 +27,12 @@ try {
     $sql->bindParam(5, $id, PDO::PARAM_INT);
     $sql->execute();
     if ($sql->rowCount() > 0) {
+        if ($tipo == 'cdp') {
+            $sql = "UPDATE `ctt_adquisiciones` SET `id_cdp` = NULL WHERE `id_cdp` = ?";
+            $sql = $cmd->prepare($sql);
+            $sql->bindParam(1, $id, PDO::PARAM_INT);
+            $sql->execute();
+        }
         echo 'ok';
     } else {
         echo $sql->errorInfo()[2];

@@ -10,6 +10,7 @@ include_once '../../../terceros.php';
 include_once '../../../financiero/consultas.php';
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
+$anulados = $_POST['anulados'];
 $vigencia = $_SESSION['vigencia'];
 $id_vigencia = $_SESSION['id_vigencia'];
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
@@ -22,6 +23,11 @@ $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 $dato = null;
 $where = $_POST['search']['value'] != '' ? "AND (`ctb_doc`.`fecha` LIKE '%{$_POST['search']['value']}%' OR `ctb_doc`.`id_manu` LIKE '%{$_POST['search']['value']}%' OR  `tb_terceros`.`nom_tercero` LIKE '%{$_POST['search']['value']}%' OR `tb_terceros`.`nit_tercero` LIKE '%{$_POST['search']['value']}%')" : '';
+if ($anulados == 1 || $_POST['search']['value'] != '') {
+    $where .= " AND `ctb_doc`.`estado` >= 0";
+} else {
+    $where .= " AND `ctb_doc`.`estado` > 0";
+}
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $erp = [];
@@ -190,7 +196,7 @@ if (!empty($listappto)) {
         }
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
 
-        if ((PermisosUsuario($permisos, 5601, 1)  || PermisosUsuario($permisos, 5602, 1) || PermisosUsuario($permisos, 5603, 1) || PermisosUsuario($permisos, 5604, 1) || $id_rol == 1)) {
+        if ((PermisosUsuario($permisos, 5601, 1) || PermisosUsuario($permisos, 5602, 1) || PermisosUsuario($permisos, 5603, 1) || PermisosUsuario($permisos, 5604, 1) || $id_rol == 1)) {
             $detalles = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" title="Detalles" onclick="cargarListaDetallePagoEdit(' . $id_ctb . ')"><span class="fas fa-eye fa-lg"></span></a>';
         }
         if ((PermisosUsuario($permisos, 5601, 3) || PermisosUsuario($permisos, 5602, 3) || PermisosUsuario($permisos, 5603, 3) || PermisosUsuario($permisos, 5604, 3) || $id_rol == 1)) {
@@ -231,11 +237,11 @@ if (!empty($listappto)) {
             $dato = '<span class="badge badge-pill badge-secondary">Anulado</span>';
         }
         $data[] = [
-            'numero' =>  $lp['id_manu'],
+            'numero' => $lp['id_manu'],
             'fecha' => $fecha,
             'ccnit' => $ccnit,
             'tercero' => $tercero,
-            'valor' =>  '<div class="text-right">' . $valor_total . '</div>',
+            'valor' => '<div class="text-right">' . $valor_total . '</div>',
             'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir . $enviar . $dato . $cerrar . $doc_soporte . $anular . '</div>',
         ];
     }

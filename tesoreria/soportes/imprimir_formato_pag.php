@@ -37,6 +37,7 @@ try {
                 , `seg_usuarios_sistema`.`nombre2`
                 , `seg_usuarios_sistema`.`apellido1`
                 , `seg_usuarios_sistema`.`apellido2`) AS `usuario`
+                , `seg_usuarios_sistema`.`descripcion` AS `cargo`
             FROM
                 `ctb_doc`
                 INNER JOIN `seg_usuarios_sistema` 
@@ -706,8 +707,8 @@ $meses = [
                     <div><?php echo $cargo_respon; ?> </div>
                 </td>
                 <?php
-                if ($cod_doc == 'CEVA') {
-                    if ($_SESSION['nit_emp'] != '844001355' || $id_forma == 2) {
+                if ($cod_doc == 'CEVA' || $cod_doc == 'CICP') {
+                    if ($_SESSION['nit_emp'] != '844001355' || $id_forma == 2 || $cod_doc == 'CICP') {
                 ?>
                         <td>
                             <div>___________________________________</div>
@@ -738,9 +739,13 @@ $meses = [
                 </tr>
                 <tr style="text-align:center">
                     <td>
+                        <br><br>
                         <?= trim($documento['usuario']) ?>
+                        <br>
+                        <?= trim($documento['cargo']) ?>
                     </td>
                     <td>
+                        <br><br>
                         <?php
                         $key = array_search('2', array_column($responsables, 'tipo_control'));
                         $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
@@ -749,6 +754,7 @@ $meses = [
                         ?>
                     </td>
                     <td>
+                        <br><br>
                         <?php
                         $key = array_search('3', array_column($responsables, 'tipo_control'));
                         $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
@@ -767,6 +773,43 @@ $meses = [
 </div>
 <?php
 if ($cod_doc == 'CEVA') {
+    try {
+        $sql = "SELECT
+                    `fin_maestro_doc`.`control_doc`
+                    , `fin_maestro_doc`.`id_doc_fte`
+                    , `fin_maestro_doc`.`costos`
+                    , `ctb_fuente`.`nombre`
+                    , `tb_terceros`.`nom_tercero`
+                    , `tb_terceros`.`nit_tercero`
+                    , `tb_terceros`.`genero`
+                    , `fin_respon_doc`.`cargo`
+                    , `fin_respon_doc`.`tipo_control`
+                    , `fin_tipo_control`.`descripcion` AS `nom_control`
+                    , `fin_respon_doc`.`fecha_ini`
+                    , `fin_respon_doc`.`fecha_fin`
+                FROM
+                    `fin_respon_doc`
+                    INNER JOIN `fin_maestro_doc` 
+                        ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
+                    INNER JOIN `ctb_fuente` 
+                        ON (`ctb_fuente`.`id_doc_fuente` = `fin_maestro_doc`.`id_doc_fte`)
+                    INNER JOIN `tb_terceros` 
+                        ON (`fin_respon_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                    INNER JOIN `fin_tipo_control` 
+                        ON (`fin_respon_doc`.`tipo_control` = `fin_tipo_control`.`id_tipo`)
+                WHERE (`fin_maestro_doc`.`id_modulo` = 56 AND `ctb_fuente`.`cod` = 'REVA'
+                    AND `fin_respon_doc`.`fecha_fin` >= '$fecha' 
+                    AND `fin_respon_doc`.`fecha_ini` <= '$fecha'
+                    AND `fin_respon_doc`.`estado` = 1
+                    AND `fin_maestro_doc`.`estado` = 1)";
+        $res = $cmd->query($sql);
+        $responsables = $res->fetchAll();
+        $key = array_search('4', array_column($responsables, 'tipo_control'));
+        $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+        $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
 ?>
     <div class="contenedor bg-light" id="imprimeResolucion" style="display: none;">
         <style>
@@ -855,8 +898,15 @@ if ($cod_doc == 'CEVA') {
                             <div class="row">
                                 <div class="col-12">
                                     <div style="text-align: center;">
-                                        <div>___________________________________</div>
-                                        <div><?= 'GERENTE' ?> </div>
+                                        <table style="width: 100%;">
+                                            <tr>
+                                                <td style="text-align: center">
+                                                    <div>___________________________________</div>
+                                                    <!--<div><?php //echo $nom_respon; ?> </div>-->
+                                                    <div><?php echo $cargo_respon; ?> </div>
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
