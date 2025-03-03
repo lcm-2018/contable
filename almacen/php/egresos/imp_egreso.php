@@ -17,7 +17,9 @@ try {
     $sql = "SELECT far_orden_egreso.id_egreso,far_orden_egreso.num_egreso,far_orden_egreso.fec_egreso,
             far_orden_egreso.hor_egreso,far_orden_egreso.detalle,far_orden_egreso.val_total,
             tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
-            tb_terceros.nom_tercero,tb_centrocostos.nom_centro,far_orden_egreso_tipo.nom_tipo_egreso,
+            tb_terceros.nom_tercero,tb_centrocostos.nom_centro,
+            IF(far_centrocosto_area.id_area=0,'',CONCAT_WS(' - ',far_centrocosto_area.nom_area,tb_sedes_area.nom_sede)) AS nom_area,
+            far_orden_egreso_tipo.nom_tipo_egreso,
             CASE far_orden_egreso.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
             CASE far_orden_egreso.estado WHEN 0 THEN far_orden_egreso.fec_anulacion WHEN 1 THEN far_orden_egreso.fec_creacion WHEN 2 THEN far_orden_egreso.fec_cierre END AS fec_estado,
             CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
@@ -27,6 +29,8 @@ try {
         INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_egreso.id_bodega)
         INNER JOIN tb_terceros ON (tb_terceros.id_tercero=far_orden_egreso.id_cliente)
         INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_orden_egreso.id_centrocosto)
+        INNER JOIN far_centrocosto_area ON (far_centrocosto_area.id_area=far_orden_egreso.id_area)
+        INNER JOIN tb_sedes AS tb_sedes_area ON (tb_sedes_area.id_sede=far_centrocosto_area.id_sede)
         INNER JOIN far_orden_egreso_tipo ON (far_orden_egreso_tipo.id_tipo_egreso=far_orden_egreso.id_tipo_egreso)
         LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_orden_egreso.id_usr_cierre)
         WHERE id_egreso=" . $id . " LIMIT 1";
@@ -99,15 +103,17 @@ try {
             <td>Sede</td>
             <td>Bodega</td>
             <td>Tipo de Egreso</td>
-            <td colspan="2">Tercero</td>
-            <td colspan="2">Dependencia</td>
+            <td>Tercero</td>
+            <td>Dependencia</td>
+            <td>Área</td>
         </tr>
         <tr>
             <td><?php echo $obj_e['nom_sede']; ?></td>
             <td><?php echo $obj_e['nom_bodega']; ?></td>
             <td><?php echo $obj_e['nom_tipo_egreso']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_tercero']; ?></td>
-            <td colspan="1"><?php echo $obj_e['nom_centro']; ?></td>
+            <td><?php echo $obj_e['nom_tercero']; ?></td>
+            <td><?php echo $obj_e['nom_centro']; ?></td>
+            <td><?php echo $obj_e['nom_area']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td colspan="6">Detalle</td>

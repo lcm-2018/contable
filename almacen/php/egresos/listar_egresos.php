@@ -55,7 +55,7 @@ if (isset($_POST['id_tipegr']) && $_POST['id_tipegr']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_orden_egreso.estado=" . $_POST['estado'];
 }
-if (isset($_POST['estado']) && strlen($_POST['modulo'])) {
+if (isset($_POST['modulo']) && strlen($_POST['modulo'])) {
     $where .= " AND far_orden_egreso.creado_far=" . $_POST['modulo'];
 }
 
@@ -77,7 +77,8 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_orden_egreso.id_egreso,far_orden_egreso.num_egreso,far_orden_egreso.fec_egreso,far_orden_egreso.hor_egreso,
-	            far_orden_egreso.detalle,tb_terceros.nom_tercero,tb_centrocostos.nom_centro,far_centrocosto_area.nom_area,
+	            far_orden_egreso.detalle,tb_terceros.nom_tercero,tb_centrocostos.nom_centro,
+                IF(far_centrocosto_area.id_area=0,'',CONCAT_WS(' - ',far_centrocosto_area.nom_area,tb_sedes_area.nom_sede)) AS nom_area,
 	            far_orden_egreso_tipo.nom_tipo_egreso,far_orden_egreso.val_total,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
                 far_orden_egreso.estado,
 	            CASE far_orden_egreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
@@ -86,6 +87,7 @@ try {
             INNER JOIN tb_terceros ON (tb_terceros.id_tercero=far_orden_egreso.id_cliente)
             INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_orden_egreso.id_centrocosto)
             INNER JOIN far_centrocosto_area ON (far_centrocosto_area.id_area=far_orden_egreso.id_area)
+            INNER JOIN tb_sedes AS tb_sedes_area ON (tb_sedes_area.id_sede=far_centrocosto_area.id_sede)
             INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_orden_egreso.id_sede)
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_egreso.id_bodega)
             $where_usr $where ORDER BY $col $dir $limit";

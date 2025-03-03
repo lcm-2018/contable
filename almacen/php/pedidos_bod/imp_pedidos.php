@@ -43,6 +43,9 @@ if (isset($_POST['id_bodpro']) && $_POST['id_bodpro']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_pedido.estado=" . $_POST['estado'];
 }
+if (isset($_POST['modulo']) && strlen($_POST['modulo'])) {
+    $where .= " AND far_pedido.creado_far=" . $_POST['modulo'];
+}
 
 try {
     $sql = "SELECT far_pedido.id_pedido,far_pedido.num_pedido,

@@ -130,9 +130,8 @@ function sede_unica_usuario($cmd){
 function bitacora($accion, $opcion, $detalle, $id_usuario, $login) {
     $fecha = date('Y-m-d h:i:s A');
     $usuario = $id_usuario . '-' . $login;
-    $ip=$_SERVER['REMOTE_ADDR'];
-    $archivo = date('Ym');
-    $dir='C:\wamp64\www\contable\log';
+    $ip=$_SERVER['REMOTE_ADDR'];    
+    $archivo = $_SESSION['ruta_logs'] . date('Ym') . 'log';
     $log= "Fecha: $fecha, Id Usuario-Login: $usuario, Accion: $accion, Opcion: $opcion, Registro: $detalle,IP:$ip\r\n";
-    file_put_contents("$dir/$archivo.log", $log, FILE_APPEND | LOCK_EX);
+    file_put_contents("$archivo", $log, FILE_APPEND | LOCK_EX);
 }
