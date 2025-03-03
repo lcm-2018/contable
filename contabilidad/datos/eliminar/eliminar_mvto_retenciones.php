@@ -14,6 +14,12 @@ try {
     $query = $pdo->prepare("DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = ?");
     $query->bindParam(1, $id);
     $query->execute();
+    if ($query->rowCount() > 0) {
+        include '../../../financiero/reg_logs.php';
+        $ruta = '../../../log';
+        $consulta = "DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = $id";
+        RegistraLogs($ruta, $consulta);
+    }
     $acumulado = GetValoresCxP($id_doc, $pdo);
     $acumulado = pesos($acumulado['val_retencion']);
     $response[] = array("value" => 'ok', "id" => $id, "acumulado" => $acumulado);

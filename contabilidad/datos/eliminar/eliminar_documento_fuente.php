@@ -11,6 +11,10 @@ try {
     $query->bindParam(1, $id);
     $query->execute();
     if ($query->rowCount() > 0) {
+        include '../../../financiero/reg_logs.php';
+        $ruta = '../../../log';
+        $consulta = "DELETE FROM `ctb_fuente` WHERE `id_doc_fuente` = $id";
+        RegistraLogs($ruta, $consulta);
         $response['value'] = 'ok';
         $response['msg'] = 'Cuenta eliminada correctamente';
     } else {

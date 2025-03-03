@@ -17,6 +17,10 @@ try {
     $query->bindParam(1, $id);
     $query->execute();
     if ($query->rowCount() > 0) {
+        include '../../../financiero/reg_logs.php';
+        $ruta = '../../../log';
+        $consulta = "DELETE FROM `ctb_retenciones` WHERE `id_retencion` = $id";
+        RegistraLogs($ruta, $consulta);
         echo 'ok';
     } else {
         echo $query->errorInfo()[2];

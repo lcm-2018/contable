@@ -18,11 +18,17 @@ $id_pto_presupuestos = $_POST['id_ejec'];
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
 $search_value = $_POST['search'] ?? '';
+$anulados = $_POST['anulados'] ?? 0;
 // Verifico si serach_value tiene datos para buscar
 if (!empty($search_value)) {
     $buscar = "AND (pto_cdp.id_manu LIKE '%$search_value%' OR pto_cdp.objeto LIKE '%$search_value%' OR pto_cdp.fecha LIKE '%$search_value%')";
 } else {
     $buscar = '';
+}
+if ($anulados == 1 || !empty($search_value)) {
+    $buscar .= " AND pto_cdp.estado >= 0";
+} else {
+    $buscar .= " AND pto_cdp.estado > 0";
 }
 try {
     $sql = "SELECT
@@ -140,8 +146,12 @@ if (!empty($listappto)) {
         }
         $key = array_search($id_pto, array_column($registros, 'id_pto_cdp'));
         $valida = $registros[$key]['id_pto_crp'] == '' ? true : false;
-        if (($id_rol == 1 || PermisosUsuario($permisos, 5401, 5)) && $lp['estado'] == 2 && $valida) {
-            $abrir = '<a onclick="abrirCdp(' . $id_pto . ')" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb " title="Abrir CDP"><span class="fas fa-lock fa-lg"></span></a>';
+        if (($id_rol == 1 || PermisosUsuario($permisos, 5401, 5)) && $valida) {
+            if ($lp['estado'] == 2) {
+                $abrir = '<a onclick="abrirCdp(' . $id_pto . ')" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb " title="Abrir CDP"><span class="fas fa-lock fa-lg"></span></a>';
+            } else {
+                $abrir = '<a onclick="cerrarCdp(' . $id_pto . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb " title="Cerrar CDP"><span class="fas fa-lock-open fa-lg"></span></a>';
+            }
             if ($fecha < $fecha_cierre) {
                 $abrir = null;
             }

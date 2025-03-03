@@ -16,6 +16,50 @@ if (esta === -1) {
         }, 900000); // 15 minutos
     }
 }*/
+
+var checkbox = '<input type="checkbox" value="" id="verAnulados" onclick="MostrarAnulados(this)" title="VER ANULADOS">' +
+    '<label for="verAnulados" class="mb-0"> &nbsp; &nbsp; &nbsp; &nbsp;</label>';
+var setdom;
+if ($("#peReg").val() === '1') {
+    setdom = "<'row'<'col-md-5'l><'bttn-plus-dt col-md-2'B><'col-md-5'<'search-wrapper'f>>>" +
+        "<'row'<'col-sm-12'tr>>" +
+        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
+} else {
+    setdom = "<'row'<'col-md-6'l><'col-md-6'<'search-wrapper'f>>>" +
+        "<'row'<'col-sm-12'tr>>" +
+        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
+}
+var setIdioma = {
+    "decimal": "",
+    "emptyTable": "No hay información",
+    "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
+    "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+    "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
+    "infoPostFix": "",
+    "thousands": ",",
+    "lengthMenu": "Ver _MENU_ Filas",
+    "loadingRecords": "Cargando...",
+    "processing": "Procesando...",
+    "search": checkbox + '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
+    "zeroRecords": "No se encontraron registros",
+    "paginate": {
+        "first": "&#10096&#10096",
+        "last": "&#10097&#10097",
+        "next": "&#10097",
+        "previous": "&#10096"
+    }
+};
+function MostrarAnulados(elemento) {
+    //tomar del aria-coontrols el nombre de la tabla
+    var table = elemento.getAttribute('aria-controls');
+    var table = $('#' + table).DataTable().ajax.reload(null, false);
+
+}
+$(document).ready(function () {
+    $('.modal').on('hidden.bs.modal', function () {
+        $(this).attr('aria-hidden', 'false');
+    });
+});
 (function ($) {
     /*$(document).ready(function () {
         $("body").on("contextmenu", function (e) {
@@ -199,30 +243,6 @@ if (esta === -1) {
         }
         return false;
     });
-
-    var setIdioma = {
-        "decimal": "",
-        "emptyTable": "No hay información",
-        "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-        "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-        "infoPostFix": "",
-        "thousands": ",",
-        "lengthMenu": "_MENU_ Registros",
-        "loadingRecords": "Cargando...",
-        "processing": "Procesando...",
-        "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-        "zeroRecords": "No se encontraron registros",
-        "paginate": {
-            "first": "&#10096&#10096",
-            "last": "&#10097&#10097",
-            "next": "&#10097",
-            "previous": "&#10096"
-        }
-    };
-    var setdom = "<'row'<'col-md-5'l><'bttn-excel col-md-2'B><'col-md-5'f>>" +
-        "<'row'<'col-sm-12'tr>>" +
-        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
     //Modal permisos de usuarios 
     var permisosModulos = function (id) {
         $.post(window.urlin + "/actualizar/datos_up_permisos.php", { id: id }, function (he) {

@@ -9,6 +9,10 @@ try {
     $query->bindParam(1, $id);
     $query->execute();
     if ($query->rowCount() > 0) {
+        include '../../../financiero/reg_logs.php';
+        $ruta = '../../../log';
+        $consulta = "DELETE FROM tes_causa_arqueo WHERE id_causa_arqueo = $id";
+        RegistraLogs($ruta, $consulta);
         $response[] = array("value" => 'ok', "id" => $id);
     } else {
         print_r($query->errorInfo()[2]);

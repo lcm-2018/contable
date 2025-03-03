@@ -23,6 +23,10 @@ try {
     $query->bindParam(1, $detalle);
     $query->execute();
     if ($query->rowCount() > 0) {
+        include '../../../financiero/reg_logs.php';
+        $ruta = '../../../log';
+        $consulta = "DELETE FROM `ctb_factura` WHERE `id_cta_factura` = $detalle";
+        RegistraLogs($ruta, $consulta);
         $response['status'] = 'ok';
         $response['msg'] = 'Factura eliminada correctamente';
         $response['id'] = $id;

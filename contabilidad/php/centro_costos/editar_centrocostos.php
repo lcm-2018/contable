@@ -62,6 +62,10 @@ try {
             $sql = "DELETE FROM tb_centrocostos WHERE id_centro=" . $id;
             $rs = $cmd->query($sql);
             if ($rs) {
+                include '../../../financiero/reg_logs.php';
+                $ruta = '../../../log';
+                $consulta = "DELETE FROM tb_centrocostos WHERE id_centro = $id";
+                RegistraLogs($ruta, $consulta);
                 $res['mensaje'] = 'ok';
             } else {
                 $res['mensaje'] = $cmd->errorInfo()[2];

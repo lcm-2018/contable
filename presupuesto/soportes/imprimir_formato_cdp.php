@@ -32,6 +32,7 @@ try {
                 , `seg_usuarios_sistema_1`.`nombre2`
                 , `seg_usuarios_sistema_1`.`apellido1`
                 , `seg_usuarios_sistema_1`.`apellido2`) AS `usuario_act`
+                , `seg_usuarios_sistema`.`descripcion` AS `cargo`
             FROM
                 `pto_cdp`
                 LEFT JOIN `seg_usuarios_sistema` 
@@ -194,7 +195,7 @@ $dto = $cdp['estado'] == '0' ? 0 : $dto;
                                     ?>
                                 </table>
                             </div>
-                            <div style="text-align: center; padding-top: 60px;">
+                            <div style="text-align: center; padding-top: 60px; font-size: 13px;">
                                 <div>___________________________________</div>
                                 <div><?= $nom_respon; ?> </div>
                                 <div><?= $cargo_respon; ?> </div>
@@ -217,7 +218,11 @@ $dto = $cdp['estado'] == '0' ? 0 : $dto;
                                         </tr>
                                         <tr style="text-align:center">
                                             <td>
+                                                <br><br>
                                                 <?= trim($cdp['usuario_act']) == '' ? $cdp['usuario'] : $cdp['usuario_act'] ?>
+                                                <br>
+                                                <?= $cdp['cargo'] ?>
+
                                             </td>
                                             <td>
                                                 <br><br>

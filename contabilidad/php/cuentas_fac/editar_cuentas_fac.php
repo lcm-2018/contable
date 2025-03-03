@@ -21,7 +21,8 @@ try {
 
     if ((PermisosUsuario($permisos, 5507, 2) && $oper == 'add' && $_POST['id_cuentafac'] == -1) ||
         (PermisosUsuario($permisos, 5507, 3) && $oper == 'add' && $_POST['id_cuentafac'] != -1) ||
-        (PermisosUsuario($permisos, 5507, 4) && $oper == 'del') || $id_rol == 1) {
+        (PermisosUsuario($permisos, 5507, 4) && $oper == 'del') || $id_rol == 1
+    ) {
 
         if ($oper == 'add') {
             $id = $_POST['id_cuentafac'];
@@ -41,7 +42,7 @@ try {
             $id_cta_caj = $_POST['id_txt_cta_caj'] ? $_POST['id_txt_cta_caj'] : 'NULL';
             $id_cta_fac_glo = $_POST['id_txt_cta_fac_glo'] ? $_POST['id_txt_cta_fac_glo'] : 'NULL';
             $id_cta_x_ide = $_POST['id_txt_cta_x_ide'] ? $_POST['id_txt_cta_x_ide'] : 'NULL';
-            $fec_vig = $_POST['txt_fec_vig'] ? "'".$_POST['txt_fec_vig']."'" : 'NULL';
+            $fec_vig = $_POST['txt_fec_vig'] ? "'" . $_POST['txt_fec_vig'] . "'" : 'NULL';
             $estado = $_POST['sl_estado'];
 
             if ($id == -1) {
@@ -104,6 +105,10 @@ try {
             $sql = "DELETE FROM tb_homologacion WHERE id_homo=" . $id;
             $rs = $cmd->query($sql);
             if ($rs) {
+                include '../../../financiero/reg_logs.php';
+                $ruta = '../../../log';
+                $consulta = $sql;
+                RegistraLogs($ruta, $consulta);
                 $res['mensaje'] = 'ok';
             } else {
                 $res['mensaje'] = $cmd->errorInfo()[2];

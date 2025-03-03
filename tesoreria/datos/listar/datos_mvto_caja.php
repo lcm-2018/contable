@@ -9,6 +9,7 @@ include_once '../../../permisos.php';
 include_once '../../../financiero/consultas.php';
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
+$anulados = $_POST['anulados'];
 $vigencia = $_SESSION['vigencia'];
 $id_vigencia = $_SESSION['id_vigencia'];
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
@@ -19,7 +20,12 @@ if ($length != -1) {
 }
 $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
-$where = $_POST['search']['value'] != '' ? "AND `tes_caja_const`.`nombre_caja` LIKE '%{$_POST['search']['value']}%' OR `tes_caja_const`.`fecha_ini` LIKE '%{$_POST['search']['value']}%' OR  `pto_actos_admin`.`nombre`" : '';
+$where = $_POST['search']['value'] != '' ? "AND (`tes_caja_const`.`nombre_caja` LIKE '%{$_POST['search']['value']}%' OR `tes_caja_const`.`fecha_ini` LIKE '%{$_POST['search']['value']}%' OR  `pto_actos_admin`.`nombre`)" : '';
+if ($anulados == 1 || $_POST['search']['value'] != '') {
+    $where .= " AND `tes_caja_const`.`estado` >= 0";
+} else {
+    $where .= " AND `tes_caja_const`.`estado` > 0";
+}
 $dato = null;
 function pesos($valor)
 {

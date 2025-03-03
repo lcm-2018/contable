@@ -6,7 +6,13 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../../conexion.php';
 include '../../../../permisos.php';
+$anulados = isset($_POST['anulados']) ? $_POST['anulados'] : 0;
 $vigencia = $_SESSION['vigencia'];
+if ($anulados == 0) {
+    $where = '> 0';
+} else {
+    $where = '>= 0';
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -22,7 +28,7 @@ try {
                 `nom_nominas`
                 LEFT JOIN `nom_meses` 
                     ON (`nom_nominas`.`mes` = `nom_meses`.`codigo`)
-            WHERE `nom_nominas`.`vigencia` = '$vigencia'";
+            WHERE `nom_nominas`.`vigencia` = '$vigencia' AND `nom_nominas`.`estado` $where";
     $rs = $cmd->query($sql);
     $nominas = $rs->fetchAll();
     $cmd = null;
@@ -48,7 +54,7 @@ if (!empty($nominas)) {
         }
         if ($n['estado'] == 0) {
             $estado = '<span class="badge badge-bill badge-secondary">OTRO</span>';
-            $solcdp = $cdpPatron = $pdf =  $compare = $cargue_patron = NULL;
+            $solcdp = $cdpPatron = $pdf = $compare = $cargue_patron = NULL;
         }
         if ($n['estado'] > 1) {
             $compare = $cargue_patron = null;
@@ -60,7 +66,7 @@ if (!empty($nominas)) {
             'mes' => $n['nom_mes'],
             'tipo' => $n['tipo'],
             'estado' => '<div class="text-center">' . $estado . '</div>',
-            'botones' => '<div class="text-center">' . $detalle . $solcdp . $cdpPatron . $pdf .  $compare . $cargue_patron . '</div>'
+            'botones' => '<div class="text-center">' . $detalle . $solcdp . $cdpPatron . $pdf . $compare . $cargue_patron . '</div>'
         ];
     }
 } else {

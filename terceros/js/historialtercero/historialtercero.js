@@ -103,7 +103,7 @@
                 },
             });
         }
-    });*/
+    });
 
     // Autocompletar Usuarios reposnables
     $('#divForms').on("input", "#txt_tercero_filtro", function () {
@@ -212,6 +212,6 @@
             $('#divModalImp').modal('show');
             $("#divImp").html(he);
         });
-    });
+    });*/
 
 })(jQuery);

@@ -12,6 +12,7 @@ include '../../../../conexion.php';
 include '../../../../permisos.php';
 include '../../../../terceros.php';
 $vigencia = $_SESSION['vigencia'];
+$anulados = $_POST['anulados'];
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -44,6 +45,9 @@ if ($id_rol == '1') {
     } else {
         $usuario = " AND `ctt_adquisiciones`.`id_user_reg` =" . $iduser;
     }
+}
+if($anulados == 0){
+    $usuario .= " AND `ctt_adquisiciones`.`estado` <> 99";
 }
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -98,23 +102,23 @@ if (!empty($ladquis)) {
             case 0:
                 $accion = '<a class="btn btn-outline-secondary btn-sm btn-circle shadow-gb disabled" title="Orden sin productos"><span class="fas fa-sign-out-alt fa-lg"></span></a>';
                 break;
-                /*
-            case 1:
-                $accion = '<a class="btn btn-outline-secondary btn-sm btn-circle shadow-gb disabled" title="Orden sin productos"><span class="fas fa-sign-out-alt fa-lg"></span></a>';
-                break;
-            case 2:
-                $accion = '<a value="' . $id_adq . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb enviar" title="Enviar cotización"><span class="fas fa-sign-out-alt fa-lg"></span></a>';
-                break;
-            case 3:
-                $accion = '<a value="' . $id_adq . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb bajar" title="Bajar cotización"><span class="fas fa-chevron-circle-down fa-lg"></span></a>';
-                break;
-            case 4:
-                $accion = '<a value="' . $id_adq . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb comprobar" title="Ver cotización de terceros"><span class="fas fa-clipboard-check fa-lg"></span></a>';
-                break;
-            case 7:
-                $accion = '<a value="' . $id_adq . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb envContrato" title="Enviar Contrato"><span class="fas fa-file-upload fa-lg"></span></a>';
-                break;
-            */
+            /*
+        case 1:
+            $accion = '<a class="btn btn-outline-secondary btn-sm btn-circle shadow-gb disabled" title="Orden sin productos"><span class="fas fa-sign-out-alt fa-lg"></span></a>';
+            break;
+        case 2:
+            $accion = '<a value="' . $id_adq . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb enviar" title="Enviar cotización"><span class="fas fa-sign-out-alt fa-lg"></span></a>';
+            break;
+        case 3:
+            $accion = '<a value="' . $id_adq . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb bajar" title="Bajar cotización"><span class="fas fa-chevron-circle-down fa-lg"></span></a>';
+            break;
+        case 4:
+            $accion = '<a value="' . $id_adq . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb comprobar" title="Ver cotización de terceros"><span class="fas fa-clipboard-check fa-lg"></span></a>';
+            break;
+        case 7:
+            $accion = '<a value="' . $id_adq . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb envContrato" title="Enviar Contrato"><span class="fas fa-file-upload fa-lg"></span></a>';
+            break;
+        */
         }
         if ((PermisosUsuario($permisos, 5302, 4) || $id_rol == 1) && $la['estado'] <= 2) {
             $borrar = '<a value="' . $id_adq . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';

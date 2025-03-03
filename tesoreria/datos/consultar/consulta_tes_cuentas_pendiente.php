@@ -9,13 +9,16 @@ try {
                 `ctb_pgcp`.`id_pgcp`
                 , `ctb_pgcp`.`cuenta`
                 , `ctb_pgcp`.`nombre`
-                , `tes_cuentas`.`id_tes_cuenta`
-                , `tes_cuentas`.`id_banco`
+                , `tb_bancos`.`id_banco`
             FROM
                 `ctb_pgcp`
                 LEFT JOIN `tes_cuentas` 
                     ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-            WHERE `tes_cuentas`.`id_tes_cuenta` IS NULL AND `ctb_pgcp`.`tipo_dato` = 'D' AND(`ctb_pgcp`.`cuenta` LIKE '1132%' OR `ctb_pgcp`.`cuenta` LIKE '1110%')";
+                LEFT JOIN `tb_bancos` 
+                                ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
+            WHERE (`ctb_pgcp`.`cuenta` LIKE '1110%' OR `ctb_pgcp`.`cuenta` LIKE '1132%')
+                AND `ctb_pgcp`.`tipo_dato` = 'D'
+                AND `tes_cuentas`.`id_tes_cuenta` IS NULL";
     $rs = $cmd->query($sql);
     $retenciones = $rs->fetchAll();
     $cmd = null;

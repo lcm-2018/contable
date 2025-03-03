@@ -19,7 +19,8 @@ try {
 
     if ((PermisosUsuario($permisos, 5509, 2) && $oper == 'add' && $_POST['id_subgrupocta_af'] == -1) ||
         (PermisosUsuario($permisos, 5509, 3) && $oper == 'add' && $_POST['id_subgrupocta_af'] != -1) ||
-        (PermisosUsuario($permisos, 5509, 4) && $oper == 'del') || $id_rol == 1) {
+        (PermisosUsuario($permisos, 5509, 4) && $oper == 'del') || $id_rol == 1
+    ) {
 
         $id_subgrupo = $_POST['id_subgrupo'];
 
@@ -29,13 +30,13 @@ try {
                 $rs = $cmd->query($sql);
                 $obj_subgrp = $rs->fetch();
 
-                if($obj_subgrp['id_grupo'] == 3 || $obj_subgrp['id_grupo'] == 4 || $obj_subgrp['id_grupo'] == 5){
+                if ($obj_subgrp['id_grupo'] == 3 || $obj_subgrp['id_grupo'] == 4 || $obj_subgrp['id_grupo'] == 5) {
                     $id = $_POST['id_subgrupocta_af'];
                     $id_cta_act = $_POST['id_txt_cta_con_act'] ? $_POST['id_txt_cta_con_act'] : 'NULL';
                     $id_cta_dep = $_POST['id_txt_cta_con_dep'] ? $_POST['id_txt_cta_con_dep'] : 'NULL';
                     $id_cta_gas = $_POST['id_txt_cta_con_gas'] ? $_POST['id_txt_cta_con_gas'] : 'NULL';
-                    $fec_vig = $_POST['txt_fec_vig'] ? "'".$_POST['txt_fec_vig']."'" : 'NULL';
-                    $estado = $_POST['sl_estado_cta'];                
+                    $fec_vig = $_POST['txt_fec_vig'] ? "'" . $_POST['txt_fec_vig'] . "'" : 'NULL';
+                    $estado = $_POST['sl_estado_cta'];
 
                     if ($id == -1) {
                         $sql = "INSERT INTO far_subgrupos_cta_af(id_subgrupo,id_cuenta,id_cuenta_dep,id_cuenta_gas,fecha_vigencia,estado,id_usr_crea,fec_creacion)  
@@ -66,7 +67,7 @@ try {
                     }
                 } else {
                     $res['mensaje'] = 'Las cuentas se asignan a Tipos de Articulos de Activos Fijos';
-                }    
+                }
             }
 
             if ($oper == 'del') {
@@ -74,6 +75,10 @@ try {
                 $sql = "DELETE FROM far_subgrupos_cta_af WHERE id_subgrupo_cta=" . $id;
                 $rs = $cmd->query($sql);
                 if ($rs) {
+                    include '../../../financiero/reg_logs.php';
+                    $ruta = '../../../log';
+                    $consulta = "DELETE FROM far_subgrupos_cta_af WHERE id_subgrupo_cta = $id";
+                    RegistraLogs($ruta, $consulta);
                     $res['mensaje'] = 'ok';
                 } else {
                     $res['mensaje'] = $cmd->errorInfo()[2];

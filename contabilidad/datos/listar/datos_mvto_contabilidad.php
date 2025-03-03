@@ -9,6 +9,7 @@ include '../../../permisos.php';
 include '../../../terceros.php';
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
+$anulados = $_POST['anulados'];
 $id_vigencia = $_SESSION['id_vigencia'];
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
@@ -20,6 +21,11 @@ $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 
 $where = $_POST['search']['value'] != '' ? "AND (`ctb_doc`.`fecha` LIKE '%{$_POST['search']['value']}%' OR `tb_terceros`.`nom_tercero` LIKE '%{$_POST['search']['value']}%' OR  `pto_crp`.`id_manu` LIKE '%{$_POST['search']['value']}%' OR `ctb_doc`.`id_manu` LIKE '%{$_POST['search']['value']}%')" : '';
+if ($anulados == 1 || $_POST['search']['value'] != '') {
+    $where .= " AND `ctb_doc`.`estado` >= 0";
+} else {
+    $where .= " AND `ctb_doc`.`estado` > 0";
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -59,6 +65,9 @@ try {
                         `pto_pag_detalle`
                         INNER JOIN `pto_cop_detalle` 
                             ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                        INNER JOIN `ctb_doc`
+                            ON (`pto_pag_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    WHERE `ctb_doc`.`estado` > 0
                     GROUP BY `pto_cop_detalle`.`id_ctb_doc`) AS `pag`
                     ON (`pag`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
             WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where)
@@ -170,7 +179,7 @@ if (!empty($listappto)) {
 
         $key = array_search($id_ctb, array_column($diferencias, 'id_ctb_doc'));
         $editar = $detalles = $borrar = $imprimir = $enviar = $acciones = $dato = $imprimir = $anular = null;
-        if ($key  !== false) {
+        if ($key !== false) {
             $valor_debito = $diferencias[$key]['debito'];
             $dif = $diferencias[$key]['diferencia'];
         } else {
@@ -188,16 +197,16 @@ if (!empty($listappto)) {
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
 
         $base = base64_encode($id_ctb . '|' . $id_ctb_doc);
-        if (PermisosUsuario($permisos, 5501, 1)  || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5501, 1) || $id_rol == 1) {
             $detalles = '<a text ="' . $base . '" onclick="cargarListaDetalle(this)" class="btn btn-outline-warning btn-sm btn-circle shadow-gb"  title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
         }
-        if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5501, 3) || $id_rol == 1) {
             //$editar = '<a class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar" text="' . $id_ctb . '"><span class="fas  fa-pencil-alt fa-lg"></span></a>';
         }
-        if (PermisosUsuario($permisos, 5501, 4)  || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5501, 4) || $id_rol == 1) {
             $borrar = '<a value="' . $id_ctb . '" onclick="eliminarRegistroDoc(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
-        if (PermisosUsuario($permisos, 5501, 5)  || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5501, 5) || $id_rol == 1) {
             if ($fecha > $fecha_cierre) {
                 $anular = null;
                 $cerrar = null;
@@ -213,7 +222,7 @@ if (!empty($listappto)) {
                 $anular = '<a value="' . $id_ctb . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" onclick="anularDocumentoCont(' . $id_ctb . ');" title="Anular"><span class="fas fa-ban fa-lg"></span></a>';
             }
         }
-        if (PermisosUsuario($permisos, 5501, 6)  || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5501, 6) || $id_rol == 1) {
             $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoDoc(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
         }
 
@@ -247,11 +256,11 @@ if (!empty($listappto)) {
         $data[] = [
 
             'numero' => $lp['id_manu'],
-            'rp' =>  $id_manu_rp,
+            'rp' => $id_manu_rp,
             'fecha' => $fecha,
             'tercero' => $tercero,
-            'valor' =>  '<div class="text-right">' . $valor_total . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir  . $enviar . $cerrar . $anular .  $dato . '</div>',
+            'valor' => '<div class="text-right">' . $valor_total . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir . $enviar . $cerrar . $anular . $dato . '</div>',
         ];
     }
 }
