@@ -9,7 +9,7 @@ include '../../../conexion.php';
 $idusr = $_SESSION['id_user'];
 $idrol = $_SESSION['rol'];
 $titulo = isset($_POST['titulo']) ? $_POST['titulo'] : '';
-$idsede = $_POST['id_sede'];
+$idsede = $_POST['id_sede'] != '' ? $_POST['id_sede'] : 0;
 $todas = isset($_POST['todas']) ? $_POST['todas'] : false;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -26,6 +26,7 @@ try {
                 INNER JOIN seg_bodegas_usuario ON (seg_bodegas_usuario.id_bodega=far_bodegas.id_bodega AND seg_bodegas_usuario.id_usuario=$idusr)
                 WHERE tb_sedes_bodega.id_sede=$idsede";
     }
+
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     foreach ($objs as $obj) {

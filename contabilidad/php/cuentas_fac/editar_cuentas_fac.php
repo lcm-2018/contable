@@ -89,11 +89,6 @@ try {
                 if ($rs) {
                     $res['mensaje'] = 'ok';
                     $res['id'] = $id;
-
-                    $accion = 'Modificar';
-                    $opcion = 'Cuentas Contables Facturación';
-                    $detalle = 'Regitro Id: ' . $id;
-                    bitacora($accion, $opcion, $detalle, $id_usr_ope, $_SESSION['user']);
                 } else {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }
