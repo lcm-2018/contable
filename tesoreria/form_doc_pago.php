@@ -125,7 +125,7 @@ if (empty($datos)) {
     $tercero = ltrim($terceros[0]['nom_tercero']);
 }
 $cero = isset($datos['id_caja']) ? $datos['id_caja'] : 0;
-$tam = $id_ctb_doc == '9' ? 4 : 6;
+$tam = $id_ctb_doc == '119' ? 4 : 6;
 ?>
 <div class="px-0">
     <div class="shadow">
@@ -143,7 +143,10 @@ $tam = $id_ctb_doc == '9' ? 4 : 6;
                     <label for="numDoc" class="small">NUMERO</label>
                     <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $datos['id_manu'] ?>">
                 </div>
-                <?php if ($id_ctb_doc == '9') { ?>
+                
+            </div>
+            <?php if ($id_ctb_doc == '14') { ?>
+                <div class="form-row px-4">
                     <div class="form-group col-md-4">
                         <label for="numDoc" class="small">&nbsp;</label>
                         <div class="input-group input-group-sm">
@@ -155,11 +158,7 @@ $tam = $id_ctb_doc == '9' ? 4 : 6;
                             <input type="text" class="form-control" disabled value="DOC. SOPORTE">
                         </div>
                     </div>
-                <?php } ?>
-            </div>
-            <?php if ($id_ctb_doc == '14') { ?>
-                <div class="form-row px-4">
-                    <div class="form-group col-md-12">
+                    <div class="form-group col-md-8">
                         <label for="id_caja" class="small">Caja</label>
                         <select name="id_caja" id="id_caja" class="form-control form-control-sm" required>
                             <option value="0" <?php $cero == 0 || $cero = '' ? 'selected' : '' ?>>--Seleccione--</option>
