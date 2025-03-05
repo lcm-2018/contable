@@ -145,6 +145,21 @@ try {
 
                                     </div>
                                 </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-5">
+                                        <label for="txt_tercero_filtro" class="small">Historial Terceros</label>
+                                        <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" name="txt_tercero_filtro" placeholder="Tercero">
+                                        <input type="hidden" id="id_txt_tercero" name="id_txt_tercero" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <label for="btn_historialtercero" class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                                        <a type="button" id="btn_historialtercero" class="btn btn-outline-success btn-sm" title="Historial tercero">
+                                            <span class="fas fa-history fa-lg" aria-hidden="true"></span>
+                                        </a>
+                                    </div>
+                                </div>
+
                                 <br>
                                 <table id="tableEjecPresupuesto" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
                                     <thead>

@@ -12,6 +12,7 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_tercero = isset($_POST['idt']) ? $_POST['idt'] : -1;
+$otro_form = isset($_POST['otro_form']) ? $_POST['otro_form'] : 0;
 
 // se vuelve a consultar los datos del tercero con el id que viene del boton
 //------------------------------------
@@ -166,5 +167,24 @@ $obj = $rs->fetch();
     </div>
 </div>
 
-<script type="text/javascript" src="../../terceros/js/historialtercero/historialtercero.js?v=<?php echo date('YmdHis') ?>"></script>
-<script type="text/javascript" src="../../terceros/js/historialtercero/historialtercero_reg.js?v=<?php echo date('YmdHis') ?>"></script>
+<?php
+if($otro_form==0)
+{
+echo '<script type="text/javascript" src= "../../terceros/js/historialtercero/historialtercero.js?v=' . date('YmdHis') . '"></script>';
+echo '<script type="text/javascript" src="../../terceros/js/historialtercero/historialtercero_reg.js?v=' . date('YmdHis') . '"></script>';
+}
+
+//----1 lo llamo desde presupuesto de gastos
+if($otro_form==1)
+{
+echo '<script type="text/javascript" src= "../terceros/js/historialtercero/historialtercero.js?v=' . date('YmdHis') . '"></script>';
+echo '<script type="text/javascript" src="../terceros/js/historialtercero/historialtercero_reg.js?v=' . date('YmdHis') . '"></script>';
+}
+
+?>
+
+
+
+<!-- scrips originales para no llamar el formulario desde otro menu y que no dependa de la variable otro form
+<script type="text/javascript" src= "../../terceros/js/historialtercero/historialtercero.js?v=<?php echo date('YmdHis') ?>"></script>'
+<script type="text/javascript" src="../../terceros/js/historialtercero/historialtercero_reg.js?v=<?php echo date('YmdHis') ?>"></script>-->

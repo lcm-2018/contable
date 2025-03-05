@@ -37,13 +37,14 @@ if (!empty($listappto)) {
         $detalles = null;
         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
             $editar = '<a value="' . $id_pto . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+            $ejecucion = '<a value="' . $id_pto . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb ejecucion" title="Ejecucion"><span class="fas fa-tasks fa-lg"></span></a>';
             //$detalles = '<a value="' . $id_pto . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
             $acciones = '<button  class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false"><i class="fas fa-ellipsis-v fa-lg"></i>
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
             <a value="' . $id_pto . '" class="dropdown-item sombra carga" href="javascript:void(0);">Cargar presupuesto</a>
             <a value="' . $id_pto . '" class="dropdown-item sombra modifica" href="javascript:void(0);">Modificaciones</a>
-            <a value="' . $id_pto . '" class="dropdown-item sombra ejecuta" href="javascript:void(0);">Ejecución</a>
+            <!--<a value="' . $id_pto . '" class="dropdown-item sombra ejecuta" href="javascript:void(0);">Ejecución</a>-->
             <a value="' . $id_pto . '" class="dropdown-item sombra homologa" href="javascript:void(0);">Homologación</a>
             </div>';
         } else {
@@ -66,7 +67,7 @@ if (!empty($listappto)) {
             'nombre' => $lp['nombre'],
             'tipo' => mb_strtoupper($lp['tipo']),
             'vigencia' => $lp['vigencia'],
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $borrar . $detalles . $acciones . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $borrar . $ejecucion . $detalles . $acciones . '</div>',
 
         ];
     }

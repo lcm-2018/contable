@@ -37,6 +37,7 @@ $municip = $_POST['slcMunicipioEmp'];
 $dir = $_POST['txtDireccion'];
 $mail_persona = $_POST['mailEmp'];
 $tel = $_POST['txtTelEmp'];
+$es_clinic = $_POST['rdo_esasist'];
 $estado = '1';
 $iduser = $_SESSION['id_user'];
 $tipouser = 'user';
@@ -129,8 +130,8 @@ if ($res > 1 || $regAtTerc == 'SI') {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
         $sql = "INSERT INTO `tb_terceros`
-                    (`tipo_doc`,`nom_tercero`,`nit_tercero`,`dir_tercero`,`tel_tercero`,`id_municipio`,`email`,`id_usr_crea`,`id_tercero_api`,`estado`,`fec_inicio`)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    (`tipo_doc`,`nom_tercero`,`nit_tercero`,`dir_tercero`,`tel_tercero`,`id_municipio`,`email`,`id_usr_crea`,`id_tercero_api`,`estado`,`fec_inicio`,es_clinico)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $tipodoc, PDO::PARAM_STR);
         $sql->bindParam(2, $nombre, PDO::PARAM_STR);
@@ -143,6 +144,7 @@ if ($res > 1 || $regAtTerc == 'SI') {
         $sql->bindParam(9, $id_ter_api, PDO::PARAM_INT);
         $sql->bindParam(10, $estado, PDO::PARAM_INT);
         $sql->bindParam(11, $fecInicio, PDO::PARAM_STR);
+        $sql->bindParam(12, $es_clinic, PDO::PARAM_INT);
         $sql->execute();
         if ($cmd->lastInsertId() > 0) {
             $cmd = NULL;
