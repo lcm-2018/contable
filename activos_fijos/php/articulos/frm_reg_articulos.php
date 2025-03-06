@@ -57,12 +57,16 @@ if (empty($obj)) {
                         </select>
                     </div>
                     <div class="form-group col-md-2">
+                        <label for="txt_vidautil_art" class="small">Vida Útil (años)</label>
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_vidautil_art" name="txt_vidautil_art" value="<?php echo $obj['vida_util'] ?>">
+                    </div>
+                    <div class="form-group col-md-2">
                         <label for="txt_topmin_art" class="small">Tope Mínimo</label>
-                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmin_art" name="txt_topmin_art" required value="<?php echo $obj['top_min'] ?>">
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmin_art" name="txt_topmin_art" value="<?php echo $obj['top_min'] ?>">
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_topmax_art" class="small">Tope Máximo</label>
-                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmax_art" name="txt_topmax_art" required value="<?php echo $obj['top_max'] ?>">
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmax_art" name="txt_topmax_art" value="<?php echo $obj['top_max'] ?>">
                     </div>
                     <div class="form-group col-md-4">
                         <label for="txt_unimed_art" class="small">Unidad Medida</label>

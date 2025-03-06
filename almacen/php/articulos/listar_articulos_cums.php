@@ -39,7 +39,8 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_medicamento_cum.id_cum,far_medicamento_cum.cum,far_medicamento_cum.ium,
-	            far_laboratorios.nom_laboratorio,far_presentacion_comercial.nom_presentacion,
+	            far_laboratorios.nom_laboratorio,far_medicamento_cum.reg_invima,
+                far_presentacion_comercial.nom_presentacion,
                 IF(far_medicamento_cum.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_medicamento_cum
             INNER JOIN far_laboratorios ON (far_laboratorios.id_lab=far_medicamento_cum.id_lab)
@@ -71,6 +72,7 @@ if (!empty($objs)) {
             "cum" => $obj['cum'],
             "ium" => $obj['ium'],
             "nom_laboratorio" => $obj['nom_laboratorio'],
+            "reg_invima" => $obj['reg_invima'],
             "nom_presentacion" => $obj['nom_presentacion'],
             "estado" => $obj['estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',

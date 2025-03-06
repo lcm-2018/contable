@@ -36,6 +36,7 @@ try {
                 $fec_ven = $_POST['txt_fec_ven'];
                 $id_pres = $_POST['id_txt_pre_lote'] ? $_POST['id_txt_pre_lote'] : 0;
                 $id_cum = $_POST['sl_cum_lot'] ? $_POST['sl_cum_lot'] : 0;
+                $reg_inv = $_POST['txt_reg_inv'];
                 $id_bodega = $_POST['id_txt_nom_bod'];
                 $estado = $_POST['sl_estado_lot'];
 
@@ -46,8 +47,8 @@ try {
                     $obj = $rs->fetch();
 
                     if ($obj['count'] == 0) {
-                        $sql = "INSERT INTO far_medicamento_lote(lote,fec_vencimiento,id_presentacion,id_cum,id_bodega,estado,id_usr_crea,id_med)  
-                        VALUES('$num_lot','$fec_ven',$id_pres,$id_cum,$id_bodega,$estado,$id_usr_crea,$id_articulo)";
+                        $sql = "INSERT INTO far_medicamento_lote(lote,fec_vencimiento,id_presentacion,id_cum,reg_invima,id_bodega,estado,id_usr_crea,id_med)  
+                        VALUES('$num_lot','$fec_ven',$id_pres,$id_cum,'$reg_inv',$id_bodega,$estado,$id_usr_crea,$id_articulo)";
                         $rs = $cmd->query($sql);
 
                         if ($rs) {
@@ -69,15 +70,24 @@ try {
                         $obj = $rs->fetch();
 
                         if ($obj['count'] == 0) {
-                            $sql = "UPDATE far_medicamento_lote SET lote='$num_lot',fec_vencimiento='$fec_ven',id_presentacion=$id_pres,id_cum=$id_cum,estado=$estado
-                                    WHERE id_lote=" . $id;
-                            $rs = $cmd->query($sql);
-
-                            if ($rs) {
-                                $sql = "UPDATE far_medicamento_lote SET lote='$num_lot',fec_vencimiento='$fec_ven',id_presentacion=$id_pres,id_cum=$id_cum,estado=$estado
-                                        WHERE id_lote_pri=" . $id;
+                            $arr = array();
+                            array_push($arr,$id);
+                            do{
+                                $id_lote = array_shift($arr);
+                                $sql = "UPDATE far_medicamento_lote SET lote='$num_lot',fec_vencimiento='$fec_ven',id_presentacion=$id_pres,id_cum=$id_cum,reg_invima='$reg_inv',estado=$estado
+                                        WHERE id_lote=" . $id_lote;
                                 $rs = $cmd->query($sql);
-                            }
+
+                                $sql = "SELECT GROUP_CONCAT(id_lote) as lotes FROM far_medicamento_lote WHERE id_lote_pri=" . $id_lote;
+                                $rs = $cmd->query($sql);
+                                $obj_lote = $rs->fetch();
+                                if($obj_lote['lotes']){
+                                    $lotes = explode(',',$obj_lote['lotes']);
+                                    foreach ($lotes as $lote) {
+                                        array_push($arr, $lote);
+                                    }
+                                }    
+                            }while($arr);
 
                             if ($rs) {
                                 $res['mensaje'] = 'ok';

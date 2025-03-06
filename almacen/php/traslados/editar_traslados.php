@@ -179,8 +179,9 @@ try {
 
                         $id_ingreso = $_POST['txt_id_ingreso'];
                         $sql = "INSERT INTO far_traslado_detalle(id_traslado,id_lote_origen,cantidad,valor) 
-                                SELECT $id_traslado,ID.id_lote,ID.cantidad,FM.val_promedio
+                                SELECT $id_traslado,ID.id_lote,(ID.cantidad*PC.cantidad),FM.val_promedio
                                 FROM far_orden_ingreso_detalle AS ID
+                                INNER JOIN far_presentacion_comercial AS PC ON (PC.id_prescom=ID.id_presentacion)
                                 INNER JOIN far_medicamento_lote AS ML ON (ML.id_lote=ID.id_lote)
                                 INNER JOIN far_medicamentos AS FM ON (FM.id_med = ML.id_med) 
                                 WHERE ID.id_ingreso=" . $id_ingreso;

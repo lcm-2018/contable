@@ -29,13 +29,15 @@
                 { 'data': 'cum' },
                 { 'data': 'ium' },
                 { 'data': 'nom_laboratorio' },
+                { 'data': 'reg_invima' },
                 { 'data': 'nom_presentacion' },
                 { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [3, 4] },
-                { orderable: false, targets: 6 }
+                { class: 'text-wrap', targets: [3, 5] },
+                { width: '5%', targets: [0, 1, 2, 4, 6] },
+                { orderable: false, targets: 7 }
             ],
             order: [
                 [0, "desc"]
@@ -77,6 +79,7 @@
                 { 'data': 'lote' },
                 { 'data': 'lote_pri' },
                 { 'data': 'fec_vencimiento' },
+                { 'data': 'reg_invima' },
                 { 'data': 'nom_presentacion', },
                 { 'data': 'existencia_umpl' },
                 { 'data': 'existencia' },
@@ -86,8 +89,9 @@
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4] },
-                { orderable: false, targets: 10 }
+                { class: 'text-wrap', targets: [5] },
+                { width: '5%', targets: [0, 1, 2, 3, 4, 6, 7, 8, 9, 10] },
+                { orderable: false, targets: 11 }
             ],
             order: [
                 [0, "desc"]
