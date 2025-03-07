@@ -49,8 +49,10 @@ if (empty($obj)) {
     $obj['id_responsable'] = $area['id_responsable'];
     $obj['nom_responsable'] = $area['nom_responsable'];
 }
+
+$edit_est = estados_activo_fijo($cmd,$id);
+$editar = $edit_est['edit_estado'] == 1 ? '' : 'disabled="disabled"';
 $imprimir = $id != -1 ? '' : 'disabled="disabled"';
-$editar = $id != -1 ? '' : 'disabled="disabled"';
 
 ?>
 
@@ -84,7 +86,7 @@ $editar = $id != -1 ? '' : 'disabled="disabled"';
                     </div>
                     <div class="form-group col-md-6">
                         <label for="nom_articulo" class="small">Artículo</label>
-                        <input type="text" class="form-control form-control-sm" id="nom_articulo" name="nom_articulo" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly" title="Doble Click para Seleccionar el Articulo">
+                        <input type="text" class="form-control form-control-sm" id="nom_articulo" name="nom_articulo" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly" title="Doble Click para Seleccionar el Articulo" <?php echo $editar ?>>
                         <input type="hidden" id="id_articulo" name="id_articulo" value="<?php echo $obj['id_articulo'] ?>">
                     </div>                    
                     <div class="form-group col-md-3">
@@ -260,9 +262,10 @@ $editar = $id != -1 ? '' : 'disabled="disabled"';
                     </div>
                     <div class="form-group col-md-3">
                         <label for="estado_general" class="small">Estado General</label>
-                        <select class="form-control form-control-sm" id="estado_general" name="estado_general">
+                        <select class="form-control form-control-sm" id="estado_general" name="estado_general" <?php echo $editar ?>>
                             <?php estado_general_activo('', $obj['estado_general']) ?>
                         </select>
+                        <input type="hidden" id="id_estado_general" name="id_estado_general" value="<?php echo $obj['estado_general'] ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="fecha_fuera_servicio" class="small">Fecha Fuera de Servicio</label>
@@ -270,9 +273,10 @@ $editar = $id != -1 ? '' : 'disabled="disabled"';
                     </div>
                     <div class="form-group col-md-3">
                         <label for="estado" class="small">Estado</label>
-                        <select class="form-control form-control-sm" id="estado" name="estado">
+                        <select class="form-control form-control-sm" id="estado" name="estado" <?php echo $editar ?>>
                             <?php estado_activo('', $obj['estado']) ?>
                         </select>
+                        <input type="hidden" id="id_estado" name="id_estado" value="<?php echo $obj['estado'] ?>">
                     </div>
                     <div class="form-group col-md-12">
                         <label for="causa_est_general" class="small">Causa del Estado General</label>

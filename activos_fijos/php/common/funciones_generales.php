@@ -80,6 +80,34 @@ function datos_activo_fijo($cmd, $id_acf){
     }
 }
 
+function estados_activo_fijo($cmd, $id_acf){
+    try {
+        $res = array();
+        $sql = "SELECT COUNT(*) AS total FROM acf_baja_detalle
+                INNER JOIN acf_baja ON (acf_baja.id_baja=acf_baja_detalle.id_baja)
+                WHERE acf_baja.estado=2 AND acf_baja_detalle.id_activo_fijo=$id_acf";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();
+        if ($obj['total']>0) {
+            $res = array('edit_estado' => 0);
+        } else {        
+            $sql = "SELECT COUNT(*) AS total FROM acf_mantenimiento_detalle
+                    INNER JOIN acf_mantenimiento ON (acf_mantenimiento.id_mantenimiento=acf_mantenimiento_detalle.id_mantenimiento)
+                    WHERE acf_mantenimiento.estado IN (2,3) AND acf_mantenimiento_detalle.id_activo_fijo=$id_acf";
+            $rs = $cmd->query($sql);
+            $obj = $rs->fetch();
+            if ($obj['total']>0) {
+                $res = array('edit_estado' => 0);
+            } else {
+                $res = array('edit_estado' => 1);
+            }    
+        }
+        $cmd = null;
+        return $res;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
 
 //BITACORA DE MENSAJES A UN ARCHIVO DE ACCIONES REALIZADAS
 function bitacora($accion, $opcion, $detalle, $id_usuario, $login) {
