@@ -1,0 +1,4 @@
+[2025-03-04 09:50:47] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_detalle_pago WHERE id_detalle_pago = 83
+[2025-03-04 09:51:55] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 2780
+[2025-03-04 09:52:00] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 2781
+[2025-03-04 10:19:50] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 394

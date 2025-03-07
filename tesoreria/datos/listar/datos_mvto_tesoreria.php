@@ -180,7 +180,7 @@ if (!empty($listappto)) {
         $disabled = $estado == 2 ? '' : 'disabled';
         if ($lp['doc_soporte'] == 1) {
             $key = array_search($id_ctb, array_column($equivalente, 'id_factura_no'));
-            if ($key !== false) {
+            if ($key !== false && $equivalente[$key]['shash'] != '') {
                 $doc_soporte = '<a onclick="VerSoporteElectronico(' . $equivalente[$key]['id_soporte'] . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="VER DOCUMENTO"><span class="far fa-file-pdf fa-lg"></span></a>';
             } else {
                 $doc_soporte = '<button value="' . $id_ctb . '" onclick="EnviaDocumentoSoporte(this)" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="REPORTAR FACTURA" ' . $disabled . '><span class="fas fa-paper-plane fa-lg"></span></button>';

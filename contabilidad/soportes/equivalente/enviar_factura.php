@@ -224,7 +224,7 @@ try {
     $referencia = $rs->fetch();
     if (!empty($referencia)) {
         $dato = explode('-', $referencia['referencia']);
-        $secuenciaf = $dato[1];
+        $secuenciaf = intval($dato[1]);
         $new = false;
         $id_soporte = $referencia['id_soporte'];
     }

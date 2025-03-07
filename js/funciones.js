@@ -524,11 +524,16 @@ $(document).ready(function () {
             fixedColumns: {
                 left: 1
             },
-            dom: setdom,
-            language: setIdioma,
+            dom: 'Bfrtip', // Agrega los botones al DataTable
             buttons: [
-                'excel'
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel fa-lg fa-lg text-success"></i>',
+                    title: 'Reporte de Nómina',
+                    className: 'btn btn-light'
+                }
             ],
+            language: setIdioma,
             "lengthMenu": [
                 [10, 25, 50, -1],
                 [10, 25, 50, 'TODO'],

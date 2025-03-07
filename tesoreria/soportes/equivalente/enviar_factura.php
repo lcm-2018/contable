@@ -82,7 +82,7 @@ try {
                 , 0 AS `valor_iva`
                 , 0 AS `valor_base`
                 , `ctb_doc`.`detalle`
-                , 'Gastos de caja menor' AS `nota`
+                , 'Gastos de caja menor' AS `nota`
                 , `tb_terceros`.`nit_tercero`
                 , `tb_terceros`.`nom_tercero`
                 , `tb_terceros`.`email`
@@ -175,7 +175,7 @@ $factura['porc_dcto'] = 0;
 $factura['observaciones'] = $contab['nota'];
 $detalles[0]['codigo'] = $unspsc['id_unspsc'];
 $detalles[0]['detalle'] = $contab['detalle'];
-$detalles[0]['val_unitario'] = $contab['valor_base'];
+$detalles[0]['val_unitario'] = $contab['valor_pago'];
 $detalles[0]['cantidad'] = 1;
 $detalles[0]['p_iva'] = 0;
 $detalles[0]['val_iva'] = 0;
@@ -229,7 +229,7 @@ try {
     $referencia = $rs->fetch();
     if (!empty($referencia)) {
         $dato = explode('-', $referencia['referencia']);
-        $secuenciaf = $dato[1];
+        $secuenciaf = intval($dato[1]);
         $new = false;
         $id_soporte = $referencia['id_soporte'];
     }
