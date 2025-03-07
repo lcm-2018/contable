@@ -125,7 +125,7 @@ if (empty($datos)) {
     $tercero = ltrim($terceros[0]['nom_tercero']);
 }
 $cero = isset($datos['id_caja']) ? $datos['id_caja'] : 0;
-$tam = $id_ctb_doc == '119' ? 4 : 6;
+$tam = $id_ctb_doc == '14' ? 4 : 6;
 ?>
 <div class="px-0">
     <div class="shadow">
@@ -143,10 +143,14 @@ $tam = $id_ctb_doc == '119' ? 4 : 6;
                     <label for="numDoc" class="small">NUMERO</label>
                     <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $datos['id_manu'] ?>">
                 </div>
+<<<<<<< HEAD
+                <?php if ($id_ctb_doc == '14') { ?>
+=======
                 
             </div>
             <?php if ($id_ctb_doc == '14') { ?>
                 <div class="form-row px-4">
+>>>>>>> a1e488548f40166116d8295d66cc5c8ab4cf1259
                     <div class="form-group col-md-4">
                         <label for="numDoc" class="small">&nbsp;</label>
                         <div class="input-group input-group-sm">

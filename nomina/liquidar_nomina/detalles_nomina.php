@@ -17,7 +17,7 @@ if (isset($_POST['id'])) {
 function pesos($valor)
 {
     //$valor = $valor > 0 ? $valor : 0;
-    return '$' . number_format($valor, 2, ",", ".");
+    return number_format($valor, 2, ".", "");
 }
 
 include '../../conexion.php';
@@ -722,7 +722,7 @@ try {
                                                                 echo pesos($vac[$keyvac]['val_liq']);
                                                                 $c = $vac[$keyvac]['val_liq'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $c = 0;
                                                             } ?></td>
                                                         <td class="text-right">
@@ -731,7 +731,7 @@ try {
                                                                 echo pesos($indemnizaciones[$keyIndem]['val_liq']);
                                                                 $d1 = $indemnizaciones[$keyIndem]['val_liq'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $d1 = 0;
                                                             } ?>
                                                         </td>
@@ -747,7 +747,7 @@ try {
                                                                 echo pesos($dlab[$keydlab]['val_liq_auxt']);
                                                                 $e = $dlab[$keydlab]['val_liq_auxt'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $e = 0;
                                                             } ?>
                                                         </td>
@@ -757,7 +757,7 @@ try {
                                                                 echo pesos($dlab[$keydlab]['aux_alim']);
                                                                 $e1 = $dlab[$keydlab]['aux_alim'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $e1 = 0;
                                                             } ?>
                                                         </td>
@@ -767,7 +767,7 @@ try {
                                                                 echo pesos($hoex[$keyhoex]['tot_he']);
                                                                 $f = $hoex[$keyhoex]['tot_he'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $f = 0;
                                                             } ?>
                                                         </td>
@@ -777,7 +777,7 @@ try {
                                                                 echo pesos($bsp[$keybsp]['val_bsp']);
                                                                 $c3 = $bsp[$keybsp]['val_bsp'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $c3 = 0;
                                                             } ?></td>
                                                         <td class="text-right">
@@ -786,7 +786,7 @@ try {
                                                                 echo pesos($vac[$keyvac]['val_prima_vac']);
                                                                 $c4 = $vac[$keyvac]['val_prima_vac'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $c4 = 0;
                                                             } ?></td>
                                                         <td class="text-right">
@@ -805,7 +805,7 @@ try {
                                                                 echo pesos($vac[$keyvac]['val_bon_recrea']);
                                                                 $c5 = $vac[$keyvac]['val_bon_recrea'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $c5 = 0;
                                                             }
                                                             $ps = false !== $keyps ? $prima_sv[$keyps]['val_liq_ps'] : 0;
@@ -905,7 +905,7 @@ try {
                                                                 echo pesos($sind[$keysind]['val_aporte']);
                                                                 $m = $sind[$keysind]['val_aporte'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $m = 0;
                                                             } ?>
                                                         </td>

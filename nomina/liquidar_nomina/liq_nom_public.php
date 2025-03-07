@@ -71,7 +71,7 @@ foreach ($valxvig as $vxv) {
 }
 $key = array_search('10', array_column($valxvig, 'id_concepto'));
 $minvit = false !== $key ? $valxvig[$key]['valor'] : $smmlv;
-exit($minvit);
+
 $dia = '01';
 $mes = $_POST['slcMesLiqNom'];
 $id_user = $_SESSION['id_user'];

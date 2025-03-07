@@ -426,6 +426,16 @@ try {
                                         </div>
                                     </div>
                                 </a>
+                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/terceros/set/configuracion.php">
+                                    <div class="form-row">
+                                        <div class="div-icono">
+                                            <i class="fas fa-cogs fa-sm" style="color: #839192;"></i>
+                                        </div>
+                                        <div>
+                                            Configuración
+                                        </div>
+                                    </div>
+                                </a>
                             </nav>
                         </div>
                     <?php
@@ -889,7 +899,7 @@ try {
                                                 Articulos
                                             </div>
                                         </a>
-                                    <?php } ?>                                    
+                                    <?php } ?>
                                     <?php if ((PermisosUsuario($permisos, 5002, 1) || $id_rol == 1) && 2 == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/financiero/php/historialtercero/index.php?var=3">
                                             <div class="div-icono">

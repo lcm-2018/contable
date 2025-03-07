@@ -38,11 +38,13 @@ try {
     foreach ($data as $key => $value) {
         $id_rubro = $key;
         $valor = str_replace(',', '', $value);
-        $sql->execute();
-        if ($sql->rowCount() > 0) {
-            $cambios++;
-        } else {
-            echo $sql->errorInfo()[2];
+        if ($valor > 0) {
+            $sql->execute();
+            if ($sql->rowCount() > 0) {
+                $cambios++;
+            } else {
+                echo $sql->errorInfo()[2];
+            }
         }
     }
     if ($cambios > 0) {

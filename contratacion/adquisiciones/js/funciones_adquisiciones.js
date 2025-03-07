@@ -561,20 +561,29 @@
     });
     $('#modificarAdquisiciones').on('click', '.anular', function () {
         let id = $(this).attr('value');
-        $.ajax({
-            type: 'POST',
-            url: 'datos/actualizar/anula_adq.php',
-            data: { id: id },
-            success: function (r) {
-                if (r == 1) {
-                    let id = 'tableAdquisiciones';
-                    reloadtable(id);
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html('Adquisición anulada correctamente');
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r);
-                }
+        Swal.fire({
+            title: "¿Confirma Anular este Proceso?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'datos/actualizar/anula_adq.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 1) {
+                            $('#tableAdquisiciones').DataTable().ajax.reload(null, false);
+                            mje('Adquisición anulada correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
             }
         });
     });

@@ -12,10 +12,10 @@ $id_tercero = $_POST['id_tercero'];
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
 $limit = "";
-if ($length != -1){
+if ($length != -1) {
     $limit = "LIMIT $start, $length";
 }
-$col = $_POST['order'][0]['column']+1;
+$col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 
 //estos where modificarlos con el filtro para buscar por disponibilidad y rango de fechas
@@ -83,8 +83,8 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 
-$totalRecords=0;
-$totalRecordsFilter=0;
+$totalRecords = 0;
+$totalRecordsFilter = 0;
 
 $editar = NULL;
 $eliminar = NULL;
@@ -92,33 +92,39 @@ $data = [];
 if (!empty($objs)) {
     foreach ($objs as $obj) {
         $id_cdp = $obj['id_pto_cdp'];
-        $totalRecords=$obj['filas'];
-        $totalRecordsFilter=$obj['filas'];
+        $saldo = $obj['saldo'];
+        $totalRecords = $obj['filas'];
+        $totalRecordsFilter = $obj['filas'];
 
         /*Permisos del usuario
            5201-Opcion [Terceros][Gestion]
             1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
-        */ 
-        if (PermisosUsuario($permisos, 5201, 1) || $id_rol == 1) {
+            5201 gestion de terceros
+            5401 presupuesto gestion
+        */
+        $liberar = null;
+        if (PermisosUsuario($permisos, 5201, 1) || $id_rol == 1 || PermisosUsuario($permisos, 5401, 1) ) {
             $listar = '<a value="' . $id_cdp . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_listar" title="Listar"><span class="fas fa-clipboard-list fa-lg"></span></a>';
         }
-        /*if (PermisosUsuario($permisos, 5015, 4) || $id_rol == 1) {
-            $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-        }*/
+        if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
+            if ($saldo > 0) {
+                $liberar =  '<a value="' . $id_cdp . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_liberar" title="Liberar"><span class="fas fa-arrow-alt-circle-left fa-lg"></span></a>';
+            }
+        }
         $data[] = [
-            "id_tercero_api" => $obj['id_tercero_api'],          
-            "nit_tercero" => $obj['nit_tercero'],             
-            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),             
-            "id_manu" => $obj['id_manu'], 
-            "id_pto_cdp" => $id_cdp, 
-            "fecha" => $obj['fecha'], 
+            "id_tercero_api" => $obj['id_tercero_api'],
+            "nit_tercero" => $obj['nit_tercero'],
+            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),
+            "id_manu" => $obj['id_manu'],
+            "id_pto_cdp" => $id_cdp,
+            "fecha" => $obj['fecha'],
             "objeto" => mb_strtoupper($obj['objeto']),
             "valor_cdp" => $obj['valor_cdp'],
             "valor_cdp_liberado" => $obj['valor_cdp_liberado'],
             "valor_crp" => $obj['valor_crp'],
             "valor_crp_liberado" => $obj['valor_crp_liberado'],
             "saldo" => $obj['saldo'],
-            "botones" => '<div class="text-center centro-vertical">' . $listar .'</div>',
+            "botones" => '<div class="text-center centro-vertical">' . $liberar . $listar . '</div>',
         ];
     }
 }
