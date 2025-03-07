@@ -24,6 +24,7 @@ $municip = $_POST['slcMunicipioEmp'];
 $dir = $_POST['txtDireccion'];
 $mail = $_POST['mailEmp'];
 $tel = $_POST['txtTelEmp'];
+$es_clinic = $_POST['rdo_esasist'];
 $iduser = $_SESSION['id_user'];
 $tipouser = 'user';
 $nit_act = $_SESSION['nit_emp'];
@@ -62,7 +63,7 @@ $res = json_decode($result, true);
 if ($res == '1' || $res == '0' || $fecInicio != '') {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $respuesta = UpTercerosEmpresa($api, [$idter], $cmd, $fecInicio);
+    $respuesta = UpTercerosEmpresa($api, [$idter], $cmd, $fecInicio,$es_clinic);
     if ($respuesta == 'ok') {
         echo 'ok';
     } else {

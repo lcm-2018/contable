@@ -40,7 +40,7 @@ if (isset($_POST['id_tiping']) && $_POST['id_tiping']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_orden_ingreso.estado=" . $_POST['estado'];
 }
-if (isset($_POST['estado']) && strlen($_POST['modulo'])) {
+if (isset($_POST['modulo']) && strlen($_POST['modulo'])) {
     $where .= " AND far_orden_ingreso.creado_far=" . $_POST['modulo'];
 }
 

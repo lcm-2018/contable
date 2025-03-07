@@ -23,7 +23,7 @@ try {
                 , dir_tercero
                 , tel_tercero
             FROM
-                aguazul.tb_terceros
+                tb_terceros
             WHERE
                 id_tercero_api=$id_tercero";
     $rs = $cmd->query($sql);

@@ -277,7 +277,6 @@
     });
 
     //------------ filtros
-    //Buascar registros de Articulos
     $('#btn_buscar_filtro').on("click", function () {
         reloadtable('tb_cdps');
 

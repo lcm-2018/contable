@@ -424,7 +424,8 @@
                 fec_fin: $('#txt_fecfin_filtro').val(),
                 id_sedpro: $('#sl_sedpro_filtro').val(),
                 id_bodpro: $('#sl_bodpro_filtro').val(),
-                estado: $('#sl_estado_filtro').val()
+                estado: $('#sl_estado_filtro').val(),
+                modulo: $('#sl_modulo_origen').val()
             }, function(he) {
                 $('#divTamModalImp').removeClass('modal-sm');
                 $('#divTamModalImp').removeClass('modal-lg');

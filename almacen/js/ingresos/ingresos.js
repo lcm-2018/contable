@@ -592,7 +592,8 @@
                 fec_fin: $('#txt_fecfin_filtro').val(),
                 id_tercero: $('#sl_tercero_filtro').val(),
                 id_tiping: $('#sl_tiping_filtro').val(),
-                estado: $('#sl_estado_filtro').val()
+                estado: $('#sl_estado_filtro').val(),
+                modulo: $('#sl_modulo_origen').val()
             }, function(he) {
                 $('#divTamModalImp').removeClass('modal-sm');
                 $('#divTamModalImp').removeClass('modal-lg');

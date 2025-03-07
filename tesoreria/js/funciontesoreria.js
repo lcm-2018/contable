@@ -360,6 +360,33 @@ var tabla;
 		$("#tableDetConciliacion").wrap('<div class="overflow" />');
 		//Fin dataTable
 	});
+
+	//--------------------------------
+	//--------------informes internos
+	$('#sl_libros_aux_tesoreria').on("click", function () {
+		//let idt = $(this).attr('value');
+		//$.post("../php/informes/frm_informes_internos.php", { idt: idt }, function (he) {
+		$.post("php/informes/frm_libros_aux_tesoreria.php", { }, function (he) {
+			$('#divTamModalForms').removeClass('modal-lg');
+			$('#divTamModalForms').removeClass('modal-sm');
+			$('#divTamModalForms').addClass('modal-lg');
+			//(modal-sm, modal-lg, modal-xl) - pequeño,mediano,grande
+			$('#divModalForms').modal('show');
+			$("#divForms").html(he);
+		});
+	});
+
+	//--------------informes bancos
+	$('#sl_libros_aux_bancos').on("click", function () {
+		$.post("php/informes_bancos/frm_libros_aux_bancos.php", { }, function (he) {
+			$('#divTamModalForms').removeClass('modal-lg');
+			$('#divTamModalForms').removeClass('modal-sm');
+			$('#divTamModalForms').addClass('modal-lg');
+			//(modal-sm, modal-lg, modal-xl) - pequeño,mediano,grande
+			$('#divModalForms').modal('show');
+			$("#divForms").html(he);
+		});
+	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
 //Recargar consiliación bancaria

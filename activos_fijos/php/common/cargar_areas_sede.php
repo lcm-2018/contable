@@ -7,14 +7,14 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 
 $titulo = isset($_POST['titulo']) ? $_POST['titulo'] : '';
-$idsede = $_POST['id_sede'];
+$idsede = $_POST['id_sede'] != '' ? $_POST['id_sede'] : 0;
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     
     echo '<option value="">' . $titulo . '</option>';    
-    $sql = "SELECT id_area,nom_area,id_responsable FROM far_centrocosto_area WHERE id_sede=$idsede";
+    $sql = "SELECT id_area,nom_area,id_responsable FROM far_centrocosto_area WHERE id_area<>0 AND id_sede=$idsede";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     foreach ($objs as $obj) {

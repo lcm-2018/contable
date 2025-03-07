@@ -593,7 +593,8 @@
                 id_cencost: $('#sl_centrocosto_filtro').val(),
                 id_area: $('#sl_area_filtro').val(),
                 id_tipegr: $('#sl_tipegr_filtro').val(),
-                estado: $('#sl_estado_filtro').val()
+                estado: $('#sl_estado_filtro').val(),
+                modulo: $('#sl_modulo_origen').val()
             }, function(he) {
                 $('#divTamModalImp').removeClass('modal-sm');
                 $('#divTamModalImp').removeClass('modal-lg');

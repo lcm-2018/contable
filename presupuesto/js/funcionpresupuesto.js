@@ -667,6 +667,17 @@
             $("#divForms").html(he);
         });
     });
+
+    //------------------------------------------
+    //1.0. boton de ejecucion de presupuesto de gastos
+    $("#modificarPresupuesto").on("click", ".ejecucion", function () {
+        let id_pto = $(this).attr("value");
+        $('<form action="lista_ejecucion_pto.php" method="post"><input type="hidden" name="id_pto" value="' + id_pto + '" /></form>')
+            .appendTo("body")
+            .submit();
+    });
+
+    //---------------------------------------------
     //1.1. ejecuta editar presupuesto
     $("#divForms").on("click", "#btnUpdatePresupuesto", function () {
         if ($("#nomPto").val() === "") {
@@ -936,6 +947,23 @@
             return false;
         }
         return false;
+    });
+    //------ boton traer historial de terceros
+    $('#btn_historialtercero').on('click', function () {
+        if ($('#id_txt_tercero').val() == '') {
+            alert("seleccione un tercero");
+        }
+        else {
+            let idt = $('#id_txt_tercero').val();
+            $.post("../terceros/php/historialtercero/frm_historialtercero.php", { idt: idt, otro_form: 1 }, function (he) {
+                $('#divTamModalForms').removeClass('modal-lg');
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').addClass('modal-xl');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+                $('#slcActEcon').focus();
+            });
+        }
     });
 })(jQuery);
 
@@ -3030,3 +3058,36 @@ function redireccionar3(ruta) {
             .submit();
     }, 100);
 }
+
+//-------------------------------------
+//buscar con 2 letras nombre tercero _----- esto si lo voy a usar, asi funciona para buscar por dos letras
+document.addEventListener("keyup", (e) => {
+    if (e.target.id == "txt_tercero_filtro") {
+        $("#txt_tercero_filtro").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "buscar_terceros.php",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        term: request.term,
+                    },
+                    success: function (data) {
+                        response(data);
+                    },
+                });
+            },
+            select: function (event, ui) {
+                $("#txt_tercero_filtro").val(ui.item.label);
+                $("#id_txt_tercero").val(ui.item.id);
+                return false;
+            },
+            focus: function (event, ui) {
+                $("#txt_tercero_filtro").val(ui.item.label);
+                return false;
+            },
+        });
+    }
+});
+
+//--------------------------------------

@@ -56,11 +56,15 @@ if (empty($obj)) {
                         <input type="text" class="form-control form-control-sm" id="txt_lab_cum" required value="<?php echo $obj['nom_laboratorio'] ?>">
                         <input type="hidden" id="id_txt_lab_cum" name="id_txt_lab_cum" value="<?php echo $obj['id_lab'] ?>">
                     </div>
+                    <div class="form-group col-md-3">
+                        <label for="txt_reg_inv" class="small">Registro Invima</label>
+                        <input type="text" class="form-control form-control-sm valcode" id="txt_reg_inv" name="txt_reg_inv" required value="<?php echo $obj['reg_invima'] ?>">
+                    </div>                 
                     <div class="form-group col-md-9">
                         <label for="txt_precom_cum" class="small">Presentación Comercial</label>
                         <input type="text" class="form-control form-control-sm" id="txt_precom_cum" required value="<?php echo $obj['nom_presentacion'] ?>">
                         <input type="hidden" id="id_txt_precom_cum" name="id_txt_precom_cum" value="<?php echo $obj['id_prescom'] ?>">
-                    </div>                    
+                    </div>                       
                     <div class="form-group col-md-3">
                         <label for="sl_estado_cum" class="small">Estado</label>
                         <select class="form-control form-control-sm" id="sl_estado_cum" name="sl_estado_cum">

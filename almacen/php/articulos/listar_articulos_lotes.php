@@ -44,7 +44,8 @@ try {
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_medicamento_lote.id_lote,far_medicamento_lote.lote,
                 IF(far_medicamento_lote.id_bodega=$bodega_pri,'SI','') as lote_pri,
-                far_medicamento_lote.fec_vencimiento,far_presentacion_comercial.nom_presentacion,
+                far_medicamento_lote.fec_vencimiento,far_medicamento_lote.reg_invima,
+                far_presentacion_comercial.nom_presentacion,
                 ROUND(far_medicamento_lote.existencia/IFNULL(far_presentacion_comercial.cantidad,1),1) AS existencia_umpl,
                 far_medicamento_lote.existencia,far_medicamento_cum.cum,
                 far_bodegas.nombre AS nom_bodega,                
@@ -80,6 +81,7 @@ if (!empty($objs)) {
             "lote" => $obj['lote'],
             "lote_pri" => $obj['lote_pri'],
             "fec_vencimiento" => $obj['fec_vencimiento'],
+            "reg_invima" => $obj['reg_invima'],
             "nom_presentacion" => $obj['nom_presentacion'],
             "existencia_umpl" => $obj['existencia_umpl'],              
             "existencia" => $obj['existencia'],

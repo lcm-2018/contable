@@ -189,6 +189,21 @@ try {
                                                     <label for="txtTelEmp" class="small">Contacto</label>
                                                     <input type="text" class="form-control form-control-sm" id="txtTelEmp" name="txtTelEmp" placeholder="Teléfono/celular">
                                                 </div>
+
+                                                <div class="form-group col-md-2">
+                                                    <label class="small">Es asistencial</label>
+                                                    <div class="form-control form-control-sm" id="rdo_esasist">
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" name="rdo_esasist" id="rdo_esasist_si" value="1">
+                                                            <label class="form-check-label small" for="rdo_esasist_si">SI</label>
+                                                        </div>
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" name="rdo_esasist" id="rdo_esasist_no" value="0" checked>
+                                                            <label class="form-check-label small" for="rdo_esasist_no">NO</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                             <div class="text-center pb-3">
                                                 <button class="btn btn-primary btn-sm" id="btnNewTercero">Registrar</button>

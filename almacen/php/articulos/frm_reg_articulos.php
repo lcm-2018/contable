@@ -119,6 +119,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                                     <th>CUM</th>
                                     <th>IUM</th>
                                     <th>Laboratorio</th>
+                                    <th>Registro Invima</th>
                                     <th>Presentación Comercial</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
@@ -136,7 +137,8 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                                     <th>Id</th>
                                     <th>Lote</th>
                                     <th>Principal</th>                                    
-                                    <th>Fecha<br>Vencimiento</th>                                    
+                                    <th>Fecha<br>Vencimiento</th>   
+                                    <th>Registro Invima</th>                                 
                                     <th>Presentación del Lote</th>
                                     <th>Unidades en UMPL</th>
                                     <th>Existencia</th>
