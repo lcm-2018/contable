@@ -31,6 +31,7 @@ if ($tipo_rete != '3') {
     $tarifa = $_POST['tarifa'] > 0 ? $_POST['tarifa'] : 0;
     $id_terceroapi = $_POST['id_terceroapi'] > 0 ? $_POST['id_terceroapi'] : NULL;
     $valor_rte = str_replace(",", "", $_POST['valor_rte']);
+    $valor_rte =  round($valor_rte);
     $base = str_replace(",", "", $data[0]);
     $base_iva = str_replace(",", "", $data[1]);
     $id_detalle = $_POST['id_detalle'];
@@ -108,6 +109,7 @@ if ($tipo_rete != '3') {
             $base = $bases[$i];
             $tarifa = $rangos[$key]['tarifa'];
             $valor_rte = str_replace(',', '', $val_retenciones[$i]);
+            $valor_rte =  round($valor_rte);
             $key = array_search($sedes[$i], array_column($terceros, 'id_municipio'));
             $id_terceroapi = $key !== false ? $terceros[$key]['id_tercero_api'] : NULL;
             if ($valor_rte > 0) {
@@ -119,6 +121,7 @@ if ($tipo_rete != '3') {
                     $base = $valor_rte;
                     $tarifa = $rangos[$key]['tarifa'];
                     $valor_rte = str_replace(',', '', $val_sobretasas[$i]);
+                    $valor_rte =  round($valor_rte);
                     if ($valor_rte > 0) {
                         $query->execute();
                         if ($cmd->lastInsertId() > 0) {
