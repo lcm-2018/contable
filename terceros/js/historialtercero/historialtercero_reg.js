@@ -322,16 +322,85 @@
         alert("imprimiendo!.....");
     });*/
 
-    $('#divForms').on("click", "#btn_imprimir", function() {
-        $.post( window.urlin + '/terceros/php/historialtercero/imp_historialtercero.php', {
+    $('#divForms').on("click", "#btn_imprimir", function () {
+        $.post(window.urlin + '/terceros/php/historialtercero/imp_historialtercero.php', {
             id_tercero: $('#id_tercero').val(),
             id_cdp: $('#id_cdp').val()
-        }, function(he) {
+        }, function (he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');
             $('#divTamModalImp').addClass('modal-xl');
             $('#divModalImp').modal('show');
             $("#divImp").html(he);
         });
+    });
+
+    //------------------- boton liberar saldos
+    $('#body_tb_cdps').on('click', '.btn_liberar', function () {
+        let id_cdp = $(this).attr('value');
+        $('#id_cdp').val(id_cdp);
+        //----------esto pa cargar modal con clic en el boton
+        $.post(window.urlin + "/terceros/php/historialtercero/frm_liberarsaldos.php", { id_cdp: id_cdp }, function (he) {
+            $('#divTamModalReg').removeClass('modal-xl');
+            $('#divTamModalReg').removeClass('modal-sm');
+            $('#divTamModalReg').addClass('modal-lg');
+            $('#divModalReg').modal('show');
+            $("#divFormsReg").html(he);
+        });
+
+        //------------ cargar la tabla saldos
+        if ($.fn.DataTable.isDataTable('#tb_saldos')) {
+            $('#tb_saldos').DataTable().destroy();
+        }
+
+        $('#tb_saldos').DataTable({
+            dom: setdom = "<'row'<'col-md-6'l><'col-md-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            buttons: [{
+                action: function (e, dt, node, config) {
+                    $.post("", { id_cdp: id_cdp }, function (he) {
+                        $('#divTamModalReg').removeClass('modal-xl');
+                        $('#divTamModalReg').removeClass('modal-sm');
+                        $('#divTamModalReg').addClass('modal-lg');
+                        $('#divModalReg').modal('show');
+                        $("#divFormsReg").html(he);
+                    });
+                }
+            }],
+            language: setIdioma,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            ajax: {
+                url: window.urlin + '/terceros/php/historialtercero/listar_saldos.php',
+                type: 'POST',
+                dataType: 'json',
+                data: function (data) {
+                    data.id_cdp = id_cdp;
+                }
+            },
+            columns: [
+                { 'data': 'id_rubro' },
+                { 'data': 'cod_pptal' },
+                { 'data': 'saldo_final' }
+            ],
+            columnDefs: [
+                { class: 'text-wrap', targets: [] }
+            ],
+            order: [
+                [0, "desc"]
+            ],
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+        });
+        $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
+        $('#tb_saldos').wrap('<div class="overflow"/>');
+
+    });
+
+    //--------------------
+    $('#divFormsReg').on("click", "#btn_liquidar", function () {
+        alert("liquidar");
     });
 })(jQuery);

@@ -75,7 +75,7 @@ try {
                 INNER JOIN ctb_doc ON (ctb_libaux.id_ctb_doc = ctb_doc.id_ctb_doc)
                 INNER JOIN ctb_pgcp ON (ctb_libaux.id_cuenta = ctb_pgcp.id_pgcp)
             WHERE ctb_doc.fecha < $fec_ini  
-            AND  ctb_libaux.id_cuenta=$id_cuenta_ini 
+            AND ctb_libaux.id_cuenta IN ('$id_cuenta_ini','$id_cuenta_ini') 
             AND ctb_doc.estado=2 limit 1";
 
     $rs = $cmd->query($sql);
@@ -143,11 +143,6 @@ if ($obj_saldos[0]['filas'] > 0) {
                         ?></b></label>
         </tr>
     </table>
-    <table style="width:100%; font-size:70%">
-        <tr style="text-align:right">
-            <label>SALDOS INICIALES: <?php echo number_format($saldo_inicial, 2, ",", "."); ?></label>
-        </tr>
-    </table>
 
     <table style="width:100% !important; border:#A9A9A9 1px solid;">
         <thead style="font-size:70%; border:#A9A9A9 1px solid;">
@@ -167,6 +162,10 @@ if ($obj_saldos[0]['filas'] > 0) {
         <tbody style="font-size: 70%;">
             <?php
             $tabla = '';
+            echo "<tr>
+            <td class='text-right' colspan='11'>Saldo inicial: </td>
+            <td class='text-right'>" . number_format($saldo_inicial, 2, ".", ",") . "</td>
+            </tr>";
             foreach ($obj_informe as $obj) {
 
                 $primer_caracter = substr($obj['cuenta'], 0, 1);
@@ -181,7 +180,7 @@ if ($obj_saldos[0]['filas'] > 0) {
                         <td style="border:#A9A9A9 1px solid;">' . $obj['fecha'] . '</td>
                         <td style="border:#A9A9A9 1px solid;">' . $obj['cod_tipo_doc'] . '</td>
                         <td style="border:#A9A9A9 1px solid;">' . $obj['id_manu'] . '</td>
-                        <td style="border:#A9A9A9 1px solid; >' . $obj['forma_pago'] . '</td>   
+                        <td style="border:#A9A9A9 1px solid;">' . mb_strtoupper($obj['forma_pago']) . '</td>
                         <td style="border:#A9A9A9 1px solid; text-align:left;" colspan="2">' . mb_strtoupper($obj['nom_tercero']) . '</td>
                         <td style="border:#A9A9A9 1px solid;">' . $obj['nit_tercero'] . '</td>
                         <td style="border:#A9A9A9 1px solid;"text-align:left;" colspan="2">' . mb_strtoupper($obj['detalle']) . '</td>
@@ -192,15 +191,14 @@ if ($obj_saldos[0]['filas'] > 0) {
                 $total_deb += $obj['debito'];
                 $total_cre += $obj['credito'];
             }
+            echo $tabla;
 
             echo "<tr>
-                <td class='text-right' colspan='7'> Total</td>
-                <td class='text-right'>" . number_format($total_deb, 2, ".", ",") . "</td>
-                <td class='text-right'>" . number_format($total_cre, 2, ".", ",") . "</td>
-                <td class='text-right'>" . number_format($saldo_inicial, 2, ".", ",") . "</td>
+                <td class='text-right' colspan='9'> Total</td>
+                <td class='text-right'>Debito: " . number_format($total_deb, 2, ".", ",") . "</td>
+                <td class='text-right'>Credito: " . number_format($total_cre, 2, ".", ",") . "</td>
+                <td class='text-right'>Saldo: " . number_format($saldo_inicial, 2, ".", ",") . "</td>
                 </tr>";
-
-            echo $tabla;
             ?>
         </tbody>
     </table>

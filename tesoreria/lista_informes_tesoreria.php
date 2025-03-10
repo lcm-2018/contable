@@ -39,10 +39,10 @@ include '../financiero/consultas.php';
                                 <a class="nav-link dropdown-toggle sombra" data-toggle="dropdown" href="#" role="button" aria-expanded="false">Internos </a>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item sombra" href="#" id="sl_libros_aux_tesoreria">Libros auxiliares de tesorería</a>
+                                    <a class="dropdown-item sombra" href="#" id="sl_libros_aux_bancos">Libros auxiliares de bancos</a>
                                     <!--<a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(1);">Libros auxiliares de tesorería</a>-->
-                                    <a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(2);">Libros auxiliares de bancos</a>
+                                    <!--<a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(2);">Libros auxiliares de bancos</a>-->
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(3);">Reporte por tercero pagos y causaciones pendientes de pago</a>
-                                    <a class="dropdown-item sombra" href="#" id="sl_libros_aux_bancos">Libros auxiliares de bancos v2</a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">
