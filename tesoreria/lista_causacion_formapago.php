@@ -11,6 +11,7 @@ $id_doc = $_POST['id_doc'] ?? 0;
 $id_cop = $_POST['id_cop'] ?? 0;
 $id_fp = $_POST['id_fp'] ?? 0;
 $valor_pago = $_POST['valor'] ?? 0;
+
 $valor_descuento = 0;
 // Consulta tipo de presupuesto
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -63,6 +64,7 @@ try {
 }
 // Consulto los documentos que estan relacionados con el pago
 // Consultar el valor a de los descuentos realizados a la cuenta de ctb_causa_retencion
+/*
 try {
     $sql = "SELECT
                 `id_pto_cop_det`
@@ -70,22 +72,22 @@ try {
                 `pto_cop_detalle`
             WHERE (`id_ctb_doc` = $id_doc)
             GROUP BY `id_pto_cop_det`";
+
     $rs = $cmd->query($sql);
     $des_documentos = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+    */
 // Consultar el valor a de los descuentos realizados a la cuenta de ctb_causa_retencion de acuerdo a los documentos relacionados
 // recorro los documentos relacionados
-foreach ($des_documentos as $des) {
-    try {
-        $sql = "SELECT SUM(`valor_retencion`) AS `valor` FROM `ctb_causa_retencion` WHERE `id_ctb_doc` = {$des['id_pto_cop_det']}";
-        $rs = $cmd->query($sql);
-        $descuentos = $rs->fetch();
-        $valor_descuento = $valor_descuento + $descuentos['valor'];
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-    }
+try {
+    $sql = "SELECT SUM(`valor_retencion`) AS `valor` FROM `ctb_causa_retencion` WHERE `id_ctb_doc` = $id_cop";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetch();
+    $valor_descuento = $valor_descuento + $descuentos['valor'];
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 // consultar el valor registrado en seg_test_detalle_pago para el id_ctb_doc
 try {
@@ -134,7 +136,7 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
 
     <div class="shadow">
         <div class="card-header" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">LISTA DE CUENTAS BANCARIAS Y FORMA DE PAGO</h5>
+            <h5 style="color: white;">LISTA DE CUENTAS BANCARIAS Y FORMA DE PAGO <?php echo "valor a pagar " . $valor_programado; ?></h5>
         </div>
         <div class="px-4 mt-3">
             <form id="formAddFormaPago">
