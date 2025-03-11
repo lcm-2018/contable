@@ -23,6 +23,24 @@ $sql = "SELECT
         WHERE pto_cdp.id_pto_cdp = 679 LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
+//----------------------------------------------------- hago la consulta aqui para que los saldos sean cajas de texto
+// sino utilizo el script para llamar a listar_saldos.php
+$sql = "SELECT
+                COUNT(*) AS filas
+                ,pto_cdp_detalle.id_pto_cdp
+                ,pto_cdp_detalle.id_rubro
+                , pto_cargue.cod_pptal
+                ,((SUM(pto_cdp_detalle.valor) - SUM(pto_cdp_detalle.valor_liberado)) - (SUM(pto_crp_detalle.valor) - SUM(IFNULL(pto_crp_detalle.valor_liberado, 0)))) AS saldo_final
+            FROM
+                pto_crp_detalle
+                INNER JOIN pto_cdp_detalle ON (pto_crp_detalle.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
+                INNER JOIN pto_cargue ON (pto_cdp_detalle.id_rubro = pto_cargue.id_cargue)
+            WHERE pto_cdp_detalle.id_pto_cdp = $id_cdp
+            GROUP BY pto_cdp_detalle.id_pto_cdp,pto_cdp_detalle.id_rubro";
+
+$rs = $cmd->query($sql);
+$obj_saldos = $rs->fetchAll();
+
 //---------------------------------------------------
 ?>
 <div class="px-0">
@@ -47,16 +65,16 @@ $obj = $rs->fetch();
                         <input type="text" class="filtro form-control form-control-sm" id="txt_fec_cdp" name="txt_fec_cdp" readonly="true" value="<?php echo $obj['fecha'] ?>">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="txt_fec_liq" class="small">FECHA LIQUIDACION</label>
+                        <label for="txt_fec_lib" class="small">FECHA LIBERACION</label>
                     </div>
                     <div class="form-group col-md-9">
-                        <input type="date" class="form-control form-control-sm" id="txt_fec_liq" name="txt_fec_liq" placeholder="Fecha liquidacion" value="<?php echo $_SESSION['vigencia'] ?>-01-01">
+                        <input type="date" class="form-control form-control-sm" id="txt_fec_lib" name="txt_fec_lib" placeholder="Fecha liberacion" value="<?php echo date('Y-m-d') ?>">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="txt_concepto_liq" class="small">CONCEPTO LIQUIDACION</label>
+                        <label for="txt_concepto_lib" class="small">CONCEPTO LIBERACION</label>
                     </div>
                     <div class="form-group col-md-9">
-                        <input type="text" class="form-control form-control-sm" id="txt_concepto_liq" name="txt_concepto_liq" placeholder="Concepto liquidacion">
+                        <input type="text" class="form-control form-control-sm" id="txt_concepto_lib" name="txt_concepto_lib" placeholder="Concepto liberacion">
                     </div>
                 </div>
 
@@ -67,9 +85,30 @@ $obj = $rs->fetch();
                                 <th>Id Rubro</th>
                                 <th style="min-width: 60%;">Codigo</th>
                                 <th>Valor</th>
+                                <th>Valor a liberar</th>
                             </tr>
                         </thead>
                         <tbody class="text-left centro-vertical" id="body_tb_saldos"></tbody>
+                        <?php
+                        foreach ($obj_saldos as $dll) {
+                        ?>
+                            <tr>
+                                <td class="border" colspan="1">
+                                    <input type="text" name="txt_id_rubro[]" class="form-control form-control-sm bg-plain" value="<?php echo $dll['id_rubro'] ?>" readonly="true">
+                                </td>
+                                <td class="border" colspan="1">
+                                    <input type="text" name="txt_codigo[]" class="form-control form-control-sm  bg-plain" value="<?php echo $dll['cod_pptal'] ?>" readonly="true">
+                                </td>
+                                <td class="border" colspan="1">
+                                    <input type="text" name="txt_valor[]" class="form-control form-control-sm bg-plain" value="<?php echo $dll['saldo_final'] ?>" readonly="true">
+                                </td>
+                                <td class="border" colspan="1">
+                                    <input type="text" name="txt_valor_liberar[]" class="form-control form-control-sm valfno bg-plain" value="<?php echo $dll['saldo_final'] ?>">
+                                </td>
+                            </tr>
+                        <?php
+                        }
+                        ?>
                     </table>
                 </div>
             </form>
@@ -80,3 +119,69 @@ $obj = $rs->fetch();
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>
+
+<script>/*
+    (function($) {
+        $(document).ready(function() {
+            $('#tb_saldos').DataTable({
+                language: setIdioma,
+                processing: true,
+                serverSide: true,
+                searching: false,
+                autoWidth: false,
+                ajax: {
+                    url: window.urlin + '/terceros/php/historialtercero/listar_saldos.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: function(data) {
+                        data.id_cdp = $('#id_cdp').val();
+                    }
+                },
+                columns: [{
+                        'data': 'id_rubro'
+                    }, //Index=0
+                    {
+                        'data': 'cod_pptal'
+                    },
+                    {
+                        'data': 'saldo_final'
+                    },
+                ],
+                columnDefs: [{
+                        class: 'text-wrap',
+                        targets: []
+                    } //,
+                    //{ width: '5%', targets: [0,1,3,4] }
+                ],
+                order: [
+                    [2, "asc"]
+                ],
+                lengthMenu: [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, 'TODO'],
+                ]
+            });
+            $('#tb_saldos').wrap('<div class="overflow"/>');
+        });
+    })(jQuery);
+
+    //Buascar registros de articulos de Articulos
+    /*
+    $('#btn_buscar_articulo_fil').on("click", function() {
+        reloadtable('tb_articulos_activos');
+    });
+
+    $('.filtro_art').keypress(function(e) {
+        if (e.keyCode == 13) {
+            reloadtable('tb_articulos_activos');
+        }
+    });
+
+    $('.filtro_art').mouseup(function(e) {
+        reloadtable('tb_articulos_activos');
+    });
+
+    $('#sl_subgrupo_art_fil').on("change", function() {
+        sessionStorage.setItem("id_subgrupo", $(this).val());
+    });*/
+</script>
