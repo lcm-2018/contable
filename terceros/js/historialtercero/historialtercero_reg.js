@@ -152,13 +152,15 @@
                 }
             },
             columns: [
+                { 'data': 'id_pto_crp' },
                 { 'data': 'id_manu' },
                 { 'data': 'fecha' },
                 { 'data': 'tipo' },
                 { 'data': 'num_contrato' },
                 { 'data': 'vr_registro' },
                 { 'data': 'vr_saldo' },
-                { 'data': 'estado' }
+                { 'data': 'estado' },
+                { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [3] }
@@ -352,46 +354,71 @@
 
     //--------------------
     $('#divFormsReg').on("click", "#btn_liquidar", function () {
-        var ban = 0;
         if ($('#txt_fec_lib').val() < $('#txt_fec_cdp').val()) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('La fecha de liberación no puede ser menor a la fecha del CDP');
         }
         else {
-            $('input[name="txt_id_rubro[]"]').each(function () {
-                let id_rubro = $(this).val();
-                let row = $(this).closest('tr');
-                let valor = row.find('input[name="txt_valor[]"]').val();
-                let valor_liberar = row.find('input[name="txt_valor_liberar[]"]').val();
-                if (valor_liberar > valor) {
-                    ban = 1;
+
+            let datos = $('#frm_liberarsaldos').serialize();
+            let url;
+            url = window.urlin + '/terceros/php/historialtercero/registrar_liberacion.php';
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: datos,
+                success: function (r) {
+                    if (r == '1') {
+                        let id = 'tb_cdps';
+                        reloadtable(id);
+                        $('#divFormsReg').modal('hide');
+                        mje('Liberacion ejecutada correctamente');
+                    } else {
+                        mjeError(r);
+                    }
                 }
             });
-            if (ban == 1) {
-                $('#divModalError').modal('show');
-                $('#divMsgError').html('Alguno de los valores a liberar es mayor que el valor maximo permitido');
-            }
-            else {
-                let datos = $('#frm_liberarsaldos').serialize();
-                let url;
-                url = window.urlin + '/terceros/php/historialtercero/registrar_liberacion.php';
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: datos,
-                    success: function (r) {
-                        if (r == '1') {
-                            //let id = 'tableFacurasNoObligados';
-                            //reloadtable(id);
-                            $('#divModalForms').modal('hide');
-                            mje('Liberacion ejecutada correctamente');
-                        } else {
-                            mjeError(r);
-                        }
-                    }
-                });
-            }
+        }
+    });
+    //------------------- boton liberar saldos crp
+    $('#body_tb_reg_presupuestal').on('click', '.btn_liberar_crp', function () {
+        let id_crp = $(this).attr('value');
+        //$('#id_cdp').val(id_cdp);
 
+        //----------esto pa cargar modal con clic en el boton
+        $.post(window.urlin + "/terceros/php/historialtercero/frm_liberarsaldos_crp.php", { id_crp: id_crp }, function (he) {
+            $('#divTamModalReg').removeClass('modal-xl');
+            $('#divTamModalReg').removeClass('modal-sm');
+            $('#divTamModalReg').addClass('modal-lg');
+            $('#divModalReg').modal('show');
+            $("#divFormsReg").html(he);
+        });
+    });
+    //-----------------------------------------------------
+    $('#divFormsReg').on("click", "#btn_liquidar_saldos_crp", function () {
+        if ($('#txt_fec_lib_crp').val() < $('#txt_fec_crp').val()) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('La fecha de liberación no puede ser menor a la fecha del CRP');
+        }
+        else {
+            let datos = $('#frm_liberarsaldos_crp').serialize();
+            let url;
+            url = window.urlin + '/terceros/php/historialtercero/registrar_liberacion_crp.php';
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: datos,
+                success: function (r) {
+                    if (r == '1') {
+                        let id = 'tb_reg_presupuestal';
+                        reloadtable(id);
+                        $('#divFormsReg').modal('hide');
+                        mje('Liberacion ejecutada correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
         }
     });
 })(jQuery);

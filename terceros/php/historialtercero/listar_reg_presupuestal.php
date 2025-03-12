@@ -23,22 +23,26 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     $sql = "SELECT
-            count(*) AS filas
-            , pto_cdp.id_pto_cdp
-            , DATE_FORMAT(pto_crp.fecha, '%Y-%m-%d') AS fecha
-            , pto_crp.id_manu
-            , 'CRP' AS tipo
-            , pto_crp.objeto
-            , pto_crp.num_contrato
-            , pto_crp_detalle.valor - IFNULL(pto_crp_detalle.valor_liberado,0) AS vr_registro
-            , (pto_cdp_detalle.valor - IFNULL(pto_cdp_detalle.valor_liberado,0))-(pto_crp_detalle.valor - IFNULL(pto_crp_detalle.valor_liberado,0)) AS vr_saldo
-            , CASE pto_crp.estado WHEN 1 THEN 'Pendiente' WHEN 2 THEN 'Cerrado' WHEN 0 THEN 'Anulado' END AS estado
-        FROM
-            pto_cdp_detalle
-            INNER JOIN pto_cdp ON (pto_cdp_detalle.id_pto_cdp = pto_cdp.id_pto_cdp)
-            INNER JOIN pto_crp_detalle ON (pto_crp_detalle.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
-            INNER JOIN pto_crp ON (pto_crp_detalle.id_pto_crp = pto_crp.id_pto_crp)
-        WHERE pto_cdp.id_pto_cdp = $id_cdp";
+                COUNT(*) AS filas
+                , pto_crp.id_pto_crp
+                , pto_crp.id_manu
+                , DATE_FORMAT(pto_crp.fecha,'%Y-%m-%d') AS fecha
+                , 'CRP' AS tipo
+                , pto_crp.num_contrato
+                , SUM(IFNULL(pto_crp_detalle.valor,0)) AS vr_crp
+                , SUM(IFNULL(pto_crp_detalle.valor_liberado,0)) AS vr_crp_liberado
+                , SUM(IFNULL(pto_cop_detalle.valor,0)) AS vr_cop
+                , SUM(IFNULL(pto_cop_detalle.valor_liberado,0)) AS vr_cop_liberado
+                , SUM(IFNULL(pto_crp_detalle.valor,0)) - SUM(IFNULL(pto_crp_detalle.valor_liberado,0)) AS vr_registro
+                , (SUM(IFNULL(pto_crp_detalle.valor,0)) - SUM(IFNULL(pto_crp_detalle.valor_liberado,0)))-(SUM(IFNULL(pto_cop_detalle.valor,0)) - SUM(IFNULL(pto_cop_detalle.valor_liberado,0))) AS vr_saldo
+                , CASE pto_crp.estado WHEN 1 THEN 'Pendiente' WHEN 2 THEN 'Cerrado' WHEN 0 THEN 'Anulado' END AS estado
+            FROM
+                pto_cop_detalle
+                INNER JOIN pto_crp_detalle ON (pto_cop_detalle.id_pto_crp_det = pto_crp_detalle.id_pto_crp_det)
+                INNER JOIN pto_cdp_detalle ON (pto_crp_detalle.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
+                INNER JOIN pto_crp ON (pto_crp_detalle.id_pto_crp = pto_crp.id_pto_crp)
+            WHERE pto_crp.id_cdp = $id_cdp
+                GROUP BY pto_crp.id_cdp";
 
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
@@ -53,10 +57,20 @@ $totalRecordsFilter=0;
 $data = [];
 if (!empty($objs)) {
     foreach ($objs as $obj) {
+        $id_crp = $obj['id_pto_crp'];
+        $saldo = $obj['vr_saldo'];
         $totalRecords=$obj['filas'];
         $totalRecordsFilter=$obj['filas'];
 
+        $liberar = null;
+        if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
+            if ($saldo > 0 || $saldo < 0) {
+                $liberar =  '<a value="' . $id_crp . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_liberar_crp" title="Liberar"><span class="fas fa-arrow-alt-circle-left fa-lg"></span></a>';
+            }
+        }
+
         $data[] = [
+            "id_pto_crp" => $obj['id_pto_crp'], 
             "id_manu" => $obj['id_manu'],             
             "fecha" => $obj['fecha'],             
             "tipo" => $obj['tipo'], 
@@ -64,6 +78,7 @@ if (!empty($objs)) {
             "vr_registro" => $obj['vr_registro'], 
             "vr_saldo" => $obj['vr_saldo'],
             "estado" => $obj['estado'],
+            "botones" => '<div class="text-center centro-vertical">' . $liberar . '</div>',
         ];
     }
 }

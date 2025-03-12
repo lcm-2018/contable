@@ -24,16 +24,21 @@ try {
 
     $sql = "SELECT
                 COUNT(*) AS filas
-                ,pto_cdp_detalle.id_pto_cdp
-                ,pto_cdp_detalle.id_rubro
-                , pto_cargue.cod_pptal
-                ,((SUM(pto_cdp_detalle.valor) - SUM(pto_cdp_detalle.valor_liberado)) - (SUM(pto_crp_detalle.valor) - SUM(IFNULL(pto_crp_detalle.valor_liberado, 0)))) AS saldo_final
+                ,pto_cdp_detalle2.id_pto_cdp
+                ,pto_cdp_detalle2.id_rubro
+                ,pto_cargue.cod_pptal
+                ,pto_cdp_detalle2.id_pto_cdp_det
+                ,SUM(pto_cdp_detalle2.valor) AS valorcdp
+                ,SUM(pto_cdp_detalle2.valor_liberado) AS cdpliberado
+                ,SUM(pto_crp_detalle.valor) AS valorcrp
+                ,SUM(IFNULL(pto_crp_detalle.valor_liberado,0)) AS crpliberado
+                ,((SUM(pto_cdp_detalle2.valor) - SUM(pto_cdp_detalle2.valor_liberado)) - (SUM(pto_crp_detalle.valor) - SUM(IFNULL(pto_crp_detalle.valor_liberado,0)))) AS saldo_final
             FROM
                 pto_crp_detalle
-                INNER JOIN pto_cdp_detalle ON (pto_crp_detalle.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
-                INNER JOIN pto_cargue ON (pto_cdp_detalle.id_rubro = pto_cargue.id_cargue)
-            WHERE pto_cdp_detalle.id_pto_cdp = $id_cdp
-            GROUP BY pto_cdp_detalle.id_pto_cdp,pto_cdp_detalle.id_rubro";
+                INNER JOIN (SELECT id_pto_cdp,id_rubro,id_pto_cdp_det,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_cdp_detalle GROUP BY id_pto_cdp) AS pto_cdp_detalle2 ON (pto_cdp_detalle2.id_pto_cdp_det = pto_crp_detalle.id_pto_cdp_det)
+                INNER JOIN pto_cargue ON (pto_cdp_detalle2.id_rubro = pto_cargue.id_cargue)
+            WHERE pto_cdp_detalle2.id_pto_cdp = $id_cdp
+            GROUP BY pto_cdp_detalle2.id_pto_cdp,pto_cdp_detalle2.id_rubro ";
 
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
