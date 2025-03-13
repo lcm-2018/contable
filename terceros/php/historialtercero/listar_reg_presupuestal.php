@@ -23,26 +23,26 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     $sql = "SELECT
-                COUNT(*) AS filas
+            COUNT(*) AS filas
                 , pto_crp.id_pto_crp
                 , pto_crp.id_manu
                 , DATE_FORMAT(pto_crp.fecha,'%Y-%m-%d') AS fecha
                 , 'CRP' AS tipo
                 , pto_crp.num_contrato
-                , SUM(IFNULL(pto_crp_detalle.valor,0)) AS vr_crp
-                , SUM(IFNULL(pto_crp_detalle.valor_liberado,0)) AS vr_crp_liberado
+                , SUM(IFNULL(pto_crp_detalle2.valor,0)) AS vr_crp
+                , SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)) AS vr_crp_liberado
                 , SUM(IFNULL(pto_cop_detalle.valor,0)) AS vr_cop
                 , SUM(IFNULL(pto_cop_detalle.valor_liberado,0)) AS vr_cop_liberado
-                , SUM(IFNULL(pto_crp_detalle.valor,0)) - SUM(IFNULL(pto_crp_detalle.valor_liberado,0)) AS vr_registro
-                , (SUM(IFNULL(pto_crp_detalle.valor,0)) - SUM(IFNULL(pto_crp_detalle.valor_liberado,0)))-(SUM(IFNULL(pto_cop_detalle.valor,0)) - SUM(IFNULL(pto_cop_detalle.valor_liberado,0))) AS vr_saldo
+                , SUM(IFNULL(pto_crp_detalle2.valor,0)) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)) AS vr_registro
+                ,(SUM(IFNULL(pto_crp_detalle2.valor,0)) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)))-(SUM(IFNULL(pto_cop_detalle.valor,0)) - SUM(IFNULL(pto_cop_detalle.valor_liberado,0))) AS vr_saldo
                 , CASE pto_crp.estado WHEN 1 THEN 'Pendiente' WHEN 2 THEN 'Cerrado' WHEN 0 THEN 'Anulado' END AS estado
             FROM
                 pto_cop_detalle
-                INNER JOIN pto_crp_detalle ON (pto_cop_detalle.id_pto_crp_det = pto_crp_detalle.id_pto_crp_det)
-                INNER JOIN pto_cdp_detalle ON (pto_crp_detalle.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
-                INNER JOIN pto_crp ON (pto_crp_detalle.id_pto_crp = pto_crp.id_pto_crp)
+                INNER JOIN (SELECT id_pto_crp,id_pto_crp_det,id_pto_cdp_det,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2 ON (pto_cop_detalle.id_pto_crp_det = pto_crp_detalle2.id_pto_crp_det)
+                INNER JOIN pto_cdp_detalle ON (pto_crp_detalle2.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
+                INNER JOIN pto_crp ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)
             WHERE pto_crp.id_cdp = $id_cdp
-                GROUP BY pto_crp.id_cdp";
+            GROUP BY pto_crp.id_cdp";
 
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();

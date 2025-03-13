@@ -60,21 +60,20 @@ try {
                 , pto_cdp.id_manu
                 , pto_cdp.id_pto_cdp
                 , DATE_FORMAT(pto_cdp.fecha, '%Y-%m-%d') AS fecha
-                , pto_cdp.objeto
-                , pto_crp_detalle.valor AS vrcrp 
+                , pto_cdp.objeto                
                 , SUM(pto_cdp_detalle2.valor) AS valor_cdp   
                 , SUM(IFNULL(pto_cdp_detalle2.valor_liberado,0)) AS valor_cdp_liberado   
-                , SUM(pto_crp_detalle.valor) AS valor_crp
-                , SUM(IFNULL(pto_crp_detalle.valor_liberado,0)) AS valor_crp_liberado
-                , (SUM(pto_cdp_detalle2.valor) - SUM(IFNULL(pto_cdp_detalle2.valor_liberado,0))) - (SUM(pto_crp_detalle.valor) - SUM(IFNULL(pto_crp_detalle.valor_liberado,0))) AS saldo
+                , SUM(pto_crp_detalle2.valor) AS valor_crp
+                , SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)) AS valor_crp_liberado
+                , (SUM(pto_cdp_detalle2.valor) - SUM(IFNULL(pto_cdp_detalle2.valor_liberado,0))) - (SUM(pto_crp_detalle2.valor) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0))) AS saldo
             FROM
                 pto_cdp
                 INNER JOIN (SELECT id_pto_cdp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_cdp_detalle GROUP BY id_pto_cdp) AS pto_cdp_detalle2 ON (pto_cdp_detalle2.id_pto_cdp = pto_cdp.id_pto_cdp)
             INNER JOIN pto_crp ON (pto_crp.id_cdp = pto_cdp.id_pto_cdp)
-            INNER JOIN pto_crp_detalle ON (pto_crp_detalle.id_pto_crp = pto_crp.id_pto_crp)  
+                INNER JOIN (SELECT id_pto_crp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2 ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)  
             INNER JOIN tb_terceros ON (pto_crp.id_tercero_api = tb_terceros.id_tercero_api)      
-            WHERE pto_crp.id_tercero_api=$id_tercero   
-            $and_where
+            WHERE pto_crp.id_tercero_api=$id_tercero  
+             $and_where
             GROUP BY pto_cdp.id_pto_cdp";
 
     $rs = $cmd->query($sql);

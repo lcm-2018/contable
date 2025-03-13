@@ -18,20 +18,21 @@ $inserta = 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $query = "INSERT INTO pto_crp_detalle (id_pto_crp, valor, valor_liberado, fecha_libera, concepto_libera, id_user_reg, fecha_reg, id_user_act, fecha_act) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO pto_crp_detalle (id_pto_crp, id_pto_cdp_det, valor, valor_liberado, fecha_libera, concepto_libera, id_user_reg, fecha_reg, id_user_act, fecha_act) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $query = $cmd->prepare($query);
     $query->bindParam(1, $id_crp, PDO::PARAM_INT);
-    $query->bindParam(2, $valor, PDO::PARAM_STR);
-    $query->bindParam(3, $valor_liberado, PDO::PARAM_STR);
-    $query->bindParam(4, $fec_lib, PDO::PARAM_STR);
-    $query->bindParam(5, $concepto_lib, PDO::PARAM_STR);
-    $query->bindParam(6, $iduser, PDO::PARAM_INT);
-    $query->bindValue(7, $date->format('Y-m-d H:i:s'));
-    $query->bindParam(8, $iduser, PDO::PARAM_INT);
-    $query->bindValue(9, $date->format('Y-m-d H:i:s'));
+    $query->bindParam(2, $id_rubro, PDO::PARAM_INT);
+    $query->bindParam(3, $valor, PDO::PARAM_STR);
+    $query->bindParam(4, $valor_liberado, PDO::PARAM_STR);
+    $query->bindParam(5, $fec_lib, PDO::PARAM_STR);
+    $query->bindParam(6, $concepto_lib, PDO::PARAM_STR);
+    $query->bindParam(7, $iduser, PDO::PARAM_INT);
+    $query->bindValue(8, $date->format('Y-m-d H:i:s'));
+    $query->bindParam(9, $iduser, PDO::PARAM_INT);
+    $query->bindValue(10, $date->format('Y-m-d H:i:s'));
     foreach ($array_rubros as $key => $value) {
-        //$id_rubro = $array_rubros[$key];
+        $id_rubro = $array_rubros[$key];
         $valor_liberado = $array_valores_liberacion[$key];
         $query->execute();
         if ($cmd->lastInsertId() > 0) {

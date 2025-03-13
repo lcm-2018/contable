@@ -282,11 +282,13 @@
     $('#btn_buscar_filtro').on("click", function () {
         reloadtable('tb_cdps');
 
-        $('#tb_contratos').empty();
+        /*$('#tb_contratos').empty();
         $('#tb_contratos').DataTable();
 
         $('#tb_reg_presupuestal').empty();
         $('#tb_reg_presupuestal').DataTable();
+
+        
 
         $('#tb_obligaciones').empty();
         $('#tb_obligaciones').DataTable();
@@ -294,7 +296,7 @@
         $('#tb_pagos').empty();
         $('#tb_pagos').DataTable();
 
-        $('#id_cdp').val('');
+        $('#id_cdp').val('');*/
     });
 
     $('.filtro').keypress(function (e) {
@@ -410,6 +412,8 @@
                 data: datos,
                 success: function (r) {
                     if (r == '1') {
+                        let id2 = 'tb_cdps';
+                        reloadtable(id2);
                         let id = 'tb_reg_presupuestal';
                         reloadtable(id);
                         $('#divFormsReg').modal('hide');

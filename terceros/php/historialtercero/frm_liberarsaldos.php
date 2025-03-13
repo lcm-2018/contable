@@ -28,20 +28,22 @@ $obj = $rs->fetch();
 $sql = "SELECT
                 COUNT(*) AS filas
                 ,pto_cdp_detalle2.id_pto_cdp
-                ,pto_cdp_detalle2.id_rubro
-                ,pto_cargue.cod_pptal
-                ,pto_cdp_detalle2.id_pto_cdp_det
+                , pto_cdp_detalle2.id_rubro
+                , pto_cargue.cod_pptal
+                , pto_cdp_detalle2.id_pto_cdp_det
                 ,SUM(pto_cdp_detalle2.valor) AS valorcdp
-                ,SUM(pto_cdp_detalle2.valor_liberado) AS cdpliberado
-                ,SUM(pto_crp_detalle.valor) AS valorcrp
-                ,SUM(IFNULL(pto_crp_detalle.valor_liberado,0)) AS crpliberado
-                ,((SUM(pto_cdp_detalle2.valor) - SUM(pto_cdp_detalle2.valor_liberado)) - (SUM(pto_crp_detalle.valor) - SUM(IFNULL(pto_crp_detalle.valor_liberado,0)))) AS saldo_final
+                ,SUM(IFNULL(pto_cdp_detalle2.valor_liberado,0)) AS cdpliberado
+                ,SUM(pto_crp_detalle2.valor) AS valorcrp
+                ,SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)) AS crpliberado
+                ,((SUM(pto_cdp_detalle2.valor) - SUM(IFNULL(pto_cdp_detalle2.valor_liberado,0))) - (SUM(pto_crp_detalle2.valor) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)))) AS saldo_final
             FROM
-                pto_crp_detalle
-                INNER JOIN (SELECT id_pto_cdp,id_rubro,id_pto_cdp_det,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_cdp_detalle GROUP BY id_pto_cdp) AS pto_cdp_detalle2 ON (pto_cdp_detalle2.id_pto_cdp_det = pto_crp_detalle.id_pto_cdp_det)
+                pto_cdp
+                INNER JOIN (SELECT id_pto_cdp,id_rubro,id_pto_cdp_det,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_cdp_detalle GROUP BY id_pto_cdp) AS pto_cdp_detalle2 ON (pto_cdp_detalle2.id_pto_cdp = pto_cdp.id_pto_cdp)
+		        INNER JOIN pto_crp ON (pto_crp.id_cdp = pto_cdp.id_pto_cdp)
+                INNER JOIN (SELECT id_pto_crp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2 ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)  
                 INNER JOIN pto_cargue ON (pto_cdp_detalle2.id_rubro = pto_cargue.id_cargue)
-            WHERE pto_cdp_detalle2.id_pto_cdp = $id_cdp
-            GROUP BY pto_cdp_detalle2.id_pto_cdp,pto_cdp_detalle2.id_rubro ";
+            WHERE pto_cdp_detalle2.id_pto_cdp = $id_cdp 
+            GROUP BY pto_cdp.id_pto_cdp";
 
 $rs = $cmd->query($sql);
 $obj_saldos = $rs->fetchAll();

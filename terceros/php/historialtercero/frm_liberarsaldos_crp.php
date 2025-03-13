@@ -27,21 +27,23 @@ $obj = $rs->fetch();
 // sino utilizo el script para llamar a listar_saldos.php
 $sql = "SELECT
             COUNT(*) AS filas
-            , pto_crp_detalle.id_pto_crp
-            , pto_cdp_detalle.id_rubro
-            , pto_cargue.cod_pptal
-            , SUM(IFNULL(pto_crp_detalle.valor,0)) AS vr_crp
-            , SUM(IFNULL(pto_crp_detalle.valor_liberado,0)) AS vr_crp_liberado
+            , pto_crp.id_pto_crp
+            , pto_cdp_detalle.id_pto_cdp_det
+            , pto_cargue.cod_pptal 
+            , SUM(IFNULL(pto_crp_detalle2.valor,0)) AS vr_crp
+            , SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)) AS vr_crp_liberado
             , SUM(IFNULL(pto_cop_detalle.valor,0)) AS vr_cop
             , SUM(IFNULL(pto_cop_detalle.valor_liberado,0)) AS vr_cop_liberado
-            , ((SUM(IFNULL(pto_crp_detalle.valor,0)) - SUM(IFNULL(pto_crp_detalle.valor_liberado,0))) - (SUM(IFNULL(pto_cop_detalle.valor,0)) - SUM(IFNULL(pto_cop_detalle.valor_liberado,0)))) AS saldo_final
+            ,(SUM(IFNULL(pto_crp_detalle2.valor,0)) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)))-(SUM(IFNULL(pto_cop_detalle.valor,0)) - SUM(IFNULL(pto_cop_detalle.valor_liberado,0))) AS saldo_final
         FROM
-            pto_crp_detalle
-            INNER JOIN pto_cdp_detalle ON (pto_crp_detalle.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
-            INNER JOIN pto_cop_detalle ON (pto_cop_detalle.id_pto_crp_det = pto_crp_detalle.id_pto_crp_det)
+            pto_cop_detalle
+            INNER JOIN (SELECT id_pto_crp,id_pto_crp_det,id_pto_cdp_det,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2 ON (pto_cop_detalle.id_pto_crp_det = pto_crp_detalle2.id_pto_crp_det)
+            INNER JOIN pto_cdp_detalle ON (pto_crp_detalle2.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
+            INNER JOIN pto_crp ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)
             INNER JOIN pto_cargue ON (pto_cdp_detalle.id_rubro = pto_cargue.id_cargue)
-        WHERE pto_crp_detalle.id_pto_crp = $id_crp
-        GROUP BY pto_crp_detalle.id_pto_crp,pto_cdp_detalle.id_rubro";
+
+            WHERE pto_crp_detalle2.id_pto_crp = $id_crp
+            GROUP BY pto_crp.id_cdp";
 
 $rs = $cmd->query($sql);
 $obj_saldos = $rs->fetchAll();
@@ -87,7 +89,7 @@ $obj_saldos = $rs->fetchAll();
                     <table id="tb_saldos_crp" class="table table-striped table-bordered table-sm nowrap table-hover shadow w-100" style="width:100%; font-size:80%">
                         <thead>
                             <tr class="text-center centro-vertical">
-                                <th>Id Rubro</th>
+                                <th>Id cdp det</th>
                                 <th style="min-width: 50%;">Codigo</th>
                                 <th>Valor</th>
                                 <th>Valor a liberar</th>
@@ -99,7 +101,7 @@ $obj_saldos = $rs->fetchAll();
                         ?>
                             <tr>
                                 <td class="border" colspan="1">
-                                    <input type="text" name="txt_id_rubro_crp[]" class="form-control form-control-sm bg-plain" value="<?php echo $dll['id_rubro'] ?>" readonly="true">
+                                    <input type="text" name="txt_id_rubro_crp[]" class="form-control form-control-sm bg-plain" value="<?php echo $dll['id_pto_cdp_det'] ?>" readonly="true">
                                 </td>
                                 <td class="border" colspan="1">
                                     <input type="text" name="txt_codigo_crp[]" class="form-control form-control-sm  bg-plain" value="<?php echo $dll['cod_pptal'] ?>" readonly="true">
