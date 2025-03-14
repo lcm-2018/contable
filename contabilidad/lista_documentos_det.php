@@ -27,6 +27,7 @@ function pesos($valor)
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 if ($id_doc == 0) {
+    $fecha_doc = date('Y-m-d');
     try {
         $sql = "SELECT
                     `pto_crp`.`id_pto_crp` AS `id_crp`
@@ -63,6 +64,8 @@ if ($id_doc == 0) {
 } else {
     $datosDoc = GetValoresCxP($id_doc, $cmd);
     $id_manu = $datosDoc['id_manu'];
+    $fecha_doc = $datosDoc['fecha'];
+    $fecha_doc = date("Y-m-d", strtotime($fecha_doc));
 }
 
 try {
@@ -136,7 +139,7 @@ $ver = 'readonly';
                                                     <div class="col"><span class="small">FECHA:</span></div>
                                                 </div>
                                                 <div class="col-10">
-                                                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d'); ?>" min="<?= date('Y-m-d', strtotime($datosDoc['fecha_crp'])) ?>" max="<?= $_SESSION['vigencia'] . '-12-31' ?>" required>
+                                                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo $fecha_doc; ?>" min="<?= date('Y-m-d', strtotime($datosDoc['fecha_crp'])) ?>" max="<?= $_SESSION['vigencia'] . '-12-31' ?>" required>
                                                 </div>
                                             </div>
                                             <div class="row mb-1">

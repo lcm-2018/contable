@@ -89,7 +89,7 @@ $saldo = 0;
 $total_deb = 0;
 $total_cre = 0;
 ?>
-<label class="text-right"> <b><?php echo $cta[0]['cuenta'] . ' - ' . $cta[0]['nombre'] . ' => ' . $cta[1]['cuenta'] . ' - ' . $cta[1]['nombre']; ?></b></label>
+<label class="text-right"> <b><?php echo $cta[0]['cuenta'] . ' - ' . $cta[0]['nombre'] . ' => ' . $cta[0]['cuenta'] . ' - ' . $cta[0]['nombre']; ?></b></label>
 <table class="table-bordered bg-light" style="width:100% !important;" border="1">
     <tr style="text-align: center;">
         <td>Fecha</td>

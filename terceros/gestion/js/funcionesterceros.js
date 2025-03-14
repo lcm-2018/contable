@@ -500,7 +500,7 @@
             $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
-            $('#slcActEcon').focus();
+            //$('#slcActEcon').focus();
         });
     });
     //-----------------------------------------------------

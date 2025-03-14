@@ -1,1 +1,4 @@
 Fecha: 2025-03-03 10:36:38 PM, Id Usuario-Login: 1-ADMINN ADMINP, Accion: Actualizar kardex, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-03-03 22:36:38,IP:127.0.0.1
+[2025-03-12 14:29:24] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_costos WHERE id = 685
+[2025-03-12 14:29:28] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_costos WHERE id = 684
+[2025-03-12 14:30:10] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_costos WHERE id = 686

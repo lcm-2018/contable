@@ -89,14 +89,14 @@ try {
                     ':cb_rehabilitacion' => $_POST['cb_rehabilitacion'],
                     ':cb_analisis_lab' => $_POST['cb_analisis_lab'],
                     ':cb_trat_mant' => $_POST['cb_trat_mant'],
-                    ':estado_general' => $_POST['estado_general'] ? $_POST['estado_general'] : 0,
+                    ':estado_general' => $_POST['id_estado_general'] ? $_POST['id_estado_general'] : 0,
                     ':causa_est_general' => $_POST['causa_est_general'],
                     ':fecha_fuera_servicio' => $_POST['fecha_fuera_servicio'] ? date('Y-m-d', strtotime($_POST['fecha_fuera_servicio'])) : null,
                     ':id_usr_crea' => $id_usr_crea,
                     ':fec_creacion' => $fecha_crea,
                     ':id_usr_actualiza' => $id_usr_crea,
                     ':fec_actualiza' => $fecha_crea,
-                    ':estado' => $_POST['estado'],
+                    ':estado' => $_POST['id_estado'],
                 ];                
                 $inserted = $sql->execute($data);
 
@@ -201,12 +201,12 @@ try {
                 $sql->bindValue(':cb_rehabilitacion', $_POST['cb_rehabilitacion']);
                 $sql->bindValue(':cb_analisis_lab', $_POST['cb_analisis_lab']);
                 $sql->bindValue(':cb_trat_mant', $_POST['cb_trat_mant']);
-                $sql->bindValue(':estado_general', $_POST['estado_general'] ? $_POST['estado_general'] : 0, PDO::PARAM_INT);
+                $sql->bindValue(':estado_general', $_POST['id_estado_general'] ? $_POST['id_estado_general'] : 0, PDO::PARAM_INT);
                 $sql->bindValue(':causa_est_general', $_POST['causa_est_general']);
                 $sql->bindValue(':fecha_fuera_servicio', $_POST['fecha_fuera_servicio'] ? date('Y-m-d', strtotime($_POST['fecha_fuera_servicio'])) : null);
                 $sql->bindValue(':id_usr_actualiza', $id_usr_crea, PDO::PARAM_INT);
                 $sql->bindValue(':fec_actualiza', $fecha_crea);
-                $sql->bindValue(':estado', $_POST['estado'], PDO::PARAM_INT);
+                $sql->bindValue(':estado', $_POST['id_estado'], PDO::PARAM_INT);
                 $sql->bindValue(':id_hv', $id_hv, PDO::PARAM_INT);
 
                 $updated = $sql->execute();

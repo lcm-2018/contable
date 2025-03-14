@@ -32,10 +32,11 @@ try {
             far_pedido_detalle.cantidad,far_pedido_detalle.valor,
             (far_pedido_detalle.cantidad*far_pedido_detalle.valor) AS val_total,
             IFNULL(TRASLADO.cantidad,0) AS cantidad_tr,
-            (IFNULL(TRASLADO.cantidad,0)*far_pedido_detalle.valor) AS val_total_tr
+            IFNULL(TRASLADO.valor,0) AS val_total_tr
         FROM far_pedido_detalle
         INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_pedido_detalle.id_medicamento)
-        LEFT JOIN (SELECT TRD.id_ped_detalle,SUM(TRD.cantidad) AS cantidad     
+        LEFT JOIN (SELECT TRD.id_ped_detalle,SUM(TRD.cantidad) AS cantidad,
+                        SUM(TRD.cantidad*TRD.valor) AS valor     
                     FROM far_traslado_detalle AS TRD
                     INNER JOIN far_traslado AS TR ON (TR.id_traslado=TRD.id_traslado)
                     WHERE TR.estado<>0 AND TRD.id_ped_detalle IS NOT NULL
@@ -76,7 +77,7 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>ORDEN DE PEDIDO DE BODEGA</th>
+            <th>ORDEN DE PEDIDO DE BODEGA - TRASLADADO</th>
         </tr>
     </table>
 

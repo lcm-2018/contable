@@ -119,6 +119,14 @@
         });
     });
 
+    $('#divForms').on("change", "#estado_general", function() {
+        $('#id_estado_general').val($('#estado_general').val());
+    });
+
+    $('#divForms').on("change", "#estado", function() {
+        $('#id_estado').val($('#estado').val());
+    });
+
     //Guardar hoja de vida
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');

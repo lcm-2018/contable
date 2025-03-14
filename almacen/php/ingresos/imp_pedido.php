@@ -14,33 +14,40 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 
 try {
-    $sql = "SELECT far_cec_pedido.id_pedido,far_cec_pedido.num_pedido,far_cec_pedido.fec_pedido,far_cec_pedido.hor_pedido,far_cec_pedido.detalle,far_cec_pedido.val_total,
-            tb_centrocostos.nom_centro,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,            
-            CASE far_cec_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS estado,
-            CASE far_cec_pedido.estado WHEN 0 THEN far_cec_pedido.fec_anulacion WHEN 1 THEN far_cec_pedido.fec_creacion ELSE far_cec_pedido.fec_cierre END AS fec_estado
-        FROM far_cec_pedido
-        INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro = far_cec_pedido.id_sede)      
-        INNER JOIN tb_sedes ON (tb_sedes.id_sede = far_cec_pedido.id_sede)
-        INNER JOIN far_bodegas ON (far_bodegas.id_bodega = far_cec_pedido.id_bodega)
-        WHERE id_pedido=" . $id . " LIMIT 1";
+    $sql = "SELECT far_alm_pedido.id_pedido,far_alm_pedido.num_pedido,far_alm_pedido.fec_pedido,far_alm_pedido.hor_pedido,far_alm_pedido.detalle,far_alm_pedido.val_total,
+                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,                    
+                CASE far_alm_pedido.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' 
+                    WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'FINALIZADO' WHEN 0 THEN 'ANULADO' END AS estado,
+                CASE far_alm_pedido.estado WHEN 1 THEN far_alm_pedido.fec_creacion WHEN 2 THEN far_alm_pedido.fec_confirma 
+                    WHEN 3 THEN far_alm_pedido.fec_acepta WHEN 4 THEN far_alm_pedido.fec_cierre WHEN 0 THEN far_alm_pedido.fec_anulacion END AS fec_estado,
+                CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_confirma,
+                usr.descripcion AS usr_perfil,usr.nom_firma
+            FROM far_alm_pedido             
+            INNER JOIN tb_sedes ON (tb_sedes.id_sede = far_alm_pedido.id_sede)
+            INNER JOIN far_bodegas ON (far_bodegas.id_bodega = far_alm_pedido.id_bodega)           
+            LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_alm_pedido.id_usr_confirma)
+            WHERE id_pedido=" . $id . " LIMIT 1";
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
 
     $sql = "SELECT far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-            far_cec_pedido_detalle.cantidad,far_cec_pedido_detalle.valor,
-            (far_cec_pedido_detalle.cantidad*far_cec_pedido_detalle.valor) AS val_total,
-            IFNULL(EGRESO.cantidad,0) AS cantidad_eg,
-            IFNULL(EGRESO.valor,0) AS val_total_eg
-        FROM far_cec_pedido_detalle
-        INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_cec_pedido_detalle.id_medicamento)
-        LEFT JOIN (SELECT EED.id_ped_detalle,SUM(EED.cantidad) AS cantidad,
-                        SUM(EED.cantidad*EED.valor) AS valor
-                    FROM far_orden_egreso_detalle AS EED
-                    INNER JOIN far_orden_egreso AS EE ON (EE.id_egreso=EED.id_egreso)
-                    WHERE EE.estado<>0 AND EED.id_ped_detalle IS NOT NULL
-                    GROUP BY EED.id_ped_detalle
-                   ) AS EGRESO ON (EGRESO.id_ped_detalle=far_cec_pedido_detalle.id_ped_detalle) 
-        WHERE far_cec_pedido_detalle.id_pedido=" . $id . " ORDER BY far_cec_pedido_detalle.id_ped_detalle";
+            far_alm_pedido_detalle.cantidad,far_alm_pedido_detalle.valor,
+            (far_alm_pedido_detalle.cantidad*far_alm_pedido_detalle.valor) AS val_total,
+            IFNULL(INGRESO.cantidad,0) AS cantidad_in,
+            IFNULL(INGRESO.valor,0) AS val_total_in
+        FROM far_alm_pedido_detalle
+        INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_alm_pedido_detalle.id_medicamento)
+        LEFT JOIN (SELECT far_medicamento_lote.id_med,
+                        SUM(far_orden_ingreso_detalle.cantidad*far_presentacion_comercial.cantidad) AS cantidad,
+                        SUM(far_orden_ingreso_detalle.cantidad*far_orden_ingreso_detalle.valor) AS valor
+                    FROM far_orden_ingreso_detalle
+                    INNER JOIN far_orden_ingreso ON (far_orden_ingreso.id_ingreso=far_orden_ingreso_detalle.id_ingreso)
+                    INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote=far_orden_ingreso_detalle.id_lote)
+                    INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_orden_ingreso_detalle.id_presentacion)
+                    WHERE far_orden_ingreso.id_pedido=$id AND far_orden_ingreso.estado<>0
+                    GROUP BY far_medicamento_lote.id_med
+                ) AS INGRESO ON (INGRESO.id_med=far_alm_pedido_detalle.id_medicamento)
+        WHERE far_alm_pedido_detalle.id_pedido=" . $id . " ORDER BY far_alm_pedido_detalle.id_ped_detalle";
     $rs = $cmd->query($sql);
     $obj_ds = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -75,7 +82,7 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>ORDEN DE PEDIDO DE DEPENDENCIA - ENTREGADO</th>
+            <th>ORDEN DE PEDIDO DE ALMACEN - INGRESADO</th>
         </tr>
     </table>
 
@@ -97,21 +104,15 @@ try {
             <td><?php echo $obj_e['fec_estado']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="2">Dependencia que solicita</td>
-            <td colspan="2">Sede Proveedor</td>
-            <td colspan="2">Bodega Proveedor</td>
-        </tr>
-        <tr>            
-            <td colspan="2"><?php echo $obj_e['nom_centro']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_sede']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_bodega']; ?></td>
-        </tr>
-        <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="6">Detalle</td>
+            <td>Sede</td>
+            <td>Bodega</td>
+            <td colspan="4">Detalle</td>
         </tr>
         <tr>
-            <td colspan="6"><?php echo $obj_e['detalle']; ?></td>
-        </tr>
+            <td><?php echo $obj_e['nom_sede']; ?></td>
+            <td><?php echo $obj_e['nom_bodega']; ?></td>
+            <td colspan="4"><?php echo $obj_e['detalle']; ?></td>        
+        </tr>        
     </table>
 
     <table style="width:100% !important">
@@ -122,14 +123,14 @@ try {
                 <th>Cantidad</th>
                 <th>Valor Promedio</th>
                 <th>Valor Total</th>
-                <th>Cantidad Entregada</th>
+                <th>Cantidad Ingresada</th>
                 <th>Valor Total</th>
                 <th>Cantidad Pendiente</th>
             </tr>
         </thead>
         <tbody style="font-size: 60%;">
             <?php
-            $val_total_eg = 0;
+            $val_total_in = 0;
             $tabla = '';
             foreach ($obj_ds as $obj) {
                 $tabla .=  '<tr class="resaltar"> 
@@ -138,10 +139,10 @@ try {
                         <td>' . $obj['cantidad'] . '</td>
                         <td>' . formato_valor($obj['valor']) . '</td>   
                         <td>' . formato_valor($obj['val_total']) . '</td>
-                        <td>' . $obj['cantidad_eg'] . '</td>
-                        <td>' . formato_valor($obj['val_total_eg']) . '</td>                        
-                        <td>' . ($obj['cantidad'] - $obj['cantidad_eg']) . '</td></tr>';
-                $val_total_eg +=$obj['val_total_eg'];
+                        <td>' . $obj['cantidad_in'] . '</td>
+                        <td>' . formato_valor($obj['val_total_in']) . '</td>                        
+                        <td>' . ($obj['cantidad'] - $obj['cantidad_in']) . '</td></tr>';
+                $val_total_in +=$obj['val_total_in'];
             }
             echo $tabla;
             ?>
@@ -152,10 +153,9 @@ try {
                 <td>TOTAL:</td>
                 <td><?php echo formato_valor($obj_e['val_total']); ?> </td>
                 <td></td>
-                <td><?php echo formato_valor($val_total_eg); ?> </td>
+                <td><?php echo formato_valor($val_total_in); ?> </td>
                 <td></td>
             </tr>
         </tfoot>
     </table>
-
 </div>
