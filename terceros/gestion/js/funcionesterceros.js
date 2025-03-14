@@ -131,9 +131,10 @@
                 dataType: 'json',
             },
             "columns": [
+                { 'data': 'id' },
                 { 'data': 'codigo' },
                 { 'data': 'descripcion' },
-                { 'data': 'estado' },
+                { 'data': 'botones' },
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [1] },

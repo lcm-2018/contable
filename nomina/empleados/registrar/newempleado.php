@@ -284,8 +284,8 @@ try {
                                                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                                                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
                                                 $sql = "INSERT INTO `tb_terceros`
-                                                        (`tipo_doc`, `id_tercero_api`, `nit_tercero`, `estado`, `fec_inicio`, `id_usr_crea`, `genero`, `nom_tercero`) 
-                                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                                                        (`tipo_doc`, `id_tercero_api`, `nit_tercero`, `estado`, `fec_inicio`, `id_usr_crea`, `genero`, `nom_tercero`,`id_municipio`,`dir_tercero`, `tel_tercero`,`email`) 
+                                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                                                 $sql = $cmd->prepare($sql);
                                                 $sql->bindParam(1, $tipodoc, PDO::PARAM_INT);
                                                 $sql->bindParam(2, $id_ter_api, PDO::PARAM_INT);
@@ -295,6 +295,10 @@ try {
                                                 $sql->bindParam(6, $idus, PDO::PARAM_INT);
                                                 $sql->bindValue(7, $genero, PDO::PARAM_STR);
                                                 $sql->bindParam(8, $nombre, PDO::PARAM_STR);
+                                                $sql->bindParam(9, $municip, PDO::PARAM_INT);
+                                                $sql->bindParam(10, $dir, PDO::PARAM_STR);
+                                                $sql->bindParam(11, $tel, PDO::PARAM_STR);
+                                                $sql->bindParam(12, $mail, PDO::PARAM_STR);
                                                 $sql->execute();
                                                 if ($cmd->lastInsertId() > 0) {
                                                     $cmd = null;
