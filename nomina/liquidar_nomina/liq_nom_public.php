@@ -288,7 +288,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT * FROM tb_datos_ips";
+    $sql = "SELECT * FROM `tb_datos_ips`";
     $rs = $cmd->query($sql);
     $empresa = $rs->fetch();
     $cmd = null;
@@ -1253,24 +1253,31 @@ if (isset($_POST['check'])) {
             //liquida seguridad social
             if ($pensolid < $smmlv * 4) {
                 $solidpension = 0;
+                $subsistencia = 0;
                 $porcenps = 0;
             } else if ($pensolid >= $smmlv * 4  && $pensolid < $smmlv * 16) {
-                $solidpension = $pensolid * 0.01;
+                $solidpension = $pensolid * 0.005;
+                $subsistencia = $pensolid * 0.005;
                 $porcenps = 1;
             } else if ($pensolid >= $smmlv * 16  && $pensolid < $smmlv * 17) {
-                $solidpension = $pensolid * 0.012;
+                $solidpension = $pensolid * 0.005;
+                $subsistencia = $pensolid * 0.007;
                 $porcenps = 1.2;
             } else if ($pensolid >= $smmlv * 17  && $pensolid < $smmlv * 18) {
-                $solidpension = $pensolid * 0.014;
+                $solidpension = $pensolid * 0.005;
+                $subsistencia = $pensolid * 0.009;
                 $porcenps = 1.4;
             } else if ($pensolid >= $smmlv * 18  && $pensolid < $smmlv * 19) {
-                $solidpension = $pensolid * 0.016;
+                $solidpension = $pensolid * 0.005;
+                $subsistencia = $pensolid * 0.011;
                 $porcenps = 1.6;
             } else if ($pensolid >= $smmlv * 19  && $pensolid < $smmlv * 20) {
-                $solidpension = $pensolid * 0.018;
+                $solidpension = $pensolid * 0.005;
+                $subsistencia = $pensolid * 0.013;
                 $porcenps = 1.8;
             } else if ($pensolid >= $smmlv * 20) {
-                $solidpension = $pensolid * 0.02;
+                $solidpension = $pensolid * 0.005;
+                $subsistencia = $pensolid * 0.015;
                 $porcenps = 2;
             }
             if ($sal_integ == 1) {
@@ -1307,6 +1314,7 @@ if (isset($_POST['check'])) {
                 $saludempleado = 0;
                 $pensionempleado = 0;
                 $solidpension = 0;
+                $subsistencia = 0;
                 $porcenps = 0;
                 $saludempresa = 0;
                 $pensionempresa = 0;
@@ -1315,6 +1323,7 @@ if (isset($_POST['check'])) {
                 $saludempleado = 0;
                 $pensionempleado = 0;
                 $solidpension = 0;
+                $subsistencia = 0;
                 $porcenps = 0;
                 $saludempresa = (($salbase / 30) * $diaslab) * 0.125;
                 $pensionempresa = 0;
@@ -1324,19 +1333,28 @@ if (isset($_POST['check'])) {
             if ($subtip_emp == 2) {
                 $pensionempleado = 0;
                 $solidpension = 0;
+                $subsistencia = 0;
                 $porcenps = 0;
                 $pensionempresa = 0;
             }
-            $semp = redondeo($saludempleado, 0);
-            $pemp = redondeo($pensionempleado, 0);
-            $solidpension = redondeo($solidpension, -2);
-            $stotal = redondeo($saludempresa + $saludempleado, -2);
-            $ptotal = redondeo($pensionempresa + $pensionempleado, -2);
             $rieslab = redondeo($rieslab, -2);
-            $saludempleado = $semp;
-            $pensionempleado = $pemp;
-            $saludempresa = $stotal - $semp;
-            $pensionempresa = $ptotal - $pemp;
+            if ($empresa['redondeo_nomina'] == '1') {
+                $semp = redondeo($saludempleado, 0);
+                $pemp = redondeo($pensionempleado, 0);
+                $solidpension = redondeo($solidpension + $subsistencia, -2);
+                $stotal = redondeo($saludempresa + $saludempleado, -2);
+                $ptotal = redondeo($pensionempresa + $pensionempleado, -2);
+                $saludempleado = $semp;
+                $pensionempleado = $pemp;
+                $saludempresa = $stotal - $semp;
+                $pensionempresa = $ptotal - $pemp;
+            } else {
+                $saludempleado = redondeo($saludempleado, -2);
+                $pensionempleado = redondeo($pensionempleado, -2);
+                $solidpension = redondeo($solidpension, -2) + redondeo($subsistencia, -2);
+                $saludempresa = redondeo($saludempresa, -2);
+                $pensionempresa = redondeo($pensionempresa, -2);
+            }
             try {
                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
