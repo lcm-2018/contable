@@ -36,6 +36,7 @@ include '../../permisos.php';
                                 <a class="nav-link dropdown-toggle sombra" data-toggle="dropdown" href="#" role="button" aria-expanded="false">Internos </a>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReporteContable(11);">Libros auxiliares</a>
+                                    <a class="dropdown-item sombra" href="#" id="sl_libros_aux_bancos">Libros auxiliares V2</a>
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReporteContable(12);">Balance de prueba</a>
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReportePresupuesto(3);">Mayor y balance</a>
                                     <a class="dropdown-item sombra" href="#" onclick="abrirLink(2);">Estado financieros</a>
