@@ -152,13 +152,15 @@
                 }
             },
             columns: [
+                { 'data': 'id_pto_crp' },
                 { 'data': 'id_manu' },
                 { 'data': 'fecha' },
                 { 'data': 'tipo' },
                 { 'data': 'num_contrato' },
                 { 'data': 'vr_registro' },
                 { 'data': 'vr_saldo' },
-                { 'data': 'estado' }
+                { 'data': 'estado' },
+                { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [3] }
@@ -280,11 +282,13 @@
     $('#btn_buscar_filtro').on("click", function () {
         reloadtable('tb_cdps');
 
-        $('#tb_contratos').empty();
+        /*$('#tb_contratos').empty();
         $('#tb_contratos').DataTable();
 
         $('#tb_reg_presupuestal').empty();
         $('#tb_reg_presupuestal').DataTable();
+
+        
 
         $('#tb_obligaciones').empty();
         $('#tb_obligaciones').DataTable();
@@ -292,7 +296,7 @@
         $('#tb_pagos').empty();
         $('#tb_pagos').DataTable();
 
-        $('#id_cdp').val('');
+        $('#id_cdp').val('');*/
     });
 
     $('.filtro').keypress(function (e) {
@@ -339,6 +343,7 @@
     $('#body_tb_cdps').on('click', '.btn_liberar', function () {
         let id_cdp = $(this).attr('value');
         $('#id_cdp').val(id_cdp);
+
         //----------esto pa cargar modal con clic en el boton
         $.post(window.urlin + "/terceros/php/historialtercero/frm_liberarsaldos.php", { id_cdp: id_cdp }, function (he) {
             $('#divTamModalReg').removeClass('modal-xl');
@@ -347,60 +352,77 @@
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
         });
-
-        //------------ cargar la tabla saldos
-        if ($.fn.DataTable.isDataTable('#tb_saldos')) {
-            $('#tb_saldos').DataTable().destroy();
-        }
-
-        $('#tb_saldos').DataTable({
-            dom: setdom = "<'row'<'col-md-6'l><'col-md-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-            buttons: [{
-                action: function (e, dt, node, config) {
-                    $.post("", { id_cdp: id_cdp }, function (he) {
-                        $('#divTamModalReg').removeClass('modal-xl');
-                        $('#divTamModalReg').removeClass('modal-sm');
-                        $('#divTamModalReg').addClass('modal-lg');
-                        $('#divModalReg').modal('show');
-                        $("#divFormsReg").html(he);
-                    });
-                }
-            }],
-            language: setIdioma,
-            processing: true,
-            serverSide: true,
-            searching: false,
-            ajax: {
-                url: window.urlin + '/terceros/php/historialtercero/listar_saldos.php',
-                type: 'POST',
-                dataType: 'json',
-                data: function (data) {
-                    data.id_cdp = id_cdp;
-                }
-            },
-            columns: [
-                { 'data': 'id_rubro' },
-                { 'data': 'cod_pptal' },
-                { 'data': 'saldo_final' }
-            ],
-            columnDefs: [
-                { class: 'text-wrap', targets: [] }
-            ],
-            order: [
-                [0, "desc"]
-            ],
-            lengthMenu: [
-                [10, 25, 50, -1],
-                [10, 25, 50, 'TODO'],
-            ],
-        });
-        $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
-        $('#tb_saldos').wrap('<div class="overflow"/>');
-
     });
 
     //--------------------
     $('#divFormsReg').on("click", "#btn_liquidar", function () {
-        alert("liquidar");
+        if ($('#txt_fec_lib').val() < $('#txt_fec_cdp').val()) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('La fecha de liberación no puede ser menor a la fecha del CDP');
+        }
+        else {
+
+            let datos = $('#frm_liberarsaldos').serialize();
+            let url;
+            url = window.urlin + '/terceros/php/historialtercero/registrar_liberacion.php';
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: datos,
+                success: function (r) {
+                    if (r == '1') {
+                        let id = 'tb_cdps';
+                        reloadtable(id);
+                        $('#divFormsReg').modal('hide');
+                        mje('Liberacion ejecutada correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
+    //------------------- boton liberar saldos crp
+    $('#body_tb_reg_presupuestal').on('click', '.btn_liberar_crp', function () {
+        let id_crp = $(this).attr('value');
+        //$('#id_cdp').val(id_cdp);
+
+        //----------esto pa cargar modal con clic en el boton
+        $.post(window.urlin + "/terceros/php/historialtercero/frm_liberarsaldos_crp.php", { id_crp: id_crp }, function (he) {
+            $('#divTamModalReg').removeClass('modal-xl');
+            $('#divTamModalReg').removeClass('modal-sm');
+            $('#divTamModalReg').addClass('modal-lg');
+            $('#divModalReg').modal('show');
+            $("#divFormsReg").html(he);
+        });
+    });
+    //-----------------------------------------------------
+    $('#divFormsReg').on("click", "#btn_liquidar_saldos_crp", function () {
+        if ($('#txt_fec_lib_crp').val() < $('#txt_fec_crp').val()) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('La fecha de liberación no puede ser menor a la fecha del CRP');
+        }
+        else {
+            let datos = $('#frm_liberarsaldos_crp').serialize();
+            let url;
+            url = window.urlin + '/terceros/php/historialtercero/registrar_liberacion_crp.php';
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: datos,
+                success: function (r) {
+                    if (r == '1') {
+                        let id2 = 'tb_cdps';
+                        reloadtable(id2);
+                        let id = 'tb_reg_presupuestal';
+                        reloadtable(id);
+                        $('#divFormsReg').modal('hide');
+                        mje('Liberacion ejecutada correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
     });
 })(jQuery);

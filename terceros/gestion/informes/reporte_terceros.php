@@ -14,6 +14,13 @@ try {
                 `tb_terceros`";
     $rs = $cmd->query($sql);
     $terEmpr = $rs->fetchAll();
+    $sql = "SELECT 
+                `id_tercero_api`, 
+                GROUP_CONCAT(`id_responsabilidad` ORDER BY `id_responsabilidad` SEPARATOR ', ') AS `responsabilidades`
+            FROM `ctt_resposabilidad_terceros`
+            GROUP BY `id_tercero_api`";
+    $rs = $cmd->query($sql);
+    $responsabilidades = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -39,18 +46,25 @@ $datos = json_decode($result, true);
 $head = '';
 if (!empty($datos)) {
     foreach ($datos[0] as $key => $value) {
+        if($key == 'resposabilidades') continue;
         $head .= '<th>' . mb_convert_encoding($key, 'UTF-8', 'ISO-8859-1') . '</th>';
     }
+    $head .= '<th>Responsabilidades</th>';
 } else {
     echo 'No hay datos para mostrar';
     exit();
 }
 $tbody = '';
 foreach ($datos as $d) {
+    $id_ter = $d['id_tercero'];
+    $key = array_search($id_ter, array_column($responsabilidades, 'id_tercero_api'));
+    $resp = $key !== false ? $responsabilidades[$key]['responsabilidades'] : '';
     $tbody .= '<tr>';
-    foreach ($d as $key => $value) {
+    foreach ($d as $ds => $value) {
+        if ($ds == 'resposabilidades') continue;
         $tbody .= '<td>' . mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1') . '</td>';
     }
+    $tbody .= '<td>' . $resp . '</td>';
     $tbody .= '</tr>';
 }
 $tabla = <<<EOT

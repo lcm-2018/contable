@@ -68,7 +68,7 @@ $vigencia = $_SESSION['vigencia'];
                                     </div>
                                     <div id="configOne" class="collapse" aria-labelledby="headingOne">
                                         <div class="card-body">
-                                            <table id="tableRespEcon" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                            <table id="tableResponsabilidades" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                                                 <thead class="text-center">
                                                     <tr>
                                                         <th>ID</th>

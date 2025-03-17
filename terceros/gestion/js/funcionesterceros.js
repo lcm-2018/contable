@@ -1,3 +1,14 @@
+function FormResponsabilidad(id) {
+    $.post("../gestion/datos/registrar/form_responsabilidad.php", { id: id }, function (he) {
+        $('#divTamModalForms').removeClass('modal-xl');
+        $('#divTamModalForms').removeClass('modal-sm');
+        $('#divTamModalForms').addClass('modal-lg');
+        $('#divModalForms').modal('show');
+        $("#divForms").html(he);
+        $('#slcRespEcon').focus();
+    });
+}
+
 (function ($) {
     //Superponer modales
     $(document).on('show.bs.modal', '.modal', function () {
@@ -50,7 +61,6 @@
         });
         return false;
     });
-
     $(document).ready(function () {
         let id_t = $('#id_tercero').val();
         //dataTable Terceros
@@ -131,6 +141,7 @@
                 dataType: 'json',
             },
             "columns": [
+
                 { 'data': 'codigo' },
                 { 'data': 'descripcion' },
                 { 'data': 'estado' },
@@ -146,6 +157,40 @@
             ],
         });
         $('#tableRespEcon').wrap('<div class="overflow" />');
+        $('#tableResponsabilidades').DataTable({
+            dom: setdom,
+            buttons: [{
+                attr: {
+                    id: 'btnRegistrarRespEcon', // Asignas un id
+                },
+                action: function (e, dt, node, config) {
+                    //Registar Responsabilidad Economica desde Detalles
+                    FormResponsabilidad(0);
+                }
+            }],
+            language: setIdioma,
+            "ajax": {
+                url: '../gestion/datos/listar/lista_responsabilidades.php',
+                type: 'POST',
+                dataType: 'json',
+            },
+            "columns": [
+                { 'data': 'id' },
+                { 'data': 'codigo' },
+                { 'data': 'descripcion' },
+                { 'data': 'botones' },
+            ],
+            columnDefs: [
+                { class: 'text-wrap', targets: [1] },
+            ],
+            order: [[0, "desc"]],
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+        });
+        $('#tableResponsabilidades').wrap('<div class="overflow" />');
         //dataTable Actividad Economica
         $('#tableActvEcon').DataTable({
             dom: setdom,
@@ -422,8 +467,7 @@
         if ($('#slcRespEcon').val() === '0') {
             $('#buscarRespEcono').addClass('is-invalid');
             $('#buscarRespEcono').focus();
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('¡Debe seleccionar una Resposabilidad Económica!');
+            mjeError('Error', '¡Debe seleccionar una Resposabilidad Económica!');
         } else {
             datos = $('#formAddRespEcon').serialize();
             $.ajax({
@@ -431,15 +475,14 @@
                 url: 'registrar/new_resp_econ.php',
                 data: datos,
                 success: function (r) {
-                    if (r === '1') {
-                        let id = 'tableRespEcon';
-                        reloadtable(id);
+                    if (r == 'ok') {
+                        if ($('#tableRespEcon').length) {
+                            $('#tableRespEcon').DataTable().ajax.reload(null, false);
+                        }
                         $('#divModalForms').modal('hide');
-                        $('#divModalDone').modal('show');
-                        $('#divMsgDone').html('Resposabilidad Económica Agregada Correctamente');
+                        mje('Responsabilidad Económica agregada correctamente');
                     } else {
-                        $('#divModalError').modal('show');
-                        $('#divMsgError').html(r);
+                        mjeError('Error', r);
                     }
                 }
             });
@@ -634,3 +677,61 @@
         });
     });
 })(jQuery);
+
+function GuardaResponsabilidad() {
+    $('.is-invalid').removeClass('is-invalid');
+    if ($('#codigoRespEcono').val() == '') {
+        $('#codigoRespEcono').addClass('is-invalid');
+        $('#codigoRespEcono').focus();
+        mjeError('Error', 'Ingresar código de la responsabilidad económica');
+    } else if ($('#nombreRespEcono').val() == '') {
+        $('#nombreRespEcono').addClass('is-invalid');
+        $('#nombreRespEcono').focus();
+        mjeError('Error', 'Ingresar descripción de la responsabilidad económica');
+    } else {
+        var datos = $('#formGestRespEcon').serialize();
+        $.ajax({
+            type: 'POST',
+            url: '../gestion/registrar/guarda_responsabilidad.php',
+            data: datos,
+            success: function (r) {
+                if (r == 'ok') {
+                    $('#divModalForms').modal('hide');
+                    $('#tableResponsabilidades').DataTable().ajax.reload(null, false);
+                    mje('Guardado', 'Responsabilidad Económica guardada correctamente');
+                } else {
+                    mjeError('Error', r);
+                }
+            }
+        });
+    }
+
+}
+function BorrarResponsabilidad(id) {
+    Swal.fire({
+        title: "¿Confirma eliminar la Responsabilidad Económica?",
+        text: "¡No podrás revertir esto!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00994C",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si!",
+        cancelButtonText: "NO",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: 'POST',
+                url: '../gestion/eliminar/delresponsabilidad.php',
+                data: { id: id },
+                success: function (r) {
+                    if (r == 'ok') {
+                        $('#tableResponsabilidades').DataTable().ajax.reload(null, false);
+                        mje('Eliminado', 'Responsabilidad Económica eliminada correctamente');
+                    } else {
+                        mjeError('Error', r);
+                    }
+                }
+            });
+        }
+    });
+}

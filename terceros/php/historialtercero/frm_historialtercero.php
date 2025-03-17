@@ -111,6 +111,7 @@ $obj = $rs->fetch();
                         <table id="tb_reg_presupuestal" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                             <thead>
                                 <tr class="text-center centro-vertical">
+                                    <th>ID CRP</th>
                                     <th>No Registro</th>
                                     <th>Fecha</th>
                                     <th>Tipo</th>   
@@ -118,9 +119,10 @@ $obj = $rs->fetch();
                                     <th>Valor registro</th>                                    
                                     <th>Saldo</th>
                                     <th>Estado</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-left centro-vertical"></tbody>
+                            <tbody class="text-left centro-vertical" id="body_tb_reg_presupuestal"></tbody>
                         </table>
                     </div>
 
