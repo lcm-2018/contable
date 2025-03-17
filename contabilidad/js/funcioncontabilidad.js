@@ -338,6 +338,18 @@
 		}
 		return false;
 	});
+
+	//--------------informes bancos
+	$('#sl_libros_aux_bancos').on("click", function () {
+		$.post(window.urlin + "/contabilidad/php/informes_bancos/frm_libros_aux_bancos.php", { }, function (he) {
+			$('#divTamModalForms').removeClass('modal-lg');
+			$('#divTamModalForms').removeClass('modal-sm');
+			$('#divTamModalForms').addClass('modal-lg');
+			//(modal-sm, modal-lg, modal-xl) - pequeño,mediano,grande
+			$('#divModalForms').modal('show');
+			$("#divForms").html(he);
+		});
+	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
 /*var recargartable = function (nom) {
