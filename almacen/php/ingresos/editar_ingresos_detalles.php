@@ -27,23 +27,25 @@ try {
 
         if ($id_ingreso > 0) {
 
-            $sql = "SELECT far_orden_ingreso.estado,far_orden_ingreso.id_pedido,far_orden_ingreso_tipo.orden_compra
+            $sql = "SELECT far_orden_ingreso.estado,far_orden_ingreso.id_pedido,far_orden_ingreso_tipo.id_tipo_ingreso,far_orden_ingreso_tipo.orden_compra
                     FROM far_orden_ingreso 
                     INNER JOIN far_orden_ingreso_tipo ON (far_orden_ingreso_tipo.id_tipo_ingreso = far_orden_ingreso.id_tipo_ingreso)
                     WHERE far_orden_ingreso.id_ingreso=" . $id_ingreso;
             $rs = $cmd->query($sql);
             $obj_ingreso = $rs->fetch();
             $estado = $obj_ingreso['estado'];
+            $id_tipo_ing = $obj_ingreso['id_tipo_ingreso'];
             $orden_compra = $obj_ingreso['orden_compra'];
-            $id_pedido = isset($obj_ingreso['id_pedido']) ? $obj_ingreso['id_pedido'] : 0;
+            $id_pedido = $obj_ingreso['id_pedido'] ? $obj_ingreso['id_pedido'] : 0;
 
             if ($estado == 1) {
                 if ($oper == 'add') {
 
-                    //Id. pedido del formulario
-                    $id_pedido2 = isset($_POST['id_pedido']) ? $_POST['id_pedido'] : 0;
+                    //Id. Tipo Ingreso e Id. pedido del formulario
+                    $id_tipo_ing2 = $_POST['id_tipo_ing'] ? $_POST['id_tipo_ing'] : 0;
+                    $id_pedido2 = $_POST['id_pedido'] ? $_POST['id_pedido'] : 0;                    
 
-                    if($id_pedido2 == $id_pedido){
+                    if($id_tipo_ing2 == $id_tipo_ing && ($orden_compra == 0 || ($orden_compra == 1 && $id_pedido2 == $id_pedido))){
                         $id = $_POST['id_detalle'];
                         $id_lote = $_POST['sl_lote_art'];
                         $id_pre_lot = $_POST['id_txt_pre_lot'];
@@ -78,16 +80,17 @@ try {
                                         far_medicamento_lote.id_med=$id_articulo AND far_orden_ingreso_detalle.id_ing_detalle<>$id";
                             $rs = $cmd->query($sql);
                             $obj = $rs->fetch();
-                            $can_ingresada = $obj['cantidad'] + $cantidad*$cant_umpl;
+                            $can_ingresada = $obj['cantidad'] + $cantidad * $cant_umpl;
                         }
 
                         if (($can_ingresada <= $can_aprobado) || $orden_compra == 0){
-                            if ($id == -1) {
-                                $sql = "SELECT COUNT(*) AS existe FROM far_orden_ingreso_detalle WHERE id_ingreso=$id_ingreso AND id_lote=" . $id_lote;
-                                $rs = $cmd->query($sql);
-                                $obj = $rs->fetch();
+                            
+                            $sql = "SELECT COUNT(*) AS existe FROM far_orden_ingreso_detalle WHERE id_ingreso=$id_ingreso AND id_lote=" . $id_lote . " AND id_ing_detalle<>" . $id;
+                            $rs = $cmd->query($sql);
+                            $obj = $rs->fetch();
 
-                                if ($obj['existe'] == 0) {
+                            if ($obj['existe'] == 0) {
+                                if ($id == -1) {                                
                                     $sql = "INSERT INTO far_orden_ingreso_detalle(id_ingreso,id_lote,id_presentacion,cantidad,valor_sin_iva,iva,valor,observacion)
                                             VALUES($id_ingreso,$id_lote,$id_pre_lot,$cantidad,$vr_unidad,$iva,$vr_costo,'$observacion')";
                                     $rs = $cmd->query($sql);
@@ -100,23 +103,23 @@ try {
                                         $res['id'] = $obj['id'];
                                     } else {
                                         $res['mensaje'] = $cmd->errorInfo()[2];
-                                    }
+                                    }                                
                                 } else {
-                                    $res['mensaje'] = 'El Lote ya existe en los detalles de la Orden de Ingreso';
-                                }
-                            } else {
-                                $sql = "UPDATE far_orden_ingreso_detalle 
-                                    SET id_lote=$id_lote,id_presentacion=$id_pre_lot,cantidad=$cantidad,valor_sin_iva=$vr_unidad,iva=$iva,valor=$vr_costo,observacion='$observacion'
-                                    WHERE id_ing_detalle=" . $id;
+                                    $sql = "UPDATE far_orden_ingreso_detalle 
+                                        SET id_lote=$id_lote,id_presentacion=$id_pre_lot,cantidad=$cantidad,valor_sin_iva=$vr_unidad,iva=$iva,valor=$vr_costo,observacion='$observacion'
+                                        WHERE id_ing_detalle=" . $id;
 
-                                $rs = $cmd->query($sql);
-                                if ($rs) {
-                                    $res['mensaje'] = 'ok';
-                                    $res['id'] = $id;
-                                } else {
-                                    $res['mensaje'] = $cmd->errorInfo()[2];
-                                }
-                            }                        
+                                    $rs = $cmd->query($sql);
+                                    if ($rs) {
+                                        $res['mensaje'] = 'ok';
+                                        $res['id'] = $id;
+                                    } else {
+                                        $res['mensaje'] = $cmd->errorInfo()[2];
+                                    }
+                                }   
+                            } else {
+                                $res['mensaje'] = 'El Lote ya existe en los detalles de la Orden de Ingreso';
+                            }                         
                         } else {
                             $res['mensaje'] = 'La Cantidad a ingresar supera la Cantidad aprobada';       
                         }        

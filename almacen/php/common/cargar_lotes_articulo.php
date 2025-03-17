@@ -16,7 +16,7 @@ try {
     
     echo '<option value="" selected="selected"></option>';    
     
-    $sql = "SELECT far_medicamento_lote.id_lote,IF(fec_vencimiento='3000-01-01',lote,CONCAT(lote,'[',fec_vencimiento,']')) AS nom_lote,
+    $sql = "SELECT far_medicamento_lote.id_lote,IF(fec_vencimiento='3000-01-01',lote,CONCAT(lote,' [Fv:',fec_vencimiento,']')) AS nom_lote,
                 far_medicamentos.nom_medicamento AS nom_articulo,
                 far_medicamento_lote.id_presentacion,far_presentacion_comercial.nom_presentacion,
                 IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl,

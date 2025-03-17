@@ -52,6 +52,7 @@ $id_pedido = isset($_POST['id_pedido']) && $_POST['id_pedido'] ? $_POST['id_pedi
                     <thead>
                         <tr class="text-center centro-vertical">
                             <th>Id</th>
+                            <th>Id. Articulo</th>
                             <th>Código</th>
                             <th>Artículo</th>                            
                             <th>Cant. Ordenada</th>
@@ -92,7 +93,8 @@ $id_pedido = isset($_POST['id_pedido']) && $_POST['id_pedido'] ? $_POST['id_pedi
                     }
                 },
                 columns: [
-                    { 'data': 'id_med' }, //Index=0
+                    { 'data': 'id_ped_detalle' }, //Index=0
+                    { 'data': 'id_med' },
                     { 'data': 'cod_medicamento' },
                     { 'data': 'nom_medicamento' },                    
                     { 'data': 'cantidad_ord'  },
@@ -100,11 +102,11 @@ $id_pedido = isset($_POST['id_pedido']) && $_POST['id_pedido'] ? $_POST['id_pedi
                     { 'data': 'cantidad_pen' }
                 ],
                 columnDefs: [
-                    { class: 'text-wrap', targets: [2] },
-                    { width: '5%', targets: [0,1,3,4,5] }
+                    { class: 'text-wrap', targets: [3] },
+                    { width: '5%', targets: [0,1,2,4,5,6] }
                 ],
                 order: [
-                    [2, "asc"]
+                    [0, "asc"]
                 ],
                 lengthMenu: [
                     [10, 25, 50, -1],

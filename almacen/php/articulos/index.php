@@ -60,6 +60,11 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <?php subgrupo_articulo($cmd,'--Subgrupo--') ?> 
                                     </select>
                                 </div>
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_clinico_filtro">
+                                        <?php estados_sino('--Uso Asistencial--') ?>
+                                    </select>
+                                </div>
                                 <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estados_registros('--Estado--') ?>
@@ -95,7 +100,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Tope Máximo</th>
                                         <th>Existencia</th>
                                         <th>Vr. Promedio</th>
-                                        <th>Es Clínico</th>
+                                        <th>Uso Asistencial</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>

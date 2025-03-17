@@ -2,14 +2,8 @@
 date_default_timezone_set('America/Bogota');
 
 $bd_driver = "mysql";
-<<<<<<< HEAD
 $bd_servidor = "localhost";
 $bd_base = "bd_cronhis_af";
-=======
-$bd_servidor = "localhost:3366";
-$bd_base = "municipal";
-
->>>>>>> 66fdf11702b900e52c9cdfd8a99f9dd3724ecfee
 $api =  "http://200.7.102.155/api_terceros/";
 $charset = "charset=utf8";
 $bd_usuario = "root";

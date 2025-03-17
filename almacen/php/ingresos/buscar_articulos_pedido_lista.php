@@ -34,7 +34,8 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
         
-    $sqlc= "SELECT far_medicamentos.id_med,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
+    $sqlc= "SELECT far_alm_pedido_detalle.id_ped_detalle,
+                    far_medicamentos.id_med,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
 	                far_alm_pedido_detalle.aprobado AS cantidad_ord,
 	                IF(ing.cantidad_ing IS NULL,0,ing.cantidad_ing) AS cantidad_ing,
                     (far_alm_pedido_detalle.aprobado-IF(ing.cantidad_ing IS NULL,0,ing.cantidad_ing)) AS cantidad_pen
@@ -64,7 +65,7 @@ try {
     $totalRecords = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT id_med,cod_medicamento,nom_medicamento,cantidad_ord,cantidad_ing,cantidad_pen FROM ($sqlc) AS c" . $where . " ORDER BY $col $dir $limit";
+    $sql = "SELECT id_ped_detalle,id_med,cod_medicamento,nom_medicamento,cantidad_ord,cantidad_ing,cantidad_pen FROM ($sqlc) AS c" . $where . " ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;
@@ -76,7 +77,8 @@ $data = [];
 if (!empty($objs)) {
     foreach ($objs as $obj) {
         $data[] = [
-            "id_med" => $obj['id_med'],
+            "id_ped_detalle" => $obj['id_ped_detalle'],
+            "id_med" => $obj['id_med'],            
             "cod_medicamento" => $obj['cod_medicamento'],
             "nom_medicamento" => $obj['nom_medicamento'],
             "cantidad_ord" => $obj['cantidad_ord'],

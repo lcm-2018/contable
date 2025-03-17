@@ -360,7 +360,7 @@
     $('#divModalBus').on('dblclick', '#tb_articulos_pedido tr', function() {
         let id_bodega = $('#id_txt_nom_bod').val();
         let data = $('#tb_articulos_pedido').DataTable().row(this).data();
-        $.post("frm_reg_ingresos_detalles.php", { id_articulo: data.id_med, cantidad: data.cantidad_pen, id_bodega: id_bodega }, function(he) {
+        $.post("frm_reg_ingresos_detalles.php", { id_articulo: data.id_med, articulo: data.nom_medicamento, cantidad: data.cantidad_pen, id_bodega: id_bodega }, function(he) {
             $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
@@ -377,7 +377,6 @@
     $('#divModalReg').on("change", "#sl_lote_art", function() {
         if ($('#id_detalle').val() == -1) {
             let lote = $(this).find('option:selected');
-            $('#txt_nom_art').val(lote.attr('data-nom_articulo'));
             $('#txt_pre_lot').val(lote.attr('data-nom_presentacion'));
             $('#id_txt_pre_lot').val(lote.attr('data-id_presentacion'));
             $('#txt_can_lot').val(lote.attr('data-cantidad_umpl'));
@@ -441,7 +440,9 @@
                 type: 'POST',
                 url: 'editar_ingresos_detalles.php',
                 dataType: 'json',
-                data: data + "&id_ingreso=" + $('#id_ingreso').val() + "&id_pedido=" + $('#txt_id_pedido').val() + '&oper=add'
+                data: data + "&id_ingreso=" + $('#id_ingreso').val() +
+                    "&id_tipo_ing=" + $('#id_tip_ing').val() +
+                    "&id_pedido=" + $('#txt_id_pedido').val() + '&oper=add'
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
                     let pag = ($('#id_detalle').val() == -1) ? 0 : $('#tb_ingresos_detalles').DataTable().page.info().page;

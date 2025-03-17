@@ -34,6 +34,7 @@
                     data.codigo = $('#txt_codigo_filtro').val();
                     data.nombre = $('#txt_nombre_filtro').val();
                     data.subgrupo = $('#sl_subgrupo_filtro').val();
+                    data.clinico = $('#sl_clinico_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
                 }
             },
@@ -413,6 +414,7 @@
             codigo: $('#txt_codigo_filtro').val(),
             nombre: $('#txt_nombre_filtro').val(),
             subgrupo: $('#sl_subgrupo_filtro').val(),
+            clinico: $('#sl_clinico_filtro').val(),
             estado: $('#sl_estado_filtro').val()
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');

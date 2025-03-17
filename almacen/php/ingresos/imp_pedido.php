@@ -19,13 +19,10 @@ try {
                 CASE far_alm_pedido.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' 
                     WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'FINALIZADO' WHEN 0 THEN 'ANULADO' END AS estado,
                 CASE far_alm_pedido.estado WHEN 1 THEN far_alm_pedido.fec_creacion WHEN 2 THEN far_alm_pedido.fec_confirma 
-                    WHEN 3 THEN far_alm_pedido.fec_acepta WHEN 4 THEN far_alm_pedido.fec_cierre WHEN 0 THEN far_alm_pedido.fec_anulacion END AS fec_estado,
-                CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_confirma,
-                usr.descripcion AS usr_perfil,usr.nom_firma
+                    WHEN 3 THEN far_alm_pedido.fec_acepta WHEN 4 THEN far_alm_pedido.fec_cierre WHEN 0 THEN far_alm_pedido.fec_anulacion END AS fec_estado
             FROM far_alm_pedido             
             INNER JOIN tb_sedes ON (tb_sedes.id_sede = far_alm_pedido.id_sede)
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega = far_alm_pedido.id_bodega)           
-            LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_alm_pedido.id_usr_confirma)
             WHERE id_pedido=" . $id . " LIMIT 1";
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();

@@ -13,6 +13,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_bodega = isset($_POST['id_bodega']) && $_POST['id_bodega'] ? $_POST['id_bodega'] : -1;
 $id_articulo = isset($_POST['id_articulo']) ? $_POST['id_articulo'] : -1;
+$articulo = isset($_POST['articulo']) ? $_POST['articulo'] : '';
 $id_lote = isset($_POST['id_lote']) ? $_POST['id_lote'] : -1;
 $cantidad = isset($_POST['cantidad']) ? $_POST['cantidad'] : 0;
 
@@ -38,6 +39,7 @@ if (empty($obj)) {
     endfor;
     $obj['iva'] = 0;
     $obj['id_med'] = $id_articulo;
+    $obj['nom_articulo'] = $articulo;
     $obj['id_lote'] = $id_lote;
     $obj['cantidad'] = (int)$cantidad;
 } 
