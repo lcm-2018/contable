@@ -31,7 +31,7 @@
             },
             columns: [
                 { 'data': 'id_pto_cdp' },
-                { 'data': 'nit_tercero' },
+                { 'data': 'id_manu' },
                 { 'data': 'fecha' },
                 { 'data': 'objeto' },
                 { 'data': 'valor_cdp' },
