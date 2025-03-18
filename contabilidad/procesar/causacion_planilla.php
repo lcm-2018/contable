@@ -11,9 +11,25 @@ $data = explode(',', file_get_contents("php://input"));
 $id_nomina = $data[0];
 $crp = $data[1];
 $tipo_nomina = $data[2];
-$id_api_sena = 1245;
-$id_api_icbf = 1247;
-$id_api_comfam = 1246;
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT
+                `id_parafiscal`,`id_tercero_api`,`tipo`
+            FROM `nom_parafiscales`
+            ORDER BY `id_parafiscal` DESC";
+    $rs = $cmd->query($sql);
+    $parafiscales = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$kpf = array_search('SENA', array_column($parafiscales, 'tipo'));
+$id_api_sena = $kpf !== false ? $parafiscales[$kpf]['id_tercero_api'] : exit('No se ha configurado el parafiscal SENA');
+$kpf = array_search('ICBF', array_column($parafiscales, 'tipo'));
+$id_api_icbf = $kpf !== false ? $parafiscales[$kpf]['id_tercero_api'] : exit('No se ha configurado el parafiscal ICBF');
+$kpf = array_search('CAJA', array_column($parafiscales, 'tipo'));
+$id_api_comfam = $kpf !== false ? $parafiscales[$kpf]['id_tercero_api'] : exit('No se ha configurado el parafiscal CAJA DE COMPENSACION');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);

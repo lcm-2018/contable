@@ -1510,36 +1510,57 @@
     });
     $('#divModalForms').on('click', '#btnRegTerceroNom', function () {
         $('.form-control').removeClass('is-invalid');
+        var valida = true;
         if ($('#slcCategoria').val() == 0) {
             $('#slcCategoria').focus();
             $('#slcCategoria').addClass('is-invalid');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe seleccionar una categoria');
+            mjeError('Debe seleccionar una categoria');
         } else if ($('#idTerceroNom').val() == 0) {
             $('#BuscaTerNom').focus();
             $('#BuscaTerNom').addClass('is-invalid');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe seleccionar un tercero');
+            mjeError('Debe seleccionar un tercero');
         } else {
-            let datos = $('#formRegTerceroNom').serialize();
-            $.ajax({
-                type: 'POST',
-                url: 'liquidar_nomina/registrar/addtercero_nomina.php',
-                data: datos,
-                success: function (r) {
-                    if (r.trim() === 'ok') {
-                        $('#divModalForms').modal('hide');
-                        let id = "tableTerceroNomina";
-                        reloadtable(id);
-                        $('#divModalDone').modal('show');
-                        $('#divMsgDone').html("Tercero registrado correctamente");
-                    } else {
-                        $('#divModalError').modal('show');
-                        $('#divMsgError').html(r);
-                    }
+            if ($('#slcTipoParaf').length) {
+                if ($('#slcTipoParaf').val() == '0') {
+                    $('#slcTipoParaf').focus();
+                    $('#slcTipoParaf').addClass('is-invalid');
+                    mjeError('Debe seleccionar un tipo de parafiscal');
+                    valida = false;
                 }
-            });
+            }
+            let datos = $('#formRegTerceroNom').serialize();
+            if (valida) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'liquidar_nomina/registrar/addtercero_nomina.php',
+                    data: datos,
+                    success: function (r) {
+                        if (r.trim() === 'ok') {
+                            $('#divModalForms').modal('hide');
+                            $('#tableTerceroNomina').DataTable().ajax.reload(null, false);
+                            mje('Tercero registrado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
         }
+    });
+    $('#divModalForms').on('change', '#slcCategoria', function () {
+        var cat = $(this).val();
+        var html = '';
+        if (cat == "PARA") {
+            //label para selecionar tipo de parafiscales
+            html += '<label for="slcTipoParaf" class="small">Tipo de Parafiscal</label>';
+            html += '<select class="form-control form-control-sm" id="slcTipoParaf" name="slcTipoParaf">';
+            html += '<option value="0">--Seleccione--</option>';
+            html += '<option value="SENA">SERVICIO NACIONAL DE APRENDIZAJE</option>';
+            html += '<option value="ICBF">INSTITUTO COLOMBIANO DE BIENESTAR FAMILIAR</option>';
+            html += '<option value="CAJA">CAJA DE COMPENSACION FAMILIAR</option>';
+            html += '</select>';
+        }
+        $('#divParaFisc').html(html);
     });
     $('#btnLiqVacaciones').on('click', function () {
         let c = 0;
