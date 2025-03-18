@@ -373,13 +373,13 @@
                     if (r == '1') {
                         let id = 'tb_cdps';
                         reloadtable(id);
-                        $('#divFormsReg').modal('hide');
                         mje('Liberacion ejecutada correctamente');
                     } else {
                         mjeError(r);
                     }
                 }
             });
+            $(this).closest('.modal').modal('hide');
         }
     });
     //--------------------- liberaciones realizadas cdp
@@ -419,8 +419,7 @@
         else {
             let datos = $('#frm_liberarsaldos_crp').serialize();
             let url;
-            //url = window.urlin + '/terceros/php/historialtercero/registrar_liberacion_crp.php';
-            url = "";
+            url = window.urlin + '/terceros/php/historialtercero/registrar_liberacion_crp.php';
             $.ajax({
                 type: 'POST',
                 url: url,
@@ -430,15 +429,19 @@
                         let id2 = 'tb_cdps';
                         reloadtable(id2);
                         let id = 'tb_reg_presupuestal';
-                        reloadtable(id);
-                        $('#divFormsReg').modal('hide');
+                        reloadtable(id);                        
                         mje('Liberacion ejecutada correctamente');
+                        //$(this).closest('.modal').modal('hide');
                     } else {
                         mjeError(r);
                     }
                 }
             });
+           $(this).closest('.modal').modal('hide');
         }
-        //$('#divFormsReg').modal('hide');
     });
+    /*$('#divFormsReg').on("click", "#btn_liquidar_saldos_crp", function () {
+        //$('.modal.show').modal('hide'); // este destruye todos los modales
+        $(this).closest('.modal').modal('hide');
+    });*/
 })(jQuery);
