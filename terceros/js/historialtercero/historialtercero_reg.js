@@ -339,7 +339,7 @@
         });
     });
 
-    //------------------- boton liberar saldos
+    //------------------- boton liberar saldos cdp
     $('#body_tb_cdps').on('click', '.btn_liberar', function () {
         let id_cdp = $(this).attr('value');
         $('#id_cdp').val(id_cdp);
@@ -354,7 +354,7 @@
         });
     });
 
-    //--------------------
+    //-------------------- liberar saldos cdp
     $('#divFormsReg').on("click", "#btn_liquidar", function () {
         if ($('#txt_fec_lib').val() < $('#txt_fec_cdp').val()) {
             $('#divModalError').modal('show');
@@ -382,6 +382,20 @@
             });
         }
     });
+    //--------------------- liberaciones realizadas cdp
+    $('#body_tb_cdps').on('click', '.btn_liberaciones', function () {
+        let id_cdp = $(this).attr('value');
+        $('#id_cdp').val(id_cdp);
+
+        $.post(window.urlin + "/terceros/php/historialtercero/frm_listar_liberaciones_cdp.php", { id_cdp: id_cdp }, function (he) {
+            $('#divTamModalReg').removeClass('modal-xl');
+            $('#divTamModalReg').removeClass('modal-sm');
+            $('#divTamModalReg').addClass('modal-lg');
+            $('#divModalReg').modal('show');
+            $("#divFormsReg").html(he);
+        });
+    });
+
     //------------------- boton liberar saldos crp
     $('#body_tb_reg_presupuestal').on('click', '.btn_liberar_crp', function () {
         let id_crp = $(this).attr('value');
@@ -396,7 +410,7 @@
             $("#divFormsReg").html(he);
         });
     });
-    //-----------------------------------------------------
+    //----------------------------------------------------- liberar saldos crp
     $('#divFormsReg').on("click", "#btn_liquidar_saldos_crp", function () {
         if ($('#txt_fec_lib_crp').val() < $('#txt_fec_crp').val()) {
             $('#divModalError').modal('show');
@@ -405,7 +419,8 @@
         else {
             let datos = $('#frm_liberarsaldos_crp').serialize();
             let url;
-            url = window.urlin + '/terceros/php/historialtercero/registrar_liberacion_crp.php';
+            //url = window.urlin + '/terceros/php/historialtercero/registrar_liberacion_crp.php';
+            url = "";
             $.ajax({
                 type: 'POST',
                 url: url,
@@ -424,5 +439,6 @@
                 }
             });
         }
+        //$('#divFormsReg').modal('hide');
     });
 })(jQuery);
