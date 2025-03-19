@@ -103,12 +103,14 @@ if (!empty($objs)) {
             5401 presupuesto gestion
         */
         $liberar = null;
+        $liberaciones = null;
         if (PermisosUsuario($permisos, 5201, 1) || $id_rol == 1 || PermisosUsuario($permisos, 5401, 1)) {
             $listar = '<a value="' . $id_cdp . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_listar" title="Listar"><span class="fas fa-clipboard-list fa-lg"></span></a>';
         }
         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
             if ($saldo > 0 || $saldo < 0) {
                 $liberar =  '<a value="' . $id_cdp . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_liberar" title="Liberar"><span class="fas fa-arrow-alt-circle-left fa-lg"></span></a>';
+                $liberaciones =  '<a value="' . $id_cdp . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb btn_liberaciones" title="Listar liberaciones"><span class="fas fa-hand-holding-usd fa-lg"></span></a>';
             }
         }
         $data[] = [
@@ -124,7 +126,7 @@ if (!empty($objs)) {
             "valor_crp" => $obj['valor_crp'],
             "valor_crp_liberado" => $obj['valor_crp_liberado'],
             "saldo" => $obj['saldo'],
-            "botones" => '<div class="text-center centro-vertical">' . $liberar . $listar . '</div>',
+            "botones" => '<div class="text-center centro-vertical">' . $liberar . $listar . $liberaciones . '</div>',
         ];
     }
 }

@@ -13,8 +13,11 @@ try {
     $sql = "SELECT
                 `tb_terceros`.`id_tercero_api`
                 , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
             FROM
-                `tb_terceros`";
+                `tb_terceros`
+            WHERE `tb_terceros`.`id_tercero_api` > 0
+            ORDER BY `tb_terceros`.`nom_tercero` ASC";
     $rs = $cmd->query($sql);
     $terceros = $rs->fetchAll();
     $cmd = null;
@@ -25,7 +28,7 @@ $data = [];
 $buscar = mb_strtoupper($_POST['term']);
 if ($buscar == '%%') {
     foreach ($terceros as $s) {
-        $nom_tercero = trim(mb_strtoupper($s['nom_tercero']), " \t\n\r\0\x0B");
+        $nom_tercero = trim(mb_strtoupper($s['nom_tercero']), " \t\n\r\0\x0B") . ' -> ' . $s['nit_tercero'];
         $data[] = [
             'id' => $s['id_tercero_api'],
             'label' => $nom_tercero,
