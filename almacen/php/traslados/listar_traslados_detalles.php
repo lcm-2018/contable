@@ -45,13 +45,15 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_traslado_detalle.id_tra_detalle,
-	            far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
+	            far_medicamentos.cod_medicamento,
+                CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion))) AS nom_medicamento,
                 far_medicamento_lote.lote,far_medicamento_lote.existencia,far_medicamento_lote.fec_vencimiento,
 	            far_traslado_detalle.cantidad,far_traslado_detalle.valor,
 	            far_traslado_detalle.valor*far_traslado_detalle.cantidad AS val_total
             FROM far_traslado_detalle
             INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_traslado_detalle.id_lote_origen)
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_medicamento_lote.id_med)
+            INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
             WHERE far_traslado_detalle.id_traslado=" . $_POST['id_traslado'] . $where . " ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);

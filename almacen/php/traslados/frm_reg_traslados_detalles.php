@@ -15,10 +15,11 @@ $id_lote = isset($_POST['id_lote']) ? $_POST['id_lote'] : -1;
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT far_traslado_detalle.*,
             far_medicamento_lote.lote,far_medicamento_lote.existencia,
-            far_medicamentos.nom_medicamento AS nom_articulo
+            CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion))) AS nom_articulo
         FROM far_traslado_detalle
         INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote=far_traslado_detalle.id_lote_origen)
         INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
+        INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
         WHERE id_tra_detalle=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();

@@ -35,7 +35,7 @@ if (empty($obj)) {
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h7 style="color: white;">REGISRTAR CUM DE ARTICULO</h7>
+            <h7 style="color: white;">REGISRTAR CUM/EXPEDIENTE DE ARTICULO</h7>
         </div>
         <div class="px-2">
 
@@ -44,7 +44,7 @@ if (empty($obj)) {
                 <input type="hidden" id="id_cum" name="id_cum" value="<?php echo $id ?>">
                 <div class=" form-row">
                     <div class="form-group col-md-3">
-                        <label for="txt_cod_cum" class="small">CUM</label>
+                        <label for="txt_cod_cum" class="small">CUM/Expediente</label>
                         <input type="text" class="form-control form-control-sm valcode" id="txt_cod_cum" name="txt_cod_cum" required value="<?php echo $obj['cum'] ?>">
                     </div>
                     <div class="form-group col-md-3">
@@ -59,8 +59,14 @@ if (empty($obj)) {
                     <div class="form-group col-md-3">
                         <label for="txt_reg_inv" class="small">Registro Invima</label>
                         <input type="text" class="form-control form-control-sm valcode" id="txt_reg_inv" name="txt_reg_inv" required value="<?php echo $obj['reg_invima'] ?>">
-                    </div>                 
-                    <div class="form-group col-md-9">
+                    </div>  
+                    <div class="form-group col-md-3">
+                        <label for="sl_estado_inv" class="small">Estado Invima</label>
+                        <select class="form-control form-control-sm" id="sl_estado_inv" name="sl_estado_inv">
+                            <?php estados_invima('', $obj['estado_invima']) ?>
+                        </select>
+                    </div>               
+                    <div class="form-group col-md-6">
                         <label for="txt_precom_cum" class="small">Presentación Comercial</label>
                         <input type="text" class="form-control form-control-sm" id="txt_precom_cum" required value="<?php echo $obj['nom_presentacion'] ?>">
                         <input type="hidden" id="id_txt_precom_cum" name="id_txt_precom_cum" value="<?php echo $obj['id_prescom'] ?>">

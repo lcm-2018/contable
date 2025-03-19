@@ -104,7 +104,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
             <div class="p-3">
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link active small" id="nav_lista_cums-tab" data-toggle="tab" href="#nav_lista_cums" role="tab" aria-controls="nav_lista_cums" aria-selected="true">CUMS</a>
+                        <a class="nav-item nav-link active small" id="nav_lista_cums-tab" data-toggle="tab" href="#nav_lista_cums" role="tab" aria-controls="nav_lista_cums" aria-selected="true">CUMS/Expedientes</a>
                         <a class="nav-item nav-link small" id="nav_lista_lotes-tab" data-toggle="tab" href="#nav_lista_lotes" role="tab" aria-controls="nav_lista_lotes" aria-selected="false">LOTES</a>
                     </div>
                 </nav>
@@ -116,10 +116,11 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             <thead>
                                 <tr class="text-center centro-vertical">
                                     <th>Id</th>
-                                    <th>CUM</th>
+                                    <th>CUM/Expediente</th>
                                     <th>IUM</th>
                                     <th>Laboratorio</th>
                                     <th>Registro Invima</th>
+                                    <th>Estado Invima</th>
                                     <th>Presentación Comercial</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
@@ -138,9 +139,10 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                                     <th>Lote</th>
                                     <th>Principal</th>                                    
                                     <th>Fecha<br>Vencimiento</th>   
-                                    <th>Registro Invima</th>                                 
+                                    <th>Reg. Invima</th>                                 
+                                    <th>Marca</th>                                 
                                     <th>Presentación del Lote</th>
-                                    <th>Unidades en UMPL</th>
+                                    <th>Unidades<br>en UMPL</th>
                                     <th>Existencia</th>
                                     <th>CUM</th>
                                     <th>Bodega</th>

@@ -45,19 +45,26 @@ try {
 
                         if ($obj_det['existencia'] >= $cantidad){
                             if ($id == -1) {
-                                $sql = "INSERT INTO far_orden_egreso_detalle(id_egreso,id_lote,cantidad,valor)
-                                    VALUES($id_egreso,$id_lote,$cantidad,$valor)";
+                                $sql = "SELECT COUNT(*) AS existe FROM far_orden_egreso_detalle WHERE id_egreso=$id_egreso AND id_lote=" . $id_lote;
                                 $rs = $cmd->query($sql);
+                                $obj = $rs->fetch();
+                                if ($obj['existe'] == 0) {
+                                    $sql = "INSERT INTO far_orden_egreso_detalle(id_egreso,id_lote,cantidad,valor)
+                                        VALUES($id_egreso,$id_lote,$cantidad,$valor)";
+                                    $rs = $cmd->query($sql);
 
-                                if ($rs) {
-                                    $res['mensaje'] = 'ok';
-                                    $sql_i = 'SELECT LAST_INSERT_ID() AS id';
-                                    $rs = $cmd->query($sql_i);
-                                    $obj = $rs->fetch();
-                                    $res['id'] = $obj['id'];
+                                    if ($rs) {
+                                        $res['mensaje'] = 'ok';
+                                        $sql_i = 'SELECT LAST_INSERT_ID() AS id';
+                                        $rs = $cmd->query($sql_i);
+                                        $obj = $rs->fetch();
+                                        $res['id'] = $obj['id'];
+                                    } else {
+                                        $res['mensaje'] = $cmd->errorInfo()[2];
+                                    }
                                 } else {
-                                    $res['mensaje'] = $cmd->errorInfo()[2];
-                                }
+                                    $res['mensaje'] = 'El Lote ya existe en los detalles de la Orden de Egreso';
+                                }    
                             } else {
                                 $sql = "UPDATE far_orden_egreso_detalle 
                                     SET cantidad=$cantidad

@@ -20,11 +20,13 @@ $cantidad = isset($_POST['cantidad']) ? $_POST['cantidad'] : 0;
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 
 $sql = "SELECT far_orden_ingreso_detalle.*,
-            far_medicamentos.id_med,far_medicamentos.nom_medicamento AS nom_articulo,
+            far_medicamentos.id_med,
+            CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion))) AS nom_articulo,
             far_presentacion_comercial.nom_presentacion,IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl
         FROM far_orden_ingreso_detalle
         INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote=far_orden_ingreso_detalle.id_lote)
         INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
+        INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
         INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_orden_ingreso_detalle.id_presentacion)
         WHERE id_ing_detalle=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);

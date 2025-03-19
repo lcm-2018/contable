@@ -60,12 +60,14 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_medicamento_lote.id_lote,far_medicamentos.id_med,
-                far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
+                far_medicamentos.cod_medicamento,
+                CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion))) AS nom_medicamento,
 	            far_medicamento_lote.lote,far_presentacion_comercial.nom_presentacion,
                 ROUND(far_medicamento_lote.existencia/IFNULL(far_presentacion_comercial.cantidad,1),1) AS existencia_umpl,
 	            far_medicamento_lote.existencia,far_medicamentos.val_promedio,far_medicamento_lote.fec_vencimiento
             FROM far_medicamento_lote
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
+            INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
             INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)"
             . $where . " ORDER BY $col $dir $limit";
 

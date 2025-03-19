@@ -258,6 +258,7 @@ function estados_movimientos($titulo = '', $estado = -1)
     echo '<option value="0"' . $selected . '>ANULADO</option>';
 }
 
+// PEDIDOS DE ALMACEN
 function estados_pedidos($titulo = '', $estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
@@ -272,7 +273,7 @@ function estados_pedidos($titulo = '', $estado = -1)
     $selected = ($estado == 0) ? 'selected="selected"' : '';
     echo '<option value="0"' . $selected . '>ANULADO</option>';
 }
-
+// PEDIDOS DE BODEGA Y DE DEPENDENCIA
 function estados_pedidos_2($titulo = '', $estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
@@ -281,7 +282,7 @@ function estados_pedidos_2($titulo = '', $estado = -1)
     $selected = ($estado == 2) ? 'selected="selected"' : '';
     echo '<option value="2"' . $selected . '>CONFIRMADO</option>';
     $selected = ($estado == 3) ? 'selected="selected"' : '';
-    echo '<option value="4"' . $selected . '>FINALIZADO</option>';
+    echo '<option value="3"' . $selected . '>FINALIZADO</option>';
     $selected = ($estado == 0) ? 'selected="selected"' : '';
     echo '<option value="0"' . $selected . '>ANULADO</option>';
 }
@@ -386,13 +387,14 @@ function lotes_articulo($cmd, $id_bodega, $id_articulo, $id = 0)
 {
     try {        
         echo '<option value=""></option>';
-        $sql = "SELECT far_medicamento_lote.id_lote,IF(fec_vencimiento='3000-01-01',lote,CONCAT(lote,'[',fec_vencimiento,']')) AS nom_lote,
-                    far_medicamentos.nom_medicamento AS nom_articulo,
+        $sql = "SELECT far_medicamento_lote.id_lote,IF(fec_vencimiento='3000-01-01',lote,CONCAT(lote,' [Fv:',fec_vencimiento,']')) AS nom_lote,                    
+                    CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion))) AS nom_articulo,
                     far_medicamento_lote.id_presentacion,far_presentacion_comercial.nom_presentacion,
                     IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl,
                     far_medicamentos.val_promedio
                 FROM far_medicamento_lote
                 INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
+                INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
                 INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
                 WHERE (far_medicamento_lote.id_med=$id_articulo AND far_medicamento_lote.id_bodega=$id_bodega AND 
                         far_medicamento_lote.estado=1 AND far_medicamentos.estado=1 AND
@@ -453,7 +455,16 @@ function tipo_traslado($titulo = '',$estado = -1)
     $selected = ($estado == 2) ? 'selected="selected"' : '';
     echo '<option value="2"' . $selected . '>TRASLADO TOTAL DE UN INGRESO</option>';
 }
-
+function estados_invima($titulo = '',$estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>VIGENTE</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>PROCESO DE RENOVACION</option>';
+    $selected = ($estado == 3) ? 'selected="selected"' : '';
+    echo '<option value="3"' . $selected . '>NO VIGENTE</option>';
+}
 
 function tipo_area($cmd, $titulo ='', $id = 0)
 {
@@ -494,6 +505,26 @@ function areas_centrocosto($cmd, $titulo = '', $idcec = 0, $id = -1)
             }
             $cmd = null;
         }    
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+function marcas($cmd, $titulo = '', $id = 0)
+{
+    try {
+        echo '<option value="">' . $titulo . '</option>';
+        $sql = "SELECT id, descripcion FROM acf_marca WHERE id<>0";
+        $rs = $cmd->query($sql);
+        $objs = $rs->fetchAll();
+        foreach ($objs as $obj) {
+            if ($obj['id']  == $id) {
+                echo '<option value="' . $obj['id'] . '" selected="selected">' . $obj['descripcion'] . '</option>';
+            } else {
+                echo '<option value="' . $obj['id'] . '">' . $obj['descripcion'] . '</option>';
+            }
+        }
+        $cmd = null;
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }

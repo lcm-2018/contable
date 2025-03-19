@@ -1,6 +1,6 @@
 <?php
 
-//FUNCION QUE RETORNA LA BODEGA PRINCIPAL DE LA ENTIDAD
+//FUNCION QUE RETORNA LA BODEGA PRINCIPAL DE LA ENTIDAD VALIDANDO PERMISO DEL USUARIO
 function bodega_principal($cmd){
     try {
         $idusr = $_SESSION['id_user'];
@@ -20,6 +20,32 @@ function bodega_principal($cmd){
                 } else {
                     $res = array('id_bodega' => '', 'nom_bodega' => 'La Bodega Principal no esta asociada al Usuario', 'id_sede' => '');        
                 }    
+            } else {
+                $res = array('id_bodega' => '', 'nom_bodega' => 'La Bodega Principal no tiene Sede', 'id_sede' => '');    
+            }    
+        } else {
+            $res = array('id_bodega' => '', 'nom_bodega' => 'No Existe Bodega Principal', 'id_sede' => '');
+        }
+        $cmd = null;
+        return $res;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+//FUNCION QUE RETORNA LA BODEGA PRINCIPAL DE LA ENTIDAD SIN VALIDAR PERMISO DEL USUARIOS
+function bodega_principal_general($cmd){
+    try {
+        $res = array();
+        $sql = "SELECT far_bodegas.id_bodega,far_bodegas.nombre,tb_sedes_bodega.id_sede
+                FROM far_bodegas 
+                LEFT JOIN tb_sedes_bodega ON (tb_sedes_bodega.id_bodega=far_bodegas.id_bodega)
+                WHERE far_bodegas.es_principal=1";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();
+        if (isset($obj['id_bodega'])) {
+            if (isset($obj['id_sede'])) {
+                $res = array('id_bodega' => $obj['id_bodega'], 'nom_bodega' => $obj['nombre'], 'id_sede' => $obj['id_sede']);
             } else {
                 $res = array('id_bodega' => '', 'nom_bodega' => 'La Bodega Principal no tiene Sede', 'id_sede' => '');    
             }    
@@ -59,11 +85,13 @@ function datos_lote($cmd, $id_lote){
     try {
         $res = array();
         $sql = "SELECT far_medicamento_lote.id_lote,far_medicamento_lote.lote,far_medicamento_lote.existencia,
-                    far_medicamentos.nom_medicamento AS nom_articulo,far_medicamentos.val_promedio,
+                    CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion))) AS nom_articulo,
+                    far_medicamentos.val_promedio,
                     far_medicamento_lote.id_presentacion,far_presentacion_comercial.nom_presentacion,
                     IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl
                 FROM far_medicamento_lote
                 INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
+                INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
                 INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
                 WHERE far_medicamento_lote.id_lote=$id_lote";
         $rs = $cmd->query($sql);
