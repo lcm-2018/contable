@@ -35,7 +35,7 @@ $otro_form = isset($_POST['otro_form']) ? $_POST['otro_form'] : 0;
         </div>
     </div>
     <div class="text-center pt-3">
-        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir_liberaciones_cdp">Imprimir</button>
+        <!--<button type="button" class="btn btn-primary btn-sm" id="btn_imprimir_liberaciones_cdp">Imprimir</button>-->
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>
@@ -61,12 +61,12 @@ $otro_form = isset($_POST['otro_form']) ? $_POST['otro_form'] : 0;
                           { 'data': 'fecha' },
                           { 'data': 'concepto_libera' },
                           { 'data': 'valor_liberado' },
+                          { 'data': 'botones' },
                 ],
                 columnDefs: [{
                         class: 'text-wrap',
                         targets: [2]
-                    } //,
-                    //{ width: '5%', targets: [0,1,3,4] }
+                    } 
                 ],
                 order: [
                     [2, "asc"]
@@ -76,8 +76,7 @@ $otro_form = isset($_POST['otro_form']) ? $_POST['otro_form'] : 0;
                     [10, 25, 50, 'TODO'],
                 ]
             });
-            $('#tb_saldos').wrap('<div class="overflow"/>');
+            $('#tb_liberacionescdp').wrap('<div class="overflow"/>');
         });
     })(jQuery);
-
 </script>
