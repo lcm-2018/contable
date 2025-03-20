@@ -9,6 +9,23 @@ include '../../../permisos.php';
 include '../../../terceros.php';
 // Div de acciones de la lista
 $id_cuenta = isset($_POST['id_cuenta']) ? $_POST['id_cuenta'] : exit('Acceso no disponible');
+$mes = $_POST['mes'];
+$vigencia = $_SESSION['vigencia'];
+
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `id_mes`,`codigo`,`nom_mes`,`fin_mes`
+            FROM `nom_meses`
+            WHERE `codigo` = '$mes'";
+    $rs = $cmd->query($sql);
+    $df = $rs->fetch(PDO::FETCH_ASSOC);
+    $dia = $df['fin_mes'];
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+$fecha = $vigencia . '-' . $mes . '-' . $dia;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -34,7 +51,7 @@ try {
                     ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
                 LEFT JOIN `tes_conciliacion_detalle`
                     ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)   
-            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_cuenta AND `ctb_doc`.`estado` = 2)";
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_cuenta AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fecha')";
     $rs = $cmd->query($sql);
     $lista = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -42,6 +59,10 @@ try {
 }
 $id_t = [];
 $terceros = [];
+$tot_deb = 0;
+$tot_cre = 0;
+$tdc = 0;
+$tcc = 0;
 if (!empty($lista)) {
     foreach ($lista as $lp) {
         if ($lp['id_tercero_api'] != '') {
@@ -53,6 +74,12 @@ if (!empty($lista)) {
     $cmd = null;
     foreach ($lista as $lp) {
         $chk = $lp['conciliado'] > 0 ? 'checked' : '';
+        $tot_deb += $lp['debito'];
+        $tot_cre += $lp['credito'];
+        if ($lp['conciliado'] > 0) {
+            $tdc += $lp['debito'];
+            $tcc += $lp['credito'];
+        }
         $check = '<input ' . $chk . ' type="checkbox" name="check[]" onclick="GuardaDetalleConciliacion(this)" text="' . $lp['id_ctb_libaux'] . '">';
         $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
         $nombre = $key !== false ? ltrim($terceros[$key]['nom_tercero'] . ' -> ' . $terceros[$key]['nit_tercero']) : '---';
@@ -69,11 +96,17 @@ if (!empty($lista)) {
             'accion' => '<div class="text-center vertical-align-middle">' . $check . '</div>',
         ];
     }
+    $tot_deb = $tot_deb - $tdc;
+    $tot_cre = $tot_cre - $tcc;
 } else {
     $data = [];
 }
 $cmd = null;
-$datos = ['data' => $data];
+$datos = [
+    'data' => $data,
+    'tot_deb' => $tot_deb,
+    'tot_cre' => $tot_cre
+];
 
 
 echo json_encode($datos);

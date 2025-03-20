@@ -44,7 +44,7 @@ try {
                 `nom_cdp_empleados`
                 INNER JOIN `pto_cargue` 
                     ON (`nom_cdp_empleados`.`rubro` = `pto_cargue`.`id_cargue`)
-            WHERE (`nom_cdp_empleados`.`id_nomina` = $id_nomina AND `nom_cdp_empleados`.`tipo` = '$tipo_nomina')";
+            WHERE (`nom_cdp_empleados`.`id_nomina` = $id_nomina AND `nom_cdp_empleados`.`tipo` = 'PL')";
     $rs = $cmd->query($sql);
     $valxrubro = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;

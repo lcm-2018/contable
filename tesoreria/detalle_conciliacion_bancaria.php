@@ -25,11 +25,54 @@ try {
 }
 try {
     $sql = "SELECT
+                `ctb_doc`.`fecha`
+                , `ctb_fuente`.`cod`
+                , `ctb_doc`.`id_manu`
+                , `ctb_libaux`.`id_tercero_api`
+                , `ctb_libaux`.`debito`
+                , `ctb_libaux`.`credito`
+                , '--' AS `documento`
+                , `ctb_libaux`.`id_ctb_libaux`
+                , `tes_conciliacion_detalle`.`id_ctb_libaux` AS `conciliado`
+            FROM
+                `ctb_libaux`
+                INNER JOIN `ctb_pgcp` 
+                    ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                INNER JOIN `tes_cuentas` 
+                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                INNER JOIN `ctb_doc` 
+                    ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                INNER JOIN `ctb_fuente` 
+                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                LEFT JOIN `tes_conciliacion_detalle`
+                    ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)   
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes')";
+    $rs = $cmd->query($sql);
+    $lista = $rs->fetchAll();
+    $tot_deb = 0;
+    $tot_cre = 0;
+    $tdc = 0;
+    $tcc = 0;
+    foreach ($lista as $lp) {
+        $tot_deb += $lp['debito'];
+        $tot_cre += $lp['credito'];
+        if ($lp['conciliado'] > 0) {
+            $tdc += $lp['debito'];
+            $tcc += $lp['credito'];
+        }
+    }
+    $tot_deb = $tot_deb - $tdc;
+    $tot_cre = $tot_cre - $tcc;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $sql = "SELECT
                 `tes_conciliacion`.`id_conciliacion`
                 , `tes_conciliacion`.`saldo_extracto`
                 , `tes_conciliacion`.`estado`
-                , `t1`.`debito`
-                , `t1`.`credito`
+                , IFNULL(`t1`.`debito`,0) AS `debito`
+                , IFNULL(`t1`.`credito`,0) AS `credito`
             FROM
                 `tes_conciliacion`
                 INNER JOIN `tes_cuentas` 
@@ -45,7 +88,7 @@ try {
                         ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)
                 GROUP BY `tes_conciliacion_detalle`.`id_concilia`) AS `t1`
                 ON (`t1`.`id_concilia` = `tes_conciliacion`.`id_conciliacion`)
-            WHERE (`tes_cuentas`.`id_cuenta` = $id AND `tes_conciliacion`.`vigencia` = '$vigencia' AND `tes_conciliacion`.`mes` = '$mes')";
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id AND `tes_conciliacion`.`vigencia` = '$vigencia' AND `tes_conciliacion`.`mes` = '$mes')";
     $rs = $cmd->query($sql);
     $data = $rs->fetch(PDO::FETCH_ASSOC);
     if (!empty($data)) {
@@ -103,7 +146,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$conciliar = $detalles['debito'] - $detalles['credito'] + $debito - $credito;
+$conciliar = $detalles['debito'] - $detalles['credito'] + $tot_deb - $tot_cre + $saldo;
 $ver = 'readonly';
 ?>
 <!DOCTYPE html>
@@ -128,6 +171,8 @@ $ver = 'readonly';
                             </div>
                         </div>
                         <div class="card-body" id="divCuerpoPag">
+                            <input type="hidden" id="tot_deb" value="<?= $tot_deb; ?>">
+                            <input type="hidden" id="tot_cre" value="<?= $tot_cre; ?>">
                             <form id="formAddDetallePag">
                                 <input type="hidden" id="id_cuenta" value="<?php echo $id; ?>">
                                 <input type="hidden" id="cod_mes" value="<?php echo $mes; ?>">
@@ -205,7 +250,7 @@ $ver = 'readonly';
                     </table>
                     <div class="text-center pt-4">
                         <a type="button" class="btn btn-primary btn-sm" onclick="imprimirFormatoCons();" style="width: 5rem;"> <span class="fas fa-print "></span></a>
-                        <a onclick="terminarDetalleCons()" class="btn btn-danger btn-sm" style="width: 7rem;" href="#"> Terminar</a>
+                        <button onclick="terminarDetalleCons()" class="btn btn-danger btn-sm" style="width: 7rem;" href="#"> Terminar</button>
                     </div>
                 </div>
         </div>
