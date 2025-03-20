@@ -11,13 +11,13 @@ include '../common/funciones_generales.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$where = "WHERE id<>0";
+$where = "WHERE id_lab<>0";
 if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND descripcion LIKE '" . $_POST['nombre'] . "%'";
+    $where .= " AND nom_laboratorio LIKE '" . $_POST['nombre'] . "%'";
 }
 
 try {
-    $sql = "SELECT id,descripcion FROM acf_marca $where ORDER BY id DESC";
+    $sql = "SELECT id_lab,nom_laboratorio FROM far_laboratorios $where ORDER BY id_lab DESC";
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
 } catch (PDOException $e) {
@@ -50,7 +50,7 @@ try {
 
     <table style="width:100%; font-size:80%">
         <tr style="text-align:center">
-            <th>REPORTE DE MARCAS</th>
+            <th>REPORTE DE LABORATORIOS</th>
         </tr>     
     </table>
 
@@ -66,8 +66,8 @@ try {
             $tabla = '';
             foreach ($objs as $obj) {
                 $tabla .=  '<tr class="resaltar" style="text-align:center"> 
-                        <td>' . $obj['id'] . '</td>
-                        <td style="text-align:left">' . $obj['descripcion'] . '</td></tr>';
+                        <td>' . $obj['id_lab'] . '</td>
+                        <td style="text-align:left">' . $obj['nom_laboratorio'] . '</td></tr>';
             }
             echo $tabla;
             ?>            

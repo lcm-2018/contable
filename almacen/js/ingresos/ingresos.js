@@ -346,7 +346,7 @@
     $('#divModalBus').on('dblclick', '#tb_lotes_articulos tr', function() {
         let id_bodega = $('#id_txt_nom_bod').val();
         let data = $('#tb_lotes_articulos').DataTable().row(this).data();
-        $.post("frm_reg_ingresos_detalles.php", { id_articulo: data.id_med, id_lote: data.id_lote, id_bodega: id_bodega }, function(he) {
+        $.post("frm_reg_ingresos_detalles.php", { id_articulo: data.id_med, articulo: data.nom_medicamento, id_lote: data.id_lote, id_bodega: id_bodega }, function(he) {
             $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
@@ -375,8 +375,9 @@
     });
 
     $('#divModalReg').on("change", "#sl_lote_art", function() {
+        let lote = $(this).find('option:selected');
+        $('#txt_nom_art').val(lote.attr('data-nom_articulo'));
         if ($('#id_detalle').val() == -1) {
-            let lote = $(this).find('option:selected');
             $('#txt_pre_lot').val(lote.attr('data-nom_presentacion'));
             $('#id_txt_pre_lot').val(lote.attr('data-id_presentacion'));
             $('#txt_can_lot').val(lote.attr('data-cantidad_umpl'));

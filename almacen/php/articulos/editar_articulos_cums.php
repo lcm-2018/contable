@@ -31,11 +31,12 @@ try {
                 $id_lab = $_POST['id_txt_lab_cum'] ? $_POST['id_txt_lab_cum'] : 0;
                 $id_precom = $_POST['id_txt_precom_cum'] ? $_POST['id_txt_precom_cum'] : 0;
                 $reg_inv = $_POST['txt_reg_inv'];
+                $estado_inv = $_POST['sl_estado_inv'] ? $_POST['sl_estado_inv'] : 0;
                 $estado = $_POST['sl_estado_cum'];
 
                 if ($id == -1) {
-                    $sql = "INSERT INTO far_medicamento_cum(cum,ium,id_lab,id_prescom,estado,id_usr_crea,id_med,con_sismed,uni_fac_sismed,reg_invima)  
-                        VALUES('$cod_cum','$cod_ium',$id_lab,$id_precom,$estado,$id_usr_crea,$id_articulo,1,'C','$reg_inv')";
+                    $sql = "INSERT INTO far_medicamento_cum(cum,ium,id_lab,id_prescom,estado,id_usr_crea,id_med,con_sismed,uni_fac_sismed,reg_invima,estado_invima)  
+                        VALUES('$cod_cum','$cod_ium',$id_lab,$id_precom,$estado,$id_usr_crea,$id_articulo,1,'C','$reg_inv',$estado_inv)";
                     $rs = $cmd->query($sql);
 
                     if ($rs) {
@@ -48,8 +49,9 @@ try {
                         $res['mensaje'] = $cmd->errorInfo()[2];
                     }
                 } else {
-                    $sql = "UPDATE far_medicamento_cum SET cum='$cod_cum',ium='$cod_ium',id_lab=$id_lab,id_prescom=$id_precom,estado=$estado,reg_invima='$reg_inv'
-                        WHERE id_cum=" . $id;
+                    $sql = "UPDATE far_medicamento_cum SET cum='$cod_cum',ium='$cod_ium',id_lab=$id_lab,
+                                    id_prescom=$id_precom,estado=$estado,reg_invima='$reg_inv',estado_invima=$estado_inv
+                            WHERE id_cum=" . $id;
                     $rs = $cmd->query($sql);
 
                     if ($rs) {

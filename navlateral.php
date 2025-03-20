@@ -890,6 +890,26 @@ try {
                                             </div>
                                         </a>
                                     <?php } ?>
+                                    <?php if (PermisosUsuario($permisos, 5010, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/marcas/index.php?var=3">
+                                            <div class="div-icono">
+                                                <i class="fab fa-staylinked" style="color: #E74C3C;"></i>
+                                            </div>
+                                            <div>
+                                                Marcas
+                                            </div>
+                                        </a>
+                                    <?php } ?>
+                                    <?php if (PermisosUsuario($permisos, 5001, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/laboratorios/index.php?var=3">
+                                            <div class="div-icono">
+                                                <i class="fas fa-bong" style="color: #E74C3C;"></i>
+                                            </div>
+                                            <div>
+                                                Laboratorios
+                                            </div>
+                                        </a>
+                                    <?php } ?>
                                     <?php if (PermisosUsuario($permisos, 5002, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/articulos/index.php?var=3">
                                             <div class="div-icono">
@@ -899,17 +919,7 @@ try {
                                                 Articulos
                                             </div>
                                         </a>
-                                    <?php } ?>
-                                    <?php if ((PermisosUsuario($permisos, 5002, 1) || $id_rol == 1) && 2 == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/financiero/php/historialtercero/index.php?var=3">
-                                            <div class="div-icono">
-                                                <i class="far fa-list-alt" style="color: #E74C3C;"></i>
-                                            </div>
-                                            <div>
-                                                Historial tercero
-                                            </div>
-                                        </a>
-                                    <?php } ?>
+                                    <?php } ?>                                    
                                 </nav>
                             </div>
                             <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapsePedidos" aria-expanded="false" aria-controls="pagesCollapsePedidos">

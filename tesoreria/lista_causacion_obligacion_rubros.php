@@ -29,7 +29,8 @@ try {
                     INNER JOIN pto_cdp_detalle ON (pto_crp_detalle.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
                     INNER JOIN pto_cargue ON (pto_cdp_detalle.id_rubro = pto_cargue.id_cargue)
                     LEFT JOIN pto_pag_detalle ON (pto_pag_detalle.id_pto_cop_det = pto_cop_detalle.id_pto_cop_det)
-                WHERE pto_cop_detalle.id_ctb_doc = $id_cop";
+                WHERE pto_cop_detalle.id_ctb_doc = $id_cop
+                GROUP BY   pto_cop_detalle.id_pto_cop_det";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll();
     $tercero = !empty($rubros) ? $rubros[0]['id_tercero_api'] : 0;

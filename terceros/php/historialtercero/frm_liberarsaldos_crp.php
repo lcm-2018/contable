@@ -25,7 +25,7 @@ $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 //----------------------------------------------------- hago la consulta aqui para que los saldos sean cajas de texto
 // sino utilizo el script para llamar a listar_saldos.php
-$sql = "SELECT
+/*$sql = "SELECT
             COUNT(*) AS filas
             , pto_crp.id_pto_crp
             , pto_cdp_detalle.id_pto_cdp_det
@@ -38,6 +38,29 @@ $sql = "SELECT
         FROM
             pto_cop_detalle
             INNER JOIN (SELECT id_pto_crp,id_pto_crp_det,id_pto_cdp_det,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2 ON (pto_cop_detalle.id_pto_crp_det = pto_crp_detalle2.id_pto_crp_det)
+            INNER JOIN pto_cdp_detalle ON (pto_crp_detalle2.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
+            INNER JOIN pto_crp ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)
+            INNER JOIN pto_cargue ON (pto_cdp_detalle.id_rubro = pto_cargue.id_cargue)
+
+            WHERE pto_crp_detalle2.id_pto_crp = $id_crp
+            GROUP BY pto_crp.id_cdp";
+
+$rs = $cmd->query($sql);
+$obj_saldos = $rs->fetchAll(); */
+
+$sql = "SELECT
+            COUNT(*) AS filas
+            , pto_crp.id_pto_crp
+            , pto_cdp_detalle.id_pto_cdp_det
+            , pto_cargue.cod_pptal 
+            , SUM(IFNULL(pto_crp_detalle2.valor,0)) AS vr_crp
+            , SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)) AS vr_crp_liberado
+            , SUM(IFNULL(pto_cop_detalle.valor,0)) AS vr_cop
+            , SUM(IFNULL(pto_cop_detalle.valor_liberado,0)) AS vr_cop_liberado
+            ,(SUM(IFNULL(pto_crp_detalle2.valor,0)) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)))-(SUM(IFNULL(pto_cop_detalle.valor,0)) - SUM(IFNULL(pto_cop_detalle.valor_liberado,0))) AS saldo_final
+        FROM
+            (SELECT id_pto_crp,id_pto_crp_det,id_pto_cdp_det,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2
+            LEFT JOIN pto_cop_detalle ON (pto_cop_detalle.id_pto_crp_det = pto_crp_detalle2.id_pto_crp_det)
             INNER JOIN pto_cdp_detalle ON (pto_crp_detalle2.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
             INNER JOIN pto_crp ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)
             INNER JOIN pto_cargue ON (pto_cdp_detalle.id_rubro = pto_cargue.id_cargue)

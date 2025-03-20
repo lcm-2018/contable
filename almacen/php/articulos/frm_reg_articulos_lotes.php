@@ -31,6 +31,7 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     //Inicializa variable por defecto
+    $obj['id_marca'] = 0;
     $obj['estado'] = 1;
     $bodega = bodega_principal($cmd);
     $obj['id_bodega'] = $bodega['id_bodega'];
@@ -49,12 +50,12 @@ if (empty($obj)) {
             <form id="frm_reg_articulos_lotes">
                 <input type="hidden" id="id_lote" name="id_lote" value="<?php echo $id ?>">
                 <div class=" form-row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-5">
                         <label for="txt_nom_bod" class="small">Bodega</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_bod" class="small" value="<?php echo $obj['nom_bodega'] ?>" readonly="readonly">
                         <input type="hidden" id="id_txt_nom_bod" name="id_txt_nom_bod" value="<?php echo $obj['id_bodega'] ?>">
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label for="txt_num_lot" class="small">lote</label>
                         <input type="text" class="form-control form-control-sm valcode" id="txt_num_lot" name="txt_num_lot" required value="<?php echo $obj['lote'] ?>">
                     </div>
@@ -62,10 +63,16 @@ if (empty($obj)) {
                         <label for="txt_fec_ven" class="small">Fecha de Vencimiento</label>
                         <input type="date" class="form-control form-control-sm" id="txt_fec_ven" name="txt_fec_ven" required value="<?php echo $obj['fec_vencimiento'] ?>">
                     </div>                    
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label for="txt_reg_inv" class="small">Registro Invima</label>
                         <input type="text" class="form-control form-control-sm valcode" id="txt_reg_inv" name="txt_reg_inv" required value="<?php echo $obj['reg_invima'] ?>">
                     </div>
+                    <div class="form-group col-md-8">
+                        <label for="sl_marca_lot" class="small">Marca</label>
+                        <select class="form-control form-control-sm" id="sl_marca_lot" name="sl_marca_lot">
+                            <?php marcas($cmd,'', $obj['id_marca']) ?>
+                        </select>
+                    </div> 
                     <div class="form-group col-md-9">
                         <label for="txt_pre_lote" class="small">Unidad de Medida de Presentación del Lote</label>
                         <input type="text" class="form-control form-control-sm" id="txt_pre_lote" value="<?php echo $obj['nom_presentacion'] ?>">

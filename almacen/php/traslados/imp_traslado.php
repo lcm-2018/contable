@@ -32,13 +32,16 @@ try {
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
     
-    $sql = "SELECT far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,far_medicamento_lote.lote,
-            far_medicamento_lote.fec_vencimiento,far_traslado_detalle.cantidad,far_traslado_detalle.valor,
-            (far_traslado_detalle.cantidad*far_traslado_detalle.valor) AS val_total
-        FROM far_traslado_detalle
-        INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_traslado_detalle.id_lote_origen)
-        INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_medicamento_lote.id_med)
-        WHERE far_traslado_detalle.id_traslado=" . $id . " ORDER BY far_traslado_detalle.id_tra_detalle";    
+    $sql = "SELECT far_medicamentos.cod_medicamento,
+                CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion))) AS nom_medicamento,
+                far_medicamento_lote.lote,
+                far_medicamento_lote.fec_vencimiento,far_traslado_detalle.cantidad,far_traslado_detalle.valor,
+                (far_traslado_detalle.cantidad*far_traslado_detalle.valor) AS val_total
+            FROM far_traslado_detalle
+            INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_traslado_detalle.id_lote_origen)
+            INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_medicamento_lote.id_med)
+            INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
+            WHERE far_traslado_detalle.id_traslado=" . $id . " ORDER BY far_traslado_detalle.id_tra_detalle";    
     $rs = $cmd->query($sql);
     $obj_ds = $rs->fetchAll();
 
