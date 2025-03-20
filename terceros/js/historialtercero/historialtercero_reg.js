@@ -470,7 +470,7 @@
             $.ajax({
                 type: 'POST',
                 url: url,
-                data: datos,
+                data: datos + "&oper=add",
                 success: function (r) {
                     if (r == '1') {
                         let id2 = 'tb_cdps';
@@ -491,4 +491,59 @@
         //$('.modal.show').modal('hide'); // este destruye todos los modales
         $(this).closest('.modal').modal('hide');
     });*/
+
+    //----------- listar liberaciones realizadas crp
+    $('#body_tb_reg_presupuestal').on('click', '.btn_liberaciones_crp', function () {
+        let id_crp = $(this).attr('value');
+        $.post(window.urlin + "/terceros/php/historialtercero/frm_listar_liberaciones_crp.php", { id_crp: id_crp }, function (he) {
+            $('#divTamModalReg').removeClass('modal-xl');
+            $('#divTamModalReg').removeClass('modal-sm');
+            $('#divTamModalReg').addClass('modal-lg');
+            $('#divModalReg').modal('show');
+            $("#divFormsReg").html(he);
+        });
+    });
+
+    //----------------anular liberacion crp
+    $('#divFormsReg').on('click', '.btn_anular_liberacion_crp', function () {
+        let id = $(this).attr('value');
+        confirmar_del('liberacion_crp', id);
+    });
+
+    $('#divModalConfDel').on("click", "#liberacion_crp", function () {
+        var id = $(this).attr('value');
+        $.ajax({
+            type: 'POST',
+            url: window.urlin + '/terceros/php/historialtercero/registrar_liberacion_crp.php',
+            dataType: 'json',
+            data: { id: id, oper: 'del' }
+        }).done(function (r) {
+            $('#divModalConfDel').modal('hide');
+            if (r.mensaje == 'ok') {
+                reloadtable('tb_liberacionescrp');
+                reloadtable('tb_reg_presupuestal');
+                reloadtable('tb_cdps');
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function () { }).fail(function () {
+            alert('Ocurrió un error');
+        });
+    });
+
+    // -------- imprimir liberacion crp
+    $('#divFormsReg').on("click", ".btn_imprimir_liberacion_crp", function () {
+        var id = $(this).attr('value');
+        $.post(window.urlin + '/terceros/php/historialtercero/imp_liberacion_crp.php', {
+            id_lib: id,
+            id_crp: $('#id_crp').val()
+        }, function (he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
 })(jQuery);

@@ -12,7 +12,7 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_lib = isset($_POST['id_lib']) && strlen($_POST['id_lib']) > 0 ? $_POST['id_lib'] : -1;
-$id_cdp = isset($_POST['id_cdp']) && strlen($_POST['id_cdp']) > 0 ? $_POST['id_cdp'] : -1;
+$id_crp = isset($_POST['id_crp']) && strlen($_POST['id_crp']) > 0 ? $_POST['id_crp'] : -1;
 
 try {
 
