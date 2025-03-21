@@ -1817,8 +1817,9 @@ const imprimirFormatoTes = (id) => {
 };
 
 const ImpConcBanc = (id) => {
+	let mes = $("#slcMesConcBanc").length ? $("#slcMesConcBanc").val() : $('#cod_mes').val();
 	let url = "soportes/imprimir_formato_conc.php";
-	$.post(url, { id: id }, function (he) {
+	$.post(url, { id: id, mes: mes }, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-xl");
 		$("#divTamModalForms").addClass("modal-lg");
@@ -2620,6 +2621,8 @@ function GuardaSaldoExtracto() {
 function GuardaDetalleConciliacion(check) {
 	var id_conciliacion = $('#id_conciliacion').val();
 	var id_libaux = check.getAttribute('text');
+	var mes = $('#cod_mes').val();
+	var id_cuenta = $('#id_cuenta').val();
 	if (id_conciliacion == '0') {
 		mjeError('Debe guardar el saldo del extracto');
 		return false;
@@ -2629,15 +2632,15 @@ function GuardaDetalleConciliacion(check) {
 			type: 'POST',
 			dataType: 'json',
 			url: "datos/registrar/guarda_detalle_conciliacion.php",
-			data: { id_conciliacion: id_conciliacion, id_libaux: id_libaux, opc: opc },
+			data: { id_conciliacion: id_conciliacion, id_libaux: id_libaux, opc: opc, mes: mes, id_cuenta: id_cuenta },
 			success: function (r) {
 				if (r.status == 'ok') {
 					let salLib = $('#salLib').val();
-					var valor = Number(salLib) + Number(r.debito) - Number(r.credito);
-					$('#saldoConcilia').val(valor.toLocaleString('es-MX'));
 					$('#tableDetConciliacion').DataTable().ajax.reload(function (json) {
 						$('#tot_deb').val(json.tot_deb);
 						$('#tot_cre').val(json.tot_cre);
+						var valor = Number(salLib) + Number(json.tot_deb) - Number(json.tot_cre);
+						$('#saldoConcilia').val(valor.toLocaleString('es-MX'));
 					});
 					mje('Proceso realizado correctamente');
 				} else {

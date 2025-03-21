@@ -146,7 +146,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$conciliar = $detalles['debito'] - $detalles['credito'] + $tot_deb - $tot_cre + $saldo;
+$conciliar = $detalles['debito'] - $detalles['credito'] + $tot_deb - $tot_cre;
 $ver = 'readonly';
 ?>
 <!DOCTYPE html>
@@ -249,8 +249,8 @@ $ver = 'readonly';
 
                     </table>
                     <div class="text-center pt-4">
-                        <a type="button" class="btn btn-primary btn-sm" onclick="imprimirFormatoCons();" style="width: 5rem;"> <span class="fas fa-print "></span></a>
-                        <button onclick="terminarDetalleCons()" class="btn btn-danger btn-sm" style="width: 7rem;" href="#"> Terminar</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="ImpConcBanc(<?= $id; ?>);" style="width: 5rem;"> <span class="fas fa-print "></span></button>
+                        <a class="btn btn-danger btn-sm" style="width: 7rem;" href="conciliacion_bancaria.php"> Terminar</a>
                     </div>
                 </div>
         </div>
