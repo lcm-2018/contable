@@ -80,7 +80,7 @@ try {
                 CONCAT(nombre1,' ',nombre2,' ',apellido1,' ',apellido2) AS nombre
                 , descripcion
             FROM seg_usuarios_sistema
-            WHERE login = '" . $_SESSION['login'] ."'";
+            WHERE login = '" . $_SESSION['login'] . "'";
     $rs = $cmd->query($sql);
     $obj_usuario = $rs->fetch();
 } catch (PDOException $e) {
@@ -129,7 +129,7 @@ try {
         </tr>
         <tr style="border:#A9A9A9 1px solid">
             <td>Detalle</td>
-            <td colspan="4"><?php echo $obj_liberacion['concepto_libera']; ?></td>
+            <td colspan="4"><?php echo strtoupper($obj_liberacion['concepto_libera']); ?></td>
         </tr>
     </table>
 
@@ -141,6 +141,9 @@ try {
 
     <table style="width:100% !important; border:#A9A9A9 1px solid;">
         <thead style="font-size:70%; border:#A9A9A9 1px solid;">
+            <tr style="background-color:#CED3D3; color:#000000; text-align:center; border:#A9A9A9 1px solid;">
+                <th style="border:#A9A9A9 1px solid;" colspan="5">IMPUTACION PRESUPUESTAL</th>
+            </tr>
             <tr style="background-color:#CED3D3; color:#000000; text-align:center; border:#A9A9A9 1px solid;">
                 <th style="border:#A9A9A9 1px solid;">CDP</th>
                 <th style="border:#A9A9A9 1px solid;" colspan="3">Rubro</th>

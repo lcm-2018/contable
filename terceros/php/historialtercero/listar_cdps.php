@@ -110,8 +110,8 @@ if (!empty($objs)) {
         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
             if ($saldo > 0 || $saldo < 0) {
                 $liberar =  '<a value="' . $id_cdp . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_liberar" title="Liberar"><span class="fas fa-arrow-alt-circle-left fa-lg"></span></a>';
-                $liberaciones =  '<a value="' . $id_cdp . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb btn_liberaciones" title="Listar liberaciones"><span class="fas fa-hand-holding-usd fa-lg"></span></a>';
             }
+            $liberaciones =  '<a value="' . $id_cdp . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb btn_liberaciones" title="Listar liberaciones"><span class="fas fa-hand-holding-usd fa-lg"></span></a>';
         }
         $data[] = [
             "id_tercero_api" => $obj['id_tercero_api'],

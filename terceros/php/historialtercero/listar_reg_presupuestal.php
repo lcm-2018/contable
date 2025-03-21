@@ -92,8 +92,8 @@ if (!empty($objs)) {
         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
             if ($saldo > 0 || $saldo < 0) {
                 $liberar =  '<a value="' . $id_crp . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_liberar_crp" title="Liberar"><span class="fas fa-arrow-alt-circle-left fa-lg"></span></a>';
-                $liberaciones =  '<a value="' . $id_crp . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb btn_liberaciones_crp" title="Listar liberaciones"><span class="fas fa-hand-holding-usd fa-lg"></span></a>';
             }
+            $liberaciones =  '<a value="' . $id_crp . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb btn_liberaciones_crp" title="Listar liberaciones"><span class="fas fa-hand-holding-usd fa-lg"></span></a>';
         }
 
         $data[] = [
