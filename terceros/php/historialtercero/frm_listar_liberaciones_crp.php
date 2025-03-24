@@ -5,20 +5,20 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
-$id_cdp = isset($_POST['id_cdp']) ? $_POST['id_cdp'] : -1;
+$id_crp = isset($_POST['id_crp']) ? $_POST['id_crp'] : -1;
 $otro_form = isset($_POST['otro_form']) ? $_POST['otro_form'] : 0;
 
 ?>
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">LISTA DE LIBERACIONES A CDP</h5>
+            <h5 style="color: white;">LISTA DE LIBERACIONES A CRP</h5>
         </div>
         <div class="px-2">
-            <form id="frm_liberacionescdp">
-                <input type="hidden" id="id_cdp" name="id_cdp" value="<?php echo $id_cdp ?>">
+            <form id="frm_liberacionescrp">
+                <input type="hidden" id="id_crp" name="id_crp" value="<?php echo $id_crp ?>">
                 <div class=" w-100 text-left">
-                    <table id="tb_liberacionescdp" class="table table-striped table-bordered table-sm nowrap table-hover shadow w-100" style="width:100%; font-size:80%">
+                    <table id="tb_liberacionescrp" class="table table-striped table-bordered table-sm nowrap table-hover shadow w-100" style="width:100%; font-size:80%">
                         <thead>
                             <tr class="text-center centro-vertical">
                                 <th>Id Lib</th>
@@ -28,14 +28,13 @@ $otro_form = isset($_POST['otro_form']) ? $_POST['otro_form'] : 0;
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="text-left centro-vertical" id="body_tb_liberacionescdp"></tbody>
+                        <tbody class="text-left centro-vertical" id="body_tb_liberacionescrp"></tbody>
                     </table>
                 </div>
             </form>
         </div>
     </div>
     <div class="text-center pt-3">
-        <!--<button type="button" class="btn btn-primary btn-sm" id="btn_imprimir_liberaciones_cdp">Imprimir</button>-->
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>
@@ -43,21 +42,21 @@ $otro_form = isset($_POST['otro_form']) ? $_POST['otro_form'] : 0;
 <script>
     (function($) {
         $(document).ready(function() {
-            $('#tb_liberacionescdp').DataTable({
+            $('#tb_liberacionescrp').DataTable({
                 language: setIdioma,
                 processing: true,
                 serverSide: true,
                 searching: false,
                 autoWidth: false,
                 ajax: {
-                    url: window.urlin + '/terceros/php/historialtercero/listar_liberaciones_cdp.php',
+                    url: window.urlin + '/terceros/php/historialtercero/listar_liberaciones_crp.php',
                     type: 'POST',
                     dataType: 'json',
                     data: function(data) {
-                        data.id_cdp = $('#id_cdp').val();
+                        data.id_crp = $('#id_crp').val();
                     }
                 },
-                columns: [{ 'data': 'id_pto_cdp_det' },
+                columns: [{ 'data': 'id_pto_crp_det' },
                           { 'data': 'fecha' },
                           { 'data': 'concepto_libera' },
                           { 'data': 'valor_liberado' },
@@ -76,7 +75,7 @@ $otro_form = isset($_POST['otro_form']) ? $_POST['otro_form'] : 0;
                     [10, 25, 50, 'TODO'],
                 ]
             });
-            $('#tb_liberacionescdp').wrap('<div class="overflow"/>');
+            $('#tb_liberacionescrp').wrap('<div class="overflow"/>');
         });
     })(jQuery);
 </script>

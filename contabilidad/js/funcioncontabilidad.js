@@ -341,7 +341,7 @@
 
 	//--------------informes bancos
 	$('#sl_libros_aux_bancos').on("click", function () {
-		$.post(window.urlin + "/contabilidad/php/informes_bancos/frm_libros_aux_bancos.php", { }, function (he) {
+		$.post(window.urlin + "/contabilidad/php/informes_bancos/frm_libros_aux_bancos.php", {}, function (he) {
 			$('#divTamModalForms').removeClass('modal-lg');
 			$('#divTamModalForms').removeClass('modal-sm');
 			$('#divTamModalForms').addClass('modal-lg');
@@ -851,6 +851,15 @@ let cerrarDocumentoCtb = function (dato) {
 			}
 		});
 };
+let masDocFuente = function (id_doc) {
+	$.post("datos/registrar/form_referencia.php", { id_doc: id_doc }, function (he) {
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").addClass("modal-xl");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+}
 // Abrir documento contable
 let abrirDocumentoCtb = function (dato) {
 	//let doc = id_ctb_doc.value;
@@ -2852,7 +2861,20 @@ function abrirFuente(id) {
 	EstadoDocFuente(id, 1);
 }
 function cerrarFuente(id) {
-	EstadoDocFuente(id, 0);
+	Swal.fire({
+		title: "¿Confirma Inactivar Documento?",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#00994C",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si!",
+		cancelButtonText: "NO",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			EstadoDocFuente(id, 0);
+		}
+	});
+
 }
 // ================================== ANULACION DE DOCUMENTOS =================================================
 // Abre formulario para datos de anulación
@@ -3116,6 +3138,97 @@ function CausaAuCentroCostos() {
 			} else {
 				mjeError(r.msg);
 			}
+		}
+	});
+}
+function RegDocREfDr(datos, id_doc) {
+	$.ajax({
+		url: 'datos/registrar/registrar_referencia_dr.php',
+		type: 'POST',
+		data: datos,
+		success: function (r) {
+			if (r == 'ok') {
+				$('#divModalReg').modal('hide');
+				masDocFuente(id_doc);
+				mje('Proceso realizado correctamente');
+			} else {
+				mjeError(r);
+			}
+		}
+	});
+}
+
+function GuardarReferenciaDr() {
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#nombre').val() == '') {
+		$('#nombre').addClass('is-invalid');
+		$('#nombre').focus();
+		mjeError('Debe digitar un nombre');
+	} else if ($('#accion').val() == '2') {
+		$('#accion').addClass('is-invalid');
+		$('#accion').focus();
+		mjeError('Debe seleccionar una acción');
+	} else if ($('#id_codigoCta').val() == '0') {
+		$('#codigoCta').addClass('is-invalid');
+		$('#codigoCta').focus();
+		mjeError('Debe seleccionar una cuenta contable');
+	} else if ($('#tipoDato').val() !== 'D') {
+		$('#codigoCta').addClass('is-invalid');
+		$('#codigoCta').focus();
+		mjeError('La cuenta contable debe ser de detalle');
+	} else {
+		var datos = $('#formRefDr').serialize();
+		var id_doc = $('#id_doc_ft').val();
+		RegDocREfDr(datos, id_doc);
+	}
+
+}
+function cerrarReferencia(id) {
+	var data = { estado: 0, id_doc_ref: $('#id_doc_ft').val(), id_ctb_ref: id };
+	Swal.fire({
+		title: "¿Confirma Inactivar Referencia?",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#00994C",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si!",
+		cancelButtonText: "NO",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			RegDocREfDr(data, $('#id_doc_ft').val());
+		}
+	});
+}
+
+function abrirReferencia(id) {
+	var data = { estado: 1, id_doc_ref: $('#id_doc_ft').val(), id_ctb_ref: id };
+	Swal.fire({
+		title: "¿Confirma Activar Referencia?",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#00994C",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si!",
+		cancelButtonText: "NO",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			RegDocREfDr(data, $('#id_doc_ft').val());
+		}
+	});
+}
+function eliminarReferencia(id) {
+	var data = { delete: 1, id_doc_ref: $('#id_doc_ft').val(), id_ctb_ref: id };
+	Swal.fire({
+		title: "¿Confirma Eliminar Referencia?",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#00994C",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si!",
+		cancelButtonText: "NO",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			RegDocREfDr(data, $('#id_doc_ft').val());
 		}
 	});
 }

@@ -78,7 +78,7 @@ if ($fin_mes != 0) {
                                 ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)
                         GROUP BY `tes_conciliacion_detalle`.`id_concilia`) AS `t3`
                         ON (`t3`.`id_concilia` = `t2`.`id_conciliacion`)";
-//        echo $sql;
+        //        echo $sql;
         $rs = $cmd->query($sql);
         $lista = $rs->fetchAll();
     } catch (PDOException $e) {
@@ -103,15 +103,18 @@ if ($fin_mes != 0) {
                 $signo = '$ ';
                 $color = 'text-success';
             }
-            $data[] = [
-                'banco' => $lp['nom_banco'],
-                'tipo' => $lp['tipo_cuenta'],
-                'nombre' => $lp['descripcion'],
-                'numero' => $lp['cta_contable'],
-                'saldo' => '<div class="text-right ' . $color . '">' . $signo . number_format($valor, 2, ',', '.') . '</div>',
-                'estado' => '<div class="text-center">' . $estado . '</div>',
-                'botones' => '<div class="text-center" style="position:relative">' . $imprimir . '</div>',
-            ];
+            // la raiz de $lp['cta_contable'] debe ser diferrente a 1105
+            if (substr($lp['cta_contable'], 0, 4) != '1105') {
+                $data[] = [
+                    'banco' => $lp['nom_banco'],
+                    'tipo' => $lp['tipo_cuenta'],
+                    'nombre' => $lp['descripcion'],
+                    'numero' => $lp['cta_contable'],
+                    'saldo' => '<div class="text-right ' . $color . '">' . $signo . number_format($valor, 2, ',', '.') . '</div>',
+                    'estado' => '<div class="text-center">' . $estado . '</div>',
+                    'botones' => '<div class="text-center" style="position:relative">' . $imprimir . '</div>',
+                ];
+            }
         }
     }
 }

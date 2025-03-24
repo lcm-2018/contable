@@ -7,7 +7,7 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../../../permisos.php';
 
-$id_cdp = $_POST['id_cdp'];
+$id_crp = $_POST['id_crp'];
 
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
@@ -23,12 +23,12 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     $sql = "SELECT
-                id_pto_cdp_det
+                id_pto_crp_det
                 , DATE_FORMAT(fecha_libera,'%Y-%m-%d') AS fecha
                 , concepto_libera
                 , valor_liberado    
-            FROM pto_cdp_detalle
-            WHERE id_pto_cdp = $id_cdp
+            FROM pto_crp_detalle
+            WHERE id_pto_crp = $id_crp
             AND valor_liberado > 0 ";
 
     $rs = $cmd->query($sql);
@@ -51,12 +51,12 @@ if (!empty($objs)) {
         $imprimir = null;
         //5401 presupuesto - gestion
         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
-            $anular = '<a value="' . $obj['id_pto_cdp_det'] . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_anular_liberacion_cdp" title="Anular liberacion"><span class="fas fa-trash-restore fa-lg"></span></a>';
-            $imprimir = '<a value="' . $obj['id_pto_cdp_det'] . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_imprimir_liberacion_cdp" title="Imprimir liberacion"><span class="fas fa-print fa-lg"></span></a>';
+            $anular = '<a value="' . $obj['id_pto_crp_det'] . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_anular_liberacion_crp" title="Anular liberacion"><span class="fas fa-trash-restore fa-lg"></span></a>';
+            $imprimir = '<a value="' . $obj['id_pto_crp_det'] . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_imprimir_liberacion_crp" title="Imprimir liberacion"><span class="fas fa-print fa-lg"></span></a>';
         }
 
         $data[] = [
-            "id_pto_cdp_det" => $obj['id_pto_cdp_det'],
+            "id_pto_crp_det" => $obj['id_pto_crp_det'],
             "fecha" => $obj['fecha'],
             "concepto_libera" => mb_strtoupper($obj['concepto_libera']),
             "valor_liberado" => $obj['valor_liberado'],

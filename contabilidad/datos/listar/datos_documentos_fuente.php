@@ -22,23 +22,26 @@ try {
 }
 if (!empty($lista)) {
     foreach ($lista as $lp) {
-        $cerrar = $editar = $borrar = null;
+        $cerrar = $editar = $borrar = $mas = null;
         $id_ctb = $lp['id_doc_fuente'];
+        if ((PermisosUsuario($permisos, 5505, 1) || $id_rol == 1) && ($lp['estado'] == 1)) {
+            $mas = '<button id ="mas_' . $id_ctb . '" value="' . $id_ctb . '" onclick="masDocFuente(' . $id_ctb . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb"  title="Parametrización de acciones"><span class="fas fa-cogs fa-lg"></span></button>';
+        }
         if ((PermisosUsuario($permisos, 5505, 3) || $id_rol == 1) && ($lp['estado'] == 1)) {
-            $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" onclick="editarDocFuente(' . $id_ctb . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Editar_' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+            $editar = '<button id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" onclick="editarDocFuente(' . $id_ctb . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Editar_' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></button>';
         }
         if (PermisosUsuario($permisos, 5505, 4) || $id_rol == 1) {
             if ($lp['estado'] == 1) {
-                $borrar = '<a value="' . $id_ctb . '" onclick="eliminarDocFuente(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-                $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" onclick="cerrarFuente(' . $id_ctb . ')" title="Desactivar Fuente"><span class="fas fa-lock-open fa-lg"></span></a>';
+                $borrar = '<button value="' . $id_ctb . '" onclick="eliminarDocFuente(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></button>';
+                $cerrar = '<button value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" onclick="cerrarFuente(' . $id_ctb . ')" title="Desactivar Fuente"><span class="fas fa-unlock fa-lg"></span></button>';
             } else {
-                $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" onclick="abrirFuente(' . $id_ctb . ')" title="Activar Fuente"><span class="fas fa-lock fa-lg"></span></a>';
+                $cerrar = '<button value="' . $id_ctb . '" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" onclick="abrirFuente(' . $id_ctb . ')" title="Activar Fuente"><span class="fas fa-lock fa-lg"></span></button>';
             }
         }
         if ($lp['estado'] == 1) {
             $estado = '<span class="badge badge-success">Activa</span>';
         } else {
-            $estado = '<span class="badge badge-danger">Inactiva</span>';
+            $estado = '<span class="badge badge-secondary">Inactiva</span>';
         }
         $data[] = [
 
@@ -48,7 +51,7 @@ if (!empty($lista)) {
             'tesor' => '<div class="text-center">' . $lp['tesor'] . '</div>',
             'cxpagar' => '',
             'estado' => '<div class="text-center">' . $estado . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $borrar . $cerrar . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $mas . $cerrar . $borrar . '</div>',
         ];
     }
 } else {
