@@ -152,6 +152,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
                         </table>
+                        <label class="block text-left"><input type="checkbox" id="chk_lotes_con_exi" checked/>&nbsp;Listar solo Lotes con Existencia </label>
                     </div>
                 </div>
             </div>

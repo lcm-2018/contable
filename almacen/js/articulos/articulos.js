@@ -306,6 +306,9 @@
     /* ---------------------------------------------------
     LOTES
     -----------------------------------------------------*/
+    $('#divForms').on("click", "#chk_lotes_con_exi", function() {
+        reloadtable('tb_articulos_lotes');
+    });
 
     //Editar un registro LOTE
     $('#divForms').on('click', '#tb_articulos_lotes .btn_editar', function() {

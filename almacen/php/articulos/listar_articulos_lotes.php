@@ -21,6 +21,9 @@ $where = "";
 if (isset($_POST['search']['value']) && $_POST['search']['value']){
     $where .= " AND far_medicamento_lote.lote LIKE '%" . $_POST['search']['value'] . "%'";
 }
+if (isset($_POST['con_existencia']) && $_POST['con_existencia']){
+    $where .= " AND far_medicamento_lote.existencia>0";
+}
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
