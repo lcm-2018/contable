@@ -66,6 +66,7 @@ try {
                 INNER JOIN pto_cdp_detalle ON (pto_crp_detalle2.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
                 INNER JOIN pto_crp ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)
             WHERE pto_crp.id_cdp = $id_cdp
+            AND pto_crp.estado=2
             GROUP BY pto_crp.id_cdp";
 
     $rs = $cmd->query($sql);

@@ -388,6 +388,26 @@ var tabla;
 			$("#divForms").html(he);
 		});
 	});
+
+	//--------------- boton cargar presupuesto
+	$('#btn_cargar_presupuesto').click(function () {
+		var id_ctb_fuente = $('#tipodato').val();
+		var id_ctb_referencia = $('#ref_mov').val();
+		var accion_pto = $('#hd_accion_pto').val();
+
+		if (accion_pto > 0) {
+				$.post(window.urlin + "/tesoreria/php/afectacion_presupuestal/frm_afectacion_presupuestal.php", { id_ctb_fuente: id_ctb_fuente, id_ctb_referencia: id_ctb_referencia, accion_pto: accion_pto }, function (he) {
+				$('#divTamModalReg').removeClass('modal-xl');
+				$('#divTamModalReg').removeClass('modal-sm');
+				$('#divTamModalReg').addClass('modal-lg');
+				$('#divModalReg').modal('show');
+				$("#divFormsReg").html(he);
+			});
+		}
+		else {
+			mjeError("La acción no esta habilitada para presupuesto");
+		}
+	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
 //Recargar consiliación bancaria
@@ -486,6 +506,8 @@ let CargaArqueoCajaTes = function (id, detalle) {
 };
 // Carga el listado de imputación presupuestal para ingresos
 let cargaPresupuestoIng = function (dato) {
+
+	/*
 	let id_pto_do = id_ctb_doc.value;
 	$.post("lista_causacion_presupuesto.php", { id_doc: id_pto_do }, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
@@ -493,7 +515,7 @@ let cargaPresupuestoIng = function (dato) {
 		$("#divTamModalForms").addClass("modal-xl");
 		$("#divModalForms").modal("show");
 		$("#divForms").html(he);
-	});
+	});*/
 };
 $('#modificartableMvtoTesoreriaPagos').on('click', '.modificar', function () {
 	var id_detalle = $(this).attr('text');
@@ -585,7 +607,7 @@ function cargarListaArqueoConsignacion(id_doc) {
 }
 // Cargar lista de obligaciones para pagar
 function cargarListaDetallePagoEdit(id_doc) {
-	let tipo_dato = $("#id_ctb_tipo").val();
+	let tipo_dato = $("#id_ctb_tipo").val(); // tiene el id_doc_fuente ej  7 - nota bancaria
 	let tipo_movi = $("#var_tip").val();
 	let url;
 	if (tipo_dato == '14') {

@@ -90,7 +90,7 @@ if ($id_crpp > 0) {
     try {
         $sql = "SELECT
                     `ctb_doc`.`id_ctb_doc`
-                    , `pto_cop_detalle`.`valor`
+                    , `pto_pag_detalle`.`valor`
                     , `pto_cargue`.`nom_rubro`
                     , `pto_cargue`.`cod_pptal` AS `rubro`
                     , `ctb_doc`.`id_manu`
@@ -885,7 +885,7 @@ if ($cod_doc == 'CEVA') {
                             <p style="text-align:center;"><b>RESOLUCIÓN No.: <?php echo $num_resolucion; ?></b></p>
                             <p style="text-align:center;"><b><?= $f_exp[2] . '-' . $meses[$f_exp[1]] . '-' . $f_exp[0] ?></b></p>
                             <p style="text-align:center;">Por medio de la cual se ordena un pago</p>
-                            <p>EL GERENTE DE EL(LA) <?= $empresa['nombre'] ?> EN USO DE SUS FACULTADES CONSTITUCIONALES, LEGALES Y ESTATUTARIAS Y CONSIDERANDO</p>
+                            <p>EL <?= $cargo_respon; ?> DE EL(LA) <?= $empresa['nombre'] ?> EN USO DE SUS FACULTADES CONSTITUCIONALES, LEGALES Y ESTATUTARIAS Y CONSIDERANDO</p>
                             <p>Que, dentro del presupuesto de gastos de el(la) <?= $empresa['nombre'] ?>, para la vigencia fiscal del año <?= $vigencia ?>, se encuentra previsto un(os) rubro(s) radicado bajo código(s): <?= $cadena ?>.</p>
                             <p>Que durante la presente vigencia se generaron obligaciones por concepto de: <?= mb_strtoupper($documento['detalle']); ?>, para lo cual se expidieron los respectivos actos administrativos.</p>
                             <p>Por lo anteriormente expuesto:</p>
@@ -902,7 +902,8 @@ if ($cod_doc == 'CEVA') {
                                             <tr>
                                                 <td style="text-align: center">
                                                     <div>___________________________________</div>
-                                                    <!--<div><?php //echo $nom_respon; ?> </div>-->
+                                                    <!--<div><?php //echo $nom_respon; 
+                                                                ?> </div>-->
                                                     <div><?php echo $cargo_respon; ?> </div>
                                                 </td>
                                             </tr>

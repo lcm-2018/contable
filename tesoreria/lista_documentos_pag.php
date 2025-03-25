@@ -17,7 +17,7 @@ tipo_var: 1
 // Consulta tipo de presupuesto
 $id_doc_pag = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no disponible');
 $id_cop = isset($_POST['id_cop']) ? $_POST['id_cop'] : 0;
-$tipo_dato = isset($_POST['tipo_dato']) ? $_POST['tipo_dato'] : 0;
+$tipo_dato = isset($_POST['tipo_dato']) ? $_POST['tipo_dato'] : 0; // tiene el id_doc_fuente ej.  7 - nota bancaria
 $tipo_mov = isset($_POST['tipo_movi']) ? $_POST['tipo_movi'] : 0;
 $tipo_var = isset($_POST['tipo_var']) ? $_POST['tipo_var'] : 0;
 $id_arq = isset($_POST['id_arq']) ? $_POST['id_arq'] : 0;
@@ -162,6 +162,19 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 
+try {
+    $sql = "SELECT
+                ctb_referencia.accion_pto
+            FROM
+                ctb_referencia
+            WHERE ctb_referencia.id_ctb_referencia =" . $datosDoc['id_ref_ctb'] 
+            . " AND id_ctb_fuente = $tipo_dato"; 
+    $rs = $cmd->query($sql);
+    $obj_referencia = $rs->fetch();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -206,6 +219,7 @@ try {
                                                 <input type="hidden" id="tipodato" name="tipodato" value="<?php echo $tipo_dato; ?>">
                                                 <input type="hidden" id="id_cop_pag" name="id_cop_pag" value="<?php echo $id_cop; ?>">
                                                 <input type="hidden" id="id_arqueo" name="id_arqueo" value="<?php echo $id_arq; ?>">
+                                                <input type="hidden" id="hd_accion_pto" name="hd_accion_pto" value="<?php echo $obj_referencia['accion_pto']; ?>">
                                             </div>
                                         </div>
                                         <div class="row mb-1">
@@ -300,7 +314,8 @@ try {
                                                         <input type="text" name="arqueo_caja" id="arqueo_caja" value="<?php echo $valor_pago; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly>
                                                         <div class="input-group-append">
                                                             <?php if ($datosDoc['estado'] == 1) { ?>
-                                                                <a class="btn btn-outline-success btn-sm" onclick="cargaPresupuestoIng('')"><span class="fas fa-plus fa-lg"></span></a>
+                                                                <!--<a class="btn btn-outline-success btn-sm" onclick="cargaPresupuestoIng('')"><span class="fas fa-plus fa-lg"></span></a>-->
+                                                                <a class="btn btn-outline-success btn-sm" id="btn_cargar_presupuesto"><span class="fas fa-plus fa-lg"></span></a>
                                                             <?php } ?>
                                                         </div>
                                                     </div>
