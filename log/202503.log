@@ -66,3 +66,14 @@ Fecha: 2025-03-03 10:36:38 PM, Id Usuario-Login: 1-ADMINN ADMINP, Accion: Actual
 [2025-03-21 11:00:42] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 182
 [2025-03-21 11:00:44] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2808
 [2025-03-21 11:00:46] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2811
+[2025-03-25 15:13:55] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2808
+[2025-03-25 15:13:57] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 182
+[2025-03-25 15:15:54] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 182
+[2025-03-25 15:15:57] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2808
+[2025-03-25 15:16:00] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2811
+[2025-03-25 15:17:26] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2811
+[2025-03-25 15:17:29] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2808
+[2025-03-25 15:17:39] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 182
+[2025-03-25 15:25:27] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2811
+[2025-03-25 15:25:29] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2808
+[2025-03-25 15:25:30] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 182

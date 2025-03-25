@@ -137,7 +137,13 @@ try {
                             `ctb_libaux`
                             INNER JOIN `ctb_doc` 
                                 ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                        WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes')
+                            LEFT JOIN `tes_conciliacion_detalle`
+                                ON (`ctb_libaux`.`id_ctb_libaux` = `tes_conciliacion_detalle`.`id_ctb_libaux`)
+                            LEFT JOIN `tes_conciliacion`
+                                ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)
+                        WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes' 
+                                AND (`tes_conciliacion`.`mes` = '$mes' OR `tes_conciliacion`.`mes` IS NULL)
+                                AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))
                         GROUP BY `ctb_libaux`.`id_cuenta`)AS `t1`  
                         ON (`t1`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
                 WHERE `tes_cuentas`.`id_tes_cuenta` = $id";
@@ -146,7 +152,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$conciliar = $detalles['debito'] - $detalles['credito'] + $tot_deb - $tot_cre;
+$conciliar = $detalles['debito'] - $detalles['credito'] + $tot_deb - $tot_cre - $saldo;
 $ver = 'readonly';
 ?>
 <!DOCTYPE html>

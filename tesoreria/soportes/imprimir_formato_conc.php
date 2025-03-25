@@ -56,9 +56,13 @@ try {
                     ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
                 LEFT JOIN `tes_conciliacion_detalle`
                     ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)
+                LEFT JOIN `tes_conciliacion`
+                    ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)
                 LEFT JOIN `tb_terceros` 
                     ON (`ctb_libaux`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
-            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes')";
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes'
+                    AND (`tes_conciliacion`.`mes` = '$mes' OR `tes_conciliacion`.`mes` IS NULL)
+                    AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))";
     $rs = $cmd->query($sql);
     $lista = $rs->fetchAll();
     $tot_deb = 0;
@@ -149,7 +153,13 @@ try {
                             `ctb_libaux`
                             INNER JOIN `ctb_doc` 
                                 ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                        WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes')
+                            LEFT JOIN `tes_conciliacion_detalle`
+                                ON (`ctb_libaux`.`id_ctb_libaux` = `tes_conciliacion_detalle`.`id_ctb_libaux`)
+                            LEFT JOIN `tes_conciliacion`
+                                ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)
+                        WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes' 
+                                AND (`tes_conciliacion`.`mes` = '$mes' OR `tes_conciliacion`.`mes` IS NULL)
+                                AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))
                         GROUP BY `ctb_libaux`.`id_cuenta`)AS `t1`  
                         ON (`t1`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
                 WHERE `tes_cuentas`.`id_tes_cuenta` = $id";
@@ -158,7 +168,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$conciliar = $detalles['debito'] - $detalles['credito'] + $tot_deb - $tot_cre;
+
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 try {
     $sql = "SELECT 
@@ -332,29 +342,29 @@ $anulado = '';
         <br>
         <table style="width:100% !important; border-collapse: collapse;" border="1">
             <tr>
-                <td style="text-align: left; width: 50%; background-color: #f1948a">SALDO EN LIBROS (contable)</td>
+                <td style="text-align: left; width: 50%;">SALDO EN LIBROS (contable)</td>
                 <td style="text-align: right; width: 25%"><?= pesos($detalles['debito'] - $detalles['credito']); ?></td>
                 <td style="text-align: left; width: 25%"></td>
             </tr>
             <tr>
-                <td style="text-align: left; background-color: #f1948a">Total Débitos Pendientes (++)</td>
+                <td style="text-align: left;">Total Débitos Pendientes (++)</td>
                 <td style="text-align: left;"></td>
                 <td style="text-align: right;"><?= pesos($tot_deb); ?></td>
             </tr>
             <tr>
-                <td style="text-align: left; background-color: #f1948a">Total Créditos Pendientes (-)</td>
+                <td style="text-align: left;">Total Créditos Pendientes (-)</td>
                 <td style="text-align: left;"></td>
                 <td style="text-align: right;"><?= pesos($tot_cre); ?></td>
             </tr>
             <tr>
-                <td style="text-align: left; background-color: #f1948a">SALDO EN LIBROS EXTRACTO</td>
+                <td style="text-align: left;">SALDO EN LIBROS EXTRACTO</td>
                 <td style="text-align: left;"></td>
                 <td style="text-align: right;"><?= pesos($saldo); ?></td>
             </tr>
             <tr>
-                <td style="text-align: left; background-color: #f1948a">SUMAS IGUALES</td>
-                <td style="text-align: left; background-color: #f1948a"></td>
-                <td style="text-align: left; background-color: #f1948a"></td>
+                <td style="text-align: left;">SUMAS IGUALES</td>
+                <td style="text-align: right;"><?= pesos($detalles['debito'] - $detalles['credito']); ?></td>
+                <td style="text-align: right;"><?= pesos($tot_deb + $tot_cre + $saldo); ?></td>
             </tr>
         </table>
         </br>
@@ -371,7 +381,7 @@ $anulado = '';
             $tdebito = 0;
             $tcredito = 0;
             foreach ($lista as $l) {
-                if ($l['conciliado'] > 0) {
+                if ($l['conciliado'] == '') {
                     $tdebito += $l['debito'];
                     $tcredito += $l['credito'];
 

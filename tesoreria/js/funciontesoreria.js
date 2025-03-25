@@ -2636,10 +2636,11 @@ function GuardaDetalleConciliacion(check) {
 			success: function (r) {
 				if (r.status == 'ok') {
 					let salLib = $('#salLib').val();
+					let salExt = $('#saldoExtracto').val();
 					$('#tableDetConciliacion').DataTable().ajax.reload(function (json) {
 						$('#tot_deb').val(json.tot_deb);
 						$('#tot_cre').val(json.tot_cre);
-						var valor = Number(salLib) + Number(json.tot_deb) - Number(json.tot_cre);
+						var valor = Number(salLib) + Number(json.tot_deb) - Number(json.tot_cre) - Number(salExt);
 						$('#saldoConcilia').val(valor.toLocaleString('es-MX'));
 					});
 					mje('Proceso realizado correctamente');

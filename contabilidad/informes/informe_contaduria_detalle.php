@@ -16,51 +16,59 @@ $parametro = 2;
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 try {
-    $sql = "SELECT 
-                `ctb_pgcp`.`cuenta`
-                , `ctb_pgcp`.`nombre`
-                , `ctb_pgcp`.`tipo_dato` AS `tipo`
-                , SUM(`t1`.`debitoi`) AS `debitoi`
-                , SUM(`t1`.`creditoi`) AS `creditoi`
-                , SUM(`t1`.`debito`) AS `debito`
-                , SUM(`t1`.`credito`) AS `credito`
+    $sql = "SELECT
+                `taux`.`cuenta`
+                , `taux`.`tipo`
+                , SUM(`taux`.`debitoi`) AS `debitoi`
+                , SUM(`taux`.`creditoi`) AS `creditoi`
+                , SUM(`taux`.`debito`) AS `debito`
+                , SUM(`taux`.`credito`) AS `credito`
             FROM
-                (SELECT
-                    `ctb_libaux`.`id_cuenta`
-                    , SUM(`ctb_libaux`.`debito`) AS `debitoi`
-                    , SUM(`ctb_libaux`.`credito`) AS `creditoi`
-                    , 0 AS `debito`
-                    , 0 AS `credito`
+                (SELECT 
+                    SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 6) AS `cuenta`
+                    , `ctb_pgcp`.`tipo_dato` AS `tipo`
+                    , SUM(`t1`.`debitoi`) AS `debitoi`
+                    , SUM(`t1`.`creditoi`) AS `creditoi`
+                    , SUM(`t1`.`debito`) AS `debito`
+                    , SUM(`t1`.`credito`) AS `credito`
                 FROM
-                    `ctb_libaux`
-                    INNER JOIN `ctb_doc`
-                        ON `ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`
+                    (SELECT
+                        `ctb_libaux`.`id_cuenta`
+                        , SUM(`ctb_libaux`.`debito`) AS `debitoi`
+                        , SUM(`ctb_libaux`.`credito`) AS `creditoi`
+                        , 0 AS `debito`
+                        , 0 AS `credito`
+                    FROM
+                        `ctb_libaux`
+                        INNER JOIN `ctb_doc`
+                            ON `ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`
+                        INNER JOIN `ctb_pgcp`
+                            ON `ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`
+                    WHERE `ctb_doc`.`estado` = 2
+                        AND ((SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('1', '2', '3') AND `ctb_doc`.`fecha` < '$fecha_inicial')
+                            OR
+                        (SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('4', '5', '6') AND `ctb_doc`.`fecha` < '$fecha_inicial' AND `ctb_doc`.`fecha` > '$inicio'))
+                    GROUP BY `ctb_libaux`.`id_cuenta`
+                    UNION ALL 
+                    SELECT
+                        `ctb_libaux`.`id_cuenta`
+                        , 0 AS `debitoi`
+                        , 0 AS `creditoi`
+                        , SUM(`ctb_libaux`.`debito`) AS `debito`
+                        , SUM(`ctb_libaux`.`credito`) AS `credito`
+                    FROM
+                        `ctb_libaux`
+                        INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        INNER JOIN `ctb_pgcp` 
+                            ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                    WHERE (`ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2)
+                    GROUP BY `ctb_libaux`.`id_cuenta`) AS `t1`
                     INNER JOIN `ctb_pgcp`
-                        ON `ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`
-                WHERE `ctb_doc`.`estado` = 2
-                    AND ((SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('1', '2', '3') AND `ctb_doc`.`fecha` < '$fecha_inicial')
-                        OR
-                    (SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('4', '5', '6') AND `ctb_doc`.`fecha` < '$fecha_inicial' AND `ctb_doc`.`fecha` > '$inicio'))
-                GROUP BY `ctb_libaux`.`id_cuenta`
-                UNION ALL 
-                SELECT
-                    `ctb_libaux`.`id_cuenta`
-                    , 0 AS `debitoi`
-                    , 0 AS `creditoi`
-                    , SUM(`ctb_libaux`.`debito`) AS `debito`
-                    , SUM(`ctb_libaux`.`credito`) AS `credito`
-                FROM
-                    `ctb_libaux`
-                    INNER JOIN `ctb_doc` 
-                        ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                    INNER JOIN `ctb_pgcp` 
-                        ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-                WHERE (`ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2)
-                GROUP BY `ctb_libaux`.`id_cuenta`) AS `t1`
-                INNER JOIN `ctb_pgcp`
-                    ON `t1`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`
-            GROUP BY `t1`.`id_cuenta`
-        ORDER BY `ctb_pgcp`.`cuenta` ASC";
+                        ON `t1`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`
+                GROUP BY `t1`.`id_cuenta`) AS `taux`
+            GROUP BY `taux`.`cuenta`
+            ORDER BY `taux`.`cuenta`";
     $res = $cmd->query($sql);
     $datos = $res->fetchAll();
 } catch (Exception $e) {

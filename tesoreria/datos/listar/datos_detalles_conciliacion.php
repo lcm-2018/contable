@@ -50,8 +50,12 @@ try {
                 INNER JOIN `ctb_fuente` 
                     ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
                 LEFT JOIN `tes_conciliacion_detalle`
-                    ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)   
-            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_cuenta AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fecha')";
+                    ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)
+                LEFT JOIN `tes_conciliacion`
+                    ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)   
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_cuenta AND `ctb_doc`.`estado` = 2 
+                    AND `ctb_doc`.`fecha` <= '$fecha' AND (`tes_conciliacion`.`mes` = '$mes' OR `tes_conciliacion`.`mes` IS NULL)
+                    AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))";
     $rs = $cmd->query($sql);
     $lista = $rs->fetchAll();
 } catch (PDOException $e) {

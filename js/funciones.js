@@ -55,11 +55,7 @@ function MostrarAnulados(elemento) {
     var table = $('#' + table).DataTable().ajax.reload(null, false);
 
 }
-$(document).ready(function () {
-    $('.modal').on('hidden.bs.modal', function () {
-        $(this).attr('aria-hidden', 'false');
-    });
-});
+
 (function ($) {
     /*$(document).ready(function () {
         $("body").on("contextmenu", function (e) {
@@ -75,6 +71,9 @@ $(document).ready(function () {
                     $btn.prop('disabled', false);
                 }, 2000);
             }
+        });
+        $('.modal').on('hidden.bs.modal', function () {
+            $(this).attr('aria-hidden', 'false');
         });
     });
     "use strict";

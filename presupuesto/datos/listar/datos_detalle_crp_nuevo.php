@@ -32,7 +32,7 @@ try {
     $sql = "SELECT
                 `pto_cdp_detalle`.`id_pto_cdp_det`
                 , `pto_cdp_detalle`.`id_rubro`
-                , (SUM(IFNULL(pto_cdp_detalle.valor,0)) - SUM(IFNULL(pto_cdp_detalle.valor_liberado,0))) AS val_cdp
+                , (SUM(IFNULL(`pto_cdp_detalle`.`valor`,0)) - SUM(IFNULL(`pto_cdp_detalle`.`valor_liberado`,0))) AS `val_cdp`
                 , `pto_cargue`.`cod_pptal`
                 , `pto_cargue`.`nom_rubro`
                 , IFNULL(`t1`.`val_crp`,0) AS `val_crp`
@@ -53,7 +53,8 @@ try {
                     WHERE (`pto_cdp_detalle`.`id_pto_cdp` = $id_cdp AND `pto_crp`.`estado` > 0 $where)
                     GROUP BY `pto_crp_detalle`.`id_pto_cdp_det`) AS `t1`
                     ON (`t1`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-            WHERE (`pto_cdp_detalle`.`id_pto_cdp` = $id_cdp)";
+            WHERE (`pto_cdp_detalle`.`id_pto_cdp` = $id_cdp)
+            GROUP BY `pto_cdp_detalle`.`id_pto_cdp_det`";
     $rs = $cmd->query($sql);
     $detalles = $rs->fetchAll();
 } catch (PDOException $e) {
