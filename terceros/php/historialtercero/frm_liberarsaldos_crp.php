@@ -49,8 +49,7 @@ $rs = $cmd->query($sql);
 $obj_saldos = $rs->fetchAll(); */
 
 $sql = "SELECT
-            COUNT(*) AS filas
-            , pto_crp.id_pto_crp
+            pto_crp.id_pto_crp
             , pto_cdp_detalle.id_pto_cdp_det
             , pto_cargue.cod_pptal 
             , SUM(IFNULL(pto_crp_detalle2.valor,0)) AS vr_crp
@@ -66,7 +65,8 @@ $sql = "SELECT
             INNER JOIN pto_cargue ON (pto_cdp_detalle.id_rubro = pto_cargue.id_cargue)
 
             WHERE pto_crp_detalle2.id_pto_crp = $id_crp
-            GROUP BY pto_crp.id_cdp";
+            AND pto_crp.estado=2
+            GROUP BY pto_crp.id_cdp limit 1";
 
 $rs = $cmd->query($sql);
 $obj_saldos = $rs->fetchAll();

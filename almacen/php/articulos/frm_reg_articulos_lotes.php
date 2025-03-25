@@ -63,11 +63,15 @@ if (empty($obj)) {
                         <label for="txt_fec_ven" class="small">Fecha de Vencimiento</label>
                         <input type="date" class="form-control form-control-sm" id="txt_fec_ven" name="txt_fec_ven" required value="<?php echo $obj['fec_vencimiento'] ?>">
                     </div>                    
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label for="txt_reg_inv" class="small">Registro Invima</label>
                         <input type="text" class="form-control form-control-sm valcode" id="txt_reg_inv" name="txt_reg_inv" required value="<?php echo $obj['reg_invima'] ?>">
                     </div>
-                    <div class="form-group col-md-8">
+                    <div class="form-group col-md-3">
+                        <label for="txt_ser_ref" class="small">Serie/Ref. (Disp. Médico)</label>
+                        <input type="text" class="form-control form-control-sm valcode" id="txt_ser_ref" name="txt_ser_ref" required value="<?php echo $obj['serie'] ?>">
+                    </div>
+                    <div class="form-group col-md-6">
                         <label for="sl_marca_lot" class="small">Marca</label>
                         <select class="form-control form-control-sm" id="sl_marca_lot" name="sl_marca_lot">
                             <?php marcas($cmd,'', $obj['id_marca']) ?>

@@ -26,8 +26,7 @@ $obj = $rs->fetch();
 //----------------------------------------------------- hago la consulta aqui para que los saldos sean cajas de texto
 // sino utilizo el script para llamar a listar_saldos.php
 $sql = "SELECT
-                COUNT(*) AS filas
-                ,pto_cdp_detalle2.id_pto_cdp
+                pto_cdp_detalle2.id_pto_cdp
                 , pto_cdp_detalle2.id_rubro
                 , pto_cargue.cod_pptal
                 , pto_cdp_detalle2.id_pto_cdp_det
@@ -43,7 +42,8 @@ $sql = "SELECT
                 INNER JOIN (SELECT id_pto_crp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2 ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)  
                 INNER JOIN pto_cargue ON (pto_cdp_detalle2.id_rubro = pto_cargue.id_cargue)
             WHERE pto_cdp_detalle2.id_pto_cdp = $id_cdp 
-            GROUP BY pto_cdp.id_pto_cdp";
+            AND pto_crp.estado=2
+            GROUP BY pto_cdp.id_pto_cdp limit 1";
 
 $rs = $cmd->query($sql);
 $obj_saldos = $rs->fetchAll();

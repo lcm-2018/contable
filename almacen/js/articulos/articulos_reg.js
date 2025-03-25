@@ -73,6 +73,7 @@
                 dataType: 'json',
                 data: function(data) {
                     data.id_articulo = $('#id_articulo').val();
+                    data.con_existencia = $('#chk_lotes_con_exi').is(':checked') ? 1 : 0;
                 }
             },
             columns: [

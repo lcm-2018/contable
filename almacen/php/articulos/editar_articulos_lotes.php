@@ -37,6 +37,7 @@ try {
                 $id_pres = $_POST['id_txt_pre_lote'] ? $_POST['id_txt_pre_lote'] : 0;
                 $id_cum = $_POST['sl_cum_lot'] ? $_POST['sl_cum_lot'] : 0;
                 $reg_inv = $_POST['txt_reg_inv'];
+                $ser_ref = $_POST['txt_ser_ref'];                
                 $id_marca = $_POST['sl_marca_lot'] ? $_POST['sl_marca_lot'] : 0;
                 $id_bodega = $_POST['id_txt_nom_bod'];
                 $estado = $_POST['sl_estado_lot'];
@@ -48,8 +49,8 @@ try {
                     $obj = $rs->fetch();
 
                     if ($obj['count'] == 0) {
-                        $sql = "INSERT INTO far_medicamento_lote(lote,fec_vencimiento,id_presentacion,id_cum,reg_invima,id_marca,id_bodega,estado,id_usr_crea,id_med)  
-                        VALUES('$num_lot','$fec_ven',$id_pres,$id_cum,'$reg_inv',$id_marca,$id_bodega,$estado,$id_usr_crea,$id_articulo)";
+                        $sql = "INSERT INTO far_medicamento_lote(lote,fec_vencimiento,id_presentacion,id_cum,reg_invima,serie,id_marca,id_bodega,estado,id_usr_crea,id_med)  
+                                VALUES('$num_lot','$fec_ven',$id_pres,$id_cum,'$reg_inv','$ser_ref',$id_marca,$id_bodega,$estado,$id_usr_crea,$id_articulo)";
                         $rs = $cmd->query($sql);
 
                         if ($rs) {
@@ -76,7 +77,7 @@ try {
                             do{
                                 $id_lote = array_shift($arr);
                                 $sql = "UPDATE far_medicamento_lote SET lote='$num_lot',fec_vencimiento='$fec_ven',id_presentacion=$id_pres,id_cum=$id_cum,
-                                                reg_invima='$reg_inv',id_marca=$id_marca,estado=$estado
+                                                reg_invima='$reg_inv',serie='$ser_ref',id_marca=$id_marca,estado=$estado
                                         WHERE id_lote=" . $id_lote;
                                 $rs = $cmd->query($sql);
 
