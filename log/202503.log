@@ -77,3 +77,12 @@ Fecha: 2025-03-03 10:36:38 PM, Id Usuario-Login: 1-ADMINN ADMINP, Accion: Actual
 [2025-03-25 15:25:27] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2811
 [2025-03-25 15:25:29] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2808
 [2025-03-25 15:25:30] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 182
+[2025-03-26 09:55:41] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6559
+[2025-03-26 09:56:06] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6560
+[2025-03-26 10:49:18] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6561
+[2025-03-26 16:23:13] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6562
+[2025-03-26 16:27:55] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6563
+[2025-03-26 16:28:12] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6564
+[2025-03-26 16:28:24] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6565
+[2025-03-26 16:55:06] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6570
+[2025-03-26 16:57:22] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6576

@@ -378,7 +378,7 @@ try {
                                                         <?php
                                                         if ($id_doc_pag > 0) {
                                                         ?>
-                                                            <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoPag('<?php echo $id_doc_pag; ?>')">Generar movimiento</button>
+                                                            <button type="button" class="btn btn-primary btn-sm" id="btn_generar_movimiento" onclick="generaMovimientoPag('<?php echo $id_doc_pag; ?>')">Generar movimiento</button>
                                                         <?php
                                                         }
                                                         ?>

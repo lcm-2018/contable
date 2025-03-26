@@ -408,6 +408,11 @@ var tabla;
 			mjeError("La acción no esta habilitada para presupuesto");
 		}
 	});
+
+	//----------------- boton generar movimiento
+	$('#btn_generar_movimiento').click(function(){
+		alert("edil");
+	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
 //Recargar consiliación bancaria

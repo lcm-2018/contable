@@ -39,6 +39,8 @@ $obj = $rs->fetch();*/
                         <label for="txt_rubro" class="small">Rubro</label>
                         <input type="text" class="form-control form-control-sm" id="txt_rubro" name="txt_rubro" placeholder="Rubro">
                         <input type="hidden" id="hd_id_txt_rubro" name="hd_id_txt_rubro" class="form-control form-control-sm">
+                        <input type="hidden" id="hd_id_tipo" name="hd_id_txt_rubro" class="form-control form-control-sm">
+                        <input type="hidden" id="hd_anio" name="hd_id_txt_rubro" class="form-control form-control-sm">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="txt_nrodisponibilidad_filtro" class="small">Valor</label>
