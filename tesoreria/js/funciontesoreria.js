@@ -391,12 +391,17 @@ var tabla;
 
 	//--------------- boton cargar presupuesto
 	$('#btn_cargar_presupuesto').click(function () {
-		var id_ctb_fuente = $('#tipodato').val();
-		var id_ctb_referencia = $('#ref_mov').val();
-		var accion_pto = $('#hd_accion_pto').val();
+		var id_ctb_fuente = $('#tipodato').val();  //ej 7- nota bancaria
+		var id_ctb_referencia = $('#ref_mov').val(); // ej 1 - rendimientos financieros propios
+		var accion_pto = $('#hd_accion_pto').val(); // 1 o 2
+		var fecha = $('#fecha').val();
+		var id_tercero_api = $('#id_tercero').val();
+		var tercero = $('#tercero').val();
+		var objeto = $('#objeto').val();
+		var id_ctb_doc = $('#id_ctb_doc').val();
 
 		if (accion_pto > 0) {
-			$.post(window.urlin + "/tesoreria/php/afectacion_presupuestal/frm_afectacion_presupuestal.php", { id_ctb_fuente: id_ctb_fuente, id_ctb_referencia: id_ctb_referencia, accion_pto: accion_pto }, function (he) {
+			$.post(window.urlin + "/tesoreria/php/afectacion_presupuestal/frm_afectacion_presupuestal.php", { id_ctb_fuente: id_ctb_fuente, id_ctb_referencia: id_ctb_referencia, accion_pto: accion_pto, fecha: fecha, id_tercero_api: id_tercero_api, tercero: tercero, objeto: objeto, id_ctb_doc: id_ctb_doc }, function (he) {
 				$('#divTamModalReg').removeClass('modal-xl');
 				$('#divTamModalReg').removeClass('modal-sm');
 				$('#divTamModalReg').addClass('modal-lg');

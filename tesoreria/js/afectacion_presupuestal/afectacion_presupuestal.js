@@ -1,4 +1,5 @@
-/*(function ($) {
+(function ($) {
+    /*
     $(document).ready(function () {
         $('#tb_cdps').DataTable({
             //va con este codigo para que no se muestre el boton de + encima
@@ -530,10 +531,69 @@
         }).always(function () { }).fail(function () {
             alert('Ocurrió un error');
         });
-    });
+    });*/
 
-    
-})(jQuery);*/
+    $('#divFormsReg').on('click', '#btn_guardar_encabezado', function () {
+        var id_pto_rad = $('#hd_id_pto_rad').val();
+
+        if (id_pto_rad == 0) {
+
+            var datos = $('#frm_afectacion_presupuestal').serialize();
+            var url;
+            url = window.urlin + '/tesoreria/php/afectacion_presupuestal/editar_afectacion_presupuestal.php';
+            $.ajax({
+                type: 'POST',
+                url: url,
+                dataType: 'json',
+                data: datos + "&oper=add"
+            }).done(function (r) {
+                if (r.mensaje == 'ok') {
+                    //let id = 'tb_cdps';
+                    //reloadtable(id);
+                    $('#hd_id_pto_rad').val(r.id);
+                    mje('Correcto');
+                } else {
+                    mjeError(r.mensaje);
+                }
+            }).always(function () { }).fail(function () {
+                mjeError("ocurrio un error");
+            });
+            //$(this).closest('.modal').modal('hide');
+        }
+        if (id_pto_rad > 0) {
+            //enviar el id_pto_rad que lo coji arriba de la caja de texto
+            mje("modificar");
+
+            /*
+            
+            var data = $('#frm_reg_articulos').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'editar_articulos.php',
+                dataType: 'json',
+                data: data + "&oper=add"
+            }).done(function(r) {
+                if (r.mensaje == 'ok') {
+                    let pag = ($('#id_articulo').val() == -1) ? 0 : $('#tb_articulos').DataTable().page.info().page;
+                    reloadtable('tb_articulos', pag);
+                    reloadtable('tb_articulos_lotes');
+                    $('#id_articulo').val(r.id);
+        
+                    $('#btn_imprimir').prop('disabled', false);
+        
+                    $('#divModalDone').modal('show');
+                    $('#divMsgDone').html("Proceso realizado con éxito");
+                } else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r.mensaje);
+                }
+            }).always(function() {}).fail(function() {
+                alert('Ocurrió un error');
+            });
+            */
+        }
+    });
+})(jQuery);
 
 
 
