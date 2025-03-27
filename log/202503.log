@@ -77,12 +77,3 @@ Fecha: 2025-03-03 10:36:38 PM, Id Usuario-Login: 1-ADMINN ADMINP, Accion: Actual
 [2025-03-25 15:25:27] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2811
 [2025-03-25 15:25:29] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 2808
 [2025-03-25 15:25:30] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 11 AND `id_ctb_libaux` = 182
-[2025-03-26 14:28:58] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: 
-[2025-03-26 15:18:07] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: 
-[2025-03-26 15:19:35] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: 
-[2025-03-26 15:20:55] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `pto_cdp` WHERE `id_pto_cdp` = 528
-[2025-03-26 15:30:30] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 2813
-[2025-03-26 15:35:39] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_factura` WHERE `id_cta_factura` = 250
-[2025-03-26 15:47:16] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 20
-[2025-03-26 15:47:18] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 21
-[2025-03-26 17:51:07] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_detalle_pago WHERE id_detalle_pago = 83
