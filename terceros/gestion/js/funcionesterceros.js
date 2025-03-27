@@ -256,6 +256,8 @@ function FormResponsabilidad(id) {
     });
     //Nuevo tercero
     $('#btnNewTercero').on('click', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#slcTipoTercero').val() === '0') {
             $('#slcTipoTercero').addClass('is-invalid');
@@ -317,6 +319,7 @@ function FormResponsabilidad(id) {
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     var cambiarEstado = function (e, idt, u, btn) {
@@ -378,6 +381,8 @@ function FormResponsabilidad(id) {
     //Actualizar datos tercero
     $('#divForms').on('click', '#btnUpTercero', function () {
         var msg = 'Diligenciar, campo obligatorio';
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#datFecInicio').val() === '') {
             $('#datFecInicio').addClass('is-invalid');
@@ -420,6 +425,7 @@ function FormResponsabilidad(id) {
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Borrar Tercero confirmar
@@ -463,6 +469,8 @@ function FormResponsabilidad(id) {
     });
     //Agregar Responsabilidad Economica
     $('#divForms').on('click', '#btnAddRespEcon', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#slcRespEcon').val() === '0') {
             $('#buscarRespEcono').addClass('is-invalid');
@@ -487,6 +495,7 @@ function FormResponsabilidad(id) {
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Registar Actividad Economica
@@ -504,6 +513,8 @@ function FormResponsabilidad(id) {
 
     //Agregar Actividad Economica
     $('#divForms').on('click', '#btnAddActvEcon', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#slcActvEcon').val() === '0') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Debe seleccionar una Actividad Económica!');
@@ -530,6 +541,7 @@ function FormResponsabilidad(id) {
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
 

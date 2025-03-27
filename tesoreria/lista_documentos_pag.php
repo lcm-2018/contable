@@ -14,7 +14,7 @@ id_doc: 0
 tipo_dato: 4
 tipo_var: 1
 */
-// Consulta tipo de presupuesto
+// Consulta tipo de presupuesto$datosDoc
 $id_doc_pag = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no disponible');
 $id_cop = isset($_POST['id_cop']) ? $_POST['id_cop'] : 0;
 $tipo_dato = isset($_POST['tipo_dato']) ? $_POST['tipo_dato'] : 0; // tiene el id_doc_fuente ej.  7 - nota bancaria
@@ -49,6 +49,7 @@ if ($id_doc_pag == 0) {
                     , `ctb_fuente`.`nombre` AS `fuente`
                     , 0 AS `val_pagado`
                     , 1 AS `estado`
+                    , 0 AS `id_ref_ctb`
 
                 FROM `ctb_doc`
                     INNER JOIN `ctb_fuente`
@@ -71,11 +72,12 @@ if ($id_doc_pag == 0) {
         $id_t = ['0' => $datosDoc['id_tercero']];
         $ids = implode(',', $id_t);
         $dat_ter = getTerceros($ids, $cmd);
-        $tercero = ltrim($dat_ter[0]['nom_tercero']);
+        $tercero = !empty($dat_ter) ? $dat_ter[0]['nom_tercero'] : '---';
     } else {
         $tercero = '---';
     }
 }
+$datosDoc['id_ref_ctb'] = $datosDoc['id_ref_ctb'] == '' ? 0 : $datosDoc['id_ref_ctb'];
 try {
     $sql = "SELECT
                 `id_ctb_doc`
@@ -167,10 +169,13 @@ try {
                 ctb_referencia.accion_pto
             FROM
                 ctb_referencia
-            WHERE ctb_referencia.id_ctb_referencia =" . $datosDoc['id_ref_ctb'] 
-            . " AND id_ctb_fuente = $tipo_dato"; 
+            WHERE ctb_referencia.id_ctb_referencia =" . $datosDoc['id_ref_ctb']
+        . " AND id_ctb_fuente = $tipo_dato";
     $rs = $cmd->query($sql);
     $obj_referencia = $rs->fetch();
+    if (empty($obj_referencia)) {
+        $obj_referencia['accion_pto'] = 0;
+    }
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -334,7 +339,7 @@ try {
                                                         <input type="text" name="valor" id="valor" value="<?php echo $datosDoc['val_pagado']; ?>" class="form-control" style="text-align: right;" required readonly>
                                                         <div class="input-group-append" id="button-addon4">
                                                             <?php if ($datosDoc['estado'] == 1 && $id_doc_pag > 0) { ?>
-                                                                <a class="btn btn-outline-success" onclick="cargaListaCausaciones('<?php echo $id_cop; ?>')"><span class="fas fa-plus fa-lg"></span></a>
+                                                                <button class="btn btn-outline-success" onclick="cargaListaCausaciones(this)"><span class="fas fa-plus fa-lg"></span></button>
                                                             <?php
                                                                 /*<a class="btn btn-outline-secondary" onclick="cargaListaInputaciones('<?php echo $id_cop;?>')"><span class="fas fa-search fa-lg"></span></a>*/
                                                             }
@@ -362,7 +367,7 @@ try {
                                                     <input type="text" name="forma_pago" id="forma_pago" value="<?php echo $valor_pago; ?>" class="form-control" style="text-align: right;" required <?php echo $campo_req; ?>>
                                                     <div class="input-group-append">
                                                         <?php if ($datosDoc['estado'] == 1 && $id_doc_pag > 0) { ?>
-                                                            <a class="btn btn-outline-primary" onclick="cargaFormaPago(<?php echo $id_cop; ?>,0)"><span class="fas fa-wallet fa-lg"></span></a>
+                                                            <button class="btn btn-outline-primary" onclick="cargaFormaPago(<?php echo $id_cop; ?>,0,this)"><span class="fas fa-wallet fa-lg"></span></button>
                                                         <?php } ?>
                                                     </div>
                                                 </div>
@@ -378,7 +383,7 @@ try {
                                                         <?php
                                                         if ($id_doc_pag > 0) {
                                                         ?>
-                                                            <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoPag('<?php echo $id_doc_pag; ?>')">Generar movimiento</button>
+                                                            <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoPag(this)">Generar movimiento</button>
                                                         <?php
                                                         }
                                                         ?>

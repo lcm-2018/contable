@@ -63,17 +63,8 @@ function MostrarAnulados(elemento) {
         });
     });*/
     $(document).ready(function () {
-        $(document).on('click', '.btn', function () {
-            var $btn = $(this);
-            if (!$btn.hasClass('no-disable')) {
-                $btn.prop('disabled', true);
-                setTimeout(function () {
-                    $btn.prop('disabled', false);
-                }, 2000);
-            }
-        });
-        $('.modal').on('hidden.bs.modal', function () {
-            $(this).attr('aria-hidden', 'false');
+        $('.modal').on('shown.bs.modal', function () {
+            $(this).find('.modal-dialog').draggable();
         });
     });
     "use strict";
@@ -679,4 +670,42 @@ function pesos(value) {
         minimumFractionDigits: 2, // Mínimo 2 decimales
         maximumFractionDigits: 2 // Máximo 2 decimales
     }).format(number);
+}
+
+function InactivaBoton(elemento) {
+    if (!(elemento instanceof HTMLElement)) {
+        console.error("El parámetro no es un elemento HTML válido:", elemento);
+        return;
+    }
+
+    elemento.disabled = true;
+    var span = elemento.querySelector('span');
+
+    if (!span) {
+        span = document.createElement('span');
+        elemento.prepend(span); // Agrega el spinner al inicio del botón
+    }
+
+    span.classList.add('spinner-border', 'spinner-border-sm', 'mr-2');
+}
+
+function ActivaBoton(elemento) {
+    if (!(elemento instanceof HTMLElement)) {
+        console.error("El parámetro no es un elemento HTML válido:", elemento);
+        return;
+    }
+    setTimeout(() => {
+        elemento.disabled = false;
+        var span = elemento.querySelector('span');
+
+        if (span) {
+            span.remove();
+        }
+    }, 1500);
+
+}
+function MensajeError(id) {
+    $("#" + id).addClass('is-invalid');
+    $("#" + id).focus();
+    mjeError("Campo requerido");
 }

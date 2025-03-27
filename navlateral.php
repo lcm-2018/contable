@@ -655,7 +655,7 @@ try {
                                                         <i class="fas fa-calculator fa-sm" style="color: green;"></i>
                                                     </div>
                                                     <div>
-                                                        Cuentas Facturación
+                                                        Ctas Facturación
                                                     </div>
                                                 </a>
                                             <?php }
@@ -681,7 +681,7 @@ try {
                                                     </div>
                                                 </a>
                                             <?php }
-                                            if (PermisosUsuario($permisos, 5510, 0) || $id_rol == 1) {
+                                            if (false) {
                                             ?>
                                                 <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/list_documentos_soporte.php">
                                                     <div class="div-icono">

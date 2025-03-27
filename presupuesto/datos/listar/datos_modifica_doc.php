@@ -137,7 +137,7 @@ if (!empty($listappto)) {
             $desaplazar = null;
         }
         if (PermisosUsuario($permisos, 5401, 2) || $id_rol == 1) {
-            $detalles = '<a value="' . $id_pto . '" onclick="cargarListaDetalleMod(' . $id_pto . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+            $detalles = '<a value="' . $id_pto . '" onclick="cargarListaDetalleMod(' . $id_pto . ')" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
             $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
             ...
             </button>
@@ -177,6 +177,7 @@ if (!empty($listappto)) {
             $dato = 'Anulado';
         }
         $num = $lp['id_manu'];
+        $acciones = null;
         $data[] = [
             'num' => $num,
             'fecha' => $fecha,

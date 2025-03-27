@@ -291,6 +291,8 @@
     });
     //Agregar tipo de contrato
     $('#divForms').on('click', '#btnAddTipoContrato', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#slcTipoCompra').val() === '0') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Tipo de compra no puede ser Vacía!');
@@ -317,6 +319,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Actualizar tipo de contrato -> formulario
@@ -332,6 +335,8 @@
     });
     //Actualizar datos tipo de contrato
     $('#divForms').on('click', '#btnUpTipoContrato', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let id;
         if ($('#txtTipoContrato').val() === '') {
             $('#divModalError').modal('show');
@@ -356,6 +361,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Borrar tipo de contrato confirmar
@@ -387,6 +393,8 @@
     });
     //Agregar tipo de bien o servicio
     $('#divForms').on('click', '#btnAddTipoBnSv', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#slcTipoContrato').val() === '0') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Debe selecionar tipo de contrato!');
@@ -416,6 +424,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Actualizar tipo de bien o servicio -> formulario
@@ -432,6 +441,8 @@
     //Actualizar datos tipo de bien o servicio
     $('#divForms').on('click', '#btnUpTipoBnSv', function () {
         let id;
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#txtTipoContrato').val() === '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Tipo de bien o servicio no puede ser Vacío!');
@@ -458,6 +469,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Borrar tipo de bien o servicio
@@ -489,6 +501,8 @@
     });
     //Agregar bien o servicio
     $('#divForms').on('click', '#btnAddBnSv', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#slcTipoBnSv').val() === '0') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Debe selecionar tipo de bien o servicio!');
@@ -515,6 +529,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Actualizar bien o servicio -> formulario
@@ -531,6 +546,8 @@
     //Actualizar datos de bien o servicio
     $('#divForms').on('click', '#btnUpBnSv', function () {
         let id;
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#txtBnSv').val() === '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Bien o servicio no puede ser Vacío!');
@@ -554,6 +571,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Borrar bien o servicio
@@ -608,6 +626,8 @@
     });
     $('#divModalForms').on('click', '#btnGuardaHomologacion', function () {
         let tipo = $(this).attr('text');
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#fileHomologacion').val() === '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Debe elegir un archivo!');
@@ -617,17 +637,17 @@
             if (ext !== '.csv') {
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('¡Solo se permite documentos .csv!');
+                ActivaBoton(btn);
                 return false;
             } else if ($('#fileHomologacion')[0].files[0].size > 2097152) {
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('¡Documento debe tener un tamaño menor a 2Mb!');
+                ActivaBoton(btn);
                 return false;
             }
             let datos = new FormData();
             datos.append('fileHomologacion', $('#fileHomologacion')[0].files[0]);
             datos.append('tipo', tipo);
-            $('#btnGuardaHomologacion').attr('disabled', true);
-            $('#btnGuardaHomologacion').html('<i class="fas fa-spinner fa-pulse"></i> Cargando...');
             $.ajax({
                 type: 'POST',
                 url: 'registrar/new_homologacion.php',
@@ -636,8 +656,6 @@
                 processData: false,
                 cache: false,
                 success: function (r) {
-                    $('#btnGuardaHomologacion').attr('disabled', false);
-                    $('#btnGuardaHomologacion').html('Guardar');
                     if (r == '1') {
                         $('#divModalForms').modal('hide');
                         $('#divModalDone').modal('show');
@@ -649,10 +667,13 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
 
     $('#divModalForms').on('click', '#btnGuardaFormatoCtt', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#slcTipoFormato').val() === '0') {
             $('#slcTipoFormato').addClass('is-invalid');
@@ -671,9 +692,11 @@
             let ext = archivo.substring(archivo.lastIndexOf(".")).toLowerCase();
             if (ext !== '.docx') {
                 mjeError('¡Solo se permite documentos .docx!');
+                ActivaBoton(btn);
                 return false;
             } else if ($('#fileContratacion')[0].files[0].size > 10485760) {
                 mjeError('¡Documento debe tener un tamaño menor a 10Mb!');
+                ActivaBoton(btn);
                 return false;
             }
             let datos = new FormData();
@@ -702,6 +725,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#tableFormCtt').on('click', '.borrar', function () {

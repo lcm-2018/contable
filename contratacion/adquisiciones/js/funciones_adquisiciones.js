@@ -263,6 +263,8 @@
     });
     //Agregar adquisicion
     $('#divForms').on('click', '#btnAddAdquisicion', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#datFecAdq').val() === '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Fecha de aquisición no puede ser Vacía!');
@@ -298,6 +300,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Editar adquisición 
@@ -353,6 +356,8 @@
         let id_adq = $('#id_compra').val();
         var validar = true;
         var centros = [];
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.form-control').removeClass('border-danger');
         $('#contenedor select').each(function () {
             let val = $(this).val();
@@ -362,6 +367,7 @@
                     $(this).addClass('border-danger');
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Centro de costo ya se encuentra seleccionado');
+                    ActivaBoton(btn);
                     return false;
                 }
                 if (val != '0') {
@@ -374,10 +380,12 @@
                 $(this).addClass('border-danger');
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Seleccionar una opción');
+                ActivaBoton(btn);
                 return false;
             }
         });
         if (!validar) {
+            ActivaBoton(btn);
             return false;
         }
         $('#contenedor input[type="number"]').each(function () {
@@ -387,6 +395,7 @@
                 $(this).addClass('border-danger');
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Ingresar un valor mayor o igual a 1');
+                ActivaBoton(btn);
                 return false;
             }
         });
@@ -411,6 +420,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     //Actualizar adquisición -> compra
     $('#btnUpDataAdqCompra').on('click', function () {
@@ -921,6 +931,8 @@
         });
     });
     $("#divModalForms").on('click', '#btnDuplicaAdq', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#datFecAdq').val() == '') {
             $('#datFecAdq').focus();
@@ -961,11 +973,13 @@
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Selecccionar centro de costo');
                     validar = true;
+                    ActivaBoton(btn);
                     return false;
                 }
 
             });
             if (validar) {
+                ActivaBoton(btn);
                 return false;
             }
             validar = false;
@@ -976,10 +990,12 @@
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Cantidad debe ser mayor a cero');
                     validar = true;
+                    ActivaBoton(btn);
                     return false;
                 }
             });
             if (validar) {
+                ActivaBoton(btn);
                 return false;
             }
             var datos = $('#formDuplicaAdq').serialize();
@@ -1000,6 +1016,7 @@
                     }
                 }
             });
+            ActivaBoton(btn);
         }
     });
     $("#divModalForms").on('input', '#SeaTercer', function () {
@@ -1061,6 +1078,8 @@
         });
     });
     $('#divModalForms').on('click', '#btnAddNewEstudioPrevio', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#datFecIniEjec').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Fecha Inicial no puede ser vacío');
@@ -1114,6 +1133,7 @@
                 });
             }
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#modificarEstPrev').on('click', '.editar', function () {
@@ -1128,6 +1148,8 @@
         return false;
     });
     $('#divModalForms').on('click', '#btnUpEstudioPrevio', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#datFecIniEjec').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Fecha Inicial no puede ser vacío');
@@ -1178,6 +1200,7 @@
                 });
             }
         }
+        ActivaBoton(btn);
         return false;
     });
     $('.downloadFormsCtt').on('click', function () {
@@ -1310,6 +1333,8 @@
         return false;
     });
     $('#divModalForms').on('click', '#btnAddContratoCompra', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#datFecIniEjec').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Fecha Inicial no puede ser vacío');
@@ -1360,6 +1385,7 @@
                 });
             }
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#modificarContraCompra').on('click', '.editar', function () {
@@ -1374,6 +1400,8 @@
         return false;
     });
     $('#divModalForms').on('click', '#btnUpContratoCompra', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#datFecIniEjec').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Fecha Inicial no puede ser vacío');
@@ -1412,6 +1440,7 @@
                 });
             }
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#modificarContraCompra').on('click', '.borrar', function () {
@@ -1442,6 +1471,8 @@
     });
     $('#btnCerrarContrato').on('click', function () {
         var id_adq = $('#id_compra').val();
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         Swal.fire({
             title: "¿Confirma cierre de Contrato?",
             icon: "warning",
@@ -1467,6 +1498,7 @@
                 });
             }
         });
+        ActivaBoton(btn);
     });
     /*
     $('#btnEnviarContrato').on('click', function () {
@@ -1678,6 +1710,8 @@
         return false;
     });
     $('#divModalForms').on('click', '#btnNovContrato', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let op = $(this).attr('value');
         let correcto = 0;
         switch (op) {
@@ -1840,6 +1874,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#divModalForms').on('change', '#slcTipoNovedad', function () {
@@ -1919,8 +1954,10 @@
     });
     $('#divModalForms').on('click', '#btnUpNovContrato', function () {
         let correcto = 0;
-        $noved = $('#slcTipoNovedad').val();
-        switch ($noved) {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
+        var noved = $('#slcTipoNovedad').val();
+        switch (noved) {
             case '1':
                 if (parseInt($('#numValAdicion').val()) <= 0 || $('#numValAdicion').val() == '') {
                     $('#divModalError').modal('show');
@@ -2070,6 +2107,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#detallesXEntrega').on('click', '.details', function () {
@@ -2171,6 +2209,8 @@
     $('#divModalForms').on('click', '#btnGuardarOrden', function () {
         var next = true;
         var c = 0;
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
 
         $('.aprobado').each(function () {
@@ -2184,10 +2224,12 @@
                         $input.addClass('is-invalid');
                         mjeError('El valor debe ser mayor a cero');
                         next = false;
+                        ActivaBoton(btn);
                         return false;
                     }
                 });
                 if (!next) {
+                    ActivaBoton(btn);
                     return false;
                 }
                 c++;
@@ -2209,6 +2251,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     $('.modificarCotizaciones').on('click', '.editar', function () {
         let id = $(this).attr('value');
@@ -2249,6 +2292,8 @@
         });
     });
     $('#divModalForms').on('click', '#btnUpDetalleOrdnen', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if (Number($('#numCantidad').val()) <= 0) {
             $('#numCantidad').addClass('is-invalid');
@@ -2272,6 +2317,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     $('#cerrarOrden').on('click', function () {
         Swal.fire({
@@ -2309,6 +2355,8 @@
         });
     });
     $('#cerrarOrdenServicio').on('click', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         Swal.fire({
             title: "¿Confirma cierre de orden?",
             icon: "warning",
@@ -2346,6 +2394,7 @@
                 }
             }
         });
+        ActivaBoton(btn);
     });
 })(jQuery);
 

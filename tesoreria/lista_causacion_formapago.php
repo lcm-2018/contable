@@ -207,7 +207,7 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                             //$id_doc = $ce['id_ctb_doc'];
                             $id = $ce['id_detalle_pago'];
                             if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
-                                $editar = '<a value="' . $id_doc . '" onclick="eliminarFormaPago(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+                                $editar = '<a value="' . $id_doc . '" onclick="eliminarFormaPago(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Modificar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
                             </button>
@@ -218,6 +218,7 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                                 $editar = null;
                                 $detalles = null;
                             }
+                            $acciones = null;
                             $valor = number_format($ce['valor'], 2, '.', ',');
                         ?>
                             <tr id="<?php echo $id; ?>">
@@ -236,7 +237,7 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                 </tbody>
             </table>
             <div class="text-right py-3">
-                <a type="button" class="btn btn-success btn-sm" onclick="GuardaFormaPago()">Guardar</a>
+                <a type="button" class="btn btn-success btn-sm" onclick="GuardaFormaPago(this)">Guardar</a>
                 <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
             </div>
         </div>

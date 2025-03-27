@@ -120,6 +120,8 @@
     $('#divForms').on('click', '#btnFacturaNO', function () {
         var opcion = $(this).attr('value');
         var aprobar = 1;
+        var btn = $(this).attr('id');
+        InactivaBoton(btn);
         $(".form-control").removeClass('is-invalid');
         if ($('#fecCompraNO').val() == '') {
             $('#fecCompraNO').addClass('is-invalid');
@@ -204,6 +206,7 @@
                     mjeError('Cantidad debe ser mayor a cero');
                 }
                 if (aprobar == 0) {
+                    ActivaBoton(btn);
                     return false;
                 }
             });
@@ -239,6 +242,7 @@
                 }
             }
         }
+        ActivaBoton(btn);
         return false;
     });
     //actualizar factura no obligado
@@ -745,7 +749,7 @@ function EnviaDocSoporte2(boton, tipo) {
             console.error("Error en la solicitud AJAX:", error);
         }
     });
-
+    ActivaBoton(boton);
     return false
 };
 

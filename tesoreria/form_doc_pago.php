@@ -143,6 +143,8 @@ $tam = $id_ctb_doc == '14' ? 4 : 6;
                     <label for="numDoc" class="small">NUMERO</label>
                     <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $datos['id_manu'] ?>">
                 </div>
+            </div>
+            <div class="form-row px-4">
                 <?php if ($id_ctb_doc == '14') { ?>
                     <div class="form-group col-md-4">
                         <label for="numDoc" class="small">&nbsp;</label>
@@ -166,9 +168,7 @@ $tam = $id_ctb_doc == '14' ? 4 : 6;
                             ?>
                         </select>
                     </div>
-                </div>
-            <?php } else { ?>
-                <div class="form-row px-4">
+                <?php } else { ?>
                     <div class="form-group col-md-6">
                         <label for="ref_mov" class="small">CONCEPTO</label>
                         <select name="ref_mov" id="ref_mov" class="form-control form-control-sm" required>
@@ -194,27 +194,27 @@ $tam = $id_ctb_doc == '14' ? 4 : 6;
                             </div>
                         </div>
                     </div>
-                </div>
-            <?php } ?>
-            <div class="form-row px-4  ">
-                <div class="form-group col-md-12">
-                    <label for="terceromov" class="small">TERCERO</label>
-                    <input type="text" name="terceromov" id="terceromov" class="form-control form-control-sm" value="<?php echo $tercero ?>">
-                    <input type="hidden" name="id_tercero" id="id_tercero" class="form-control form-control-sm" value="<?php echo $datos['id_tercero'] ?>">
-                </div>
-
             </div>
-            <div class="form-row px-4">
-                <div class="form-group col-md-12">
-                    <label for="objeto" class="small">DETALLES</label>
-                    <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-label="Default select example" rows="4" required><?php echo $datos['detalle'] ?></textarea>
-                </div>
-
+        <?php } ?>
+        <div class="form-row px-4  ">
+            <div class="form-group col-md-12">
+                <label for="terceromov" class="small">TERCERO</label>
+                <input type="text" name="terceromov" id="terceromov" class="form-control form-control-sm" value="<?php echo $tercero ?>">
+                <input type="hidden" name="id_tercero" id="id_tercero" class="form-control form-control-sm" value="<?php echo $datos['id_tercero'] ?>">
             </div>
-        </form>
-        <div class="text-right pb-3 px-4 w-100">
-            <button class="btn btn-primary btn-sm" style="width: 5rem;" id="gestionarMvtoCtbPag" text="<?php echo $id_documento ?>"><?php echo $id_documento == 0 ? 'Registrar' : 'Actualizar'; ?></button>
-            <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>
+
         </div>
+        <div class="form-row px-4">
+            <div class="form-group col-md-12">
+                <label for="objeto" class="small">DETALLES</label>
+                <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-label="Default select example" rows="4" required><?php echo $datos['detalle'] ?></textarea>
+            </div>
+
+        </div>
+        </form>
+    </div>
+    <div class="text-right pt-3 w-100">
+        <button class="btn btn-primary btn-sm" id="gestionarMvtoCtbPag" text="<?php echo $id_documento ?>"><?php echo $id_documento == 0 ? 'Registrar' : 'Actualizar'; ?></button>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>

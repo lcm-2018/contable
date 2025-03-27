@@ -44,7 +44,7 @@ if (!empty($lista)) {
         }
         if (PermisosUsuario($permisos, 5504, 4) || $id_rol == 1) {
             if ($lp['estado'] == 1) {
-                $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" onclick="cerrarCuentaPlan(' . $id_ctb . ')" title="Desactivar cuenta"><span class="fas fa-lock-open fa-lg"></span></a>';
+                $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" onclick="cerrarCuentaPlan(' . $id_ctb . ')" title="Desactivar cuenta"><span class="fas fa-unlock fa-lg"></span></a>';
                 $borrar = '<a value="' . $id_ctb . '" onclick="eliminarCuentaContable(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
             } else {
                 $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" onclick="abrirCuentaPlan(' . $id_ctb . ')" title="Activar cuenta"><span class="fas fa-lock fa-lg"></span></a>';

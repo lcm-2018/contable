@@ -75,7 +75,7 @@ try {
             </div>
         </form>
         <div class="text-right pb-3 px-4 w-100">
-            <button type="button" class="btn btn-primary btn-sm" onclick="GuardarReferenciaDr()">Guardar</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="GuardarReferenciaDr(this)">Guardar</button>
             <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>
         </div>
     </div>

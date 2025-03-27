@@ -539,13 +539,20 @@ document.addEventListener("submit", (e) => {
 });
 
 $('#divModalForms').on('click', '#gestionarMvtoCtb', function () {
+	var btn = $(this).get(0);
+	InactivaBoton(btn);
 	var id = $(this).attr('text');
 	GuardaDocCtb(id);
+	ActivaBoton(btn);
+	return false;
 
 });
 $('#GuardaDocCtb').on('click', function () {
+	var btn = $(this).get(0);
+	InactivaBoton(btn);
 	var id = $(this).attr('text');
 	GuardaDocCtb(id);
+	ActivaBoton(btn);
 
 });
 function GuardaDocCtb(id) {
@@ -601,7 +608,6 @@ function GuardaDocCtb(id) {
 			}
 		});
 	}
-	return false;
 };
 
 $('#divModalForms').on('keyup', '#valor_pagar', function () {
@@ -728,6 +734,7 @@ function consultarSumaDoc(id_doc) {
 
 // Funcion para agregar o editar registros contables en el libro auxiliar
 function GestMvtoDetalle(elemento) {
+	InactivaBoton(elemento);
 	$('.is-invalid').removeClass('is-invalid');
 	var opc = elemento.getAttribute('text');
 	var fila = elemento.closest('tr');
@@ -804,6 +811,7 @@ function GestMvtoDetalle(elemento) {
 				}
 			});
 	}
+	ActivaBoton(elemento);
 	return false;
 };
 // Funcion sumas iguales
@@ -1134,7 +1142,8 @@ let validarValorMaximo = function (id) {
 };
 
 // Guardar los rubros y el valor de la afectación presupuestal asociada a la cuenta por pagar
-var DetalleImputacionCtasPorPagar = function () {
+var DetalleImputacionCtasPorPagar = function (boton) {
+	InactivaBoton(boton);
 	var band = true;
 	var valor = 0;
 	var min, max;
@@ -1149,6 +1158,7 @@ var DetalleImputacionCtasPorPagar = function () {
 			$(this).focus();
 			mjeError('El valor debe estar entre ' + min.toLocaleString("es-MX") + ' y ' + max.toLocaleString("es-MX"));
 			band = false;
+			ActivaBoton(boton);
 			return false;
 		}
 	});
@@ -1170,6 +1180,7 @@ var DetalleImputacionCtasPorPagar = function () {
 			}
 		});
 	}
+	ActivaBoton(boton);
 };
 /*
 let rubrosaObligar = function () {
@@ -1314,7 +1325,8 @@ let mostrarCentroCostos = function (dato) {
 };
 
 // Guardar datos de causación de costos
-var guardarCostos = function () {
+var guardarCostos = function (boton) {
+	InactivaBoton(boton);
 	var valor = Number($('#valor_cc').val().replace(/\,/g, "", ""));
 	var max = Number($('#valor_cc').attr('max').replace(/\,/g, "", ""));
 
@@ -1353,6 +1365,7 @@ var guardarCostos = function () {
 			}
 		});
 	}
+	ActivaBoton(boton);
 
 };
 document.addEventListener("submit", (e) => {
@@ -1687,7 +1700,8 @@ var ValorBase = function (data) {
 	$("#valor_iva").val(data[1]);
 };
 // Guardar valor de la retención
-var GuardarRetencion = function () {
+var GuardarRetencion = function (boton) {
+	InactivaBoton(boton);
 	$('.is-invalid').removeClass('is-invalid');
 	if ($('#tipo_rete').val() == '3') {
 		enviaRetenciones();
@@ -1708,6 +1722,7 @@ var GuardarRetencion = function () {
 			enviaRetenciones();
 		}
 	}
+	ActivaBoton(boton);
 };
 function enviaRetenciones() {
 	$("#formAddRetencioness").find(":disabled").prop("disabled", false);
@@ -1933,6 +1948,7 @@ const procesaCausacionCxp = (id) => {
 const ProcesaFacturas = (boton) => {
 	$('.is-invalid').removeClass('is-invalid');
 	id = boton.getAttribute("text");
+	InactivaBoton(boton);
 	if ($('#tipoDoc').val() == '0') {
 		$('#tipoDoc').addClass('is-invalid');
 		$('#tipoDoc').focus();
@@ -1994,6 +2010,7 @@ const ProcesaFacturas = (boton) => {
 			}
 		});
 	}
+	ActivaBoton(boton);
 	return false;
 };
 const FacturarCtasPorPagar = (id) => {
@@ -2076,7 +2093,8 @@ const eliminarFactura = (boton) => {
 	});
 };
 // Genera movimiento cuando se hace procesamiento automatico del documento cxp
-const generaMovimientoCxp = () => {
+const generaMovimientoCxp = (boton) => {
+	InactivaBoton(boton);
 	var val_fac = $('#valFactura').text().replace(/[\s$]+/g, "").replace(/\,/g, "");
 	var val_inp = $('#valImputacion').text().replace(/[\s$]+/g, "").replace(/\,/g, "");
 	var val_cos = $('#valCentroCosto').text().replace(/[\s$]+/g, "").replace(/\,/g, "");
@@ -2115,8 +2133,10 @@ const generaMovimientoCxp = () => {
 			});
 	} else {
 		mjeError("Los valores de Facturación, imputacion y centro de costo no son iguales");
+		ActivaBoton(boton);
 		return false;
 	}
+	ActivaBoton(boton);
 };
 
 // llenar cero en el input
@@ -2426,7 +2446,7 @@ const EnviaDocumentoSoporte = (boton) => {
 			console.error("Error en la solicitud AJAX:", error);
 		}
 	});
-
+	ActivaBoton(boton);
 	return false
 };
 const VerSoporteElectronico = (id) => {
@@ -2643,7 +2663,8 @@ const buscarCuentaPlan = async () => {
 	}
 };
 // Guardar cuenta en plan contable
-const guardarPlanCuentas = async () => {
+const guardarPlanCuentas = async (boton) => {
+	InactivaBoton(boton);
 	let formEnvio = new FormData(formNuevaCuentaContable);
 	for (var pair of formEnvio.entries()) {
 		console.log(pair[0] + ", " + pair[1]);
@@ -2651,16 +2672,19 @@ const guardarPlanCuentas = async () => {
 		if (formEnvio.get("cuentas") == "") {
 			document.querySelector("#cuentas").focus();
 			mjeError("Debe digitar una cuenta valida ", "");
+			ActivaBoton(boton);
 			return false;
 		}
 		if (formEnvio.get("nombre") == "") {
 			document.querySelector("#nombre").focus();
 			mjeError("Debe digitar un mombre valido ", "");
+			ActivaBoton(boton);
 			return false;
 		}
 		if (formEnvio.get("controlid") == 1) {
 			document.querySelector("#cuentas").focus();
 			mjeError("La cuenta contable ya existe ", "");
+			ActivaBoton(boton);
 			return false;
 		}
 	}
@@ -2682,6 +2706,8 @@ const guardarPlanCuentas = async () => {
 	} catch (error) {
 		console.error(error);
 	}
+	ActivaBoton(boton);
+
 };
 // Abre formulario para edición de datos de cuenta contable
 const editarDatosPlanCuenta = (id) => {
@@ -2697,36 +2723,60 @@ const editarDatosPlanCuenta = (id) => {
 
 // Cerrar cuenta contable
 let cerrarCuentaPlan = function (dato) {
-	fetch("datos/consultar/consultaCerrarCuentaPlan.php", {
-		method: "POST",
-		body: dato,
-	})
-		.then((response) => response.json())
-		.then((response) => {
-			if (response.value == "ok") {
-				$('#tablePlanCuentas').DataTable().ajax.reload(null, false);
-				mje("Documento cerrado");
-			} else {
-				mjeError("Error: " + response.msg, "Verificar");
-			}
-		});
+	Swal.fire({
+		title: "¿Está seguro de Desactivar esta Cuenta?",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#3085d6",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si, Desactivar",
+		cancelButtonText: "Cancelar",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			fetch("datos/consultar/consultaCerrarCuentaPlan.php", {
+				method: "POST",
+				body: dato,
+			})
+				.then((response) => response.json())
+				.then((response) => {
+					if (response.value == "ok") {
+						$('#tablePlanCuentas').DataTable().ajax.reload(null, false);
+						mje("Documento cerrado");
+					} else {
+						mjeError("Error: " + response.msg, "Verificar");
+					}
+				});
+		}
+	});
 };
 // Abrir cuenta contable
 let abrirCuentaPlan = function (dato) {
-	//let doc = id_ctb_doc.value;
-	fetch("datos/consultar/consultaAbriCuentaPlan.php", {
-		method: "POST",
-		body: dato,
-	})
-		.then((response) => response.json())
-		.then((response) => {
-			if (response.value == "ok") {
-				mje("Documento activado");
-				$('#tablePlanCuentas').DataTable().ajax.reload(null, false);
-			} else {
-				mjeError("Error: " + response.msg);
-			}
-		});
+	Swal.fire({
+		title: "¿Está seguro de Activar esta Cuenta?",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#3085d6",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si, Abrir",
+		cancelButtonText: "Cancelar",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			//let doc = id_ctb_doc.value;
+			fetch("datos/consultar/consultaAbriCuentaPlan.php", {
+				method: "POST",
+				body: dato,
+			})
+				.then((response) => response.json())
+				.then((response) => {
+					if (response.value == "ok") {
+						mje("Documento activado");
+						$('#tablePlanCuentas').DataTable().ajax.reload(null, false);
+					} else {
+						mjeError("Error: " + response.msg);
+					}
+				});
+		}
+	});
 };
 
 // Eliminar cuenta contable
@@ -2762,7 +2812,8 @@ const eliminarCuentaContable = (comp) => {
 		}
 	});
 };
-const guardarDocFuente = async () => {
+const guardarDocFuente = async (boton) => {
+	InactivaBoton(boton);
 	$('.is-invalid').removeClass('is-invalid');
 	let formEnvio = new FormData(formDocFuente);
 	for (var pair of formEnvio.entries()) {
@@ -2772,12 +2823,14 @@ const guardarDocFuente = async () => {
 			document.querySelector("#txtCodigo").classList.add("is-invalid");
 			document.querySelector("#txtCodigo").focus();
 			mjeError("Debe digitar una codigo", "");
+			ActivaBoton(boton);
 			return false;
 		}
 		if (formEnvio.get("txtNombre") == "") {
 			document.querySelector("#txtNombre").classList.add("is-invalid");
 			document.querySelector("#txtNombre").focus();
 			mjeError("Debe digitar un mombre valido ", "");
+			ActivaBoton(boton);
 			return false;
 		}
 	}
@@ -2799,6 +2852,7 @@ const guardarDocFuente = async () => {
 	} catch (error) {
 		console.error(error);
 	}
+	ActivaBoton(boton);
 };
 const editarDocFuente = (id) => {
 	let url = "form_documentos_fuente.php";
@@ -3122,7 +3176,8 @@ function obtenerNumeroSemana(fecha) {
 
 	return 1 + Math.ceil((primerJueves - fechaAuxiliar) / 604800000);
 }
-function CausaAuCentroCostos() {
+function CausaAuCentroCostos(boton) {
+	InactivaBoton(boton);
 	var id_crp = $('#id_crpp').val();
 	var id_doc = $('#id_ctb_doc').val();
 	var valor = parseFloat($('#valFactura').text().replace(/[\$,]/g, ''));
@@ -3140,6 +3195,7 @@ function CausaAuCentroCostos() {
 			}
 		}
 	});
+	ActivaBoton(boton);
 }
 function RegDocREfDr(datos, id_doc) {
 	$.ajax({
@@ -3158,7 +3214,8 @@ function RegDocREfDr(datos, id_doc) {
 	});
 }
 
-function GuardarReferenciaDr() {
+function GuardarReferenciaDr(boton) {
+	InactivaBoton(boton);
 	$('.is-invalid').removeClass('is-invalid');
 	if ($('#nombre').val() == '') {
 		$('#nombre').addClass('is-invalid');
@@ -3181,6 +3238,7 @@ function GuardarReferenciaDr() {
 		var id_doc = $('#id_doc_ft').val();
 		RegDocREfDr(datos, id_doc);
 	}
+	ActivaBoton(boton);
 
 }
 function cerrarReferencia(id) {

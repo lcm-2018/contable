@@ -20,7 +20,7 @@ try {
         include '../../../financiero/reg_logs.php';
         $ruta = '../../../log';
         $sql = "DELETE FROM `pto_cdp` WHERE `id_pto_cdp` = $data";
-        RegistraLogs($ruta, $consulta);
+        RegistraLogs($ruta, $sql);
         echo "ok";
     } else {
         echo $query->errorInfo()[2];

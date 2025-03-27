@@ -249,7 +249,7 @@ $max = $max < 0 ? 0 : $max;
         </div>
     </div>
     <div class="text-right pt-3">
-        <a type="button" class="btn btn-primary btn-sm" onclick="guardarCostos()">Guardar</a>
+        <button type="button" class="btn btn-primary btn-sm" onclick="guardarCostos(this)">Guardar</button>
         <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>

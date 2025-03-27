@@ -451,6 +451,8 @@
     //===================================================================================== INSERT
     //Agregar nuevo Presupuesto
     $("#divForms").on("click", "#btnAddPresupuesto", function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($("#nomPto").val() === "") {
             $("#divModalError").modal("show");
             $("#divMsgError").html("¡El nombre de presupuesto no puede estar vacio 1!");
@@ -480,10 +482,13 @@
                 },
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     // Agregar nuevo cargue de rubros del presupuestos
     $("#divForms").on("click", "#btnCargaPresupuesto", function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let value = $(this).attr('text');
         let id_tipoRubro = $("#tipoDato").val();
         let estado = $("#estadoPresupuesto").val();
@@ -537,11 +542,14 @@
                 },
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     // Agregar ejcución a presupuesto CDP
     $("#divForms").on("click", "#btnGestionCDP", function () {
         var op = $(this).attr('text');
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if (Number($('#id_manu').val()) <= 0) {
             $("#id_manu").focus();
@@ -595,6 +603,7 @@
                 },
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     // Agregar cargue de rubros al CDP
@@ -680,6 +689,8 @@
     //---------------------------------------------
     //1.1. ejecuta editar presupuesto
     $("#divForms").on("click", "#btnUpdatePresupuesto", function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($("#nomPto").val() === "") {
             $("#divModalError").modal("show");
             $("#divMsgError").html("¡El nombre de presupuesto no puede estar vacio!");
@@ -709,6 +720,7 @@
                 },
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //2. Editar detalles de CDP
@@ -1241,6 +1253,8 @@ $('#modificaHomologaPto').on('click', '.dupLine', function () {
 });
 $('#setHomologacionPto').on('click', '', function () {
     var valida = 1;
+    var btn = $(this).get(0);
+    InactivaBoton(btn);
     $('.is-invalid').removeClass('is-invalid');
     $('.validaPto').each(function () {
         var celda = $(this).parent();
@@ -1250,6 +1264,7 @@ $('#setHomologacionPto').on('click', '', function () {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Se debe diligenciar este campo');
             valida = 0;
+            ActivaBoton(btn);
             return false;
         }
     });
@@ -1272,8 +1287,11 @@ $('#setHomologacionPto').on('click', '', function () {
             }
         });
     }
+    ActivaBoton(btn);
 });
 $('#divModalForms').on('click', '#registrarModificaPto', function () {
+    var btn = $(this).get(0);
+    InactivaBoton(btn);
     $('.is-invalid').removeClass('is-invalid');
     if ($('#fecha').val() == '') {
         $('#fecha').addClass('is-invalid');
@@ -1309,6 +1327,7 @@ $('#divModalForms').on('click', '#registrarModificaPto', function () {
             }
         });
     }
+    ActivaBoton(btn);
 });
 // genera cdp y rp para nomina
 //--!EDWIN
@@ -1696,6 +1715,7 @@ document.addEventListener("keyup", (e) => {
 // Registrar el detalle de las modificaciones
 
 function RegDetalleMod(boton) {
+    InactivaBoton(boton);
     var fila = boton.closest('tr');
     var opcion = boton.getAttribute('text');
     var valorDeb = fila.querySelector('input[name="valorDeb"]').value;
@@ -1731,9 +1751,11 @@ function RegDetalleMod(boton) {
                 }
             });
     }
+    ActivaBoton(boton);
     return false;
 };
 function RegDetalleCDPs(boton) {
+    InactivaBoton(boton);
     var fila = boton.closest('tr');
     var opcion = boton.getAttribute('text');
     var valorDeb = fila.querySelector('input[name="valorDeb"]').value;
@@ -1793,7 +1815,7 @@ function RegDetalleCDPs(boton) {
             .catch(function (error) {
                 console.error("Error al consultar el saldo del rubro: ", error);
             });
-
+        ActivaBoton(boton);
 
     }
     function RegistraDetalle(campos, opcion) {
@@ -2472,6 +2494,8 @@ $("#divForms").on("click", "#btnGestionCRP", function () {
 $('#registrarMovDetalle').on('click', function () {
     var pto = $("#id_pto_ppto").val();
     var id_cdp = $("#id_cdp").val();
+    var btn = $(this).get(0);
+    InactivaBoton(btn);
     $('.is-invalid').removeClass('is-invalid');
     if ($('#fecha').val() == '') {
         $('#fecha').focus();
@@ -2498,6 +2522,7 @@ $('#registrarMovDetalle').on('click', function () {
                 $(this).focus();
                 $(this).addClass('is-invalid');
                 mjeError('El valor no puede ser menor a cero', '');
+                ActivaBoton(btn);
                 return false;
             } else {
                 let min = $(this).attr('min');
@@ -2507,6 +2532,7 @@ $('#registrarMovDetalle').on('click', function () {
                     $(this).focus();
                     $(this).addClass('is-invalid');
                     mjeError('El valor no puede ser menor a ' + min + ' o mayor a ' + max, '');
+                    ActivaBoton(btn);
                     return false;
                 }
             }
@@ -2536,7 +2562,7 @@ $('#registrarMovDetalle').on('click', function () {
             });
         }
     }
-
+    ActivaBoton(btn);
 });
 
 $('.btnOptionPto').on('click', function () {

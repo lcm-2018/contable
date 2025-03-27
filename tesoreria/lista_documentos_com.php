@@ -114,8 +114,8 @@ try {
                                                 <?php
                                                 if ($tipo_doc == '4') {
                                                     echo '<div class="input-group-prepend px-1">
-                                                        <button type="button" class="btn btn-primary" onclick ="CargaObligaPago(2)">
-                                                          Ver Listado <span class="badge badge-light"><?php echo $tipo_doc; ?></span>
+                                                        <button type="button" class="btn btn-primary" onclick ="CargaObligaPago(this)">
+                                                          Ver Listado
                                                         </button>
                                                      </div>
                                                      <div class="input-group-prepend px-1">
@@ -125,7 +125,7 @@ try {
                                                      </div>
                                                      <div class="input-group-prepend px-1">
                                                      <input type="hidden" id="total" value="' . $total . '">
-                                                         <button type="button" class="btn btn-outline-success" onclick ="CegresoNomina()">
+                                                         <button type="button" class="btn btn-outline-success" onclick ="CegresoNomina(this)">
                                                            Nómina <span class="badge badge-light" id="totalCausa">' . $total . '</span>
                                                          </button>
                                                       </div>';

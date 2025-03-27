@@ -102,7 +102,7 @@ if ($tipo_dato == 'M') {
             </div>
         </div>
         <div class="text-right">
-            <button type="button" class="btn btn-primary btn-sm" onclick="guardarPlanCuentas()">Enviar</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="guardarPlanCuentas(this)">Guardar</button>
             <a class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
         </div>
     </form>

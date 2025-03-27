@@ -181,7 +181,7 @@ $ver = 'readonly';
                                                 <div class="col-4 input-group input-group-sm p-0">
                                                     <div class="form-control" readonly id="valCentroCosto"><?php echo pesos($datosDoc['val_ccosto']); ?></div>
                                                     <div class="input-group-append" title="Asignar centros de costo automaticamente">
-                                                        <button class="btn btn-outline-warning" type="button" onclick="CausaAuCentroCostos(id)" <?= $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-eject fa-lg"></i></button>
+                                                        <button class="btn btn-outline-warning" type="button" onclick="CausaAuCentroCostos(this)" <?= $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-eject fa-lg"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -201,7 +201,7 @@ $ver = 'readonly';
                                         <?php
                                         if ($tipo_dato == '3') {
                                         ?>
-                                            <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoCxp();" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoCxp(this);" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>
                                         <?php
                                         }
                                         ?>

@@ -112,7 +112,7 @@ try {
                             $fecha = $ce['fecha'];
 
                             if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
-                                $editar = '<a value="' . $id_doc . '" onclick="cargaRubrosPago(' . $id . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+                                $editar = '<button value="' . $id_doc . '" onclick="cargaRubrosPago(' . $id . ',this)" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="Causar"><span class="fas fa-chevron-circle-down fa-lg"></span></a>';
                                 $borrar = '<a value="' . $id_doc . '" onclick="eliminarFormaPago(' . $id_doc . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
@@ -124,6 +124,7 @@ try {
                                 $editar = null;
                                 $detalles = null;
                             }
+                            $acciones = null;
                             $saldo = $ce['val_cop'] - $ce['val_pag'];
                             if ($saldo == 0) {
                                 $editar = null;

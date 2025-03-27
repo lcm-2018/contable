@@ -240,7 +240,7 @@ $val_iva = $valores[1];
     </div>
     <div class="text-right pt-3">
         <?php if ($band) { ?>
-            <a type="button" class="btn btn-primary btn-sm" onclick="GuardarRetencion()">Guardar</a>
+            <button type="button" class="btn btn-primary btn-sm" onclick="GuardarRetencion(this)">Guardar</button>
         <?php } ?>
         <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>

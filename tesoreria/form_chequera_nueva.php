@@ -41,7 +41,6 @@ try {
             WHERE (`fin_chequeras`.`id_chequera` = $id)";
     $rs = $cmd->query($sql);
     $chequera = $rs->fetch(PDO::FETCH_ASSOC);
-    print_r($chequera);
     if (!empty($chequera)) {
         $id_chequera = $chequera['id_chequera'];
         $id_banco = $chequera['id_banco'];
@@ -61,7 +60,6 @@ try {
         $inicial = '';
         $maximo = '';
     }
-    echo 'cuenta: ' . $cuenta;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -172,7 +170,7 @@ try {
             </div>
         </div>
         <div class="text-right">
-            <button type="button" class="btn btn-primary btn-sm" onclick="GuardarChequera()">Guardar</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="GuardarChequera(this)">Guardar</button>
             <a class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
         </div>
     </form>

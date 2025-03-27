@@ -125,6 +125,8 @@
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
     });
     $('#divModalForms').on('click', '#btnGuardaTpRte', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#txtTipoRte').val() == '') {
             $('#txtTipoRte').addClass('is-invalid');
@@ -151,8 +153,11 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     $('#divModalForms').on('click', '#btnGuardaRetencion', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#txtTipoRte').val() == '0') {
             $('#txtTipoRte').addClass('is-invalid');
@@ -187,8 +192,11 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     $('#divModalForms').on('click', '#btnGuardaRango', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#id_retencion').val() == '0') {
             $('#buscaRetencion').addClass('is-invalid');
@@ -223,6 +231,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     $('#modificarTipoRetencion').on('click', '.editar', function () {
         var id = $(this).attr('text');

@@ -55,6 +55,7 @@ if (!empty($lista)) {
             </div>';
         }
         $contador = $lp['contador'] == '' ? $lp['en_uso'] : $lp['contador'];
+        $acciones = null;
         $data[] = [
 
             'fecha' => $fecha,

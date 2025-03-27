@@ -7,11 +7,7 @@ if (!isset($_SESSION['user'])) {
 include '../conexion.php';
 include '../permisos.php';
 include '../terceros.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
-// Consulta tipo de presupuesto
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -109,7 +105,7 @@ try {
                         $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
                         // fin api terceros
 
-                        if ((intval($permisos['editar'])) === 1) {
+                        if (true) {
                             $editar = '<a value="' . $id_doc . '" onclick="cargarListaArqueoConsignacion(' . $id_doc . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-plus-square fa-lg"></span></a>';
                             $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
@@ -121,6 +117,7 @@ try {
                             $editar = null;
                             $detalles = null;
                         }
+                        $acciones = null;
                     ?>
                         <tr>
                             <td class="text-left"><?php echo $ce['id_manu']  ?></td>
@@ -138,9 +135,6 @@ try {
         </div>
     </div>
     <div class="text-right pt-3">
-        <a type="button" class="btn btn-primary btn-sm" data-dismiss="modal"> Procesar lote</a>
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>
-<?php
-$cmd = null;

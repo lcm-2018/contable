@@ -16,7 +16,12 @@ try {
     $sql = "SELECT `fin_mes` FROM `nom_meses` WHERE (`codigo` = '$mes')";
     $rs = $cmd->query($sql);
     $dia = $rs->fetch(PDO::FETCH_ASSOC);
-    $fin_mes = !(empty($dia)) ? $vigencia . '-' . $mes . '-' . $dia['fin_mes'] : 0;
+    if (!empty($dia)) {
+        $last = $mes == '02' ? cal_days_in_month(CAL_GREGORIAN, 2, $vigencia) : $dia['fin_mes'];
+    } else {
+        $last = 0;
+    }
+    $fin_mes = !(empty($dia)) ? $vigencia . '-' . $mes . '-' . $last : 0;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }

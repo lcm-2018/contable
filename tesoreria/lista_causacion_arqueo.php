@@ -228,7 +228,7 @@ $valor_pagar = 0;
                             $editar = $borrar = $detalles = NULL;
                             $id = $ar['id_causa_arqueo'];
                             if (PermisosUsuario($permisos, 5602, 1) || $id_rol == 1) {
-                                $detalles = '<a onclick="DetalleArqueoCaja(' . $id . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-list fa-lg"></span></a>';
+                                $detalles = '<button onclick="DetalleArqueoCaja(' . $id . ',this)" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-list fa-lg"></span></buttn>';
                             }
                             if (PermisosUsuario($permisos, 5602, 3) || $id_rol == 1) {
                                 $editar = '<a onclick="CargaArqueoCajaTes(' . $id_doc . ',' . $id . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
@@ -257,7 +257,7 @@ $valor_pagar = 0;
                 <?php
                 if ($estado['estado'] == 1) {
                 ?>
-                    <a type="button" class="btn btn-success btn-sm" onclick="GuardaMvtoDetalle(<?php echo $id_doc . ',' . $id_detalle ?>)">Guardar</a>
+                    <button type="button" class="btn btn-success btn-sm" onclick="GuardaMvtoDetalle(<?php echo $id_doc . ',' . $id_detalle ?>,this)">Guardar</button>
                 <?php
                 }
                 ?>

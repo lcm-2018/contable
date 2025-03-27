@@ -104,9 +104,9 @@ if (!empty($id_t)) {
         if ($key !== false) {
             $idT = $terceros[$key]['id_tercero'];
             if (PermisosUsuario($permisos, 5201, 2) || $id_rol == 1) {
-                $addresponsabilidad = '<a value="' . $idT . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb responsabilidad" title="+ Responsabilidad Económica"><span class="fas fa-hand-holding-usd fa-lg"></span></a>';
-                $addactividad = '<a value="' . $idT . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb actividad" title="+ Actividad Económica"><span class="fas fa-donate fa-lg"></span></a>';
-                $histtecero = '<a value="' . $idT . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb historial" title="+ historial tercero"><span class="fas fa-history fa-lg"></span></a>';
+                $addresponsabilidad = '<button value="' . $idT . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb responsabilidad" title="+ Responsabilidad Económica"><span class="fas fa-hand-holding-usd fa-lg"></span></button>';
+                $addactividad = '<button value="' . $idT . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb actividad" title="+ Actividad Económica"><span class="fas fa-donate fa-lg"></span></button>';
+                $histtecero = '<button value="' . $idT . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb historial" title="+ historial tercero"><span class="fas fa-history fa-lg"></span></button>';
             } else {
                 $addresponsabilidad = null;
                 $addactividad = null;
@@ -115,7 +115,7 @@ if (!empty($id_t)) {
             $editar = null;
             if (PermisosUsuario($permisos, 5201, 3) || $id_rol == 1) {
                 if ($t['estado'] == '1') {
-                    $editar = '<a value="' . $idter . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+                    $editar = '<button value="' . $idter . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></button>';
                     $estado = '<button id="btnestado_' . $idT . '" class="btn-estado" title="Activo"><span class="fas fa-toggle-on fa-lg estado activo" value="' . $idT . '"></span></button>';
                 } else {
                     $estado = '<button id="btnestado_' . $idT . '"  class="btn-estado" title="Inactivo"><span class="fas fa-toggle-off fa-lg estado inactivo" value="' . $idT . '"></span></button>';
@@ -124,14 +124,14 @@ if (!empty($id_t)) {
                 $estado = $terceros[$key]['estado'];
             }
             if (PermisosUsuario($permisos, 5201, 4) || $id_rol == 1) {
-                $borrar = '<a value="' . $idT . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+                $borrar = '<button value="' . $idT . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></button>';
             } else {
                 $borrar = null;
             }
             if ($t['estado'] == '0') {
                 $editar = $addresponsabilidad = $addactividad = $borrar = null;
             }
-            $detalles = '<a class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" value="' . $idT . '" title="Detalles"><span class="far fa-eye fa-lg"></span></a>';
+            $detalles = '<button class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" value="' . $idT . '" title="Detalles"><span class="far fa-eye fa-lg"></span></button>';
             $data[] = [
                 'cc_nit' => $terceros[$key]['cc_nit'],
                 'nombre_tercero' => mb_strtoupper(trim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social'])),

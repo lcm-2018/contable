@@ -396,7 +396,7 @@ var tabla;
 		var accion_pto = $('#hd_accion_pto').val();
 
 		if (accion_pto > 0) {
-				$.post(window.urlin + "/tesoreria/php/afectacion_presupuestal/frm_afectacion_presupuestal.php", { id_ctb_fuente: id_ctb_fuente, id_ctb_referencia: id_ctb_referencia, accion_pto: accion_pto }, function (he) {
+			$.post(window.urlin + "/tesoreria/php/afectacion_presupuestal/frm_afectacion_presupuestal.php", { id_ctb_fuente: id_ctb_fuente, id_ctb_referencia: id_ctb_referencia, accion_pto: accion_pto }, function (he) {
 				$('#divTamModalReg').removeClass('modal-xl');
 				$('#divTamModalReg').removeClass('modal-sm');
 				$('#divTamModalReg').addClass('modal-lg');
@@ -415,7 +415,8 @@ function recargarConciliacion() {
 	$('#tableConcBancaria').DataTable().ajax.reload(null, false);
 };
 // Cargar lista de registros para obligar en contabilidad de
-let CargaObligaPago = function (dato) {
+let CargaObligaPago = function (boton) {
+	InactivaBoton(boton);
 	$.post("lista_causacion_obligaciones.php", {}, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-lg");
@@ -423,9 +424,11 @@ let CargaObligaPago = function (dato) {
 		$("#divModalForms").modal("show");
 		$("#divForms").html(he);
 	});
+	ActivaBoton(boton);
 };
 //--- EGRESO Tesoreria nómina
-function CegresoNomina() {
+function CegresoNomina(boton) {
+	boton.disabled = true;
 	$.post("lista_causacion_registros.php", {}, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-lg");
@@ -433,6 +436,9 @@ function CegresoNomina() {
 		$("#divModalForms").modal("show");
 		$("#divForms").html(he);
 	});
+	setTimeout(function () {
+		boton.disabled = false;
+	}, 1500);
 }
 function CausaCENomina(boton) {
 	var fila = boton.parentNode.parentNode;
@@ -542,8 +548,8 @@ let cargaLegalizacionCajaMenor = function (dato) {
 };
 
 // Cargar lista de causaciones para adicionar al pago del tercero
-let cargaListaCausaciones = function (dato) {
-	// obtener el id del id_ctb_cop
+let cargaListaCausaciones = function (boton) {
+	boton.disabled = true;
 	let id_cop = $('#id_cop_pag').val();
 	let id_tercero = $("#id_tercero").val();
 	$.post("lista_causacion_listas_ter.php", { id_cop: id_cop, id_tercero: id_tercero }, function (he) {
@@ -553,6 +559,9 @@ let cargaListaCausaciones = function (dato) {
 		$("#divModalForms").modal("show");
 		$("#divForms").html(he);
 	});
+	setTimeout(function () {
+		boton.disabled = false;
+	}, 1500);
 };
 
 // Cargar lista de causaciones para adicionar al pago del tercero
@@ -664,7 +673,7 @@ let buscarConsecutivoTeso = function (doc) {
 	}
 };
 // Cargar lista de rubros para realizar el pago del valor
-let cargaRubrosPago = function (dato) {
+let cargaRubrosPago = function (dato, boton) {
 	let id_doc = id_ctb_doc.value;
 	if (id_doc == 0) {
 		mjeError("Seleccione un documento contable", "Verifique");
@@ -682,7 +691,8 @@ let cargaRubrosPago = function (dato) {
 };
 
 // Guardar los rubros y el valor de la afectación presupuestal asociada a la cuenta por pagar
-let rubrosaPagar = function (doc) {
+let rubrosaPagar = function (boton) {
+	InactivaBoton(boton);
 	var max = 0;
 	var bandera = true;
 	var valor;
@@ -697,7 +707,6 @@ let rubrosaPagar = function (doc) {
 			$(this).focus();
 			mjeError('El valor no puede ser menor a cero o mayor al saldo', '');
 			bandera = false;
-			return false;
 		}
 	});
 	if (bandera) {
@@ -719,45 +728,8 @@ let rubrosaPagar = function (doc) {
 			}
 		});
 	}
+	ActivaBoton(boton);
 	return false;
-	let formDatos = new FormData(rubrosPagar);
-	let id_cop = 0;
-	let datos = {};
-	// Genero array con datos de fromEmvio
-	for (var pair of formDatos.entries()) {
-		datos[pair[0]] = parseFloat(pair[1].replace(/\,/g, "", ""));
-	}
-	let id_crrp = id_pto_rp.value;
-	let id_doc = id_ctb_doc.value;
-	if (doc > 0) {
-		id_cop = doc;
-	} else {
-		id_cop = id_cop_pag.value;
-	}
-	let formEnvio = new FormData();
-	formEnvio.append("id_crrp", id_crrp);
-	formEnvio.append("id_ctb_doc", id_doc);
-	formEnvio.append("id_ctb_cop", id_cop);
-	formEnvio.append("datos", JSON.stringify(datos));
-	for (var pair of formEnvio.entries()) {
-		console.log(pair[0] + ", " + pair[1]);
-	}
-	// Enviar a guardar afectación de rubros en mtto presupuesto como obligacion
-	fetch("datos/registrar/registrar_mvto_pago.php", {
-		method: "POST",
-		body: formEnvio,
-	})
-		.then((response) => response.json())
-		.then((response) => {
-			if (response[0].value == "ok") {
-				console.log(response);
-				valor.value = response[0].total.toLocaleString("es-MX");
-				mje("Afectación presupuestal registrada", "Exito");
-				$("#divModalForms").modal("hide");
-			} else {
-				mjeError("Error al registrar afectación presupuestal", "Error");
-			}
-		});
 };
 function GuardaDocPag(id) {
 	$('.is-invalid').removeClass('is-invalid');
@@ -785,7 +757,6 @@ function GuardaDocPag(id) {
 				$('#id_caja').focus();
 				mjeError('La caja no puede estar vacia');
 				band = false;
-				return false;
 			}
 		}
 		if (band) {
@@ -814,16 +785,21 @@ function GuardaDocPag(id) {
 			});
 		}
 	}
-	return false;
 }
 // Procesar causación de cuentas por pagar con boton guardar
 $('#divModalForms').on('click', '#gestionarMvtoCtbPag', function () {
 	var id = $(this).attr('text');
+	var btn = $(this).get(0);
+	InactivaBoton(btn);
 	GuardaDocPag(id);
+	ActivaBoton(btn);
 });
 $('#GuardaDocMvtoPag').on('click', function () {
+	var btn = $(this).get(0);
+	InactivaBoton(btn);
 	var id = $(this).attr('text');
 	GuardaDocPag(id);
+	ActivaBoton(btn);
 });
 $('#divModalForms').on('click', '#gestionarMvtoCtbCaja', function () {
 	var id = $(this).attr('text');
@@ -968,6 +944,7 @@ const EnviarNomina = (boton) => {
 };
 // Funcion para agregar o editar registros contables en el libro auxiliar
 function GestMvtoDetallePag(elemento) {
+	InactivaBoton(elemento);
 	$('.is-invalid').removeClass('is-invalid');
 	var opc = elemento.getAttribute('text');
 	var fila = elemento.closest('tr');
@@ -1037,6 +1014,7 @@ function GestMvtoDetallePag(elemento) {
 				}
 			});
 	}
+	ActivaBoton(elemento);
 	return false;
 };
 // Eliminar un registro de detalles
@@ -1378,7 +1356,8 @@ function cargarRubrosCaja(id_caja, id_detalle) {
 //============================================  FORMA DE PAGO ============================================*/
 
 // Cargar lista de centros de costo para realizar la causación del valor
-let cargaFormaPago = (cop, detalle) => {
+let cargaFormaPago = (cop, detalle, boton) => {
+	boton.disabled = true;
 	let valor_pago = 0;
 	let id_docu = id_ctb_doc.value;
 	let id_cop = id_cop_pag.value;
@@ -1405,6 +1384,9 @@ let cargaFormaPago = (cop, detalle) => {
 	} else {
 		mjeError("No puede causar centros de costo", "Primero guarde el documento");
 	}
+	setTimeout(() => {
+		boton.disabled = false;
+	}, 1500);
 };
 
 // ==========================================================  ARQUEO DE CAJA ============================================*/
@@ -1446,7 +1428,8 @@ let copiarValor = function () {
 };
 
 //Guarda el arqueo de caja
-function GuardaMvtoDetalle(id, op) {
+function GuardaMvtoDetalle(id, op, boton) {
+	InactivaBoton(boton);
 	$('.is-invalid').removeClass('is-invalid');
 	if ($('#id_facturador').val() == '0') {
 		$('#id_facturador').addClass('is-invalid');
@@ -1478,7 +1461,7 @@ function GuardaMvtoDetalle(id, op) {
 			}
 		});
 	}
-
+	ActivaBoton(boton);
 }
 document.addEventListener("submit", async (e) => {
 	e.preventDefault();
@@ -1608,7 +1591,8 @@ let mostrarCuentasPendiente = function (dato) {
 };
 
 // Guarda cuenta bancaria, forma de pago y valor
-var GuardaFormaPago = function () {
+var GuardaFormaPago = function (boton) {
+	InactivaBoton(boton);
 	$('.is-invalid').removeClass('is-invalid');
 	if ($('#banco').val() == '0') {
 		$('#banco').addClass('is-invalid');
@@ -1643,7 +1627,7 @@ var GuardaFormaPago = function () {
 					let value = r.valor;
 					$('#forma_pago').val(value.toLocaleString('es-MX'));
 					mje('Proceso realizado correctamente');
-					cargaFormaPago(0, 0);
+					cargaFormaPago(0, 0, boton);
 				} else {
 					mjeError('Error:', r.msg);
 				}
@@ -1652,9 +1636,11 @@ var GuardaFormaPago = function () {
 		});
 
 	}
+	ActivaBoton(boton);
 };
 
-function DetalleArqueoCaja(id) {
+function DetalleArqueoCaja(id, boton) {
+	boton.disabled = true;
 	$.post("datos/listar/datos_detalle_facturador.php", { id: id }, function (he) {
 		$("#divTamModalReg").removeClass("modal-sm");
 		$("#divTamModalReg").removeClass("modal-lg");
@@ -1662,6 +1648,9 @@ function DetalleArqueoCaja(id) {
 		$("#divModalReg").modal("show");
 		$("#divFormsReg").html(he);
 	});
+	setTimeout(() => {
+		boton.disabled = false;
+	}, 1500);
 };
 document.addEventListener("submit", (e) => {
 	e.preventDefault();
@@ -1740,7 +1729,8 @@ const eliminarFormaPago = (dato) => {
 };
 
 // Genera movimiento cuando se hace procesamiento automatico del documento cxp
-const generaMovimientoPag = () => {
+const generaMovimientoPag = (boton) => {
+	InactivaBoton(boton);
 	let id = id_ctb_doc.value;
 	let id_cop = id_cop_pag.value;
 	let tipo = $('#tipodato').val();
@@ -1775,6 +1765,7 @@ const generaMovimientoPag = () => {
 		.catch((error) => {
 			console.log("Error:");
 		});
+	ActivaBoton(boton);
 };
 const generaMovimientoCaja = () => {
 	let id = id_ctb_doc.value;
@@ -2134,7 +2125,8 @@ function changeEstadoAnulacionTes() {
 // ========================================== Gestión de chequeras ======================================================
 // Enviar datos para anulacion
 //Guardar datos de chequera
-const GuardarChequera = () => {
+const GuardarChequera = (boton) => {
+	InactivaBoton(boton);
 	$('.is-invalid').removeClass('is-invalid');
 	if ($('#banco').val() == '0') {
 		$('#banco').addClass('is-invalid');
@@ -2182,6 +2174,7 @@ const GuardarChequera = () => {
 			}
 		});
 	}
+	ActivaBoton(boton);
 };
 const SSguardarChequera = async () => {
 	let formEnvio = new FormData(formNuevaChequera);
@@ -2288,18 +2281,19 @@ const buscarCheque = (id) => {
 
 // ========================================== Gestión de cuentas bancarias ================================================
 // Enviar datos para anulacion
-const guardarCuentaBanco = () => {
+const guardarCuentaBanco = (boton) => {
+	InactivaBoton(boton);
 	$('.is-invalid').removeClass('is-invalid');
 	if ($("#banco").val() == '0') {
 		$("#banco").addClass("is-invalid");
 		$("#banco").focus();
 		mjeError("Debe seleccionar un banco");
-	} else
+	} else {
 		if ($("#cuentas").val() == "0") {
 			$("#cuentas").addClass("is-invalid");
 			$("#cuentas").focus();
 			mjeError("Debe seleccionar una cuenta");
-		} else
+		} else {
 			if ($("#tipo_cuenta").val() == "0") {
 				$("#tipo_cuenta").addClass("is-invalid");
 				$("#tipo_cuenta").focus();
@@ -2328,6 +2322,9 @@ const guardarCuentaBanco = () => {
 					}
 				});
 			}
+		}
+	}
+	ActivaBoton(boton);
 };
 
 // Abre formulario para edición de datos de cuenta bancaria

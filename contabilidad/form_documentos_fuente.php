@@ -81,7 +81,7 @@ try {
             </div>
         </div>
         <div class="text-right">
-            <button type="button" class="btn btn-primary btn-sm" onclick="guardarDocFuente()">Enviar</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="guardarDocFuente(this)">Guardar</button>
             <a class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
         </div>
     </form>

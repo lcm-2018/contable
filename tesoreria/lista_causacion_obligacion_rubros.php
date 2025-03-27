@@ -88,7 +88,7 @@ try {
                             <th style="width: 15%;">Valor Rp</th>
                             <th style="width: 15%;">Valor Causado</th>
                             <th style="width: 15%;">Valor Cxp</th>
-                            <th style="width: 15%;">Acciones</th>
+                            <!--<th style="width: 15%;">Acciones</th>-->
                         </tr>
                     </thead>
                     <tbody>
@@ -124,7 +124,8 @@ try {
                                 <td class="text-right">
                                     <input type="text" name="detalle[<?php echo $id_det_cop; ?>]" id="detalle_<?php echo $id_det_cop; ?>" class="form-control form-control-sm detalle-pag" value="<?php echo $valor_mil; ?>" style="text-align: right;" required onkeyup="valorMiles(id)" max="<?php echo $valor; ?>">
                                 </td>
-                                <td class="text-center"> <?php echo $editar  .  $acciones; ?></td>
+                                <!--<td class="text-center"> <?php //echo $editar  .  $acciones; 
+                                                                ?></td>-->
                             </tr>
                         <?php
                         }
@@ -133,8 +134,8 @@ try {
                     </tbody>
                 </table>
                 <div class="text-right py-3">
-                    <a type="button" class="btn btn-primary btn-sm" onclick="rubrosaPagar(<?php echo $id_doc; ?>);"> Aceptar</a>
-                    <a type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Cancelar</a>
+                    <button type="button" class="btn btn-success btn-sm" onclick="rubrosaPagar(this);"> Guardar</button>
+                    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>
                 </div>
             </div>
         </form>
