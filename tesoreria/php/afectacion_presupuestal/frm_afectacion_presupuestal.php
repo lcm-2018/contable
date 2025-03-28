@@ -159,7 +159,7 @@ if (!empty($obj_id_pto_rad['id_pto_rad'])) {
                     <span class="small">DETALLES RUBROS</span>
                 </div>
 
-                <div class="form_row" style="text-align: center;">
+                <div class="form_row" style="text-align: center; width:50%; font-size:50%">
                     <span class="small">&nbsp;</span>
                 </div>
 
@@ -167,8 +167,8 @@ if (!empty($obj_id_pto_rad['id_pto_rad'])) {
                     <div class="form-group col-md-8">
                         <input type="text" class="form-control form-control-sm" id="txt_rubro" name="txt_rubro" placeholder="Rubro">
                         <input type="hidden" id="hd_id_txt_rubro" name="hd_id_txt_rubro" class="form-control form-control-sm">
-                        <input type="hidden" id="hd_id_tipo" name="hd_id_txt_rubro" class="form-control form-control-sm">
-                        <input type="hidden" id="hd_anio" name="hd_id_txt_rubro" class="form-control form-control-sm">
+                        <input type="hidden" id="hd_tipo_dato" name="hd_tipo_dato" class="form-control form-control-sm">
+                        <input type="hidden" id="hd_anio" name="hd_anio" class="form-control form-control-sm">
                     </div>
                     <div class="form-group col-md-3">
                         <input type="text" class="form-control form-control-sm" id="txt_valor" name="txt_valor" placeholder="Valor">

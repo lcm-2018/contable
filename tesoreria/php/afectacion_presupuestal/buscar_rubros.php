@@ -13,11 +13,13 @@ try {
                 , pto_cargue.cod_pptal
                 , pto_cargue.nom_rubro
                 , pto_presupuestos.id_tipo
+                , pto_cargue.tipo_dato
                 , tb_vigencias.anio
             FROM
                 pto_cargue
                 INNER JOIN pto_presupuestos ON (pto_cargue.id_pto = pto_presupuestos.id_pto)
-                INNER JOIN tb_vigencias ON (pto_presupuestos.id_vigencia = tb_vigencias.id_vigencia)";
+                INNER JOIN tb_vigencias ON (pto_presupuestos.id_vigencia = tb_vigencias.id_vigencia)
+            WHERE pto_presupuestos.id_tipo=1";
     $rs = $cmd->query($sql);
     $obj_rubros = $rs->fetchAll();
     $cmd = null;
@@ -33,7 +35,7 @@ if ($buscar == '%%') {
         $data[] = [
             'id' => $obj['id_cargue'],
             'label' => $nom_rubro,
-            'id_tipo' => $obj['id_tipo'],
+            'tipo_dato' => $obj['tipo_dato'],
             'anio' => $obj['anio'],
         ];
     }
@@ -45,7 +47,7 @@ if ($buscar == '%%') {
             $data[] = [
                 'id' => $obj['id_cargue'],
                 'label' => $nom_rubro,
-                'id_tipo' => $obj['id_tipo'],
+                'tipo_dato' => $obj['tipo_dato'],
                 'anio' => $obj['anio'],
             ];
         }
@@ -56,7 +58,7 @@ if (empty($data)) {
     $data[] = [
         'id' => '0',
         'label' => 'No hay coincidencias...',
-        'id_tipo' => '0',
+        'tipo_dato' => '0',
         'anio' => '1999',
     ];
 }

@@ -1,46 +1,27 @@
 (function ($) {
-    /*
     $(document).ready(function () {
-        $('#tb_cdps').DataTable({
-            //va con este codigo para que no se muestre el boton de + encima
+        $('#tb_rubros').DataTable({
             dom: setdom = "<'row'<'col-md-6'l><'col-md-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-            buttons: [{
-                action: function (e, dt, node, config) {
-                    $.post("", { id_articulo: $('#id_tercero').val() }, function (he) {
-                        $('#divTamModalReg').removeClass('modal-xl');
-                        $('#divTamModalReg').removeClass('modal-sm');
-                        $('#divTamModalReg').addClass('modal-lg');
-                        $('#divModalReg').modal('show');
-                        $("#divFormsReg").html(he);
-                    });
-                }
-            }],
             language: setIdioma,
             processing: true,
             serverSide: true,
             searching: false,
             ajax: {
-                url: window.urlin + '/terceros/php/historialtercero/listar_cdps.php',
+                url: window.urlin + '/tesoreria/php/afectacion_presupuestal/listar_rubros.php',
                 type: 'POST',
                 dataType: 'json',
                 data: function (data) {
-                    data.id_tercero = $('#id_tercero').val();
-                    data.nrodisponibilidad = $('#txt_nrodisponibilidad_filtro').val();
-                    data.fecini = $('#txt_fecini_filtro').val();
-                    data.fecfin = $('#txt_fecfin_filtro').val();
+                    data.id_pto_rad = $('#hd_id_pto_rad').val();
                 }
             },
             columns: [
-                { 'data': 'id_pto_cdp' },
-                { 'data': 'id_manu' },
-                { 'data': 'fecha' },
-                { 'data': 'objeto' },
-                { 'data': 'valor_cdp' },
-                { 'data': 'saldo' },
+                { 'data': 'id_pto_rad_det' },
+                { 'data': 'rubro' },
+                { 'data': 'valor' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [3] }
+                { class: 'text-wrap', targets: [2] }
             ],
             order: [
                 [0, "desc"]
@@ -50,11 +31,10 @@
                 [10, 25, 50, 'TODO'],
             ],
         });
-        $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
-        $('#tb_cdps').wrap('<div class="overflow"/>');
+        $('#tb_rubros').wrap('<div class="overflow"/>');
         //$('#tb_cdps_wrapper').addClass("w-100");
     });
-
+    /*
     //-------------------------------
     //---boton listar de la tabla cdps
     $('#body_tb_cdps').on('click', '.btn_listar', function () {
@@ -533,6 +513,7 @@
         });
     });*/
 
+    //------------guardar encabezado
     $('#divFormsReg').on('click', '#btn_guardar_encabezado', function () {
         var id_pto_rad = $('#hd_id_pto_rad').val();
 
@@ -548,8 +529,6 @@
                 data: datos + "&oper=add"
             }).done(function (r) {
                 if (r.mensaje == 'ok') {
-                    //let id = 'tb_cdps';
-                    //reloadtable(id);
                     $('#hd_id_pto_rad').val(r.id);
                     mje('Correcto');
                 } else {
@@ -558,46 +537,84 @@
             }).always(function () { }).fail(function () {
                 mjeError("ocurrio un error");
             });
-            //$(this).closest('.modal').modal('hide');
         }
         if (id_pto_rad > 0) {
-            //enviar el id_pto_rad que lo coji arriba de la caja de texto
-            mje("modificar");
-
-            /*
-            
-            var data = $('#frm_reg_articulos').serialize();
+            var datos = $('#frm_afectacion_presupuestal').serialize();
+            var url;
+            url = window.urlin + '/tesoreria/php/afectacion_presupuestal/editar_afectacion_presupuestal.php';
             $.ajax({
                 type: 'POST',
-                url: 'editar_articulos.php',
+                url: url,
                 dataType: 'json',
-                data: data + "&oper=add"
-            }).done(function(r) {
+                data: datos + "&oper=edit"
+            }).done(function (r) {
                 if (r.mensaje == 'ok') {
-                    let pag = ($('#id_articulo').val() == -1) ? 0 : $('#tb_articulos').DataTable().page.info().page;
-                    reloadtable('tb_articulos', pag);
-                    reloadtable('tb_articulos_lotes');
-                    $('#id_articulo').val(r.id);
-        
-                    $('#btn_imprimir').prop('disabled', false);
-        
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html("Proceso realizado con éxito");
+                    mje('Correcto');
                 } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r.mensaje);
+                    mjeError(r.mensaje);
                 }
-            }).always(function() {}).fail(function() {
-                alert('Ocurrió un error');
+            }).always(function () { }).fail(function () {
+                mjeError("ocurrio un error");
             });
-            */
         }
     });
+
+    //---------------agregar detalles rubros
+    $('#divFormsReg').on("click", "#btn_agregar_rubro", function () {
+        if ($('#hd_tipo_dato').val() == "") {
+            mjeError("No ha seleccionado ningun rubro");
+        }
+        else {
+            if ($('#hd_tipo_dato').val() == "0") {
+                mjeError("El tipo de dato no permite realizar la afectación");
+            }
+            else {
+                if($('#txt_valor').val() == ""){
+                    mjeError("El valor no puede estar vacio");
+                }
+                else{
+                    var datos = $('#frm_afectacion_presupuestal').serialize();
+                    var url;
+                    url = window.urlin + '/tesoreria/php/afectacion_presupuestal/editar_detalles_rubros.php';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        dataType: 'json',
+                        data: datos + "&oper=add"
+                    }).done(function (r) {
+                        if (r.mensaje == 'ok') {
+                            reloadtable("tb_rubros");
+                        } else {
+                            mjeError(r.mensaje);
+                        }
+                    }).always(function () { }).fail(function () {
+                        mjeError("ocurrio un error");
+                    });
+                }
+            }
+        }
+    });
+
+    //------------------------ quitar detalle rubro
+    $('#divFormsReg').on("click", ".btn_eliminar_rubro", function () {
+        var id = $(this).attr('value');
+        $.ajax({
+            type: 'POST',
+            url: window.urlin + '/tesoreria/php/afectacion_presupuestal/editar_detalles_rubros.php',
+            dataType: 'json',
+            data: { id: id, oper: 'del' }
+        }).done(function (r) {
+            if (r.mensaje == 'ok') {
+                reloadtable('tb_rubros');
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function () { }).fail(function () {
+            alert('Ocurrió un error');
+        });
+    });
 })(jQuery);
-
-
-
-
 
 //-------------------------------------
 //autocomplete para rubro con 2 letras 
@@ -620,7 +637,7 @@ document.addEventListener("keyup", (e) => {
             select: function (event, ui) {
                 $("#txt_rubro").val(ui.item.label);
                 $("#hd_id_txt_rubro").val(ui.item.id);
-                $('#hd_id_tipo').val(ui.item.id_tipo);
+                $('#hd_tipo_dato').val(ui.item.tipo_dato);
                 $('#hd_anio').val(ui.item.anio);
                 return false;
             },
