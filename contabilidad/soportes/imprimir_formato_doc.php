@@ -632,8 +632,8 @@ $meses = [
                 foreach ($movimiento as $mv) {
                     // Consulta terceros en la api ********************************************* API
                     $key = array_search($mv['id_tercero'], array_column($terceros, 'id_tercero_api'));
-                    $ccnit = $terceros[$key]['nit_tercero'];
-                    $nom_ter =  $terceros[$key]['nom_tercero'];
+                    $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '';
+                    $nom_ter = $key !== false ? $terceros[$key]['nom_tercero'] : '';
 
                     echo "<tr style='border: 1px solid black'>
                 <td class='text-left' style='border: 1px solid black'>" . $mv['cuenta'] . "</td>

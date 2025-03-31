@@ -54,26 +54,7 @@ try {
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ],
@@ -115,7 +96,7 @@ try {
                             <tr>
                                 <td class="text-center"><?php echo $id_nomina ?></td>
                                 <td class="text-left" style="min-width: 300PX;"><?php echo $nm['descripcion'] . ' ' . $pl . ', NÓMINA No. ' . $nm['id_nomina'] . ' DE ' . $vigencia ?></td>
-                                <td class="text-left"><?php echo '<input type="date" name="fec_doc[]" class="form-control form-control-sm" value="' . $nm['fecha'] . '" min="' . $nm['fecha'] . '" max="' . $vigencia. '-12-31">' ?></td>
+                                <td class="text-left"><?php echo '<input type="date" name="fec_doc[]" class="form-control form-control-sm" value="' . $nm['fecha'] . '" min="' . $nm['fecha'] . '" max="' . $vigencia . '-12-31">' ?></td>
                                 <td class="text-left"><?php echo $nm['nom_tercero'] ?></td>
                                 <td class="text-left text-right"><?php echo '$ ' . number_format($nm['valor'], 2, ',', '.') ?></td>
                                 <td class="text-center"> <?php echo $causar ?></td>

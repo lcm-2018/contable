@@ -712,7 +712,7 @@ let rubrosaPagar = function (boton) {
 		max = $(this).attr('max');
 		//quitar las comas y convertir a numero
 		valor = $(this).val().replace(/\,/g, "", "");
-		if (Number(valor) <= 0 || Number(valor) > max) {
+		if (Number(valor) < 0 || Number(valor) > max) {
 			$(this).addClass('is-invalid');
 			$(this).focus();
 			mjeError('El valor no puede ser menor a cero o mayor al saldo', '');

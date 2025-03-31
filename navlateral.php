@@ -18,6 +18,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+$urlin = $_SESSION['urlin'];
 ?>
 <div id="layoutSidenav_nav">
     <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
@@ -25,6 +26,90 @@ try {
             <div class="nav">
                 <div class="sb-sidenav-menu-heading">MÓDULOS</div>
                 <?php
+                $key = array_search('80', array_column($perm_modulos, 'id_modulo'));
+                if (false !== $key) {
+                ?>
+                    <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapseNomina" aria-expanded="false" aria-controls="collapseNomina">
+                        <div class="form-row">
+                            <div class="div-icono">
+                                <span class="fas fa-calculator fa-lg" style="color: #2ECC71CC;"></span>
+                            </div>
+                            <div>
+                                Nómina
+                            </div>
+                        </div>
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-caret-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseNomina" aria-labelledby="headingOne" data-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
+                            <?php
+                            if (PermisosUsuario($permisos, 8001, 0) || PermisosUsuario($permisos, 8002, 0) || PermisosUsuario($permisos, 8003, 0) || $id_rol == 1) {
+                            ?>
+                                <a class="nav-link collapsed sombra" href="javascript:void(0)" data-toggle="collapse" data-target="#pagesCollapseNom" aria-expanded="false" aria-controls="pagesCollapseNom">
+                                    <div class="form-row">
+                                        <div class="div-icono">
+                                            <i class="fas fa-tags fa-sm" style="color: #FFC300CC;"></i>
+                                        </div>
+                                        <div>
+                                            General
+                                        </div>
+                                    </div>
+                                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-caret-down"></i></div>
+                                </a>
+                                <div class="collapse" id="pagesCollapseNom" aria-labelledby="headingOne">
+                                    <nav class="sb-sidenav-menu-nested nav shadow-nav-lat">
+                                        <?php
+                                        if (PermisosUsuario($permisos, 8001, 0) || $id_rol == 1) {
+                                        ?>
+                                            <a class="nav-link sombra" href="<?= $urlin; ?>/nomina_rebuild/php/config/index.php">
+                                                <div class="form-row">
+                                                    <div class="div-icono">
+                                                        <i class="fas fa-cogs fa-xs" style="color: #839192;"></i>
+                                                    </div>
+                                                    <div>
+                                                        Configuración
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        <?php
+                                        }
+                                        if (PermisosUsuario($permisos, 8002, 0) || $id_rol == 1) {
+                                        ?>
+                                            <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/nomina/extras/horas/listhoraextra.php">
+                                                <div class="form-row">
+                                                    <div class="div-icono">
+                                                        <i class="fas fa-users fa-xs" style="color: #85C1E9;"></i>
+                                                    </div>
+                                                    <div>
+                                                        Empleados
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        <?php
+                                        }
+                                        if (PermisosUsuario($permisos, 8003, 0) || $id_rol == 1) {
+                                        ?>
+                                            <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/nomina/extras/horas/listhoraextra.php">
+                                                <div class="form-row">
+                                                    <div class="div-icono">
+                                                        <i class="fas fa-user-clock fa-xs" style="color: #e67e22;"></i>
+                                                    </div>
+                                                    <div>
+                                                        Horas Extra
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        <?php
+                                        }
+                                        ?>
+                                    </nav>
+                                </div>
+                            <?php }
+                            ?>
+                        </nav>
+                    </div>
+                <?php
+                }
                 $key = array_search('51', array_column($perm_modulos, 'id_modulo'));
                 if (false !== $key) {
                 ?>
@@ -919,7 +1004,7 @@ try {
                                                 Articulos
                                             </div>
                                         </a>
-                                    <?php } ?>                                    
+                                    <?php } ?>
                                 </nav>
                             </div>
                             <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapsePedidos" aria-expanded="false" aria-controls="pagesCollapsePedidos">

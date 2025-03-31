@@ -15,12 +15,7 @@ try {
     $rs = $cmd->query($sql);
     $sumaMov = $rs->fetch();
     $dif = $sumaMov['debito'] - $sumaMov['credito'];
-
-    $sql = "SELECT
-                `id_cuenta`, `id_ctb_doc`
-            FROM
-                `ctb_libaux`
-            WHERE (`id_ctb_doc` = $data)";
+    $sql = "SELECT `id_cuenta`, `id_ctb_doc` FROM `ctb_libaux` WHERE (`id_ctb_doc` = $data)";
     $rs = $cmd->query($sql);
     $cuentas = $rs->fetchAll();
     if ($sumaMov['debito'] == 0 || $sumaMov['credito'] == 0) {
@@ -32,6 +27,11 @@ try {
             break;
         }
     }
+    $sql = "SELECT `id_tipo_doc` FROM `ctb_doc` WHERE (`id_ctb_doc` = $data)";
+    $rs = $cmd->query($sql);
+    $tipo = $rs->fetch(PDO::FETCH_ASSOC);
+    $dif = $tipo['id_tipo_doc'] == '14' ? 0 : $dif;
+
     if ($dif == 0) {
         $estado = 2;
         $query = "UPDATE `ctb_doc` SET `estado`= ? WHERE `id_ctb_doc`= ?";

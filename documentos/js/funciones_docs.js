@@ -55,6 +55,8 @@
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
     });
     $('#divModalForms').on('click', '#btnGuardarDocs', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#id_doc_fte').val() == '0') {
             $('#id_doc_fte').addClass('is-invalid');
@@ -89,8 +91,11 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     $('#divModalForms').on('click', '#btnGuardarDetDocs', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#control').val() == '1' && $('#tipo_control').val() == '0') {
             $('#tipo_control').addClass('is-invalid');
@@ -133,6 +138,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     $('#modificarGeDocs').on('click', '.editar', function () {
         var id = $(this).attr('text');

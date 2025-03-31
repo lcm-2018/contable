@@ -1,5 +1,5 @@
 (function ($) {
-    $(document).ready(function() {
+    $(document).ready(function () {
         //Tabla de sedes
         $('#tb_sedes').DataTable({
             language: setIdioma,
@@ -10,7 +10,7 @@
                 url: 'datos/listar/listar_sedes.php',
                 type: 'POST',
                 dataType: 'json',
-                data: function(data) {
+                data: function (data) {
                     /*data.id_sede = $('#sl_sede_filtro').val();
                     data.id_bodega = $('#sl_bodega_filtro').val();
                     data.opcion = $("input[name='rdo_opcion']:checked").val();

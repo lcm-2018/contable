@@ -10,6 +10,8 @@ $url = $_SESSION['urlin'];
 
 ?>
 <nav id="navMenu" class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <input type="hidden" id="user_js" value="<?= base64_encode($_SESSION['id_user']) ?>">
+    <input type="hidden" id="url_js" value="<?= base64_encode($url) ?>">
     <a class="navbar-brand sombra-nav" href="<?php echo $url ?>/inicio.php" title="Inicio"><img class="card-img-top" src="<?php echo $url ?>/images/logoFinanciero.png" alt="logo"></a>
     <button class="btn btn-link btn-sm order-1 order-lg-0 sombra-nav" id="sidebarToggle" value="<?php echo $_SESSION['navarlat']; ?>" href="#"><i id="navlateralSH" class="fas fa-bars fa-lg" style="color: #A9CCE3;"></i></button>
     <ul class="navbar-nav ml-auto mr-0 mr-md-3 my-2 my-md-0">
