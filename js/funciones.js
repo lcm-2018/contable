@@ -16,16 +16,54 @@ if (esta === -1) {
         }, 900000); // 15 minutos
     }
 }*/
+document.addEventListener("show.bs.modal", function (event) {
+    var modalsVisible = document.querySelectorAll(".modal.show").length;
+    var zIndex = 1040 + 10 * modalsVisible;
 
-var checkbox = '<input type="checkbox" value="" id="verAnulados" onclick="MostrarAnulados(this)" title="VER ANULADOS">' +
-    '<label for="verAnulados" class="mb-0"> &nbsp; &nbsp; &nbsp; &nbsp;</label>';
-var setdom;
+    event.target.style.zIndex = zIndex;
+
+    setTimeout(function () {
+        document.querySelectorAll(".modal-backdrop:not(.modal-stack)").forEach(function (backdrop) {
+            backdrop.style.zIndex = zIndex - 1;
+            backdrop.classList.add("modal-stack");
+        });
+    }, 0);
+}, true);
+
+function mje(titulo) {
+    Swal.fire({
+        title: titulo,
+        icon: "success",
+        showConfirmButton: true,
+        timer: 3000,
+    });
+}
+
+function mjeError(titulo, texto) {
+    Swal.fire({
+        title: titulo,
+        text: texto,
+        icon: "error",
+        showConfirmButton: true,
+        timer: 3000,
+    });
+}
+var url_js = $('#url_js').length ? atob($('#url_js').val()) : '/';
+var user_js = $('#user_js').length ? atob($('#user_js').val()) : '0';
+window.urlin = url_js;
+window.user = user_js;
+
+var checkbox = '';
+if ($('#tableMvtoContable').length || $('#tableAdquisiciones').length || $('#tableListEmpleados').length || $('#tableNominas').length || $('#tableEjecPresupuesto').length || $('#tableEjecPresupuestoCrp').length || $('#tableTerceros').length || $('#tableMvtoTesoreriaPagos').length) {
+    var checkbox = '<input type="checkbox" value="" id="verAnulados" onclick="MostrarAnulados(this)" title="Ver Anulados y/o Inactivos">' +
+        '<label for="verAnulados" class="mb-0"><span class="badge badge-pill badge-light">ANULADOS</span></label>';
+}
+var setdom = "<'row'<'col-md-6'l><'col-md-6'<'search-wrapper'f>>>" +
+    "<'row'<'col-sm-12'tr>>" +
+    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
+
 if ($("#peReg").val() === '1') {
     setdom = "<'row'<'col-md-5'l><'bttn-plus-dt col-md-2'B><'col-md-5'<'search-wrapper'f>>>" +
-        "<'row'<'col-sm-12'tr>>" +
-        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-} else {
-    setdom = "<'row'<'col-md-6'l><'col-md-6'<'search-wrapper'f>>>" +
         "<'row'<'col-sm-12'tr>>" +
         "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
 }
@@ -65,6 +103,10 @@ function MostrarAnulados(elemento) {
     $(document).ready(function () {
         $('.modal').on('shown.bs.modal', function () {
             $(this).find('.modal-dialog').draggable();
+            $('.modal').attr('aria-hidden', 'false');
+        });
+        $('.modal').on('hidden.bs.modal', function () {
+            $('.modal').attr('aria-hidden', 'false');
         });
     });
     "use strict";
@@ -194,6 +236,8 @@ function MostrarAnulados(elemento) {
     });
     //modificar contraseña
     $('#divModalPermisos').on('click', '#btnChangePass', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let pass = $("#passAnt").val();
         let newpas = $("#passNew").val();
         let newpasconfir = $("#passNewConf").val();
@@ -231,6 +275,7 @@ function MostrarAnulados(elemento) {
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Modal permisos de usuarios 
@@ -464,7 +509,7 @@ function MostrarAnulados(elemento) {
         let login = $("#txtUsuario").val();
         if (login === "") {
             $('#divModalError').modal('show');
-            $('#divMsgError').html("Login  no puede estar vacio");
+            $('#divMsgError').html("Login no puede estar vacio");
         } else {
             let duser = $("#formUpUser").serialize();
             $.ajax({
@@ -485,7 +530,7 @@ function MostrarAnulados(elemento) {
         }
 
     });
-    $('.table-hover tbody').on('dblclick', 'tr', function () {
+    $('.table-hover tbody').on('click', 'tr', function () {
         let table = $('.table-hover').DataTable();
         if ($(this).hasClass('selecionada')) {
             $(this).removeClass('selecionada');
@@ -697,7 +742,6 @@ function ActivaBoton(elemento) {
     setTimeout(() => {
         elemento.disabled = false;
         var span = elemento.querySelector('span');
-
         if (span) {
             span.remove();
         }

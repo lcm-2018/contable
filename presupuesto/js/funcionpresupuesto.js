@@ -1815,9 +1815,9 @@ function RegDetalleCDPs(boton) {
             .catch(function (error) {
                 console.error("Error al consultar el saldo del rubro: ", error);
             });
-        ActivaBoton(boton);
 
     }
+    ActivaBoton(boton);
     function RegistraDetalle(campos, opcion) {
         fetch("datos/registrar/registrar_modifica_cdp_det.php", {
             method: "POST",

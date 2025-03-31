@@ -194,7 +194,7 @@ $ver = 'readonly';
                                                     <input type="text" name="forma_pago" id="forma_pago" value="<?php echo $valor_pago; ?>" class="form-control" style="text-align: right;" readonly>
                                                     <div class="input-group-append">
                                                         <?php if ($datosDoc['estado'] == 1) { ?>
-                                                            <a class="btn btn-outline-primary" onclick="cargaFormaPago(<?php echo $id_cop; ?>,0)"><span class="fas fa-wallet fa-lg"></span></a>
+                                                            <button class="btn btn-outline-primary" onclick="cargaFormaPago(<?php echo $id_cop; ?>,0,this)"><span class="fas fa-wallet fa-lg"></span></button>
                                                         <?php } ?>
                                                     </div>
                                                 </div>
