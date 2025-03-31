@@ -80,19 +80,18 @@ try {
                 , `ctb_causa_retencion`.`tarifa`
                 , SUM(`ctb_causa_retencion`.`valor_retencion`) as total_retencion
                 , `ctb_causa_retencion`.`id_terceroapi`
-                , `ctb_doc`.`tipo_doc`
+                , `ctb_doc`.`id_tipo_doc`
                 , `ctb_retenciones`.`nombre_retencion`
+                , `ctb_retenciones`.`id_retencion`
                 , `ctb_retencion_tipo`.`tipo`
-                , `ctb_retencion_tipo`.`id_retencion_tipo`
+
             FROM
                 `ctb_causa_retencion`
-                INNER JOIN `ctb_doc` 
-                    ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                INNER JOIN `ctb_retenciones` 
-                    ON (`ctb_causa_retencion`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
-                INNER JOIN `ctb_retencion_tipo` 
-                    ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
-            WHERE `ctb_doc`.`id_tercero` =$id_tercero AND  `ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_fin' AND `ctb_doc`.`tipo_doc` ='NCXP'  AND `ctb_retencion_tipo`.`id_retencion_tipo` IN ($campos)
+                INNER JOIN `ctb_doc` ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                INNER JOIN `ctb_retencion_rango` ON (`ctb_causa_retencion`.`id_rango` = `ctb_retencion_rango`.`id_rango`)
+                INNER JOIN `ctb_retenciones` ON (`ctb_retencion_rango`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
+                INNER JOIN ctb_retencion_tipo ON (ctb_retenciones.id_retencion_tipo = ctb_retencion_tipo.id_retencion_tipo)
+            WHERE `ctb_doc`.`id_tercero` =$id_tercero AND  `ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_fin' AND `ctb_doc`.`id_tipo_doc` =3  AND `ctb_retenciones`.`id_retencion_tipo` IN ($campos) and ctb_doc.estado=2
             GROUP BY `ctb_causa_retencion`.`tarifa`, `ctb_causa_retencion`.`id_terceroapi`";
     $rs = $cmd->query($sql);
     $retenciones = $rs->fetchAll();
@@ -118,7 +117,7 @@ if ($key !== false) {
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 
 try {
-    $sql = "SELECT `nombre`, `nit`, `dig_ver` FROM `tb_datos_ips`;";
+    $sql = "SELECT razon_social_ips, nit_ips, dv,direccion_ips FROM tb_datos_ips;";
     $res = $cmd->query($sql);
     $empresa = $res->fetch();
 } catch (PDOException $e) {
@@ -132,7 +131,7 @@ try {
     `fin_respon_doc`
     INNER JOIN `fin_maestro_doc` 
         ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
-    WHERE (`fin_maestro_doc`.`tipo_doc` ='CIR'
+    WHERE (`fin_maestro_doc`.`id_doc_fte` ='1'
     AND `fin_respon_doc`.`estado` =1)
     ORDER BY `fin_respon_doc`.`tipo_control` ASC;";
     $res = $cmd->query($sql);
@@ -155,8 +154,9 @@ try {
             <tr>
                 <td class='text-center' style="width:18%"><label class="small"><img src="../../images/logos/logo.png" width="100"></label></td>
                 <td style="text-align:center">
-                    <strong><?php echo $empresa['nombre']; ?> </strong>
-                    <div>NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></div>
+                    <strong><?php echo $empresa['razon_social_ips']; ?> </strong>
+                    <div>NIT <?php echo $empresa['nit_ips'] . '-' . $empresa['dv']; ?></div>
+                    <div>Dirección <?php echo $empresa['direccion_ips']; ?></div>
                 </td>
             </tr>
         </table>
@@ -189,9 +189,11 @@ try {
                     <td class='text-left' style="width:18%">CC/NIT:</td>
                     <td class='text-left'><?php echo $num_doc; ?></td>
                 </tr>
+
             </table>
             </br>
-            <div class="row">
+
+            <div class="row" style="margin-top: 2em;">
                 <div class="col-12">
                     <div style="text-align: left">
                         <div><strong>Ingresos y retenciones: </strong></div>
@@ -214,7 +216,7 @@ try {
                     $key = array_search($re['id_terceroapi'], array_column($terceros, 'id_tercero_api'));
                     $tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '---';
                     // fin api terceros **************************
-                    if ($re['id_retencion_tipo'] == 6) {
+                    if ($re['id_retencion'] == 6) {
                         $tercero = 'OTRAS RETENCIONES';
                     }
                     echo "<tr>
@@ -234,13 +236,40 @@ try {
 
             </table>
 
-            </br>
+            <div class="row" style="margin-top: 2em;">
+                <div class="col-12">
+                    <div style="text-align: left">
+                        <div>El valor retenido fue consignado en oportunamente en la Dirección de Aduanas Nacionales Dian para el caso de retención en la fuente y demás beneficiarios para los otros conceptos, se omite firma del certificado de conformidad con el artículo 10 del Decreto 836 de 1991. </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 2em;">
+                <div class="col-12">
+                    <div style="text-align: left">
+                        <div><?php
+                                // Crear el formateador de fechas en español
+                                $formatter = new IntlDateFormatter(
+                                    'es_ES',
+                                    IntlDateFormatter::LONG,
+                                    IntlDateFormatter::NONE,
+                                    'America/Bogota',
+                                    IntlDateFormatter::GREGORIAN
+                                );
 
-            </br>
-            </br>
+                                // Obtener la fecha formateada
+                                $fecha_formateada = $formatter->format(new DateTime());
 
-            </br>
-
+                                // Convertir todo a minúsculas y luego capitalizar solo la primera letra del mes
+                                $fecha_formateada = strtolower($fecha_formateada);
+                                $fecha_formateada = preg_replace_callback('/\b(\p{L}+)/u', function ($matches) {
+                                    return ($matches[0] === 'de') ? 'de' : ucfirst($matches[0]);
+                                }, $fecha_formateada);
+                                echo "se firma a, " . ucwords($fecha_formateada);
+                                ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <table class="table-bordered bg-light firmas" style="width:100% !important;" rowspan="8">
                 <tr>
                     <?php foreach ($firmas as $mv) {

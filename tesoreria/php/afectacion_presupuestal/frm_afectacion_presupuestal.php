@@ -31,8 +31,8 @@ $obj_manu = $rs->fetch();
 // esta consulta es para consultar el id_pto_rad segun el id_ctb_doc y el manu para editar
 //--------------------------------------------------
 $sql = "SELECT 
-            id_pto_rad
-            , id_manu
+             id_pto_rad
+            ,id_manu
         FROM pto_rad 
         WHERE pto_rad.id_ctb_doc = $id_ctb_doc LIMIT 1";
 $rs = $cmd->query($sql);
@@ -42,6 +42,22 @@ $id_pto_rad = 0;
 
 if (!empty($obj_id_pto_rad['id_pto_rad'])) {
     $id_pto_rad = $obj_id_pto_rad['id_pto_rad'];
+}
+
+// esta consulta es para consultar el id_pto_rec segun el id_ctb_doc
+//--------------------------------------------------
+$sql = "SELECT 
+             id_pto_rec
+            ,id_manu
+        FROM pto_rec 
+        WHERE pto_rec.id_ctb_doc = $id_ctb_doc LIMIT 1";
+$rs = $cmd->query($sql);
+$obj_id_pto_rec = $rs->fetch();
+
+$id_pto_rec = 0;
+
+if (!empty($obj_id_pto_rec['id_pto_rec'])) {
+    $id_pto_rec = $obj_id_pto_rec['id_pto_rec'];
 }
 //---------------------------------------------------
 ?>
@@ -89,6 +105,7 @@ if (!empty($obj_id_pto_rad['id_pto_rad'])) {
                     </div>
                     <input type="hidden" id="hd_id_pto_rad" name="hd_id_pto_rad" value=" <?php echo $id_pto_rad ?> ">
                     <input type="hidden" id="hd_id_ctb_doc" name="hd_id_ctb_doc" value=" <?php echo $id_ctb_doc ?> ">
+                    <input type="hidden" id="hd_id_pto_rec" name="hd_id_pto_rec" value=" <?php echo $id_pto_rec ?> ">
                 </div>
 
                 <div class="form-row" style="text-align: left;">

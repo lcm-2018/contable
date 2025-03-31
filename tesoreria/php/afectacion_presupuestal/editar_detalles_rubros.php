@@ -17,10 +17,13 @@ try {
 
     if ($oper == "add") {
         $id_pto_rad = $_POST['hd_id_pto_rad'];
+        $id_pto_rec = $_POST['hd_id_pto_rec'];
         $id_tercero_api = $_POST['hd_id_tercero_api'];
         $id_rubro = $_POST['hd_id_txt_rubro'];
         $valor = $_POST['txt_valor'];
         $valor_liberado = 0;
+
+        $id_pto_rad_det = 0;
 
         $sql = "INSERT INTO pto_rad_detalle (id_pto_rad, id_tercero_api, id_rubro, valor, valor_liberado, id_user_reg, fecha_reg) 
                   VALUES ($id_pto_rad, $id_tercero_api, $id_rubro, $valor, $valor_liberado, $id_usr_crea, '$fecha_crea')";
@@ -29,9 +32,19 @@ try {
 
         if ($rs) {
             $res['mensaje'] = 'ok';
+
+            $sql_i = 'SELECT LAST_INSERT_ID() AS id';
+            $rs = $cmd->query($sql_i);
+            $obj = $rs->fetch();
+            $id_pto_rad_det = $obj['id'];
         } else {
             $res['mensaje'] = $cmd->errorInfo()[2];
         }
+
+        $sql = "INSERT INTO pto_rec_detalle (id_pto_rac, id_pto_rad_detalle, id_tercero_api, valor, valor_liberado, id_user_reg, fecha_reg) 
+                  VALUES ($id_pto_rec, $id_pto_rad_det, $id_tercero_api, $valor, $valor_liberado, $id_usr_crea, '$fecha_crea')";
+
+        $rs = $cmd->query($sql);
     }
 
     if ($oper == "edit") {
@@ -60,6 +73,10 @@ try {
 
     if ($oper == "del") {
         $id = $_POST['id'];
+
+        $sql = "DELETE FROM pto_rec_detalle WHERE id_pto_rad_detalle=" . $id;
+        $rs = $cmd->query($sql);
+
         $sql = "DELETE FROM pto_rad_detalle WHERE id_pto_rad_det=" . $id;
         $rs = $cmd->query($sql);
         if ($rs) {
