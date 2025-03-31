@@ -7,68 +7,73 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 
 $oper = isset($_POST['oper']) ? $_POST['oper'] : exit('Acción no permitida');
+$fecha_crea = date('Y-m-d H:i:s');
+$id_usr_crea = $_SESSION['id_user'];
 $res = array();
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
     if ($oper == "add") {
-        $id_cdp = $_POST['id_cdp'];
-        $fec_lib = $_POST['txt_fec_lib'];
-        $concepto_lib = $_POST['txt_concepto_lib'];
-        $valor = 0;
-        $array_rubros = $_POST['txt_id_rubro'];
-        $array_valores_liberacion = $_POST['txt_valor_liberar'];
-        $iduser = $_SESSION['id_user'];
-        $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-        $inserta = 0;
+        $id_pto_rad = $_POST['hd_id_pto_rad'];
+        $id_tercero_api = $_POST['hd_id_tercero_api'];
+        $id_rubro = $_POST['hd_id_txt_rubro'];
+        $valor = $_POST['txt_valor'];
+        $valor_liberado = 0;
 
-        $query = "INSERT INTO pto_cdp_detalle (id_pto_cdp, id_rubro, valor, valor_liberado, fecha_libera, concepto_libera, id_user_reg, fecha_reg, id_user_act, fecha_act) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_cdp, PDO::PARAM_INT);
-        $query->bindParam(2, $id_rubro, PDO::PARAM_INT);
-        $query->bindParam(3, $valor, PDO::PARAM_STR);
-        $query->bindParam(4, $valor_liberado, PDO::PARAM_STR);
-        $query->bindParam(5, $fec_lib, PDO::PARAM_STR);
-        $query->bindParam(6, $concepto_lib, PDO::PARAM_STR);
-        $query->bindParam(7, $iduser, PDO::PARAM_INT);
-        $query->bindValue(8, $date->format('Y-m-d H:i:s'));
-        $query->bindParam(9, $iduser, PDO::PARAM_INT);
-        $query->bindValue(10, $date->format('Y-m-d H:i:s'));
-        foreach ($array_rubros as $key => $value) {
-            $id_rubro = $array_rubros[$key];
-            $valor_liberado = $array_valores_liberacion[$key];
-            $query->execute();
-            if ($cmd->lastInsertId() > 0) {
-                $inserta++;
-            } else {
-                echo $query->errorInfo()[2];
-            }
+        $sql = "INSERT INTO pto_rad_detalle (id_pto_rad, id_tercero_api, id_rubro, valor, valor_liberado, id_user_reg, fecha_reg) 
+                  VALUES ($id_pto_rad, $id_tercero_api, $id_rubro, $valor, $valor_liberado, $id_usr_crea, '$fecha_crea')";
+
+        $rs = $cmd->query($sql);
+
+        if ($rs) {
+            $res['mensaje'] = 'ok';
+        } else {
+            $res['mensaje'] = $cmd->errorInfo()[2];
         }
-        if ($inserta > 0) {
-            echo '1';
-        }
+    }
+
+    if ($oper == "edit") {
+        /*$id_pto_rad = $_POST['hd_id_pto_rad'];
+        $fecha = $_POST['txt_fecha'];
+        $id_manu = $_POST['txt_id_manu'];
+        $id_tercero_api = $_POST['hd_id_tercero_api'];
+        $objeto = $_POST['txt_objeto'];
+        $num_factura = 0;
+        $estado = 2;
+        $tipo_movimiento = 1;
+        $id_ctb_doc = $_POST['hd_id_ctb_doc'];
+
+        $sql = "UPDATE pto_rad set fecha='$fecha', id_manu=$id_manu, id_tercero_api=$id_tercero_api, objeto='$objeto', num_factura='$num_factura', estado=$estado, 
+                                   id_user_act=$id_usr_crea, fecha_act='$fecha_crea', tipo_movimiento=$tipo_movimiento, id_ctb_doc=$id_ctb_doc 
+                WHERE id_pto_rad = $id_pto_rad";
+
+        $rs = $cmd->query($sql);
+
+        if ($rs) {
+            $res['mensaje'] = 'ok';
+        } else {
+            $res['mensaje'] = $cmd->errorInfo()[2];
+        }*/
     }
 
     if ($oper == "del") {
         $id = $_POST['id'];
-        $sql = "DELETE FROM pto_cdp_detalle WHERE id_pto_cdp_det=" . $id;
+        $sql = "DELETE FROM pto_rad_detalle WHERE id_pto_rad_det=" . $id;
         $rs = $cmd->query($sql);
         if ($rs) {
             $res['mensaje'] = 'ok';
         } else {
             $res['mensaje'] = $cmd->errorInfo()[2];
         }
-        echo json_encode($res);
     }
 
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-
+echo json_encode($res);
 
 
 // asi realiza el profe add, edit, y del
@@ -137,6 +142,7 @@ try {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }
             }
+
         }
 
         if ($oper == 'del') {
