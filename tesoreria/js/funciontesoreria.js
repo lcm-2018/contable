@@ -414,9 +414,16 @@ var tabla;
 		}
 	});
 
-	//----------------- boton generar movimiento
-	$('#btn_generar_movimiento').click(function(){
-		alert("edil");
+	//-------------- historico pagos pendientes a terceros
+	$('#sl_historico_pagos_pendientes').on("click", function () {
+		$.post("php/historico_pagos_pendientes/frm_historico_pagos_pendientes.php", {}, function (he) {
+			$('#divTamModalForms').removeClass('modal-lg');
+			$('#divTamModalForms').removeClass('modal-sm');
+			$('#divTamModalForms').addClass('modal-lg');
+			//(modal-sm, modal-lg, modal-xl) - pequeño,mediano,grande
+			$('#divModalForms').modal('show');
+			$("#divForms").html(he);
+		});
 	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
