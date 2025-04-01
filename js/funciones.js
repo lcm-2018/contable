@@ -30,22 +30,24 @@ document.addEventListener("show.bs.modal", function (event) {
     }, 0);
 }, true);
 
-function mje(titulo) {
+function mje(titulo, html) {
     Swal.fire({
         title: titulo,
         icon: "success",
         showConfirmButton: true,
-        timer: 3000,
+        timer: 2000,
+        html: html,
     });
 }
 
-function mjeError(titulo, texto) {
+function mjeError(titulo, texto, html) {
     Swal.fire({
         title: titulo,
         text: texto,
         icon: "error",
         showConfirmButton: true,
-        timer: 3000,
+        timer: 2000,
+        html: html,
     });
 }
 var url_js = $('#url_js').length ? atob($('#url_js').val()) : '/';
@@ -72,10 +74,10 @@ var setIdioma = {
     "emptyTable": "No hay información",
     "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
     "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-    "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
+    "infoFiltered": "(Filtrado de _MAX_ Registros totales)",
     "infoPostFix": "",
     "thousands": ",",
-    "lengthMenu": "Ver _MENU_ Filas",
+    "lengthMenu": "_MENU_ Filas",
     "loadingRecords": "Cargando...",
     "processing": "Procesando...",
     "search": checkbox + '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
@@ -105,9 +107,7 @@ function MostrarAnulados(elemento) {
             $(this).find('.modal-dialog').draggable();
             $('.modal').attr('aria-hidden', 'false');
         });
-        $('.modal').on('hidden.bs.modal', function () {
-            $('.modal').attr('aria-hidden', 'false');
-        });
+        $('[aria-hidden]').attr('aria-hidden', 'false');
     });
     "use strict";
     $("#sidebarToggle").click(function () {

@@ -1,6 +1,43 @@
 const modalForms = new bootstrap.Modal(document.getElementById('divModalForms'));
 const modalFormsSize = document.getElementById('divTamModalForms');
 const modalFormsBody = document.getElementById('divForms');
+const btnplus = '<span class="fa fa-plus fa-lg"></span>';
+
+const dataTableDefaults = {
+    dom: setdom,
+    language: setIdioma,
+    serverSide: true,
+    processing: true,
+    lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, 'TODO']
+    ],
+    search: {
+        return: true
+    },
+    rowCallback: function (row, data) {
+        $(row).attr('data-id', data.id);
+        $(row).closest('table').wrap('<div class="overflow" />');
+    }
+};
+
+const reloadtable = (table) => {
+    let dataTable = $('#' + table).DataTable();
+
+    let selectedRow = $('.selecionada');
+    let rowId = selectedRow.length > 0 ? selectedRow.attr('data-id') : null;
+
+    // Recargar la tabla sin resetear la paginación
+    dataTable.ajax.reload(() => {
+        // Buscar la fila con el mismo ID después de la recarga
+        if (rowId !== null) {
+            let newRow = $('#' + table + ' tbody tr[data-id="' + rowId + '"]');
+            if (newRow.length > 0) {
+                newRow.addClass('selecionada');
+            }
+        }
+    }, false);
+};
 
 const HtmlPost = (url, data, modal, size) => {
     fetch(url, {
@@ -93,3 +130,40 @@ const Serializa = (formulario) => {
     }
     return datos;
 };
+
+$('#layoutSidenav').on('click', '#BuscaTerNom', function () {
+    $(this).autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: window.urlin + '/common/php/ac_terceros.php',
+                dataType: "json",
+                type: 'POST',
+                data: { term: request.term },
+                success: function (data) {
+                    response($.map(data, function (item) {
+                        return {
+                            label: item.nombre + " - " + item.cedula, // Solo para búsqueda
+                            value: item.nombre + " - " + item.cedula, // Solo para búsqueda
+                            id: item.id,
+                            nombre: item.nombre,
+                            cedula: item.cedula
+                        };
+                    }));
+                }
+            });
+        },
+        minLength: 2,
+        select: function (event, ui) {
+            $('#idTerceroNom').val(ui.item.id);
+        }
+    }).autocomplete("instance")._renderItem = function (ul, item) {
+        return $("<li>")
+            .append(`
+                <div class="autocomplete-item w-100">
+                    <span class="nombre">${item.nombre}</span>
+                    <span class="cedula">${item.cedula}</span>
+                </div>
+            `)
+            .appendTo(ul);
+    };
+});

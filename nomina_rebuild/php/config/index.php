@@ -81,33 +81,36 @@ $contador = 1;
                                     </div>
                                 </div>
                                 <div class="card">
-                                    <div class="card-header card-header-detalles py-0 headings" id="headingtres">
+                                    <div class="card-header card-header-detalles py-0 headings" id="headingcinco">
                                         <h5 class="mb-0">
-                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configtres" aria-expanded="true" aria-controls="collapsetres">
+                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configcinco" aria-expanded="true" aria-controls="collapsecinco">
                                                 <div class="form-row">
                                                     <div class="div-icono">
-                                                        <span class="fas fa-sort-amount-up fa-lg" style="color: #F9E79F;"></span>
+                                                        <span class="fas fa-user-tie fa-lg" style="color: #145a32;"></span>
                                                     </div>
                                                     <div>
                                                         <?php echo $contador;
-                                                        $contador++ ?>. INCREMENTO SALARIAL.
+                                                        $contador++ ?>. CARGOS.
                                                     </div>
                                                 </div>
                                             </a>
                                         </h5>
                                     </div>
-                                    <div id="configtres" class="collapse" aria-labelledby="headingtres">
+                                    <div id="configcinco" class="collapse" aria-labelledby="headingcinco">
                                         <div class="card-body">
-                                            <table id="tableIncremento" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                            <table id="tableCargosNomina" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                                                 <thead class="text-center">
                                                     <tr>
-                                                        <th>PORCENTAJE</th>
-                                                        <th>FECHA INICIO</th>
-                                                        <th>ESTADO</th>
-                                                        <th>ACCIONES</th>
+                                                        <th>#</th>
+                                                        <th>Código</th>
+                                                        <th>Cargo</th>
+                                                        <th>Grado</th>
+                                                        <th>Perfíl SIHO</th>
+                                                        <th>Nombramiento</th>
+                                                        <th>Acciones</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody id="modificaIncremento">
+                                                <tbody id="modificaCargoNomina">
                                                 </tbody>
                                             </table>
                                         </div>
@@ -147,36 +150,33 @@ $contador = 1;
                                     </div>
                                 </div>
                                 <div class="card">
-                                    <div class="card-header card-header-detalles py-0 headings" id="headingcinco">
+                                    <div class="card-header card-header-detalles py-0 headings" id="headingtres">
                                         <h5 class="mb-0">
-                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configcinco" aria-expanded="true" aria-controls="collapsecinco">
+                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configtres" aria-expanded="true" aria-controls="collapsetres">
                                                 <div class="form-row">
                                                     <div class="div-icono">
-                                                        <span class="fas fa-user-tie fa-lg" style="color: #145a32;"></span>
+                                                        <span class="fas fa-sort-amount-up fa-lg" style="color: #F9E79F;"></span>
                                                     </div>
                                                     <div>
                                                         <?php echo $contador;
-                                                        $contador++ ?>. CARGOS.
+                                                        $contador++ ?>. INCREMENTO SALARIAL.
                                                     </div>
                                                 </div>
                                             </a>
                                         </h5>
                                     </div>
-                                    <div id="configcinco" class="collapse" aria-labelledby="headingcinco">
+                                    <div id="configtres" class="collapse" aria-labelledby="headingtres">
                                         <div class="card-body">
-                                            <table id="tableCargosNomina" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                            <table id="tableIncremento" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                                                 <thead class="text-center">
                                                     <tr>
-                                                        <th>#</th>
-                                                        <th>Código</th>
-                                                        <th>Cargo</th>
-                                                        <th>Grado</th>
-                                                        <th>Perfíl SIHO</th>
-                                                        <th>Nombramiento</th>
-                                                        <th>Acciones</th>
+                                                        <th>PORCENTAJE</th>
+                                                        <th>FECHA INICIO</th>
+                                                        <th>ESTADO</th>
+                                                        <th>ACCIONES</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody id="modificaCargoNomina">
+                                                <tbody id="modificaIncremento">
                                                 </tbody>
                                             </table>
                                         </div>
