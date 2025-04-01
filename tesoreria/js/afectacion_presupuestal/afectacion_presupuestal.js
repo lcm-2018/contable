@@ -530,9 +530,10 @@
             }).done(function (r) {
                 if (r.mensaje == 'ok') {
                     $('#hd_id_pto_rad').val(r.id);
+                    $('#hd_id_pto_rec').val(r.id2);
                     mje('Correcto');
                 } else {
-                    mjeError(r.mensaje);
+                    mjeError(r.mensaje + " - " + r.mensaje2);
                 }
             }).always(function () { }).fail(function () {
                 mjeError("ocurrio un error");
@@ -561,35 +562,40 @@
 
     //---------------agregar detalles rubros
     $('#divFormsReg').on("click", "#btn_agregar_rubro", function () {
-        if ($('#hd_tipo_dato').val() == "") {
-            mjeError("No ha seleccionado ningun rubro");
+        if ($('#hd_id_pto_rad').val() == 0) {
+            mjeError("Primero debe guardar la afectación presupuestal");
         }
         else {
-            if ($('#hd_tipo_dato').val() == "0") {
-                mjeError("El tipo de dato no permite realizar la afectación");
+            if ($('#hd_tipo_dato').val() == "") {
+                mjeError("No ha seleccionado ningun rubro");
             }
             else {
-                if($('#txt_valor').val() == ""){
-                    mjeError("El valor no puede estar vacio");
+                if ($('#hd_tipo_dato').val() == "0") {
+                    mjeError("El tipo de dato no permite realizar la afectación");
                 }
-                else{
-                    var datos = $('#frm_afectacion_presupuestal').serialize();
-                    var url;
-                    url = window.urlin + '/tesoreria/php/afectacion_presupuestal/editar_detalles_rubros.php';
-                    $.ajax({
-                        type: 'POST',
-                        url: url,
-                        dataType: 'json',
-                        data: datos + "&oper=add"
-                    }).done(function (r) {
-                        if (r.mensaje == 'ok') {
-                            reloadtable("tb_rubros");
-                        } else {
-                            mjeError(r.mensaje);
-                        }
-                    }).always(function () { }).fail(function () {
-                        mjeError("ocurrio un error");
-                    });
+                else {
+                    if ($('#txt_valor').val() == "") {
+                        mjeError("El valor no puede estar vacio");
+                    }
+                    else {
+                        var datos = $('#frm_afectacion_presupuestal').serialize();
+                        var url;
+                        url = window.urlin + '/tesoreria/php/afectacion_presupuestal/editar_detalles_rubros.php';
+                        $.ajax({
+                            type: 'POST',
+                            url: url,
+                            dataType: 'json',
+                            data: datos + "&oper=add"
+                        }).done(function (r) {
+                            if (r.mensaje == 'ok') {
+                                reloadtable("tb_rubros");
+                            } else {
+                                mjeError(r.mensaje);
+                            }
+                        }).always(function () { }).fail(function () {
+                            mjeError("ocurrio un error");
+                        });
+                    }
                 }
             }
         }
