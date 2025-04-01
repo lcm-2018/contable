@@ -749,6 +749,9 @@
                 { 'data': 'nombramiento' },
                 { 'data': 'acciones' },
             ],
+            "columnDefs": [
+                { "targets": op_caracter == '2' ? [] : [1, 3, 4, 5], "visible": false }
+            ],
             "order": [
                 [2, "asc"]
             ],
@@ -1599,7 +1602,7 @@
     });
     $('#divModalForms').on('click', '#btnGuardaCargo', function () {
         $('.form-control').removeClass('is-invalid');
-        if ($('#slcCodigo').val() == '0') {
+        if ($('#slcCodigo').val() == '0' && op_caracter == '2') {
             $('#slcCodigo').focus();
             $('#slcCodigo').addClass('is-invalid');
             mjeError('Debe seleccionar un código');
@@ -1607,15 +1610,15 @@
             $('#txtNomCargo').focus();
             $('#txtNomCargo').addClass('is-invalid');
             mjeError('Debe ingresar un nombre');
-        } else if (Number($('#numGrado').val()) <= 0) {
+        } else if (Number($('#numGrado').val()) <= 0 && op_caracter == '2') {
             $('#slcGrado').focus();
             $('#slcGrado').addClass('is-invalid');
             mjeError('Grado debe ser mayor a cero');
-        } else if ($('#slcNombramiento').val() == '0') {
+        } else if ($('#slcNombramiento').val() == '0' && op_caracter == '2') {
             $('#slcNombramiento').focus();
             $('#slcNombramiento').addClass('is-invalid');
             mjeError('Debe seleccionar un nombramiento');
-        } else if ($('#txtPerfilSiho').val() == '') {
+        } else if ($('#txtPerfilSiho').val() == '' && op_caracter == '2') {
             $('#txtPerfilSiho').focus();
             $('#txtPerfilSiho').addClass('is-invalid');
             mjeError('Debe ingresar un perfil');

@@ -7,12 +7,18 @@ if (!isset($_SESSION['user'])) {
 $id_causacion = isset($_POST['id_causacion']) ? $_POST['id_causacion'] : exit("Acción no permitida");
 include '../../../../conexion.php';
 
+$where = '';
+if ($_SESSION['caracter'] == '1') {
+    $where = "WHERE `nom_tipo_rubro`.`tipo` = '1'";
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "SELECT
                 `id_rubro`,`nombre`
-            FROM `nom_tipo_rubro` ORDER BY `nombre` ASC";
+            FROM `nom_tipo_rubro` 
+            $where
+            ORDER BY `nombre` ASC";
     $rs = $cmd->query($sql);
     $tipo = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;

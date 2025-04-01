@@ -61,7 +61,11 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 // consulto el nombre de la empresa de la tabla seg_empresas
 try {
-    $sql = "SELECT `razon_social_ips` AS `nombre`, `nit_ips` AS `nit`, `dv` AS `dig_ver` FROM `tb_datos_ips`";
+    $sql = "SELECT 
+                `razon_social_ips` AS `nombre`, `nit_ips` AS `nit`, `dv` AS `dig_ver`, `nom_municipio`
+            FROM `tb_datos_ips`
+                INNER JOIN `tb_municipios` 
+                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)";
     $res = $cmd->query($sql);
     $empresa = $res->fetch();
 } catch (PDOException $e) {
@@ -236,6 +240,10 @@ $key = array_search($datos['id_empleado'], array_column($bpserv, 'id_empleado'))
 $bsp = $key !== false ? $bpserv[$key]['val_bsp'] : 0;
 $doceavabsp = $bsp / 12;
 //prima de vacaciones
+if ($_SESSION['caracter'] != '2') {
+    $bsp = $primservicio = $gasrep = $auxtransp = $auxali = 0;
+    $dayvac = $dayhab;
+}
 $primvacacion  = (($salbase + $gasrep + $auxtransp + $auxali + $bsp / 12 + $primservicio / 12) * $dayhab) / 30;
 $primavacn = ($primvacacion / 360) * $diastocalc;
 //liquidacion vacaciones
@@ -332,18 +340,26 @@ $bonserpres = 0;
                     <td>Días</td>
                     <td style="text-align: center;">Valor</td>
                 </tr>
-                <tr>
-                    <td colspan="2"></td>
-                    <td colspan="4">PRIMA DE VACACIONES</td>
-                    <td><?php echo $datos['dias_habiles'] ?></td>
-                    <td style="text-align: right;"><?php echo pesos($primavacn) ?></td>
-                </tr>
-                <tr>
-                    <td colspan="2"></td>
-                    <td colspan="4">BONIFICACIÓN RECREACIÓN</td>
-                    <td>2</td>
-                    <td style="text-align: right;"><?php echo pesos($bonrecreacion) ?></td>
-                </tr>
+                <?php
+                if ($_SESSION['caracter'] == 2) {
+                ?>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td colspan="4">PRIMA DE VACACIONES</td>
+                        <td><?php echo $datos['dias_habiles'] ?></td>
+                        <td style="text-align: right;"><?php echo pesos($primavacn) ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td colspan="4">BONIFICACIÓN RECREACIÓN</td>
+                        <td>2</td>
+                        <td style="text-align: right;"><?php echo pesos($bonrecreacion) ?></td>
+                    </tr>
+                <?php
+                } else {
+                    $primavacn = $bonrecreacion = 0;
+                }
+                ?>
                 <tr>
                     <td colspan="2"></td>
                     <td colspan="4">VACACIONES</td>
@@ -424,7 +440,7 @@ $bonserpres = 0;
                 </tr>
                 <tr>
                     <td colspan="8">
-                        Dada en Yopal, a los <?php echo $date->format('d') ?> días del mes de <?php echo $meses[date('n') - 1] ?> de <?php echo $date->format('Y') ?>.
+                        Dada en <?= $empresa['nom_municipio']; ?>, a los <?php echo $date->format('d') ?> días del mes de <?php echo $meses[date('n') - 1] ?> de <?php echo $date->format('Y') ?>.
                     </td>
                 </tr>
                 <tr>

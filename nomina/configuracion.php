@@ -122,39 +122,6 @@ $contador = 1;
                                     </div>
                                 </div>
                                 <div class="card">
-                                    <div class="card-header card-header-detalles py-0 headings" id="headingtres">
-                                        <h5 class="mb-0">
-                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configtres" aria-expanded="true" aria-controls="collapsetres">
-                                                <div class="form-row">
-                                                    <div class="div-icono">
-                                                        <span class="fas fa-sort-amount-up fa-lg" style="color: #F9E79F;"></span>
-                                                    </div>
-                                                    <div>
-                                                        <?php echo $contador;
-                                                        $contador++ ?>. INCREMENTO SALARIAL.
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </h5>
-                                    </div>
-                                    <div id="configtres" class="collapse" aria-labelledby="headingtres">
-                                        <div class="card-body">
-                                            <table id="tableIncremento" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
-                                                <thead class="text-center">
-                                                    <tr>
-                                                        <th>PORCENTAJE</th>
-                                                        <th>FECHA INICIO</th>
-                                                        <th>ESTADO</th>
-                                                        <th>ACCIONES</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="modificaIncremento">
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card">
                                     <div class="card-header card-header-detalles py-0 headings" id="headingcuatro">
                                         <h5 class="mb-0">
                                             <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configcuatro" aria-expanded="true" aria-controls="collapsecuatro">
@@ -223,46 +190,85 @@ $contador = 1;
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
-                                    <div class="card-header card-header-detalles py-0 headings" id="headingseis">
-                                        <h5 class="mb-0">
-                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configseis" aria-expanded="true" aria-controls="collapseseis">
-                                                <div class="form-row">
-                                                    <div class="div-icono">
-                                                        <span class="fas fa-clipboard-list fa-lg" style="color: #dc7633;"></span>
+                                <?php
+                                if ($_SESSION['pto'] == '1') {
+                                ?>
+                                    <div class="card">
+                                        <div class="card-header card-header-detalles py-0 headings" id="headingtres">
+                                            <h5 class="mb-0">
+                                                <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configtres" aria-expanded="true" aria-controls="collapsetres">
+                                                    <div class="form-row">
+                                                        <div class="div-icono">
+                                                            <span class="fas fa-sort-amount-up fa-lg" style="color: #F9E79F;"></span>
+                                                        </div>
+                                                        <div>
+                                                            <?php echo $contador;
+                                                            $contador++ ?>. INCREMENTO SALARIAL.
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <?php echo $contador;
-                                                        $contador++ ?>. RUBROS PRESUPUESTALES.
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </h5>
-                                    </div>
-                                    <div id="configseis" class="collapse" aria-labelledby="headingseis">
-                                        <div class="card-body">
-                                            <table id="tableRubrosNomina" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
-                                                <thead class="text-center">
-                                                    <tr>
-                                                        <th rowspan="2">#</th>
-                                                        <th rowspan="2">Tipo</th>
-                                                        <th colspan="2">Rubro Administrativo</th>
-                                                        <th colspan="2">Rubro Operativo</th>
-                                                        <th rowspan="2">Acciones</th>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Código</th>
-                                                        <th>Nombre</th>
-                                                        <th>Código</th>
-                                                        <th>Nombre</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="modificaRubrosNomina">
-                                                </tbody>
-                                            </table>
+                                                </a>
+                                            </h5>
+                                        </div>
+                                        <div id="configtres" class="collapse" aria-labelledby="headingtres">
+                                            <div class="card-body">
+                                                <table id="tableIncremento" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                    <thead class="text-center">
+                                                        <tr>
+                                                            <th>PORCENTAJE</th>
+                                                            <th>FECHA INICIO</th>
+                                                            <th>ESTADO</th>
+                                                            <th>ACCIONES</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="modificaIncremento">
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                    <div class="card">
+                                        <div class="card-header card-header-detalles py-0 headings" id="headingseis">
+                                            <h5 class="mb-0">
+                                                <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configseis" aria-expanded="true" aria-controls="collapseseis">
+                                                    <div class="form-row">
+                                                        <div class="div-icono">
+                                                            <span class="fas fa-clipboard-list fa-lg" style="color: #dc7633;"></span>
+                                                        </div>
+                                                        <div>
+                                                            <?php echo $contador;
+                                                            $contador++ ?>. RUBROS PRESUPUESTALES.
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </h5>
+                                        </div>
+                                        <div id="configseis" class="collapse" aria-labelledby="headingseis">
+                                            <div class="card-body">
+                                                <table id="tableRubrosNomina" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                    <thead class="text-center">
+                                                        <tr>
+                                                            <th rowspan="2">#</th>
+                                                            <th rowspan="2">Tipo</th>
+                                                            <th colspan="2">Rubro Administrativo</th>
+                                                            <th colspan="2">Rubro Operativo</th>
+                                                            <th rowspan="2">Acciones</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Código</th>
+                                                            <th>Nombre</th>
+                                                            <th>Código</th>
+                                                            <th>Nombre</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="modificaRubrosNomina">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php
+                                }
+                                ?>
                                 <div class="card">
                                     <div class="card-header card-header-detalles py-0 headings" id="headingsiete">
                                         <h5 class="mb-0">
