@@ -34,9 +34,13 @@ include '../../../terceros.php';
                     <table id="tb_terceros" class="table table-striped table-bordered table-sm nowrap table-hover shadow w-100" style="width:100%; font-size:80%">
                         <thead>
                             <tr class="text-center centro-vertical">
-                                <th>Id</th>
+                                <th>Id tercero</th>
                                 <th>Documento/Nit</th>
-                                <th style="min-width: 70%;">Tercero</th>
+                                <th style="min-width: 40%;">Tercero</th>
+                                <th>Fecha debito</th>
+                                <th>Credito</th>
+                                <th>Debito</th>
+                                <th>Saldo</th>
                             </tr>
                         </thead>
                         <tbody class="text-left centro-vertical" id="body_tb_terceros"></tbody>

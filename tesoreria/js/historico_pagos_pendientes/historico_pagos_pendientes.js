@@ -25,6 +25,11 @@
                 { 'data': 'id_tercero_api' },
                 { 'data': 'nit_tercero' },
                 { 'data': 'nom_tercero' },
+               // { 'data': 'id_ctb_doc' },
+                { 'data': 'fecha_debito' },
+                { 'data': 'sumacredito' },
+                { 'data': 'sumadebito' },
+                { 'data': 'saldo' },
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [2] }

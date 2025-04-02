@@ -419,7 +419,7 @@ var tabla;
 		$.post("php/historico_pagos_pendientes/frm_historico_pagos_pendientes.php", {}, function (he) {
 			$('#divTamModalForms').removeClass('modal-lg');
 			$('#divTamModalForms').removeClass('modal-sm');
-			$('#divTamModalForms').addClass('modal-lg');
+			$('#divTamModalForms').addClass('modal-xl');
 			//(modal-sm, modal-lg, modal-xl) - pequeño,mediano,grande
 			$('#divModalForms').modal('show');
 			$("#divForms").html(he);
