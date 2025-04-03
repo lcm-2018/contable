@@ -3,3 +3,4 @@
 [2025-04-02 15:55:56] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 416
 [2025-04-02 17:51:27] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 421
 [2025-04-02 17:51:31] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 422
+[2025-04-03 09:14:41] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 433

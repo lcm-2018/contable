@@ -1,8 +1,4 @@
 <?php
-
-use Sabberworm\CSS\Value\Value;
-use Sabberworm\CSS\Value\ValueList;
-
 session_start();
 if (!isset($_SESSION['user'])) {
     header('Location: ../../../../index.php');

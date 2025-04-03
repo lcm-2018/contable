@@ -240,9 +240,10 @@ $key = array_search($datos['id_empleado'], array_column($bpserv, 'id_empleado'))
 $bsp = $key !== false ? $bpserv[$key]['val_bsp'] : 0;
 $doceavabsp = $bsp / 12;
 //prima de vacaciones
-if ($_SESSION['caracter'] != '2') {
+if ($_SESSION['caracter'] == '1') {
     $bsp = $primservicio = $gasrep = $auxtransp = $auxali = 0;
     $dayvac = $dayhab;
+    $datos['dias_inactivo'] = $dayhab;
 }
 $primvacacion  = (($salbase + $gasrep + $auxtransp + $auxali + $bsp / 12 + $primservicio / 12) * $dayhab) / 30;
 $primavacn = ($primvacacion / 360) * $diastocalc;
@@ -252,6 +253,9 @@ $vacacion = ($liqvacacion / 360) * $diastocalc;
 $bonrecrea = ($salbase / 30) * 2;
 $bonrecreacion = ($bonrecrea / 360) * $diastocalc;
 $bonserpres = 0;
+if ($_SESSION['caracter'] == '1') {
+    $primavacn = $bonrecreacion = $doceavaps = 0;
+}
 ?>
 <div class="text-right py-3">
     <!--<a type="button" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
