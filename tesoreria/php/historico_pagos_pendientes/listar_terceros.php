@@ -45,28 +45,75 @@ try {
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(DISTINCT ctb_libaux.id_tercero_api) AS total
-            FROM
-                ctb_libaux 
-            WHERE DATE_FORMAT(ctb_libaux.fecha_reg,'%Y-%m-%d') <= '$fecha'";
+    /*$sql = "(SELECT COUNT(*) AS total FROM (
+                SELECT 1
+                FROM ctb_libaux
+                LEFT JOIN ctb_doc ON (ctb_libaux.id_ctb_doc = ctb_doc.id_ctb_doc)
+                INNER JOIN tb_terceros ON (ctb_libaux.id_tercero_api = tb_terceros.id_tercero_api)
+                WHERE ctb_doc.id_tipo_doc = 3
+                AND DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') <= '$fecha'
+                GROUP BY ctb_libaux.id_ctb_doc, tb_terceros.id_tercero_api
+            ) AS subquery) ";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
-    $totalRecordsFilter = $total['total'];
+    $totalRecordsFilter = $total['total'];*/
     
-
-    //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT DISTINCT
-                ctb_libaux.id_tercero_api
-                , tb_terceros.nit_tercero
-                , tb_terceros.nom_tercero
+    //------Consulta los datos para listarlos en la tabla
+    $sql = "SELECT 
+                d.ctb_doc_debito,
+                d.id_tercero_api,
+                tb_terceros.nit_tercero,
+                tb_terceros.nom_tercero,
+                d.id_tipo_doc AS tipo_doc_debito,
+                c.id_tipo_doc AS tipo_doc_credito,
+                d.fecha_debito,
+                d.sumadebito,
+                c.sumacredito,
+                d.ctb_doc_credito,
+                (c.sumacredito - d.sumadebito) AS saldo,
+                COUNT(*) OVER() AS total
             FROM
-                tb_terceros
-                INNER JOIN ctb_libaux ON (tb_terceros.id_tercero_api = ctb_libaux.id_tercero_api)
-            WHERE DATE_FORMAT(ctb_libaux.fecha_reg,'%Y-%m-%d') <= '$fecha'
-            ORDER BY $col $dir $limit";
+                (SELECT
+                    ctb_libaux.id_ctb_doc AS ctb_doc_debito,
+                    tb_terceros.id_tercero_api,
+                    ctb_doc.id_tipo_doc,
+                    DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') AS fecha_debito,
+                    SUM(ctb_libaux.debito) AS sumadebito,
+                    pto_cop_detalle.id_ctb_doc AS ctb_doc_credito
+                FROM
+                    ctb_libaux
+                    INNER JOIN ctb_doc ON (ctb_libaux.id_ctb_doc = ctb_doc.id_ctb_doc)
+                    INNER JOIN tb_terceros ON (ctb_libaux.id_tercero_api = tb_terceros.id_tercero_api)
+                    LEFT JOIN pto_pag_detalle ON (ctb_libaux.id_ctb_doc = pto_pag_detalle.id_ctb_doc)
+                    LEFT JOIN pto_cop_detalle ON (pto_pag_detalle.id_pto_cop_det = pto_cop_detalle.id_pto_cop_det)
+                WHERE ctb_doc.id_tipo_doc = 4
+                    AND DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') <= '$fecha'
+                GROUP BY ctb_libaux.id_ctb_doc, tb_terceros.id_tercero_api) d
+            LEFT JOIN
+                (SELECT
+                    ctb_libaux.id_ctb_doc,
+                    tb_terceros.id_tercero_api,
+                    ctb_doc.id_tipo_doc,
+                    DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') AS fecha,
+                    SUM(ctb_libaux.credito) AS sumacredito
+                FROM
+                    ctb_libaux
+                    INNER JOIN ctb_doc ON (ctb_libaux.id_ctb_doc = ctb_doc.id_ctb_doc)
+                    INNER JOIN tb_terceros ON (ctb_libaux.id_tercero_api = tb_terceros.id_tercero_api)
+                WHERE ctb_doc.id_tipo_doc = 3
+                    AND DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') <= '$fecha'
+                GROUP BY ctb_libaux.id_ctb_doc, tb_terceros.id_tercero_api) c
+            ON d.ctb_doc_credito = c.id_ctb_doc AND d.id_tercero_api = c.id_tercero_api
+            LEFT JOIN tb_terceros ON (tb_terceros.id_tercero_api = c.id_tercero_api)
+            WHERE tb_terceros.nom_tercero IS NOT NULL
+            AND (c.sumacredito - d.sumadebito) > 0
+            ORDER BY 4 asc $limit";
 
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
+
+    $totalRecordsFilter = $objs[0]['total'];
+
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -79,6 +126,11 @@ if (!empty($objs)) {
             "id_tercero_api" => $obj['id_tercero_api'],
             "nit_tercero" => $obj['nit_tercero'],
             "nom_tercero" => mb_strtoupper($obj['nom_tercero']),
+            //"id_ctb_doc" => $obj['id_ctb_doc'],
+            "fecha_debito" => $obj['fecha_debito'],
+            "sumadebito" => $obj['sumadebito'],
+            "sumacredito" => $obj['sumacredito'],
+            "saldo" => $obj['saldo'],
         ];
     }
 }
