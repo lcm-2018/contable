@@ -21,6 +21,7 @@ $fecha_actual = $fecha->format('Y-m-d');
 // obtengo la lista de municipio asociados a las sedes de la empresa
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+/*
 $sql = "SELECT
             `tb_municipios`.`nom_municipio`
             , `tb_sedes`.`id_tercero`
@@ -30,17 +31,18 @@ $sql = "SELECT
         ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`);";
 $rs = $cmd->query($sql);
 $sedes = $rs->fetchAll();
+*/
 ?>
 
 <div class="row justify-content-center">
-    <div class="col-sm-8 ">
+    <div class="col-md-9">
         <div class="card">
             <h5 class="card-header small">Informe de impuestos municipales aplicados</h5>
             <div class="card-body">
                 <form>
                     <div class="row">
-                        <div class="col-2"></div>
-                        <div class="col-3 small">Municipio:</div>
+                        <div class="col-3"></div>
+                        <div class="col-3 small">Entidad:</div>
                         <div class="col-3">
                             <select name="tipo_sede" id="tipo_sede" class="form-control form-control-sm">
                                 <option value="0">-- Selecionar --</option>
@@ -51,28 +53,35 @@ $sedes = $rs->fetchAll();
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-2"></div>
+                        <div class="col-3"></div>
                         <div class="col-3 small">Fecha de inicial:</div>
                         <div class="col-3"><input type="date" name="fecha_ini" id="fecha_ini" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_min; ?>"></div>
                     </div>
 
                     <div class="row">
-                        <div class="col-2"></div>
+                        <div class="col-3"></div>
                         <div class="col-3 small">Fecha de corte:</div>
                         <div class="col-3"><input type="date" name="fecha_fin" id="fecha_fin" class="form-control form-control-sm" min="<?php echo $fecha_min; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha_actual; ?>"></div>
                     </div>
 
-                    <div class="px-50">&nbsp; </div>
+
+
                     <div class="row">
                         <div class="col-12">
                             <div class="text-center pt-3">
-                                <a type="button" class="btn btn-primary btn-sm" onclick="generarInformeCtb(4);"> Resumen</a>
-                                <a type="button" class="btn btn-warning btn-sm" onclick="generarInformeCtb(5);"> Detallado</a>
+                                <button class="btn btn-primary" onclick="generarInformeCtb(this)" value="4"><span></span>Resumen</button>
+                                <a type="" id="btnExcelEntrada" class="btn btn-outline-success" value="01" title="Exprotar a Excel">
+                                    <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
+                                </a>
+                                <a type="button" class="btn btn-danger" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
                             </div>
                         </div>
                     </div>
             </div>
             </form>
+        </div>
+        <br>
+        <div id="areaImprimir" class="table-responsive px-2" style="font-size: 100%;">
         </div>
     </div>
 </div>
