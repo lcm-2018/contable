@@ -2723,11 +2723,14 @@
     $(document).ready(function () {
         var id = $('#idEmpNovEps').val();
         $('#dataTable').DataTable({
-            'pageLength': 100,
+            pageLength: 100,
             language: setIdioma,
             "lengthMenu": [
                 [10, 25, 50, 100, -1],
                 [10, 25, 50, 100, 'TODO'],
+            ],
+            columnDefs: [
+                { "targets": op_caracter == '2' ? [] : [3], "visible": false }
             ],
         });
         //dataTable lista de empleados

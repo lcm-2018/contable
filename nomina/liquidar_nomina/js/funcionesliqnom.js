@@ -11,11 +11,7 @@
             return false;
         }
         let dliqnom = $("#formLiqNomina").serialize();
-        if (parseInt($('#caracter_empresa').val()) == 2) {
-            var url = window.urlin + '/nomina/liquidar_nomina/liq_nom_public.php';
-        } else {
-            var url = window.urlin + '/nomina/liquidar_nomina/liquidarnomina.php';
-        }
+        var url = window.urlin + '/nomina/liquidar_nomina/liq_nom_public.php';
         $('#divModalEspera').modal('show');
         $.ajax({
             type: 'POST',
@@ -68,7 +64,7 @@
             if (parseInt($('#caracter_empresa').val()) == 2) {
                 var url = window.urlin + '/nomina/liquidar_nomina/liq_prima_public.php';
             } else {
-                var url = window.urlin + '/nomina/liquidar_nomina/liquidarprima.php';
+                var url = window.urlin + '/nomina/liquidar_nomina/liq_prima_public.php';
             }
             if (p == 2 && parseInt($('#caracter_empresa').val()) == 2) {
                 var url = window.urlin + '/nomina/liquidar_nomina/liq_prima_navidad_public.php';
@@ -1134,30 +1130,35 @@
         $('<form action="liquidar_pres_soc.php" method="post"><input type="hidden" name="corte" value="' + corte + '" /></form>').appendTo('body').submit();
     });
     $('#btnConfirmaNomina').on('click', function () {
-        $('#divModalConfDel').modal('show');
-        $('#divMsgConfdel').html("Nomina definitiva, esta acción no se puede deshacer. <b>¿Desea continuar?</b>");
-        $('#divBtnsModalDel').html('<a href="#" class="btn btn-success btn-sm w-25" id="btnConfirmaNomina">SI</a><a href="#" class="btn btn-secondary btn-sm w-25" data-dismiss="modal">NO</a>');
-    });
-    $('#divBtnsModalDel').on('click', "#btnConfirmaNomina", function () {
-        let id = $('#id_nomina').val();
-        $('#divModalConfDel').modal('hide');
-        $('#divModalEspera').modal('show');
-        $.ajax({
-            type: 'POST',
-            url: 'procesar/definitiva.php',
-            data: { id: id },
-            success: function (r) {
-                setTimeout(function () {
-                    hideModalEspera();
-                    if (r.trim() === 'ok') {
-                        $('#divModalDone').modal('show');
-                        $('#divMsgDone').html("Nomina definitiva");
-                        setTimeout(function () { location.reload() }, 1000);
-                    } else {
-                        $('#divModalError').modal('show');
-                        $('#divMsgError').html(r);
+        Swal.fire({
+            title: "¿Confirma?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let id = $('#id_nomina').val();
+                $('#divModalConfDel').modal('hide');
+                $('#divModalEspera').modal('show');
+                $.ajax({
+                    type: 'POST',
+                    url: 'procesar/definitiva.php',
+                    data: { id: id },
+                    success: function (r) {
+                        setTimeout(function () {
+                            hideModalEspera();
+                            if (r.trim() === 'ok') {
+                                mje('Nomina definitiva tramitada correctamente');
+                                setTimeout(function () { location.reload() }, 1000);
+                            } else {
+                                mjeError(r);
+                            }
+                        }, 500);
                     }
-                }, 500);
+                });
             }
         });
     });
@@ -1221,21 +1222,34 @@
     });
     $('#btnReversaNomina').on('click', function () {
         let id = $('#id_nomina').val();
-        $.ajax({
-            type: 'POST',
-            url: 'procesar/reversar_nomina.php',
-            data: { id: id },
-            success: function (r) {
-                if (r == '1') {
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html("Nomina reversada correctamente");
-                    setTimeout(function () { location = window.urlin + '/nomina/liquidar_nomina/mostrar/liqxmes.php' }, 1000);
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r);
-                }
+        Swal.fire({
+            title: "¿Confirma anulación de documento?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'procesar/reversar_nomina.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == '1') {
+                            $('#divModalDone').modal('show');
+                            $('#divMsgDone').html("Nomina reversada correctamente");
+                            setTimeout(function () { location = window.urlin + '/nomina/liquidar_nomina/mostrar/liqxmes.php' }, 1000);
+                        } else {
+                            $('#divModalError').modal('show');
+                            $('#divMsgError').html(r);
+                        }
+                    }
+                });
             }
         });
+
     });
     $('#accionNominas').on('click', '.detalle', function () {
         let id = $(this).attr('value');

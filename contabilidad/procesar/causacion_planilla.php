@@ -338,203 +338,206 @@ try {
 }
 //DETALLE DOCUMENTO
 $liberado = 0;
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $query = "INSERT INTO `pto_cop_detalle`
+if ($_SESSION['pto'] == '1') {
+
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $query = "INSERT INTO `pto_cop_detalle`
                     (`id_ctb_doc`, `id_pto_crp_det`,`id_tercero_api`,`valor`,`valor_liberado`,`id_user_reg`,`fecha_reg`) 
                 VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $query = $cmd->prepare($query);
-    $query->bindParam(1, $id_doc_nom, PDO::PARAM_INT);
-    $query->bindParam(2, $id_det, PDO::PARAM_INT);
-    $query->bindParam(3, $id_tercero, PDO::PARAM_INT);
-    $query->bindParam(4, $valor, PDO::PARAM_STR);
-    $query->bindParam(5, $liberado, PDO::PARAM_STR);
-    $query->bindParam(6, $iduser, PDO::PARAM_INT);
-    $query->bindParam(7, $fecha2, PDO::PARAM_STR);
-    foreach ($rubros as $rb) {
-        $tipo = $rb['id_tipo'];
-        $valor = 0;
-        switch ($tipo) {
-            case 11:
-                $valor = isset($administrativo['comfam']) && $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
-                $rubro = $rb['r_admin'];
-                $id_tercero = $id_api_comfam;
-                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
-                    }
-                }
-                $rubro = $rb['r_operativo'];
-                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                $valor = isset($operativo['comfam']) && $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
-                    }
-                }
-                break;
-            case 12:
-                if (!empty($administrativo['eps'])) {
+        $query = $cmd->prepare($query);
+        $query->bindParam(1, $id_doc_nom, PDO::PARAM_INT);
+        $query->bindParam(2, $id_det, PDO::PARAM_INT);
+        $query->bindParam(3, $id_tercero, PDO::PARAM_INT);
+        $query->bindParam(4, $valor, PDO::PARAM_STR);
+        $query->bindParam(5, $liberado, PDO::PARAM_STR);
+        $query->bindParam(6, $iduser, PDO::PARAM_INT);
+        $query->bindParam(7, $fecha2, PDO::PARAM_STR);
+        foreach ($rubros as $rb) {
+            $tipo = $rb['id_tipo'];
+            $valor = 0;
+            switch ($tipo) {
+                case 11:
+                    $valor = isset($administrativo['comfam']) && $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
                     $rubro = $rb['r_admin'];
-                    $epss = $administrativo['eps'];
-                    foreach ($epss as $key => $value) {
-                        $id_tercero = $idsTercer['eps'][$key];
-                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
-                            }
+                    $id_tercero = $id_api_comfam;
+                    $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                    if ($valor > 0) {
+                        $query->execute();
+                        if (!($cmd->lastInsertId() > 0)) {
+                            echo $query->errorInfo()[2];
+                            exit();
                         }
                     }
-                }
-                if (!empty($operativo['eps'])) {
                     $rubro = $rb['r_operativo'];
-                    $epss = $operativo['eps'];
-                    foreach ($epss as $key => $value) {
-                        $id_tercero = $idsTercer['eps'][$key];
-                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
+                    $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                    $valor = isset($operativo['comfam']) && $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
+                    if ($valor > 0) {
+                        $query->execute();
+                        if (!($cmd->lastInsertId() > 0)) {
+                            echo $query->errorInfo()[2];
+                            exit();
+                        }
+                    }
+                    break;
+                case 12:
+                    if (!empty($administrativo['eps'])) {
+                        $rubro = $rb['r_admin'];
+                        $epss = $administrativo['eps'];
+                        foreach ($epss as $key => $value) {
+                            $id_tercero = $idsTercer['eps'][$key];
+                            $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                            $valor = $value;
+                            if ($valor > 0) {
+                                $query->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $query->errorInfo()[2];
+                                    exit();
+                                }
                             }
                         }
                     }
-                }
-                break;
-            case 13:
-                if (!empty($administrativo['arl'])) {
+                    if (!empty($operativo['eps'])) {
+                        $rubro = $rb['r_operativo'];
+                        $epss = $operativo['eps'];
+                        foreach ($epss as $key => $value) {
+                            $id_tercero = $idsTercer['eps'][$key];
+                            $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                            $valor = $value;
+                            if ($valor > 0) {
+                                $query->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $query->errorInfo()[2];
+                                    exit();
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 13:
+                    if (!empty($administrativo['arl'])) {
+                        $rubro = $rb['r_admin'];
+                        $arls = $administrativo['arl'];
+                        foreach ($arls as $key => $value) {
+                            $id_tercero = $idsTercer['arl'][$key];
+                            $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                            $valor = $value;
+                            if ($valor > 0) {
+                                $query->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $query->errorInfo()[2];
+                                    exit();
+                                }
+                            }
+                        }
+                    }
+                    if (!empty($operativo['arl'])) {
+                        $rubro = $rb['r_operativo'];
+                        $arls = $operativo['arl'];
+                        foreach ($arls as $key => $value) {
+                            $id_tercero = $idsTercer['arl'][$key];
+                            $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                            $valor = $value;
+                            if ($valor > 0) {
+                                $query->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $query->errorInfo()[2];
+                                    exit();
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 14:
+                    if (!empty($administrativo['afp'])) {
+                        $rubro = $rb['r_admin'];
+                        $afps = $administrativo['afp'];
+                        foreach ($afps as $key => $value) {
+                            $id_tercero = $idsTercer['afp'][$key];
+                            $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                            $valor = $value;
+                            if ($valor > 0) {
+                                $query->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $query->errorInfo()[2];
+                                    exit();
+                                }
+                            }
+                        }
+                    }
+                    if (!empty($operativo['afp'])) {
+                        $rubro = $rb['r_operativo'];
+                        $afps = $operativo['afp'];
+                        foreach ($afps as $key => $value) {
+                            $id_tercero = $idsTercer['afp'][$key];
+                            $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                            $valor = $value;
+                            if ($valor > 0) {
+                                $query->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $query->errorInfo()[2];
+                                    exit();
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 15:
+                    $valor = isset($administrativo['icbf']) && $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
                     $rubro = $rb['r_admin'];
-                    $arls = $administrativo['arl'];
-                    foreach ($arls as $key => $value) {
-                        $id_tercero = $idsTercer['arl'][$key];
-                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
-                            }
+                    $id_tercero = $id_api_icbf;
+                    $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                    if ($valor > 0) {
+                        $query->execute();
+                        if (!($cmd->lastInsertId() > 0)) {
+                            echo $query->errorInfo()[2];
+                            exit();
                         }
                     }
-                }
-                if (!empty($operativo['arl'])) {
                     $rubro = $rb['r_operativo'];
-                    $arls = $operativo['arl'];
-                    foreach ($arls as $key => $value) {
-                        $id_tercero = $idsTercer['arl'][$key];
-                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
-                            }
+                    $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                    $valor = isset($operativo['icbf']) && $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
+                    if ($valor > 0) {
+                        $query->execute();
+                        if (!($cmd->lastInsertId() > 0)) {
+                            echo $query->errorInfo()[2];
+                            exit();
                         }
                     }
-                }
-                break;
-            case 14:
-                if (!empty($administrativo['afp'])) {
+                    break;
+                case 16:
+                    $valor = isset($administrativo['sena']) && $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
                     $rubro = $rb['r_admin'];
-                    $afps = $administrativo['afp'];
-                    foreach ($afps as $key => $value) {
-                        $id_tercero = $idsTercer['afp'][$key];
-                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
-                            }
+                    $id_tercero = $id_api_sena;
+                    $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                    if ($valor > 0) {
+                        $query->execute();
+                        if (!($cmd->lastInsertId() > 0)) {
+                            echo $query->errorInfo()[2];
+                            exit();
                         }
                     }
-                }
-                if (!empty($operativo['afp'])) {
                     $rubro = $rb['r_operativo'];
-                    $afps = $operativo['afp'];
-                    foreach ($afps as $key => $value) {
-                        $id_tercero = $idsTercer['afp'][$key];
-                        $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                        $valor = $value;
-                        if ($valor > 0) {
-                            $query->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $query->errorInfo()[2];
-                                exit();
-                            }
+                    $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
+                    $valor = isset($operativo['sena']) && $operativo['sena'] > 0 ? $operativo['sena'] : 0;
+                    if ($valor > 0) {
+                        $query->execute();
+                        if (!($cmd->lastInsertId() > 0)) {
+                            echo $query->errorInfo()[2];
+                            exit();
                         }
                     }
-                }
-                break;
-            case 15:
-                $valor = isset($administrativo['icbf']) && $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
-                $rubro = $rb['r_admin'];
-                $id_tercero = $id_api_icbf;
-                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
-                    }
-                }
-                $rubro = $rb['r_operativo'];
-                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                $valor = isset($operativo['icbf']) && $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
-                    }
-                }
-                break;
-            case 16:
-                $valor = isset($administrativo['sena']) && $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
-                $rubro = $rb['r_admin'];
-                $id_tercero = $id_api_sena;
-                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
-                    }
-                }
-                $rubro = $rb['r_operativo'];
-                $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                $valor = isset($operativo['sena']) && $operativo['sena'] > 0 ? $operativo['sena'] : 0;
-                if ($valor > 0) {
-                    $query->execute();
-                    if (!($cmd->lastInsertId() > 0)) {
-                        echo $query->errorInfo()[2];
-                        exit();
-                    }
-                }
-                break;
-            default:
-                $valor = 0;
-                break;
+                    break;
+                default:
+                    $valor = 0;
+                    break;
+            }
         }
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 //LIBRO AUXILIAR
 try {

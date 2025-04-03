@@ -207,7 +207,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_cuenta` AS `cta_contable` FROM `tes_cuentas` WHERE (`estado` = 1)";
+    $sql = "SELECT `id_cuenta` AS `cta_contable` FROM `tes_cuentas` WHERE (`est_nomina` = 1)";
     $rs = $cmd->query($sql);
     $banco = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;

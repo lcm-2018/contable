@@ -294,7 +294,7 @@ $urlin = $_SESSION['urlin'];
                                                 </div>
                                             </a>
                                         <?php }
-                                        if (PermisosUsuario($permisos, 5105, 0) || $id_rol == 1) {
+                                        if ((PermisosUsuario($permisos, 5105, 0) || $id_rol == 1) && $_SESSION['caracter'] == '2') {
                                         ?>
                                             <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/nomina/liquidar_nomina/retroactivo/lista_retroactivos.php">
                                                 <div class="form-row">
@@ -359,7 +359,7 @@ $urlin = $_SESSION['urlin'];
                                                 </div>
                                             </a>
                                         <?php }
-                                        if (PermisosUsuario($permisos, 5109, 0) || $id_rol == 1) {
+                                        if ((PermisosUsuario($permisos, 5109, 0) || $id_rol == 1) && $_SESSION['caracter'] == '2') {
                                         ?>
                                             <a class="nav-link collapsed sombra btnListLiqPrima" href="javascript:void(0)" value="2">
                                                 <div class="form-row">
@@ -592,7 +592,7 @@ $urlin = $_SESSION['urlin'];
                 }
                 $key = array_search('54', array_column($perm_modulos, 'id_modulo'));
                 if (false !== $key) {
-                    if (PermisosUsuario($permisos, 5401, 0) || PermisosUsuario($permisos, 5402, 0) || $id_rol == 1) {
+                    if ((PermisosUsuario($permisos, 5401, 0) || PermisosUsuario($permisos, 5402, 0) || $id_rol == 1) && $_SESSION['pto'] == '1') {
                     ?>
                         <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapsePages2" aria-expanded="false" aria-controls="collapsePages2">
                             <div class="form-row">

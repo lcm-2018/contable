@@ -122,7 +122,7 @@ if ($id_r == 3) {
                     , `nom_nomina_pto_ctb_tes`.`tipo`
                     , `nom_nomina_pto_ctb_tes`.`cdp`
                     , `nom_nomina_pto_ctb_tes`.`crp`
-                    , `nom_nominas`.`descripcion`
+                    , 'PLANILLA PATRONAL' AS `descripcion`
                     , `nom_nominas`.`mes`
                     , `nom_nominas`.`vigencia`
                     , `nom_nominas`.`planilla` AS `estado`
@@ -166,6 +166,18 @@ if ($id_r == 3) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
     }
+    if ($_SESSION['pto'] != '1') {
+        $valores = [];
+        foreach ($nominas as $n) {
+            $valores[] = [
+                'id_pto_crp' => $n['crp'],
+                'valor' => '0',
+                'id_manu' => '',
+                'fecha' => date('Y-m-d'),
+                'objeto' => $n['descripcion'] . ' ' . $n['mes'] . ' ' . $n['vigencia'] . ' No. ' . $n['id_nomina'],
+            ];
+        }
+    }
 }
 ?>
 <script>
@@ -195,11 +207,10 @@ if ($id_r == 3) {
                 <thead>
                     <tr>
                         <th>Num</th>
-                        <th>Rp</th>
-                        <th>Contrato</th>
+                        <?= $_SESSION['pto'] == '1' ? '<th>Rp</th><th>Contrato</th>' : ''; ?>
                         <th>Fecha</th>
                         <th>Terceros</th>
-                        <th>Valor</th>
+                        <?= $_SESSION['pto'] == '1' ? '<th>Valor</th>' : ''; ?>
                         <th>Acciones</th>
 
                     </tr>
@@ -288,11 +299,10 @@ if ($id_r == 3) {
                                 ?>
                                     <tr>
                                         <td class="text-center"><?php echo $nominas[$key]['id_nomina'] ?></td>
-                                        <td class="text-left"><?php echo $vl['id_manu']; ?></td>
-                                        <td class="text-left"><?php echo '-'  ?></td>
+                                        <?= $_SESSION['pto'] == '1' ? '<td class="text-left">' . $vl['id_manu'] . '</td><td class="text-left">-</td>' : ''; ?>
                                         <td class="text-left"><?php echo '<input type="date" class="form-control form-control-sm" name="fec_doc[]" value="' . date('Y-m-d', strtotime($vl['fecha'])) . '" min="' . date('Y-m-d', strtotime($vl['fecha'])) . '" max="' . $_SESSION['vigencia'] . '-12-31">'; ?></td>
                                         <td class="text-left"><?php echo $vl['objeto']; ?></td>
-                                        <td class="text-right"> <?php echo  pesos($vl['valor']); ?></td>
+                                        <?= $_SESSION['pto'] == '1' ? '<td class="text-right">' . pesos($vl['valor']) . '</td>' : ''; ?>
                                         <td class="text-center"> <?php echo $causar ?></td>
                                     </tr>
                     <?php

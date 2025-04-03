@@ -91,7 +91,8 @@
 			columnDefs: [
 				{ class: 'text-wrap', targets: [3] },
 				{ orderable: false, targets: 5 },
-				{ targets: -1, width: "160px", className: "text-nowrap" }
+				{ targets: -1, width: "160px", className: "text-nowrap" },
+				{ targets: op_caracter == '2' ? [] : [0, 1], "visible": false }
 			],
 			order: [
 				[2, "desc"],
