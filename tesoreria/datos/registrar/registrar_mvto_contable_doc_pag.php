@@ -47,8 +47,8 @@ try {
     if ($id_reg == 0) {
         $estado = 1;
         $query = "INSERT INTO `ctb_doc`
-                    (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`,`id_ref`,`id_ref_ctb`,`doc_soporte`)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`,`id_ref`,`id_ref_ctb`,`doc_soporte`,id_ctb_doc_tipo3)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $query = $cmd->prepare($query);
         $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
         $query->bindParam(2, $tipodato, PDO::PARAM_INT);
@@ -62,6 +62,7 @@ try {
         $query->bindParam(10, $referencia, PDO::PARAM_INT);
         $query->bindParam(11, $id_ref_ctb, PDO::PARAM_INT);
         $query->bindParam(12, $doc_soporte, PDO::PARAM_INT);
+        $query->bindParam(13, $id_cop, PDO::PARAM_INT);
         $query->execute();
         $id_pag = $cmd->lastInsertId();
         if ($id_pag > 0) {
