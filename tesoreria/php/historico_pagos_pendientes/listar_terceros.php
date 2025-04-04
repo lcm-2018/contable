@@ -43,6 +43,7 @@ try {
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
+    $totalRecordsFilter = 0;
 
     //Consulta el total de registros aplicando el filtro
     /*$sql = "(SELECT COUNT(*) AS total FROM (
@@ -66,11 +67,31 @@ try {
                 tb_terceros.nom_tercero,
                 d.id_tipo_doc AS tipo_doc_debito,
                 c.id_tipo_doc AS tipo_doc_credito,
+                c.fecha_credito,
                 d.fecha_debito,
                 d.sumadebito,
                 c.sumacredito,
                 d.ctb_doc_credito,
                 (c.sumacredito - d.sumadebito) AS saldo,
+                DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) AS antiguedad,
+                CASE 
+                WHEN DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) <= 30 THEN (c.sumacredito - d.sumadebito)
+                END AS menos30,
+                CASE 
+                WHEN (DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) > 30) && (DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) <= 60) THEN (c.sumacredito - d.sumadebito)
+                END AS de30a60,
+                CASE 
+                WHEN (DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) > 60) && (DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) <= 90) THEN (c.sumacredito - d.sumadebito)
+                END AS de60a90,
+                CASE 
+                WHEN (DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) > 90) && (DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) <= 180) THEN (c.sumacredito - d.sumadebito)
+                END AS de90a180,
+                CASE 
+                WHEN (DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) > 180) && (DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) <= 360) THEN (c.sumacredito - d.sumadebito)
+                END AS de180a360,
+                CASE 
+                WHEN (DATEDIFF(DATE_FORMAT('$fecha', '%Y-%m-%d'),(DATE_FORMAT(c.fecha_credito, '%Y-%m-%d'))) > 360) THEN (c.sumacredito - d.sumadebito)
+                END AS mas360,
                 COUNT(*) OVER() AS total
             FROM
                 (SELECT
@@ -88,13 +109,13 @@ try {
                     LEFT JOIN pto_cop_detalle ON (pto_pag_detalle.id_pto_cop_det = pto_cop_detalle.id_pto_cop_det)
                 WHERE ctb_doc.id_tipo_doc = 4
                     AND DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') <= '$fecha'
-                GROUP BY ctb_libaux.id_ctb_doc, tb_terceros.id_tercero_api) d
+                GROUP BY pto_cop_detalle.id_ctb_doc) d
             LEFT JOIN
                 (SELECT
                     ctb_libaux.id_ctb_doc,
                     tb_terceros.id_tercero_api,
                     ctb_doc.id_tipo_doc,
-                    DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') AS fecha,
+                    DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') AS fecha_credito,
                     SUM(ctb_libaux.credito) AS sumacredito
                 FROM
                     ctb_libaux
@@ -112,7 +133,7 @@ try {
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
 
-    $totalRecordsFilter = $objs[0]['total'];
+    
 
     $cmd = null;
 } catch (PDOException $e) {
@@ -121,15 +142,21 @@ try {
 
 $data = [];
 if (!empty($objs)) {
+    $totalRecordsFilter = $objs[0]['total'];
     foreach ($objs as $obj) {
         $data[] = [
             "id_tercero_api" => $obj['id_tercero_api'],
             "nit_tercero" => $obj['nit_tercero'],
             "nom_tercero" => mb_strtoupper($obj['nom_tercero']),
             //"id_ctb_doc" => $obj['id_ctb_doc'],
-            "fecha_debito" => $obj['fecha_debito'],
-            "sumadebito" => $obj['sumadebito'],
+            "fecha_credito" => $obj['fecha_credito'],
             "sumacredito" => $obj['sumacredito'],
+            "menos30" => $obj['menos30'],
+            "de30a60" => $obj['de30a60'],
+            "de60a90" => $obj['de60a90'],
+            "de90a180" => $obj['de90a180'],
+            "de180a360" => $obj['de180a360'],
+            "mas360" => $obj['mas360'],
             "saldo" => $obj['saldo'],
         ];
     }

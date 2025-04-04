@@ -37,9 +37,14 @@ include '../../../terceros.php';
                                 <th>Id tercero</th>
                                 <th>Documento/Nit</th>
                                 <th style="min-width: 40%;">Tercero</th>
-                                <th>Fecha debito</th>
+                                <th>Fecha credito</th>
                                 <th>Credito</th>
-                                <th>Debito</th>
+                                <th>< 30 dias</th>
+                                <th>30 a 60 dias</th>
+                                <th>60 a 90 dias</th>
+                                <th>90 a 180 dias</th>
+                                <th>180 a 360 dias</th>
+                                <th>> 360 dias</th>
                                 <th>Saldo</th>
                             </tr>
                         </thead>
@@ -50,7 +55,7 @@ include '../../../terceros.php';
         </div>
     </div>
     <div class="text-center pt-3">
-        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir">Imprimir</button>
+        <!--<button type="button" class="btn btn-primary btn-sm" id="btn_imprimir">Imprimir</button>-->
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>
