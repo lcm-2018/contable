@@ -415,88 +415,92 @@ $meses = [
             <h3><?php echo $anulado ?></h3>
         </div>
 
-        <?php if ($doc['tipo_doc'] == '3' || $doc['tipo_doc'] == '5') { ?>
-            </br>
-            <div class="row">
-                <div class="col-12">
-                    <div style="text-align: left">
-                        <div><strong>Imputación presupuestal: </strong></div>
+        <?php if ($doc['tipo_doc'] == '3' || $doc['tipo_doc'] == '5') {
+            if ($_SESSION['pto'] == '1') {
+        ?>
+                </br>
+                <div class="row">
+                    <div class="col-12">
+                        <div style="text-align: left">
+                            <div><strong>Imputación presupuestal: </strong></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <table class="table-bordered" style="width:100% !important; border-collapse: collapse; " cellspacing="2">
-                <tr>
+                <table class="table-bordered" style="width:100% !important; border-collapse: collapse; " cellspacing="2">
+                    <tr>
+                        <?php
+                        if ($doc['tipo_doc'] == '5') {
+                        ?>
+                            <td style="text-align: left;border: 1px solid black ">Número Rp </td>
+                            <td style="text-align: left;border: 1px solid black ">Cc/nit</td>
+                            <td style="border: 1px solid black ">Código</td>
+                            <td style="border: 1px solid black ">Nombre</td>
+                            <td style="border: 1px solid black;text-align:center">Valor</td>
+                        <?php
+                        } else {
+                        ?>
+                            <td style="text-align: left;border: 1px solid black ">Número Rp</td>
+                            <td style="border: 1px solid black ">Código</td>
+                            <td style="border: 1px solid black ">Nombre</td>
+                            <td style="border: 1px solid black;text-align:center">Valor</td>
+                        <?php
+                        }
+                        ?>
+                    </tr>
                     <?php
+                    $total_pto = 0;
                     if ($doc['tipo_doc'] == '5') {
-                    ?>
-                        <td style="text-align: left;border: 1px solid black ">Número Rp </td>
-                        <td style="text-align: left;border: 1px solid black ">Cc/nit</td>
-                        <td style="border: 1px solid black ">Código</td>
-                        <td style="border: 1px solid black ">Nombre</td>
-                        <td style="border: 1px solid black;text-align:center">Valor</td>
-                    <?php
-                    } else {
-                    ?>
-                        <td style="text-align: left;border: 1px solid black ">Número Rp</td>
-                        <td style="border: 1px solid black ">Código</td>
-                        <td style="border: 1px solid black ">Nombre</td>
-                        <td style="border: 1px solid black;text-align:center">Valor</td>
-                    <?php
-                    }
-                    ?>
-                </tr>
-                <?php
-                $total_pto = 0;
-                if ($doc['tipo_doc'] == '5') {
-                    foreach ($rubros as $rp) {
-                        $key = array_search($rp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
-                        if ($rp['tipo_mov'] == 'COP') {
-                            echo "<tr>
+                        foreach ($rubros as $rp) {
+                            $key = array_search($rp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+                            if ($rp['tipo_mov'] == 'COP') {
+                                echo "<tr>
                                     <td class='text-left' style='border: 1px solid black '>" . $rp['id_manu'] . "</td>
                                     <td class='text-left' style='border: 1px solid black '>" . $terceros[$key]['nit_tercero'] . "</td>
                                     <td class='text-left' style='border: 1px solid black '>" . $rp['rubro'] . "</td>
                                     <td class='text-left' style='border: 1px solid black '>" . $rp['nom_rubro'] . "</td>
                                     <td class='text-right' style='border: 1px solid black; text-align: right'>" . number_format($rp['valor'], 2, ",", ".")  . "</td>
                                 </tr>";
-                            $total_pto += $rp['valor'];
+                                $total_pto += $rp['valor'];
+                            }
                         }
-                    }
-                } else {
-                    foreach ($rubros as $rp) {
-                        if ($rp['tipo_mov'] == 'COP') {
-                            echo "<tr>
+                    } else {
+                        foreach ($rubros as $rp) {
+                            if ($rp['tipo_mov'] == 'COP') {
+                                echo "<tr>
                                     <td class='text-left' style='border: 1px solid black '>" . $rp['id_manu'] . "</td>
                                     <td class='text-left' style='border: 1px solid black '>" . $rp['rubro'] . "</td>
                                     <td class='text-left' style='border: 1px solid black '>" . $rp['nom_rubro'] . "</td>
                                     <td class='text-right' style='border: 1px solid black; text-align: right'>" . number_format($rp['valor'], 2, ",", ".")  . "</td>
                                 </tr>";
-                            $total_pto += $rp['valor'];
+                                $total_pto += $rp['valor'];
+                            }
                         }
                     }
-                }
-                ?>
-                <?php
-                if ($doc['tipo_doc'] == '5') {
-                ?>
-                    <tr>
-                        <td colspan="4" style="text-align:left;border: 1px solid black ">Total</td>
-                        <td style="text-align: right;border: 1px solid black "><?php echo number_format($total_pto, 2, ",", "."); ?></td>
-                    </tr>
-                <?php
-                } else {
-                ?>
-                    <tr>
-                        <td colspan="3" style="text-align:left;border: 1px solid black ">Total</td>
-                        <td style="text-align: right;border: 1px solid black "><?php echo number_format($total_pto, 2, ",", "."); ?></td>
-                    </tr>
-                <?php
-                }
-                ?>
-            </table>
-            </br>
+                    ?>
+                    <?php
+                    if ($doc['tipo_doc'] == '5') {
+                    ?>
+                        <tr>
+                            <td colspan="4" style="text-align:left;border: 1px solid black ">Total</td>
+                            <td style="text-align: right;border: 1px solid black "><?php echo number_format($total_pto, 2, ",", "."); ?></td>
+                        </tr>
+                    <?php
+                    } else {
+                    ?>
+                        <tr>
+                            <td colspan="3" style="text-align:left;border: 1px solid black ">Total</td>
+                            <td style="text-align: right;border: 1px solid black "><?php echo number_format($total_pto, 2, ",", "."); ?></td>
+                        </tr>
+                    <?php
+                    }
+                    ?>
+                </table>
+                </br>
             <?php
+            }
             if ($doc['tipo_doc'] != '5') {
             ?>
+                <br>
                 <div class="row">
                     <div class="col-12">
                         <div style="text-align: left">

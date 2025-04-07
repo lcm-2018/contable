@@ -48,7 +48,7 @@
 	$(document).ready(function () {
 		//dataTable de movimientos contables
 		let id_doc = $("#id_ctb_doc").val();
-		if (id_doc === "3") {
+		if (id_doc === "3" && op_caracter == "2") {
 			setdom = "<'row'<'col-md-6'l><'col-md-6'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
 		}
 		var tableMvtoCtb = $("#tableMvtoContable").DataTable({
@@ -92,7 +92,7 @@
 				{ class: 'text-wrap', targets: [3] },
 				{ orderable: false, targets: 5 },
 				{ targets: -1, width: "160px", className: "text-nowrap" },
-				{ targets: op_caracter == '2' ? [] : [0, 1], "visible": false }
+				{ targets: op_caracter == '2' ? [] : [1], "visible": false }
 			],
 			order: [
 				[2, "desc"],
@@ -2112,6 +2112,9 @@ const generaMovimientoCxp = (boton) => {
 	var val_inp = $('#valImputacion').text().replace(/[\s$]+/g, "").replace(/\,/g, "");
 	var val_cos = $('#valCentroCosto').text().replace(/[\s$]+/g, "").replace(/\,/g, "");
 	// verificar si los tres valores son iguales
+	if (op_caracter == '1' && op_ppto == '0') {
+		val_inp = val_fac;
+	}
 	if (val_fac == val_inp && val_fac == val_cos) {
 		let id_crp = $('#id_crpp').val();
 		let id_doc = $('#id_ctb_doc').val();
@@ -2145,7 +2148,7 @@ const generaMovimientoCxp = (boton) => {
 				console.log("Error:");
 			});
 	} else {
-		mjeError("Los valores de Facturación, imputacion y centro de costo no son iguales");
+		mjeError("Los valores de Facturación, imputacion y centro de costo no son iguales.");
 		ActivaBoton(boton);
 		return false;
 	}

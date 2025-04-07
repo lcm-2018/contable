@@ -8,6 +8,9 @@
 [2025-04-03 15:51:34] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1858
 =======
 [2025-04-03 09:14:41] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 433
+<<<<<<< HEAD
+[2025-04-07 15:31:11] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 434
+=======
 >>>>>>> 806104e30f53e4e5c708859032f8bfc4dea987df
 [2025-04-04 10:00:49] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1859
 [2025-04-04 10:32:12] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1860
@@ -16,3 +19,4 @@
 [2025-04-04 10:48:14] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1865
 [2025-04-04 10:48:17] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1864
 [2025-04-04 10:48:20] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1863
+>>>>>>> 3dd2aa737db574f6c016194963badd2cd0203da5

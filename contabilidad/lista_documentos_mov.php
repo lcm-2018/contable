@@ -121,7 +121,7 @@ $cmd = null;
                                     REGISTRO DE MOVIMIENTOS CONTABLES
                                 </div>
                                 <?php
-                                if ((PermisosUsuario($permisos, 5501, 2)  || $id_rol == 1) && !($tipo_doc == '5' || $tipo_doc == '3')) {
+                                if ((PermisosUsuario($permisos, 5501, 2)  || $id_rol == 1) && !($tipo_doc == '5' || $tipo_doc == '3') || ($_SESSION['caracter'] == '1' && $tipo_doc == '3')) {
                                     echo '<input type="hidden" id="peReg" value="1">';
                                 } else {
                                     echo '<input type="hidden" id="peReg" value="0">';
@@ -150,14 +150,14 @@ $cmd = null;
                                                     </select>
                                                 </form>
                                                 <?php
-                                                if ($tipo_doc == '3') {
+                                                if ($tipo_doc == '3' && $_SESSION['caracter'] == '2') {
                                                     echo '<div class="input-group-prepend px-1">
                                                         <button type="button" class="btn btn-primary" onclick ="CargaObligaCrp(2)">
                                                           Ver Listado <span class="badge badge-light"><?php echo $tipo_doc; ?></span>
                                                         </button>
                                                      </div>';
                                                 }
-                                                
+
                                                 if (false && $tipo_doc == '1') {
                                                     echo '<div class="input-group-prepend px-1">
                                                         <button type="button" class="btn btn-primary" onclick ="CargaObligaCrp(2)">
