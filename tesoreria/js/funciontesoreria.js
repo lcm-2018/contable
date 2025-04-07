@@ -123,7 +123,6 @@ var tabla;
 				columnDefs: [
 					{ class: 'text-wrap', targets: [3] },
 					{ orderable: false, targets: 10 },
-					{ targets: op_caracter == '2' ? [] : [0], "visible": false }
 				],
 				order: [[0, "desc"]],
 			});
@@ -162,7 +161,6 @@ var tabla;
 				columnDefs: [
 					{ class: 'text-wrap', targets: [3] },
 					{ orderable: false, targets: 5 },
-					{ targets: op_caracter == '2' ? [] : [0], "visible": false }
 				],
 				order: [[0, "desc"]],
 			});
