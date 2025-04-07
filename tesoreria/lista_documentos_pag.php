@@ -222,7 +222,7 @@ try {
                                             <div class="col-10">
                                                 <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $id_manu; ?>">
                                                 <input type="hidden" id="tipodato" name="tipodato" value="<?php echo $tipo_dato; ?>">
-                                                <input type="hidden" id="id_cop_pag" name="id_cop_pag" value="<?php echo $id_cop; ?>">
+                                                <input type="text" id="id_cop_pag" name="id_cop_pag" value="<?php echo $id_cop; ?>">
                                                 <input type="hidden" id="id_arqueo" name="id_arqueo" value="<?php echo $id_arq; ?>">
                                                 <input type="hidden" id="hd_accion_pto" name="hd_accion_pto" value="<?php echo $obj_referencia['accion_pto']; ?>">
                                             </div>
