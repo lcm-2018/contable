@@ -21,17 +21,6 @@ $fecha_actual = $fecha->format('Y-m-d');
 // obtengo la lista de municipio asociados a las sedes de la empresa
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-/*
-$sql = "SELECT
-            `tb_municipios`.`nom_municipio`
-            , `tb_sedes`.`id_tercero`
-        FROM
-            `tb_sedes`
-        INNER JOIN `tb_municipios` 
-        ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`);";
-$rs = $cmd->query($sql);
-$sedes = $rs->fetchAll();
-*/
 ?>
 
 <div class="row justify-content-center">
@@ -45,10 +34,8 @@ $sedes = $rs->fetchAll();
                         <div class="col-3 small">Entidad:</div>
                         <div class="col-3">
                             <select name="tipo_sede" id="tipo_sede" class="form-control form-control-sm">
-                                <option value="0">-- Selecionar --</option>
-                                <?php
-                                echo '<option value="680">DIAN</option>';
-                                ?>
+                                <option value="680">DIAN</option>
+
                             </select>
                         </div>
                     </div>
@@ -70,6 +57,7 @@ $sedes = $rs->fetchAll();
                         <div class="col-12">
                             <div class="text-center pt-3">
                                 <button class="btn btn-primary" onclick="generarInformeCtb(this)" value="4"><span></span>Resumen</button>
+                                <button class="btn btn-primary" onclick="generarInformeCtb(this)" value="5"><span></span>Detalle</button>
                                 <a type="" id="btnExcelEntrada" class="btn btn-outline-success" value="01" title="Exprotar a Excel">
                                     <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
                                 </a>
@@ -80,9 +68,12 @@ $sedes = $rs->fetchAll();
             </div>
             </form>
         </div>
-        <br>
-        <div id="areaImprimir" class="table-responsive px-2" style="font-size: 100%;">
+
+    </div>
+    <div class="col-md-9">
+        <div class="row">
+            <br>
+            <div id="areaImprimir" class="table-responsive px-2" style="font-size: 100%;"></div>
         </div>
     </div>
-</div>
 </div>

@@ -3099,7 +3099,9 @@ const generarInformeCtb = (boton) => {
     type: "POST",
     data: data,
     success: function (response) {
-      boton.disabled = false;
+      if (id !== 4 && id !== 5) {
+        boton.disabled = false;
+      }
       span.classList.remove("spinner-border", "spinner-border-sm");
       areaImprimir.innerHTML = response;
     },
