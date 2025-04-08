@@ -34,17 +34,22 @@ include '../../../terceros.php';
                     <table id="tb_terceros" class="table table-striped table-bordered table-sm nowrap table-hover shadow w-100" style="width:100%; font-size:80%">
                         <thead>
                             <tr class="text-center centro-vertical">
-                                <th>Id tercero</th>
+                                <th colspan="5">&nbsp;</th>
+                                <th colspan="7">Antigüedad (dias)</th>
+                            </tr>
+                            <tr class="text-center centro-vertical">
+                                <!--<th>Id tercero</th>-->
+                                <th>ID Manu</th>
                                 <th>Documento/Nit</th>
-                                <th style="min-width: 40%;">Tercero</th>
+                                <th style="max-width: 40%;">Tercero</th>
                                 <th>Fecha credito</th>
                                 <th>Credito</th>
-                                <th>< 30 dias</th>
-                                <th>30 a 60 dias</th>
-                                <th>60 a 90 dias</th>
-                                <th>90 a 180 dias</th>
-                                <th>180 a 360 dias</th>
-                                <th>> 360 dias</th>
+                                <th>< 30</th>
+                                <th>30 a 60</th>
+                                <th>60 a 90</th>
+                                <th>90 a 180</th>
+                                <th>180 a 360</th>
+                                <th>> 360</th>
                                 <th>Saldo</th>
                             </tr>
                         </thead>

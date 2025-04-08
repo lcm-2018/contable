@@ -351,6 +351,18 @@
 			$("#divForms").html(he);
 		});
 	});
+
+	//--------------frm informes supersalud
+	$('#sl_supersalud').on("click", function () {
+		$.post(window.urlin + "/contabilidad/php/supersalud/frm_supersalud.php", {}, function (he) {
+			$('#divTamModalForms').removeClass('modal-lg');
+			$('#divTamModalForms').removeClass('modal-sm');
+			$('#divTamModalForms').addClass('modal-lg');
+			//(modal-sm, modal-lg, modal-xl) - pequeño,mediano,grande
+			$('#divModalForms').modal('show');
+			$("#divForms").html(he);
+		});
+	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
 /*var recargartable = function (nom) {

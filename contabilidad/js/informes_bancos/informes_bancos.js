@@ -1,19 +1,24 @@
 (function ($) {
     $('#frm_libros_aux_bancos').on("click", "#btn_consultar", function () {
-        $.post(window.urlin + '/contabilidad/php/informes_bancos/imp_libros_bancos.php', {
-            id_cuenta_ini: $('#id_txt_cuentainicial').val(),
-            id_cuenta_fin: $('#id_txt_cuentafinal').val(),
-            fec_ini: $('#txt_fecini').val(),
-            fec_fin: $('#txt_fecfin').val(),
-            id_tipo_doc: $('#sl_tipo_documento').val(),
-            id_tercero: $('#id_txt_tercero').val()
-        }, function (he) {
-            $('#divTamModalImp').removeClass('modal-sm');
-            $('#divTamModalImp').removeClass('modal-lg');
-            $('#divTamModalImp').addClass('modal-xl');
-            $('#divModalImp').modal('show');
-            $("#divImp").html(he);
-        });
+        if ($('#id_txt_cuentainicial').val() == "" || $('#id_txt_cuentafinal').val() == "") {
+            mjeError("Debe seleccionar la cuenta inicial y la cuenta final");
+        }
+        else {
+            $.post(window.urlin + '/contabilidad/php/informes_bancos/imp_libros_bancos.php', {
+                id_cuenta_ini: $('#id_txt_cuentainicial').val(),
+                id_cuenta_fin: $('#id_txt_cuentafinal').val(),
+                fec_ini: $('#txt_fecini').val(),
+                fec_fin: $('#txt_fecfin').val(),
+                id_tipo_doc: $('#sl_tipo_documento').val(),
+                id_tercero: $('#id_txt_tercero').val()
+            }, function (he) {
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
+            });
+        }
     });
 })(jQuery);
 
