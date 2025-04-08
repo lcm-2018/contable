@@ -14,23 +14,50 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                    pto_cop_detalle.id_tercero_api
-                    , pto_cop_detalle.id_pto_crp_det
-                    , pto_cop_detalle.id_pto_cop_det
-                    , pto_cargue.nom_rubro                    
-                    , pto_cargue.cod_pptal AS rubro
-                    , pto_cargue.nom_rubro
-                    , IFNULL(pto_crp_detalle.valor,0) - IFNULL(pto_crp_detalle.valor_liberado,0) AS valor
-                    , IFNULL(pto_cop_detalle.valor,0) - IFNULL(pto_cop_detalle.valor_liberado,0) AS val_cop
-                    , SUM(IFNULL(pto_pag_detalle.valor,0) - IFNULL(pto_pag_detalle.valor_liberado,0)) AS val_pag
-                FROM
-                    pto_cop_detalle
-                    INNER JOIN pto_crp_detalle ON (pto_cop_detalle.id_pto_crp_det = pto_crp_detalle.id_pto_crp_det)
-                    INNER JOIN pto_cdp_detalle ON (pto_crp_detalle.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
-                    INNER JOIN pto_cargue ON (pto_cdp_detalle.id_rubro = pto_cargue.id_cargue)
-                    LEFT JOIN pto_pag_detalle ON (pto_pag_detalle.id_pto_cop_det = pto_cop_detalle.id_pto_cop_det)
-                WHERE pto_cop_detalle.id_ctb_doc = $id_cop
-                GROUP BY   pto_cop_detalle.id_pto_cop_det";
+                pto_cop_detalle.id_tercero_api
+                , pto_cop_detalle.id_pto_crp_det
+                , pto_cop_detalle.id_pto_cop_det
+                , pto_cargue.nom_rubro                    
+                , pto_cargue.cod_pptal AS rubro
+                , pto_cargue.nom_rubro
+                , IFNULL(crp.valor,0) - IFNULL(crp.valor_liberado,0) AS valor
+                , IFNULL(pto_cop_detalle.valor,0) - IFNULL(pto_cop_detalle.valor_liberado,0) AS val_cop
+                , SUM(IFNULL(pag.valor,0) - IFNULL(pag.valor_liberado,0)) AS val_pag
+            FROM
+                pto_cop_detalle
+                INNER JOIN
+                    (SELECT 
+                        id_pto_crp_det
+                        , id_pto_cdp_det
+                        , valor
+                        , valor_liberado
+                    FROM
+                        pto_crp_detalle
+                        INNER JOIN pto_crp ON (pto_crp_detalle.id_pto_crp = pto_crp.id_pto_crp)
+                    WHERE pto_crp.estado = 2) AS crp
+                    ON (pto_cop_detalle.id_pto_crp_det = crp.id_pto_crp_det)
+                INNER JOIN 
+                    (SELECT 
+                        id_pto_cdp_det
+                        , id_rubro
+                    FROM
+                        pto_cdp_detalle
+                        INNER JOIN pto_cdp ON (pto_cdp_detalle.id_pto_cdp = pto_cdp.id_pto_cdp)
+                    WHERE pto_cdp.estado = 2) AS cdp
+                    ON (crp.id_pto_cdp_det = cdp.id_pto_cdp_det)
+                INNER JOIN pto_cargue ON (cdp.id_rubro = pto_cargue.id_cargue)
+                LEFT JOIN
+                    (SELECT
+                        id_pto_cop_det
+                        , valor
+                        , valor_liberado
+                    FROM
+                        pto_pag_detalle
+                        INNER JOIN ctb_doc ON (pto_pag_detalle.id_ctb_doc = ctb_doc.id_ctb_doc)
+                    WHERE ctb_doc.estado > 0) AS pag
+                    ON (pag.id_pto_cop_det = pto_cop_detalle.id_pto_cop_det)
+            WHERE pto_cop_detalle.id_ctb_doc = $id_cop
+            GROUP BY pto_cop_detalle.id_pto_cop_det";
     $rs = $cmd->query($sql);
     $rubros = $rs->fetchAll();
     $tercero = !empty($rubros) ? $rubros[0]['id_tercero_api'] : 0;

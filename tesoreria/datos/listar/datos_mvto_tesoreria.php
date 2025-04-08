@@ -33,7 +33,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $erp = [];
 if ($id_ctb_doc == '6') {
     try {
-        $sql = "SELECT `id_transaccion` FROM `fac_pagos_erp`";
+        $sql = "SELECT `id_transaccion` FROM `fac_pagos_erp` WHERE `estado` = 1";
         $rs = $cmd->query($sql);
         $erp = $rs->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {

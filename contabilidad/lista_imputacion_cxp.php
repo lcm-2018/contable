@@ -14,22 +14,31 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `ctb_doc`.`id_ctb_doc`
-                , `pto_crp_detalle`.`id_tercero_api`
-                , IFNULL(`pto_crp_detalle`.`valor`,0) - IFNULL(`pto_crp_detalle`.`valor_liberado`,0) AS `valor_crp` 
+                , `crp`.`id_tercero_api`
+                , IFNULL(`crp`.`valor`,0) - IFNULL(`crp`.`valor_liberado`,0) AS `valor_crp` 
                 , `pto_cdp_detalle`.`id_rubro`
                 , `pto_cargue`.`cod_pptal`
                 , `pto_cargue`.`nom_rubro`
                 , IFNULL(`t1`.`valor`,0) - IFNULL(`t1`.`valor_liberado`,0) AS `valor_cop`
-                , `pto_crp_detalle`.`id_pto_crp_det`
+                , `crp`.`id_pto_crp_det`
 
             FROM
                 `ctb_doc`
                 INNER JOIN `pto_crp` 
                     ON (`ctb_doc`.`id_crp` = `pto_crp`.`id_pto_crp`)
-                INNER JOIN `pto_crp_detalle` 
-                    ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                INNER JOIN 
+                    (SELECT 
+                        `pto_crp_detalle`.`id_pto_crp_det`
+                        , `pto_crp_detalle`.`id_pto_crp`
+                        , `pto_crp_detalle`.`id_pto_cdp_det`
+                        , `pto_crp_detalle`.`id_tercero_api`
+                        , SUM(`pto_crp_detalle`.`valor`) AS `valor`
+                        , SUM(`pto_crp_detalle`.`valor_liberado`) AS `valor_liberado`
+                    FROM `pto_crp_detalle`
+                    GROUP BY `id_pto_crp`, `id_pto_cdp_det`) AS `crp`
+                    ON (`crp`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
                 INNER JOIN `pto_cdp_detalle` 
-                    ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                    ON (`crp`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                 INNER JOIN `pto_cargue` 
                     ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN 
@@ -40,7 +49,7 @@ try {
                     FROM
                         `pto_cop_detalle`
                     GROUP BY `id_pto_crp_det`) AS `t1`  
-                    ON (`t1`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                    ON (`t1`.`id_pto_crp_det` = `crp`.`id_pto_crp_det`)
             WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)
             UNION ALL 
             SELECT
@@ -206,4 +215,3 @@ try {
         <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
     </div>
 </div>
-<?php

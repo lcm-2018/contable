@@ -15,7 +15,8 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 try {
-    $sql = "SELECT
+    if ($_SESSION['pto'] == '1') {
+        $sql = "SELECT
                 `t1`.`id_pto_cop_det`
                 , SUM(`t1`.`val_cop`) AS `val_cop`
                 , SUM(`t1`.`val_pag`) AS `val_pag`
@@ -48,6 +49,41 @@ try {
                 WHERE `pto_cop_detalle`.`id_tercero_api` = $id_tercero AND `ctb_doc`.`estado` = 2) AS `t1`
             WHERE `val_cop` > `val_pag`
             GROUP BY `t1`.`id_ctb_doc`";
+    } else {
+        $sql = "SELECT 
+                    'e' AS `id_pto_cop_det`
+                    , `causado`.`valor` AS `val_cop`
+                    , IFNULL(`pagado`.`valor`,0) AS `val_pag`
+                    , `ctb_doc`.`id_manu` 
+                    , `ctb_doc`.`id_ctb_doc`
+                    , `ctb_doc`.`fecha`
+                FROM 
+                    `ctb_doc`
+                    INNER JOIN
+                        (SELECT
+                            `ctb_libaux`.`id_ctb_doc`
+                            , SUM(`ctb_libaux`.`debito`) AS `valor`
+                        FROM
+                            `ctb_libaux`
+                            INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_doc`.`id_ctb_doc_tipo3` IS NULL AND `ctb_doc`.`id_tipo_doc` = 3 AND `ctb_doc`.`estado` = 2)
+                        GROUP BY `ctb_libaux`.`id_ctb_doc`) AS `causado`
+                        ON(`causado`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    LEFT JOIN
+                        (SELECT
+                            `ctb_libaux`.`id_ctb_doc`
+                            , `ctb_doc`.`id_ctb_doc_tipo3`
+                            , SUM(`ctb_libaux`.`debito`) AS `valor`
+                        FROM
+                            `ctb_libaux`
+                            INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_doc`.`id_ctb_doc_tipo3` > 0 AND `ctb_doc`.`estado` > 1)
+                        GROUP BY `ctb_libaux`.`id_ctb_doc`) AS `pagado`
+                        ON(`causado`.`id_ctb_doc` = `pagado`.`id_ctb_doc_tipo3`)
+                WHERE `ctb_doc`.`id_tercero` = $id_tercero";
+    }
     $rs = $cmd->query($sql);
     $causaciones = $rs->fetchAll();
 } catch (PDOException $e) {

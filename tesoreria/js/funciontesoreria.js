@@ -943,16 +943,17 @@ const EnviarNomina = (boton) => {
 		.then((response) => response.json())
 		.then((response) => {
 			console.log(response);
-			if (response[0].value == "ok") {
-				boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
-				id = "tableMvtoTesoreriaPagos";
-				reloadtable(id);
-				mje(response[0].msg);
+			if (response.msg == "ok") {
+				$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
+				if(response.incorrec > 0){
+					response.procesados = response.procesados + ' <br> ' + response.error;
+				}
+				mje(response.procesados);
 			} else {
 				boton.disabled = false;
 				boton.value = id;
 				boton.innerHTML = '<span class="fas fa-paper-plane fa-lg"></span>';
-				mjeError(response[0].msg);
+				mjeError(response.msg);
 			}
 		})
 		.catch((error) => {
@@ -1381,11 +1382,11 @@ let cargaFormaPago = (cop, detalle, boton) => {
 	if (id_cop == 0) {
 		valor_pago = 1;
 	} else {
-		valor_pago = parseFloat(valor.value.replace(/\,/g, "", ""));
+		valor_pago = $('#valor').length ? parseFloat(valor.value.replace(/\,/g, "", "")) : 0;
 	}
 
 	if (id_docu > 0) {
-		if (valor_pago != "") {
+		if (valor_pago != "" || op_ppto == '0') {
 			$.post("lista_causacion_formapago.php", { id_doc: id_docu, id_cop: id_cop, valor: valor_pago, id_fp: detalle }, function (he) {
 				$("#divTamModalForms").removeClass("modal-sm");
 				$("#divTamModalForms").removeClass("modal-lg");

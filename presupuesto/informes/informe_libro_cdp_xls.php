@@ -46,11 +46,14 @@ try {
                     WHERE (`pto_cdp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_cdp`.`estado` <> 0)) AS `taux`
                 LEFT JOIN
                     (SELECT
-                        `id_pto_cdp`
+                        `pto_cdp`.`id_pto_cdp`
                         , `id_rubro`
                         , SUM(IFNULL(`valor`,0)) - SUM(IFNULL(`valor_liberado`,0)) AS `valor`
                     FROM
                         `pto_cdp_detalle`
+                        INNER JOIN `pto_cdp` 
+                            ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
+                    WHERE (`pto_cdp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_cdp`.`estado` <> 0)
                     GROUP BY `id_pto_cdp`, `id_rubro`) AS `t1`
                     ON (`t1`.`id_pto_cdp` = `taux`.`id_pto_cdp` AND `t1`.`id_rubro` = `taux`.`id_rubro`)
                 LEFT JOIN
@@ -67,6 +70,7 @@ try {
                     WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` <> 0)
                     GROUP BY `pto_cdp_detalle`.`id_pto_cdp`, `pto_cdp_detalle`.`id_rubro`) AS `t2`
                     ON (`t2`.`id_pto_cdp` = `taux`.`id_pto_cdp` AND `t2`.`id_rubro` = `taux`.`id_rubro`)
+            GROUP BY `taux`.`id_pto_cdp`,`taux`.`id_rubro`
             ORDER BY `taux`.`fecha` ASC";
     $res = $cmd->query($sql);
     $causaciones = $res->fetchAll();

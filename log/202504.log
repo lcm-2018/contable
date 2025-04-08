@@ -20,3 +20,6 @@
 [2025-04-04 10:48:17] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1864
 [2025-04-04 10:48:20] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1863
 >>>>>>> 3dd2aa737db574f6c016194963badd2cd0203da5
+[2025-04-07 15:56:27] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 436
+[2025-04-07 16:07:06] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 437
+[2025-04-07 17:49:23] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_detalle_pago WHERE id_detalle_pago = 86
