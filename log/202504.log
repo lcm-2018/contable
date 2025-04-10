@@ -1,0 +1,25 @@
+[2025-04-02 15:52:34] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 414
+[2025-04-02 15:54:39] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 415
+[2025-04-02 15:55:56] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 416
+[2025-04-02 17:51:27] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 421
+[2025-04-02 17:51:31] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 422
+<<<<<<< HEAD
+[2025-04-03 15:49:24] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6589
+[2025-04-03 15:51:34] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1858
+=======
+[2025-04-03 09:14:41] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 433
+<<<<<<< HEAD
+[2025-04-07 15:31:11] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 434
+=======
+>>>>>>> 806104e30f53e4e5c708859032f8bfc4dea987df
+[2025-04-04 10:00:49] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1859
+[2025-04-04 10:32:12] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1860
+[2025-04-04 10:34:21] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1861
+[2025-04-04 10:44:54] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1862
+[2025-04-04 10:48:14] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1865
+[2025-04-04 10:48:17] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1864
+[2025-04-04 10:48:20] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1863
+>>>>>>> 3dd2aa737db574f6c016194963badd2cd0203da5
+[2025-04-07 15:56:27] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 436
+[2025-04-07 16:07:06] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 437
+[2025-04-07 17:49:23] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_detalle_pago WHERE id_detalle_pago = 86

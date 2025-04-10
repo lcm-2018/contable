@@ -326,9 +326,8 @@ try {
                                                     </div>
                                                 </div>
                                             </div>
-                                        <?php } ?>
-                                        <?php
-                                        if ($id_cop > 0) {
+                                        <?php }
+                                        if ($id_cop > 0 && $_SESSION['pto'] == '1') {
                                         ?>
                                             <div class="row mb-1">
                                                 <div class="col-2">
@@ -374,22 +373,15 @@ try {
                                             </div>
                                         </div>
                                         <?php if ($datosDoc['estado'] == 1) { ?>
-                                            <div class="row ">
-                                                <div class="col-2">
-                                                    <div><label for="fecha" class="small"></label></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-align: center">
-                                                        <?php
-                                                        if ($id_doc_pag > 0) {
-                                                        ?>
-                                                            <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoPag(this)">Generar movimiento</button>
-                                                        <?php
-                                                        }
-                                                        ?>
-                                                        <button type="button" class="btn btn-warning btn-sm" id="GuardaDocMvtoPag" text="<?= $id_doc_pag; ?>">Guardar</button>
-                                                    </div>
-                                                </div>
+                                            <div class="text-center py-2">
+                                                <?php
+                                                if ($id_doc_pag > 0) {
+                                                ?>
+                                                    <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoPag(this)">Generar movimiento</button>
+                                                <?php
+                                                }
+                                                ?>
+                                                <button type="button" class="btn btn-warning btn-sm" id="GuardaDocMvtoPag" text="<?= $id_doc_pag; ?>">Guardar</button>
                                             </div>
                                         <?php } ?>
                                     </div>

@@ -7,11 +7,11 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../../../permisos.php';
 $id_cargo = isset($_POST['id_cargo']) ? $_POST['id_cargo'] : exit('Acceso denegado');
-$id_codigo = $_POST['slcCodigo'];
+$id_codigo = isset($_POST['slcCodigo']) ? $_POST['slcCodigo'] : NULL;;
 $cargo = $_POST['txtNomCargo'];
-$grado = $_POST['numGrado'];
-$perfil = $_POST['txtPerfilSiho'];
-$id_nombramiento = $_POST['slcNombramiento'];
+$grado = isset($_POST['numGrado']) ? $_POST['numGrado'] : NULL;;
+$perfil = isset($_POST['txtPerfilSiho']) ? $_POST['txtPerfilSiho'] : NULL;;
+$id_nombramiento = isset($_POST['slcNombramiento']) ? $_POST['slcNombramiento'] : NULL;;
 
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $id_user = $_SESSION['id_user'];

@@ -153,7 +153,8 @@ try {
                                         <input type="hidden" id="id_txt_tercero" name="id_txt_tercero" class="form-control form-control-sm">
                                     </div>
                                     <div class="form-group col-md-1">
-                                        <label for="btn_historialtercero" class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                                        <label for="txtbl" class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                                        <input hidden id="txtbl" value="1">
                                         <a type="button" id="btn_historialtercero" class="btn btn-outline-success btn-sm" title="Historial tercero">
                                             <span class="fas fa-history fa-lg" aria-hidden="true"></span>
                                         </a>

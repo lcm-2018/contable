@@ -14,14 +14,51 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id_ctb_fuente = isset($_POST['id_ctb_fuente']) ? $_POST['id_ctb_fuente'] : 0;
 $id_ctb_referencia = isset($_POST['id_ctb_referencia']) ? $_POST['id_ctb_referencia'] : 0;
 $accion_pto = isset($_POST['accion_pto']) ? $_POST['accion_pto'] : 0;
+$fecha = isset($_POST['fecha']) && strlen($_POST['fecha']) > 0 ? $_POST['fecha'] : '2000-01-01';
+$id_tercero_api = isset($_POST['id_tercero_api']) ? $_POST['id_tercero_api'] : 0;
+$tercero = isset($_POST['tercero']) && strlen($_POST['tercero']) > 0 ? $_POST['tercero'] : '';
+$objeto = isset($_POST['objeto']) && strlen($_POST['objeto']) > 0 ? $_POST['objeto'] : '';
+$id_ctb_doc = isset($_POST['id_ctb_doc']) ? $_POST['id_ctb_doc'] : 0;
 
-// se vuelve a consultar los datos del tercero con el id que viene del boton
+// esta consulta es para generar el proximo id_manu
 //------------------------------------
-/*$sql = "SELECT tb_terceros.id_tercero_api,tb_terceros.nom_tercero
-        FROM tb_terceros 
-        WHERE id_tercero_api= $id_tercero LIMIT 1";
+$sql = "SELECT COUNT(*) + 1 AS id_manu
+        FROM pto_rad LIMIT 1";
 $rs = $cmd->query($sql);
-$obj = $rs->fetch();*/
+$obj_manu = $rs->fetch();
+//---------------------------------------------------
+
+// esta consulta es para consultar el id_pto_rad segun el id_ctb_doc y el manu para editar
+//--------------------------------------------------
+$sql = "SELECT 
+             id_pto_rad
+            ,id_manu
+        FROM pto_rad 
+        WHERE pto_rad.id_ctb_doc = $id_ctb_doc LIMIT 1";
+$rs = $cmd->query($sql);
+$obj_id_pto_rad = $rs->fetch();
+
+$id_pto_rad = 0;
+
+if (!empty($obj_id_pto_rad['id_pto_rad'])) {
+    $id_pto_rad = $obj_id_pto_rad['id_pto_rad'];
+}
+
+// esta consulta es para consultar el id_pto_rec segun el id_ctb_doc
+//--------------------------------------------------
+$sql = "SELECT 
+             id_pto_rec
+            ,id_manu
+        FROM pto_rec 
+        WHERE pto_rec.id_ctb_doc = $id_ctb_doc LIMIT 1";
+$rs = $cmd->query($sql);
+$obj_id_pto_rec = $rs->fetch();
+
+$id_pto_rec = 0;
+
+if (!empty($obj_id_pto_rec['id_pto_rec'])) {
+    $id_pto_rec = $obj_id_pto_rec['id_pto_rec'];
+}
 //---------------------------------------------------
 ?>
 <div class="px-0">
@@ -34,20 +71,126 @@ $obj = $rs->fetch();*/
                 <input type="hidden" id="hd_id_ctb_fuente" name="hd_id_ctb_fuente" value="<?php echo $id_ctb_fuente ?>">
                 <input type="hidden" id="hd_id_ctb_referencia" name="hd_id_ctb_referencia" value="<?php echo $id_ctb_referencia ?>">
                 <input type="hidden" id="hd_accion_pto" name="hd_accion_pto" value="<?php echo $accion_pto ?>">
-                <div class=" form-row">
-                    <div class="form-group col-md-8">
-                        <label for="txt_rubro" class="small">Rubro</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_rubro" name="txt_rubro" placeholder="Rubro">
-                        <input type="hidden" id="hd_id_txt_rubro" name="hd_id_txt_rubro" class="form-control form-control-sm">
-                        <input type="hidden" id="hd_id_tipo" name="hd_id_txt_rubro" class="form-control form-control-sm">
-                        <input type="hidden" id="hd_anio" name="hd_id_txt_rubro" class="form-control form-control-sm">
+
+                <div class="form-row" style="text-align: left;">
+                    <div class="form-group col-md-2">
+                        <span class="small">Fecha</span>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <input type="text" class="form-control form-control-sm" id="txt_fecha" name="txt_fecha" readonly value="<?php echo $fecha ?>">
+                    </div>
+                    <div class="form-group col-md-1">
+                        <span class="small"></span>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <span class="small">Id Manu</span>
+                    </div>
+                    <div class="form-group col-md-1">
+                        <input type="text" class="form-control form-control-sm" id="txt_id_manu" name="txt_id_manu" value="<?php 
+                            if($id_pto_rad==0){ 
+                                echo $obj_manu['id_manu'];
+                            }
+                            else{
+                                echo $obj_id_pto_rad['id_manu'];
+                            }
+                         ?>">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="txt_nrodisponibilidad_filtro" class="small">Valor</label>
+                        <span class="small"></span>
+                    </div>
+                    <div class="form-group col-md-1">
+                        <a type="button" id="btn_guardar_encabezado" class="btn btn-outline-success btn-sm" title="Guardar encabezado">
+                            <span class="fas fa-save fa-lg" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                    <input type="hidden" id="hd_id_pto_rad" name="hd_id_pto_rad" value=" <?php echo $id_pto_rad ?> ">
+                    <input type="hidden" id="hd_id_ctb_doc" name="hd_id_ctb_doc" value=" <?php echo $id_ctb_doc ?> ">
+                    <input type="hidden" id="hd_id_pto_rec" name="hd_id_pto_rec" value=" <?php echo $id_pto_rec ?> ">
+                </div>
+
+                <div class="form-row" style="text-align: left;">
+                    <div class="form-group col-md-2">
+                        <span class="small">Tercero</span>
+                    </div>
+                    <div class="form-group col-md-10">
+                        <input type="text" class="form-control form-control-sm" id="txt_tercero" name="txt_tercero" readonly value="<?php echo $tercero ?>">
+                        <input type="hidden" id="hd_id_tercero_api" name="hd_id_tercero_api" value="<?php echo $id_tercero_api ?>">
+                    </div>
+                </div>
+
+                <div class="form-row" style="text-align: left;">
+                    <div class="form-group col-md-2">
+                        <span class="small">Objeto</span>
+                    </div>
+                    <div class="form-group col-md-10">
+                        <input type="text" class="form-control form-control-sm" id="txt_objeto" name="txt_objeto" value="<?php echo $objeto ?>">
+                    </div>
+                </div>
+
+                <!--<div class="separador" style="height: 30px;"></div>-->
+
+                <div class="separador-decorativo"></div>
+
+                <!--<div class="separador-con-texto">
+                    <span class="texto-separador"> - o - </span>
+                </div>-->
+
+                <style>
+                    .separador {
+                        border-top: 1px solid #ccc;
+                        /* Línea horizontal */
+                        margin: 10px 0;
+                        /* Espacio arriba y abajo */
+                    }
+                </style>
+
+                <style>
+                    .separador-decorativo {
+                        height: 1.5px;
+                        background: linear-gradient(to right, transparent, #16a085, transparent);
+                        margin: 20px 0;
+                    }
+                </style>
+
+                <style>
+                    .separador-con-texto {
+                        display: flex;
+                        align-items: center;
+                        text-align: center;
+                        margin: 20px 0;
+                    }
+
+                    .separador-con-texto::before,
+                    .separador-con-texto::after {
+                        content: "";
+                        flex: 1;
+                        border-bottom: 1px solid #ccc;
+                    }
+
+                    .texto-separador {
+                        padding: 0 10px;
+                    }
+                </style>
+
+                <div class="form_row" style="text-align: center; width:100%; font-size:105%">
+                    <span class="small">DETALLES RUBROS</span>
+                </div>
+
+                <div class="form_row" style="text-align: center; width:50%; font-size:50%">
+                    <span class="small">&nbsp;</span>
+                </div>
+
+                <div class=" form-row">
+                    <div class="form-group col-md-8">
+                        <input type="text" class="form-control form-control-sm" id="txt_rubro" name="txt_rubro" placeholder="Rubro">
+                        <input type="hidden" id="hd_id_txt_rubro" name="hd_id_txt_rubro" class="form-control form-control-sm">
+                        <input type="hidden" id="hd_tipo_dato" name="hd_tipo_dato" class="form-control form-control-sm">
+                        <input type="hidden" id="hd_anio" name="hd_anio" class="form-control form-control-sm">
+                    </div>
+                    <div class="form-group col-md-3">
                         <input type="text" class="form-control form-control-sm" id="txt_valor" name="txt_valor" placeholder="Valor">
                     </div>
                     <div class="form-group col-md-1">
-                        <label for="btn_agregar_rubro" class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                         <a type="button" id="btn_agregar_rubro" class="btn btn-outline-success btn-sm" title="Agregar">
                             <span class="fas fa-plus fa-lg" aria-hidden="true"></span>
                         </a>
@@ -58,7 +201,8 @@ $obj = $rs->fetch();*/
                     <table id="tb_rubros" class="table table-striped table-bordered table-sm nowrap table-hover shadow w-100" style="width:100%; font-size:80%">
                         <thead>
                             <tr class="text-center centro-vertical">
-                                <th style="min-width: 70%;">Rubro</th>
+                                <th>Id rad det</th>
+                                <th style="min-width: 60%;">Rubro</th>
                                 <th class="text-right">Valor</th>
                                 <th>Acciones</th>
                             </tr>

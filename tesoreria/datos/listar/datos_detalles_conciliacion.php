@@ -29,33 +29,35 @@ $fecha = $vigencia . '-' . $mes . '-' . $dia;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `ctb_doc`.`fecha`
-                , `ctb_fuente`.`cod`
-                , `ctb_doc`.`id_manu`
-                , `ctb_libaux`.`id_tercero_api`
-                , `ctb_libaux`.`debito`
-                , `ctb_libaux`.`credito`
-                , '--' AS `documento`
-                , `ctb_libaux`.`id_ctb_libaux`
-                , `tes_conciliacion_detalle`.`id_ctb_libaux` AS `conciliado`
-            FROM
-                `ctb_libaux`
-                INNER JOIN `ctb_pgcp` 
-                    ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-                INNER JOIN `tes_cuentas` 
-                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-                INNER JOIN `ctb_doc` 
-                    ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                INNER JOIN `ctb_fuente` 
-                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
-                LEFT JOIN `tes_conciliacion_detalle`
-                    ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)
-                LEFT JOIN `tes_conciliacion`
-                    ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)   
-            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_cuenta AND `ctb_doc`.`estado` = 2 
-                    AND `ctb_doc`.`fecha` <= '$fecha' AND (`tes_conciliacion`.`mes` = '$mes' OR `tes_conciliacion`.`mes` IS NULL)
-                    AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))";
+    $sql = "SELECT * FROM 
+                (SELECT
+                    DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') AS `fecha`
+                    , `ctb_fuente`.`cod`
+                    , `ctb_doc`.`id_manu`
+                    , `ctb_libaux`.`id_tercero_api`
+                    , `ctb_libaux`.`debito`
+                    , `ctb_libaux`.`credito`
+                    , '--' AS `documento`
+                    , `ctb_libaux`.`id_ctb_libaux`
+                    , `tes_conciliacion_detalle`.`id_ctb_libaux` AS `conciliado`
+                FROM
+                    `ctb_libaux`
+                    INNER JOIN `ctb_pgcp` 
+                        ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                    INNER JOIN `tes_cuentas` 
+                        ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                    INNER JOIN `ctb_doc` 
+                        ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    INNER JOIN `ctb_fuente` 
+                        ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                    LEFT JOIN `tes_conciliacion_detalle`
+                        ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)
+                    LEFT JOIN `tes_conciliacion`
+                        ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)   
+                WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_cuenta AND `ctb_doc`.`estado` = 2 
+                        AND (`tes_conciliacion`.`mes` = '$mes' OR `tes_conciliacion`.`mes` IS NULL)
+                        AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))) AS `t1`
+            WHERE `t1`.`fecha` <= '$fecha'";
     $rs = $cmd->query($sql);
     $lista = $rs->fetchAll();
 } catch (PDOException $e) {

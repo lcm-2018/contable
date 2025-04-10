@@ -16,16 +16,58 @@ if (esta === -1) {
         }, 900000); // 15 minutos
     }
 }*/
+document.addEventListener("show.bs.modal", function (event) {
+    var modalsVisible = document.querySelectorAll(".modal.show").length;
+    var zIndex = 1040 + 10 * modalsVisible;
 
-var checkbox = '<input type="checkbox" value="" id="verAnulados" onclick="MostrarAnulados(this)" title="VER ANULADOS">' +
-    '<label for="verAnulados" class="mb-0"> &nbsp; &nbsp; &nbsp; &nbsp;</label>';
-var setdom;
+    event.target.style.zIndex = zIndex;
+
+    setTimeout(function () {
+        document.querySelectorAll(".modal-backdrop:not(.modal-stack)").forEach(function (backdrop) {
+            backdrop.style.zIndex = zIndex - 1;
+            backdrop.classList.add("modal-stack");
+        });
+    }, 0);
+}, true);
+
+function mje(titulo, html) {
+    Swal.fire({
+        title: titulo,
+        icon: "success",
+        showConfirmButton: true,
+        timer: 2000,
+        html: html,
+    });
+}
+
+function mjeError(titulo, texto, html) {
+    Swal.fire({
+        title: titulo,
+        text: texto,
+        icon: "error",
+        showConfirmButton: true,
+        timer: 2000,
+        html: html,
+    });
+}
+var url_js = $('#url_js').length ? atob($('#url_js').val()) : '/';
+var user_js = $('#user_js').length ? atob($('#user_js').val()) : '0';
+var op_ppto = $('#op_pto').length ? atob($('#op_pto').val()) : '0';
+var op_caracter = $('#op_caracter').length ? atob($('#op_caracter').val()) : '0';
+window.urlin = url_js;
+window.user = user_js;
+
+var checkbox = '';
+if ($('#tableMvtoContable').length || $('#tableAdquisiciones').length || $('#tableListEmpleados').length || $('#tableNominas').length || $('#tableEjecPresupuesto').length || $('#tableEjecPresupuestoCrp').length || $('#tableTerceros').length || $('#tableMvtoTesoreriaPagos').length) {
+    var checkbox = '<input type="checkbox" value="" id="verAnulados" onclick="MostrarAnulados(this)" title="Ver Anulados y/o Inactivos">' +
+        '<label for="verAnulados" class="mb-0"><span class="badge badge-pill badge-light">ANULADOS</span></label>';
+}
+var setdom = "<'row'<'col-md-6'l><'col-md-6'<'search-wrapper'f>>>" +
+    "<'row'<'col-sm-12'tr>>" +
+    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
+
 if ($("#peReg").val() === '1') {
     setdom = "<'row'<'col-md-5'l><'bttn-plus-dt col-md-2'B><'col-md-5'<'search-wrapper'f>>>" +
-        "<'row'<'col-sm-12'tr>>" +
-        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-} else {
-    setdom = "<'row'<'col-md-6'l><'col-md-6'<'search-wrapper'f>>>" +
         "<'row'<'col-sm-12'tr>>" +
         "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
 }
@@ -34,10 +76,10 @@ var setIdioma = {
     "emptyTable": "No hay información",
     "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
     "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-    "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
+    "infoFiltered": "(Filtrado de _MAX_ Registros totales)",
     "infoPostFix": "",
     "thousands": ",",
-    "lengthMenu": "Ver _MENU_ Filas",
+    "lengthMenu": "_MENU_ Filas",
     "loadingRecords": "Cargando...",
     "processing": "Procesando...",
     "search": checkbox + '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
@@ -64,8 +106,12 @@ function MostrarAnulados(elemento) {
     });*/
     $(document).ready(function () {
         $('.modal').on('shown.bs.modal', function () {
-            $(this).find('.modal-dialog').draggable();
+            $(this).find('.modal-dialog').draggable({
+                handle: 'h5'
+            });
+            $('.modal').attr('aria-hidden', 'false');
         });
+        $('[aria-hidden]').attr('aria-hidden', 'false');
     });
     "use strict";
     $("#sidebarToggle").click(function () {
@@ -194,6 +240,8 @@ function MostrarAnulados(elemento) {
     });
     //modificar contraseña
     $('#divModalPermisos').on('click', '#btnChangePass', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let pass = $("#passAnt").val();
         let newpas = $("#passNew").val();
         let newpasconfir = $("#passNewConf").val();
@@ -231,6 +279,7 @@ function MostrarAnulados(elemento) {
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Modal permisos de usuarios 
@@ -464,7 +513,7 @@ function MostrarAnulados(elemento) {
         let login = $("#txtUsuario").val();
         if (login === "") {
             $('#divModalError').modal('show');
-            $('#divMsgError').html("Login  no puede estar vacio");
+            $('#divMsgError').html("Login no puede estar vacio");
         } else {
             let duser = $("#formUpUser").serialize();
             $.ajax({
@@ -485,7 +534,7 @@ function MostrarAnulados(elemento) {
         }
 
     });
-    $('.table-hover tbody').on('dblclick', 'tr', function () {
+    $('.table-hover tbody').on('click', 'tr', function () {
         let table = $('.table-hover').DataTable();
         if ($(this).hasClass('selecionada')) {
             $(this).removeClass('selecionada');
@@ -697,7 +746,6 @@ function ActivaBoton(elemento) {
     setTimeout(() => {
         elemento.disabled = false;
         var span = elemento.querySelector('span');
-
         if (span) {
             span.remove();
         }

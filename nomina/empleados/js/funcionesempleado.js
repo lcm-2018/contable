@@ -2723,11 +2723,14 @@
     $(document).ready(function () {
         var id = $('#idEmpNovEps').val();
         $('#dataTable').DataTable({
-            'pageLength': 100,
+            pageLength: 100,
             language: setIdioma,
             "lengthMenu": [
                 [10, 25, 50, 100, -1],
                 [10, 25, 50, 100, 'TODO'],
+            ],
+            columnDefs: [
+                { "targets": op_caracter == '2' ? [] : [3], "visible": false }
             ],
         });
         //dataTable lista de empleados
@@ -2973,6 +2976,44 @@
             "pageLength": -1
         });
         $('#tableAfp').wrap('<div class="overflow" />');
+        $('#tbCttEmpleado').DataTable({
+            dom: setdom,
+            buttons: [{
+                action: function (e, dt, node, config) {
+                    $.post("datos/registrar/form_contratos.php", { id: 0 }, function (he) {
+                        $('#divTamModalForms').removeClass('modal-sm');
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').addClass('modal-lg');
+                        $('#divModalForms').modal('show');
+                        $("#divForms").html(he);
+                    });
+                }
+            }],
+            language: setIdioma,
+            "ajax": {
+                url: 'datos/listar/datos_contratos.php',
+                type: 'POST',
+                data: { id: id },
+                dataType: 'json',
+            },
+            "columns": [
+                { 'data': "id" },
+                { 'data': "inicia" },
+                { 'data': "ternina" },
+                { 'data': 'salario' },
+                { 'data': 'estado' },
+                { 'data': 'botones' },
+            ],
+            "order": [
+                [2, "asc"]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
+        });
+        $('#tbCttEmpleado').wrap('<div class="overflow" />');
         $('#tableFCesan').DataTable({
             dom: setdom,
             buttons: [{

@@ -34,7 +34,7 @@
                 }
             }],
             language: setIdioma,
-            "ajax": {
+            ajax: {
                 url: 'datos/listar/list_usuarios.php',
                 type: 'POST',
                 dataType: 'json',
@@ -86,21 +86,20 @@
     });
     //agregar usuario del sistema
     $("#divModalForms").on('click', '#btnAddUser', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let login = $("#txtlogin").val();
         let pass = $("#passuser").val();
         let rol = $("#slcRolUser").val();
         if (login == "") {
             $('#divModalError').modal('show');
             $('#divMsgError').html("Login  no puede estar vacio");
-            return false;
         } else if (pass == "") {
             $('#divModalError').modal('show');
             $('#divMsgError').html("Contraseña no puede estar vacia");
-            return false;
         } else if (rol == "0") {
             $('#divModalError').modal('show');
             $('#divMsgError').html("Debe elegir un Rol de usuario");
-            return false;
         } else {
             let duser = $("#formAddUser").serialize();
             let passencrp = hex_sha512(pass);
@@ -129,12 +128,15 @@
                     }
                 }
             });
-            return false;
         }
+        ActivaBoton(btn);
+        return false;
 
     });
     //Actualizar usuario del sistema
     $("#divModalForms").on('click', '#btnAddPerfil', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         var data = $('#txtPerfil').val();
         if (data == '') {
             $('#txtPerfil').addClass('is-invalid');
@@ -159,6 +161,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     $("#modificarListUsers").on('click', '.editar', function () {
         let id = $(this).attr('value');
@@ -181,6 +184,8 @@
         });
     });
     $("#divModalForms").on('click', '#btnUpPerfil', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         var perfil = $('#txtPerfil').val();
         var id_perfil = $('#id_perfil').val();
         if (perfil == '') {
@@ -206,19 +211,20 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     //up usuario del sistema
     $("#divModalForms").on('click', '#btnUpUser', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let login = $("#txtUplogin").val();
         let pass = $("#passUpuser").val();
         if (login === "") {
             $('#divModalError').modal('show');
             $('#divMsgError').html("Login  no puede estar vacio");
-            return false;
         } else if (pass === "") {
             $('#divModalError').modal('show');
             $('#divMsgError').html("Contraseña no puede estar vacia");
-            return false;
         } else {
             let mpass = hex_sha512($('#passUpuser').val());
             if ($('#passAnterior').val() === $('#passUpuser').val()) {
@@ -243,8 +249,9 @@
                     }
                 }
             });
-            return false;
         }
+        ActivaBoton(btn);
+        return false;
 
     });
     //Eliminar usuario (confirmar)
@@ -344,7 +351,7 @@
         });
 
         //var data = $('#formAddUser').serialize();
-        var data = {sed:sedesSeleccionadas};
+        var data = { sed: sedesSeleccionadas };
 
         if ($.fn.DataTable.isDataTable('#tb_bodegas')) {
             $('#tb_bodegas').DataTable().destroy();
@@ -382,5 +389,5 @@
         $('#tb_bodegas').wrap('<div class="overflow"/>');
     });
 
-    
+
 })(jQuery);

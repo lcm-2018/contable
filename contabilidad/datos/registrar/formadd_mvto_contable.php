@@ -77,7 +77,7 @@ $cmd = null;
                 </div>
                 <div class="form-group col-md-6">
                     <label for="numDoc" class="small">NUMERO</label>
-                    <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" readonly value="<?php echo $datos['id_manu'] ?>">
+                    <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $datos['id_manu'] ?>">
                 </div>
 
             </div>

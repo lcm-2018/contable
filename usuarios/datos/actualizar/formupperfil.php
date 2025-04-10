@@ -4,10 +4,13 @@ if (!isset($_SESSION['user'])) {
     header('Location: <?php echo $_SESSION["urlin"] ?>/index.php');
     exit;
 }
-if ($_SESSION['id_user'] != 1) {
+include '../../../conexion.php';
+include '../../../permisos.php';
+
+
+if ($id_rol != 1) {
     exit('Usuario no autorizado');
 }
-include '../../../conexion.php';
 $id_perfirl = isset($_POST['id']) ? $_POST['id'] : exit('Acceso denegado');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

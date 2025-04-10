@@ -168,12 +168,18 @@ $ver = 'readonly';
                                                 </div>
                                                 <div class="form-control col-4" readonly id="valFactura"><?php echo pesos($datosDoc['val_factura']); ?></div>
                                             </div>
-                                            <div class="input-group input-group-sm mb-1">
-                                                <div class="input-group-prepend col-2 pr-0">
-                                                    <button class="btn btn-outline-primary btn-block text-left" type="button" onclick="ImputacionCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-file-signature fa-lg mr-2"></i>Imputación</button>
+                                            <?php
+                                            if ($_SESSION['caracter'] == '2') {
+                                            ?>
+                                                <div class="input-group input-group-sm mb-1">
+                                                    <div class="input-group-prepend col-2 pr-0">
+                                                        <button class="btn btn-outline-primary btn-block text-left" type="button" onclick="ImputacionCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-file-signature fa-lg mr-2"></i>Imputación</button>
+                                                    </div>
+                                                    <div class="form-control col-4" readonly id="valImputacion"><?php echo pesos($datosDoc['val_imputacion']); ?></div>
                                                 </div>
-                                                <div class="form-control col-4" readonly id="valImputacion"><?php echo pesos($datosDoc['val_imputacion']); ?></div>
-                                            </div>
+                                            <?php
+                                            }
+                                            ?>
                                             <div class="input-group input-group-sm mb-1">
                                                 <div class="input-group-prepend col-2 pr-0">
                                                     <button class="btn btn-outline-warning btn-block text-left" type="button" onclick="CentroCostoCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-kaaba fa-lg mr-2"></i></i>Centro Costo</button>

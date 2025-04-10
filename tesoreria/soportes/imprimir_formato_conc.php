@@ -364,7 +364,7 @@ $anulado = '';
             <tr>
                 <td style="text-align: left;">SUMAS IGUALES</td>
                 <td style="text-align: right;"><?= pesos($detalles['debito'] - $detalles['credito']); ?></td>
-                <td style="text-align: right;"><?= pesos($tot_deb + $tot_cre + $saldo); ?></td>
+                <td style="text-align: right;"><?= pesos($saldo + $tot_deb - $tot_cre); ?></td>
             </tr>
         </table>
         </br>

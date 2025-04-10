@@ -137,28 +137,6 @@ try {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }
             }
-
-            // Verificar según el subgrupo Si el articulo tiene lote x defecto
-            $sql = "SELECT lote_xdef FROM far_subgrupos WHERE id_subgrupo=$id_subgrp";
-            $rs = $cmd->query($sql);
-            $obj = $rs->fetch();
-            $lote_xdef = isset($obj['lote_xdef']) ? $obj['lote_xdef'] : 1;
-
-            if ($lote_xdef == 1){
-                $id_articulo = $res['id'];
-                $sql = "SELECT COUNT(*) AS count FROM far_medicamento_lote WHERE id_med=$id_articulo";
-                $rs = $cmd->query($sql);
-                $obj = $rs->fetch();
-
-                if ($obj['count'] == 0) {
-                    $bodega = bodega_principal($cmd);
-                    $bodega_pri = $bodega['id_bodega'];
-
-                    $sql = "INSERT INTO far_medicamento_lote(lote,fec_vencimiento,id_presentacion,id_cum,id_bodega,estado,id_usr_crea,id_med)  
-                    VALUES('LOTEG','3000-01-01',0,0,$bodega_pri,1,$id_usr_crea,$id_articulo)";
-                    $rs = $cmd->query($sql);
-                }
-            }
         }
 
         if ($oper == 'del') {

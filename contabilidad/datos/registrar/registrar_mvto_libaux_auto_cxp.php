@@ -133,40 +133,17 @@ try {
                 `ctb_causa_retencion`.`valor_retencion`
                 , `ctb_causa_retencion`.`id_terceroapi`
                 , `ctb_retencion_rango`.`id_retencion`
+                , `ctb_retenciones`.`id_cuenta`
             FROM
                 `ctb_causa_retencion`
                 INNER JOIN `ctb_retencion_rango` 
                     ON (`ctb_causa_retencion`.`id_rango` = `ctb_retencion_rango`.`id_rango`)
+                LEFT JOIN `ctb_retenciones`
+                    ON (`ctb_retencion_rango`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
             WHERE (`ctb_causa_retencion`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sq2);
     $datosretencion = $rs->fetchAll();
-    $sqln = "SELECT
-                `ctb_libaux`.`id_ctb_libaux`
-                , `ctb_retencion_rango`.`id_retencion`
-                , `ctb_libaux`.`id_cuenta`
-            FROM
-                `ctb_causa_retencion`
-                INNER JOIN `ctb_retencion_rango` 
-                    ON (`ctb_causa_retencion`.`id_rango` = `ctb_retencion_rango`.`id_rango`)
-                INNER JOIN `ctb_doc` 
-                    ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                INNER JOIN `ctb_libaux` 
-                    ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-            WHERE (`ctb_libaux`.`id_ctb_libaux` 
-                IN (SELECT
-                        MAX(`ctb_libaux`.`id_ctb_libaux`)
-                    FROM
-                        `ctb_causa_retencion`
-                        INNER JOIN `ctb_retencion_rango` 
-                            ON (`ctb_causa_retencion`.`id_rango` = `ctb_retencion_rango`.`id_rango`)
-                        INNER JOIN `ctb_doc` 
-                            ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                        INNER JOIN `ctb_libaux` 
-                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                    GROUP BY `ctb_retencion_rango`.`id_retencion`)
-                )";
-    $rs = $cmd->query($sqln);
-    $ctas_ret = $rs->fetchAll();
+
     $sqla = "SELECT
                 SUM(`vl`.`cantidad` * `vl`.`valor_sin_iva`) AS `base`
                 , SUM(`vl`.`cantidad`*`vl`.`valor_sin_iva` * `vl`.`iva`/100) AS `iva`
@@ -251,8 +228,7 @@ try {
     $debito = 0;
     foreach ($datosretencion as $dr) {
         $id_rte = $dr['id_retencion'];
-        $key = array_search($id_rte, array_column($ctas_ret, 'id_retencion'));
-        $id_cuenta = $key !== false ? $ctas_ret[$key]['id_cuenta'] : NULL;
+        $id_cuenta = $dr['id_cuenta'];
         $credito = $dr['valor_retencion'];
         $id_tercero = $dr['id_terceroapi'];
         $query->execute();

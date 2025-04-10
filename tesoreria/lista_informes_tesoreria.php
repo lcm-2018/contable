@@ -40,6 +40,7 @@ include '../financiero/consultas.php';
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item sombra" href="#" id="sl_libros_aux_tesoreria">Libros auxiliares de tesorería</a>
                                     <a class="dropdown-item sombra" href="#" id="sl_libros_aux_bancos">Libros auxiliares de bancos</a>
+                                    <a class="dropdown-item sombra" href="#" id="sl_historico_pagos_pendientes">Historial de pagos pendientes a terceros</a>
                                     <!--<a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(1);">Libros auxiliares de tesorería</a>-->
                                     <!--<a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(2);">Libros auxiliares de bancos</a>-->
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(3);">Reporte por tercero pagos y causaciones pendientes de pago</a>

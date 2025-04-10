@@ -30,7 +30,7 @@ try {
         <input type="hidden" id="id_pto_doc" name="id_pto_doc" value="<?php echo $id_ctb_doc; ?>">
         <div class="shadow mb-3">
             <div class="card-header" style="background-color: #16a085 !important;">
-                <h6 style="color: white;"><i class="fas fa-lock fa-lg" style="color: #FCF3CF"></i>&nbsp;ANULACIÓN DE DOCUMENTO TESORERÍA</h5>
+                <h5 style="color: white;"><i class="fas fa-lock fa-lg" style="color: #FCF3CF"></i>&nbsp;ANULACIÓN DE DOCUMENTO TESORERÍA</h5>
             </div>
             <div class="pt-3 px-3">
                 <div class="form-row">

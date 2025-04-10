@@ -122,7 +122,7 @@ var tabla;
 				],
 				columnDefs: [
 					{ class: 'text-wrap', targets: [3] },
-					{ orderable: false, targets: 10 }
+					{ orderable: false, targets: 10 },
 				],
 				order: [[0, "desc"]],
 			});
@@ -160,7 +160,7 @@ var tabla;
 				],
 				columnDefs: [
 					{ class: 'text-wrap', targets: [3] },
-					{ orderable: false, targets: 5 }
+					{ orderable: false, targets: 5 },
 				],
 				order: [[0, "desc"]],
 			});
@@ -391,12 +391,17 @@ var tabla;
 
 	//--------------- boton cargar presupuesto
 	$('#btn_cargar_presupuesto').click(function () {
-		var id_ctb_fuente = $('#tipodato').val();
-		var id_ctb_referencia = $('#ref_mov').val();
-		var accion_pto = $('#hd_accion_pto').val();
+		var id_ctb_fuente = $('#tipodato').val();  //ej 7- nota bancaria
+		var id_ctb_referencia = $('#ref_mov').val(); // ej 1 - rendimientos financieros propios
+		var accion_pto = $('#hd_accion_pto').val(); // 1 o 2
+		var fecha = $('#fecha').val();
+		var id_tercero_api = $('#id_tercero').val();
+		var tercero = $('#tercero').val();
+		var objeto = $('#objeto').val();
+		var id_ctb_doc = $('#id_ctb_doc').val();
 
 		if (accion_pto > 0) {
-			$.post(window.urlin + "/tesoreria/php/afectacion_presupuestal/frm_afectacion_presupuestal.php", { id_ctb_fuente: id_ctb_fuente, id_ctb_referencia: id_ctb_referencia, accion_pto: accion_pto }, function (he) {
+			$.post(window.urlin + "/tesoreria/php/afectacion_presupuestal/frm_afectacion_presupuestal.php", { id_ctb_fuente: id_ctb_fuente, id_ctb_referencia: id_ctb_referencia, accion_pto: accion_pto, fecha: fecha, id_tercero_api: id_tercero_api, tercero: tercero, objeto: objeto, id_ctb_doc: id_ctb_doc }, function (he) {
 				$('#divTamModalReg').removeClass('modal-xl');
 				$('#divTamModalReg').removeClass('modal-sm');
 				$('#divTamModalReg').addClass('modal-lg');
@@ -409,9 +414,16 @@ var tabla;
 		}
 	});
 
-	//----------------- boton generar movimiento
-	$('#btn_generar_movimiento').click(function(){
-		alert("edil");
+	//-------------- historico pagos pendientes a terceros
+	$('#sl_historico_pagos_pendientes').on("click", function () {
+		$.post("php/historico_pagos_pendientes/frm_historico_pagos_pendientes.php", {}, function (he) {
+			$('#divTamModalForms').removeClass('modal-lg');
+			$('#divTamModalForms').removeClass('modal-sm');
+			$('#divTamModalForms').addClass('modal-xl');
+			//(modal-sm, modal-lg, modal-xl) - pequeño,mediano,grande
+			$('#divModalForms').modal('show');
+			$("#divForms").html(he);
+		});
 	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
@@ -707,7 +719,7 @@ let rubrosaPagar = function (boton) {
 		max = $(this).attr('max');
 		//quitar las comas y convertir a numero
 		valor = $(this).val().replace(/\,/g, "", "");
-		if (Number(valor) <= 0 || Number(valor) > max) {
+		if (Number(valor) < 0 || Number(valor) > max) {
 			$(this).addClass('is-invalid');
 			$(this).focus();
 			mjeError('El valor no puede ser menor a cero o mayor al saldo', '');
@@ -931,16 +943,17 @@ const EnviarNomina = (boton) => {
 		.then((response) => response.json())
 		.then((response) => {
 			console.log(response);
-			if (response[0].value == "ok") {
-				boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
-				id = "tableMvtoTesoreriaPagos";
-				reloadtable(id);
-				mje(response[0].msg);
+			if (response.msg == "ok") {
+				$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
+				if(response.incorrec > 0){
+					response.procesados = response.procesados + ' <br> ' + response.error;
+				}
+				mje(response.procesados);
 			} else {
 				boton.disabled = false;
 				boton.value = id;
 				boton.innerHTML = '<span class="fas fa-paper-plane fa-lg"></span>';
-				mjeError(response[0].msg);
+				mjeError(response.msg);
 			}
 		})
 		.catch((error) => {
@@ -1369,11 +1382,11 @@ let cargaFormaPago = (cop, detalle, boton) => {
 	if (id_cop == 0) {
 		valor_pago = 1;
 	} else {
-		valor_pago = parseFloat(valor.value.replace(/\,/g, "", ""));
+		valor_pago = $('#valor').length ? parseFloat(valor.value.replace(/\,/g, "", "")) : 0;
 	}
 
 	if (id_docu > 0) {
-		if (valor_pago != "") {
+		if (valor_pago != "" || op_ppto == '0') {
 			$.post("lista_causacion_formapago.php", { id_doc: id_docu, id_cop: id_cop, valor: valor_pago, id_fp: detalle }, function (he) {
 				$("#divTamModalForms").removeClass("modal-sm");
 				$("#divTamModalForms").removeClass("modal-lg");

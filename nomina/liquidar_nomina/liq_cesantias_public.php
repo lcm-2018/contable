@@ -425,6 +425,10 @@ if (count($empleado) > 0) {
             $censantia_dia = ($salbase + $gasrep +  $auxt + $auxali + $promHorExt + $bspant  / 12 + $primserant / 12 + $primavacant / 12 + $primanavant / 12) / 360;
             $cesantia = $censantia_dia * $diasToCes;
             $icesantia = $cesantia * 0.12;
+            if ($_SESSION['caracter'] == '1') {
+                $cesantia = ($salbase + $promHorExt) * $diasToCes / 360;
+                $icesantia = $cesantia * 0.12;
+            }
             //cesantias
             $porcentaje = 12;
             try {

@@ -99,6 +99,40 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
+if ($_SESSION['pto'] == '0') {
+    try {
+        $sql = "SELECT 
+                    `causado`.`valor` AS `valor_pagar`
+                    , IFNULL(`pagado`.`valor`,0) AS `valor_pagado`
+                FROM 
+                    `ctb_doc`
+                    INNER JOIN
+                        (SELECT
+                            `ctb_libaux`.`id_ctb_doc`
+                            , SUM(`ctb_libaux`.`credito`) AS `valor`
+                        FROM
+                            `ctb_libaux`
+                            INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_libaux`.`id_ctb_doc` = $id_cop AND `ctb_libaux`.`ref` = 1)) AS `causado`
+                        ON(`causado`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    LEFT JOIN
+                        (SELECT
+                            `ctb_doc`.`id_ctb_doc_tipo3`
+                            , SUM(`tes_detalle_pago`.`valor`) AS `valor`
+                        FROM
+                            `tes_detalle_pago`
+                            INNER JOIN `ctb_doc` 
+                                ON (`tes_detalle_pago`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_doc`.`id_ctb_doc_tipo3` = $id_cop)) AS `pagado`
+                        ON(`causado`.`id_ctb_doc` = `pagado`.`id_ctb_doc_tipo3`)";
+        $rs = $cmd->query($sql);
+        $pagos = $rs->fetch();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    $valor_pagar = $pagos['valor_pagar'] - $pagos['valor_pagado'];
+}
 
 ?>
 <script>
@@ -106,26 +140,7 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ]
@@ -136,7 +151,7 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
 
     <div class="shadow">
         <div class="card-header" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">LISTA DE CUENTAS BANCARIAS Y FORMA DE PAGO <?php echo "valor a pagar " . $valor_programado; ?></h5>
+            <h5 style="color: white;">LISTA DE CUENTAS BANCARIAS Y FORMA DE PAGO</h5>
         </div>
         <div class="px-4 mt-3">
             <form id="formAddFormaPago">

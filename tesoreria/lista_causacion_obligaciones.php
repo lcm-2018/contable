@@ -23,7 +23,8 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 try {
-    $sql = "SELECT 
+    if ($_SESSION['pto'] == '1') {
+        $sql = "SELECT 
                 `t1`.`id_ctb_doc`
                 , `t1`.`causacion`
                 , `t1`.`registro`
@@ -68,6 +69,42 @@ try {
                 WHERE `ctb_doc`.`id_crp` IS NOT NULL) AS `t1`  
             WHERE  `valor` > `valor_pagado`
             GROUP BY `id_ctb_doc`";
+    } else {
+        $sql = "SELECT 
+                    `ctb_doc`.`id_ctb_doc`
+                    , `ctb_doc`.`id_manu` AS `causacion`
+                    , 0 AS `registro`
+                    , `ctb_doc`.`id_tercero`
+                    , `ctb_doc`.`fecha`
+                    , `causado`.`valor`
+                    , IFNULL(`pagado`.`valor`,0) AS `valor_pagado`
+                    , '' AS `num_contrato`
+                FROM 
+                    `ctb_doc`
+                    INNER JOIN
+                        (SELECT
+                            `ctb_libaux`.`id_ctb_doc`
+                            , SUM(`ctb_libaux`.`debito`) AS `valor`
+                        FROM
+                            `ctb_libaux`
+                            INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_doc`.`id_ctb_doc_tipo3` IS NULL AND `ctb_doc`.`id_tipo_doc` = 3 AND `ctb_doc`.`estado` = 2)
+                        GROUP BY `ctb_libaux`.`id_ctb_doc`) AS `causado`
+                        ON(`causado`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    LEFT JOIN
+                        (SELECT
+                            `ctb_libaux`.`id_ctb_doc`
+                            , `ctb_doc`.`id_ctb_doc_tipo3`
+                            , SUM(`ctb_libaux`.`debito`) AS `valor`
+                        FROM
+                            `ctb_libaux`
+                            INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_doc`.`id_ctb_doc_tipo3` > 0 AND `ctb_doc`.`estado` > 1)
+                        GROUP BY `ctb_libaux`.`id_ctb_doc`) AS `pagado`
+                        ON(`causado`.`id_ctb_doc` = `pagado`.`id_ctb_doc_tipo3`)";
+    }
     $sql2 = $sql;
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();
@@ -88,29 +125,14 @@ $terceros = getTerceros($ids, $cmd);
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
-        ]
+        ],
+        columnDefs: [{
+            targets: op_caracter == '2' ? [] : [1,2],
+            "visible": false
+        }],
     });
     $('#tableObligacionesPago').wrap('<div class="overflow" />');
 </script>

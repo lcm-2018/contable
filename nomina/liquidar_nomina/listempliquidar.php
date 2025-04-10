@@ -337,7 +337,7 @@ $carcater_empresa = $_SESSION['caracter'] == 2 ? $_SESSION['caracter'] : 1;
                                                             <td>
                                                                 <?php
                                                                 if ($diasVacacionar >= 360) {
-                                                                    echo '<span class="badge badge-danger">REGISTRAR VACACIONES (' . $diasVacacionar . ')</span>';
+                                                                    echo '<span class="badge badge-danger">VACACIONES (+ 360)</span>';
                                                                 }
                                                                 ?>
                                                             </td>

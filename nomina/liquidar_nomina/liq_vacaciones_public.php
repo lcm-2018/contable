@@ -303,6 +303,10 @@ foreach ($datos as $d) {
     $key = array_search($id_empleado, array_column($bpserv, 'id_empleado'));
     $bsp = $key !== false ? $bpserv[$key]['val_bsp'] : 0;
     //prima de vacaciones
+    if ($_SESSION['caracter'] == '1') {
+        $bsp = $primservicio = $gasrep = $auxt = $auxali = 0;
+        $dayvac = $dayhab;
+    }
     $primvacacion  = (($salbase + $gasrep + $auxt + $auxali + $bsp / 12 + $primservicio / 12) * $dayhab) / 30;
     $primavacn = ($primvacacion / 360) * $diastocalc;
     //liquidacion vacaciones
@@ -311,6 +315,9 @@ foreach ($datos as $d) {
     $bonrecrea = ($salbase / 30) * 2;
     $bonrecreacion = ($bonrecrea / 360) * $diastocalc;
     $bonserpres = 0;
+    if ($_SESSION['caracter'] == '1') {
+        $primavacn = $bonrecreacion = 0;
+    }
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);

@@ -733,53 +733,56 @@ if (isset($_POST['check'])) {
             }
             $dayBSP = 30 - $daylcnr;
             $bsp_salarial = 0;
-            $bsp = (($salbase + $gasrep) <= $bbs ? ($salbase + $gasrep) * 0.5 : ($salbase + $gasrep) * 0.35);
-            $keybxsp = array_search($i, array_column($bonxserv, 'id_empleado'));
-            if ($keybxsp !== false) {
-                $keybsp = array_search($i, array_column($dias_bonificacion, 'id_empleado'));
-                $esta = false !== $keybsp ? $dias_bonificacion[$keybsp]['total_dias'] + $dayBSP : 0;
-            } else {
-                try {
-                    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                    $sql = "SELECT
+            $bsp = 0;
+            if ($_SESSION['caracter'] == '2') {
+                $bsp = (($salbase + $gasrep) <= $bbs ? ($salbase + $gasrep) * 0.5 : ($salbase + $gasrep) * 0.35);
+                $keybxsp = array_search($i, array_column($bonxserv, 'id_empleado'));
+                if ($keybxsp !== false) {
+                    $keybsp = array_search($i, array_column($dias_bonificacion, 'id_empleado'));
+                    $esta = false !== $keybsp ? $dias_bonificacion[$keybsp]['total_dias'] + $dayBSP : 0;
+                } else {
+                    try {
+                        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                        $sql = "SELECT
                                 `id_empleado`
                                 , SUM(`cant_dias`) AS `total_dias`
                             FROM
                                 `nom_liq_dias_lab`
                             WHERE (`id_empleado`  = $i)";
-                    $res = $cmd->query($sql);
-                    $dyastobs = $res->fetch(PDO::FETCH_ASSOC);
-                    $esta = $dyastobs['total_dias'] + $dayBSP;
-                } catch (PDOException $e) {
-                    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-                }
-            }
-            $keycargo = array_search($i, array_column($emple, 'id_empleado'));
-            $cargo = false !== $keycargo ? $emple[$keycargo]['cargo'] : 0;
-            if ($esta >= 360) {
-                if (!($cargo == 1 || $cargo == 2 || $cargo == 3 || $cargo == 12 || $cargo == 14 || $cargo == 18)) {
-                    $bsp_salarial = $bsp;
-                    try {
-                        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                        $sql = "INSERT INTO `nom_liq_bsp`(`id_empleado`, `val_bsp`, `id_user_reg`, `fec_reg`, `id_nomina`, `mes`, `anio`) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)";
-                        $sql = $cmd->prepare($sql);
-                        $sql->bindParam(1, $i, PDO::PARAM_INT);
-                        $sql->bindParam(2, $bsp, PDO::PARAM_STR);
-                        $sql->bindParam(3, $id_user, PDO::PARAM_INT);
-                        $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
-                        $sql->bindParam(5, $id_nomina, PDO::PARAM_INT);
-                        $sql->bindParam(6, $mes, PDO::PARAM_STR);
-                        $sql->bindParam(7, $anio, PDO::PARAM_STR);
-                        $sql->execute();
-                        if (!($cmd->lastInsertId() > 0)) {
-                            echo $sql->errorInfo()[2] . '2';
-                        }
-                        $cmd = null;
+                        $res = $cmd->query($sql);
+                        $dyastobs = $res->fetch(PDO::FETCH_ASSOC);
+                        $esta = $dyastobs['total_dias'] + $dayBSP;
                     } catch (PDOException $e) {
-                        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+                    }
+                }
+                $keycargo = array_search($i, array_column($emple, 'id_empleado'));
+                $cargo = false !== $keycargo ? $emple[$keycargo]['cargo'] : 0;
+                if ($esta >= 360) {
+                    if (!($cargo == 1 || $cargo == 2 || $cargo == 3 || $cargo == 12 || $cargo == 14 || $cargo == 18)) {
+                        $bsp_salarial = $bsp;
+                        try {
+                            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                            $sql = "INSERT INTO `nom_liq_bsp`(`id_empleado`, `val_bsp`, `id_user_reg`, `fec_reg`, `id_nomina`, `mes`, `anio`) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?)";
+                            $sql = $cmd->prepare($sql);
+                            $sql->bindParam(1, $i, PDO::PARAM_INT);
+                            $sql->bindParam(2, $bsp, PDO::PARAM_STR);
+                            $sql->bindParam(3, $id_user, PDO::PARAM_INT);
+                            $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
+                            $sql->bindParam(5, $id_nomina, PDO::PARAM_INT);
+                            $sql->bindParam(6, $mes, PDO::PARAM_STR);
+                            $sql->bindParam(7, $anio, PDO::PARAM_STR);
+                            $sql->execute();
+                            if (!($cmd->lastInsertId() > 0)) {
+                                echo $sql->errorInfo()[2] . '2';
+                            }
+                            $cmd = null;
+                        } catch (PDOException $e) {
+                            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                        }
                     }
                 }
             }
@@ -868,8 +871,8 @@ if (isset($_POST['check'])) {
                     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                     $sql = "SELECT id_licmp, SUM(dias_liqs) AS tot_dias
                             FROM nom_liq_licmp
-                            GROUP BY id_licmp
-                            HAVING id_licmp = '$idlc'";
+                            WHERE id_licmp = '$idlc'
+                            GROUP BY id_licmp";
                     $rs = $cmd->query($sql);
                     $diaslic = $rs->fetch();
                     $cmd = null;
@@ -1012,6 +1015,17 @@ if (isset($_POST['check'])) {
                 $vacacionsalario = $vacacion;
                 $primavacnsalario = $primavacn;
                 $bonrecreacionsalario = $bonrecreacion;
+                if ($_SESSION['caracter'] == '1') {
+                    //$diastocalc -> 360
+                    $dayvac = ($diastocalc * 15) / 360;
+                    $vacacionsalario = ($salbase * $diastocalc) / 720;
+                    $vacacion = $vacacionsalario;
+                    $bonserpres = 0;
+                    $primavacn = 0;
+                    $bonrecreacion = 0;
+                    $primavacnsalario = 0;
+                    $bonrecreacionsalario = 0;
+                }
                 try {
                     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -1455,6 +1469,15 @@ if (isset($_POST['check'])) {
                 $censantias = $salbase + $gasrep +  $auxt + $auxali + $ant_bsp / 12 + $ant_prima_servicio / 12 + $ant_prima_vacaciones / 12 + $ant_prima_navidad / 12;
                 $cesantia = ($censantias / 360) * $diastocesantias; //=
                 $icesant = $cesantia * 0.12;
+                if ($_SESSION['caracter'] == '1') {
+                    $vacacion = $salbase * $diatovaca / 720;
+                    $cesantia = ($salbase + $devhe + ($auxtransp * $diaslab)) * ($diaslab - $daylcnr) / 360;
+                    $icesant = $cesantia * 0.12;
+                    $prima = ($salbase + $devhe + ($auxtransp * ($diatovaca + $daylcnr))) * ($diatovaca + $daylcnr) / 360;
+                    $privacmes = 0;
+                    $prinavmes = 0;
+                    $bonrecmes = 0;
+                }
             }
             if ($tipo_emp == 12 || $tipo_emp == 8) {
                 $vacacion = 0;

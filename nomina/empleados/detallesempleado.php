@@ -394,6 +394,41 @@ if ($_SESSION['navarlat'] == '1') {
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="card">
+                                        <div class="card-header card-header-detalles py-0 headings" id="headingctt">
+                                            <h5 class="mb-0">
+                                                <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configctt" aria-expanded="true" aria-controls="collapsectt">
+                                                    <div class="form-row">
+                                                        <div class="div-icono">
+                                                            <span class="fas fa-file-contract fa-lg" style="color: #5dade2;">
+                                                        </div>
+                                                        <div>
+                                                            <?php echo $contador;
+                                                            $contador++ ?>. CONTRATOS.
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </h5>
+                                        </div>
+                                        <div id="configctt" class="collapse" aria-labelledby="headingctt">
+                                            <div class="card-body">
+                                                <table id="tbCttEmpleado" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                    <thead class="text-center">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Inicia</th>
+                                                            <th>Termina</th>
+                                                            <th>Salario</th>
+                                                            <th>Estado</th>
+                                                            <th>Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="modificaCttEmpleado">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <!-- parte-->
                                     <div class="card">
                                         <div class="card-header card-header-detalles py-0 headings" id="historyCCosto">

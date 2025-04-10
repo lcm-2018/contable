@@ -22,6 +22,7 @@ try {
                 `nit_ips` AS `nit`
                 , `razon_social_ips` AS `nombre`
                 , `caracter`
+                , `tiene_pto`
             FROM
                 `tb_datos_ips`";
     $rs = $cmd->query($sql);
@@ -55,6 +56,7 @@ try {
         $_SESSION['id_vigencia'] = $vigencia['id_vigencia'];
         $_SESSION['vigencia'] = $vigencia['anio'];
         $_SESSION['nit_emp'] = $empresa['nit'];
+        $_SESSION['pto'] = $empresa['tiene_pto'];
         $res['mensaje'] = 1;
         if ($obj['estado'] === '0') {
             $res['mensaje'] = 3;

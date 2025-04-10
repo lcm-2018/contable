@@ -25,6 +25,9 @@ try {
 }
 $response['res'] = 'error';
 $datosDoc = GetValoresCxP($id_doc, $cmd);
+if ($_SESSION['caracter'] == '1' && $_SESSION['pto'] == '0') {
+    $datosDoc['val_imputacion'] = $datosDoc['val_factura'];
+}
 if ($datosDoc['val_factura'] == $datosDoc['val_imputacion'] && $datosDoc['val_factura'] == $datosDoc['val_ccosto'] && $valida) {
     $response['res'] = 'ok';
 }

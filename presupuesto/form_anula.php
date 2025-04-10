@@ -29,7 +29,7 @@ try {
         <input type="hidden" id="tipo" name="tipo" value="<?php echo $tipo; ?>">
         <div class="shadow mb-3">
             <div class="card-header" style="background-color: #16a085 !important;">
-                <h6 style="color: white;"><i class="fas fa-lock fa-lg" style="color: #FCF3CF"></i>&nbsp;ANULACIÓN DE DOCUMENTO PRESUPUESTAL</h5>
+                <h5 style="color: white;"><i class="fas fa-lock fa-lg" style="color: #FCF3CF"></i>&nbsp;ANULACIÓN DE DOCUMENTO PRESUPUESTAL</h5>
             </div>
             <div class="pt-3 px-3">
                 <div class="form-row">
