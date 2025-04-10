@@ -16,10 +16,12 @@ try {
     echo '<option value="">' . $titulo . '</option>';    
     if ($todas){        
         $sql = "SELECT id_area,CONCAT_WS(' - ',nom_area,nom_sede) AS nom_area FROM far_centrocosto_area 
-                INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_centrocosto_area.id_sede) WHERE id_area<>0";
+                INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_centrocosto_area.id_sede) WHERE id_area<>0
+                ORDER BY ar_centrocosto_area.es_almacen DESC, far_centrocosto_area.nom_area";
     } else {    
         $sql = "SELECT id_area,CONCAT_WS(' - ',nom_area,nom_sede) AS nom_area FROM far_centrocosto_area 
-                INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_centrocosto_area.id_sede) WHERE id_area<>0 AND id_centrocosto=$idcec";
+                INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_centrocosto_area.id_sede) WHERE id_area<>0 AND id_centrocosto=$idcec
+                ORDER BY far_centrocosto_area.es_almacen DESC, far_centrocosto_area.nom_area";
     }
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();

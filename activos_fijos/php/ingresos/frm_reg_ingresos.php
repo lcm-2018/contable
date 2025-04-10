@@ -100,11 +100,11 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </div>    
                     </div>    
                     <div class="form-group col-md-2">
-                        <label for="txt_num_fac" class="small">No. Acta y/o Remisión</label>
+                        <label for="txt_num_fac" class="small">No. Fact./Acta/Rem.</label>
                         <input type="text" class="form-control form-control-sm" id="txt_num_fac" name="txt_num_fac" class="small" value="<?php echo $obj['num_factura'] ?>">
                     </div>
                     <div class="form-group col-md-2">
-                        <label for="txt_fec_fac" class="small">Fecha Acta y/o Remisión</label>
+                        <label for="txt_fec_fac" class="small">Fecha Fact./Acta/Rem.</label>
                         <input type="date" class="form-control form-control-sm" id="txt_fec_fac" name="txt_fec_fac" class="small" value="<?php echo $obj['fec_factura'] ?>">
                     </div>
                     <div class="form-group col-md-2">

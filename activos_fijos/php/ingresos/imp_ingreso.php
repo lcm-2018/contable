@@ -97,8 +97,8 @@ try {
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td>Sede</td>
             <td>Tipo de Ingreso</td>            
-            <td>No. Acta y/o Remisión</td>
-            <td>Fecha Acta y/o Remisión</td>
+            <td>No. Fact./Acta/Rem.</td>
+            <td>Fecha Fact./Acta/Rem.</td>
             <td colspan="2">Proveedor</td>
         </tr>
         <tr>
