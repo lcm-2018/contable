@@ -3,11 +3,7 @@ date_default_timezone_set('America/Bogota');
 
 $bd_driver = "mysql";
 $bd_servidor = "localhost";
-<<<<<<< HEAD
 $bd_base = "bd_eseipiales";
-=======
-$bd_base = "ips_mun";
->>>>>>> be873645bd26ded10b39652eae7ce20b699b846f
 $api =  "http://200.7.102.155/api_terceros/";
 $charset = "charset=utf8";
 $bd_usuario = "root";
