@@ -138,7 +138,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <thead>
                                         <tr class="text-center centro-vertical">
                                             <th rowspan="2">
-                                                <label for="chk_sel_filtri">Sel.</label>
+                                                <label for="chk_sel_filtro">Sel.</label>
                                                 <input type="checkbox" id="chk_sel_filtro">
                                             </th>
                                             <th colspan="3">Articulo</th>

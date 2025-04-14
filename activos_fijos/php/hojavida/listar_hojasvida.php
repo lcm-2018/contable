@@ -81,12 +81,12 @@ try {
             LEFT JOIN (SELECT MDA.id_activo_fijo,GROUP_CONCAT(MMA.id_mantenimiento) AS aprobado
                         FROM acf_mantenimiento_detalle AS MDA
                         INNER JOIN acf_mantenimiento AS MMA ON (MMA.id_mantenimiento=MDA.id_mantenimiento)
-                        WHERE MMA.estado=2 GROUP BY MDA.id_activo_fijo
+                        WHERE MMA.estado=2 AND MDA.estado IN (1,2) GROUP BY MDA.id_activo_fijo
                         ) AS MAPRO ON (MAPRO.id_activo_fijo=HV.id_activo_fijo)
             LEFT JOIN (SELECT MDE.id_activo_fijo,GROUP_CONCAT(MME.id_mantenimiento) AS ejecucion
                         FROM acf_mantenimiento_detalle AS MDE
                         INNER JOIN acf_mantenimiento AS MME ON (MME.id_mantenimiento=MDE.id_mantenimiento)
-                        WHERE MME.estado=3 GROUP BY MDE.id_activo_fijo
+                        WHERE MME.estado=3 AND MDE.estado IN (1,2) GROUP BY MDE.id_activo_fijo
                         ) AS MEJEC ON (MEJEC.id_activo_fijo=HV.id_activo_fijo)
             $where ORDER BY $col $dir $limit";
 

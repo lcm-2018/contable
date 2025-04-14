@@ -5,7 +5,8 @@ function sedes($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT tb_sedes.id_sede,tb_sedes.nom_sede FROM tb_sedes";
+        $sql = "SELECT tb_sedes.id_sede,tb_sedes.nom_sede FROM tb_sedes 
+                ORDER BY es_principal DESC,nom_sede ASC";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
@@ -27,8 +28,9 @@ function bodegas_sede($cmd, $titulo = '', $idsede = 0, $id = 0)
         echo '<option value="">' . $titulo . '</option>';
         if ($idsede != 0) {
             $sql = "SELECT far_bodegas.id_bodega,far_bodegas.nombre FROM far_bodegas
-                INNER JOIN tb_sedes_bodega ON (tb_sedes_bodega.id_bodega=far_bodegas.id_bodega)
-                WHERE tb_sedes_bodega.id_sede=$idsede";
+                    INNER JOIN tb_sedes_bodega ON (tb_sedes_bodega.id_bodega=far_bodegas.id_bodega)
+                    WHERE tb_sedes_bodega.id_sede=$idsede
+                    ORDER BY far_bodegas.es_principal DESC, far_bodegas.nombre";
             $rs = $cmd->query($sql);
             $objs = $rs->fetchAll();
             foreach ($objs as $obj) {
@@ -49,7 +51,8 @@ function bodegas($cmd, $titulo = '', $id = 0)
 {  
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT far_bodegas.id_bodega,far_bodegas.nombre FROM far_bodegas";
+        $sql = "SELECT far_bodegas.id_bodega,far_bodegas.nombre FROM far_bodegas
+                ORDER BY far_bodegas.es_principal DESC, far_bodegas.nombre";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
@@ -74,10 +77,12 @@ function sedes_usuario($cmd, $titulo = '', $id = 0)
         $idrol = $_SESSION['rol'];
         echo '<option value="">' . $titulo . '</option>';
         if ($idrol == 1) {
-            $sql = "SELECT tb_sedes.id_sede,tb_sedes.nom_sede FROM tb_sedes";
+            $sql = "SELECT tb_sedes.id_sede,tb_sedes.nom_sede FROM tb_sedes
+                    ORDER BY es_principal DESC,nom_sede ASC";
         } else {
             $sql = "SELECT tb_sedes.id_sede,tb_sedes.nom_sede FROM tb_sedes 
-                    INNER JOIN seg_sedes_usuario ON (seg_sedes_usuario.id_sede=tb_sedes.id_sede AND seg_sedes_usuario.id_usuario=$idusr)";
+                    INNER JOIN seg_sedes_usuario ON (seg_sedes_usuario.id_sede=tb_sedes.id_sede AND seg_sedes_usuario.id_usuario=$idusr)
+                    ORDER BY es_principal DESC,nom_sede ASC";
         }
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
@@ -105,12 +110,14 @@ function bodegas_usuario($cmd, $titulo = '', $idsede = 0, $id = 0)
             if ($idrol == 1) {
                 $sql = "SELECT far_bodegas.id_bodega,far_bodegas.nombre FROM far_bodegas
                     INNER JOIN tb_sedes_bodega ON (tb_sedes_bodega.id_bodega=far_bodegas.id_bodega)
-                    WHERE tb_sedes_bodega.id_sede=$idsede";
+                    WHERE tb_sedes_bodega.id_sede=$idsede
+                    ORDER BY far_bodegas.es_principal DESC, far_bodegas.nombre";
             } else {
                 $sql = "SELECT far_bodegas.id_bodega,far_bodegas.nombre FROM far_bodegas
                     INNER JOIN tb_sedes_bodega ON (tb_sedes_bodega.id_bodega=far_bodegas.id_bodega)
                     INNER JOIN seg_bodegas_usuario ON (seg_bodegas_usuario.id_bodega=far_bodegas.id_bodega AND seg_bodegas_usuario.id_usuario=$idusr)
-                    WHERE tb_sedes_bodega.id_sede=$idsede";
+                    WHERE tb_sedes_bodega.id_sede=$idsede
+                    ORDER BY far_bodegas.es_principal DESC, far_bodegas.nombre";
             }
             $rs = $cmd->query($sql);
             $objs = $rs->fetchAll();
@@ -132,7 +139,7 @@ function centros_costo($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_centro,nom_centro FROM tb_centrocostos WHERE id_centro<>0";
+        $sql = "SELECT id_centro,nom_centro FROM tb_centrocostos WHERE id_centro<>0 ORDER BY nom_centro";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
@@ -158,10 +165,11 @@ function centros_costo_usuario($cmd, $titulo = '', $id = 0)
         $rs = $cmd->query($sql);
         $obj = $rs->fetch();        
         if ($idrol == 1 || $obj['bodegas']>0) {
-            $sql = "SELECT id_centro,nom_centro FROM tb_centrocostos WHERE id_centro<>0";
+            $sql = "SELECT id_centro,nom_centro FROM tb_centrocostos WHERE id_centro<>0 ORDER BY nom_centro";
         } else {
             $sql = "SELECT id_centro,nom_centro FROM tb_centrocostos 
-                    WHERE id_centro IN (SELECT id_centrocosto FROM seg_usuarios_sistema WHERE id_usuario=$idusr AND id_centrocosto<>0)";
+                    WHERE id_centro IN (SELECT id_centrocosto FROM seg_usuarios_sistema WHERE id_usuario=$idusr AND id_centrocosto<>0)
+                    ORDER BY nom_centro";
         }
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
@@ -209,7 +217,8 @@ function terceros($cmd, $titulo = '', $id = 0)
         $sql = "SELECT tb_terceros.id_tercero,tb_terceros.nom_tercero 
                 FROM tb_terceros
                 WHERE tb_terceros.id_tercero<>0 AND 
-                    (tb_terceros.id_tercero_api IN (SELECT id_tercero_api FROM tb_rel_tercero) OR tb_terceros.es_clinico=1)";
+                    (tb_terceros.id_tercero_api IN (SELECT id_tercero_api FROM tb_rel_tercero) OR tb_terceros.es_clinico=1)
+                ORDER BY tb_terceros.nom_tercero";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
@@ -493,7 +502,8 @@ function areas_centrocosto($cmd, $titulo = '', $idcec = 0, $id = -1)
         if ($idcec != 0) {
             $sql = "SELECT id_area,CONCAT_WS(' - ',nom_area,nom_sede) AS nom_area FROM far_centrocosto_area 
                     INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_centrocosto_area.id_sede)
-                    WHERE id_centrocosto=$idcec";
+                    WHERE id_centrocosto=$idcec
+                    ORDER BY far_centrocosto_area.es_almacen DESC, far_centrocosto_area.nom_area";
             $rs = $cmd->query($sql);
             $objs = $rs->fetchAll();
             foreach ($objs as $obj) {
@@ -514,7 +524,7 @@ function marcas($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id, descripcion FROM acf_marca WHERE id<>0";
+        $sql = "SELECT id, descripcion FROM acf_marca WHERE id<>0 ORDER BY descripcion";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {

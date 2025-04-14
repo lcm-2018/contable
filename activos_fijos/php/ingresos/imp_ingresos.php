@@ -88,8 +88,8 @@ try {
                 <th>No. Ingreso</th>
                 <th>Fecha Ingreso</th>
                 <th>Hora Ingreso</th>
-                <th>No. Factura</th>
-                <th>Fecha Factura</th>
+                <th>No. Fact./Acta/Rem.</th>
+                <th>Fecha Fact./Acta/Rem.</th>
                 <th>Detalle</th>
                 <th>Tercero</th>
                 <th>Tipo Ingreso</th>                

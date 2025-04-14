@@ -27,6 +27,8 @@ try {
         (PermisosUsuario($permisos, 5705, 5) && $oper == 'annul') || $id_rol == 1
       ){
 
+        $id = 0;
+
         if ($oper == 'add') {
             $id = $_POST['id_mantenimiento'];
 
@@ -144,12 +146,8 @@ try {
 
                     $sql = "UPDATE acf_mantenimiento SET estado=2,id_usr_aprueba=$id_usr_ope,fec_aprueba='$fecha_ope' WHERE id_mantenimiento=$id";
                     $rs1 = $cmd->query($sql);
-
-                    $sql = "UPDATE acf_hojavida SET estado=2 
-                            WHERE estado=1 AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
-                    $rs2 = $cmd->query($sql);
                     
-                    if ($rs1 == false || $rs2 == false || error_get_last()) {
+                    if ($rs1 == false || error_get_last()) {
                         $error = 1;
                     }                
                     if ($error == 0) {
@@ -194,12 +192,8 @@ try {
 
                     $sql = "UPDATE acf_mantenimiento SET estado=3,id_usr_ejecucion=$id_usr_ope,fec_ejecucion='$fecha_ope' WHERE id_mantenimiento=" . $id;
                     $rs1 = $cmd->query($sql);
-
-                    $sql = "UPDATE acf_hojavida SET estado=3 
-                            WHERE estado IN (1,2) AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
-                    $rs2 = $cmd->query($sql);
                     
-                    if ($rs1 == false || $rs2 == false || error_get_last()) {
+                    if ($rs1 == false || error_get_last()) {
                         $error = 1;
                     }                
                     if ($error == 0) {
@@ -231,12 +225,8 @@ try {
 
                 $sql = "UPDATE acf_mantenimiento SET estado=4,id_usr_cierre=$id_usr_ope,fec_cierre='$fecha_ope' WHERE id_mantenimiento=" . $id;
                 $rs1 = $cmd->query($sql);
-
-                $sql = "UPDATE acf_hojavida SET estado=1 
-                        WHERE estado IN (2,3) AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
-                $rs2 = $cmd->query($sql);
                 
-                if ($rs1 == false || $rs2 == false || error_get_last()) {
+                if ($rs1 == false || error_get_last()) {
                     $error = 1;
                 }                
                 if ($error == 0) {
@@ -265,12 +255,8 @@ try {
 
                 $sql = "UPDATE acf_mantenimiento SET estado=0,id_usr_anula=$id_usr_ope,fec_anulacion='$fecha_ope' WHERE id_mantenimiento=" . $id;
                 $rs1 = $cmd->query($sql);
-
-                $sql = "UPDATE acf_hojavida SET estado=1 
-                        WHERE estado IN (2,3) AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)";
-                $rs2 = $cmd->query($sql);
                 
-                if ($rs1 == false || $rs2 == false || error_get_last()) {
+                if ($rs1 == false || error_get_last()) {
                     $error = 1;
                 }                
                 if ($error == 0) {
@@ -285,25 +271,17 @@ try {
             }   
         }
 
-        //Coloca un estado de los activos que estan en algun mantenimiento
-        if ($oper == 'close' || $oper == 'annul') {
-            //Colocar en Para mantenimiento
-            $sql = "UPDATE acf_hojavida SET estado=2 
-                    WHERE estado=1 AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)
-                            AND id_activo_fijo IN (SELECT MD.id_activo_fijo 
-                                                    FROM acf_mantenimiento_detalle AS MD
-                                                    INNER JOIN acf_mantenimiento AS MM ON (MM.id_mantenimiento=MD.id_mantenimiento)
-                                                    WHERE MM.estado=2)";
+        //Actualiza el estado de los activo de la Orden siempre y cuando su estado actual sea 1,2 o 3
+        if ($oper == 'aprob' || $oper == 'ejecu' || $oper == 'close' || $oper == 'annul') {
+            $sql = "SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=" . $id;
             $rs = $cmd->query($sql);
+            $objs = $rs->fetchAll();
+            foreach ($objs as $obj) {
+                $estado = estados_activo_fijo($cmd, $obj['id_activo_fijo'])['estado'];
+                $sql = "UPDATE acf_hojavida SET estado=$estado WHERE estado IN (1,2,3) AND id_activo_fijo=" . $obj['id_activo_fijo'];
+                $rs1 = $cmd->query($sql);
+            }
 
-            //Colocar en En mantenimiento
-            $sql = "UPDATE acf_hojavida SET estado=3 
-                    WHERE estado IN (1,2) AND id_activo_fijo IN (SELECT id_activo_fijo FROM acf_mantenimiento_detalle WHERE id_mantenimiento=$id)
-                            AND id_activo_fijo IN (SELECT MD.id_activo_fijo 
-                                                    FROM acf_mantenimiento_detalle AS MD
-                                                    INNER JOIN acf_mantenimiento AS MM ON (MM.id_mantenimiento=MD.id_mantenimiento)
-                                                    WHERE MM.estado=3)";
-            $rs = $cmd->query($sql);
         }    
 
     } else {

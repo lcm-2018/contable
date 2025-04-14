@@ -11,12 +11,12 @@ $term = isset($_POST['term']) ? $_POST['term'] : exit('Acción no permitida');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT 
-                HV.id_activo_fijo,
+    $sql = "SELECT HV.id_activo_fijo,
                 CONCAT(HV.placa,' (',M.nom_medicamento,')') as nombre_activo
                 FROM acf_hojavida HV
                 INNER JOIN far_medicamentos M ON m.id_med = HV.id_articulo
-                WHERE CONCAT(HV.placa,' (',M.nom_medicamento,')') LIKE '%$term%'";
+                WHERE CONCAT(HV.placa,' (',M.nom_medicamento,')') LIKE '%$term%'
+                ORDER BY M.nom_medicamento,HV.placa";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;

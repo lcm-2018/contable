@@ -80,7 +80,8 @@ function datos_activo_fijo($cmd, $id_acf){
     }
 }
 
-function estados_activo_fijo($cmd, $id_acf){
+//FUNCION QUE ACTIVA O DESACTIVA EL ESTADO DEL ACTIVO FIJO PARA MODIFICAR
+function edit_estados_activo_fijo($cmd, $id_acf){
     try {
         $res = array();
         $sql = "SELECT COUNT(*) AS total FROM acf_baja_detalle
@@ -100,6 +101,38 @@ function estados_activo_fijo($cmd, $id_acf){
                 $res = array('edit_estado' => 0);
             } else {
                 $res = array('edit_estado' => 1);
+            }    
+        }
+        $cmd = null;
+        return $res;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+//FUNCION QUE RETORNA EL ESTADO DE MANTENIMIENTO DE UN ACTIVO FIJO
+function estados_activo_fijo($cmd, $id_acf){
+    try {
+        $res = array();
+        $sql = "SELECT COUNT(*) AS total FROM acf_mantenimiento_detalle
+                INNER JOIN acf_mantenimiento ON (acf_mantenimiento.id_mantenimiento=acf_mantenimiento_detalle.id_mantenimiento)
+                WHERE acf_mantenimiento.estado=3 AND acf_mantenimiento_detalle.estado IN (1,2) 
+                    AND acf_mantenimiento_detalle.id_activo_fijo=$id_acf";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();
+        if ($obj['total']>0) {
+            $res = array('estado' => 3);
+        } else {        
+            $sql = "SELECT COUNT(*) AS total FROM acf_mantenimiento_detalle
+                    INNER JOIN acf_mantenimiento ON (acf_mantenimiento.id_mantenimiento=acf_mantenimiento_detalle.id_mantenimiento)
+                    WHERE acf_mantenimiento.estado=2 AND acf_mantenimiento_detalle.estado IN (1,2) 
+                        AND acf_mantenimiento_detalle.id_activo_fijo=$id_acf";
+            $rs = $cmd->query($sql);
+            $obj = $rs->fetch();
+            if ($obj['total']>0) {
+                $res = array('estado' => 2);
+            } else {
+                $res = array('estado' => 1);
             }    
         }
         $cmd = null;
