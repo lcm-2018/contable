@@ -138,6 +138,7 @@ $val_iva = $valores[1];
                                     <input type="hidden" name="id_terceroapi" id="id_terceroapi" value="">
                                     <input type="hidden" name="id_detalle" id="id_detalle" value="0">
                                     <input type="hidden" name="id_rango" id="id_rango" value="0">
+                                    <input type="hidden" name="hd_id_causa_retencion" id="hd_id_causa_retencion" value="0">
                                 </div>
                             </div>
                         </div>
@@ -184,26 +185,31 @@ $val_iva = $valores[1];
                             $tercero = isset($tercero[0]) ? $tercero[0]['nom_tercero'] : '--';
                             // Obtener el saldo del registro por obligar
 
+                            $modificar = null;
+                            $editar = null;
+
+                            $editar = '<a value="' . $id_doc . '" onclick="eliminarRetencion(' . $id_doc . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+
                             if (true) {
-                                $editar = '<a value="' . $id_doc . '" onclick="eliminarRetencion(' . $id_doc . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
                             </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <a value="' . $id_doc . '" class="dropdown-item sombra carga" href="#">Historial</a>
                             </div>';
-                            } else {
-                                $editar = null;
                             }
+                            
                             $valor = number_format($ce['valor_base'], 2, '.', ',');
                             $acciones = NULL;
+
+                            $modificar = '<a value="' . $id_doc . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb modificar" title="Causar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
                         ?>
                             <tr id="<?php echo $id_doc; ?>">
                                 <td class="text-left"> <?php echo $tercero; ?></td>
                                 <td class="text-left"> <?php echo $ce['nombre_retencion']; ?></td>
                                 <td class="text-right"> <?php echo number_format($ce['valor_base'], 2, '.', ','); ?></td>
                                 <td class="text-right"> <?php echo number_format($ce['valor_retencion'], 2, '.', ','); ?></td>
-                                <td class="text-center"> <?php echo $editar .  $acciones; ?></td>
+                                <td class="text-center"> <?php echo $modificar . $editar .  $acciones; ?></td>
 
                             </tr>
                         <?php

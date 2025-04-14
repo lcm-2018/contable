@@ -363,6 +363,36 @@
 			$("#divForms").html(he);
 		});
 	});
+
+	//--------------------------------- modificar retenciones
+	$('#divForms').on("click", ".modificar", function () {
+		var id = $(this).attr('value');
+
+		let id_ctb_doc = id_docr.value;
+		let data = [id_ctb_doc, 0];
+
+		$('#hd_id_causa_retencion').val(id);
+
+		$.ajax({
+            type: 'POST',
+            url: window.urlin + '/contabilidad/datos/eliminar/modificar_mvto_retenciones.php',
+            dataType: 'json',
+            data: { id: id, oper: 'del' }
+        }).done(function (r) {
+            $('#divModalConfDel').modal('hide');
+            if (r.mensaje == 'ok') {
+                $('#tipo_rete').val(r.id_tipo_retencion);
+				mostrarRetenciones(r.id_tipo_retencion);
+				$('#id_rete').val(r.id_retencion);
+				$('#valor_rte').val(response[0].valor_retencion);
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function () { }).fail(function () {
+            alert('Ocurrió un error');
+        });		
+	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
 /*var recargartable = function (nom) {
@@ -1714,28 +1744,55 @@ var ValorBase = function (data) {
 };
 // Guardar valor de la retención
 var GuardarRetencion = function (boton) {
-	InactivaBoton(boton);
-	$('.is-invalid').removeClass('is-invalid');
-	if ($('#tipo_rete').val() == '3') {
-		enviaRetenciones();
-	} else {
-		if ($('#tipo_rete').val() == '0') {
-			$('#tipo_rete').addClass('is-invalid');
-			$('#tipo_rete').focus();
-			mjeError('Debe seleccionar un tipo retención');
-		} else if ($('#id_rete').val() == '0') {
-			$('#id_rete').addClass('is-invalid');
-			$('#id_rete').focus();
-			mjeError('Debe seleccionar una retención');
-		} else if (Number($('#valor_rte').val()) < 0) {
-			$('#valor_rte').addClass('is-invalid');
-			$('#valor_rte').focus();
-			mjeError('Debe ingresar un valor de retención');
-		} else {
+	if ($('#hd_id_causa_retencion').val() == "0") {
+		InactivaBoton(boton);
+		$('.is-invalid').removeClass('is-invalid');
+		if ($('#tipo_rete').val() == '3') {
 			enviaRetenciones();
+		} else {
+			if ($('#tipo_rete').val() == '0') {
+				$('#tipo_rete').addClass('is-invalid');
+				$('#tipo_rete').focus();
+				mjeError('Debe seleccionar un tipo retención');
+			} else if ($('#id_rete').val() == '0') {
+				$('#id_rete').addClass('is-invalid');
+				$('#id_rete').focus();
+				mjeError('Debe seleccionar una retención');
+			} else if (Number($('#valor_rte').val()) < 0) {
+				$('#valor_rte').addClass('is-invalid');
+				$('#valor_rte').focus();
+				mjeError('Debe ingresar un valor de retención');
+			} else {
+				enviaRetenciones();
+			}
 		}
+		ActivaBoton(boton);
 	}
-	ActivaBoton(boton);
+	else {
+		InactivaBoton(boton);
+		$('.is-invalid').removeClass('is-invalid');
+		if ($('#tipo_rete').val() == '3') {
+			enviaRetenciones();
+		} else {
+			if ($('#tipo_rete').val() == '0') {
+				$('#tipo_rete').addClass('is-invalid');
+				$('#tipo_rete').focus();
+				mjeError('Debe seleccionar un tipo retención');
+			} else if ($('#id_rete').val() == '0') {
+				$('#id_rete').addClass('is-invalid');
+				$('#id_rete').focus();
+				mjeError('Debe seleccionar una retención');
+			} else if (Number($('#valor_rte').val()) < 0) {
+				$('#valor_rte').addClass('is-invalid');
+				$('#valor_rte').focus();
+				mjeError('Debe ingresar un valor de retención');
+			} else {
+				enviaRetencionesMod();
+				reloadtable('tableCausacionRetenciones');
+			}
+		}
+		ActivaBoton(boton);
+	}
 };
 function enviaRetenciones() {
 	$("#formAddRetencioness").find(":disabled").prop("disabled", false);
@@ -1757,6 +1814,27 @@ function enviaRetenciones() {
 		}
 	});
 }
+function enviaRetencionesMod() {
+	$("#formAddRetencioness").find(":disabled").prop("disabled", false);
+	var data = $('#formAddRetencioness').serialize();
+	$("#formAddRetencioness").find(":disabled").prop("disabled", true);
+	$.ajax({
+		type: 'POST',
+		dataType: 'json',
+		url: 'datos/registrar/modificar_mvto_retenciones.php',
+		data: data,
+		success: function (r) {
+			//if (r.status == 'ok') {
+				mje('Proceso realizado correctamente');
+				DesctosCtasPorPagar($('#id_ctb_doc').val(), $('#factura_des').val());
+				$('#valDescuentos').html(r.acumulado);
+			//} else {
+				//mjeError('Error:', r.msg);
+			//}
+		}
+	});
+}
+
 document.addEventListener("submit", (e) => {
 	e.preventDefault();
 	if (e.target.id == "formAddRetencioness") {
