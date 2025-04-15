@@ -2,7 +2,8 @@
 
 include '../../../conexion.php';
 $data = file_get_contents("php://input");
-$data = str_replace('|', '', $data);
+$data = str_replace('|', ',', $data);
+$data = str_replace("'", "", $data);
 // Incio la transaccion
 $response['status'] = 'error';
 try {

@@ -48,7 +48,7 @@ try {
 ?>
 <div class="text-right py-3">
     <?php if (PermisosUsuario($permisos, 5501, 6)  || $id_rol == 1) { ?>
-        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecDoc('areaImprimir',<?php echo implode('|', $_POST['id']); ?>);"> Imprimir</a>
+        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecDoc('areaImprimir','<?php echo implode('|', $_POST['id']); ?>');"> Imprimir</a>
     <?php } ?>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>
