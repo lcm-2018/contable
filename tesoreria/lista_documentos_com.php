@@ -138,6 +138,9 @@ try {
                                                      </div>';
                                                 }
                                                 ?>
+                                                <button type="button" class="btn btn-success" title="Imprimir por Lotes" id="btnImpLotesTes">
+                                                    <i class="fas fa-print fa-lg"></i>
+                                                </button>
                                             </div>
                                         </div>
 
