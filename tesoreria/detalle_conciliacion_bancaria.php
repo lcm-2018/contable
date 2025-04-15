@@ -108,6 +108,31 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+
+try {
+    $sql = "SELECT
+                `tes_cuentas`.`id_tes_cuenta`
+                , SUM(IFNULL(`ctb_libaux`.`debito`,0) - IFNULL(`ctb_libaux`.`credito`,0)) AS `saldo_lib`
+            FROM
+                `ctb_libaux`
+                INNER JOIN `ctb_pgcp` 
+                    ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                INNER JOIN `tes_cuentas` 
+                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                INNER JOIN `ctb_doc` 
+                    ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+            WHERE (`tes_cuentas`.`id_tes_cuenta`  = $id AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') <= '$fin_mes')";
+    $rs = $cmd->query($sql);
+    $libros = $rs->fetch(PDO::FETCH_ASSOC);
+    if (!empty($libros)) {
+        $saldo_libros = $libros['saldo_lib'];
+    } else {
+        $saldo_libros = 0;
+    }
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 try {
     $sql = "SELECT
                     `tb_bancos`.`id_banco`
@@ -196,8 +221,8 @@ $ver = 'readonly';
                                             <span class="small">SALDO LIBROS </span>
                                         </div>
                                         <div class="col-md-4">
-                                            <div class="form-control form-control-sm text-right" readonly><?php echo pesos($detalles['debito'] - $detalles['credito']) ?></div>
-                                            <input type="hidden" id="salLib" value="<?php echo $detalles['debito'] - $detalles['credito'] ?>">
+                                            <div class="form-control form-control-sm text-right" readonly><?php echo pesos($saldo_libros) ?></div>
+                                            <input type="hidden" id="salLib" value="<?php echo $saldo_libros ?>">
                                         </div>
                                     </div>
                                     <div class="row mb-1">
