@@ -31,7 +31,7 @@ if ($anulados == 1 || $_POST['search']['value'] != '') {
 
 //----------- filtros--------------------------
 
-$andwhere = " WHERE 1";
+$andwhere = " ";
 
 if (isset($_POST['id_manu']) && $_POST['id_manu']) {
     $andwhere .= " AND ctb_doc.id_manu LIKE '%" . $_POST['id_manu'] . "%'";
@@ -71,7 +71,7 @@ try {
     $fecha_cierre = !empty($fecha_cierre) ? $fecha_cierre['fecha_cierre'] : date("Y-m-d");
     $fecha_cierre = date('Y-m-d', strtotime($fecha_cierre));
     // incrementar un dia a $fecha cierre
-    $fecha_cierre = date('Y-m-d', strtotime($fecha_cierre . '+1 day'));
+    $fecha_cierre = date('Y-m-d', strtotime($fecha_cierre . '+15 day'));
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }

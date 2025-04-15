@@ -230,7 +230,6 @@ try {
         $id_rte = $dr['id_retencion'];
         $id_cuenta = $dr['id_cuenta'];
         $credito = $dr['valor_retencion'];
-        $id_tercero = $dr['id_terceroapi'];
         $query->execute();
         if ($cmd->lastInsertId() > 0) {
             $total_credito += $credito;
@@ -245,7 +244,6 @@ try {
             $key = array_search($id_tipo_bn_sv, array_column($ctas_credito, 'id_tipo_bn_sv'));
             $id_cuenta = $key !== false ? $ctas_credito[$key]['id_cuenta'] : NULL;
             $credito = $total_debito - $total_credito;
-            $id_tercero = $id_tercero_ant;
             $ref = 1;
             $query->execute();
             if ($cmd->lastInsertId() > 0) {
@@ -257,7 +255,6 @@ try {
         }
     } else {
         $credito = $total_debito - $total_credito;
-        $id_tercero = $id_tercero_ant;
         $ref = 1;
         $query->execute();
         if ($cmd->lastInsertId() > 0) {

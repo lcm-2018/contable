@@ -1478,6 +1478,18 @@ $urlin = $_SESSION['urlin'];
                     }
                 }
                 ?>
+                <?php if (PermisosUsuario($permisos, 5099, 1) || $id_rol == 1) { ?>
+                    <a class="nav-link sombra opcion_personalizado" href="javascript:void(0)" txt_id_opcion="5499">
+                        <div class="form-row">
+                            <div class="div-icono">
+                                <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
+                            </div>
+                            <div>
+                                Inf. Personalizados
+                            </div>
+                        </div>
+                    </a>
+                <?php } ?>
             </div>
         </div>
         <div class="sb-sidenav-footer py-0">

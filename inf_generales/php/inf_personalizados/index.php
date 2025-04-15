@@ -43,7 +43,7 @@ include '../../../permisos.php';
                         <div class="card-body" id="divCuerpoPag">
                             <table style="width:100% !important">
                                 <tr>
-                                    <td style="width:50% !important">
+                                    <td style="width:50% !important" class="align-top">
                                         <div class="form-row">
                                             <input type="hidden" id="txt_id_opcion" value="<?php echo $_POST['id_opcion'] ?>">
                                             <div class="form-group col-md-6">

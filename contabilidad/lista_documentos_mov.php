@@ -174,6 +174,9 @@ $cmd = null;
                                                      </div>';
                                                 }
                                                 ?>
+                                                <button type="button" class="btn btn-success" title="Imprimir por Lotes" id="btnImpLotes">
+                                                    <i class="fas fa-print fa-lg"></i>
+                                                </button>
                                             </div>
                                         </div>
 

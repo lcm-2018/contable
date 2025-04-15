@@ -34,7 +34,7 @@ if ($id_cta_factura == 0) {
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $id_ctb_doc, PDO::PARAM_INT);
         $sql->bindParam(2, $id_tipo_doc, PDO::PARAM_INT);
-        $sql->bindParam(3, $num_doc, PDO::PARAM_INT);
+        $sql->bindParam(3, $num_doc, PDO::PARAM_STR);
         $sql->bindParam(4, $fecha_fact, PDO::PARAM_STR);
         $sql->bindParam(5, $fecha_ven, PDO::PARAM_STR);
         $sql->bindParam(6, $valor_pago, PDO::PARAM_STR);
@@ -61,7 +61,7 @@ if ($id_cta_factura == 0) {
                 WHERE `id_cta_factura` = ?";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $id_tipo_doc, PDO::PARAM_INT);
-        $sql->bindParam(2, $num_doc, PDO::PARAM_INT);
+        $sql->bindParam(2, $num_doc, PDO::PARAM_STR);
         $sql->bindParam(3, $fecha_fact, PDO::PARAM_STR);
         $sql->bindParam(4, $fecha_ven, PDO::PARAM_STR);
         $sql->bindParam(5, $valor_pago, PDO::PARAM_STR);

@@ -23,13 +23,3 @@
 [2025-04-07 15:56:27] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 436
 [2025-04-07 16:07:06] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 437
 [2025-04-07 17:49:23] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_detalle_pago WHERE id_detalle_pago = 86
-[2025-04-14 09:36:55] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 94
-[2025-04-14 09:40:05] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 95
-[2025-04-14 09:40:20] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 96
-[2025-04-14 14:32:47] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 98
-[2025-04-14 15:37:37] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 97
-[2025-04-14 16:21:23] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 99
-[2025-04-14 17:10:30] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 100
-[2025-04-14 17:34:33] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM tes_detalle_pago WHERE id_detalle_pago = 408
-[2025-04-14 17:34:52] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 6594
-[2025-04-14 17:34:57] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 1866

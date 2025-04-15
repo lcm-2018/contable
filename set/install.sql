@@ -197,3 +197,43 @@ INSERT INTO `far_subgrupos` (`id_subgrupo`, `cod_subgrupo`, `nom_subgrupo`, `id_
 INSERT  INTO `tes_caja_tipogasto`(`id_caja_tipogasto`,`nombre_tipogasto`,`estado`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`) VALUES (1,'ADQUISICION DE BIENES',1,1,'2023-04-26 19:39:50',NULL,NULL),(2,'ADQUISICION DE SERVICIOS',1,1,'2023-04-26 19:40:10',NULL,NULL);
 
 INSERT  INTO `tes_caja_conceptos`(`id_caja_concptos`,`id_caja_tipogasto`,`concepto`,`estado`,`id_user_reg`,`fec_reg`,`id_user_act`,`fec_act`) VALUES (1,1,'Impresos y publicaciones',1,1,'2023-04-26 22:12:37',NULL,NULL),(2,1,'Comunicación y transporte',1,1,'2023-04-26 22:12:37',NULL,NULL),(3,1,'Elementos para mantenimiento administrativo',1,1,'2023-04-26 22:12:37',NULL,NULL),(4,2,'Mantenimiento operativo',1,1,'2023-04-26 22:12:37',NULL,NULL);
+
+DELIMITER //
+
+CREATE FUNCTION calcularDV(nit VARCHAR(20)) RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE arr TEXT DEFAULT '3,7,13,17,19,23,29,37,41,43,47,53,59,67,71';
+    DECLARE x INT DEFAULT 0;
+    DECLARE y INT DEFAULT 0;
+    DECLARE z INT DEFAULT LENGTH(nit);
+    DECLARE i INT DEFAULT 0;
+    DECLARE valor_nit INT;
+    DECLARE valor_arr INT;
+    DECLARE pos INT;
+
+    IF nit IS NULL OR nit = '' OR nit REGEXP '[^0-9]' THEN
+        RETURN -1; -- Indica un error
+    END IF;
+
+    WHILE i < z DO
+        SET valor_nit = SUBSTRING(nit, i + 1, 1);
+        SET pos = z - i;
+
+        -- Obtener el valor correspondiente del array
+        SET valor_arr = CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(arr, ',', pos), ',', -1) AS UNSIGNED);
+
+        SET x = x + (valor_nit * valor_arr);
+        SET i = i + 1;
+    END WHILE;
+
+    SET y = x % 11;
+
+    IF y > 1 THEN
+        RETURN 11 - y;
+    ELSE
+        RETURN y;
+    END IF;
+END //
+
+DELIMITER ;
