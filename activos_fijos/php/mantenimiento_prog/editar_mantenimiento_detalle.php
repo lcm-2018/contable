@@ -67,11 +67,10 @@ try {
 
                 if ($updated) {                    
                     //Actualiza el estado general del activo fijo
-                    $sql = "UPDATE acf_hojavida SET estado_general=:estado_general,causa_est_general=:causa_est_general,estado=:estado WHERE id_activo_fijo=:id_activo_fijo";
+                    $sql = "UPDATE acf_hojavida SET estado_general=:estado_general,causa_est_general=:causa_est_general WHERE id_activo_fijo=:id_activo_fijo";
                     $sql = $cmd->prepare($sql);
                     $sql->bindValue(':estado_general', $_POST['sl_estado_general'], PDO::PARAM_INT);
                     $sql->bindValue(':causa_est_general',$_POST['txt_observacio_fin_mant'], PDO::PARAM_STR);
-                    $sql->bindValue(':estado', 1);
                     $sql->bindValue(':id_activo_fijo', $obj_man['id_activo_fijo'], PDO::PARAM_INT);                            
                     $updated = $sql->execute();
                 }
@@ -97,6 +96,13 @@ try {
                         $sql = "UPDATE acf_mantenimiento SET estado=4 WHERE id_mantenimiento="  . $obj_man['id_mantenimiento'];
                         $updated = $cmd->query($sql);
                     }   
+                }
+
+                if ($updated) {   
+                    //Actualiza el estado del activo siempre y cuando su estado actual sea 1,2 o 3
+                    $estado = estados_activo_fijo($cmd, $obj_man['id_activo_fijo'])['estado'];
+                    $sql = "UPDATE acf_hojavida SET estado=$estado WHERE estado IN (1,2,3) AND id_activo_fijo=" . $obj_man['id_activo_fijo'];
+                    $rs1 = $cmd->query($sql);
                 }
 
                 if ($updated) {

@@ -117,13 +117,6 @@ var verifica_valmax = function(objeto, val = 500, msg = "") {
 };
 
 $(function() {
-    $('#divModalForms').on('shown.bs.modal', function() {
-        let $modal = $('#divTamModalReg, #divTamModalBus, #divTamModalImp, #divTamModalAux');
-        $modal.css({}).draggable({
-            containment: "window"
-        });
-    });
-
     //Dato numerico
     $("#divModalForms,#divModalReg,#divModalBus").on("input", ".number", function() {
         var that = $(this);

@@ -50,7 +50,7 @@ if (empty($obj)) {
     $obj['nom_responsable'] = $area['nom_responsable'];
 }
 
-$edit_est = estados_activo_fijo($cmd,$id);
+$edit_est = edit_estados_activo_fijo($cmd,$id);
 $editar = $edit_est['edit_estado'] == 1 ? '' : 'disabled="disabled"';
 $imprimir = $id != -1 ? '' : 'disabled="disabled"';
 

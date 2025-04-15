@@ -73,13 +73,13 @@ if(empty($obj)){
                     <div class="form-group col-md-5">
                         <label for="sl_cobertura" class="small">Cobertura</label>
                         <select class="form-control form-control-sm" id="sl_cobertura" name="sl_cobertura" required>
-                            <?php cobertura($cmd, '', $obj['id_regimen']) ?>
+                            <?php cobertura($cmd, '', $obj['id_cobertura']) ?>
                         </select>
                     </div>
                     <div class="form-group col-md-4">
                         <label for="sl_modalidad" class="small">Modalidad</label>
                         <select class="form-control form-control-sm" id="sl_modalidad" name="sl_modalidad" required>
-                            <?php modalidad($cmd, '', $obj['id_regimen']) ?>
+                            <?php modalidad($cmd, '', $obj['id_modalidad']) ?>
                         </select>
                     </div>
                     <div class="form-group col-md-3">
