@@ -360,7 +360,8 @@ $meses = [
         if ($cod_doc == 'CEVA') { ?>
             <a type="button" class="btn btn-info btn-sm" onclick="imprSelecTes('imprimeResolucion',<?php echo $id_doc; ?>);"> Resolución</a>
         <?php } ?>
-        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>
+        <!--<a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>-->
+        <a type="button" class="btn btn-primary btn-sm" id="btnImprimir">Imprimir</a>
     <?php } ?>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>

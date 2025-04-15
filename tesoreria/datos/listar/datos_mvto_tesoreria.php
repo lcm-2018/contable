@@ -28,6 +28,30 @@ if ($anulados == 1 || $_POST['search']['value'] != '') {
 } else {
     $where .= " AND `ctb_doc`.`estado` > 0";
 }
+
+//----------- filtros--------------------------
+
+$andwhere = " WHERE 1";
+
+if (isset($_POST['id_manu']) && $_POST['id_manu']) {
+    $andwhere .= " AND ctb_doc.id_manu LIKE '%" . $_POST['id_manu'] . "%'";
+}
+if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
+    $andwhere .= " AND ctb_doc.fecha BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+}
+if (isset($_POST['tercero']) && $_POST['tercero']) {
+    $andwhere .= " AND tb_terceros.nom_tercero LIKE '%" . $_POST['tercero'] . "%'";
+}
+if (isset($_POST['estado']) && strlen($_POST['estado'])) {
+    if ($_POST['estado'] == "-1") {
+        $andwhere .= " AND ctb_doc.estado>=" . $_POST['estado'];
+    } 
+    else {
+        $andwhere .= " AND ctb_doc.estado=" . $_POST['estado'];
+    }
+}
+
+//-----------------------------------------------------------------------------------------------
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $erp = [];
@@ -75,8 +99,8 @@ try {
                     ON (`nom_nomina_pto_ctb_tes`.`id_nomina` = `nom_nominas`.`id_nomina`)
                 LEFT JOIN `tb_terceros`
                     ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
-            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where) 
-            ORDER BY $col $dir $limit";
+            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where) $andwhere  
+             ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $listappto = $rs->fetchAll();
     // contar el total de registros

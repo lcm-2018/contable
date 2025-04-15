@@ -96,6 +96,7 @@ var tabla;
 				language: setIdioma,
 				serverSide: true,
 				processing: true,
+				searching: false,
 				ajax: {
 					url: "datos/listar/datos_mvto_caja.php",
 					data: function (d) {
@@ -140,9 +141,23 @@ var tabla;
 				language: setIdioma,
 				serverSide: true,
 				processing: true,
+				searching: false,
 				ajax: {
 					url: "datos/listar/datos_mvto_tesoreria.php",
 					data: function (d) {
+						d.id_manu = $('#txt_idmanu_filtro').val();
+						d.fec_ini = $('#txt_fecini_filtro').val();
+						d.fec_fin = $('#txt_fecfin_filtro').val();
+						d.tercero = $('#txt_tercero_filtro').val();
+						d.estado = $('#sl_estado_filtro').val();
+
+						if ($('#sl_estado_filtro').val() == "0") {
+							d.estado = "-1";
+						}
+						if ($('#sl_estado_filtro').val() == "3") {
+							d.estado = "0";
+						}
+
 						d.id_doc = id_doc;
 						d.anulados = $('#verAnulados').is(':checked') ? 1 : 0;
 						return d;
@@ -424,6 +439,19 @@ var tabla;
 			$('#divModalForms').modal('show');
 			$("#divForms").html(he);
 		});
+	});
+
+	//------------------------------
+	//Buscar registros de Ingresos
+	$('#btn_buscar_filtro').on("click", function () {
+		$('.is-invalid').removeClass('is-invalid');
+		reloadtable('tableMvtoTesoreriaPagos');
+	});
+
+	$('.filtro').keypress(function (e) {
+		if (e.keyCode == 13) {
+			reloadtable('tableMvtoTesoreriaPagos');
+		}
 	});
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
@@ -945,7 +973,7 @@ const EnviarNomina = (boton) => {
 			console.log(response);
 			if (response.msg == "ok") {
 				$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
-				if(response.incorrec > 0){
+				if (response.incorrec > 0) {
 					response.procesados = response.procesados + ' <br> ' + response.error;
 				}
 				mje(response.procesados);
@@ -1839,11 +1867,11 @@ const imprimirFormatoTes = (id) => {
 	}
 	let url = "soportes/imprimir_formato_pag.php";
 	$.post(url, { id: id }, function (he) {
-		$("#divTamModalForms").removeClass("modal-sm");
-		$("#divTamModalForms").removeClass("modal-xl");
-		$("#divTamModalForms").addClass("modal-lg");
-		$("#divModalForms").modal("show");
-		$("#divForms").html(he);
+		$('#divTamModalImp').removeClass('modal-sm');
+		$('#divTamModalImp').removeClass('modal-lg');
+		$('#divTamModalImp').addClass('modal-lg');
+		$('#divModalImp').modal('show');
+		$("#divImp").html(he);
 	});
 };
 
