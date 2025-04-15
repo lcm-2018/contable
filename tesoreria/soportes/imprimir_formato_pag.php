@@ -396,6 +396,76 @@ foreach ($documentos_tes as $documento) {
     ];
     ob_start();
 ?>
+<div class="text-right py-3">
+    <?php if (PermisosUsuario($permisos, 5601, 6)  || $id_rol == 1) {
+        if ($cod_doc == 'CEVA') { ?>
+            <a type="button" class="btn btn-info btn-sm" onclick="imprSelecTes('imprimeResolucion',<?php echo $id_doc; ?>);"> Resolución</a>
+        <?php } ?>
+        <!--<a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>-->
+        <a type="button" class="btn btn-primary btn-sm" id="btnImprimir">Imprimir</a>
+    <?php } ?>
+    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
+</div>
+<div class="contenedor bg-light" id="areaImprimir">
+    <style>
+        /* CSS para replicar la clase .row */
+        .row-custom {
+            display: flex;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+
+        .row-custom>div {
+            padding-right: 15px;
+            padding-left: 15px;
+        }
+
+        /* Opcional: columnas */
+        .col-6-custom {
+            flex: 0 0 50%;
+            /* Toma el 50% del ancho */
+            max-width: 50%;
+            /* Limita el ancho máximo al 50% */
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            /* Se añade rotación */
+            font-size: 100px;
+            color: rgba(255, 0, 0, 0.2);
+            /* Cambia la opacidad para que sea tenue */
+            z-index: 1000;
+            pointer-events: none;
+            /* Para que no interfiera con el contenido */
+            white-space: nowrap;
+            /* Evita que el texto se divida en varias líneas */
+        }
+
+        /* Estilos específicos para la impresión */
+        @media print {
+
+            body {
+                position: relative;
+            }
+
+            .watermark {
+                position: fixed;
+                /* Cambiar a 'fixed' para impresión */
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 100px;
+                color: rgba(255, 0, 0, 0.2);
+                /* Asegura que el color y opacidad se mantengan */
+                z-index: -1;
+                /* Colocar detrás del contenido impreso */
+            }
+        }
+    </style>
     <div class="px-2 " style="width:90% !important;margin: 0 auto;">
 
         </br>
