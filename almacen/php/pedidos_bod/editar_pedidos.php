@@ -21,7 +21,7 @@ try {
     if ((PermisosUsuario($permisos, 5003, 2) && $oper == 'add' && $_POST['id_pedido'] == -1) ||
         (PermisosUsuario($permisos, 5003, 3) && $oper == 'add' && $_POST['id_pedido'] != -1) ||
         (PermisosUsuario($permisos, 5003, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5005, 3) && $oper == 'conf') ||
+        (PermisosUsuario($permisos, 5003, 3) && $oper == 'conf') ||
         (PermisosUsuario($permisos, 5003, 3) && $oper == 'close') ||
         (PermisosUsuario($permisos, 5003, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
