@@ -6,8 +6,8 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
-$id_doc = $_POST['id'];
-$num_doc = '';
+$data = $_POST['id'];
+
 function pesos($valor)
 {
     return '$' . number_format($valor, 2);
@@ -18,6 +18,31 @@ include '../../financiero/consultas.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$tipo = $_POST['tipo'];
+
+if ($data['id'] == 0) {
+    $docIni = $data['docInicia'];
+    $docFin = $data['docTermina'];
+    try {
+        $sql = "SELECT `id_ctb_doc`, `id_manu`
+                FROM
+                    `ctb_doc`
+                WHERE (`id_manu` BETWEEN '$docIni' AND '$docFin' AND `id_tipo_doc` = $tipo AND `estado` > 0)";
+        $res = $cmd->query($sql);
+        $datos = $res->fetchAll();
+        $ids = array_map(function ($item) {
+            return intval($item['id_ctb_doc']);
+        }, $datos);
+        $ids = implode(',', $ids);
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+} else {
+    $ids = $data['id'];
+}
+// $id_doc = $_POST['id'];
+$num_doc = '';
 try {
     $sql = "SELECT
                 `ctb_doc`.`id_ctb_doc`
@@ -46,28 +71,43 @@ try {
                     ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
                 LEFT JOIN `tb_terceros` 
                     ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
-            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
+            WHERE (`ctb_doc`.`id_ctb_doc` IN ($ids))";
     $res = $cmd->query($sql);
-    $documento = $res->fetch();
+    $documentos_tes = $res->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$nom_doc = $documento['nombre'];
-$cod_doc = $documento['cod'];
-$tercero = $documento['nom_tercero'];
-$num_doc = $documento['nit_tercero'];
-// Valor total del registro
-try {
-    $sql = "SELECT `id_ctb_doc` , SUM(`debito`) AS `valor` FROM `ctb_libaux` WHERE (`id_ctb_doc` = $id_doc)";
-    $res = $cmd->query($sql);
-    $datos = $res->fetch();
-    $total = $datos['valor'];
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-// consultar el id del crrp para saber si es un pago presupuestal
-try {
-    $sql = "SELECT
+?>
+<div class="text-right py-3">
+    <?php if (PermisosUsuario($permisos, 5601, 6)  || $id_rol == 1) {
+        if ($tipo == '4') { ?>
+            <a type="button" class="btn btn-info btn-sm" onclick="imprSelecTes('imprimeResolucion','<?= str_replace(',', '|', $ids); ?>');"> Resolución</a>
+        <?php } ?>
+        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir','<?= str_replace(',', '|', $ids); ?>');"> Imprimir</a>
+    <?php } ?>
+    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
+</div>
+<?php
+$html_doc = '';
+$html_res = '';
+foreach ($documentos_tes as $documento) {
+    $id_doc = $documento['id_ctb_doc'];
+    $nom_doc = $documento['nombre'];
+    $cod_doc = $documento['cod'];
+    $tercero = $documento['nom_tercero'];
+    $num_doc = $documento['nit_tercero'];
+    // Valor total del registro
+    try {
+        $sql = "SELECT `id_ctb_doc` , SUM(`debito`) AS `valor` FROM `ctb_libaux` WHERE (`id_ctb_doc` = $id_doc)";
+        $res = $cmd->query($sql);
+        $datos = $res->fetch();
+        $total = $datos['valor'];
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    // consultar el id del crrp para saber si es un pago presupuestal
+    try {
+        $sql = "SELECT
                 `ctb_doc`.`id_ctb_doc`
                 , `pto_crp_detalle`.`id_pto_crp`
             FROM
@@ -79,16 +119,16 @@ try {
                 INNER JOIN `pto_crp_detalle` 
                     ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
             WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc) LIMIT 1 ";
-    $res = $cmd->query($sql);
-    $datos_crpp = $res->fetch(PDO::FETCH_ASSOC);
-    $id_crpp = !empty($datos_crpp) ? $datos_crpp['id_pto_crp'] : 0;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-$rubros = [];
-if ($id_crpp > 0) {
-    try {
-        $sql = "SELECT
+        $res = $cmd->query($sql);
+        $datos_crpp = $res->fetch(PDO::FETCH_ASSOC);
+        $id_crpp = !empty($datos_crpp) ? $datos_crpp['id_pto_crp'] : 0;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    $rubros = [];
+    if ($id_crpp > 0) {
+        try {
+            $sql = "SELECT
                     `ctb_doc`.`id_ctb_doc`
                     , `pto_pag_detalle`.`valor`
                     , `pto_cargue`.`nom_rubro`
@@ -107,14 +147,14 @@ if ($id_crpp > 0) {
                     INNER JOIN `pto_cargue` 
                         ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
-        $res = $cmd->query($sql);
-        $rubros = $res->fetchAll();
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-    }
-    // Consulto el numero de documentos asociados al pago 
-    try {
-        $sql = "SELECT
+            $res = $cmd->query($sql);
+            $rubros = $res->fetchAll();
+        } catch (PDOException $e) {
+            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+        }
+        // Consulto el numero de documentos asociados al pago 
+        try {
+            $sql = "SELECT
                     `ctb_doc`.`id_manu`
                     , `ctb_factura`.`num_doc`
                     , `ctb_tipo_doc`.`tipo`
@@ -149,16 +189,16 @@ if ($id_crpp > 0) {
                         WHERE (`pto_pag_detalle`.`id_ctb_doc` = $id_doc)) AS `descuento`
                         ON (`descuento`.`id_ctb_doc` = `pto_pag_detalle`.`id_ctb_doc`)
                 WHERE (`pto_pag_detalle`.`id_ctb_doc` = $id_doc)";
-        $rs = $cmd->query($sql);
-        $data = $rs->fetch();
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+            $rs = $cmd->query($sql);
+            $data = $rs->fetch();
+        } catch (PDOException $e) {
+            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+        }
     }
-}
-$enletras = numeroLetras($total);
-// Movimiento contable
-try {
-    $sql = "SELECT
+    $enletras = numeroLetras($total);
+    // Movimiento contable
+    try {
+        $sql = "SELECT
                 `ctb_libaux`.`id_cuenta`
                 , `ctb_pgcp`.`cuenta`
                 , `ctb_pgcp`.`nombre`
@@ -175,15 +215,15 @@ try {
                     ON (`ctb_libaux`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
             WHERE (`ctb_libaux`.`id_ctb_doc` = $id_doc)
             ORDER BY `ctb_pgcp`.`cuenta` DESC";
-    $res = $cmd->query($sql);
-    $movimiento = $res->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
+        $res = $cmd->query($sql);
+        $movimiento = $res->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
 
-// Consulta para mostrar la forma de pago
-try {
-    $sql = "SELECT
+    // Consulta para mostrar la forma de pago
+    try {
+        $sql = "SELECT
                 `tes_detalle_pago`.`id_detalle_pago`
                 ,`tb_bancos`.`nom_banco`
                 , `tes_cuentas`.`nombre`
@@ -200,28 +240,28 @@ try {
                 INNER JOIN `tb_bancos` 
                     ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
             WHERE (`tes_detalle_pago`.`id_ctb_doc` = $id_doc)";
-    $rs = $cmd->query($sql);
-    $formapago = $rs->fetchAll();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-// consulto el nombre de la empresa de la tabla tb_datos_ips
-try {
-    $sql = "SELECT 
+        $rs = $cmd->query($sql);
+        $formapago = $rs->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    // consulto el nombre de la empresa de la tabla tb_datos_ips
+    try {
+        $sql = "SELECT 
                 `tb_datos_ips`.`razon_social_ips` AS `nombre`, `tb_datos_ips`.`nit_ips` AS `nit`, `tb_datos_ips`.`dv` AS `dig_ver`, `tb_municipios`.`nom_municipio`
             FROM `tb_datos_ips`
                 INNER JOIN `tb_municipios`
                     ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)";
-    $res = $cmd->query($sql);
-    $empresa = $res->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-// si tipo de documento es CICP es un recibo de caja
+        $res = $cmd->query($sql);
+        $empresa = $res->fetch();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    // si tipo de documento es CICP es un recibo de caja
 
-if ($documento['id_tipo_doc'] == '9') {
-    try {
-        $sql = "SELECT
+    if ($documento['id_tipo_doc'] == '9') {
+        try {
+            $sql = "SELECT
                 `tes_causa_arqueo`.`id_causa_arqueo`
                 , `tes_causa_arqueo`.`fecha_ini`
                 , `tes_causa_arqueo`.`fecha_fin`
@@ -236,18 +276,18 @@ if ($documento['id_tipo_doc'] == '9') {
                 INNER JOIN `tb_terceros` 
                     ON (`tes_causa_arqueo`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE (`tes_causa_arqueo`.`id_ctb_doc` = $id_doc)";
-        $res = $cmd->query($sql);
-        $facturadores = $res->fetchAll();
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+            $res = $cmd->query($sql);
+            $facturadores = $res->fetchAll();
+        } catch (PDOException $e) {
+            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+        }
     }
-}
-$fecha = date('Y-m-d', strtotime($documento['fecha']));
-$hora = date('H:i:s', strtotime($documento['fecha_reg']));
-// fechas para factua
-// Consulto responsable del documento
-try {
-    $sql = "SELECT
+    $fecha = date('Y-m-d', strtotime($documento['fecha']));
+    $hora = date('H:i:s', strtotime($documento['fecha_reg']));
+    // fechas para factua
+    // Consulto responsable del documento
+    try {
+        $sql = "SELECT
                 `fin_maestro_doc`.`control_doc`
                 , `fin_maestro_doc`.`id_doc_fte`
                 , `fin_maestro_doc`.`costos`
@@ -275,22 +315,22 @@ try {
                 AND `fin_respon_doc`.`fecha_ini` <= '$fecha'
                 AND `fin_respon_doc`.`estado` = 1
                 AND `fin_maestro_doc`.`estado` = 1)";
-    $res = $cmd->query($sql);
-    $responsables = $res->fetchAll();
-    $key = array_search('4', array_column($responsables, 'tipo_control'));
-    $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
-    $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
-    $gen_respon = $key !== false ? $responsables[$key]['genero'] : '';
-    $control = $key !== false ? $responsables[$key]['control_doc'] : '';
-    $control = $control == '' || $control == '0' ? false : true;
-    $nombre_doc = $key !== false ? $responsables[$key]['nombre'] : '';
-    $ver_costos = isset($responsables[0]) && $responsables[0]['costos'] == 1 ? false : true;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-$id_vigencia = $_SESSION['id_vigencia'];
-try {
-    $sql = "SELECT 	
+        $res = $cmd->query($sql);
+        $responsables = $res->fetchAll();
+        $key = array_search('4', array_column($responsables, 'tipo_control'));
+        $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+        $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
+        $gen_respon = $key !== false ? $responsables[$key]['genero'] : '';
+        $control = $key !== false ? $responsables[$key]['control_doc'] : '';
+        $control = $control == '' || $control == '0' ? false : true;
+        $nombre_doc = $key !== false ? $responsables[$key]['nombre'] : '';
+        $ver_costos = isset($responsables[0]) && $responsables[0]['costos'] == 1 ? false : true;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    $id_vigencia = $_SESSION['id_vigencia'];
+    try {
+        $sql = "SELECT 	
                 `t1`.`consecutivo` AS `cons_asigando`
                 , `t2`.`consecutivo` AS `cons_maximo`
             FROM
@@ -304,63 +344,65 @@ try {
                     FROM `tes_resolucion_pago`
                     WHERE `id_ctb_doc` = $id_doc AND `id_vigencia` = $id_vigencia) AS `t1` 
                 ON 1 = 1";
-    $res = $cmd->query($sql);
-    $consecutivos = $res->fetch(PDO::FETCH_ASSOC);
-    $id_user = $_SESSION['id_user'];
-    $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-    $num_resolucion = $vigencia . '0001';
+        $res = $cmd->query($sql);
+        $consecutivos = $res->fetch(PDO::FETCH_ASSOC);
+        $id_user = $_SESSION['id_user'];
+        $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+        $num_resolucion = $vigencia . '0001';
 
-    if ($consecutivos['cons_asigando'] == '' && $consecutivos['cons_maximo'] > 0) {
-        $num_resolucion = $consecutivos['cons_maximo'] + 1;
-    } else if ($consecutivos['cons_asigando'] > 0) {
-        $num_resolucion = $consecutivos['cons_asigando'];
-    }
-    if ($consecutivos['cons_asigando'] == '' && $cod_doc == 'CEVA') {
-        try {
-            $sql = "INSERT INTO `tes_resolucion_pago`
+        if ($consecutivos['cons_asigando'] == '' && $consecutivos['cons_maximo'] > 0) {
+            $num_resolucion = $consecutivos['cons_maximo'] + 1;
+        } else if ($consecutivos['cons_asigando'] > 0) {
+            $num_resolucion = $consecutivos['cons_asigando'];
+        }
+        if ($consecutivos['cons_asigando'] == '' && $tipo == '4') {
+            try {
+                $sql = "INSERT INTO `tes_resolucion_pago`
 	                    (`consecutivo`,`id_ctb_doc`,`id_vigencia`,`id_user_reg`,`fec_reg`)
                     VALUES (?, ?, ?, ?, ?)";
-            $cmd->prepare($sql);
-            $sql = $cmd->prepare($sql);
-            $sql->bindParam(1, $num_resolucion, PDO::PARAM_INT);
-            $sql->bindParam(2, $id_doc, PDO::PARAM_INT);
-            $sql->bindParam(3, $id_vigencia, PDO::PARAM_INT);
-            $sql->bindParam(4, $id_user, PDO::PARAM_INT);
-            $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
-            $sql->execute();
-            if (!($cmd->lastInsertId() > 0)) {
-                echo $sql->errorInfo()[2];
+                $cmd->prepare($sql);
+                $sql = $cmd->prepare($sql);
+                $sql->bindParam(1, $num_resolucion, PDO::PARAM_INT);
+                $sql->bindParam(2, $id_doc, PDO::PARAM_INT);
+                $sql->bindParam(3, $id_vigencia, PDO::PARAM_INT);
+                $sql->bindParam(4, $id_user, PDO::PARAM_INT);
+                $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
+                $sql->execute();
+                if (!($cmd->lastInsertId() > 0)) {
+                    echo $sql->errorInfo()[2];
+                }
+            } catch (PDOException $e) {
+                echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
             }
-        } catch (PDOException $e) {
-            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-$id_forma = 0;
-$anulado = $documento['estado'] == '0' ? 'ANULADO' : '';
-$meses = [
-    '01' => 'enero',
-    '02' => 'febrero',
-    '03' => 'marzo',
-    '04' => 'abril',
-    '05' => 'mayo',
-    '06' => 'junio',
-    '07' => 'julio',
-    '08' => 'agosto',
-    '09' => 'septiembre',
-    '10' => 'octubre',
-    '11' => 'noviembre',
-    '12' => 'diciembre'
-];
+    $id_forma = 0;
+    $anulado = $documento['estado'] == '0' ? 'ANULADO' : '';
+    $meses = [
+        '01' => 'enero',
+        '02' => 'febrero',
+        '03' => 'marzo',
+        '04' => 'abril',
+        '05' => 'mayo',
+        '06' => 'junio',
+        '07' => 'julio',
+        '08' => 'agosto',
+        '09' => 'septiembre',
+        '10' => 'octubre',
+        '11' => 'noviembre',
+        '12' => 'diciembre'
+    ];
+    ob_start();
 ?>
 <div class="text-right py-3">
     <?php if (PermisosUsuario($permisos, 5601, 6)  || $id_rol == 1) {
         if ($cod_doc == 'CEVA') { ?>
             <a type="button" class="btn btn-info btn-sm" onclick="imprSelecTes('imprimeResolucion',<?php echo $id_doc; ?>);"> Resolución</a>
         <?php } ?>
-        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>
+        <!--<a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>-->
+        <a type="button" class="btn btn-primary btn-sm" id="btnImprimir">Imprimir</a>
     <?php } ?>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>
@@ -478,7 +520,8 @@ $meses = [
             </tr>
         </table>
         </br>
-        <?php if ($id_crpp > 0) {
+        <?php
+        if ($id_crpp > 0) {
         ?>
             <div class="row">
                 <div class="col-12">
@@ -497,18 +540,20 @@ $meses = [
                 <?php
                 $total_pto = 0;
                 foreach ($rubros as $rp) {
-                    echo "<tr>
-                <td class='text-left' style='border: 1px solid black '>" . $rp['id_manu'] . "</td>
-                <td class='text-left' style='border: 1px solid black '>" . $rp['rubro'] . "</td>
-                <td class='text-left' style='border: 1px solid black '>" . $rp['nom_rubro'] . "</td>
-                <td class='text-right' style='border: 1px solid black; text-align: right'>" . number_format($rp['valor'], 2, ",", ".")  . "</td>
-                </tr>";
+                ?>
+                    <tr>
+                        <td class='text-left' style='border: 1px solid black '><?= $rp['id_manu']; ?></td>
+                        <td class='text-left' style='border: 1px solid black '><?= $rp['rubro']; ?></td>
+                        <td class='text-left' style='border: 1px solid black '><?= $rp['nom_rubro']; ?></td>
+                        <td class='text-right' style='border: 1px solid black; text-align: right'><?= number_format($rp['valor'], 2, ",", "."); ?></td>
+                    </tr>
+                <?php
                     $total_pto += $rp['valor'];
                 }
                 ?>
                 <tr>
                     <td colspan="3" style="text-align:left;border: 1px solid black ">Total</td>
-                    <td style="text-align: right;border: 1px solid black "><?php echo number_format($total_pto, 2, ",", "."); ?></td>
+                    <td style="text-align: right;border: 1px solid black "><?= number_format($total_pto, 2, ",", "."); ?></td>
                 </tr>
             </table>
             </br>
@@ -523,6 +568,7 @@ $meses = [
                     </div>
                 </div>
                 <?php
+
                 $total_pto = 0;
                 ?>
 
@@ -707,7 +753,7 @@ $meses = [
                     <div><?php echo $cargo_respon; ?> </div>
                 </td>
                 <?php
-                if ($cod_doc == 'CEVA' || $cod_doc == 'CICP') {
+                if ($tipo == '4' || $cod_doc == '9') {
                     if ($_SESSION['nit_emp'] != '844001355' || $id_forma == 2 || $cod_doc == 'CICP') {
                 ?>
                         <td>
@@ -769,12 +815,13 @@ $meses = [
         ?>
         </br> </br>
     </div>
-
-</div>
-<?php
-if ($cod_doc == 'CEVA') {
-    try {
-        $sql = "SELECT
+    <div class="page-break"></div>
+    <?php
+    $html_doc .= ob_get_clean();
+    ob_start();
+    if ($tipo == '4') {
+        try {
+            $sql = "SELECT
                     `fin_maestro_doc`.`control_doc`
                     , `fin_maestro_doc`.`id_doc_fte`
                     , `fin_maestro_doc`.`costos`
@@ -802,54 +849,14 @@ if ($cod_doc == 'CEVA') {
                     AND `fin_respon_doc`.`fecha_ini` <= '$fecha'
                     AND `fin_respon_doc`.`estado` = 1
                     AND `fin_maestro_doc`.`estado` = 1)";
-        $res = $cmd->query($sql);
-        $responsables = $res->fetchAll();
-        $key = array_search('4', array_column($responsables, 'tipo_control'));
-        $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
-        $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-    }
-?>
-    <div class="contenedor bg-light" id="imprimeResolucion" style="display: none;">
-        <style>
-            @media print {
-                body {
-                    margin: 0;
-                    padding: 0;
-                }
-
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    page-break-inside: auto;
-                }
-
-                thead {
-                    display: table-header-group;
-                }
-
-                tfoot {
-                    display: table-footer-group;
-                }
-
-                tbody {
-                    display: table-row-group;
-                }
-
-                tfoot tr {
-                    page-break-inside: avoid;
-                    padding-bottom: 50px;
-                    width: 100%;
-                    text-align: center;
-                }
-
-                tr {
-                    page-break-inside: avoid;
-                }
-            }
-        </style>
-        <?php
+            $res = $cmd->query($sql);
+            $responsables = $res->fetchAll();
+            $key = array_search('4', array_column($responsables, 'tipo_control'));
+            $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+            $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
+        } catch (PDOException $e) {
+            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+        }
         $f_exp = explode('-', $fecha);
         $cadena = [];
         $cad_rubros = [];
@@ -860,7 +867,7 @@ if ($cod_doc == 'CEVA') {
         }
         $cadena = implode(',', $cadena);
         $cad_rubros = implode(',', $cad_rubros);
-        ?>
+    ?>
         <div class="px-2 " style="width:90% !important;margin: 0 auto;">
             <table style="width: 100%;" class="page_break_avoid">
                 <thead>
@@ -932,7 +939,118 @@ if ($cod_doc == 'CEVA') {
                 </tfoot>
             </table>
         </div>
-    </div>
 <?php
+    }
+    $html_res .= ob_get_clean();
 }
 ?>
+<div class="contenedor bg-light" id="areaImprimir">
+    <style>
+        /* CSS para replicar la clase .row */
+        .row-custom {
+            display: flex;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+
+        .row-custom>div {
+            padding-right: 15px;
+            padding-left: 15px;
+        }
+
+        /* Opcional: columnas */
+        .col-6-custom {
+            flex: 0 0 50%;
+            /* Toma el 50% del ancho */
+            max-width: 50%;
+            /* Limita el ancho máximo al 50% */
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            /* Se añade rotación */
+            font-size: 100px;
+            color: rgba(255, 0, 0, 0.2);
+            /* Cambia la opacidad para que sea tenue */
+            z-index: 1000;
+            pointer-events: none;
+            /* Para que no interfiera con el contenido */
+            white-space: nowrap;
+            /* Evita que el texto se divida en varias líneas */
+        }
+
+        /* Estilos específicos para la impresión */
+        @media print {
+
+            body {
+                position: relative;
+            }
+
+            .watermark {
+                position: fixed;
+                /* Cambiar a 'fixed' para impresión */
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 100px;
+                color: rgba(255, 0, 0, 0.2);
+                /* Asegura que el color y opacidad se mantengan */
+                z-index: -1;
+                /* Colocar detrás del contenido impreso */
+            }
+
+            .page-break {
+                page-break-after: always;
+            }
+        }
+    </style>
+    <?php
+    echo $html_doc;
+    ?>
+</div>
+<div class="contenedor bg-light" id="imprimeResolucion" style="display: none;">
+    <style>
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                page-break-inside: auto;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            tfoot {
+                display: table-footer-group;
+            }
+
+            tbody {
+                display: table-row-group;
+            }
+
+            tfoot tr {
+                page-break-inside: avoid;
+                padding-bottom: 50px;
+                width: 100%;
+                text-align: center;
+            }
+
+            tr {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+    <?php
+    echo $html_res;
+    ?>
+</div>

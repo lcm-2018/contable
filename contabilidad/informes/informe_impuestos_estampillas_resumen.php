@@ -30,8 +30,8 @@ if (!isset($_SESSION['user'])) {
 <?php
 $vigencia = $_SESSION['vigencia'];
 // estraigo las variables que llegan por post en json
-$fecha_inicial = $_POST['fec_inicial'];
-$fecha_corte = $_POST['fec_final'];
+$fecha_inicial = $_POST['fecha_inicial'];
+$fecha_corte = $_POST['fecha_final'];
 $id_des = $_POST['mpio'];
 function pesos($valor)
 {

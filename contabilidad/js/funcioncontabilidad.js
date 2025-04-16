@@ -2281,26 +2281,37 @@ function ValidaValoresIguales(id, callback) {
 		url: ruta,
 		method: 'POST',
 		dataType: 'json',
-		data: { id: id },
+		data: id,
 		success: function (response) {
 			if (response.res == 'ok') {
-				callback(true);
+				callback({
+					res: response.res,
+					msg: response.msg,
+				});
 			} else {
-				callback(false);
+				callback({
+					res: response.res,
+					msg: response.msg,
+				});
 			}
 		},
 		error: function (xhr, status, error) {
 			console.error("Error en la solicitud AJAX:", error);
-			callback(false);
+			callback({
+				res: 'error',
+				msg: 'Error en la solicitud AJAX ' + error,
+			});
 		}
 	});
 }
 function CierraDocCtb(id) {
 	let tipo = $("#tipodato").length ? $("#tipodato").val() : $("#id_ctb_doc").val();
 	if (tipo == '3') {
-		ValidaValoresIguales(id, function (resultado) {
-			if (resultado === true) {
-				cerrarDocumentoCtb(id);
+		id = { id: id, tipo: tipo };
+		ValidaValoresIguales(id, function (he) {
+			id.id = he.msg;
+			if (he.res === 'ok') {
+				cerrarDocumentoCtb(he.msg);
 				mje("Documento cerrado correctamente");
 			} else {
 				mjeError("Verificar igualdad en valores y cuentas contables vacias");
@@ -2312,24 +2323,57 @@ function CierraDocCtb(id) {
 	}
 }
 const imprimirFormatoDoc = (id) => {
+	var impRango = id;
 	let tipo = $("#tipodato").length ? $("#tipodato").val() : $("#id_ctb_doc").val();
+	if (id == 0) {
+		$('.is-invalid').removeClass('is-invalid');
+		if ($('#docInicia').val() == '') {
+			$('#docInicia').addClass('is-invalid');
+			$('#docInicia').focus();
+			mjeError('Debe ingresar el número de documento inicial');
+			return false;
+		} else if ($('#docTermina').val() == '') {
+			$('#docTermina').addClass('is-invalid');
+			$('#docTermina').focus();
+			mjeError('Debe ingresar el número de documento final');
+			return false;
+		} else if ($('#docInicia').val() > $('#docTermina').val()) {
+			mjeError('El número de documento inicial no puede ser mayor al número de documento final');
+			return false;
+		}
+	}
 	if (tipo == '3') {
-		ValidaValoresIguales(id, function (resultado) {
-			if (resultado === true) {
-				ImprimirD(id, tipo);
+		if (impRango == 0) {
+			id = { id: id, docInicia: $('#docInicia').val(), docTermina: $('#docTermina').val(), tipo: $('#tipo_dc').val() };
+		} else {
+			id = { id: id, tipo: tipo };
+		}
+		ValidaValoresIguales(id, function (he) {
+			id.id = he.msg;
+			if (he.res === 'ok') {
+				ImprimirD(id);
 			} else {
-				mjeError("Verificar igualdad en valores y cuentas contables vacias");
+				mjeError("Verificar igualdad en valores y cuentas contables vacias en documento: " + he.msg);
 			}
 		});
 	} else {
-		ImprimirD(id, tipo);
+		if (impRango == 0) {
+			id = { id: id, docInicia: $('#docInicia').val(), docTermina: $('#docTermina').val(), tipo: $('#tipo_dc').val() };
+			ValidaValoresIguales(id, function (he) {
+				id.id = he.msg;
+				ImprimirD(id);
+			});
+		} else {
+			id = { id: { id: id }, tipo: tipo };
+			ImprimirD(id);
+		}
 	}
 
 };
 
-function ImprimirD(id, tipo) {
+function ImprimirD(id) {
 	let url = "soportes/imprimir_formato_doc.php";
-	$.post(url, { id: id, tipo: tipo }, function (he) {
+	$.post(url, id, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-xl");
 		$("#divTamModalForms").addClass("modal-lg");
@@ -3306,3 +3350,15 @@ function eliminarReferencia(id) {
 		}
 	});
 }
+
+$('#btnImpLotes').on('click', function () {
+	var tipo = $('#id_ctb_doc').val();
+	$.post("datos/registrar/form_rango_imp", { tipo: tipo }, function (he) {
+		$("#divTamModalForms").removeClass("modal-xl");
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-sm");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+});

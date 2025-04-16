@@ -23,3 +23,4 @@
 [2025-04-07 15:56:27] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 436
 [2025-04-07 16:07:06] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 437
 [2025-04-07 17:49:23] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_detalle_pago WHERE id_detalle_pago = 86
+[2025-04-15 16:55:53] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 287
