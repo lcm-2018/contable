@@ -30,15 +30,16 @@
                 { 'data': 'ium' },
                 { 'data': 'nom_laboratorio' },
                 { 'data': 'reg_invima' },
+                { 'data': 'fec_invima' },
                 { 'data': 'estado_invima' },
                 { 'data': 'nom_presentacion' },
                 { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [3, 6] },
-                { width: '5%', targets: [0, 1, 2, 4, 5, 7] },
-                { orderable: false, targets: 8 }
+                { class: 'text-wrap', targets: [3, 7] },
+                { width: '5%', targets: [0, 1, 2, 4, 5, 6, 8] },
+                { orderable: false, targets: 9 }
             ],
             order: [
                 [0, "desc"]

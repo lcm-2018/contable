@@ -116,10 +116,11 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             <thead>
                                 <tr class="text-center centro-vertical">
                                     <th>Id</th>
-                                    <th>CUM/Expediente</th>
+                                    <th>CUM/</br>Expediente</th>
                                     <th>IUM</th>
                                     <th>Laboratorio</th>
                                     <th>Registro Invima</th>
+                                    <th>Fec. Vence</br> Invima</th>
                                     <th>Estado Invima</th>
                                     <th>Presentación Comercial</th>
                                     <th>Estado</th>

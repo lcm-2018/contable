@@ -39,7 +39,7 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_medicamento_cum.id_cum,far_medicamento_cum.cum,far_medicamento_cum.ium,
-	            far_laboratorios.nom_laboratorio,far_medicamento_cum.reg_invima,
+	            far_laboratorios.nom_laboratorio,far_medicamento_cum.reg_invima,far_medicamento_cum.fec_invima,
                 CASE far_medicamento_cum.estado_invima WHEN 1 THEN 'VIGENTE' WHEN 2 THEN 'PROCESO DE RENOVACION' WHEN 3 THEN 'NO VIGENTE' ELSE '' END AS estado_invima,
                 far_presentacion_comercial.nom_presentacion,
                 IF(far_medicamento_cum.estado=1,'ACTIVO','INACTIVO') AS estado
@@ -74,6 +74,7 @@ if (!empty($objs)) {
             "ium" => $obj['ium'],
             "nom_laboratorio" => $obj['nom_laboratorio'],
             "reg_invima" => $obj['reg_invima'],
+            "fec_invima" => $obj['fec_invima'],
             "estado_invima" => $obj['estado_invima'],
             "nom_presentacion" => $obj['nom_presentacion'],
             "estado" => $obj['estado'],
