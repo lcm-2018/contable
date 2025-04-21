@@ -53,6 +53,13 @@ try {
             $errores .= $sumaMov['id_manu'] . " ";
         }
     }
+    if ($total == 0) {
+        $estado = 2;
+        $query = "UPDATE `ctb_doc` SET `estado`= ? WHERE `id_ctb_doc` IN ($data)";
+        $query = $cmd->prepare($query);
+        $query->bindParam(1, $estado, PDO::PARAM_INT);
+        $query->execute();
+    }
     $cmd = null;
 } catch (Exception $e) {
     $response['msg'] = $e->getMessage();

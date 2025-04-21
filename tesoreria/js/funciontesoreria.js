@@ -1862,16 +1862,36 @@ const ImputacionCtasCajas = (id) => {
 };
 /*=================================   IMPRESION DE FORMATOS =====================================*/
 const imprimirFormatoTes = (id) => {
-	if (id == "") {
-		id = id_ctb_doc.value;
+	if (id === "") {
+		id = { id: id_ctb_doc.value };
+	} else if (id === 0) {
+		$('.is-invalid').removeClass('is-invalid');
+		if ($('#docInicia').val() == '') {
+			$('#docInicia').addClass('is-invalid');
+			$('#docInicia').focus();
+			mjeError('El campo no puede estar vacio');
+			return false;
+		} else if ($('#docTermina').val() == '') {
+			$('#docTermina').addClass('is-invalid');
+			$('#docTermina').focus();
+			mjeError('El campo no puede estar vacio');
+			return false;
+		} else if ($('#docInicia').val() > $('#docTermina').val()) {
+			mjeError('El campo no puede ser mayor al campo final');
+			return false;
+		}
+		id = { id: id, docInicia: $('#docInicia').val(), docTermina: $('#docTermina').val() };
+	} else {
+		id = { id: id };
 	}
+	let tipo = $("#id_ctb_tipo").length ? $("#id_ctb_tipo").val() : $('#tipodato').val();
 	let url = "soportes/imprimir_formato_pag.php";
-	$.post(url, { id: id }, function (he) {
-		$('#divTamModalImp').removeClass('modal-sm');
-		$('#divTamModalImp').removeClass('modal-lg');
-		$('#divTamModalImp').addClass('modal-lg');
-		$('#divModalImp').modal('show');
-		$("#divImp").html(he);
+	$.post(url, { id: id, tipo: tipo }, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-xl");
+		$("#divTamModalForms").addClass("modal-lg");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
 	});
 };
 
@@ -1903,7 +1923,14 @@ let cerrarDocumentoCtbTes = function (dato) {
 		});
 };
 const imprSelecTes = (nombre, id) => {
-	if (id > 0) {
+	var base;
+	if (id.indexOf("|") > -1) {
+		let data = id.split("|");
+		base = data[0];
+	} else {
+		base = id;
+	}
+	if (base > 0) {
 		cerrarDocumentoCtbTes(id);
 	}
 	var ficha = document.getElementById(nombre);
@@ -2741,3 +2768,15 @@ function SaldoCuenta(id) {
 		}
 	});
 }
+
+$('#btnImpLotesTes').on('click', function () {
+	var tipo = $('#id_ctb_tipo').val();
+	$.post("datos/registrar/form_rango_imp", { tipo: tipo }, function (he) {
+		$("#divTamModalForms").removeClass("modal-xl");
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-sm");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+});
