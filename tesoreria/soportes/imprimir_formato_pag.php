@@ -155,46 +155,38 @@ foreach ($documentos_tes as $documento) {
         // Consulto el numero de documentos asociados al pago 
         try {
             $sql = "SELECT
-                    `ctb_doc`.`id_manu`
-                    , `ctb_factura`.`num_doc`
-                    , `ctb_tipo_doc`.`tipo`
-                    , `ctb_factura`.`fecha_fact`
-                    , `ctb_factura`.`fecha_ven`
-                    , `ctb_factura`.`valor_pago`
-                    , `ctb_factura`.`valor_iva`
-                    , `ctb_factura`.`valor_base`
-                    , `descuento`.`dcto`
-                FROM
-                    `pto_pag_detalle`
-                    INNER JOIN `pto_cop_detalle` 
-                        ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
-                    INNER JOIN `ctb_doc` 
-                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                    INNER JOIN `ctb_factura` 
-                        ON (`ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                    INNER JOIN `ctb_tipo_doc` 
-                        ON (`ctb_factura`.`id_tipo_doc` = `ctb_tipo_doc`.`id_ctb_tipodoc`)
-                    LEFT JOIN
-                        (SELECT
-                            SUM(`ctb_causa_retencion`.`valor_retencion`) AS `dcto`
-                            , `pto_pag_detalle`.`id_ctb_doc`
-                        FROM
-                            `pto_pag_detalle`
-                            INNER JOIN `pto_cop_detalle` 
-                                ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
-                            INNER JOIN `ctb_doc` 
-                                ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                            INNER JOIN `ctb_causa_retencion` 
-                                ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                        WHERE (`pto_pag_detalle`.`id_ctb_doc` = $id_doc)) AS `descuento`
-                        ON (`descuento`.`id_ctb_doc` = `pto_pag_detalle`.`id_ctb_doc`)
-                WHERE (`pto_pag_detalle`.`id_ctb_doc` = $id_doc)";
+                        `ctb_doc`.`id_ctb_doc`
+                        , `ctb_doc`.`id_manu`
+                        , `ctb_tipo_doc`.`tipo` AS `tipo_doc`
+                        , `ctb_fuente`.`nombre` AS `tipo`
+                        , GROUP_CONCAT(`ctb_factura`.`num_doc` SEPARATOR ', ') AS `num_doc`
+                        , SUM(`ctb_factura`.`valor_pago`) AS `valor_pago`
+                        , SUM(`ctb_factura`.`valor_iva`) AS `valor_iva`
+                        , SUM(`ctb_factura`.`valor_base`) AS `valor_base`
+                    FROM
+                        `ctb_factura`
+                        INNER JOIN `ctb_doc` 
+                            ON (`ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        INNER JOIN `ctb_fuente` 
+                            ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                        INNER JOIN `ctb_tipo_doc` 
+                            ON (`ctb_factura`.`id_tipo_doc` = `ctb_tipo_doc`.`id_ctb_tipodoc`)
+                    WHERE (`ctb_doc`.`id_ctb_doc` = (SELECT
+                                        `pto_cop_detalle`.`id_ctb_doc`
+                                    FROM
+                                        `pto_pag_detalle`
+                                        INNER JOIN `pto_cop_detalle` 
+                                        ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                                        INNER JOIN `ctb_causa_retencion` 
+                                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_causa_retencion`.`id_ctb_doc`)
+                                    WHERE (`pto_pag_detalle`.`id_ctb_doc` = $id_doc) LIMIT 1))";
             $rs = $cmd->query($sql);
             $data = $rs->fetch();
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
     }
+
     $enletras = numeroLetras($total);
     // Movimiento contable
     try {
@@ -217,6 +209,26 @@ foreach ($documentos_tes as $documento) {
             ORDER BY `ctb_pgcp`.`cuenta` DESC";
         $res = $cmd->query($sql);
         $movimiento = $res->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    try {
+        $sql = "SELECT
+				    SUM(`valor_retencion`) AS `dcto`
+				    , `id_ctb_doc`
+				FROM
+				    `ctb_causa_retencion`
+				WHERE (`id_ctb_doc` = (SELECT
+							    `pto_cop_detalle`.`id_ctb_doc`
+							FROM
+							    `pto_pag_detalle`
+							    INNER JOIN `pto_cop_detalle` 
+								ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+							    INNER JOIN `ctb_causa_retencion` 
+								ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_causa_retencion`.`id_ctb_doc`)
+							WHERE (`pto_pag_detalle`.`id_ctb_doc` = $id_doc) LIMIT 1))";
+        $res = $cmd->query($sql);
+        $descuentos = $res->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -396,76 +408,6 @@ foreach ($documentos_tes as $documento) {
     ];
     ob_start();
 ?>
-<div class="text-right py-3">
-    <?php if (PermisosUsuario($permisos, 5601, 6)  || $id_rol == 1) {
-        if ($cod_doc == 'CEVA') { ?>
-            <a type="button" class="btn btn-info btn-sm" onclick="imprSelecTes('imprimeResolucion',<?php echo $id_doc; ?>);"> Resolución</a>
-        <?php } ?>
-        <!--<a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo $id_doc; ?>);"> Imprimir</a>-->
-        <a type="button" class="btn btn-primary btn-sm" id="btnImprimir">Imprimir</a>
-    <?php } ?>
-    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
-</div>
-<div class="contenedor bg-light" id="areaImprimir">
-    <style>
-        /* CSS para replicar la clase .row */
-        .row-custom {
-            display: flex;
-            flex-wrap: wrap;
-            margin-right: -15px;
-            margin-left: -15px;
-        }
-
-        .row-custom>div {
-            padding-right: 15px;
-            padding-left: 15px;
-        }
-
-        /* Opcional: columnas */
-        .col-6-custom {
-            flex: 0 0 50%;
-            /* Toma el 50% del ancho */
-            max-width: 50%;
-            /* Limita el ancho máximo al 50% */
-        }
-
-        .watermark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            /* Se añade rotación */
-            font-size: 100px;
-            color: rgba(255, 0, 0, 0.2);
-            /* Cambia la opacidad para que sea tenue */
-            z-index: 1000;
-            pointer-events: none;
-            /* Para que no interfiera con el contenido */
-            white-space: nowrap;
-            /* Evita que el texto se divida en varias líneas */
-        }
-
-        /* Estilos específicos para la impresión */
-        @media print {
-
-            body {
-                position: relative;
-            }
-
-            .watermark {
-                position: fixed;
-                /* Cambiar a 'fixed' para impresión */
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) rotate(-45deg);
-                font-size: 100px;
-                color: rgba(255, 0, 0, 0.2);
-                /* Asegura que el color y opacidad se mantengan */
-                z-index: -1;
-                /* Colocar detrás del contenido impreso */
-            }
-        }
-    </style>
     <div class="px-2 " style="width:90% !important;margin: 0 auto;">
 
         </br>
@@ -576,19 +518,16 @@ foreach ($documentos_tes as $documento) {
                     <tr>
                         <td style="text-align: left">Causación</td>
                         <td>Documento</td>
-                        <td>Número</td>
-                        <td>Fecha</td>
-                        <td>Vencimiento</td>
+                        <td colspan="3">Número(s)</td>
+
                     </tr>
                     <tr>
-                        <td><?php echo   $data['id_manu']; ?></td>
+                        <td><?= $data['id_manu']; ?></td>
                         <td><?php echo $data['tipo']; ?></td>
-                        <td><?php echo $data['num_doc']; ?></td>
-                        <td><?php echo date('Y-m-d', strtotime($data['fecha_fact'])); ?></td>
-                        <td><?php echo date('Y-m-d', strtotime($data['fecha_ven'])); ?></td>
+                        <td colspan="3"><?php echo $data['num_doc']; ?></td>
                     </tr>
                     <tr>
-                        <td style="text-align: left">Valor factura</td>
+                        <td style="text-align: left">Valor factura(s)</td>
                         <td>Valor IVA</td>
                         <td>Base</td>
                         <td>Descuentos</td>
@@ -598,8 +537,8 @@ foreach ($documentos_tes as $documento) {
                         <td><?php echo number_format($data['valor_pago'], 2, ',', '.'); ?></td>
                         <td><?php echo  number_format($data['valor_iva'], 2, ',', '.');; ?></td>
                         <td><?php echo number_format($data['valor_base'], 2, ',', '.'); ?></td>
-                        <td><?php echo number_format($data['dcto'], 2, ',', '.'); ?></td>
-                        <td><?php echo number_format(($data['valor_pago'] - $data['dcto']), 2, ',', '.'); ?></td>
+                        <td><?php echo number_format($descuentos['dcto'], 2, ',', '.'); ?></td>
+                        <td><?php echo number_format(($data['valor_pago'] - $descuentos['dcto']), 2, ',', '.'); ?></td>
                     </tr>
                 </table>
                 </br>

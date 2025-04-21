@@ -189,20 +189,9 @@ try {
                     ON (`ctb_factura`.`id_tipo_doc` = `ctb_tipo_doc`.`id_ctb_tipodoc`)
             WHERE (`ctb_doc`.`id_ctb_doc` = $dto)";
             $res = $cmd->query($sql);
-            $factura = $res->fetch();
+            $facturas = $res->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-        }
-        if (empty($factura)) {
-            $factura['id_ctb_doc'] = '';
-            $factura['tipo_doc'] = '';
-            $factura['tipo'] = '';
-            $factura['num_doc'] = '';
-            $factura['fecha_fact'] = date('Y-m-d');
-            $factura['fecha_ven'] = date('Y-m-d');
-            $factura['valor_pago'] = 0;
-            $factura['valor_iva'] = 0;
-            $factura['valor_base'] = 0;
         }
         // Movimiento contable
         try {
@@ -506,150 +495,163 @@ try {
                         ?>
                     </table>
                     </br>
-                <?php
+                    <?php
                 }
                 if ($doc['tipo_doc'] != '5') {
-                ?>
-                    <br>
-                    <div class="row">
-                        <div class="col-12">
-                            <div style="text-align: left">
-                                <div><strong>Datos de la factura: </strong></div>
+                    if (!empty($facturas)) {
+                    ?>
+                        <br>
+                        <div class="row">
+                            <div class="col-12">
+                                <div style="text-align: left">
+                                    <div><strong>Datos de la factura: </strong></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <table class="table-bordered bg-light" style="width:100% !important;">
-                        <tr>
-                            <td style="text-align: left">Documento</td>
-                            <td>Número</td>
-                            <td>Fecha</td>
-                            <td>Vencimiento</td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left"><?php echo $factura['tipo_doc']; ?></td>
-                            <td><?php echo $prefijo . $factura['num_doc']; ?></td>
-                            <td><?php echo $fecha_fact; ?></td>
-                            <td><?php echo $fecha_ven; ?></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left">Valor Total</td>
-                            <td>Valor IVA</td>
-                            <td>Base</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td><?php echo number_format($factura['valor_pago'], 2, ',', '.'); ?></td>
-                            <td><?php echo  number_format($factura['valor_iva'], 2, ',', '.');; ?></td>
-                            <td><?php echo number_format($factura['valor_base'], 2, ',', '.'); ?></td>
-                            <td></td>
-                        </tr>
-                    </table>
-                    </br>
-                    <div class="row">
-                        <div class="col-12">
-                            <div style="text-align: left">
-                                <div><strong>Retenciones y descuentos: </strong></div>
-                            </div>
-                        </div>
-                    </div>
-                    <table class="table-bordered bg-light" style="width:100% !important;border-collapse: collapse;">
-                        <tr>
-                            <td style="text-align: left;border: 1px solid black">Entidad</td>
-                            <td style='border: 1px solid black'>Descuento</td>
-                            <td style='border: 1px solid black'>Valor base</td>
-                            <td style='border: 1px solid black'>Valor rete</td>
-                        </tr>
+                        <table class="table-bordered bg-light" style="width:100% !important;">
+                            <tr style="text-align: center">
+                                <td>Documento</td>
+                                <td>Valor Total</td>
+                                <td>Valor IVA</td>
+                                <td>Base</td>
+                            </tr>
+                            <?php
+                            $t_pago = 0;
+                            $t_iva = 0;
+                            $t_base = 0;
+                            $cr = 0;
+                            foreach ($facturas as $factura) {
+                            ?>
+
+                                <tr>
+                                    <td style="text-align: left"><?php echo $factura['tipo_doc'] . ' ' . $prefijo . $factura['num_doc']; ?></td>
+                                    <td style="text-align: right"><?php echo number_format($factura['valor_pago'], 2, ',', '.'); ?></td>
+                                    <td style="text-align: right"><?php echo  number_format($factura['valor_iva'], 2, ',', '.');; ?></td>
+                                    <td style="text-align: right"><?php echo number_format($factura['valor_base'], 2, ',', '.'); ?></td>
+                                </tr>
                         <?php
-                        $total_rete = 0;
-                        foreach ($retenciones as $re) {
-                            // Consulto el valor del tercero de la api
-                            // Consulta terceros en la api ********************************************* API
-                            $key = array_search($re['id_terceroapi'], array_column($terceros, 'id_tercero_api'));
-                            $tercero = $terceros[$key]['nom_tercero'];
-                            // fin api terceros **************************
-                            echo "<tr>
+                                $t_pago += $factura['valor_pago'];
+                                $t_iva += $factura['valor_iva'];
+                                $t_base += $factura['valor_base'];
+                                $cr++;
+                            }
+                            if ($cr > 1) {
+                                echo "<tr style='text-align: right'>
+                                    <td style='text-align: center'>TOTAL</td>
+                                    <td style='text-align: right'>" . number_format($t_pago, 2, ',', '.') . "</td>
+                                    <td style='text-align: right'>" . number_format($t_iva, 2, ',', '.') . "</td>
+                                    <td style='text-align: right'>" . number_format($t_base, 2, ',', '.') . "</td>
+                                </tr>";
+                            }
+                            echo "</table>";
+                        }
+                        ?>
+                        </br>
+                        <div class="row">
+                            <div class="col-12">
+                                <div style="text-align: left">
+                                    <div><strong>Retenciones y descuentos: </strong></div>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="table-bordered bg-light" style="width:100% !important;border-collapse: collapse;">
+                            <tr>
+                                <td style="text-align: left;border: 1px solid black">Entidad</td>
+                                <td style='border: 1px solid black'>Descuento</td>
+                                <td style='border: 1px solid black'>Valor base</td>
+                                <td style='border: 1px solid black'>Valor rete</td>
+                            </tr>
+                            <?php
+                            $total_rete = 0;
+                            foreach ($retenciones as $re) {
+                                // Consulto el valor del tercero de la api
+                                // Consulta terceros en la api ********************************************* API
+                                $key = array_search($re['id_terceroapi'], array_column($terceros, 'id_tercero_api'));
+                                $tercero = $terceros[$key]['nom_tercero'];
+                                // fin api terceros **************************
+                                echo "<tr>
                 <td style='text-align: left;border: 1px solid black'>" . $tercero . "</td>
                 <td style='text-align: left;border: 1px solid black'>" . $re['nombre_retencion'] . "</td>
                 <td style='text-align: right;border: 1px solid black'>" . number_format($re['valor_base'], 2, ',', '.') . "</td>
                 <td style='text-align: right;border: 1px solid black'>" . number_format($re['valor_retencion'], 2, ',', '.') . "</td>
                 </tr>";
-                            $total_rete += $re['valor_retencion'];
-                        }
-                        ?>
-                        <tr>
-                            <td colspan="3" style="text-align:left;border: 1px solid black ">Total</td>
-                            <td style="text-align: right;border: 1px solid black "><?php echo number_format($total_rete, 2, ",", "."); ?></td>
-                        </tr>
+                                $total_rete += $re['valor_retencion'];
+                            }
+                            ?>
+                            <tr>
+                                <td colspan="3" style="text-align:left;border: 1px solid black ">Total</td>
+                                <td style="text-align: right;border: 1px solid black "><?php echo number_format($total_rete, 2, ",", "."); ?></td>
+                            </tr>
 
-                    </table>
-                <?php
+                        </table>
+                    <?php
                 }
-                ?>
-            <?php }
+                    ?>
+                <?php }
             if ($ver_costos) {
-            ?>
+                ?>
 
-                </br>
-                <div class="row">
-                    <div class="col-12">
-                        <div style="text-align: left">
-                            <div><strong>Distribución de costos: </strong></div>
+                    </br>
+                    <div class="row">
+                        <div class="col-12">
+                            <div style="text-align: left">
+                                <div><strong>Distribución de costos: </strong></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <table class="table-bordered bg-light" style="width:100% !important; border-collapse: collapse;">
-                    <tr>
-                        <td style="text-align: left;border: 1px solid black">Municipio</td>
-                        <td style='border: 1px solid black'>Centro Costo</td>
-                        <td style='border: 1px solid black'>Valor</td>
-                    </tr>
-                    <?php
-                    $tot_costos = 0;
-                    foreach ($costos as $ct) {
-                        echo "<tr style='border: 1px solid black'>
+                    <table class="table-bordered bg-light" style="width:100% !important; border-collapse: collapse;">
+                        <tr>
+                            <td style="text-align: left;border: 1px solid black">Municipio</td>
+                            <td style='border: 1px solid black'>Centro Costo</td>
+                            <td style='border: 1px solid black'>Valor</td>
+                        </tr>
+                        <?php
+                        $tot_costos = 0;
+                        foreach ($costos as $ct) {
+                            echo "<tr style='border: 1px solid black'>
                             <td class='text-left' style='border: 1px solid black'>" . $ct['nom_municipio'] . "</td>
                             <td class='text-left' style='border: 1px solid black'>" . $ct['nom_area'] .  "</td>
                             <td class='text-right' style='border: 1px solid black;text-align: right'>" . number_format($ct['valor'], 2, ",", ".")  . "</td>
                         </tr>";
-                        $tot_costos += $ct['valor'];
-                    }
-                    ?>
-                    <tr>
-                        <td style="text-align: left;border: 1px solid black" colspan="2">Total</td>
-                        <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_costos, 2, ",", "."); ?> </td>
-                    </tr>
-                </table>
-            <?php } ?>
-            </br>
-            <div class="row">
-                <div class="col-12">
-                    <div style="text-align: left">
-                        <div><strong>Movimiento contable: </strong></div>
+                            $tot_costos += $ct['valor'];
+                        }
+                        ?>
+                        <tr>
+                            <td style="text-align: left;border: 1px solid black" colspan="2">Total</td>
+                            <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_costos, 2, ",", "."); ?> </td>
+                        </tr>
+                    </table>
+                <?php } ?>
+                </br>
+                <div class="row">
+                    <div class="col-12">
+                        <div style="text-align: left">
+                            <div><strong>Movimiento contable: </strong></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <table class="table-bordered bg-light" style="width:100% !important; border-collapse: collapse;">
-                <?php
-                if ($doc['tipo_doc'] == '5') {
-                ?>
-                    <tr>
-                        <td style="text-align: left;border: 1px solid black">Cuenta</td>
-                        <td style='border: 1px solid black'>Nombre</td>
-                        <td style='border: 1px solid black'>Terceros</td>
-                        <td style='border: 1px solid black'>Nombre</td>
-                        <td style='border: 1px solid black'>Débito</td>
-                        <td style='border: 1px solid black'>Crédito</td>
-                    </tr>
+                <table class="table-bordered bg-light" style="width:100% !important; border-collapse: collapse;">
                     <?php
-                    $tot_deb = 0;
-                    $tot_cre = 0;
-                    foreach ($movimiento as $mv) {
-                        // Consulta terceros en la api ********************************************* API
-                        $key = array_search($mv['id_tercero'], array_column($terceros, 'id_tercero_api'));
-                        $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '';
-                        $nom_ter = $key !== false ? $terceros[$key]['nom_tercero'] : '';
+                    if ($doc['tipo_doc'] == '5') {
+                    ?>
+                        <tr>
+                            <td style="text-align: left;border: 1px solid black">Cuenta</td>
+                            <td style='border: 1px solid black'>Nombre</td>
+                            <td style='border: 1px solid black'>Terceros</td>
+                            <td style='border: 1px solid black'>Nombre</td>
+                            <td style='border: 1px solid black'>Débito</td>
+                            <td style='border: 1px solid black'>Crédito</td>
+                        </tr>
+                        <?php
+                        $tot_deb = 0;
+                        $tot_cre = 0;
+                        foreach ($movimiento as $mv) {
+                            // Consulta terceros en la api ********************************************* API
+                            $key = array_search($mv['id_tercero'], array_column($terceros, 'id_tercero_api'));
+                            $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '';
+                            $nom_ter = $key !== false ? $terceros[$key]['nom_tercero'] : '';
 
-                        echo "<tr style='border: 1px solid black'>
+                            echo "<tr style='border: 1px solid black'>
                 <td class='text-left' style='border: 1px solid black'>" . $mv['cuenta'] . "</td>
                 <td class='text-left' style='border: 1px solid black'>" . $mv['nombre'] .  "</td>
                 <td class='text-left' style='border: 1px solid black'>" . $ccnit . "</td>
@@ -657,108 +659,108 @@ try {
                 <td class='text-right' style='border: 1px solid black;text-align: right'>" . number_format($mv['debito'], 2, ",", ".")  . "</td>
                 <td class='text-right' style='border: 1px solid black;text-align: right'>" . number_format($mv['credito'], 2, ",", ".")  . "</td>
                 </tr>";
-                        $tot_deb += $mv['debito'];
-                        $tot_cre += $mv['credito'];
-                    }
-                    ?>
-                    <tr>
-                        <td style="text-align: left;border: 1px solid black" colspan="4">Sumas iguales</td>
-                        <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_deb, 2, ",", "."); ?></td>
-                        <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_cre, 2, ",", "."); ?> </td>
-                    </tr>
-                <?php
-                } else {
-                ?>
-                    <tr>
-                        <td style="text-align: left;border: 1px solid black">Cuenta</td>
-                        <td style='border: 1px solid black'>Nombre</td>
-                        <td style='border: 1px solid black'>Débito</td>
-                        <td style='border: 1px solid black'>Crédito</td>
-                    </tr>
+                            $tot_deb += $mv['debito'];
+                            $tot_cre += $mv['credito'];
+                        }
+                        ?>
+                        <tr>
+                            <td style="text-align: left;border: 1px solid black" colspan="4">Sumas iguales</td>
+                            <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_deb, 2, ",", "."); ?></td>
+                            <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_cre, 2, ",", "."); ?> </td>
+                        </tr>
                     <?php
+                    } else {
+                    ?>
+                        <tr>
+                            <td style="text-align: left;border: 1px solid black">Cuenta</td>
+                            <td style='border: 1px solid black'>Nombre</td>
+                            <td style='border: 1px solid black'>Débito</td>
+                            <td style='border: 1px solid black'>Crédito</td>
+                        </tr>
+                        <?php
 
-                    $tot_deb = 0;
-                    $tot_cre = 0;
-                    foreach ($movimiento as $mv) {
-                        // Consulta terceros en la api ********************************************* API
+                        $tot_deb = 0;
+                        $tot_cre = 0;
+                        foreach ($movimiento as $mv) {
+                            // Consulta terceros en la api ********************************************* API
 
 
-                        echo "<tr style='border: 1px solid black'>
+                            echo "<tr style='border: 1px solid black'>
             <td class='text-left' style='border: 1px solid black'>" . $mv['cuenta'] . "</td>
             <td class='text-left' style='border: 1px solid black'>" . $mv['nombre'] .  "</td>
             <td class='text-right' style='border: 1px solid black;text-align: right'>" . number_format($mv['debito'], 2, ",", ".")  . "</td>
             <td class='text-right' style='border: 1px solid black;text-align: right'>" . number_format($mv['credito'], 2, ",", ".")  . "</td>
             </tr>";
-                        $tot_deb += $mv['debito'];
-                        $tot_cre += $mv['credito'];
+                            $tot_deb += $mv['debito'];
+                            $tot_cre += $mv['credito'];
+                        }
+                        ?>
+                        <tr>
+                            <td style="text-align: left;border: 1px solid black" colspan="2">Sumas iguales</td>
+                            <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_deb, 2, ",", "."); ?></td>
+                            <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_cre, 2, ",", "."); ?> </td>
+                        </tr>
+                    <?php
                     }
                     ?>
-                    <tr>
-                        <td style="text-align: left;border: 1px solid black" colspan="2">Sumas iguales</td>
-                        <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_deb, 2, ",", "."); ?></td>
-                        <td class='text-right' style='border: 1px solid black;text-align: right'><?php echo number_format($tot_cre, 2, ",", "."); ?> </td>
-                    </tr>
+                </table>
+                </br>
+                </br>
+                <div class="row">
+                    <div class="col-12">
+                        <div style="text-align: center; font-size: 10px;">
+                            <div>___________________________________</div>
+                            <div><?= $nom_respon; ?> </div>
+                            <div><?= $cargo_respon; ?> </div>
+                        </div>
+                    </div>
+                </div>
+                </br>
+                </br>
+                <?php
+                if ($control) {
+                ?>
+                    <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
+                        <tr style="text-align:left">
+                            <td style="width:33%">
+                                <strong>Elaboró:</strong>
+                            </td>
+                            <td style="width:33%">
+                                <strong>Revisó:</strong>
+                            </td>
+                            <td style="width:33%">
+                                <strong>Aprobó:</strong>
+                            </td>
+                        </tr>
+                        <tr style="text-align:center">
+                            <td>
+                                <br><br>
+                                <?= trim($doc['usuario_act']) == '' ? $doc['usuario_reg'] : $doc['usuario_act'] ?>
+                            </td>
+                            <td>
+                                <br><br>
+                                <?php
+                                $key = array_search('2', array_column($responsables, 'tipo_control'));
+                                $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                                $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                                echo $nombre . '<br> ' . $cargo;
+                                ?>
+                            </td>
+                            <td>
+                                <br><br>
+                                <?php
+                                $key = array_search('3', array_column($responsables, 'tipo_control'));
+                                $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                                $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                                echo $nombre . '<br> ' . $cargo;
+                                ?>
+                            </td>
+                        </tr>
+                    </table>
                 <?php
                 }
                 ?>
-            </table>
-            </br>
-            </br>
-            <div class="row">
-                <div class="col-12">
-                    <div style="text-align: center; font-size: 10px;">
-                        <div>___________________________________</div>
-                        <div><?= $nom_respon; ?> </div>
-                        <div><?= $cargo_respon; ?> </div>
-                    </div>
-                </div>
-            </div>
-            </br>
-            </br>
-            <?php
-            if ($control) {
-            ?>
-                <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
-                    <tr style="text-align:left">
-                        <td style="width:33%">
-                            <strong>Elaboró:</strong>
-                        </td>
-                        <td style="width:33%">
-                            <strong>Revisó:</strong>
-                        </td>
-                        <td style="width:33%">
-                            <strong>Aprobó:</strong>
-                        </td>
-                    </tr>
-                    <tr style="text-align:center">
-                        <td>
-                            <br><br>
-                            <?= trim($doc['usuario_act']) == '' ? $doc['usuario_reg'] : $doc['usuario_act'] ?>
-                        </td>
-                        <td>
-                            <br><br>
-                            <?php
-                            $key = array_search('2', array_column($responsables, 'tipo_control'));
-                            $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
-                            $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
-                            echo $nombre . '<br> ' . $cargo;
-                            ?>
-                        </td>
-                        <td>
-                            <br><br>
-                            <?php
-                            $key = array_search('3', array_column($responsables, 'tipo_control'));
-                            $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
-                            $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
-                            echo $nombre . '<br> ' . $cargo;
-                            ?>
-                        </td>
-                    </tr>
-                </table>
-            <?php
-            }
-            ?>
-            </br> </br> </br>
+                </br> </br> </br>
         </div>
         <div class="page-break"></div>
     <?php
