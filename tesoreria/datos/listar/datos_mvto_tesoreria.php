@@ -39,6 +39,9 @@ if (isset($_POST['id_manu']) && $_POST['id_manu']) {
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
     $andwhere .= " AND ctb_doc.fecha BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
 }
+if (isset($_POST['ccnit']) && $_POST['ccnit']) {
+    $andwhere .= " AND tb_terceros.nit_tercero LIKE '%" . $_POST['ccnit'] . "%'";
+}
 if (isset($_POST['tercero']) && $_POST['tercero']) {
     $andwhere .= " AND tb_terceros.nom_tercero LIKE '%" . $_POST['tercero'] . "%'";
 }

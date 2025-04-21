@@ -2,8 +2,8 @@
 date_default_timezone_set('America/Bogota');
 
 $bd_driver = "mysql";
-$bd_servidor = "localhost";
-$bd_base = "bd_aguazul";
+$bd_servidor = "localhost:3366";
+$bd_base = "municipal";
 $api =  "http://200.7.102.155/api_terceros/";
 $charset = "charset=utf8";
 $bd_usuario = "root";

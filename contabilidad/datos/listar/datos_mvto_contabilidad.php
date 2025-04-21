@@ -24,8 +24,37 @@ $where = $_POST['search']['value'] != '' ? "AND (`ctb_doc`.`fecha` LIKE '%{$_POS
 if ($anulados == 1 || $_POST['search']['value'] != '') {
     $where .= " AND `ctb_doc`.`estado` >= 0";
 } else {
-    $where .= " AND `ctb_doc`.`estado` > 0";
+    $where .= " AND `ctb_doc`.`estado` >= 0";
 }
+
+
+//----------- filtros--------------------------
+
+$andwhere = " ";
+
+if (isset($_POST['id_manu']) && $_POST['id_manu']) {
+    $andwhere .= " AND ctb_doc.id_manu LIKE '%" . $_POST['id_manu'] . "%'";
+}
+if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
+    $andwhere .= " AND ctb_doc.fecha BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+}
+if (isset($_POST['rp']) && $_POST['rp']) {
+    $andwhere .= " AND pto_crp.id_manu LIKE '%" . $_POST['rp'] . "%'";
+}
+if (isset($_POST['tercero']) && $_POST['tercero']) {
+    $andwhere .= " AND tb_terceros.nom_tercero LIKE '%" . $_POST['tercero'] . "%'";
+}
+if (isset($_POST['estado']) && strlen($_POST['estado'])) {
+    if ($_POST['estado'] == "-1") {
+        $andwhere .= " AND ctb_doc.estado>=" . $_POST['estado'];
+    } 
+    else {
+        $andwhere .= " AND ctb_doc.estado=" . $_POST['estado'];
+    }
+}
+
+//-------------------------------------------------------------------------
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -70,7 +99,7 @@ try {
                     WHERE `ctb_doc`.`estado` > 0
                     GROUP BY `pto_cop_detalle`.`id_ctb_doc`) AS `pag`
                     ON (`pag`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where)
+            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where) $andwhere
             GROUP BY `ctb_doc`.`id_ctb_doc`
             ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);

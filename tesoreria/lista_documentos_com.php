@@ -165,6 +165,9 @@ try {
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="form-group col-md-2">
+                                        <input type="text" class="filtro form-control form-control-sm" id="txt_ccnit_filtro" placeholder="CC / Nit">
+                                    </div>
                                     <div class="form-group col-md-3">
                                         <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" placeholder="Tercero">
                                     </div>
