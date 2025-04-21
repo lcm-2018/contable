@@ -26,7 +26,7 @@ $where = $_POST['search']['value'] != '' ? "AND (`ctb_doc`.`fecha` LIKE '%{$_POS
 if ($anulados == 1 || $_POST['search']['value'] != '') {
     $where .= " AND `ctb_doc`.`estado` >= 0";
 } else {
-    $where .= " AND `ctb_doc`.`estado` > 0";
+    $where .= " AND `ctb_doc`.`estado` >= 0";
 }
 
 //----------- filtros--------------------------

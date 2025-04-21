@@ -84,6 +84,8 @@ try {
                                 INNER JOIN tb_terceros ON (ctb_libaux.id_tercero_api = tb_terceros.id_tercero_api)
                             WHERE ctb_doc.id_tipo_doc = 3
                                 AND DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') <= '$fec_fin'
+                                AND ctb_libaux.ref = 1
+                                AND ctb_doc.estado = 2
                             GROUP BY 
                                 ctb_libaux.id_ctb_doc, tb_terceros.id_tercero_api
                             ) c

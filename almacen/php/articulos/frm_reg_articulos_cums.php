@@ -61,6 +61,10 @@ if (empty($obj)) {
                         <input type="text" class="form-control form-control-sm valcode" id="txt_reg_inv" name="txt_reg_inv" required value="<?php echo $obj['reg_invima'] ?>">
                     </div>  
                     <div class="form-group col-md-3">
+                        <label for="txt_fec_ven_inv" class="small">Vencimiento Invima</label>
+                        <input type="date" class="form-control form-control-sm" id="txt_fec_ven_inv" name="txt_fec_ven_inv" required value="<?php echo $obj['fec_invima'] ?>">
+                    </div> 
+                    <div class="form-group col-md-4">
                         <label for="sl_estado_inv" class="small">Estado Invima</label>
                         <select class="form-control form-control-sm" id="sl_estado_inv" name="sl_estado_inv">
                             <?php estados_invima('', $obj['estado_invima']) ?>
