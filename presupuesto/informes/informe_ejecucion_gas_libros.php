@@ -69,3 +69,5 @@ $fecha_actual = $fecha->format('Y-m-d');
         </div>
     </div>
 </div>
+
+<script type="text/javascript" src="js/rel_cuentasxpagar/common.js?v=<?php echo date('YmdHis') ?>"></script>
