@@ -47,7 +47,7 @@ $fecha_actual = $fecha->format('Y-m-d');
                         <a type="" id="btnExcelEntrada" class="btn btn-outline-success" value="01" title="Exprotar a Excel">
                             <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
                         </a>
-                        <a type="button" class="btn btn-danger" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
+                        <a type="button" class="btn btn-danger" title="Imprimir" onclick="imprSelecTes('areaImprimir','<?php echo 0; ?>');"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
                     </div>
                 </form>
             </div>

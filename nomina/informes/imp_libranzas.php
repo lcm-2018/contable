@@ -110,7 +110,7 @@ foreach ($datos as $dt) {
         <a type="button" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
             <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
         </a>
-        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"> Imprimir</a>
+        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir','<?php echo 0; ?>');"> Imprimir</a>
     <?php } ?>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>

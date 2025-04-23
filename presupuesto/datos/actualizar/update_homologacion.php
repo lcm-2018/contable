@@ -19,67 +19,67 @@ $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $suma = 0;
 $presupuesto = $_POST['id_pto_tipo'];
+$error = '';
 if ($presupuesto == 1) {
     $ingreso = $_POST['ingreso'];
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        if ($ingreso == 0) {
-            $sql = "INSERT INTO `pto_homologa_ingresos`
-                (`id_cargue`, `id_cgr`, `id_cpc`, `id_fuente`, `id_tercero`, `id_politica`, `id_siho`, `id_sia`, `id_situacion`, `id_vigencia`, `id_user_reg`, `fec_reg`)
-            VALUES (?, ?, ?, ? , ?, ?, ?, ?, ?, ?, ?, ?)";
-        } else {
-            $sql = "UPDATE `pto_homologa_ingresos` 
-                SET `id_cargue` = ?, `id_cgr` = ?, `id_cpc` = ?, `id_fuente` = ?, `id_tercero` = ?, `id_politica` = ?, `id_siho` = ?, `id_sia` = ?, `id_situacion` = ?, `id_vigencia` = ?
+
+        $sqlI = "INSERT INTO `pto_homologa_ingresos`
+                    (`id_cargue`, `id_cgr`, `id_cpc`, `id_fuente`, `id_tercero`, `id_politica`, `id_siho`, `id_sia`, `id_situacion`, `id_vigencia`, `id_user_reg`, `fec_reg`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        $sqlU = "UPDATE `pto_homologa_ingresos`
+                    SET `id_cargue` = ?, `id_cgr` = ?, `id_cpc` = ?, `id_fuente` = ?, `id_tercero` = ?, `id_politica` = ?, `id_siho` = ?, `id_sia` = ?, `id_situacion` = ?, `id_vigencia` = ?
                 WHERE `id_homologacion` = ?";
-        }
-        $sql = $cmd->prepare($sql);
-        $sql->bindParam(1, $id_ppto, PDO::PARAM_INT);
-        $sql->bindParam(2, $cgr, PDO::PARAM_STR);
-        $sql->bindParam(3, $cpc, PDO::PARAM_STR);
-        $sql->bindParam(4, $fte, PDO::PARAM_STR);
-        $sql->bindParam(5, $tercer, PDO::PARAM_STR);
-        $sql->bindParam(6, $polit, PDO::PARAM_STR);
-        $sql->bindParam(7, $siho, PDO::PARAM_STR);
-        $sql->bindParam(8, $sia, PDO::PARAM_STR);
-        $sql->bindParam(9, $situa, PDO::PARAM_STR);
-        $sql->bindParam(10, $vig, PDO::PARAM_STR);
-        if ($ingreso == 0) {
-            $sql->bindParam(11, $iduser, PDO::PARAM_INT);
-            $sql->bindValue(12, $date->format('Y-m-d H:i:s'));
-        } else {
-            $sql->bindParam(11, $idHom, PDO::PARAM_INT);
-        }
+
+        $insert = $cmd->prepare($sqlI);
+        $update = $cmd->prepare($sqlU);
         foreach ($codCgrs as $key => $value) {
-            $id_ppto = $key;
-            $cgr = $value;
-            $cpc = $codCpc[$key];
-            $fte = $codFuente[$key];
-            $tercer = $codTercero[$key];
-            $polit = $codPolitica[$key];
-            $siho = $codSiho[$key];
-            $sia = $codSia[$key];
-            $situa = $codSituacion[$key];
-            $vig = $codVigencia[$key];
-            if ($ingreso == 1) {
+            if ($codCpc[$key] > 0) {
+                $params = [
+                    (int) $key,
+                    $value,
+                    $codCpc[$key],
+                    $codFuente[$key],
+                    $codTercero[$key],
+                    $codPolitica[$key],
+                    $codSiho[$key],
+                    $codSia[$key],
+                    $codSituacion[$key],
+                    $codVigencia[$key],
+                    (int) $iduser,
+                    $date->format('Y-m-d H:i:s')
+                ];
                 $idHom = $idsHomolgacion[$key];
-            }
-            $sql->execute();
-            if ($sql->rowCount() > 0) {
-                $suma++;
-                if ($ingreso == 1) {
-                    $con = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                    $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                    $query = "UPDATE `pto_homologa_ingresos` SET `id_user_act` = ?, `fec_act` = ? WHERE `id_homologacion` = ?";
-                    $query = $con->prepare($query);
-                    $query->bindParam(1, $iduser, PDO::PARAM_INT);
-                    $query->bindValue(2, $date->format('Y-m-d H:i:s'));
-                    $query->bindParam(3, $idHom, PDO::PARAM_INT);
-                    $query->execute();
-                    $con = null;
+
+                if ($idHom == 0) {
+                    $insert->execute($params);
+                    if ($insert->rowCount() > 0) {
+                        $suma++;
+                    } else {
+                        $error .= $insert->errorInfo()[2];
+                    }
+                } else {
+                    $paramsUpdate = array_slice($params, 0, 10); // Solo los 10 primeros
+                    $paramsUpdate[] = (int) $idHom;
+                    $update->execute($paramsUpdate);
+                    if ($update->rowCount() > 0) {
+                        $suma++;
+                        $con = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                        $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                        $query = "UPDATE `pto_homologa_ingresos` SET `id_user_act` = ?, `fec_act` = ? WHERE `id_homologacion` = ?";
+                        $query = $con->prepare($query);
+                        $query->bindParam(1, $iduser, PDO::PARAM_INT);
+                        $query->bindValue(2, $date->format('Y-m-d H:i:s'));
+                        $query->bindParam(3, $idHom, PDO::PARAM_INT);
+                        $query->execute();
+                        $con = null;
+                    } else {
+                        $error .= $insert->errorInfo()[2];
+                    }
                 }
-            } else {
-                echo $sql->errorInfo()[2];
             }
         }
         $cmd = null;
@@ -94,68 +94,61 @@ if ($presupuesto == 1) {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        if ($gasto == 0) {
-            $sql = "INSERT INTO `pto_homologa_gastos`
-                        (`id_cargue`, `id_cgr`, `id_cpc`, `id_fuente`, `id_tercero`, `id_politica`, `id_siho`, `id_sia`, `id_situacion`, `id_vigencia`, `id_seccion`, `id_sector`, `id_csia`, `id_user_reg`, `fec_reg`)
-                    VALUES (?, ?, ?, ? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        } else {
-            $sql = "UPDATE `pto_homologa_gastos` 
+        $sqlI = "INSERT INTO `pto_homologa_gastos`
+                    (`id_cargue`, `id_cgr`, `id_cpc`, `id_fuente`, `id_tercero`, `id_politica`, `id_siho`, `id_sia`, `id_situacion`, `id_vigencia`, `id_seccion`, `id_sector`, `id_csia`, `id_user_reg`, `fec_reg`)
+                VALUES (?, ?, ?, ? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sqlU = "UPDATE `pto_homologa_gastos` 
                     SET `id_cargue` = ?, `id_cgr` = ?, `id_cpc` = ?, `id_fuente` = ?, `id_tercero` = ?, `id_politica` = ?, `id_siho` = ?, `id_sia` = ?, `id_situacion` = ?, `id_vigencia` = ?, `id_seccion` = ?, `id_sector` = ?, `id_csia` = ?
-                    WHERE `id_homologacion` = ?";
-        }
-        $sql = $cmd->prepare($sql);
-        $sql->bindParam(1, $id_ppto, PDO::PARAM_INT);
-        $sql->bindParam(2, $cgr, PDO::PARAM_STR);
-        $sql->bindParam(3, $cpc, PDO::PARAM_STR);
-        $sql->bindParam(4, $fte, PDO::PARAM_STR);
-        $sql->bindParam(5, $tercer, PDO::PARAM_STR);
-        $sql->bindParam(6, $polit, PDO::PARAM_STR);
-        $sql->bindParam(7, $siho, PDO::PARAM_STR);
-        $sql->bindParam(8, $sia, PDO::PARAM_STR);
-        $sql->bindParam(9, $situa, PDO::PARAM_STR);
-        $sql->bindParam(10, $vig, PDO::PARAM_STR);
-        $sql->bindParam(11, $secc, PDO::PARAM_STR);
-        $sql->bindParam(12, $sect, PDO::PARAM_STR);
-        $sql->bindParam(13, $csia, PDO::PARAM_STR);
-        if ($gasto == 0) {
-            $sql->bindParam(14, $iduser, PDO::PARAM_INT);
-            $sql->bindValue(15, $date->format('Y-m-d H:i:s'));
-        } else {
-            $sql->bindParam(14, $idHom, PDO::PARAM_INT);
-        }
+                WHERE `id_homologacion` = ?";
+        $insert = $cmd->prepare($sqlI);
+        $update = $cmd->prepare($sqlU);
         foreach ($codCgrs as $key => $value) {
-            $id_ppto = $key;
-            $cgr = $value;
-            $cpc = $codCpc[$key];
-            $fte = $codFuente[$key];
-            $tercer = $codTercero[$key];
-            $polit = $codPolitica[$key];
-            $siho = $codSiho[$key];
-            $sia = $codSia[$key];
-            $situa = $codSituacion[$key];
-            $vig = $codVigencia[$key];
-            $secc = $codSeccion[$key];
-            $sect = $codSector[$key];
-            $csia = $codClaseSia[$key];
-            if ($gasto == 1) {
+            if ($codCpc[$key] > 0) {
+                $params = [
+                    (int) $key,
+                    $value,
+                    $codCpc[$key],
+                    $codFuente[$key],
+                    $codTercero[$key],
+                    $codPolitica[$key],
+                    $codSiho[$key],
+                    $codSia[$key],
+                    $codSituacion[$key],
+                    $codVigencia[$key],
+                    $codSeccion[$key],
+                    $codSector[$key],
+                    $codClaseSia[$key],
+                    (int) $iduser,
+                    $date->format('Y-m-d H:i:s')
+                ];
                 $idHom = $idsHomolgacion[$key];
-            }
-            $sql->execute();
-            if ($sql->rowCount() > 0) {
-                $suma++;
-                if ($gasto == 1) {
-                    $con = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                    $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                    $query = "UPDATE `pto_homologa_gastos` SET `id_user_act` = ?, `fec_act` = ? WHERE `id_homologacion` = ?";
-                    $query = $con->prepare($query);
-                    $query->bindParam(1, $iduser, PDO::PARAM_INT);
-                    $query->bindValue(2, $date->format('Y-m-d H:i:s'));
-                    $query->bindParam(3, $idHom, PDO::PARAM_INT);
-                    $query->execute();
-                    $con = null;
+
+                if ($idHom == 0) {
+                    $insert->execute($params);
+                    if ($insert->rowCount() > 0) {
+                        $suma++;
+                    } else {
+                        $error .= $insert->errorInfo()[2];
+                    }
+                } else {
+                    $paramsUpdate = array_slice($params, 0, 13);
+                    $paramsUpdate[] = (int) $idHom;
+                    $update->execute($paramsUpdate);
+                    if ($update->rowCount() > 0) {
+                        $suma++;
+                        $con = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                        $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                        $query = "UPDATE `pto_homologa_gastos` SET `id_user_act` = ?, `fec_act` = ? WHERE `id_homologacion` = ?";
+                        $query = $con->prepare($query);
+                        $query->bindParam(1, $iduser, PDO::PARAM_INT);
+                        $query->bindValue(2, $date->format('Y-m-d H:i:s'));
+                        $query->bindParam(3, $idHom, PDO::PARAM_INT);
+                        $query->execute();
+                        $con = null;
+                    } else {
+                        $error .= $insert->errorInfo()[2];
+                    }
                 }
-            } else {
-                echo $sql->errorInfo()[2];
             }
         }
         $cmd = null;
@@ -166,5 +159,5 @@ if ($presupuesto == 1) {
 if ($suma > 0) {
     echo 'ok';
 } else {
-    echo 'No se realizó ninguna modificación';
+    echo 'No se realizó ninguna modificación' . $error;
 }

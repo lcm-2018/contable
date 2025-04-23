@@ -1253,22 +1253,34 @@ $('#modificaHomologaPto').on('click', '.dupLine', function () {
 });
 $('#setHomologacionPto').on('click', '', function () {
     var valida = 1;
+    var c = 0;
     var btn = $(this).get(0);
     InactivaBoton(btn);
     $('.is-invalid').removeClass('is-invalid');
-    $('.validaPto').each(function () {
-        var celda = $(this).parent();
-        if ($(this).val() == 0) {
-            celda.find('.homologaPTO').focus();
-            celda.find('.homologaPTO').addClass('is-invalid');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Se debe diligenciar este campo');
-            valida = 0;
-            ActivaBoton(btn);
+    $('.srow').each(function () {
+        if (Number($(this).val()) > 0) {
+            c++;
+            var fila = $(this).closest('tr');
+            fila.find('.validaPto').each(function () {
+                celda = $(this).parent();
+                if (!(Number($(this).val()) > 0)) {
+                    celda.find('.homologaPTO').focus();
+                    celda.find('.homologaPTO').addClass('is-invalid');
+                    mjeError('Campo requerido', 'Se debe diligenciar este campo');
+                    valida = 0;
+                    ActivaBoton(btn);
+                    return false;
+                }
+            });
+            if (valida == 0) {
+                return false;
+            }
+        }
+        if (valida == 0) {
             return false;
         }
     });
-    if (valida == 1) {
+    if (valida == 1 && c > 0) {
         var data = $('#formDataHomolPto').serialize();
         $.ajax({
             type: 'POST',
@@ -1276,16 +1288,17 @@ $('#setHomologacionPto').on('click', '', function () {
             data: data,
             success: function (r) {
                 if (r.trim() === 'ok') {
-                    $('#divModalDone a').attr('data-dismiss', '');
-                    $('#divModalDone a').attr('href', 'javascript:location.reload()');
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html('Homologación realizada correctamente');
+                    mje('Homologación realizada correctamente');
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
                 } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r);
+                    mjeError('Error', r);
                 }
             }
         });
+    } else {
+        mjeError('Error', 'No hay registros para homologar');
     }
     ActivaBoton(btn);
 });

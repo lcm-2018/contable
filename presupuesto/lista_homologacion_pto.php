@@ -240,7 +240,7 @@ $gasto = empty($homologacion) ? 0 : 1;;
                                                         </td>";
                                                         echo "<td class='p-0'>
                                                                 <input tipo='1' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='uno[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_cgr'] . ' -> ' . $homologacion[$key]['nombre_cgr'] : '') . "'>
-                                                                <input type='hidden' class='validaPto' name='codCgr[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_cgr'] : 0) . "'>
+                                                                <input type='hidden' class='validaPto srow' name='codCgr[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_cgr'] : 0) . "'>
                                                             </td>";
                                                         $val_vig = $key !== false ? $homologacion[$key]['id_vigencia'] : 0;
                                                         echo "<td class='p-0'>
@@ -300,7 +300,7 @@ $gasto = empty($homologacion) ? 0 : 1;;
                                                         </td>";
                                                         echo "<td class='p-0'>
                                                                 <input tipo='1' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='uno[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_cgr'] . ' -> ' . $homologacion[$key]['nombre_cgr'] : '') . "'>
-                                                                <input type='hidden' class='validaPto' name='codCgr[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_cgr'] : 0) . "'>
+                                                                <input type='hidden' class='validaPto srow' name='codCgr[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_cgr'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
                                                                 <input tipo='2' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='dos[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_vig'] . ' -> ' . $homologacion[$key]['nombre_vig'] : '') . "'>
