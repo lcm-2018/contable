@@ -148,6 +148,7 @@ var tabla;
 						d.id_manu = $('#txt_idmanu_filtro').val();
 						d.fec_ini = $('#txt_fecini_filtro').val();
 						d.fec_fin = $('#txt_fecfin_filtro').val();
+						d.ccnit = $('#txt_ccnit_filtro').val();
 						d.tercero = $('#txt_tercero_filtro').val();
 						d.estado = $('#sl_estado_filtro').val();
 

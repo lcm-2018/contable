@@ -977,6 +977,7 @@
             });
         }
     });
+
 })(jQuery);
 
 const imprimirFormatoCdp = (id) => {
@@ -3037,7 +3038,7 @@ const generarInformeLibros = (boton) => {
         ruta = ruta + "informe_libro_cxp.php";
     }
     if (tipo == 6) {
-        ruta = ruta + "informe_libro_ft04.php";
+        // ruta = ruta + "informe_libro_ft04.php";
     }
     if (tipo == 7) {
         ruta = ruta + "informe_libro_cdp_anula_xls.php";
@@ -3060,22 +3061,39 @@ const generarInformeLibros = (boton) => {
     if (id == 20) {
         ruta = ruta + "informe_ejecucion_ing_xls.php ";
     }
-    boton.disabled = true;
-    var span = boton.querySelector("span")
-    span.classList.add("spinner-border", "spinner-border-sm");
-    areaImprimir.innerHTML = "";
-    $.ajax({
-        url: ruta,
-        type: "POST",
-        data: data,
-        success: function (response) {
-            boton.disabled = false;
-            span.classList.remove("spinner-border", "spinner-border-sm")
-            areaImprimir.innerHTML = response;
-        }, error: function (error) {
-            console.log("Error:" + error);
-        }
-    });
+
+    if (tipo != 6) {
+        boton.disabled = true;
+        var span = boton.querySelector("span")
+        span.classList.add("spinner-border", "spinner-border-sm");
+        areaImprimir.innerHTML = "";
+        $.ajax({
+            url: ruta,
+            type: "POST",
+            data: data,
+            success: function (response) {
+                boton.disabled = false;
+                span.classList.remove("spinner-border", "spinner-border-sm")
+                areaImprimir.innerHTML = response;
+            }, error: function (error) {
+                console.log("Error:" + error);
+            }
+        });
+    }
+
+    //------------------- aqui va mi codigo para la relacion de compromisos y cuentas por pagar att. chuzz
+    else{
+        $.post( window.urlin + '/presupuesto/php/rel_cuentasxpagar/imp_rel_cuentasxpagar.php', {
+                fec_ini:  $('#fecha_ini').val(),
+                fec_fin: $('#fecha').val()
+            }, function(he) {
+                $('#divTamModalImp').removeClass('modal-sm');
+                $('#divTamModalImp').removeClass('modal-lg');
+                $('#divTamModalImp').addClass('modal-xl');
+                $('#divModalImp').modal('show');
+                $("#divImp").html(he);
+            });
+    }
 };
 
 // Funcion para redireccionar la recarga de la pagina

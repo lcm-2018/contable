@@ -71,9 +71,24 @@
 			language: setIdioma,
 			serverSide: true,
 			processing: true,
+			searching: false,
 			ajax: {
 				url: "datos/listar/datos_mvto_contabilidad.php",
 				data: function (d) {
+					d.id_manu = $('#txt_idmanu_filtro').val();
+					d.fec_ini = $('#txt_fecini_filtro').val();
+					d.fec_fin = $('#txt_fecfin_filtro').val();
+					d.rp = $('#txt_rp_filtro').val();
+					d.tercero = $('#txt_tercero_filtro').val();
+					d.estado = $('#sl_estado_filtro').val();
+
+					if ($('#sl_estado_filtro').val() == "0") {
+						d.estado = "-1";
+					}
+					if ($('#sl_estado_filtro').val() == "3") {
+						d.estado = "0";
+					}
+
 					d.id_doc = id_doc;
 					d.anulados = $('#verAnulados').is(':checked') ? 1 : 0;
 					return d;
@@ -363,6 +378,20 @@
 			$("#divForms").html(he);
 		});
 	});
+
+	//------------------------------
+	//Buscar registros de Ingresos
+	$('#btn_buscar_filtro').on("click", function () {
+		$('.is-invalid').removeClass('is-invalid');
+		reloadtable('tableMvtoContable');
+	});
+
+	$('.filtro').keypress(function (e) {
+		if (e.keyCode == 13) {
+			reloadtable('tableMvtoContable');
+		}
+	});
+
 })(jQuery);
 /*========================================================================== Utilitarios ========================================*/
 /*var recargartable = function (nom) {
