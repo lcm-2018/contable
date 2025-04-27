@@ -162,16 +162,16 @@ try {
                                 </div>
 
                                 <br>
-                                <table id="tableEjecPresupuesto" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
+                                <table id="tableEjecPresupuesto" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 100%;">
                                     <thead>
-                                        <tr>
-                                            <th style="width: 10%;">Numero</th>
+                                        <tr class="text-center">
+                                            <th style="width: 8%;">Numero</th>
                                             <th style="width: 8%;">Fecha</th>
                                             <th style="width: 38%;">Objeto</th>
-                                            <th style="width: 12%;">Valor CDP</th>
-                                            <th style="width: 12%;">X Registrar</th>
+                                            <th style="width: 10%;">Valor CDP</th>
+                                            <th style="width: 10%;">X Registrar</th>
                                             <th style="width: 8%;">Registro</th>
-                                            <th style="width: 12%;">Acciones</th>
+                                            <th style="min-width: 150px;">Acciones</th>
 
                                         </tr>
                                     </thead>

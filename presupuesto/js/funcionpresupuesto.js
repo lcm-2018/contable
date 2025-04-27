@@ -241,9 +241,18 @@
                 type: "POST",
                 dataType: "json",
             },
-            columns: [{ data: "numero" }, { data: "fecha" }, { data: "objeto" }, { data: "valor" }, { data: "xregistrar" }, { data: "accion" }, { data: "botones" }],
+            columns: [
+                { data: "numero" },
+                { data: "fecha" },
+                { data: "objeto" },
+                { data: "valor" },
+                { data: "xregistrar" },
+                { data: "accion" },
+                { data: "botones" }
+            ],
             order: [[0, "desc"]],
-            pageLength: 25,
+            pageLength: 25
+
         });
         // Control del campo de búsqueda
         $('#tableEjecPresupuesto_filter input').unbind(); // Desvinculamos el evento por defecto
@@ -3082,17 +3091,17 @@ const generarInformeLibros = (boton) => {
     }
 
     //------------------- aqui va mi codigo para la relacion de compromisos y cuentas por pagar att. chuzz
-    else{
-        $.post( window.urlin + '/presupuesto/php/rel_cuentasxpagar/imp_rel_cuentasxpagar.php', {
-                fec_ini:  $('#fecha_ini').val(),
-                fec_fin: $('#fecha').val()
-            }, function(he) {
-                $('#divTamModalImp').removeClass('modal-sm');
-                $('#divTamModalImp').removeClass('modal-lg');
-                $('#divTamModalImp').addClass('modal-xl');
-                $('#divModalImp').modal('show');
-                $("#divImp").html(he);
-            });
+    else {
+        $.post(window.urlin + '/presupuesto/php/rel_cuentasxpagar/imp_rel_cuentasxpagar.php', {
+            fec_ini: $('#fecha_ini').val(),
+            fec_fin: $('#fecha').val()
+        }, function (he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
     }
 };
 

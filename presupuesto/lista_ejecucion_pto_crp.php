@@ -60,9 +60,9 @@ try {
                                     </div>
                                 </div>
                                 <br>
-                                <table id="tableEjecPresupuestoCrp" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
+                                <table id="tableEjecPresupuestoCrp" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 100%;">
                                     <thead>
-                                        <tr>
+                                        <tr class="text-center">
                                             <th style="width: 8%;">Numero</th>
                                             <th style="width: 8%;">Cdp</th>
                                             <th style="width: 10%;">Fecha</th>
@@ -70,7 +70,7 @@ try {
                                             <th style="width: 10%;">CC/Nit</th>
                                             <th style="width: 32%;">Tercero</th>
                                             <th style="width: 12%;">Valor</th>
-                                            <th style="width: 8%;">Acciones</th>
+                                            <th style="min-width: 150px;">Acciones</th>
 
                                         </tr>
                                     </thead>

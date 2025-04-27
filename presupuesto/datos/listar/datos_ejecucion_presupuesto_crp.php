@@ -129,7 +129,7 @@ if (!empty($listappto)) {
             if ($lp['estado'] == 2) {
                 $abrir = '<a onclick="abrirCrp(' . $id_pto . ')" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb " title="Abrir Registro Presupuestal"><span class="fas fa-lock fa-lg"></span></a>';
             } else {
-                $abrir = '<a onclick="CierraCrp(' . $id_pto . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb " title="Cerrar Registro Presupuestal"><span class="fas fa-lock-open fa-lg"></span></a>';
+                $abrir = '<a onclick="CierraCrp(' . $id_pto . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb " title="Cerrar Registro Presupuestal"><span class="fas fa-unlock fa-lg"></span></a>';
             }
         }
         if ($lp['saldo'] > 0) {

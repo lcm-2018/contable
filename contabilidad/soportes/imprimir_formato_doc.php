@@ -196,22 +196,22 @@ try {
         // Movimiento contable
         try {
             $sql = "SELECT
-                `ctb_libaux`.`id_tercero_api` AS `id_tercero`
-                , `ctb_pgcp`.`cuenta`
-                , `ctb_pgcp`.`nombre`
-                , `ctb_libaux`.`debito`
-                , `ctb_libaux`.`credito`
-                , `ctb_fuente`.`nombre` AS `fuente`
-            FROM
-                `ctb_libaux`
-                INNER JOIN `ctb_doc` 
-                    ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                INNER JOIN `ctb_pgcp` 
-                    ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-                INNER JOIN `ctb_fuente` 
-                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
-            WHERE (`ctb_doc`.`id_ctb_doc` = $dto)
-            ORDER BY `ctb_pgcp`.`cuenta`,`ctb_pgcp`.`nombre` DESC";
+                        `ctb_libaux`.`id_tercero_api` AS `id_tercero`
+                        , `ctb_pgcp`.`cuenta`
+                        , `ctb_pgcp`.`nombre`
+                        , `ctb_libaux`.`debito`
+                        , `ctb_libaux`.`credito`
+                        , `ctb_fuente`.`nombre` AS `fuente`
+                    FROM
+                        `ctb_libaux`
+                        INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        INNER JOIN `ctb_pgcp` 
+                            ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                        INNER JOIN `ctb_fuente` 
+                            ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                    WHERE (`ctb_doc`.`id_ctb_doc` = $dto)
+                    ORDER BY `ctb_pgcp`.`cuenta`,`ctb_pgcp`.`nombre` DESC";
             $res = $cmd->query($sql);
             $movimiento = $res->fetchAll();
         } catch (PDOException $e) {

@@ -118,8 +118,12 @@ if (!empty($listappto)) {
             $anular = '<button text="' . $info . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Anular" onclick="anulacionPto(this);"><span class="fas fa-ban fa-lg"></span></button>';
         }
         if (PermisosUsuario($permisos, 5401, 2) || $id_rol == 1) {
-            $registrar = '<a value="' . $id_pto . '" onclick="CargarFormularioCrpp(' . $id_pto . ')" class="text-blue " role="button" title="Detalles"><span class="badge badge-pill badge-primary">Registrar</span></a>';
-
+            if ($lp['estado'] == 2) {
+                $registrar = '<a value="' . $id_pto . '" onclick="CargarFormularioCrpp(' . $id_pto . ')" class="text-blue " role="button" title="Detalles"><span class="badge badge-pill badge-primary">Registrar</span></a>';
+            } else {
+                $mje = "Primero debe cerrar el CDP";
+                $registrar = '<a onclick="mjeError(\'' . htmlspecialchars($mje, ENT_QUOTES) . '\')" class="text-blue" role="button" title="Detalles"><span class="badge badge-pill badge-secondary">Registrar</span></a>';
+            }
             if ($cxregistrar  == 0) {
                 $registrar = '--';
             }
@@ -150,7 +154,7 @@ if (!empty($listappto)) {
             if ($lp['estado'] == 2) {
                 $abrir = '<a onclick="abrirCdp(' . $id_pto . ')" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb " title="Abrir CDP"><span class="fas fa-lock fa-lg"></span></a>';
             } else {
-                $abrir = '<a onclick="cerrarCdp(' . $id_pto . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb " title="Cerrar CDP"><span class="fas fa-lock-open fa-lg"></span></a>';
+                $abrir = '<a onclick="cerrarCdp(' . $id_pto . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb " title="Cerrar CDP"><span class="fas fa-unlock fa-lg"></span></a>';
             }
             if ($fecha < $fecha_cierre) {
                 $abrir = null;
@@ -180,7 +184,7 @@ if (!empty($listappto)) {
             'liberado' =>  '<div class="text-right">' . $valor_cdp_lib . '</div>',
             'xregistrar' =>  '<div class="text-right">' . $xregistrar  . '</div>',
             'accion' => '<div class="text-center">' . $registrar . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . $historial . $abrir . '</div>',
+            'botones' => '<div class="text-center">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . $historial . $abrir . '</div>',
         ];
     }
 } else {

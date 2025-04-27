@@ -45,7 +45,7 @@ try {
                     INNER JOIN `ctb_pgcp`
                         ON `ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`
                 WHERE `ctb_doc`.`estado` = 2
-                    AND ((SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('1', '2', '3') AND `ctb_doc`.`fecha` < '$fecha_inicial')
+                    AND ((SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('1', '2', '3', '8', '9') AND `ctb_doc`.`fecha` < '$fecha_inicial')
                         OR
                     (SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('4', '5', '6') AND `ctb_doc`.`fecha` < '$fecha_inicial' AND `ctb_doc`.`fecha` > '$inicio'))
                 GROUP BY `ctb_libaux`.`id_cuenta`, `ctb_libaux`.`id_tercero_api`
