@@ -65,23 +65,24 @@ try {
                     ON(`reduccion`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
                     (SELECT
-                        `tt_rec`.`id_rubro`
-                        , `tt_rec`.`valor`
+                        SUM(IFNULL(`ctt2`.`valor`,0) - IFNULL(`ctt2`.`valor_liberado`,0)) AS `valor`
+                        ,`ctt2`.`id_rubro`
                     FROM
                         (SELECT
-                            CASE
-                                WHEN `pto_rec_detalle`.`id_pto_rad_detalle` IS NULL THEN `pto_rec_detalle`.`id_rubro`
-                                ELSE `pto_rad_detalle`.`id_rubro`
+                            `pto_rec_detalle`.`valor`
+                            , `pto_rec_detalle`.`valor_liberado`
+                            , CASE
+                                WHEN `pto_rec_detalle`.`id_rubro`IS NULL THEN `pto_rad_detalle`.`id_rubro`
+                                ELSE `pto_rec_detalle`.`id_rubro` 
                             END AS `id_rubro`
-                            , SUM(IFNULL(`pto_rec_detalle`.`valor`,0)) - SUM(IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `valor`
                         FROM
                             `pto_rec_detalle`
                             INNER JOIN `pto_rec` 
                                 ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
-                            LEFT JOIN `pto_rad_detalle` 
+                            INNER JOIN `pto_rad_detalle` 
                                 ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
-                        WHERE (`pto_rec`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_rec`.`estado` = 2)) AS `tt_rec`
-                    GROUP BY `tt_rec`.`id_rubro`) AS `recaudo`
+                        WHERE (`pto_rec`.`estado` = 2 AND DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte')) AS `ctt2`
+                    GROUP BY `ctt2`.`id_rubro`) AS `recaudo`
                     ON(`recaudo`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
                     (SELECT
@@ -120,23 +121,24 @@ try {
                     ON(`reduccion_mes`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
                     (SELECT
-                        `tt_rec`.`id_rubro`
-                        , `tt_rec`.`valor`
+                        SUM(IFNULL(`ctt2`.`valor`,0) - IFNULL(`ctt2`.`valor_liberado`,0)) AS `valor`
+                        ,`ctt2`.`id_rubro`
                     FROM
                         (SELECT
-                            CASE
-                                WHEN `pto_rec_detalle`.`id_pto_rad_detalle` IS NULL THEN `pto_rec_detalle`.`id_rubro`
-                                ELSE `pto_rad_detalle`.`id_rubro`
+                            `pto_rec_detalle`.`valor`
+                            , `pto_rec_detalle`.`valor_liberado`
+                            , CASE
+                                WHEN `pto_rec_detalle`.`id_rubro`IS NULL THEN `pto_rad_detalle`.`id_rubro`
+                                ELSE `pto_rec_detalle`.`id_rubro` 
                             END AS `id_rubro`
-                            , SUM(IFNULL(`pto_rec_detalle`.`valor`,0)) - SUM(IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `valor`
                         FROM
                             `pto_rec_detalle`
                             INNER JOIN `pto_rec` 
                                 ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
-                            LEFT JOIN `pto_rad_detalle` 
+                            INNER JOIN `pto_rad_detalle` 
                                 ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
-                        WHERE (`pto_rec`.`fecha` BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_rec`.`estado` = 2)) AS `tt_rec`
-                    GROUP BY `tt_rec`.`id_rubro`) AS `recaudo_mes`
+                        WHERE (`pto_rec`.`estado` = 2 AND DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini_mes' AND '$fecha_corte')) AS `ctt2`
+                    GROUP BY `ctt2`.`id_rubro`) AS `recaudo_mes`
                     ON(`recaudo_mes`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
                     (SELECT
