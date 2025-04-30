@@ -79,7 +79,7 @@ try {
                             `pto_rec_detalle`
                             INNER JOIN `pto_rec` 
                                 ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
-                            INNER JOIN `pto_rad_detalle` 
+                            LEFT JOIN `pto_rad_detalle` 
                                 ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
                         WHERE (`pto_rec`.`estado` = 2 AND DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte')) AS `ctt2`
                     GROUP BY `ctt2`.`id_rubro`) AS `recaudo`
@@ -135,7 +135,7 @@ try {
                             `pto_rec_detalle`
                             INNER JOIN `pto_rec` 
                                 ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
-                            INNER JOIN `pto_rad_detalle` 
+                            lEFT JOIN `pto_rad_detalle` 
                                 ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
                         WHERE (`pto_rec`.`estado` = 2 AND DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini_mes' AND '$fecha_corte')) AS `ctt2`
                     GROUP BY `ctt2`.`id_rubro`) AS `recaudo_mes`
