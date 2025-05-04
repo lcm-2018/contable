@@ -45,7 +45,7 @@ try {
                     INNER JOIN `ctb_pgcp`
                         ON `ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`
                 WHERE `ctb_doc`.`estado` = 2
-                    AND ((SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('1', '2', '3') AND `ctb_doc`.`fecha` < '$fecha_inicial')
+                    AND ((SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('1', '2', '3', '8', '9') AND `ctb_doc`.`fecha` < '$fecha_inicial')
                         OR
                     (SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('4', '5', '6') AND `ctb_doc`.`fecha` < '$fecha_inicial' AND `ctb_doc`.`fecha` > '$inicio'))
                 GROUP BY `ctb_libaux`.`id_cuenta`, `ctb_libaux`.`id_tercero_api`
@@ -88,6 +88,9 @@ foreach ($datos as $dato) {
     $cuenta = $dato['cuenta'];
     foreach ($cuentas as $c) {
         $idTer = $_POST['xtercero'] == 1 && $c['tipo_dato'] == 'D' ? '-' . $dato['id_tercero_api'] : '';
+        if (!($_POST['xtercero'] == 1 && (substr($c['cuenta'], 0, 1) === "2" || substr($c['cuenta'], 0, 2) === "13" || substr($c['cuenta'], 0, 1) === "8" || substr($c['cuenta'], 0, 1) === "9"))) {
+            $idTer = '';
+        }
         if (($c['tipo_dato'] == 'M' && strpos($cuenta, $c['cuenta']) === 0) || ($c['tipo_dato'] != 'M' && $cuenta == $c['cuenta'])) {
             $cta = $c['cuenta'] . $idTer;
             if (!isset($acum[$c['cuenta']])) {
@@ -105,7 +108,7 @@ foreach ($datos as $dato) {
             $acum[$cta]['creditoi'] += $dato['creditoi'];
             $acum[$cta]['debito'] += $dato['debito'];
             $acum[$cta]['credito'] += $dato['credito'];
-            if ($_POST['xtercero'] == 1 && (substr($c['cuenta'], 0, 1) === "2" || substr($c['cuenta'], 0, 2) === "13") && $c['tipo_dato'] == 'D') {
+            if ($_POST['xtercero'] == 1 && (substr($c['cuenta'], 0, 1) === "2" || substr($c['cuenta'], 0, 2) === "13" || substr($c['cuenta'], 0, 1) === "8" || substr($c['cuenta'], 0, 1) === "9") && $c['tipo_dato'] == 'D') {
                 $acum[$cta]['id_tercero_api'] = $dato['id_tercero_api'];
                 $acum[$cta]['nom_tercero'] = $dato['nom_tercero'];
                 $acum[$cta]['nit_tercero'] = $dato['nit_tercero'];

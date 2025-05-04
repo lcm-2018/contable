@@ -23,13 +23,36 @@ $anulados = $_POST['anulados'] ?? 0;
 if (!empty($search_value)) {
     $buscar = "AND (pto_cdp.id_manu LIKE '%$search_value%' OR pto_cdp.objeto LIKE '%$search_value%' OR pto_cdp.fecha LIKE '%$search_value%')";
 } else {
-    $buscar = '';
+    $buscar = ' ';
 }
 if ($anulados == 1 || !empty($search_value)) {
     $buscar .= " AND pto_cdp.estado >= 0";
 } else {
-    $buscar .= " AND pto_cdp.estado > 0";
+    $buscar .= " AND pto_cdp.estado >= 0";
 }
+
+//----------- filtros--------------------------
+
+$andwhere = " ";
+
+if (isset($_POST['id_manu']) && $_POST['id_manu']) {
+    $andwhere .= " AND pto_cdp.id_manu LIKE '%" . $_POST['id_manu'] . "%'";
+}
+if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
+    $andwhere .= " AND pto_cdp.fecha BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+}
+if (isset($_POST['objeto']) && $_POST['objeto']) {
+    $andwhere .= " AND pto_cdp.objeto LIKE '%" . $_POST['objeto'] . "%'";
+}
+if (isset($_POST['estado']) && strlen($_POST['estado'])) {
+    if ($_POST['estado'] == "-1") {
+        $andwhere .= " AND pto_cdp.estado>=" . $_POST['estado'];
+    } 
+    else {
+        $andwhere .= " AND pto_cdp.estado=" . $_POST['estado'];
+    }
+}
+
 try {
     $sql = "SELECT
                 `pto_cdp`.`id_pto_cdp`
@@ -65,7 +88,7 @@ try {
                 WHERE (`pto_crp`.`estado` > 0)
                 GROUP BY `pto_cdp_detalle`.`id_pto_cdp`) AS `crp`
                 ON (`pto_cdp`.`id_pto_cdp` = `crp`.`id_pto_cdp`)
-            WHERE `pto_cdp`.`id_pto` = $id_pto_presupuestos $buscar
+            WHERE `pto_cdp`.`id_pto` = $id_pto_presupuestos $buscar $andwhere
             ORDER BY `pto_cdp`.`id_manu` DESC
             LIMIT $start, $length";
     $rs = $cmd->query($sql);
@@ -118,8 +141,12 @@ if (!empty($listappto)) {
             $anular = '<button text="' . $info . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Anular" onclick="anulacionPto(this);"><span class="fas fa-ban fa-lg"></span></button>';
         }
         if (PermisosUsuario($permisos, 5401, 2) || $id_rol == 1) {
-            $registrar = '<a value="' . $id_pto . '" onclick="CargarFormularioCrpp(' . $id_pto . ')" class="text-blue " role="button" title="Detalles"><span class="badge badge-pill badge-primary">Registrar</span></a>';
-
+            if ($lp['estado'] == 2) {
+                $registrar = '<a value="' . $id_pto . '" onclick="CargarFormularioCrpp(' . $id_pto . ')" class="text-blue " role="button" title="Detalles"><span class="badge badge-pill badge-primary">Registrar</span></a>';
+            } else {
+                $mje = "Primero debe cerrar el CDP";
+                $registrar = '<a onclick="mjeError(\'' . htmlspecialchars($mje, ENT_QUOTES) . '\')" class="text-blue" role="button" title="Detalles"><span class="badge badge-pill badge-secondary">Registrar</span></a>';
+            }
             if ($cxregistrar  == 0) {
                 $registrar = '--';
             }
@@ -150,7 +177,7 @@ if (!empty($listappto)) {
             if ($lp['estado'] == 2) {
                 $abrir = '<a onclick="abrirCdp(' . $id_pto . ')" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb " title="Abrir CDP"><span class="fas fa-lock fa-lg"></span></a>';
             } else {
-                $abrir = '<a onclick="cerrarCdp(' . $id_pto . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb " title="Cerrar CDP"><span class="fas fa-lock-open fa-lg"></span></a>';
+                $abrir = '<a onclick="cerrarCdp(' . $id_pto . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb " title="Cerrar CDP"><span class="fas fa-unlock fa-lg"></span></a>';
             }
             if ($fecha < $fecha_cierre) {
                 $abrir = null;
@@ -180,7 +207,7 @@ if (!empty($listappto)) {
             'liberado' =>  '<div class="text-right">' . $valor_cdp_lib . '</div>',
             'xregistrar' =>  '<div class="text-right">' . $xregistrar  . '</div>',
             'accion' => '<div class="text-center">' . $registrar . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . $historial . $abrir . '</div>',
+            'botones' => '<div class="text-center">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . $historial . $abrir . '</div>',
         ];
     }
 } else {

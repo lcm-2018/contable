@@ -60,9 +60,52 @@ try {
                                     </div>
                                 </div>
                                 <br>
-                                <table id="tableEjecPresupuestoCrp" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
+
+                                <!--Opciones de filtros -->
+                                <div class="form-row">
+                                    <div class="form-group col-md-1">
+                                        <input type="text" class="filtrocrp form-control form-control-sm" id="txt_idmanu_filtrocrp" placeholder="Id. Manu CRP">
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <input type="text" class="filtrocrp form-control form-control-sm" id="txt_idmanucdp_filtrocrp" placeholder="Id. Manu CDP">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <input type="date" class="form-control form-control-sm" id="txt_fecini_filtrocrp" name="txt_fecini_filtro" placeholder="Fecha Inicial">
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtrocrp" name="txt_fecfin_filtro" placeholder="Fecha Final">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <input type="text" class="filtrocrp form-control form-control-sm" id="txt_contrato_filtrocrp" placeholder="Contrato">
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <input type="text" class="filtrocrp form-control form-control-sm" id="txt_ccnit_filtrocrp" placeholder="CC / Nit">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <input type="text" class="filtrocrp form-control form-control-sm" id="txt_tercero_filtrocrp" placeholder="Tercero">
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <select class="form-control form-control-sm" id="sl_estado_filtrocrp">
+                                            <option value="0">--Estado--</option>
+                                            <option value="1">Abierto</option>
+                                            <option value="2">Cerrado</option>
+                                            <option value="3">Anulado</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <a type="button" id="btn_buscar_filtrocrp" class="btn btn-outline-success btn-sm" title="Filtrar">
+                                            <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <table id="tableEjecPresupuestoCrp" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 100%;">
                                     <thead>
-                                        <tr>
+                                        <tr class="text-center">
                                             <th style="width: 8%;">Numero</th>
                                             <th style="width: 8%;">Cdp</th>
                                             <th style="width: 10%;">Fecha</th>
@@ -70,7 +113,7 @@ try {
                                             <th style="width: 10%;">CC/Nit</th>
                                             <th style="width: 32%;">Tercero</th>
                                             <th style="width: 12%;">Valor</th>
-                                            <th style="width: 8%;">Acciones</th>
+                                            <th style="min-width: 150px;">Acciones</th>
 
                                         </tr>
                                     </thead>

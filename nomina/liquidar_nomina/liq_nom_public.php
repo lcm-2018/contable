@@ -760,7 +760,7 @@ if (isset($_POST['check'])) {
                 $keycargo = array_search($i, array_column($emple, 'id_empleado'));
                 $cargo = false !== $keycargo ? $emple[$keycargo]['cargo'] : 0;
                 if ($esta >= 360) {
-                    if (!($cargo == 1 || $cargo == 2 || $cargo == 3 || $cargo == 12 || $cargo == 14 || $cargo == 18)) {
+                    if (true) {
                         $bsp_salarial = $bsp;
                         try {
                             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

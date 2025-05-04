@@ -227,9 +227,24 @@
             language: setIdioma,
             serverSide: true,
             processing: true,
+            searching: false,
             ajax: {
                 url: "datos/listar/datos_ejecucion_presupuesto.php",
                 data: function (d) {
+                    // -- datos de filtros
+                    d.id_manu = $('#txt_idmanu_filtro').val();
+                    d.fec_ini = $('#txt_fecini_filtro').val();
+                    d.fec_fin = $('#txt_fecfin_filtro').val();
+                    d.objeto = $('#txt_objeto_filtro').val();
+                    d.estado = $('#sl_estado_filtro').val();
+
+                    if ($('#sl_estado_filtro').val() == "0") {
+                        d.estado = "-1";
+                    }
+                    if ($('#sl_estado_filtro').val() == "3") {
+                        d.estado = "0";
+                    }
+
                     // datos para enviar al servidor
                     d.id_ejec = id_ejec;
                     d.start = d.start || 0; // inicio de la página
@@ -241,9 +256,18 @@
                 type: "POST",
                 dataType: "json",
             },
-            columns: [{ data: "numero" }, { data: "fecha" }, { data: "objeto" }, { data: "valor" }, { data: "xregistrar" }, { data: "accion" }, { data: "botones" }],
+            columns: [
+                { data: "numero" },
+                { data: "fecha" },
+                { data: "objeto" },
+                { data: "valor" },
+                { data: "xregistrar" },
+                { data: "accion" },
+                { data: "botones" }
+            ],
             order: [[0, "desc"]],
-            pageLength: 25,
+            pageLength: 25
+
         });
         // Control del campo de búsqueda
         $('#tableEjecPresupuesto_filter input').unbind(); // Desvinculamos el evento por defecto
@@ -303,9 +327,29 @@
             language: setIdioma,
             serverSide: true,
             processing: true,
+            searching: false,
             ajax: {
                 url: "datos/listar/datos_ejecucion_presupuesto_crp.php",
                 data: function (d) {
+
+                    //-- datos para filtros
+                    d.id_manu = $('#txt_idmanu_filtrocrp').val();
+                    d.id_manucdp = $('#txt_idmanucdp_filtrocrp').val();
+                    d.fec_ini = $('#txt_fecini_filtrocrp').val();
+                    d.fec_fin = $('#txt_fecfin_filtrocrp').val();
+                    d.contrato = $('#txt_contrato_filtrocrp').val();
+                    d.ccnit = $('#txt_ccnit_filtrocrp').val();
+                    d.tercero = $('#txt_tercero_filtrocrp').val();
+                    d.estado = $('#sl_estado_filtrocrp').val();
+
+                    if ($('#sl_estado_filtrocrp').val() == "0") {
+                        d.estado = "-1";
+                    }
+                    if ($('#sl_estado_filtrocrp').val() == "3") {
+                        d.estado = "0";
+                    }
+
+
                     // datos para enviar al servidor
                     d.id_ejec = id_ejec;
                     d.start = d.start || 0; // inicio de la página
@@ -977,7 +1021,29 @@
             });
         }
     });
+    //------------------------------
+    //filtros
+    $('#btn_buscar_filtro').on("click", function () {
+        $('.is-invalid').removeClass('is-invalid');
+        reloadtable('tableEjecPresupuesto');
+    });
 
+    $('.filtro').keypress(function (e) {
+        if (e.keyCode == 13) {
+            reloadtable('tableEjecPresupuesto');
+        }
+    });
+
+    $('#btn_buscar_filtrocrp').on("click", function () {
+        $('.is-invalid').removeClass('is-invalid');
+        reloadtable('tableEjecPresupuestoCrp');
+    });
+
+    $('.filtrocrp').keypress(function (e) {
+        if (e.keyCode == 13) {
+            reloadtable('tableEjecPresupuestoCrp');
+        }
+    });
 })(jQuery);
 
 const imprimirFormatoCdp = (id) => {

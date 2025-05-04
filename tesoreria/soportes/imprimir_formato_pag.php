@@ -692,8 +692,8 @@ foreach ($documentos_tes as $documento) {
                     <div><?php echo $cargo_respon; ?> </div>
                 </td>
                 <?php
-                if ($tipo == '4' || $cod_doc == '9') {
-                    if ($_SESSION['nit_emp'] != '844001355' || $id_forma == 2 || $cod_doc == 'CICP') {
+                if ($tipo == '4' || $cod_doc == '9' || $tipo == '34') {
+                    if ($_SESSION['nit_emp'] != '844001355' || $id_forma == 2 || $cod_doc == 'CICP' || $tipo == '34') {
                 ?>
                         <td>
                             <div>___________________________________</div>

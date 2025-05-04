@@ -41,7 +41,7 @@ if ($detalle_mes == 1) {
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                         INNER JOIN `pto_presupuestos` 
                             ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 2 AND `pto_presupuestos`.`id_tipo` = 2)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `adicion_mes`
                     ON(`adicion_mes`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
@@ -173,7 +173,7 @@ try {
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                         INNER JOIN `pto_presupuestos` 
                             ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 2 AND `pto_presupuestos`.`id_tipo` = 2)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `adicion`
                     ON(`adicion`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
@@ -413,7 +413,7 @@ try {
                 $nomrb = '';
             }
             $tipo_dat = $tipo == '0' ? 'M' : 'D';
-            
+
             if ($value['registrado'] == 0) {
                 $ciento = 0;
             } else {
