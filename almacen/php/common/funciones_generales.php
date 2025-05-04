@@ -69,6 +69,20 @@ function fecha_hora_servidor(){
     return $res;
 }
 
+//FUNCION QUE RETORNAR FECHA Y HORA DEL SERVIDOR
+function add_fecha($fecha, $tipo, $valor){
+    $fecha_ini = $fecha == '' ? new DateTime() : new DateTime($fecha);
+    switch($tipo){
+        case 1: $incremento = $valor.' year'; break;       //Años
+        case 2: $incremento = $valor.' months'; break;     //Meses
+        case 3: $incremento = $valor.' days'; break;       //Dias
+        default: $incremento = '0 days'; break;
+    }
+    date_add($fecha_ini, date_interval_create_from_date_string($incremento));
+    $fecha_fin = date_format($fecha_ini, 'Y-m-d');    
+    return $fecha_fin;    
+}
+
 //FUNCION PARA DAR FORMATO A LOS VALORES NUMERICOS
 function formato_valor($valor){
     return '$' . number_format($valor, 2, ",", ".");    

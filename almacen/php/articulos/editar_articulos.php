@@ -30,14 +30,15 @@ try {
             $top_min = $_POST['txt_topmin_art'];
             $top_max = $_POST['txt_topmax_art'];
             $id_unimed = $_POST['id_txt_unimed_art'] ? $_POST['id_txt_unimed_art'] : 0;
-            $es_clinic = $_POST['rdo_escli_art'];
+            $tip_riesgo = $_POST['sl_riesgo_art'] ? $_POST['sl_riesgo_art'] : 0;
+            $es_clinico = $_POST['rdo_escli_art'];
             $id_medins = $_POST['sl_medins_art'] ? $_POST['sl_medins_art'] : 'NULL';
             $estado = $_POST['sl_estado'];
 
             if ($id == -1) {
                 $sql = "INSERT INTO far_medicamentos(cod_medicamento,nom_medicamento,id_subgrupo,top_min,top_max,
-                            id_unidadmedida_2,id_unidadmedida,id_formafarmaceutica,id_atc,es_clinico,id_tip_medicamento,estado,id_usr_crea) 
-                        VALUES('$cod_art','$nom_art',$id_subgrp,$top_min,$top_max,$id_unimed,0,0,0,$es_clinic,$id_medins,$estado,$id_usr_crea)";
+                            id_unidadmedida_2,id_unidadmedida,id_formafarmaceutica,id_atc,tipo_riesgo,es_clinico,id_tip_medicamento,estado,id_usr_crea) 
+                        VALUES('$cod_art','$nom_art',$id_subgrp,$top_min,$top_max,$id_unimed,0,0,0,$tip_riesgo,$es_clinico,$id_medins,$estado,$id_usr_crea)";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -52,7 +53,7 @@ try {
             } else {
                 $sql = "UPDATE far_medicamentos SET cod_medicamento='$cod_art',nom_medicamento='$nom_art',
                             id_subgrupo=$id_subgrp,top_min=$top_min,top_max=$top_max,id_unidadmedida_2=$id_unimed,
-                            es_clinico=$es_clinic,id_tip_medicamento=$id_medins,estado=$estado
+                            tipo_riesgo=$tip_riesgo,es_clinico=$es_clinico,id_tip_medicamento=$id_medins,estado=$estado
                         WHERE id_med=" . $id;
                 $rs = $cmd->query($sql);
 

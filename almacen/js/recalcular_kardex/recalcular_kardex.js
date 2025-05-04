@@ -100,6 +100,7 @@
                 $('.is-invalid').removeClass('is-invalid');
                 error = 0;
             }
+            error += verifica_vacio($('#txt_fecha_filtro'));
         } else if ($("input[name='rdo_opcion']:checked").val() == 'I') {
             error += verifica_vacio($('#txt_id_ing_filtro'));
         } else if ($("input[name='rdo_opcion']:checked").val() == 'E') {

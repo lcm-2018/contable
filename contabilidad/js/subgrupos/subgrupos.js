@@ -43,13 +43,14 @@
                 { 'data': 'cuenta_dep' },
                 { 'data': 'cuenta_gas' },
                 { 'data': 'nom_grupo' },
+                { 'data': 'es_clinico' },
                 { 'data': 'lote_xdef' },
                 { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [2, 3] },
-                { orderable: false, targets: 7 }
+                { class: 'text-wrap', targets: [2, 7] },
+                { orderable: false, targets: 11 }
             ],
             order: [
                 [0, "desc"]
