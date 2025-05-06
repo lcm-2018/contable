@@ -1,1 +1,4 @@
 [2025-05-04 07:42:28] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_subgrupos WHERE id_subgrupo = 33
+[2025-05-05 14:57:17] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 156
+[2025-05-05 15:25:03] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `pto_cdp_detalle` WHERE `id_pto_cdp_det` = 1640
+[2025-05-05 15:51:54] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 154
