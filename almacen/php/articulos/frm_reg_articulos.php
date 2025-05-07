@@ -27,8 +27,9 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     //Inicializa variable por defecto
-    $obj['estado'] = 1;
     $obj['es_clinico'] = 0;
+    $obj['tipo_riesgo'] = 0;
+    $obj['estado'] = 1;    
 }
 $imprimir = $id != -1 ? '' : 'disabled="disabled"';
 
@@ -60,17 +61,27 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-2">
+                        <label for="txt_vidautil_art" class="small">Vida Últil</label>
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_vidautil_art" name="txt_vidautil_art" value="<?php echo $obj['vida_util'] ?>">
+                    </div>
+                    <div class="form-group col-md-2">
                         <label for="txt_topmin_art" class="small">Tope Mínimo</label>
-                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmin_art" name="txt_topmin_art" required value="<?php echo $obj['top_min'] ?>">
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmin_art" name="txt_topmin_art" value="<?php echo $obj['top_min'] ?>">
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_topmax_art" class="small">Tope Máximo</label>
-                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmax_art" name="txt_topmax_art" required value="<?php echo $obj['top_max'] ?>">
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmax_art" name="txt_topmax_art" value="<?php echo $obj['top_max'] ?>">
                     </div>
                     <div class="form-group col-md-4">
                         <label for="txt_unimed_art" class="small">Unidad Medida</label>
                         <input type="text" class="form-control form-control-sm" id="txt_unimed_art" required value="<?php echo $obj['unidad_medida'] ?>">
                         <input type="hidden" id="id_txt_unimed_art" name="id_txt_unimed_art" value="<?php echo $obj['id_unidadmedida_2'] ?>">
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="sl_riesgo_art" class="small">Clasificación de Riesgo</label>
+                        <select class="form-control form-control-sm" id="sl_riesgo_art" name="sl_riesgo_art" required>
+                            <?php clasificacion_riesgo('', $obj['tipo_riesgo']) ?>
+                        </select>
                     </div>
                     <div class="form-group col-md-2">
                         <label class="small">Para Uso Asistencial</label>

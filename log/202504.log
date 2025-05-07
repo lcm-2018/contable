@@ -24,3 +24,13 @@
 [2025-04-07 16:07:06] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 437
 [2025-04-07 17:49:23] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_detalle_pago WHERE id_detalle_pago = 86
 [2025-04-15 16:55:53] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 287
+<<<<<<< HEAD
+Fecha: 2025-04-25 08:00:32 PM, Id Usuario-Login: 365-ADMINN ADMINP, Accion: Actualizar kardex, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-04-25 20:00:32,IP:127.0.0.1
+Fecha: 2025-04-25 08:03:55 PM, Id Usuario-Login: 365-ADMINN ADMINP, Accion: Actualizar kardex, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-04-25 20:03:55,IP:127.0.0.1
+Fecha: 2025-04-25 08:58:40 PM, Id Usuario-Login: 365-ADMINN ADMINP, Accion: Actualizar kardex, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-04-25 20:58:40,IP:127.0.0.1
+Fecha: 2025-04-25 10:40:16 PM, Id Usuario-Login: 365-ADMINN ADMINP, Accion: Actualizar kardex, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-04-25 22:40:16,IP:127.0.0.1
+Fecha: 2025-04-25 10:40:26 PM, Id Usuario-Login: 365-ADMINN ADMINP, Accion: Actualizar kardex, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-04-25 22:40:26,IP:127.0.0.1
+=======
+[2025-04-24 11:29:19] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM tb_centrocostos_subgr_cta_detalle WHERE id_cecsubgrp_det = 2
+[2025-04-24 11:29:23] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM tb_centrocostos_subgr_cta WHERE id_cecsubgrp = 2
+>>>>>>> 0c59027af51c3fdae49539cbf473786a0b0af70d

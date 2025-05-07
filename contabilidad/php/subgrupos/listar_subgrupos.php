@@ -39,6 +39,7 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_subgrupos.id_subgrupo,far_subgrupos.cod_subgrupo,far_subgrupos.nom_subgrupo,far_grupos.nom_grupo,
+                IF(far_subgrupos.es_clinico=1,'SI','NO') AS es_clinico,
                 IF(far_subgrupos.lote_xdef=1,'SI','NO') AS lote_xdef,                
                 IF(far_subgrupos.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_subgrupos
@@ -100,6 +101,7 @@ if (!empty($objs)) {
             "cuenta_dep" => $cuenta_dep,
             "cuenta_gas" => $cuenta_gas,
             "nom_grupo" => mb_strtoupper($obj['nom_grupo']),
+            "es_clinico" => $obj['es_clinico'],
             "lote_xdef" => $obj['lote_xdef'],
             "estado" => $obj['estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',

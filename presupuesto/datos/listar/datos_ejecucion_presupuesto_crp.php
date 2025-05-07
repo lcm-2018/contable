@@ -23,11 +23,44 @@ if (!empty($search_value)) {
 if ($anulados == 1 || !empty($search_value)) {
     $buscar .= " AND `pto_crp`.`estado` >= 0";
 } else {
-    $buscar .= " AND `pto_crp`.`estado` > 0";
+    $buscar .= " AND `pto_crp`.`estado` >= 0";
 }
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
+
+
+//----------- filtros--------------------------
+
+$andwhere = " ";
+
+if (isset($_POST['id_manu']) && $_POST['id_manu']) {
+    $andwhere .= " AND pto_crp.id_manu LIKE '%" . $_POST['id_manu'] . "%'";
+}
+if (isset($_POST['id_manucdp']) && $_POST['id_manucdp']) {
+    $andwhere .= " AND detalle.id_cdp LIKE '%" . $_POST['id_manucdp'] . "%'";
+}
+if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
+    $andwhere .= " AND pto_crp.fecha BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+}
+if (isset($_POST['contrato']) && $_POST['contrato']) {
+    $andwhere .= " AND pto_crp.num_contrato LIKE '%" . $_POST['contrato'] . "%'";
+}
+if (isset($_POST['ccnit']) && $_POST['ccnit']) {
+    $andwhere .= " AND tb_terceros.nit_tercero LIKE '%" . $_POST['ccnit'] . "%'";
+}
+if (isset($_POST['tercero']) && $_POST['tercero']) {
+    $andwhere .= " AND tb_terceros.nom_tercero LIKE '%" . $_POST['tercero'] . "%'";
+}
+if (isset($_POST['estado']) && strlen($_POST['estado'])) {
+    if ($_POST['estado'] == "-1") {
+        $andwhere .= " AND pto_crp.estado>=" . $_POST['estado'];
+    } 
+    else {
+        $andwhere .= " AND pto_crp.estado=" . $_POST['estado'];
+    }
+}
+
 try {
     $sql = "SELECT
                 `pto_crp`.`id_pto_crp`
@@ -77,7 +110,7 @@ try {
                 ON (`pto_crp`.`id_pto_crp` = `cop`.`id_pto_crp`)
             LEFT JOIN `tb_terceros`
                 ON (`pto_crp`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
-            WHERE (`id_pto` = $id_pto_presupuestos) $buscar
+            WHERE (`id_pto` = $id_pto_presupuestos) $buscar $andwhere
             ORDER BY `id_manu` DESC 
             LIMIT $start, $length";
     $rs = $cmd->query($sql);

@@ -539,3 +539,16 @@ function marcas($cmd, $titulo = '', $id = 0)
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
 }
+
+function clasificacion_riesgo($titulo = '',$estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>I BAJO RIESGO</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>IIa RIESGO MODERADO</option>';
+    $selected = ($estado == 3) ? 'selected="selected"' : '';
+    echo '<option value="3"' . $selected . '>IIb RIESGO ALTO</option>';
+    $selected = ($estado == 4) ? 'selected="selected"' : '';
+    echo '<option value="4"' . $selected . '>III RIESGO MUY ALTO</option>';
+}

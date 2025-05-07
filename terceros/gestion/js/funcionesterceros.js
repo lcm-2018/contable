@@ -74,11 +74,17 @@ function FormResponsabilidad(id) {
             language: setIdioma,
             serverSide: true,
             processing: true,
+            searching: false,
             ajax: {
                 url: 'datos/listar/datos_terceros.php',
                 type: 'POST',
                 dataType: 'json',
                 data: function (d) {
+                    //------ datos de filtros
+                    d.ccnit = $('#txt_ccnit_filtro').val();
+                    d.tercero = $('#txt_tercero_filtro').val();
+                    //--------------------------------
+
                     d.anulados = $('#verAnulados').prop('checked') ? '1' : '0';
                     return d
                 }
@@ -556,6 +562,19 @@ function FormResponsabilidad(id) {
             $("#divForms").html(he);
             //$('#slcActEcon').focus();
         });
+    });
+
+    //------------------------------
+    //Buscar registros de Ingresos
+    $('#btn_buscar_filtro').on("click", function () {
+        $('.is-invalid').removeClass('is-invalid');
+        reloadtable('tableTerceros');
+    });
+
+    $('.filtro').keypress(function (e) {
+        if (e.keyCode == 13) {
+            reloadtable('tableTerceros');
+        }
     });
     //-----------------------------------------------------
 

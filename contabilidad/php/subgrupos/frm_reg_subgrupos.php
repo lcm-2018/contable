@@ -23,8 +23,9 @@ if(empty($obj)){
         $obj[$name]=NULL;
     endfor;    
     //Inicializa variable por defecto
+    $obj['es_clinico'] = 0;
     $obj['lote_xdef'] = 1;
-    $obj['estado'] = 1;
+    $obj['estado'] = 1;    
 }
 
 ?>
@@ -50,6 +51,19 @@ if(empty($obj)){
                         <select class="form-control form-control-sm" id="sl_grp_subgrupo" name="sl_grp_subgrupo" required>
                             <?php grupo_articulo($cmd,'',$obj['id_grupo']) ?>
                         </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label class="small">Para Uso Asistencial</label>
+                        <div class="form-control form-control-sm" id="rdo_escli_subgrupo">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rdo_escli_subgrupo" id="rdo_escli_subgrupo_si" value="1" <?php echo $obj['es_clinico'] == 1 ? 'checked' : '' ?>>
+                                <label class="form-check-label small" for="rdo_escli_subgrupo_si">SI</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rdo_escli_subgrupo" id="rdo_escli_subgrupo_no" value="0" <?php echo $obj['es_clinico'] == 0 ? 'checked' : '' ?>>
+                                <label class="form-check-label small" for="rdo_escli_subgrupo_no">NO</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group col-md-2">
                         <label for="sl_lotexdef" class="small">Lote x Defecto</label>

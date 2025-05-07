@@ -15,6 +15,9 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../../../permisos.php';
 include '../common/cargar_combos.php';
+include '../common/funciones_generales.php';
+
+$fecha = add_fecha('',2,-6);
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -64,15 +67,15 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <div class="form-row">
                                         <div class="form-group col-md-4">
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion1" value="O">
+                                                <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion1" value="O" checked="checked">
                                                 <label class="form-check-label small" for="rdo_opcion1">Datos Articulo</label>
                                             </div>
                                         </div>
                                         <div class="form-group col-md-4">
-                                            <input type="text" class="filtro form-control form-control-sm" id="txt_codigo_filtro" placeholder="Codigo" disabled="disabled">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_codigo_filtro" placeholder="Codigo">
                                         </div>
                                         <div class="form-group col-md-4">
-                                            <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre" disabled="disabled">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
                                         </div>
                                     </div>
                                     <div class="form-row">    
@@ -80,7 +83,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             <label class="form-control-sm">Fecha Inicial de proceso Recalcular Kardex</label>
                                         </div>
                                         <div class="form-group col-md-4">
-                                            <input type="date" class="filtro form-control form-control-sm" id="txt_fecha_filtro" name="txt_fecha_filtro" placeholder="Fecha Inicial" disabled="disabled">
+                                            <input type="date" class="filtro form-control form-control-sm" id="txt_fecha_filtro" name="txt_fecha_filtro" placeholder="Fecha Inicial" value="<?php echo $fecha ?>">
                                         </div>
                                     </div>   
                                 </div>

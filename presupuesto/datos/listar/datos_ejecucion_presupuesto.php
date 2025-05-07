@@ -23,13 +23,36 @@ $anulados = $_POST['anulados'] ?? 0;
 if (!empty($search_value)) {
     $buscar = "AND (pto_cdp.id_manu LIKE '%$search_value%' OR pto_cdp.objeto LIKE '%$search_value%' OR pto_cdp.fecha LIKE '%$search_value%')";
 } else {
-    $buscar = '';
+    $buscar = ' ';
 }
 if ($anulados == 1 || !empty($search_value)) {
     $buscar .= " AND pto_cdp.estado >= 0";
 } else {
-    $buscar .= " AND pto_cdp.estado > 0";
+    $buscar .= " AND pto_cdp.estado >= 0";
 }
+
+//----------- filtros--------------------------
+
+$andwhere = " ";
+
+if (isset($_POST['id_manu']) && $_POST['id_manu']) {
+    $andwhere .= " AND pto_cdp.id_manu LIKE '%" . $_POST['id_manu'] . "%'";
+}
+if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
+    $andwhere .= " AND pto_cdp.fecha BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+}
+if (isset($_POST['objeto']) && $_POST['objeto']) {
+    $andwhere .= " AND pto_cdp.objeto LIKE '%" . $_POST['objeto'] . "%'";
+}
+if (isset($_POST['estado']) && strlen($_POST['estado'])) {
+    if ($_POST['estado'] == "-1") {
+        $andwhere .= " AND pto_cdp.estado>=" . $_POST['estado'];
+    } 
+    else {
+        $andwhere .= " AND pto_cdp.estado=" . $_POST['estado'];
+    }
+}
+
 try {
     $sql = "SELECT
                 `pto_cdp`.`id_pto_cdp`
@@ -65,7 +88,7 @@ try {
                 WHERE (`pto_crp`.`estado` > 0)
                 GROUP BY `pto_cdp_detalle`.`id_pto_cdp`) AS `crp`
                 ON (`pto_cdp`.`id_pto_cdp` = `crp`.`id_pto_cdp`)
-            WHERE `pto_cdp`.`id_pto` = $id_pto_presupuestos $buscar
+            WHERE `pto_cdp`.`id_pto` = $id_pto_presupuestos $buscar $andwhere
             ORDER BY `pto_cdp`.`id_manu` DESC
             LIMIT $start, $length";
     $rs = $cmd->query($sql);
