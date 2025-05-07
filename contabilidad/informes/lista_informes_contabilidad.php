@@ -55,7 +55,6 @@ include '../../permisos.php';
                                 <a class="nav-link dropdown-toggle sombra" data-toggle="dropdown" href="#" role="button" aria-expanded="false">Entidades de control </a>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReporteContable(1);">Contaduría CGN</a>
-                                    <a class="dropdown-item sombra" href="#" id="sl_supersalud">SuperSalud</a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">

@@ -1482,7 +1482,7 @@ function GuardaMvtoDetalle(id, op, boton) {
 		$('#id_facturador').addClass('is-invalid');
 		$('#id_facturador').focus();
 		mjeError('Debe seleccionar un facturador');
-	} else if ($('#valor_fact').val() == '0') {
+	} else if (Number($('#valor_fact').val()) < 0) {
 		$('#valor_fact').addClass('is-invalid');
 		$('#valor_fact').focus();
 		mjeError('El valor facturado no puede ser cero');
