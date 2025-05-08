@@ -23,12 +23,12 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     $sql = "SELECT
-            count(*) AS filas
-            , pto_cdp_detalle.id_pto_cdp
+              pto_cdp_detalle.id_pto_cdp
             , ctb_doc.id_manu
             , DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') AS fecha
             , ctb_doc.detalle
             , IFNULL(pto_pag_detalle.valor,0)-IFNULL(pto_pag_detalle.valor_liberado,0) AS valorpagado
+            , COUNT(*) OVER() AS filas
         FROM
             pto_pag_detalle
             INNER JOIN ctb_doc ON (pto_pag_detalle.id_ctb_doc = ctb_doc.id_ctb_doc)

@@ -27,13 +27,13 @@ try {
                 , pto_crp.objeto
                 , pto_cargue.cod_pptal
                 , pto_cargue.nom_rubro
-                , sum(ifnull(pto_crp_detalle.valor,0)) as valor_crp
+                , ifnull(pto_crp_detalle.valor,0) as valor_crp
                 , sum(ifnull(pto_crp_detalle.valor_liberado,0)) as valor_liberado_crp
-                , ((sum(ifnull(pto_crp_detalle.valor,0)))-(SUM(IFNULL(pto_crp_detalle.valor_liberado,0)))) as a_crp_menos_crpliberado
-                , sum(pto_cop_detalle.valor) as b_valor_cop_detalle
+                , ((ifnull(pto_crp_detalle.valor,0))-(SUM(IFNULL(pto_crp_detalle.valor_liberado,0)))) as a_crp_menos_crpliberado
+                , pto_cop_detalle.valor as b_valor_cop_detalle
                 , sum(pto_pag_detalle.valor) as c_valor_pag_detalle
-                , (((SUM(IFNULL(pto_crp_detalle.valor,0)))-(SUM(IFNULL(pto_crp_detalle.valor_liberado,0))))-(SUM(pto_cop_detalle.valor))) as a_menos_b
-                , ((SUM(pto_cop_detalle.valor))-(SUM(pto_pag_detalle.valor))) as b_menos_c
+                , (((IFNULL(pto_crp_detalle.valor,0))-(SUM(IFNULL(pto_crp_detalle.valor_liberado,0))))-(pto_cop_detalle.valor)) as a_menos_b
+                , ((pto_cop_detalle.valor)-(SUM(pto_pag_detalle.valor))) as b_menos_c
                 
             FROM
                 pto_crp
@@ -46,7 +46,7 @@ try {
                 INNER JOIN pto_pag_detalle ON (pto_pag_detalle.id_pto_cop_det = pto_cop_detalle.id_pto_cop_det)
             where pto_crp.estado = 2
             and DATE_FORMAT(pto_crp.fecha,'%Y-%m-%d') between $fec_ini and $fec_fin 
-            group by tb_terceros.id_tercero_api,pto_cargue.cod_pptal
+            GROUP BY pto_cdp.id_manu
             order by tb_terceros.nom_tercero";
 
     $rs = $cmd->query($sql);
