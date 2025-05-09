@@ -121,7 +121,7 @@ try {
                     ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
                 INNER JOIN `ctb_doc` 
                     ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-            WHERE (`tes_cuentas`.`id_tes_cuenta`  = $id AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') <= '$fin_mes')";
+            WHERE (`tes_cuentas`.`id_tes_cuenta`  = $id AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') <= '$fin_mes'  AND `ctb_doc`.`estado` = 2)";
     $rs = $cmd->query($sql);
     $libros = $rs->fetch(PDO::FETCH_ASSOC);
     if (!empty($libros)) {
@@ -178,7 +178,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$conciliar = ($saldo + $tot_deb - $tot_cre) - ($detalles['debito'] - $detalles['credito']);
+$conciliar = $saldo_libros + $tot_deb - $tot_cre - $saldo;
 $ver = 'readonly';
 ?>
 <!DOCTYPE html>

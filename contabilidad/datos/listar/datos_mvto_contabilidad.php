@@ -149,7 +149,7 @@ try {
 }
 // consultar la fecha de cierre del periodo del módulo de presupuesto 
 try {
-    $sql = "SELECT fecha_cierre FROM tb_fin_periodos WHERE id_modulo = 55";
+    $sql = "SELECT MAX(fecha_cierre) AS fecha_cierre  FROM tb_fin_periodos WHERE id_modulo = 55";
     $rs = $cmd->query($sql);
     $fecha_cierre = $rs->fetch();
     $fecha_cierre = !empty($fecha_cierre) ? $fecha_cierre['fecha_cierre'] : date("Y-m-d");
@@ -236,7 +236,7 @@ if (!empty($listappto)) {
             $borrar = '<a value="' . $id_ctb . '" onclick="eliminarRegistroDoc(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
         if (PermisosUsuario($permisos, 5501, 5) || $id_rol == 1) {
-            if ($fecha > $fecha_cierre) {
+            if ($fecha < $fecha_cierre) {
                 $anular = null;
                 $cerrar = null;
             } else if ($lp['pag'] != '') {

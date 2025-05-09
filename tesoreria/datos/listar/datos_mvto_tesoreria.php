@@ -68,13 +68,12 @@ if ($id_ctb_doc == '6') {
     }
 }
 try {
-    $sql = "SELECT `fecha_cierre` FROM `tb_fin_periodos` WHERE `id_modulo` = 56";
+    $sql = "SELECT MAX(`fecha_cierre`) AS `fecha_cierre` FROM `tb_fin_periodos` WHERE `id_modulo` = 56";
     $rs = $cmd->query($sql);
     $fecha_cierre = $rs->fetch();
     $fecha_cierre = !empty($fecha_cierre) ? $fecha_cierre['fecha_cierre'] : date("Y-m-d");
     $fecha_cierre = date('Y-m-d', strtotime($fecha_cierre));
     // incrementar un dia a $fecha cierre
-    $fecha_cierre = date('Y-m-d', strtotime($fecha_cierre . '+15 day'));
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -240,7 +239,7 @@ if (!empty($listappto)) {
             }
             $anular = '<a value="' . $id_ctb . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" onclick="anularDocumentoTes(' . $id_ctb . ')" title="Anular"><span class="fas fa-ban fa-lg"></span></a>';
             $key = array_search($id_ctb, array_column($erp, 'id_transaccion'));
-            if ($fecha >= $fecha_cierre || $key !== false) {
+            if ($fecha < $fecha_cierre || $key !== false) {
                 $anular = null;
                 $cerrar = null;
             }

@@ -368,7 +368,11 @@ var tabla;
 				{ data: "accion" }
 			],
 			order: [[0, "desc"]],
-			"pageLength": 10,
+			lengthMenu: [
+				[10, 25, 50, 100, -1],
+				[10, 25, 50, 100, 'TODO'],
+			],
+			pageLength: -1,
 			columnDefs: [{
 				class: 'text-wrap',
 				targets: [2]
