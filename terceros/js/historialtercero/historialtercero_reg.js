@@ -354,7 +354,7 @@
     });
 
     //-------------------- liberar saldos cdp
-    $('#divFormsReg').on("click", "#btn_liquidar", function () {
+    $('#divFormsReg').off("click, #btn_liquidar").on("click", "#btn_liquidar", function () {
         if ($('#txt_fec_lib').val() < $('#txt_fec_cdp').val()) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('La fecha de liberación no puede ser menor a la fecha del CDP');
@@ -367,6 +367,7 @@
                 type: 'POST',
                 url: url,
                 data: datos + "&oper=add",
+                context: this,
                 success: function (r) {
                     if (r == '1') {
                         let id = 'tb_cdps';
@@ -458,7 +459,7 @@
         });
     });
     //----------------------------- liberar saldos crp
-    $('#divFormsReg').on("click", "#btn_liquidar_saldos_crp", function () {
+    $('#divFormsReg').off("click","#btn_liquidar_saldos_crp").on("click", "#btn_liquidar_saldos_crp", function () {
         if ($('#txt_fec_lib_crp').val() < $('#txt_fec_crp').val()) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('La fecha de liberación no puede ser menor a la fecha del CRP');
@@ -471,6 +472,7 @@
                 type: 'POST',
                 url: url,
                 data: datos + "&oper=add",
+                context: this,
                 success: function (r) {
                     if (r == '1') {
                         let id2 = 'tb_cdps';
