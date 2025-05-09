@@ -72,8 +72,24 @@ $vigencia = $_SESSION['vigencia'];
                                         <span class="fas fa-search fa-lg" aria-hidden="true"></span>
                                     </a>
                                 </div>
-                            </div>
 
+                                <!-- para dashboard 
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_iniciar_dashboard" class="btn btn-outline-success btn-sm" title="Dashboard">
+                                        <span class="fas fa-chart-line fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                </div>
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_dashboard" class="btn btn-outline-primary btn-sm" title="Dashboard">
+                                        <span class="fas fa-chart-line fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                </div>
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_detener_dashboard" class="btn btn-outline-danger btn-sm" title="Dashboard">
+                                        <span class="fas fa-chart-line fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                </div> -->
+                            </div>
 
                             <div class="table-responsive">
                                 <table id="tableTerceros" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">

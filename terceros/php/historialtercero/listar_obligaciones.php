@@ -23,8 +23,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     $sql = "SELECT
-            count(*) AS filas
-            , ctb_doc.id_manu
+            ctb_doc.id_manu
             , pto_cop_detalle.id_ctb_doc
             , pto_cdp_detalle.id_pto_cdp   
             , DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') AS fecha
@@ -34,6 +33,7 @@ try {
             , SUM(IFNULL(pto_pag_detalle.valor,0)- IFNULL(pto_pag_detalle.valor_liberado,0)) AS neto       
             , CASE ctb_doc.estado WHEN 1 THEN 'Pendiente' WHEN 2 THEN 'Cerrado' WHEN 0 THEN 'Anulado' END AS estado
             , CASE WHEN ((pto_cop_detalle.valor-IFNULL(pto_cop_detalle.valor_liberado,0))-(SUM(IFNULL(ctb_causa_retencion.valor_retencion,0)))-(SUM(IFNULL(pto_pag_detalle.valor,0)- IFNULL(pto_pag_detalle.valor_liberado,0)))) = 0 THEN 'pagado' ELSE 'causado' END AS est
+            , COUNT(*) OVER() AS filas
         FROM
             pto_crp_detalle
             INNER JOIN pto_cdp_detalle ON (pto_crp_detalle.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)

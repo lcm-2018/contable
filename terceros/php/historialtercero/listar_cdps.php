@@ -53,8 +53,7 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT
-                COUNT(*) AS filas
-                ,tb_terceros.id_tercero_api
+                tb_terceros.id_tercero_api
                 , tb_terceros.nit_tercero
                 , tb_terceros.nom_tercero
                 , pto_cdp.id_manu
@@ -66,6 +65,7 @@ try {
                 , SUM(pto_crp_detalle2.valor) AS valor_crp
                 , SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)) AS valor_crp_liberado
                 , (SUM(pto_cdp_detalle2.valor) - SUM(IFNULL(pto_cdp_detalle2.valor_liberado,0))) - (SUM(pto_crp_detalle2.valor) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0))) AS saldo
+                , COUNT(*) OVER() AS filas
             FROM
                 pto_cdp
                 INNER JOIN (SELECT id_pto_cdp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_cdp_detalle GROUP BY id_pto_cdp) AS pto_cdp_detalle2 ON (pto_cdp_detalle2.id_pto_cdp = pto_cdp.id_pto_cdp)

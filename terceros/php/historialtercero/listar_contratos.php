@@ -23,8 +23,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     $sql = "SELECT
-            count(*) AS filas
-            ,ctt_novedad_liquidacion.id_liquidacion
+            ctt_novedad_liquidacion.id_liquidacion
             , ctt_contratos.num_contrato
             , DATE_FORMAT(ctt_contratos.fec_ini, '%Y-%m-%d') AS fec_ini
             , DATE_FORMAT(ctt_contratos.fec_fin, '%Y-%m-%d') AS fec_fin
@@ -32,6 +31,7 @@ try {
             , ctt_novedad_adicion_prorroga.val_adicion
             , ctt_novedad_liquidacion.val_cte
             , CASE ctt_novedad_liquidacion.estado WHEN 1 THEN 'Liquidado' ELSE 'En ejecucion' END AS estado
+            , COUNT(*) OVER() AS filas
         FROM
             ctt_contratos
             INNER JOIN ctt_adquisiciones ON (ctt_contratos.id_compra = ctt_adquisiciones.id_adquisicion)

@@ -576,6 +576,51 @@ function FormResponsabilidad(id) {
             reloadtable('tableTerceros');
         }
     });
+    //-----------------dashboard
+    $('#btn_iniciar_dashboard').on("click", async function () {
+        try {
+            const response = await fetch('../python/dash_controller.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Indica que envías JSON
+                },
+                body: JSON.stringify({ action: 'start' }) // Campo 'action' incluido
+            });
+            const data = await response.json();
+            console.log(data.status);
+            mje("iniciado");
+        } catch (error) {
+            console.error("Error:", error);
+        }        
+    });
+
+    $('#btn_detener_dashboard').on("click", async function () {
+        try {
+            const response = await fetch('../python/dash_controller.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Indica que envías JSON
+                },
+                body: JSON.stringify({ action: 'stop' }) // Campo 'action' incluido
+            });
+            const data = await response.json();
+            console.log(data.status);
+            mje("detenido");
+        } catch (error) {
+            console.error("Error:", error);
+        }
+     });
+
+     $('#btn_dashboard').on("click", async function () {
+        var parametro="Telefonos";
+        try {
+            //setTimeout(() => {
+                window.open("http://localhost:8050?producto=" + parametro, "_blank");
+           // }, 2000);
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    });
     //-----------------------------------------------------
 
     //descargar documento PDF

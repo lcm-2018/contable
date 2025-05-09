@@ -12,7 +12,7 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_tercero = isset($_POST['id_tercero']) ? $_POST['id_tercero'] : -1;
-$id_cdp = isset($_POST['id_cdp']) && strlen($_POST['id_cdp'])>0 ? $_POST['id_cdp'] : -1;
+$id_cdp = isset($_POST['id_cdp']) && strlen($_POST['id_cdp']) > 0 ? $_POST['id_cdp'] : -1;
 
 try {
 
@@ -31,26 +31,27 @@ try {
 
     //-----cdps-----------------------
     $sql = "SELECT
-            tb_terceros.id_tercero_api
-            , tb_terceros.nit_tercero
-            , tb_terceros.nom_tercero
-            , pto_cdp.id_manu
-            , pto_cdp.id_pto_cdp
-            , DATE_FORMAT(pto_cdp.fecha, '%Y-%m-%d') AS fecha
-            , pto_cdp.objeto
-            , SUM(pto_cdp_detalle.valor) AS valor_cdp   
-            , SUM(IFNULL(pto_cdp_detalle.valor_liberado,0)) AS valor_cdp_liberado   
-            , SUM(pto_crp_detalle.valor) AS valor_crp
-            , SUM(IFNULL(pto_crp_detalle.valor_liberado,0)) AS valor_crp_liberado
-            , (SUM(pto_cdp_detalle.valor) - SUM(IFNULL(pto_cdp_detalle.valor_liberado,0))) - (SUM(pto_crp_detalle.valor) - SUM(IFNULL(pto_crp_detalle.valor_liberado,0))) AS saldo
-        FROM
-            pto_cdp_detalle 
-            INNER JOIN pto_cdp ON (pto_cdp_detalle.id_pto_cdp = pto_cdp.id_pto_cdp)
-            INNER JOIN pto_crp_detalle ON (pto_cdp_detalle.id_pto_cdp_det=pto_crp_detalle.id_pto_cdp_det)    
-            INNER JOIN pto_crp ON (pto_crp_detalle.id_pto_crp = pto_crp.id_pto_crp)  
-            INNER JOIN tb_terceros ON (pto_crp.id_tercero_api = tb_terceros.id_tercero_api)
-        WHERE tb_terceros.id_tercero_api = $id_tercero   
-        GROUP BY pto_cdp.id_pto_cdp";
+                tb_terceros.id_tercero_api
+                , tb_terceros.nit_tercero
+                , tb_terceros.nom_tercero
+                , pto_cdp.id_manu
+                , pto_cdp.id_pto_cdp
+                , DATE_FORMAT(pto_cdp.fecha, '%Y-%m-%d') AS fecha
+                , pto_cdp.objeto                
+                , SUM(pto_cdp_detalle2.valor) AS valor_cdp   
+                , SUM(IFNULL(pto_cdp_detalle2.valor_liberado,0)) AS valor_cdp_liberado   
+                , SUM(pto_crp_detalle2.valor) AS valor_crp
+                , SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)) AS valor_crp_liberado
+                , (SUM(pto_cdp_detalle2.valor) - SUM(IFNULL(pto_cdp_detalle2.valor_liberado,0))) - (SUM(pto_crp_detalle2.valor) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0))) AS saldo
+            FROM
+                pto_cdp
+                INNER JOIN (SELECT id_pto_cdp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_cdp_detalle GROUP BY id_pto_cdp) AS pto_cdp_detalle2 ON (pto_cdp_detalle2.id_pto_cdp = pto_cdp.id_pto_cdp)
+                INNER JOIN pto_crp ON (pto_crp.id_cdp = pto_cdp.id_pto_cdp)
+                INNER JOIN (SELECT id_pto_crp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2 ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)  
+                INNER JOIN tb_terceros ON (pto_crp.id_tercero_api = tb_terceros.id_tercero_api)      
+            WHERE pto_crp.id_tercero_api=$id_tercero  
+            AND pto_crp.estado=2
+            GROUP BY pto_cdp.id_pto_cdp";
 
     $rs = $cmd->query($sql);
     $obj_cdps = $rs->fetchAll();
@@ -79,21 +80,37 @@ try {
 
     //--------------registros presupuestales ---------------
     $sql = "SELECT
-            pto_cdp.id_pto_cdp
-            , DATE_FORMAT(pto_crp.fecha, '%Y-%m-%d') AS fecha
-            , pto_crp.id_manu
-            , 'CRP' AS tipo
-            , pto_crp.objeto
-            , pto_crp.num_contrato
-            , pto_crp_detalle.valor - IFNULL(pto_crp_detalle.valor_liberado,0) AS vr_registro
-            , (pto_cdp_detalle.valor - IFNULL(pto_cdp_detalle.valor_liberado,0))-(pto_crp_detalle.valor - IFNULL(pto_crp_detalle.valor_liberado,0)) AS vr_saldo
-            , CASE pto_crp.estado WHEN 1 THEN 'Pendiente' WHEN 2 THEN 'Cerrado' WHEN 0 THEN 'Anulado' END AS estado
-        FROM
-            pto_cdp_detalle
-            INNER JOIN pto_cdp ON (pto_cdp_detalle.id_pto_cdp = pto_cdp.id_pto_cdp)
-            INNER JOIN pto_crp_detalle ON (pto_crp_detalle.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
-            INNER JOIN pto_crp ON (pto_crp_detalle.id_pto_crp = pto_crp.id_pto_crp)
-        WHERE pto_cdp.id_pto_cdp = $id_cdp";
+                    pto_crp.id_pto_crp,
+                    pto_crp.id_manu,
+                    DATE_FORMAT(pto_crp.fecha,'%Y-%m-%d') AS fecha,
+                    'CRP' AS tipo,
+                    pto_crp.num_contrato,
+                    SUM(IFNULL(pto_crp_detalle2.valor,0)) AS vr_crp,
+                    SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)) AS vr_crp_liberado,
+                    IFNULL(cop_sum.vr_cop, 0) AS vr_cop,
+                    IFNULL(cop_sum.vr_cop_liberado, 0) AS vr_cop_liberado,
+                    (SUM(IFNULL(pto_crp_detalle2.valor,0)) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0))) AS vr_registro,
+                    (SUM(IFNULL(pto_crp_detalle2.valor,0)) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0))) - 
+                    (IFNULL(cop_sum.vr_cop, 0) - IFNULL(cop_sum.vr_cop_liberado, 0)) AS vr_saldo,
+                    CASE pto_crp.estado WHEN 1 THEN 'Pendiente' WHEN 2 THEN 'Cerrado' WHEN 0 THEN 'Anulado' END AS estado,
+                    COUNT(*) OVER() AS filas
+                FROM
+                    (SELECT id_pto_crp, id_pto_crp_det, id_pto_cdp_det, SUM(valor) AS valor, SUM(valor_liberado) AS valor_liberado 
+                    FROM pto_crp_detalle 
+                    GROUP BY id_pto_crp, id_pto_crp_det, id_pto_cdp_det) AS pto_crp_detalle2
+                INNER JOIN pto_cdp_detalle ON (pto_crp_detalle2.id_pto_cdp_det = pto_cdp_detalle.id_pto_cdp_det)
+                INNER JOIN pto_crp ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)
+                LEFT JOIN (
+                    SELECT 
+                        id_pto_crp_det,
+                        SUM(valor) AS vr_cop,
+                        SUM(valor_liberado) AS vr_cop_liberado
+                    FROM pto_cop_detalle
+                    GROUP BY id_pto_crp_det
+                ) cop_sum ON cop_sum.id_pto_crp_det = pto_crp_detalle2.id_pto_crp_det
+            WHERE pto_crp.id_cdp = $id_cdp
+            AND pto_crp.estado=2
+            GROUP BY pto_crp.id_pto_crp, pto_crp.id_manu, pto_crp.fecha, pto_crp.num_contrato, pto_crp.estado";
 
     $rs = $cmd->query($sql);
     $obj_regpresupuestal = $rs->fetchAll();
@@ -126,7 +143,7 @@ try {
 
     //-----------------pagos-------------------------------------
     $sql = "SELECT
-            pto_cdp_detalle.id_pto_cdp
+              pto_cdp_detalle.id_pto_cdp
             , ctb_doc.id_manu
             , DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') AS fecha
             , ctb_doc.detalle
@@ -159,9 +176,11 @@ try {
                 font-family: Arial, sans-serif;
             }
         }
+
         .resaltar:nth-child(even) {
             background-color: #F8F9F9;
         }
+
         .resaltar:nth-child(odd) {
             background-color: #ffffff;
         }
@@ -195,7 +214,7 @@ try {
             <th>CDPs</th>
         </tr>
     </table>
-    
+
     <table style="width:100% !important; border:#A9A9A9 1px solid;">
         <thead style="font-size:70%; border:#A9A9A9 1px solid;">
             <tr style="background-color:#CED3D3; color:#000000; text-align:center; border:#A9A9A9 1px solid;">
@@ -217,8 +236,8 @@ try {
                         <td style="border:#A9A9A9 1px solid;">' . $obj['fecha'] . '</td>
                         <td style="border:#A9A9A9 1px solid; text-align:left;">' . mb_strtoupper($obj['objeto']) . '</td>   
                         <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['valor_cdp']) . '</td>   
-                        <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['saldo']) . '</td></tr>';   
-            }            
+                        <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['saldo']) . '</td></tr>';
+            }
             echo $tabla;
             ?>
         </tbody>
@@ -253,8 +272,8 @@ try {
                         <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['val_contrato']) . '</td>  
                         <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['val_adicion']) . '</td>   
                         <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['val_cte']) . '</td> 
-                        <td style="border:#A9A9A9 1px solid;">' . $obj['estado'] . '</td></tr>';  
-            }            
+                        <td style="border:#A9A9A9 1px solid;">' . $obj['estado'] . '</td></tr>';
+            }
             echo $tabla;
             ?>
         </tbody>
@@ -289,8 +308,8 @@ try {
                         <td style="border:#A9A9A9 1px solid;">' . $obj['num_contrato'] . '</td>  
                         <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['vr_registro']) . '</td>   
                         <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['vr_saldo']) . '</td> 
-                        <td style="border:#A9A9A9 1px solid;">' . $obj['estado'] . '</td></tr>';  
-            }            
+                        <td style="border:#A9A9A9 1px solid;">' . $obj['estado'] . '</td></tr>';
+            }
             echo $tabla;
             ?>
         </tbody>
@@ -325,13 +344,13 @@ try {
                         <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['valorcausado']) . '</td>  
                         <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['descuentos']) . '</td>   
                         <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['neto']) . '</td> 
-                        <td style="border:#A9A9A9 1px solid;">' . $obj['est'] . '</td></tr>';  
-            }            
+                        <td style="border:#A9A9A9 1px solid;">' . $obj['est'] . '</td></tr>';
+            }
             echo $tabla;
             ?>
         </tbody>
     </table>
-    
+
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
             <th>Pagos</th>
@@ -355,8 +374,8 @@ try {
                         <td style="border:#A9A9A9 1px solid;">' . $obj['id_manu'] . '</td>
                         <td style="border:#A9A9A9 1px solid;">' . $obj['fecha'] . '</td>
                         <td style="border:#A9A9A9 1px solid; text-align:left;">' . mb_strtoupper($obj['detalle']) . '</td>
-                        <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['valorpagado']) . '</td></tr>';  
-            }            
+                        <td style="border:#A9A9A9 1px solid;">' . formato_valor($obj['valorpagado']) . '</td></tr>';
+            }
             echo $tabla;
             ?>
         </tbody>
