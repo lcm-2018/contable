@@ -1,43 +1,63 @@
 import dash
 from dash import Dash, html, dcc, Input, Output
-from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, unquote
+import json
 
-# Inicializar la app
 app = Dash(__name__)
 
-# Datos de ejemplo
-df = pd.DataFrame({
-    "Producto": ["Laptops", "Telefonos", "Tablets"],
-    "Ventas": [120, 90, 50]
-})
-
-#diseño del dashboard
 app.layout = html.Div([
-    html.H1("Dashboard de Terceros", style={"textAlign": "center"}),
-    dcc.Location(id='url', refresh=False),  # Componente para manejar la URL
-    html.Div(id='output-message'),  # Para mostrar el parámetro recibido
-    dcc.Graph(id='graph')
+    html.H1("Distribución de Terceros por Municipio", style={'textAlign': 'center', 'color': '#2c3e50'}),
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='titulo-municipios', style={'margin': '20px', 'fontSize': '18px'}),
+    dcc.Graph(id='grafico-municipios'),
+    html.Div(id='total-terceros', style={'margin': '20px', 'fontWeight': 'bold'})
 ])
 
-# Callback que actualiza el gráfico según la URL
 @app.callback(
-    [Output('output-message', 'children'),
-     Output('graph', 'figure')],
+    [Output('titulo-municipios', 'children'),
+     Output('grafico-municipios', 'figure'),
+     Output('total-terceros', 'children')],
     [Input('url', 'search')]
 )
-def update_graph(search):
+def actualizar_grafico(search):
     params = parse_qs(search.lstrip('?')) if search else {}
-    producto = params.get('producto', ['Todos'])[0]  # Valor por defecto: 'Todos'
+    datos_json = params.get('datos', ['[]'])[0]
     
-    filtered_df = df if producto == 'Todos' else df[df['Producto'] == producto]
+    try:
+        datos = json.loads(unquote(datos_json))
+        df = pd.DataFrame(datos)
+        
+        if df.empty:
+            raise ValueError("No se recibieron datos válidos")
+            
+        # Ordenamos por cantidad descendente
+        df = df.sort_values('cantidad', ascending=False)
+        
+        # Calculamos el total
+        total = df['cantidad'].sum()
+        
+        # Creamos gráfico de barras horizontal
+        fig = px.bar(df, 
+                     x='cantidad', 
+                     y='municipio',
+                     orientation='h',
+                     color='municipio',
+                     title="",
+                     labels={'cantidad': 'Número de Terceros', 'municipio': 'Municipio'})
+        
+        fig.update_layout(showlegend=False)
+        
+        titulo = "Distribución de Terceros por Municipio"
+        total_texto = f"Total de terceros registrados: {total}"
+        
+    except Exception as e:
+        titulo = f"Error: {str(e)}"
+        fig = px.bar(title="Error al cargar datos")
+        total_texto = ""
     
-    mensaje = f"Mostrando: {producto}"
-    fig = px.bar(filtered_df, x="Producto", y="Ventas", title=f"Ventas de {producto}")
-    
-    return mensaje, fig
+    return titulo, fig, total_texto
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=8050, use_reloader=False)
+    app.run(debug=True, host='0.0.0.0', port=8050)

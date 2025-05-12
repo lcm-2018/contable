@@ -1021,6 +1021,7 @@
             });
         }
     });
+
     //------------------------------
     //filtros
     $('#btn_buscar_filtro').on("click", function () {
@@ -1044,6 +1045,18 @@
             reloadtable('tableEjecPresupuestoCrp');
         }
     });
+
+    //-------------- libros auxiliares de presupuesto
+	$('#sl_libros_aux_pto').on("click", function () {
+		$.post("php/libros_aux_pto/frm_libros_aux_pto.php", {}, function (he) {
+			$('#divTamModalForms').removeClass('modal-lg');
+			$('#divTamModalForms').removeClass('modal-sm');
+			$('#divTamModalForms').addClass('modal-lg');
+			//(modal-sm, modal-lg, modal-xl) - pequeño,mediano,grande
+			$('#divModalForms').modal('show');
+			$("#divForms").html(he);
+		}); 
+	});
 })(jQuery);
 
 const imprimirFormatoCdp = (id) => {
