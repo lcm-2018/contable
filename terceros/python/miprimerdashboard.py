@@ -1,3 +1,5 @@
+#dashboard basico sin recibir datos de php
+
 import dash
 from dash import Dash, html, dcc, Input, Output
 from dash.dependencies import Input, Output
