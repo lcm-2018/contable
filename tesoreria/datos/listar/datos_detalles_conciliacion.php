@@ -29,35 +29,28 @@ $fecha = $vigencia . '-' . $mes . '-' . $dia;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT * FROM 
-                (SELECT
-                    DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') AS `fecha`
-                    , `ctb_fuente`.`cod`
-                    , `ctb_doc`.`id_manu`
-                    , `ctb_libaux`.`id_tercero_api`
-                    , `ctb_libaux`.`debito`
-                    , `ctb_libaux`.`credito`
-                    , '--' AS `documento`
-                    , `ctb_libaux`.`id_ctb_libaux`
-                    , `tes_conciliacion_detalle`.`id_ctb_libaux` AS `conciliado`
-                FROM
-                    `ctb_libaux`
-                    INNER JOIN `ctb_pgcp` 
-                        ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-                    INNER JOIN `tes_cuentas` 
-                        ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-                    INNER JOIN `ctb_doc` 
-                        ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                    INNER JOIN `ctb_fuente` 
-                        ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
-                    LEFT JOIN `tes_conciliacion_detalle`
-                        ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)
-                    LEFT JOIN `tes_conciliacion`
-                        ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)   
-                WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_cuenta AND `ctb_doc`.`estado` = 2 
-                        AND (`tes_conciliacion`.`mes` = '$mes' OR `tes_conciliacion`.`mes` IS NULL)
-                        AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))) AS `t1`
-            WHERE `t1`.`fecha` <= '$fecha'";
+    $sql = "SELECT
+                `ctb_doc`.`fecha`
+                , `ctb_fuente`.`cod`
+                , `ctb_doc`.`id_manu`
+                , `ctb_libaux`.`id_tercero_api`
+                , `ctb_libaux`.`debito`
+                , `ctb_libaux`.`credito`
+                , '--' AS `documento`
+                , `ctb_libaux`.`id_ctb_libaux`
+                , `tes_conciliacion_detalle`.`id_ctb_libaux` AS `conciliado`
+                , `tes_conciliacion_detalle`.`fecha_marca` AS `marca`
+            FROM
+                `ctb_libaux`
+                INNER JOIN `ctb_pgcp`  ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                INNER JOIN `tes_cuentas`  ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                INNER JOIN `ctb_doc`   ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                INNER JOIN `ctb_fuente` ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                LEFT JOIN `tes_conciliacion_detalle` ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)
+                LEFT JOIN `tes_conciliacion` ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)   
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_cuenta AND `ctb_doc`.`estado` = 2 
+                    AND `ctb_doc`.`fecha` <= '$fecha' AND (`tes_conciliacion_detalle`.`fecha_marca` >= '$fecha' or `tes_conciliacion_detalle`.`fecha_marca` IS NULL)
+                    AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))";
     $rs = $cmd->query($sql);
     $lista = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -79,7 +72,18 @@ if (!empty($lista)) {
     $terceros = getTerceros($ids, $cmd);
     $cmd = null;
     foreach ($lista as $lp) {
-        $chk = $lp['conciliado'] > 0 ? 'checked' : '';
+        if ($lp['conciliado'] > 0  && $lp['marca'] <= $fecha) {
+            $chk =  'checked';
+            $estado = 'Conciliado';
+        } else {
+            $chk =  '';
+            $estado = 'Pendiente';
+        }
+        if ($lp['conciliado'] > 0  && $lp['marca'] > $fecha) {
+            $chk =  'disabled';
+            $estado = 'Marcado';
+        }
+
         $tot_deb += $lp['debito'];
         $tot_cre += $lp['credito'];
         if ($lp['conciliado'] > 0) {
@@ -89,7 +93,6 @@ if (!empty($lista)) {
         $check = '<input ' . $chk . ' type="checkbox" name="check[]" onclick="GuardaDetalleConciliacion(this)" text="' . $lp['id_ctb_libaux'] . '">';
         $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
         $nombre = $key !== false ? ltrim($terceros[$key]['nom_tercero'] . ' -> ' . $terceros[$key]['nit_tercero']) : '---';
-        $estado = $lp['conciliado'] > 0 ? 'Conciliado' : 'Pendiente';
         $data[] = [
 
             'fecha' => date('Y-m-d', strtotime($lp['fecha'])),

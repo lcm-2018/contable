@@ -153,7 +153,7 @@ if ($tesoreria == 1) {
             $query2->execute();
             if ($query2->rowCount() > 0) {
                 $tescon++;
-            }else{
+            } else {
                 $response['msg'] = $query2->errorInfo()[2];
                 echo json_encode($response);
                 exit();
@@ -184,6 +184,7 @@ try {
     } else {
         $primer = $sql->rowCount();
         $segundo = 0;
+        $tercer = 0;
         if ($id_tercero != $id_teractual && $id_adq > 0) {
             $sql = "UPDATE `ctt_adquisiciones` SET `id_tercero` = ? WHERE `id_adquisicion` = ?";
             $sql = $cmd->prepare($sql);
@@ -192,7 +193,15 @@ try {
             $sql->execute();
             $segundo = $sql->rowCount();
         }
-        if ($primer > 0 || $segundo > 0) {
+        if ($id_tercero != $id_teractual) {
+            $sql = "UPDATE `pto_crp_detalle` SET `id_tercero_api` = ? WHERE `id_pto_crp` = ?";
+            $sql = $cmd->prepare($sql);
+            $sql->bindParam(1, $id_tercero, PDO::PARAM_INT);
+            $sql->bindParam(2, $id_crp, PDO::PARAM_INT);
+            $sql->execute();
+            $tercer = $sql->rowCount();
+        }
+        if ($primer > 0 || $segundo > 0 || $tercer > 0) {
             $sql = "UPDATE `pto_crp` SET `id_user_act` = ?, `fecha_act` = ? WHERE `id_pto_crp` = ?";
             $sql = $cmd->prepare($sql);
             $sql->bindParam(1, $id_user, PDO::PARAM_STR);

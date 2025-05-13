@@ -621,6 +621,7 @@
             $("#divModalError").modal("show");
             $("#divMsgError").html("¡El objeto no puede ser vacio!");
         } else {
+
             var datos, url;
             if (op == 1) {
                 datos = $("#formAddCDP").serialize()
@@ -2508,6 +2509,11 @@ $("#divForms").on("click", "#btnGestionCRP", function () {
         $("#dateFecha").focus();
         $("#dateFecha").addClass('is-invalid');
         mjeError("¡La fecha debe estar entre " + $("#dateFecha").attr("min") + " y " + $("#dateFecha").attr("max") + "!");
+    } else if ($('#fec_cierre').val() >= $("#dateFecha").val()) {
+        $("#dateFecha").focus();
+        $("#dateFecha").addClass('is-invalid');
+        $("#divModalError").modal("show");
+        $("#divMsgError").html("Fecha debe ser mayor a la fecha de cierre del presupuesto:<br> <b>" + $('#fec_cierre').val()) + "</b>";
     } else if ($("#id_manu").val() === "") {
         $("#id_manu").focus();
         $("#id_manu").addClass('is-invalid');
@@ -2581,6 +2587,10 @@ $('#registrarMovDetalle').on('click', function () {
         $('#fecha').focus();
         $('#fecha').addClass('is-invalid');
         mjeError('La fecha no puede estar vacia', '');
+    } else if ($('#fec_cierre').val() >= $("#fecha").val()) {
+        $("#fecha").focus();
+        $("#fecha").addClass('is-invalid');
+        mjeError("Fecha debe ser mayor a la fecha de cierre del presupuesto:<br> <b>" + $('#fec_cierre').val()) + "</b>";
     } else if ($('#id_tercero').val() == '0') {
         $('#tercero').focus();
         $('#tercero').addClass('is-invalid');

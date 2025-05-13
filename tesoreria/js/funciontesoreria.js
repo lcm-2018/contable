@@ -787,6 +787,10 @@ function GuardaDocPag(id) {
 		$('#fecha').addClass('is-invalid');
 		$('#fecha').focus();
 		mjeError('La fecha no puede estar vacia');
+	} else if ($('#fec_cierre').val() >= $("#fecha").val()) {
+		$("#fecha").focus();
+		$("#fecha").addClass('is-invalid');
+		mjeError("Fecha debe ser mayor a la fecha de cierre de Tesorería:<br> <b>" + $('#fec_cierre').val()) + "</b>";
 	} else if (Number($('#numDoc').val()) <= 0) {
 		$('#numDoc').addClass('is-invalid');
 		$('#numDoc').focus();
