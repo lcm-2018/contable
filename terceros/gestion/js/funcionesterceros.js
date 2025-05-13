@@ -591,7 +591,7 @@ function FormResponsabilidad(id) {
             mje("iniciado");
         } catch (error) {
             console.error("Error:", error);
-        }        
+        }
     });
 
     $('#btn_detener_dashboard').on("click", async function () {
@@ -609,17 +609,84 @@ function FormResponsabilidad(id) {
         } catch (error) {
             console.error("Error:", error);
         }
-     });
+    });
 
-     $('#btn_dashboard').on("click", async function () {
-        var parametro="Telefonos";
+    $('#btn_dashboard').on("click", async function () {
+        try {
+            const response = await $.ajax({
+                url: window.urlin + "/terceros/python/listar_terceros.php",
+                type: 'POST',
+                dataType: 'json'
+            });
+
+            // Preparamos los datos para el gráfico
+            const datosGrafico = response.map(item => ({
+                municipio: item.municipio,
+                cantidad: parseInt(item.numero)
+            }));
+
+            // Codificamos como parámetro URL
+            const params = new URLSearchParams();
+            params.append('datos', JSON.stringify(datosGrafico));
+
+            window.open(`http://localhost:8050?${params.toString()}`, "_blank");
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error al cargar datos para el dashboard");
+        }
+
+        /*
+        //--------esto pa traer el numero de terceros por ciudad
+        $.ajax({
+            url: window.urlin + "/terceros/python/listar_terceros.php",
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                //------ datos de filtros
+                //ccnit: $('#txt_ccnit_filtro').val(),
+                //tercero: $('#txt_tercero_filtro').val()
+                //--------------------------------
+            },
+            success: function (data) {
+                //$('#txt_ccnit_filtro').val(data.id);
+                response(data);                
+            },
+        });
+
+        var parametro = "Todos";
         try {
             //setTimeout(() => {
-                window.open("http://localhost:8050?producto=" + parametro, "_blank");
-           // }, 2000);
+            window.open("http://localhost:8050?producto=" + parametro, "_blank");
+            // }, 2000);
         } catch (error) {
             console.error("Error:", error);
         }
+        
+        /*
+        source: function (request, response) {
+            $.ajax({
+                url: window.urlin + "/presupuesto/php/libros_aux_pto/listar_rubros.php",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    term: request.term,
+                },
+                success: function (data) {
+                    response(data);
+                },
+            });
+        },
+        select: function (event, ui) {
+            $("#txt_tipo_doc").val(ui.item.label);
+            $("#id_cargue").val(ui.item.id);
+            return false;
+        },
+        focus: function (event, ui) {
+            $("#txt_tipo_doc").val(ui.item.label);
+            return false;
+        },*/
+
+        //----------------------------------------------------
     });
     //-----------------------------------------------------
 

@@ -3,6 +3,3 @@
 [2025-05-05 15:25:03] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM `pto_cdp_detalle` WHERE `id_pto_cdp_det` = 1640
 [2025-05-05 15:51:54] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 154
 [2025-05-09 10:57:14] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 7 AND `id_ctb_libaux` = 3806
-[2025-05-12 14:50:08] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 3072
-[2025-05-12 14:52:22] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 3073
-[2025-05-12 14:53:51] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 3074
