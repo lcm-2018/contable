@@ -25,6 +25,9 @@ $id_vigencia = $_SESSION['id_vigencia'];
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 56, $cmd);
+
 if ($id_doc_pag == 0) {
     try {
         $sql = "SELECT
@@ -212,6 +215,7 @@ try {
                         ?>
                         <input type="hidden" id="valor_teso" value="<?php echo $valor_teso; ?>">
                         <form id="formGetMvtoTes">
+                            <input type="hidden" id="fec_cierre" value="<?php echo $fecha_cierre; ?>">
                             <div class="card-body" id="divCuerpoPag">
                                 <div>
                                     <div class="right-block">

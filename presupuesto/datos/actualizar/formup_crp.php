@@ -5,12 +5,19 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
+include '../../../financiero/consultas.php';
+
 $id_crp = isset($_POST['id_crp']) ? $_POST['id_crp'] : exit('Acceso no disponible');
 $id_pto = $_POST['id_pto'];
 $vigencia = $_SESSION['vigencia'];
+
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
+
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
     $sql = "SELECT
                 `pto_crp`.`id_manu`
                 , `pto_crp`.`num_contrato`
@@ -54,6 +61,7 @@ $id_adq = $crp['id_adquisicion'] != '' ? $crp['id_adquisicion'] : 0;
             <input type="hidden" name="id_crp" value="<?php echo $id_crp ?>">
             <input type="hidden" name="id_pto" value="<?php echo $id_pto ?>">
             <input type="hidden" name="id_adq" value="<?php echo $id_adq ?>">
+            <input type="hidden" id="fec_cierre" value="<?php echo $fecha_cierre ?>">
             <div class="form-row px-4 pt-2">
                 <div class="form-group col-md-3">
                     <label for="id_manu" class="small">CONSECUTIVO</label>

@@ -27,8 +27,8 @@ if ($detalle_mes == 1) {
                 , IFNULL(`reduccion_mes`.`valor`,0) AS `val_reduccion_mes` 
                 , IFNULL(`credito_mes`.`valor`,0) AS `val_credito_mes` 
                 , IFNULL(`contracredito_mes`.`valor`,0) AS `val_contracredito_mes` 
-                , IFNULL(`comprometido_mes`.`valor`,0) AS `val_comprometido_mes` 
-                , IFNULL(`registrado_mes`.`valor`,0) AS `val_registrado_mes` 
+                , IFNULL(`comprometido_mes`.`valor`,0) - IFNULL(`comprometido_mes_liberado`.`valor_liberado`,0) AS `val_comprometido_mes` 
+                , IFNULL(`registrado_mes`.`valor`,0) - IFNULL(`registrado_mes_liberado`.`valor_liberado_reg`,0) AS `val_registrado_mes` 
                 , IFNULL(`causado_mes`.`valor`,0) AS `val_causado_mes` 
                 , IFNULL(`pagado_mes`.`valor`,0) AS `val_pagado_mes`";
     $join_mes = "LEFT JOIN
@@ -86,7 +86,7 @@ if ($detalle_mes == 1) {
                 LEFT JOIN
                     (SELECT
                         `pto_cdp_detalle`.`id_rubro`
-                        , SUM(IFNULL(`pto_cdp_detalle`.`valor`,0)) - SUM(IFNULL(`pto_cdp_detalle`.`valor_liberado`,0)) AS `valor`
+                        , SUM(IFNULL(`pto_cdp_detalle`.`valor`,0)) AS `valor`
                     FROM
                         `pto_cdp_detalle`
                         INNER JOIN `pto_cdp` 
@@ -99,7 +99,20 @@ if ($detalle_mes == 1) {
                 LEFT JOIN
                     (SELECT
                         `pto_cdp_detalle`.`id_rubro`
-                        , SUM(IFNULL(`pto_crp_detalle`.`valor`,0)) - SUM(IFNULL(`pto_crp_detalle`.`valor_liberado`,0)) AS `valor`
+                        , SUM(IFNULL(`pto_cdp_detalle`.`valor_liberado`,0)) AS `valor_liberado`
+                    FROM
+                        `pto_cdp_detalle`
+                        INNER JOIN `pto_cdp` 
+                            ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
+                        INNER JOIN `pto_cargue` 
+                            ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                    WHERE (`pto_cdp`.`estado` = 2 AND `pto_cdp_detalle`.`fecha_libera` BETWEEN '$fecha_ini_mes' AND '$fecha_corte')
+                    GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `comprometido_mes_liberado`
+                    ON(`comprometido_mes_liberado`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_cdp_detalle`.`id_rubro`
+                        , SUM(IFNULL(`pto_crp_detalle`.`valor`,0)) AS `valor`
                     FROM
                         `pto_crp_detalle`
                         INNER JOIN `pto_crp` 
@@ -109,6 +122,19 @@ if ($detalle_mes == 1) {
                     WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_crp`.`estado` = 2)
                     GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `registrado_mes`
                     ON(`registrado_mes`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_cdp_detalle`.`id_rubro`
+                        , SUM(IFNULL(`pto_crp_detalle`.`valor_liberado`,0)) AS `valor_liberado_reg`
+                    FROM
+                        `pto_crp_detalle`
+                        INNER JOIN `pto_crp` 
+                            ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                        INNER JOIN `pto_cdp_detalle` 
+                            ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                    WHERE (`pto_crp_detalle`.`fecha_libera` BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_crp`.`estado` = 2)
+                    GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `registrado_mes_liberado`
+                    ON(`registrado_mes_liberado`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
                     (SELECT
                         `pto_cdp_detalle`.`id_rubro`
@@ -154,8 +180,8 @@ try {
                 , IFNULL(`reduccion`.`valor`,0) AS `val_reduccion` 
                 , IFNULL(`credito`.`valor`,0) AS `val_credito` 
                 , IFNULL(`contracredito`.`valor`,0) AS `val_contracredito` 
-                , IFNULL(`comprometido`.`valor`,0) AS `val_comprometido` 
-                , IFNULL(`registrado`.`valor`,0) AS `val_registrado` 
+                , IFNULL(`comprometido`.`valor`,0) - IFNULL(`comprometido_liberado`.`valor_liberado`,0) AS val_comprometido                                
+                , IFNULL(`registrado`.`valor`,0) - IFNULL(`registrado_liberado`.`valor_liberado_reg`,0) AS val_registrado   
                 , IFNULL(`causado`.`valor`,0) AS `val_causado` 
                 , IFNULL(`pagado`.`valor`,0) AS `val_pagado`
                 , `pto_presupuestos`.`id_tipo`
@@ -218,7 +244,7 @@ try {
                 LEFT JOIN
                     (SELECT
                         `pto_cdp_detalle`.`id_rubro`
-                        , SUM(IFNULL(`pto_cdp_detalle`.`valor`,0)) - SUM(IFNULL(`pto_cdp_detalle`.`valor_liberado`,0)) AS `valor`
+                        , SUM(IFNULL(`pto_cdp_detalle`.`valor`,0)) AS `valor`
                     FROM
                         `pto_cdp_detalle`
                         INNER JOIN `pto_cdp` 
@@ -231,7 +257,20 @@ try {
                 LEFT JOIN
                     (SELECT
                         `pto_cdp_detalle`.`id_rubro`
-                        , SUM(IFNULL(`pto_crp_detalle`.`valor`,0)) - SUM(IFNULL(`pto_crp_detalle`.`valor_liberado`,0)) AS `valor`
+                        , SUM(IFNULL(`pto_cdp_detalle`.`valor_liberado`,0)) AS `valor_liberado`
+                    FROM
+                        `pto_cdp_detalle`
+                        INNER JOIN `pto_cdp` 
+                            ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
+                        INNER JOIN `pto_cargue` 
+                            ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                    WHERE (`pto_cdp`.`estado` = 2 AND `pto_cdp_detalle`.`fecha_libera` BETWEEN '$fecha_ini' AND '$fecha_corte')
+                    GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `comprometido_liberado`
+                    ON(`comprometido_liberado`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_cdp_detalle`.`id_rubro`
+                        , SUM(IFNULL(`pto_crp_detalle`.`valor`,0)) AS `valor`
                     FROM
                         `pto_crp_detalle`
                         INNER JOIN `pto_crp` 
@@ -241,6 +280,20 @@ try {
                     WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` = 2)
                     GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `registrado`
                     ON(`registrado`.`id_rubro` = `pto_cargue`.`id_cargue`)
+		LEFT JOIN
+                    (SELECT
+                        `pto_cdp_detalle`.`id_rubro`
+                        , SUM(IFNULL(`pto_crp_detalle`.`valor_liberado`,0)) AS `valor_liberado_reg`
+                    FROM
+                        `pto_crp_detalle`
+                        INNER JOIN `pto_crp` 
+                            ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                        INNER JOIN `pto_cdp_detalle` 
+                            ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
+                    WHERE (`pto_crp_detalle`.`fecha_libera` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` = 2)
+                    GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `registrado_liberado`
+                    ON(`registrado_liberado`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                    
                 LEFT JOIN
                     (SELECT
                         `pto_cdp_detalle`.`id_rubro`
@@ -398,7 +451,9 @@ try {
             <th>Obligación</th>
             <?= $detalle_mes == 1 ? '<th>Pagados mes</th>' : ''; ?>
             <th>Pagos</th>
-            <th>Saldo presupuestal</th>
+            <th>Saldo disponible CDP</th>
+            <th>Saldo presupuestal CRP</th>
+            <th>Compromisos por pagar</th>
             <th>Cuentas por pagar</th>
         </tr>
     </thead>
@@ -468,6 +523,8 @@ try {
             }
             echo '<td style="text-align:right">' . pesos($value['pagado']) . '</td>';
             echo '<td style="text-align:right">' . pesos((($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito']) - $value['comprometido'])) . '</td>';
+            echo '<td style="text-align:right">' . pesos((($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito']) - $value['registrado'])) . '</td>';
+            echo '<td style="text-align:right">' . pesos(($value['registrado'] - $value['causado'])) . '</td>';
             echo '<td style="text-align:right">' . pesos(($value['causado'] - $value['pagado'])) . '</td>';
             echo '</tr>';
         }

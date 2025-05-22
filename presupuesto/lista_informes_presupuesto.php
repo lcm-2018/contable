@@ -41,6 +41,7 @@ include '../financiero/consultas.php';
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReportePresupuesto(1);">Ejecución presupuestal de ingresos</a>
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReportePresupuesto(2);">Ejecución presupuestal de gastos</a>
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReportePresupuesto(3);">Libros presupuestales</a>
+                                    <a class="dropdown-item sombra" id="sl_libros_aux_pto">Libros auxiliares de presupuesto<a>
                                     <a class="dropdown-item sombra" href="#" onclick="abrirLink(2);">Modificaciones presupuestales ingresos</a>
                                     <a class="dropdown-item sombra" href="#" onclick="abrirLink(2);">Modificaciones presupuestales gastos</a>
                                 </div>
@@ -110,6 +111,8 @@ include '../financiero/consultas.php';
             $(this).tab('show')
         })
     </script>
+
+    <script type="text/javascript" src="js/libros_aux_pto/libros_aux_pto.js?v=<?php echo date('YmdHis') ?>"></script>
 </body>
 
 </html>

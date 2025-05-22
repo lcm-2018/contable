@@ -6,12 +6,18 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 include '../../../terceros.php';
+include '../../../financiero/consultas.php';
+
+
 $id_ctb_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no permitido');
 $id_documento = isset($_POST['id_detalle']) ? $_POST['id_detalle'] : 0;
 $id_vigencia = $_SESSION['id_vigencia'];
+
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 55, $cmd);
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 MAX(`ctb_doc`.`id_manu`) AS `id_manu`, `ctb_fuente`.`nombre`
             FROM
@@ -70,6 +76,7 @@ $cmd = null;
         </div>
         <form id="formGetMvtoCtb">
             <input type="hidden" name="id_ctb_doc" value="<?php echo $id_ctb_doc; ?>">
+            <input type="hidden" id="fec_cierre" value="<?php echo $fecha_cierre; ?>">
             <div class="form-row px-4 pt-2">
                 <div class="form-group col-md-6">
                     <label for="fecha" class="small">FECHA </label>

@@ -23,6 +23,17 @@ if ($anulados == 1 || $_POST['search']['value'] != '') {
 }
 $where .= $_POST['search']['value'] != '' ? "AND (`tb_terceros`.`nit_tercero` LIKE '%{$_POST['search']['value']}%' OR `tb_terceros`.`nom_tercero` LIKE '%{$_POST['search']['value']}%')" : '';
 
+//----------- filtros--------------------------
+
+$andwhere = " ";
+
+if (isset($_POST['ccnit']) && $_POST['ccnit']) {
+    $andwhere .= " AND tb_terceros.nit_tercero LIKE '%" . $_POST['ccnit'] . "%'";
+}
+if (isset($_POST['tercero']) && $_POST['tercero']) {
+    $andwhere .= " AND tb_terceros.nom_tercero LIKE '%" . $_POST['tercero'] . "%'";
+}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -39,7 +50,7 @@ try {
                     ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
                 LEFT JOIN `tb_tipo_tercero` 
                     ON (`tb_rel_tercero`.`id_tipo_tercero` = `tb_tipo_tercero`.`id_tipo`)
-            WHERE `tb_terceros`.`estado` $where
+            WHERE `tb_terceros`.`estado` $where $andwhere
             GROUP BY
                 `tb_terceros`.`id_tercero_api`
             ORDER BY $col $dir $limit";

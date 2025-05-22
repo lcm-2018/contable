@@ -35,6 +35,7 @@ try {
                 , '--' AS `documento`
                 , `ctb_libaux`.`id_ctb_libaux`
                 , `tes_conciliacion_detalle`.`id_ctb_libaux` AS `conciliado`
+                , `tes_conciliacion_detalle`.`fecha_marca` AS `marca`
             FROM
                 `ctb_libaux`
                 INNER JOIN `ctb_pgcp` 
@@ -47,7 +48,8 @@ try {
                     ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
                 LEFT JOIN `tes_conciliacion_detalle`
                     ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)   
-            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes')";
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes' ) ";
+    $sql2 = $sql;
     $rs = $cmd->query($sql);
     $lista = $rs->fetchAll();
     $tot_deb = 0;
@@ -57,7 +59,7 @@ try {
     foreach ($lista as $lp) {
         $tot_deb += $lp['debito'];
         $tot_cre += $lp['credito'];
-        if ($lp['conciliado'] > 0) {
+        if ($lp['conciliado'] > 0 && $lp['marca'] <= $fin_mes) {
             $tdc += $lp['debito'];
             $tcc += $lp['credito'];
         }
@@ -121,7 +123,7 @@ try {
                     ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
                 INNER JOIN `ctb_doc` 
                     ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-            WHERE (`tes_cuentas`.`id_tes_cuenta`  = $id AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') <= '$fin_mes')";
+            WHERE (`tes_cuentas`.`id_tes_cuenta`  = $id AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') <= '$fin_mes'  AND `ctb_doc`.`estado` = 2)";
     $rs = $cmd->query($sql);
     $libros = $rs->fetch(PDO::FETCH_ASSOC);
     if (!empty($libros)) {
@@ -178,7 +180,8 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$conciliar = ($saldo + $tot_deb - $tot_cre) - ($detalles['debito'] - $detalles['credito']);
+$conciliar = $saldo_libros - ($saldo + $tot_deb - $tot_cre);
+
 $ver = 'readonly';
 ?>
 <!DOCTYPE html>
@@ -198,7 +201,7 @@ $ver = 'readonly';
                             <div class="row">
                                 <div class="col-md-md-11">
                                     <i class="fas fa-users fa-lg" style="color:#1D80F7"></i>
-                                    DETALLES CONCILIACIÓN BANCARIA
+                                    DETALLES CONCILIACIÓN BANCARIA <?php echo "saldo " . $saldo_libros . " debitos " . $tot_deb . " creditos " . $tot_cre . " saldo " . $saldo; ?>
                                 </div>
                             </div>
                         </div>

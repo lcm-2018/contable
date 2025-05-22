@@ -114,6 +114,8 @@ $id_t = [$datosCRP['id_tercero_api']];
 
 $ids = implode(',', $id_t);
 $terceros = getTerceros($ids, $cmd);
+$fec_cierre_periodo = fechaCierre($_SESSION['vigencia'], 54, $cmd);
+
 $cmd = null;
 //$terceros = array_merge($terceros, getTerceros($id_ter, $cmd));
 if ($id_ter == 0) {
@@ -153,6 +155,7 @@ $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
                             </div>
                         </div>
                         <form id="formGestionaCrp">
+                            <input type="hidden" name="fec_cierre" id="fec_cierre" value="<?php echo $fec_cierre_periodo; ?>">
                             <div class="card-body" id="divCuerpoPag">
                                 <div>
                                     <div class="right-block">

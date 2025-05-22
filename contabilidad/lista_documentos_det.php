@@ -26,6 +26,7 @@ function pesos($valor)
 }
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 55, $cmd);
 if ($id_doc == 0) {
     $fecha_doc = date('Y-m-d');
     try {
@@ -123,6 +124,7 @@ $ver = 'readonly';
                                 <div>
                                     <div class="right-block">
                                         <form id="formGetMvtoCtb">
+                                            <input type="hidden" id="fec_cierre" name="fec_cierre" value="<?php echo $fecha_cierre; ?>">
                                             <div class="row mb-1">
                                                 <div class="col-2">
                                                     <div class="col"><span class="small">NUMERO ACTO:</span></div>

@@ -42,6 +42,7 @@ try {
                 , `ctb_libaux`.`credito`
                 , `ctb_libaux`.`id_ctb_libaux`
                 , `tes_conciliacion_detalle`.`id_ctb_libaux` AS `conciliado`
+                ,  `tes_conciliacion_detalle`.`fecha_marca` AS marca
                 , `tb_terceros`.`nom_tercero`
                 , `tb_terceros`.`nit_tercero`
             FROM
@@ -56,13 +57,11 @@ try {
                     ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
                 LEFT JOIN `tes_conciliacion_detalle`
                     ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)
-                LEFT JOIN `tes_conciliacion`
-                    ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)
                 LEFT JOIN `tb_terceros` 
                     ON (`ctb_libaux`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
-            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes'
-                    AND (`tes_conciliacion`.`mes` = '$mes' OR `tes_conciliacion`.`mes` IS NULL)
-                    AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))";
+            WHERE `tes_cuentas`.`id_tes_cuenta` = $id AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes'
+                    AND (`tes_conciliacion_detalle`.`fecha_marca` > '$fin_mes' OR `tes_conciliacion_detalle`.`fecha_marca` IS NULL)
+                  ";
     $rs = $cmd->query($sql);
     $lista = $rs->fetchAll();
     $tot_deb = 0;
@@ -72,7 +71,7 @@ try {
     foreach ($lista as $lp) {
         $tot_deb += $lp['debito'];
         $tot_cre += $lp['credito'];
-        if ($lp['conciliado'] > 0) {
+        if ($lp['conciliado'] > 0 && $lp['marca'] <= $fin_mes) {
             $tdc += $lp['debito'];
             $tcc += $lp['credito'];
         }
@@ -151,16 +150,9 @@ try {
                             , `ctb_doc`.`fecha`
                         FROM
                             `ctb_libaux`
-                            INNER JOIN `ctb_doc` 
-                                ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                            LEFT JOIN `tes_conciliacion_detalle`
-                                ON (`ctb_libaux`.`id_ctb_libaux` = `tes_conciliacion_detalle`.`id_ctb_libaux`)
-                            LEFT JOIN `tes_conciliacion`
-                                ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)
-                        WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes' 
-                                AND (`tes_conciliacion`.`mes` = '$mes' OR `tes_conciliacion`.`mes` IS NULL)
-                                AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))
-                        GROUP BY `ctb_libaux`.`id_cuenta`)AS `t1`  
+                            INNER JOIN `ctb_doc`  ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes' 
+                        GROUP BY `ctb_libaux`.`id_cuenta`) AS `t1`  
                         ON (`t1`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
                 WHERE `tes_cuentas`.`id_tes_cuenta` = $id";
     $rs = $cmd->query($sql);
@@ -381,21 +373,19 @@ $anulado = '';
             $tdebito = 0;
             $tcredito = 0;
             foreach ($lista as $l) {
-                if ($l['conciliado'] == '') {
-                    $tdebito += $l['debito'];
-                    $tcredito += $l['credito'];
+                $tdebito += $l['debito'];
+                $tcredito += $l['credito'];
 
             ?>
-                    <tr style="text-align: left;">
-                        <td><?= date('Y-m-d', strtotime($l['fecha'])); ?></td>
-                        <td><?= $l['cod'] . $l['id_manu']; ?></td>
-                        <td><?= $l['nom_tercero'] . ' - ' . $l['nit_tercero']; ?></td>
-                        <td><?= '' ?></td>
-                        <td style="text-align: right;"><?= pesos($l['debito']); ?></td>
-                        <td style="text-align: right;"><?= pesos($l['credito']); ?></td>
-                    </tr>
+                <tr style="text-align: left;">
+                    <td><?= date('Y-m-d', strtotime($l['fecha'])); ?></td>
+                    <td><?= $l['cod'] . $l['id_manu']; ?></td>
+                    <td><?= $l['nom_tercero'] . ' - ' . $l['nit_tercero']; ?></td>
+                    <td><?= '' ?></td>
+                    <td style="text-align: right;"><?= pesos($l['debito']); ?></td>
+                    <td style="text-align: right;"><?= pesos($l['credito']); ?></td>
+                </tr>
             <?php
-                }
             }
             ?>
             <tr>

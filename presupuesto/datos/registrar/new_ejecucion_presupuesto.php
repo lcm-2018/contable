@@ -5,6 +5,7 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
+
 $id_pto = $_POST['id_pto'];
 $fecha = $_POST['dateFecha'];
 $num_solicitud = $_POST['numSolicitud'];

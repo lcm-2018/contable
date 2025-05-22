@@ -368,7 +368,11 @@ var tabla;
 				{ data: "accion" }
 			],
 			order: [[0, "desc"]],
-			"pageLength": 10,
+			lengthMenu: [
+				[10, 25, 50, 100, -1],
+				[10, 25, 50, 100, 'TODO'],
+			],
+			pageLength: -1,
 			columnDefs: [{
 				class: 'text-wrap',
 				targets: [2]
@@ -783,6 +787,10 @@ function GuardaDocPag(id) {
 		$('#fecha').addClass('is-invalid');
 		$('#fecha').focus();
 		mjeError('La fecha no puede estar vacia');
+	} else if ($('#fec_cierre').val() >= $("#fecha").val()) {
+		$("#fecha").focus();
+		$("#fecha").addClass('is-invalid');
+		mjeError("Fecha debe ser mayor a la fecha de cierre de Tesorería:<br> <b>" + $('#fec_cierre').val()) + "</b>";
 	} else if (Number($('#numDoc').val()) <= 0) {
 		$('#numDoc').addClass('is-invalid');
 		$('#numDoc').focus();
@@ -1482,7 +1490,7 @@ function GuardaMvtoDetalle(id, op, boton) {
 		$('#id_facturador').addClass('is-invalid');
 		$('#id_facturador').focus();
 		mjeError('Debe seleccionar un facturador');
-	} else if ($('#valor_fact').val() == '0') {
+	} else if (Number($('#valor_fact').val()) < 0) {
 		$('#valor_fact').addClass('is-invalid');
 		$('#valor_fact').focus();
 		mjeError('El valor facturado no puede ser cero');

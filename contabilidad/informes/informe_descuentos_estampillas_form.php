@@ -18,7 +18,7 @@ $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 $fecha_min = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-01-01'));
 $fecha = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha_actual = $fecha->format('Y-m-d');
-// obtengo la lista de municipio asociados a las sedes de la empresa
+// obtengo la lista de retenciones creadas en la empresa
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $sql = "SELECT
@@ -69,14 +69,21 @@ $otras = $rs->fetchAll();
                     <div class="row">
                         <div class="col-12">
                             <div class="text-center pt-3">
-                                <a type="button" class="btn btn-primary btn-sm" onclick="generarInformeCtb(10);"> Resumen</a>
-                                <a type="button" class="btn btn-warning btn-sm" onclick="generarInformeCtb(11);"> Detallado</a>
+                                <button class="btn btn-primary" onclick="generarInformeCtb(this)" value="10"><span></span>Resumen</button>
+                                <button class="btn btn-primary" onclick="generarInformeCtb(this)" value="11"><span></span>Detalle</button>
+                                <a type="" id="btnExcelEntrada" class="btn btn-outline-success" value="01" title="Exprotar a Excel">
+                                    <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
+                                </a>
+                                <a type="button" class="btn btn-danger" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
                             </div>
                         </div>
                     </div>
+
             </div>
             </form>
         </div>
+        <br>
+        <div id="areaImprimir" class="table-responsive px-2" style="font-size: 100%;"></div>
     </div>
 </div>
 </div>
