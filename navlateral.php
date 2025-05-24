@@ -662,7 +662,20 @@ $urlin = $_SESSION['urlin'];
                                             Movimientos
                                         </div>
                                     </a>
-                                <?php }
+                                <?php
+                                }
+                                if (PermisosUsuario($permisos, 5501, 0)  || $id_rol == 1) {
+                                ?>
+                                    <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/lista_documentos_invoice.php">
+                                        <div class="div-icono">
+                                            <i class="fas fa-file-invoice fa-sm" style="color:rgb(244, 84, 190);"></i>
+                                        </div>
+                                        <div>
+                                            Facturación
+                                        </div>
+                                    </a>
+                                <?php
+                                }
                                 if (false) {
                                 ?>
                                     <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/lista_documentos_mov.php">

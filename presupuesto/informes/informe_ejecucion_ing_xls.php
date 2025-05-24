@@ -248,6 +248,7 @@ try {
             <td>Reconocimiento acumulado</td>
             <?= $detalle_mes == '1' ? '<td>Recaudo mes</td>' : ''; ?>
             <td>Recaudo acumulado</td>
+            <td>% Ejec</td>
             <td>Saldo por recaudar</td>
         </tr>
     </thead>
@@ -279,6 +280,7 @@ try {
             echo '<td style="text-align:right">' . pesos($value['reconocimiento']) . '</td>';
             echo  $detalle_mes == '1' ? '<td style="text-align:right">' . pesos($value['recaudo_mes']) . '</td>' : '';
             echo '<td style="text-align:right">' . pesos($value['recaudo']) . '</td>
+             <td style="text-align:right">' .  round(($value['recaudo'] / ($value['inicial'] + $value['adicion'] - $value['reduccion'])) * 100, 2) . '</td>
                     <td style="text-align:right">' .  pesos($saldo_recaudar) . '</td>
                 </tr>';
         }

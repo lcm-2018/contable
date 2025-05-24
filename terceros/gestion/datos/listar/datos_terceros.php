@@ -81,7 +81,7 @@ try {
                 COUNT(*) AS `total`
             FROM
                 `tb_terceros`
-            WHERE `tb_terceros`.`estado` $where";
+            WHERE `tb_terceros`.`estado` $where $andwhere";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];

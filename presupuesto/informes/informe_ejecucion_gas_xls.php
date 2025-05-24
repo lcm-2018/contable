@@ -329,6 +329,7 @@ try {
                     $join_mes
                    WHERE (`pto_presupuestos`.`id_tipo` = 2)
                    ORDER BY `pto_cargue`.`cod_pptal` ASC";
+                   echo $sql;
     $res = $cmd->query($sql);
     $rubros = $res->fetchAll();
 } catch (PDOException $e) {
@@ -447,6 +448,7 @@ try {
             <th>Disponibilidades</th>
             <?= $detalle_mes == 1 ? '<th>Registrados mes</th>' : ''; ?>
             <th>Compromisos</th>
+            <th>% Ejec</th>
             <?= $detalle_mes == 1 ? '<th>Causados mes</th>' : ''; ?>
             <th>Obligación</th>
             <?= $detalle_mes == 1 ? '<th>Pagados mes</th>' : ''; ?>
@@ -514,6 +516,8 @@ try {
                 echo '<td style="text-align:right">' . pesos($value['registrado_mes']) . '</td>';
             }
             echo '<td style="text-align:right">' . pesos($value['registrado']) . '</td>';
+            echo '<td style="text-align:right">' . round(($value['comprometido'] / ($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito'])) * 100, 2) . '</td>';
+
             if ($detalle_mes == 1) {
                 echo '<td style="text-align:right">' . pesos($value['causado_mes']) . '</td>';
             }

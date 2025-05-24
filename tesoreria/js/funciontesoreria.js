@@ -428,8 +428,7 @@ var tabla;
 				$('#divModalReg').modal('show');
 				$("#divFormsReg").html(he);
 			});
-		}
-		else {
+		} else {
 			mjeError("La acción no esta habilitada para presupuesto");
 		}
 	});
@@ -452,10 +451,15 @@ var tabla;
 		$('.is-invalid').removeClass('is-invalid');
 		reloadtable('tableMvtoTesoreriaPagos');
 	});
+	$('#btn_buscar_filtro_Invoice').on("click", function () {
+		$('.is-invalid').removeClass('is-invalid');
+		reloadtable('tableMvtCtbInvoice');
+	});
 
 	$('.filtro').keypress(function (e) {
 		if (e.keyCode == 13) {
 			reloadtable('tableMvtoTesoreriaPagos');
+			reloadtable('tableMvtCtbInvoice');
 		}
 	});
 })(jQuery);
@@ -550,6 +554,16 @@ let CargaArqueoCaja = function (dato) {
 		$("#divForms").html(he);
 	});
 };
+
+let CargaListaRads = function () {
+	$.post("lista_obligacion_rads.php", {}, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-xl");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+};
 let CargaArqueoCajaTes = function (id, detalle) {
 	var fecha = $("#fecha").val();
 	$.post("lista_causacion_arqueo.php", { id_doc: id, id_detalle: detalle, fecha: fecha }, function (he) {
@@ -602,7 +616,16 @@ let cargaListaCausaciones = function (boton) {
 	boton.disabled = true;
 	let id_cop = $('#id_cop_pag').val();
 	let id_tercero = $("#id_tercero").val();
-	$.post("lista_causacion_listas_ter.php", { id_cop: id_cop, id_tercero: id_tercero }, function (he) {
+	var id_doc_rad = $("#id_doc_rad").length ? $("#id_doc_rad").val() : 0;
+	var data, url;
+	if (id_doc_rad > 0) {
+		data = { id_rad: id_doc_rad, id_tercero: id_tercero };
+		url = "lista_causacion_rads.php";
+	} else {
+		data = { id_cop: id_cop, id_tercero: id_tercero };
+		url = "lista_causacion_listas_ter.php";
+	}
+	$.post(url, data, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-lg");
 		$("#divTamModalForms").addClass("modal-xl");
@@ -664,6 +687,22 @@ function cargarListaArqueoConsignacion(id_doc) {
 		.appendTo("body")
 		.submit();
 }
+
+function cargarListaObligacionRads(id_doc_rad) {
+	let tipo_dato = $("#id_ctb_tipo").val();
+	let tipo_movi = $("#var_tip").val();
+	$(
+		'<form action="lista_documentos_pag.php" method="post">' +
+		'<input type="hidden" name="id_doc" value="0" />' +
+		'<input type="hidden" name="tipo_dato" value="' + tipo_dato + '" />' +
+		'<input type="hidden" name="tipo_var" value="' + tipo_movi + '" />' +
+		'<input type="hidden" name="id_doc_rad" value="' + id_doc_rad + '" />' +
+		'</form>'
+	)
+		.appendTo("body")
+		.submit();
+}
+
 // Cargar lista de obligaciones para pagar
 function cargarListaDetallePagoEdit(id_doc) {
 	let tipo_dato = $("#id_ctb_tipo").val(); // tiene el id_doc_fuente ej  7 - nota bancaria
@@ -828,7 +867,7 @@ function GuardaDocPag(id) {
 						$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
 						if ($('#tableMvtoContableDetallePag').length) {
 							setTimeout(function () {
-								ListarDetallePago2(0, r.id, $('#tipodato').val(), 1);
+								ListarDetallePago2(0, r.id, $('#tipodato').val(), $('#tipo_var').val());
 							}, 400);
 						}
 					} else {
@@ -838,6 +877,55 @@ function GuardaDocPag(id) {
 				}
 			});
 		}
+	}
+}
+// 
+function GuardaDocPagInvoice(id) {
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#fecha').val() == '') {
+		$('#fecha').addClass('is-invalid');
+		$('#fecha').focus();
+		mjeError('La fecha no puede estar vacia');
+	} else if ($('#fec_cierre').val() >= $("#fecha").val()) {
+		$("#fecha").focus();
+		$("#fecha").addClass('is-invalid');
+		mjeError("Fecha debe ser mayor a la fecha de cierre de Tesorería:<br> <b>" + $('#fec_cierre').val()) + "</b>";
+	} else if (Number($('#numDoc').val()) <= 0) {
+		$('#numDoc').addClass('is-invalid');
+		$('#numDoc').focus();
+		mjeError('El número de documento debe ser mayor a cero');
+	} else if ($('#id_tercero').val() == '0') {
+		$('#terceromov').addClass('is-invalid');
+		$('#terceromov').focus();
+		mjeError('El tercero no puede estar vacio');
+	} else if ($('#objeto').val() == '') {
+		$('#objeto').addClass('is-invalid');
+		$('#objeto').focus();
+		mjeError('El objeto no puede estar vacio');
+	} else {
+		var datos = $('#formGetMvtoTes').serialize() + '&id=' + id;
+		url = "datos/registrar/registrar_mvto_contable_doc_pag.php";
+		$.ajax({
+			type: 'POST',
+			url: url,
+			data: datos,
+			dataType: 'json',
+			success: function (r) {
+				if (r.status == 'ok') {
+					$('#divModalForms').modal('hide');
+					mje('Proceso realizado correctamente');
+					$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
+					if ($('#tableMvtoContableDetallePag').length) {
+						setTimeout(function () {
+							ListarDetallePago2(0, r.id, $('#tipodato').val(), 1);
+						}, 400);
+					}
+				} else {
+					mjeError('Error:', r.msg);
+				}
+
+			}
+		});
 	}
 }
 // Procesar causación de cuentas por pagar con boton guardar
@@ -855,6 +943,7 @@ $('#GuardaDocMvtoPag').on('click', function () {
 	GuardaDocPag(id);
 	ActivaBoton(btn);
 });
+
 $('#divModalForms').on('click', '#gestionarMvtoCtbCaja', function () {
 	var id = $(this).attr('text');
 	$('.is-invalid').removeClass('is-invalid');
