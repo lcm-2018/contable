@@ -21,6 +21,7 @@ $tipo_dato = isset($_POST['tipo_dato']) ? $_POST['tipo_dato'] : 0; // tiene el i
 $tipo_mov = isset($_POST['tipo_movi']) ? $_POST['tipo_movi'] : 0;
 $tipo_var = isset($_POST['tipo_var']) ? $_POST['tipo_var'] : 0;
 $id_arq = isset($_POST['id_arq']) ? $_POST['id_arq'] : 0;
+$id_doc_rad = isset($_POST['id_doc_rad']) ? $_POST['id_doc_rad'] : 0;
 $id_vigencia = $_SESSION['id_vigencia'];
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -42,7 +43,8 @@ if ($id_doc_pag == 0) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
     try {
-        $sql = "SELECT 
+        if ($id_cop > 0) {
+            $sql = "SELECT 
                     `ctb_doc`.`id_tercero`
                     , `ctb_doc`.`fecha`
                     , `ctb_doc`.`detalle`
@@ -60,6 +62,26 @@ if ($id_doc_pag == 0) {
                     LEFT JOIN `tb_terceros`
                         ON(`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
                 WHERE (`ctb_doc`.`id_ctb_doc` =  $id_cop) LIMIT 1";
+        } else if ($id_doc_rad > 0) {
+            $sql = "SELECT 
+                    `ctb_doc`.`id_tercero`
+                    , `ctb_doc`.`fecha`
+                    , `ctb_doc`.`detalle`
+                    , `ctb_doc`.`id_ref`
+                    , `tb_terceros`.`nom_tercero`
+                    ,  $id_manu AS `id_manu`
+                    , `ctb_fuente`.`nombre` AS `fuente`
+                    , 0 AS `val_pagado`
+                    , 1 AS `estado`
+                    , `ctb_doc`.`id_ref_ctb`
+
+                FROM `ctb_doc`
+                    INNER JOIN `ctb_fuente`
+                        ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                    LEFT JOIN `tb_terceros`
+                        ON(`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                WHERE (`ctb_doc`.`id_ctb_doc` =  $id_doc_rad) LIMIT 1";
+        }
         $rs = $cmd->query($sql);
         $datosDoc = $rs->fetch();
         $tercero = $datosDoc['nom_tercero'];
@@ -71,6 +93,7 @@ if ($id_doc_pag == 0) {
     $id_manu = $datosDoc['id_manu'];
     $id_cop = $datosDoc['id_doc_cop'] > 0 ? $datosDoc['id_doc_cop'] : 0;
     $id_ref = $datosDoc['id_ref'];
+    $id_doc_rad = $datosDoc['id_ctb_doc_tipo3'];
     if (!empty($datosDoc)) {
         $id_t = ['0' => $datosDoc['id_tercero']];
         $ids = implode(',', $id_t);
@@ -153,14 +176,18 @@ if ($tipo_dato == '9') {
     }
 }
 try {
-    $sql = "SELECT
-                `ctb_referencia`.`id_ctb_referencia`
-                , `ctb_referencia`.`nombre`
-            FROM
-                `ctb_referencia`
-                INNER JOIN `ctb_fuente` 
-                    ON (`ctb_referencia`.`id_ctb_fuente` = `ctb_fuente`.`id_doc_fuente`)
-            WHERE (`ctb_fuente`.`id_doc_fuente` = $tipo_dato)";
+    if ($id_doc_rad == 0) {
+        $sql = "SELECT
+                    `ctb_referencia`.`id_ctb_referencia`
+                    , `ctb_referencia`.`nombre`
+                FROM
+                    `ctb_referencia`
+                    INNER JOIN `ctb_fuente` 
+                        ON (`ctb_referencia`.`id_ctb_fuente` = `ctb_fuente`.`id_doc_fuente`)
+                WHERE (`ctb_fuente`.`id_doc_fuente` = $tipo_dato)";
+    } else {
+        $sql = "SELECT `id_ctb_referencia`,`nombre` FROM `ctb_referencia` WHERE `id_ctb_referencia` = {$datosDoc['id_ref_ctb']}";
+    }
     $rs = $cmd->query($sql);
     $referencia = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -196,6 +223,7 @@ try {
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid p-2">
+                    <input type="hidden" id="tipo_var" value="<?php echo $tipo_var; ?>">
                     <div class="card mb-4">
                         <div class="card-header" id="divTituloPag">
                             <div class="row">
@@ -228,12 +256,13 @@ try {
                                                 <input type="hidden" id="tipodato" name="tipodato" value="<?php echo $tipo_dato; ?>">
                                                 <input type="hidden" id="id_cop_pag" name="id_cop_pag" value="<?php echo $id_cop; ?>">
                                                 <input type="hidden" id="id_arqueo" name="id_arqueo" value="<?php echo $id_arq; ?>">
+                                                <input type="hidden" id="id_doc_rad" name="id_doc_rad" value="<?php echo $id_doc_rad; ?>">
                                                 <input type="hidden" id="hd_accion_pto" name="hd_accion_pto" value="<?php echo $obj_referencia['accion_pto']; ?>">
                                             </div>
                                         </div>
                                         <div class="row mb-1">
                                             <div class="col-2">
-                                                <span class="small">FECHA:</span>
+                                                <span for="fecha" class="small">FECHA:</span>
                                             </div>
                                             <div class="col-10">
                                                 <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datosDoc['fecha'])); ?>">
@@ -254,7 +283,6 @@ try {
                                             </div>
                                             <div class="col-10">
                                                 <select name="ref_mov" id="ref_mov" class="form-control form-control-sm" readonly>
-                                                    <option value="0"></option>
                                                     <?php foreach ($referencia as $rf) {
                                                         if ($datosDoc['id_ref_ctb'] == $rf['id_ctb_referencia']) {
                                                             echo '<option value="' . $rf['id_ctb_referencia'] . '" selected>' . $rf['nombre'] . '</option>';
@@ -313,10 +341,10 @@ try {
                                                 </div>
                                             </div>
                                         <?php }
-                                        if ($tipo_dato == '6' || $tipo_dato == '16' || $tipo_dato == '7' || $tipo_dato == '12') { ?>
+                                        if (($tipo_dato == '6' || $tipo_dato == '16' || $tipo_dato == '7' || $tipo_dato == '12') && $id_doc_rad == 0) { ?>
                                             <div class="row mb-1">
                                                 <div class="col-2">
-                                                    <label for="fecha" class="small">PRESUPUESTO:</label>
+                                                    <label for="arqueo_caja" class="small">PRESUPUESTO:</label>
                                                 </div>
                                                 <div class="col-4">
                                                     <div class="input-group input-group-sm">
@@ -335,7 +363,7 @@ try {
                                         ?>
                                             <div class="row mb-1">
                                                 <div class="col-2">
-                                                    <label for="fecha" class="small">IMPUTACION:</label>
+                                                    <label for="valor" class="small">IMPUTACION:</label>
                                                 </div>
                                                 <div class="col-4">
                                                     <div class="input-group input-group-sm">
@@ -363,7 +391,7 @@ try {
 
                                         <div class="row mb-1">
                                             <div class="col-2">
-                                                <label class="small">FORMA DE PAGO :</label>
+                                                <label for="forma_pago" class="small">FORMA DE PAGO :</label>
                                             </div>
                                             <div class="col-4">
                                                 <div class="input-group input-group-sm">

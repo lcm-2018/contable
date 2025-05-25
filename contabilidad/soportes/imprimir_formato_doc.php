@@ -133,6 +133,14 @@ try {
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
+        try {
+            $sql = "SELECT SUM(`debito`) as `valor` FROM `ctb_libaux` WHERE `id_ctb_doc` = $dto";
+            $res = $cmd->query($sql);
+            $datos = $res->fetch();
+            $total = $datos['valor'];
+        } catch (PDOException $e) {
+            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+        }
         $enletras = numeroLetras($total);
         try {
             $sql = "SELECT
@@ -279,6 +287,7 @@ try {
                 , `fin_maestro_doc`.`id_doc_fte`
                 , `fin_maestro_doc`.`costos`
                 , `ctb_fuente`.`nombre`
+                , `ctb_fuente`.`cod`
                 , `tb_terceros`.`nom_tercero`
                 , `tb_terceros`.`nit_tercero`
                 , `tb_terceros`.`genero`
@@ -311,7 +320,8 @@ try {
             $control = $key !== false ? $responsables[$key]['control_doc'] : '';
             $control = $control == '' || $control == '0' ? false : true;
             $nombre_doc = $key !== false ? $responsables[$key]['nombre'] : '';
-            $ver_costos = $responsables[0]['costos'] == 1 ? false : true;
+            $ver_costos = !empty($responsables) ? ($responsables[0]['costos'] == 1 ? false : true) : false;
+            $cod_doc = $key !== false ? $responsables[$key]['cod'] : '';
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
@@ -588,7 +598,7 @@ try {
                 }
                     ?>
                 <?php }
-            if ($ver_costos) {
+            if ($ver_costos && $cod_doc !== 'FELE') {
                 ?>
 
                     </br>

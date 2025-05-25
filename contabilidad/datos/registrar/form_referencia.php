@@ -18,10 +18,12 @@ try {
                 , `ctb_referencia`.`nombre`
                 , `ctb_referencia`.`accion`
                 , `ctb_referencia`.`estado`
-                , `ctb_pgcp`.`cuenta` AS `nom_cuenta`
+                , IF(`pgcp`.`nombre` IS NULL, `ctb_pgcp`.`cuenta`,CONCAT(`ctb_pgcp`.`cuenta`,' - ', `pgcp`.`cuenta`)) AS `nom_cuenta`
             FROM `ctb_referencia`
                 INNER JOIN `ctb_pgcp` 
                     ON (`ctb_referencia`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                LEFT JOIN `ctb_pgcp` AS `pgcp` 
+                    ON (`ctb_referencia`.`id_cta_credito` = `pgcp`.`id_pgcp`)
             WHERE `ctb_referencia`.`id_ctb_fuente` = $id_doc";
     $rs = $cmd->query($sql);
     $referencias = $rs->fetchAll(PDO::FETCH_ASSOC);

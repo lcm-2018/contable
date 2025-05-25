@@ -28,6 +28,7 @@ try {
                 , `taux`.`nom_rubro`
                 , IFNULL(`t1`.`valor`,0) AS `val_cdp`
                 , IFNULL(`t2`.`valor`,0) AS `val_crp`
+                , IFNULL(`t3`.`valor_liberado`,0) AS `val_cdp_liberado`
             FROM
                 (SELECT
                     `pto_cdp`.`id_pto_cdp`
@@ -43,19 +44,31 @@ try {
                         ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
                     INNER JOIN `pto_cargue` 
                         ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                    WHERE (`pto_cdp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_cdp`.`estado` <> 0)) AS `taux`
+                    WHERE (`pto_cdp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_cdp`.`estado` = 2)) AS `taux`
                 LEFT JOIN
                     (SELECT
                         `pto_cdp`.`id_pto_cdp`
                         , `id_rubro`
-                        , SUM(IFNULL(`valor`,0)) - SUM(IFNULL(`valor_liberado`,0)) AS `valor`
+                        , SUM(IFNULL(`valor`,0))  AS `valor`
                     FROM
                         `pto_cdp_detalle`
                         INNER JOIN `pto_cdp` 
                             ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                    WHERE (`pto_cdp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_cdp`.`estado` <> 0)
+                    WHERE (`pto_cdp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_cdp`.`estado` =2)
                     GROUP BY `id_pto_cdp`, `id_rubro`) AS `t1`
                     ON (`t1`.`id_pto_cdp` = `taux`.`id_pto_cdp` AND `t1`.`id_rubro` = `taux`.`id_rubro`)
+                LEFT JOIN
+                    (SELECT
+                        `pto_cdp`.`id_pto_cdp`
+                        , `id_rubro`
+                        , SUM(IFNULL(`valor_liberado`,0))  AS `valor_liberado`
+                    FROM
+                        `pto_cdp_detalle`
+                        INNER JOIN `pto_cdp` 
+                            ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
+                    WHERE (`pto_cdp_detalle`.`fecha_libera` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_cdp`.`estado` =2)
+                    GROUP BY `id_pto_cdp`, `id_rubro`) AS `t3`
+                    ON (`t3`.`id_pto_cdp` = `taux`.`id_pto_cdp` AND `t3`.`id_rubro` = `taux`.`id_rubro`)
                 LEFT JOIN
                     (SELECT
                         `pto_cdp_detalle`.`id_pto_cdp`
@@ -67,7 +80,7 @@ try {
                             ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                         INNER JOIN `pto_crp` 
                             ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
-                    WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` <> 0)
+                    WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` = 2)
                     GROUP BY `pto_cdp_detalle`.`id_pto_cdp`, `pto_cdp_detalle`.`id_rubro`) AS `t2`
                     ON (`t2`.`id_pto_cdp` = `taux`.`id_pto_cdp` AND `t2`.`id_rubro` = `taux`.`id_rubro`)
             GROUP BY `taux`.`id_pto_cdp`,`taux`.`id_rubro`
@@ -90,7 +103,9 @@ include_once '../../financiero/encabezado_empresa.php';
             <th>Objeto</th>
             <th>Rubro</th>
             <th>Nombre rubro</th>
-            <th>Valor</th>
+            <th>Valor inicial CDP</th>
+            <th>Valor liberado</th>
+            <th>Valor definitivo CDP</th>
             <th>Saldo</th>
         </tr>
     </thead>
@@ -99,7 +114,9 @@ include_once '../../financiero/encabezado_empresa.php';
         foreach ($causaciones as $rp) {
             $fecha = date("Y-m-d", strtotime($rp['fecha']));
             $valor_cdp = $rp['val_cdp'];
-            $saldo = $rp['val_cdp'] - $rp['val_crp'];
+            $saldo = ($rp['val_cdp'] - $rp['val_cdp_liberado']) - $rp['val_crp'];
+            $val_cdp_liberado = $rp['val_cdp_liberado'];
+            $val_cdp_neto = $rp['val_cdp'] - $rp['val_cdp_liberado'];
             if ($valor_cdp > 0) {
                 echo "<tr>";
                 echo "<td>" . $rp['id_manu'] . "</td>";
@@ -108,6 +125,8 @@ include_once '../../financiero/encabezado_empresa.php';
                 echo "<td>" . $rp['rubro'] . "</td>";
                 echo "<td>" . $rp['nom_rubro'] . "</td>";
                 echo "<td style='text-align:right;'>" . pesos($valor_cdp) . "</td>";
+                echo "<td style='text-align:right;'>" . pesos($val_cdp_liberado) . "</td>";
+                echo "<td style='text-align:right;'>" . pesos($val_cdp_neto) . "</td>";
                 echo "<td style='text-align:right;'>" . pesos($saldo) . "</td>";
                 echo "</tr>";
             }

@@ -40,20 +40,27 @@ try {
                 INNER JOIN `pto_cargue` 
                     ON (`pto_rad_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
-                (SELECT
-                    `pto_rec`.`id_pto_rec`
-                    , `pto_rad_detalle`.`id_rubro`
-                    , SUM(IFNULL(`pto_rec_detalle`.`valor`,0)) - SUM(IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `valor`
-                FROM
-                    `pto_rec_detalle`
-                    INNER JOIN `pto_rad_detalle` 
-                        ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
-                    INNER JOIN `pto_rec` 
-                        ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
-                    INNER JOIN `pto_cargue` 
-                        ON (`pto_rad_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                WHERE (`pto_rec`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_rec`.`estado` <> 0)
-                GROUP BY `pto_rec`.`id_pto_rec`, `pto_rad_detalle`.`id_rubro`) AS `t1`
+                    (SELECT
+                        SUM(IFNULL(`ctt2`.`valor`,0) - IFNULL(`ctt2`.`valor_liberado`,0)) AS `valor`
+                        , `ctt2`.`id_rubro`
+                        , `ctt2`.`id_pto_rec`
+                    FROM
+                        (SELECT
+                            `pto_rec_detalle`.`valor`
+                            , `pto_rec_detalle`.`valor_liberado`
+                            , CASE
+                                WHEN `pto_rec_detalle`.`id_rubro`IS NULL THEN `pto_rad_detalle`.`id_rubro`
+                                ELSE `pto_rec_detalle`.`id_rubro` 
+                            END AS `id_rubro`
+                            , `pto_rec`.`id_pto_rec`
+                        FROM
+                            `pto_rec_detalle`
+                            INNER JOIN `pto_rec` 
+                                ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
+                            LEFT JOIN `pto_rad_detalle` 
+                                ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
+                        WHERE (`pto_rec`.`estado` = 2 AND DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte')) AS `ctt2`
+                    GROUP BY `ctt2`.`id_rubro`, `ctt2`.`id_pto_rec`) AS `t1`
                 ON(`pto_rec`.`id_pto_rec`  = `t1`.`id_pto_rec` AND `t1`.`id_rubro` = `pto_rad_detalle`.`id_rubro`)
             WHERE (`pto_rec`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_rec`.`estado` <> 0)
             GROUP BY `pto_rec`.`id_pto_rec`, `pto_rad_detalle`.`id_rubro`";

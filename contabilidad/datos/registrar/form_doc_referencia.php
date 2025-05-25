@@ -15,14 +15,20 @@ try {
     $sql = "SELECT
                 `ctb_referencia`.`id_ctb_referencia`
                 , `ctb_referencia`.`id_cuenta`
+                , IF(`ctb_referencia`.`id_cta_credito` IS NULL, 0, `ctb_referencia`.`id_cta_credito`) AS `id_cta_credito`
                 ,`ctb_referencia`.`nombre`
+                , `ctb_pgcp`.`nombre` AS `nombre2`
                 , `ctb_referencia`.`accion`
                 , `ctb_referencia`.`estado`
                 , CONCAT(`ctb_pgcp`.`nombre`, ' -> ',`ctb_pgcp`.`cuenta`) AS `nom_cuenta`
+                , CONCAT(`pgcp`.`nombre`, ' -> ',`pgcp`.`cuenta`) AS `nom_cuenta2`
                 , 'D' AS `tipo`
+                , 'D' AS `tipo2`
             FROM `ctb_referencia`
-                INNER JOIN `ctb_pgcp` 
+                LEFT JOIN `ctb_pgcp` 
                     ON (`ctb_referencia`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                LEFT JOIN `ctb_pgcp` AS `pgcp`
+                    ON (`ctb_referencia`.`id_cta_credito` = `pgcp`.`id_pgcp`)
             WHERE `ctb_referencia`.`id_ctb_referencia` = $id_ctb_ref";
     $rs = $cmd->query($sql);
     $referencias = $rs->fetch(PDO::FETCH_ASSOC);
@@ -30,11 +36,15 @@ try {
         $referencias = [
             'id_ctb_referencia' => 0,
             'id_cuenta' => 0,
+            'id_cta_credito' => 0,
             'nombre' => '',
+            'nombre2' => '',
             'accion' => 2,
             'estado' => 1,
             'nom_cuenta' => '',
-            'tipo' => 'M'
+            'nom_cuenta2' => '',
+            'tipo' => 'M',
+            'tipo2' => 'M'
         ];
     }
     $cmd = null;
@@ -66,11 +76,17 @@ try {
                 </div>
             </div>
             <div class="form-row px-4 pb-3">
-                <div class="form-group col-md-12">
-                    <label for="BusCta" class="small">Cuenta</label>
-                    <input type="text" name="codigoCta" id="codigoCta" class="form-control form-control-sm" value="<?php echo $referencias['nom_cuenta']; ?>">
-                    <input type="hidden" name="id_codigoCta" id="id_codigoCta" value="<?php echo $referencias['id_cuenta']; ?>">
-                    <input type="hidden" name="tipoDato" id="tipoDato" value="<?php echo $referencias['tipo']; ?>">
+                <div class="form-group col-md-6">
+                    <label for="codigoCta1" class="small">Cuenta D</label>
+                    <input type="text" name="codigoCta1" id="codigoCta1" class="form-control form-control-sm" value="<?php echo $referencias['nom_cuenta']; ?>">
+                    <input type="hidden" name="id_codigoCta1" id="id_codigoCta1" value="<?php echo $referencias['id_cuenta']; ?>">
+                    <input type="hidden" name="tipoDato1" id="tipoDato1" value="<?php echo $referencias['tipo']; ?>">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="codigoCta2" class="small">Cuenta C</label>
+                    <input type="text" name="codigoCta2" id="codigoCta2" class="form-control form-control-sm" value="<?php echo $referencias['nom_cuenta2']; ?>">
+                    <input type="hidden" name="id_codigoCta2" id="id_codigoCta2" value="<?php echo $referencias['id_cta_credito']; ?>">
+                    <input type="hidden" name="tipoDato2" id="tipoDato2" value="<?php echo $referencias['tipo2']; ?>">
                 </div>
             </div>
         </form>

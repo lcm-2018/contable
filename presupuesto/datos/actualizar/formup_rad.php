@@ -1,0 +1,83 @@
+<?php
+session_start();
+if (!isset($_SESSION['user'])) {
+    header("Location: ../../../index.php");
+    exit();
+}
+include '../../../conexion.php';
+include '../../../financiero/consultas.php';
+$id_rad = isset($_POST['id_rad']) ? $_POST['id_rad'] : exit('Acceso no disponible');
+$id_pto = $_POST['id_pto'];
+
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
+
+try {
+    $sql = "SELECT
+               `pto_rad`. `id_pto_rad`
+               , `pto_rad`.`id_manu`
+               , `pto_rad`.`fecha`
+               , `pto_rad`.`objeto`
+               , `pto_rad`.`num_factura`
+               , CONCAT(`tb_terceros`.`nom_tercero`, ' -> ', `tb_terceros`.`nit_tercero`) AS `tercero`
+               , `pto_rad`.`id_tercero_api`
+            FROM
+                `pto_rad`
+            LEFT JOIN `tb_terceros` 
+                ON (`pto_rad`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            WHERE `id_pto_rad` = $id_rad";
+    $rs = $cmd->query($sql);
+    $datos = $rs->fetch();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
+
+
+?>
+<div class="px-0">
+    <div class="shadow">
+        <div class="card-header" style="background-color: #16a085 !important;">
+            <h5 style="color: white;">ACTUALIZAR RECONOCIMIENTO</h5>
+        </div>
+        <form id="formUpRad">
+            <input type="hidden" name="id_rad" value="<?php echo $id_rad ?>">
+            <input type="hidden" name="id_pto" value="<?php echo $id_pto ?>">
+            <input type="hidden" id="fec_cierre" value="<?php echo $fecha_cierre ?>">
+            <div class="form-row px-4 pt-2">
+                <div class="form-group col-md-4">
+                    <label for="id_manu" class="small">CONSECUTIVO rad</label>
+                    <input type="number" name="id_manu" id="id_manu" class="form-control form-control-sm" value="<?php echo $datos['id_manu'] ?>">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="dateFecha" class="small">FECHA</label>
+                    <input type="date" name="dateFecha" id="dateFecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datos['fecha'])) ?>">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="numSolicitud" class="small">NÚMERO FACTURA</label>
+                    <input type="text" id="numSolicitud" name="numSolicitud" class="form-control form-control-sm py-0 sm" aria-label="Default select example" value="<?php echo $datos['num_factura'] ?>">
+                </div>
+            </div>
+            <div class="form-row px-4 pt-2">
+                <div class="form-group col-md-12">
+                    <label for="tercerocrp" class="small">TERCERO</label>
+                    <input type="text" id="tercerocrp" class="form-control form-control-sm py-0 sm" aria-label="Default select example" value="<?php echo $datos['tercero'] ?>">
+                    <input type="hidden" id="id_tercero" name="id_tercero" value="<?php echo $datos['id_tercero_api'] ?>">
+                </div>
+            </div>
+            <div class="form-row px-4 pt-2">
+                <div class="form-group col-md-12">
+                    <label for="txtObjeto" class="small">OBJETO</label>
+                    <textarea id="txtObjeto" type="text" name="txtObjeto" class="form-control form-control-sm py-0 sm" aria-label="Default select example" rows="3"><?php echo $datos['objeto'] ?></textarea>
+                </div>
+            </div>
+            <div class="text-right pb-3 px-4">
+                <button class="btn btn-primary btn-sm" id="btnGestionRad" text="2">Actualizar</button>
+                <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

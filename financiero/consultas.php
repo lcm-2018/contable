@@ -257,6 +257,8 @@ function GetValoresCxP($id_doc, $cmd)
                     , `ctb_doc`.`id_tercero`
                     , `ctb_doc`.`estado`
                     , `ctb_doc`.`id_crp`
+                    , `ctb_doc`.`id_rad`
+                    , `ctb_doc`.`id_ref_ctb`
                     , IFNULL(`factura`.`val_factura`,0) AS `val_factura`
                     , IFNULL(`imputacion`.`val_imputacion`,0) AS `val_imputacion`
                     , IFNULL(`centro_costo`.`val_ccosto`,0) AS `val_ccosto`
@@ -322,6 +324,7 @@ function GetValoresCeva($id_pag, $cmd)
                     , `ctb_doc`.`estado`
                     , `ctb_doc`.`id_ref`
                     , `ctb_doc`.`id_ref_ctb`
+                    , `ctb_doc`.`id_ctb_doc_tipo3`
                     , `tes_rel_pag_cop`.`id_doc_cop`
                     , IFNULL(`pagado`.`valor`,0) AS `val_pagado`
                 FROM

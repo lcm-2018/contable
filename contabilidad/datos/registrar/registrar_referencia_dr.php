@@ -8,7 +8,8 @@ include '../../../conexion.php';
 $id_doc = isset($_POST['id_doc_ref']) ? $_POST['id_doc_ref'] : exit('Acceso no autorizado');
 $id_ctb_ref = $_POST['id_ctb_ref'];
 $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
-$id_cuenta = isset($_POST['id_codigoCta']) ? $_POST['id_codigoCta'] : '';
+$id_cuenta = isset($_POST['id_codigoCta1']) ? $_POST['id_codigoCta1'] : NULL;
+$id_cta_credito = isset($_POST['id_codigoCta2']) ? $_POST['id_codigoCta2'] : NULL;
 $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
 $estado = 1;
 $iduser = $_SESSION['id_user'];
@@ -31,8 +32,8 @@ try {
     }
     if ($id_ctb_ref == 0) {
         $query = "INSERT INTO `ctb_referencia`
-                    (`id_ctb_fuente`,`id_cuenta`,`nombre`,`accion`,`estado`,`id_user_reg`,`fecha_reg`)
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    (`id_ctb_fuente`,`id_cuenta`,`nombre`,`accion`,`estado`,`id_user_reg`,`fecha_reg`,`id_cta_credito`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $query = $cmd->prepare($query);
         $query->bindParam(1, $id_doc, PDO::PARAM_INT);
         $query->bindParam(2, $id_cuenta, PDO::PARAM_INT);
@@ -41,6 +42,7 @@ try {
         $query->bindParam(5, $estado, PDO::PARAM_INT);
         $query->bindParam(6, $iduser, PDO::PARAM_INT);
         $query->bindParam(7, $fecha2);
+        $query->bindParam(8, $id_cta_credito);
         $query->execute();
         $id = $cmd->lastInsertId();
         if ($cmd->lastInsertId() > 0) {
@@ -59,13 +61,14 @@ try {
             $query->bindParam(2, $id_ctb_ref, PDO::PARAM_INT);
         } else {
             $query = "UPDATE `ctb_referencia`
-                        SET `id_cuenta` = ?, `nombre` = ?, `accion` = ?
+                        SET `id_cuenta` = ?, `nombre` = ?, `accion` = ?, `id_cta_credito` = ?
                     WHERE `id_ctb_referencia` = ?";
             $query = $cmd->prepare($query);
             $query->bindParam(1, $id_cuenta, PDO::PARAM_INT);
             $query->bindParam(2, $nombre, PDO::PARAM_STR);
             $query->bindParam(3, $accion, PDO::PARAM_INT);
-            $query->bindParam(4, $id_ctb_ref, PDO::PARAM_INT);
+            $query->bindParam(4, $id_cta_credito, PDO::PARAM_INT);
+            $query->bindParam(5, $id_ctb_ref, PDO::PARAM_INT);
         }
         if (!($query->execute())) {
             echo $query->errorInfo()[2];
