@@ -73,7 +73,7 @@ $vigencia = $_SESSION['vigencia'];
                                     </a>
                                 </div>
 
-                                <!-- para dashboard 
+                                <!-- para dashboard  -->
                                 <div class="form-group col-md-1">
                                     <a type="button" id="btn_iniciar_dashboard" class="btn btn-outline-success btn-sm" title="Dashboard">
                                         <span class="fas fa-chart-line fa-lg" aria-hidden="true"></span>
@@ -88,7 +88,7 @@ $vigencia = $_SESSION['vigencia'];
                                     <a type="button" id="btn_detener_dashboard" class="btn btn-outline-danger btn-sm" title="Dashboard">
                                         <span class="fas fa-chart-line fa-lg" aria-hidden="true"></span>
                                     </a>
-                                </div> -->
+                                </div>
                             </div>
 
                             <div class="table-responsive">

@@ -1,5 +1,5 @@
 function FormResponsabilidad(id) {
-    $.post("../gestion/datos/registrar/form_responsabilidad.php", { id: id }, function (he) {
+    $.post("../gestion/datos/registrar/form_responsabilidad.php", { id: id }, function(he) {
         $('#divTamModalForms').removeClass('modal-xl');
         $('#divTamModalForms').removeClass('modal-sm');
         $('#divTamModalForms').addClass('modal-lg');
@@ -9,39 +9,39 @@ function FormResponsabilidad(id) {
     });
 }
 
-(function ($) {
+(function($) {
     //Superponer modales
-    $(document).on('show.bs.modal', '.modal', function () {
+    $(document).on('show.bs.modal', '.modal', function() {
         var zIndex = 1040 + (10 * $('.modal:visible').length);
         $(this).css('z-index', zIndex);
-        setTimeout(function () {
+        setTimeout(function() {
             $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
         }, 0);
     });
-    var showError = function (id) {
+    var showError = function(id) {
         $('#' + id).focus();
         $('#e' + id).show();
-        setTimeout(function () {
+        setTimeout(function() {
             $('#e' + id).fadeOut(600);
         }, 800);
     };
-    var bordeError = function (p) {
+    var bordeError = function(p) {
         $('#' + p).css("border", "2px solid #F5B7B1");
         $('#' + p).css('box-shadow', '0 0 4px 3px pink');
     };
-    var reloadtable = function (nom) {
-        $(document).ready(function () {
+    var reloadtable = function(nom) {
+        $(document).ready(function() {
             var table = $('#' + nom).DataTable();
             table.ajax.reload();
         });
     };
-    var confdel = function (i, t) {
+    var confdel = function(i, t) {
         $.ajax({
             type: 'POST',
             dataType: 'json',
             url: '../../nomina/empleados/eliminar/confirdel.php',
             data: { id: i, tip: t }
-        }).done(function (res) {
+        }).done(function(res) {
             $('#divModalConfDel').modal('show');
             $('#divMsgConfdel').html(res.msg);
             $('#divBtnsModalDel').html(res.btns);
@@ -49,25 +49,25 @@ function FormResponsabilidad(id) {
         return false;
     };
     //Cambiar Municipios por departamento
-    $('#divForms').on('change', '#slcDptoEmp', function () {
+    $('#divForms').on('change', '#slcDptoEmp', function() {
         let dpto = $(this).val();
         $.ajax({
             type: 'POST',
             url: window.urlin + '/nomina/empleados/registrar/slcmunicipio.php',
             data: { dpto: dpto },
-            success: function (r) {
+            success: function(r) {
                 $('#slcMunicipioEmp').html(r);
             }
         });
         return false;
     });
-    $(document).ready(function () {
+    $(document).ready(function() {
         let id_t = $('#id_tercero').val();
         //dataTable Terceros
         tbListTerceros = $('#tableTerceros').DataTable({
             dom: setdom,
             buttons: [{
-                action: function (e, dt, node, config) {
+                action: function(e, dt, node, config) {
                     window.location = '../gestion/registrar/formaddtercero.php';
                 }
             }],
@@ -79,7 +79,7 @@ function FormResponsabilidad(id) {
                 url: 'datos/listar/datos_terceros.php',
                 type: 'POST',
                 dataType: 'json',
-                data: function (d) {
+                data: function(d) {
                     //------ datos de filtros
                     d.ccnit = $('#txt_ccnit_filtro').val();
                     d.tercero = $('#txt_tercero_filtro').val();
@@ -105,7 +105,9 @@ function FormResponsabilidad(id) {
                 { class: 'text-wrap', targets: [1, 2, 4] },
                 { orderable: false, targets: 8 }
             ],
-            order: [[0, "desc"]],
+            order: [
+                [0, "desc"]
+            ],
             pageLength: 10,
             lengthMenu: [
                 [10, 25, 50, -1],
@@ -114,7 +116,7 @@ function FormResponsabilidad(id) {
         });
         $('#tableTerceros').wrap('<div class="overflow" />');
         $('#tableTerceros_filter input').unbind(); // Desvinculamos el evento por defecto
-        $('#tableTerceros_filter input').bind('keypress', function (e) {
+        $('#tableTerceros_filter input').bind('keypress', function(e) {
             if (e.keyCode == 13) { // Si se presiona Enter (código 13)
                 tbListTerceros.search(this.value).draw(); // Realiza la búsqueda y actualiza la tabla
             }
@@ -127,9 +129,9 @@ function FormResponsabilidad(id) {
                 attr: {
                     id: 'btnRegistrarRespEcon', // Asignas un id
                 },
-                action: function (e, dt, node, config) {
+                action: function(e, dt, node, config) {
                     //Registar Responsabilidad Economica desde Detalles
-                    $.post("datos/registrar/formadd_resp_economica.php", { idt: idt }, function (he) {
+                    $.post("datos/registrar/formadd_resp_economica.php", { idt: idt }, function(he) {
                         $('#divTamModalForms').removeClass('modal-xl');
                         $('#divTamModalForms').removeClass('modal-sm');
                         $('#divTamModalForms').addClass('modal-lg');
@@ -155,7 +157,9 @@ function FormResponsabilidad(id) {
             columnDefs: [
                 { class: 'text-wrap', targets: [1] },
             ],
-            order: [[0, "desc"]],
+            order: [
+                [0, "desc"]
+            ],
             pageLength: 10,
             lengthMenu: [
                 [10, 25, 50, -1],
@@ -169,7 +173,7 @@ function FormResponsabilidad(id) {
                 attr: {
                     id: 'btnRegistrarRespEcon', // Asignas un id
                 },
-                action: function (e, dt, node, config) {
+                action: function(e, dt, node, config) {
                     //Registar Responsabilidad Economica desde Detalles
                     FormResponsabilidad(0);
                 }
@@ -189,7 +193,9 @@ function FormResponsabilidad(id) {
             columnDefs: [
                 { class: 'text-wrap', targets: [1] },
             ],
-            order: [[0, "desc"]],
+            order: [
+                [0, "desc"]
+            ],
             pageLength: 10,
             lengthMenu: [
                 [10, 25, 50, -1],
@@ -201,8 +207,8 @@ function FormResponsabilidad(id) {
         $('#tableActvEcon').DataTable({
             dom: setdom,
             buttons: [{
-                action: function (e, dt, node, config) {
-                    $.post("datos/registrar/formadd_actv_economica.php", { idt: idt }, function (he) {
+                action: function(e, dt, node, config) {
+                    $.post("datos/registrar/formadd_actv_economica.php", { idt: idt }, function(he) {
                         $('#divTamModalForms').removeClass('modal-lg');
                         $('#divTamModalForms').removeClass('modal-sm');
                         $('#divTamModalForms').addClass('modal-xl');
@@ -228,7 +234,9 @@ function FormResponsabilidad(id) {
             columnDefs: [
                 { class: 'text-wrap', targets: [1] },
             ],
-            order: [[0, "desc"]],
+            order: [
+                [0, "desc"]
+            ],
             pageLength: 10,
             lengthMenu: [
                 [10, 25, 50, -1],
@@ -261,7 +269,7 @@ function FormResponsabilidad(id) {
         $('#tableDocumento').wrap('<div class="overflow" />');
     });
     //Nuevo tercero
-    $('#btnNewTercero').on('click', function () {
+    $('#btnNewTercero').on('click', function() {
         var btn = $(this).get(0);
         InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
@@ -313,10 +321,10 @@ function FormResponsabilidad(id) {
                 type: 'POST',
                 url: 'newtercero.php',
                 data: datos,
-                success: function (r) {
+                success: function(r) {
                     if (r == 'ok') {
                         mje('Nuevo Tercero', 'Tercero registrado correctamente');
-                        setTimeout(function () {
+                        setTimeout(function() {
                             window.location.reload();
                         }, 1000);
                     } else {
@@ -328,12 +336,12 @@ function FormResponsabilidad(id) {
         ActivaBoton(btn);
         return false;
     });
-    var cambiarEstado = function (e, idt, u, btn) {
+    var cambiarEstado = function(e, idt, u, btn) {
         $.ajax({
             type: 'POST',
             url: u,
             data: { e: e, idt: idt },
-            success: function (r) {
+            success: function(r) {
                 switch (r) {
                     case '0':
                         $('#' + btn + idt).attr('title', 'Inactivo');
@@ -358,13 +366,13 @@ function FormResponsabilidad(id) {
         });
     };
     //detalles tercero
-    $('#modificarTerceros').on('click', '.detalles', function () {
+    $('#modificarTerceros').on('click', '.detalles', function() {
         let id = $(this).attr('value');
         $('<form action="detalles_tercero.php" method="post"><input type="hidden" name="id_ter" value="' + id + '" /></form>').appendTo('body').submit();
         return false;
     });
     //cambiar estado tercero
-    $('#modificarTerceros').on('click', '.estado', function () {
+    $('#modificarTerceros').on('click', '.estado', function() {
         let e = !($(this).hasClass('activo')) ? '1' : '0';
         let idt = $(this).attr('value');
         let url = 'actualizar/upestadotercero.php';
@@ -373,9 +381,9 @@ function FormResponsabilidad(id) {
         return false;
     });
     //Actualizar terceros
-    $('#modificarTerceros').on('click', '.editar', function () {
+    $('#modificarTerceros').on('click', '.editar', function() {
         let idt = $(this).attr('value');
-        $.post("datos/actualizar/uptercero.php", { idt: idt }, function (he) {
+        $.post("datos/actualizar/uptercero.php", { idt: idt }, function(he) {
             $('#divTamModalForms').addClass('modal-sm');
             $('#divTamModalForms').addClass('modal-lg');
             $('#divTamModalForms').addClass('modal-xl');
@@ -385,7 +393,7 @@ function FormResponsabilidad(id) {
         });
     });
     //Actualizar datos tercero
-    $('#divForms').on('click', '#btnUpTercero', function () {
+    $('#divForms').on('click', '#btnUpTercero', function() {
         var msg = 'Diligenciar, campo obligatorio';
         var btn = $(this).get(0);
         InactivaBoton(btn);
@@ -420,7 +428,7 @@ function FormResponsabilidad(id) {
                 type: 'POST',
                 url: 'actualizar/up_datos_tercero.php',
                 data: datos,
-                success: function (r) {
+                success: function(r) {
                     if (r == 'ok') {
                         $('#divModalForms').modal('hide');
                         $('#tableTerceros').DataTable().ajax.reload();
@@ -435,19 +443,19 @@ function FormResponsabilidad(id) {
         return false;
     });
     //Borrar Tercero confirmar
-    $('#modificarTerceros').on('click', '.borrar', function () {
+    $('#modificarTerceros').on('click', '.borrar', function() {
         let id = $(this).attr('value');
         let tip = 'Tercero';
         confdel(id, tip);
     });
     //Eliminar tercero confirmar
-    $("#divBtnsModalDel").on('click', '#btnConfirDelTercero', function () {
+    $("#divBtnsModalDel").on('click', '#btnConfirDelTercero', function() {
         $('#divModalConfDel').modal('hide');
         $.ajax({
             type: 'POST',
             url: 'eliminar/deltercero.php',
             data: {},
-            success: function (r) {
+            success: function(r) {
                 if (r === '1') {
                     let id = 'tableTerceros';
                     reloadtable(id);
@@ -462,9 +470,9 @@ function FormResponsabilidad(id) {
         return false;
     });
     //Registar Responsabilidad Economica
-    $('#modificarTerceros').on('click', '.responsabilidad', function () {
+    $('#modificarTerceros').on('click', '.responsabilidad', function() {
         let idt = $(this).attr('value');
-        $.post("datos/registrar/formadd_resp_economica.php", { idt: idt }, function (he) {
+        $.post("datos/registrar/formadd_resp_economica.php", { idt: idt }, function(he) {
             $('#divTamModalForms').removeClass('modal-xl')
             $('#divTamModalForms').addClass('modal-sm')
             $('#divTamModalForms').addClass('modal-lg')
@@ -474,7 +482,7 @@ function FormResponsabilidad(id) {
         });
     });
     //Agregar Responsabilidad Economica
-    $('#divForms').on('click', '#btnAddRespEcon', function () {
+    $('#divForms').on('click', '#btnAddRespEcon', function() {
         var btn = $(this).get(0);
         InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
@@ -488,7 +496,7 @@ function FormResponsabilidad(id) {
                 type: 'POST',
                 url: 'registrar/new_resp_econ.php',
                 data: datos,
-                success: function (r) {
+                success: function(r) {
                     if (r == 'ok') {
                         if ($('#tableRespEcon').length) {
                             $('#tableRespEcon').DataTable().ajax.reload(null, false);
@@ -505,9 +513,9 @@ function FormResponsabilidad(id) {
         return false;
     });
     //Registar Actividad Economica
-    $('#modificarTerceros').on('click', '.actividad', function () {
+    $('#modificarTerceros').on('click', '.actividad', function() {
         let idt = $(this).attr('value');
-        $.post("datos/registrar/formadd_actv_economica.php", { idt: idt }, function (he) {
+        $.post("datos/registrar/formadd_actv_economica.php", { idt: idt }, function(he) {
             $('#divTamModalForms').removeClass('modal-lg');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-xl');
@@ -518,7 +526,7 @@ function FormResponsabilidad(id) {
     });
 
     //Agregar Actividad Economica
-    $('#divForms').on('click', '#btnAddActvEcon', function () {
+    $('#divForms').on('click', '#btnAddActvEcon', function() {
         var btn = $(this).get(0);
         InactivaBoton(btn);
         if ($('#slcActvEcon').val() === '0') {
@@ -533,7 +541,7 @@ function FormResponsabilidad(id) {
                 type: 'POST',
                 url: 'registrar/new_actv_econ.php',
                 data: datos,
-                success: function (r) {
+                success: function(r) {
                     if (r === '1') {
                         let id = 'tableActvEcon';
                         reloadtable(id);
@@ -552,9 +560,9 @@ function FormResponsabilidad(id) {
     });
 
     //-------------- historial terceros
-    $('#modificarTerceros').on('click', '.historial', function () {
+    $('#modificarTerceros').on('click', '.historial', function() {
         let idt = $(this).attr('value');
-        $.post("../php/historialtercero/frm_historialtercero.php", { idt: idt }, function (he) {
+        $.post("../php/historialtercero/frm_historialtercero.php", { idt: idt }, function(he) {
             $('#divTamModalForms').removeClass('modal-lg');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-xl');
@@ -566,18 +574,18 @@ function FormResponsabilidad(id) {
 
     //------------------------------
     //Buscar registros de Ingresos
-    $('#btn_buscar_filtro').on("click", function () {
+    $('#btn_buscar_filtro').on("click", function() {
         $('.is-invalid').removeClass('is-invalid');
         reloadtable('tableTerceros');
     });
 
-    $('.filtro').keypress(function (e) {
+    $('.filtro').keypress(function(e) {
         if (e.keyCode == 13) {
             reloadtable('tableTerceros');
         }
     });
     //-----------------dashboard
-    $('#btn_iniciar_dashboard').on("click", async function () {
+    $('#btn_iniciar_dashboard').on("click", async function() {
         try {
             const response = await fetch('../python/dash_controller.php', {
                 method: 'POST',
@@ -594,7 +602,7 @@ function FormResponsabilidad(id) {
         }
     });
 
-    $('#btn_detener_dashboard').on("click", async function () {
+    $('#btn_detener_dashboard').on("click", async function() {
         try {
             const response = await fetch('../python/dash_controller.php', {
                 method: 'POST',
@@ -611,7 +619,7 @@ function FormResponsabilidad(id) {
         }
     });
 
-    $('#btn_dashboard').on("click", async function () {
+    $('#btn_dashboard').on("click", async function() {
         try {
             const response = await $.ajax({
                 url: window.urlin + "/terceros/python/listar_terceros.php",
@@ -629,7 +637,7 @@ function FormResponsabilidad(id) {
             const params = new URLSearchParams();
             params.append('datos', JSON.stringify(datosGrafico));
 
-            window.open(`http://localhost:8050?${params.toString()}`, "_blank");
+            window.open(`http://0.0.0.0:8050?${params.toString()}`, "_blank");
         } catch (error) {
             console.error("Error:", error);
             alert("Error al cargar datos para el dashboard");
@@ -691,14 +699,14 @@ function FormResponsabilidad(id) {
     //-----------------------------------------------------
 
     //descargar documento PDF
-    $('#modificarDocs').on('click', '.descargar', function () {
+    $('#modificarDocs').on('click', '.descargar', function() {
         let id_doc = $(this).attr('value');
         $.ajax({
             type: 'POST',
             url: 'datos/descargas/descarga_docs.php',
             dataType: 'json',
             data: { id_doc: id_doc },
-            success: function (r) {
+            success: function(r) {
                 if (r == '0') {
                     alert('Archivo no disponible');
                 } else {
@@ -712,66 +720,66 @@ function FormResponsabilidad(id) {
         });
         return false;
     });
-    $('#txtBuscarTercero').on('input', function () {
+    $('#txtBuscarTercero').on('input', function() {
         $(this).autocomplete({
-            source: function (request, response) {
+            source: function(request, response) {
                 $.ajax({
                     url: window.urlin + '/terceros/gestion/datos/listar/buscar_terceros.php',
                     dataType: "json",
                     type: 'POST',
                     data: { term: request.term },
-                    success: function (data) {
+                    success: function(data) {
                         response(data);
                     }
                 });
             },
             minLength: 2,
-            select: function (event, ui) {
+            select: function(event, ui) {
                 $('#txtIdTercero').val(ui.item.id);
                 $('#slcTipoTerce').focus();
             }
         });
     });
-    $('#divModalForms').on('input', '#buscarRespEcono', function () {
+    $('#divModalForms').on('input', '#buscarRespEcono', function() {
         $(this).autocomplete({
-            source: function (request, response) {
+            source: function(request, response) {
                 $.ajax({
                     url: window.urlin + '/terceros/gestion/datos/listar/buscar_resposabilidad.php',
                     dataType: "json",
                     type: 'POST',
                     data: { term: request.term },
-                    success: function (data) {
+                    success: function(data) {
                         response(data);
                     }
                 });
             },
             minLength: 2,
-            select: function (event, ui) {
+            select: function(event, ui) {
                 $('#slcRespEcon').val(ui.item.id);
             }
         });
     });
-    $('#divModalForms').on('input', '#buscarActvEcono', function () {
+    $('#divModalForms').on('input', '#buscarActvEcono', function() {
         $(this).autocomplete({
-            source: function (request, response) {
+            source: function(request, response) {
                 $.ajax({
                     url: window.urlin + '/terceros/gestion/datos/listar/buscar_actividad.php',
                     dataType: "json",
                     type: 'POST',
                     data: { term: request.term },
-                    success: function (data) {
+                    success: function(data) {
                         response(data);
                     }
                 });
             },
             minLength: 2,
-            select: function (event, ui) {
+            select: function(event, ui) {
                 $('#slcActvEcon').val(ui.item.id);
                 $('#datFecInicio').focus();
             }
         });
     });
-    $('#btnNewTipoTercero').on('click', function () {
+    $('#btnNewTipoTercero').on('click', function() {
         if ($('#txtBuscarTercero').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe seleccionar un Tercero');
@@ -787,7 +795,7 @@ function FormResponsabilidad(id) {
                 type: 'POST',
                 url: 'new_tipo_tercero.php',
                 data: datos,
-                success: function (r) {
+                success: function(r) {
                     if (r == '1') {
                         $('#formAddTipoTercero')[0].reset();
                         $('#divModalForms').modal('hide');
@@ -801,17 +809,17 @@ function FormResponsabilidad(id) {
             });
         }
     });
-    $('#btnReporteTerceros').on('click', function () {
+    $('#btnReporteTerceros').on('click', function() {
         $('<form action="informes/reporte_terceros.php" method="post"></form>').appendTo('body').submit();
     });
-    $('#btnActualizaRepositorio').on('click', function () {
+    $('#btnActualizaRepositorio').on('click', function() {
         $('#btnActualizaRepositorio').attr('disabled', true);
         //buscar span para poner una animacion de carga
         $('#btnActualizaRepositorio span').addClass('spinner-border spinner-border-sm');
         $.ajax({
             type: 'POST',
             url: 'registrar/newmasivo.php',
-            success: function (r) {
+            success: function(r) {
                 $('#tableTerceros').DataTable().ajax.reload();
                 $('#btnActualizaRepositorio').attr('disabled', false);
                 $('#btnActualizaRepositorio span').removeClass('spinner-border spinner-border-sm');
@@ -837,7 +845,7 @@ function GuardaResponsabilidad() {
             type: 'POST',
             url: '../gestion/registrar/guarda_responsabilidad.php',
             data: datos,
-            success: function (r) {
+            success: function(r) {
                 if (r == 'ok') {
                     $('#divModalForms').modal('hide');
                     $('#tableResponsabilidades').DataTable().ajax.reload(null, false);
@@ -850,6 +858,7 @@ function GuardaResponsabilidad() {
     }
 
 }
+
 function BorrarResponsabilidad(id) {
     Swal.fire({
         title: "¿Confirma eliminar la Responsabilidad Económica?",
@@ -866,7 +875,7 @@ function BorrarResponsabilidad(id) {
                 type: 'POST',
                 url: '../gestion/eliminar/delresponsabilidad.php',
                 data: { id: id },
-                success: function (r) {
+                success: function(r) {
                     if (r == 'ok') {
                         $('#tableResponsabilidades').DataTable().ajax.reload(null, false);
                         mje('Eliminado', 'Responsabilidad Económica eliminada correctamente');

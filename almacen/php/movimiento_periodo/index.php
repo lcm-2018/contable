@@ -85,6 +85,11 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             </div>    
                             <div class="form-row">  
                                 <div class="form-group col-md-2">
+                                    <select class="filtro form-control form-control-sm" id="sl_tipoasis_filtro">
+                                        <?php estados_sino('--Uso Asistencial--') ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
                                     <select class="filtro form-control form-control-sm" id="sl_subgrupo_filtro">
                                         <?php subgrupo_articulo($cmd,'--Subgrupo--') ?>
                                     </select>
