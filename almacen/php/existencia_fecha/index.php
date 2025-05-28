@@ -58,24 +58,24 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <select class="filtro form-control form-control-sm" id="sl_bodega_filtro">
                                     </select>
                                 </div> 
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-6">
                                     <div class="form-row">
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group col-md-3">
                                             <input type="date" class="filtro form-control form-control-sm" id="txt_fecha_filtro" name="txt_fecha_filtro" placeholder="Fecha Corte">
-                                        </div>
-                                        <div class="form-group col-md-6">
+                                        </div>                                        
+                                        <div class="form-group col-md-3">
                                             <input type="text" class="filtro form-control form-control-sm" id="txt_codigo_filtro" placeholder="Codigo">
                                         </div>    
-                                    </div>
-                                </div>    
-                                <div class="form-group col-md-2">
-                                    <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <select class="filtro form-control form-control-sm" id="sl_subgrupo_filtro">
-                                        <?php subgrupo_articulo($cmd,'--Subgrupo--') ?>
-                                    </select>
-                                </div>
+                                        <div class="form-group col-md-3">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
+                                        </div>  
+                                        <div class="form-group col-md-3">
+                                            <select class="filtro form-control form-control-sm" id="sl_tipoasis_filtro">
+                                                <?php estados_sino('--Uso Asistencial--') ?>
+                                            </select>
+                                        </div>
+                                    </div>    
+                                </div>        
                                 <div class="form-group col-md-1">
                                     <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
                                         <span class="fas fa-search fa-lg" aria-hidden="true"></span>
@@ -83,9 +83,14 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <a type="button" id="btn_imprime_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
                                         <span class="fas fa-print" aria-hidden="true"></span>                                       
                                     </a>
-                                </div>  
+                                </div>                                 
                             </div>    
                             <div class="form-row">                                
+                                <div class="form-group col-md-2">
+                                    <select class="filtro form-control form-control-sm" id="sl_subgrupo_filtro">
+                                        <?php subgrupo_articulo($cmd,'--Subgrupo--') ?>
+                                    </select>
+                                </div> 
                                 <div class="form-group col-md-2">
                                     <div class="form-check form-check-inline">
                                         <input class="filtro form-check-input" type="checkbox" id="chk_artact_filtro" checked>

@@ -24,6 +24,9 @@ if (isset($_POST['codigo']) && $_POST['codigo']) {
 if (isset($_POST['nombre']) && $_POST['nombre']) {
     $where .= " AND far_medicamentos.nom_medicamento LIKE '" . $_POST['nombre'] . "%'";
 }
+if (isset($_POST['tipo_asis']) && strlen($_POST['tipo_asis'])) {
+    $where .= " AND far_medicamentos.es_clinico=" . $_POST['tipo_asis'];
+}
 if (isset($_POST['id_subgrupo']) && $_POST['id_subgrupo']) {
     $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];
 }
