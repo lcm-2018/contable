@@ -198,6 +198,12 @@ $ver = 'readonly';
                                                 </div>
                                             </div>
                                         </form>
+                                        <div class="input-group input-group-sm mb-1 mt-3">
+                                            <div class="input-group-prepend col-2 pr-0">
+                                                <button class="btn btn-outline-success btn-block text-left" type="button" onclick="GeneraFormInvoice(<?php echo $id_doc; ?>)" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-file-invoice-dollar fa-lg mr-2"></i>Facturación</button>
+                                            </div>
+                                            <div class="form-control col-4" readonly id="valFactura"><?php echo pesos($datosDoc['val_factura']); ?></div>
+                                        </div>
                                     </div>
                                     <div class="text-center py-2">
                                         <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoInvoice(this);" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>

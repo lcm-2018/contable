@@ -779,8 +779,19 @@ let cargaRubrosPago = function (dato, boton) {
 	}
 };
 
+let cargaRubroPagInvoice = function (dato, boton) {
+	let id_doc = id_ctb_doc.value;
+	if (id_doc == 0) {
+		mjeError("Seleccione un documento contable", "Verifique");
+		return false;
+	} else {
+		$.post("lista_causacion_obligacion_rads.php", { id_cop: dato, id_doc: id_doc }, function (he) {
+			$("#detalle-rubros").html(he);
+		});
+	}
+};
 // Guardar los rubros y el valor de la afectación presupuestal asociada a la cuenta por pagar
-let rubrosaPagar = function (boton) {
+let rubrosaPagar = function (boton, opc = 0) {
 	InactivaBoton(boton);
 	var max = 0;
 	var bandera = true;
@@ -800,9 +811,13 @@ let rubrosaPagar = function (boton) {
 	});
 	if (bandera) {
 		var data = $('#rubrosPagar').serialize();
+		var url = "datos/registrar/registrar_mvto_pago.php";
+		if (opc == 1) {
+			url = "datos/registrar/registrar_mvto_pago_invoice.php";
+		}
 		$.ajax({
 			type: 'POST',
-			url: 'datos/registrar/registrar_mvto_pago.php',
+			url: url,
 			data: data,
 			dataType: 'json',
 			success: function (r) {

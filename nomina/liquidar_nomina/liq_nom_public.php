@@ -178,6 +178,7 @@ try {
                 , CONCAT(`nombre1`, ' ', `nombre2`, ' ',`apellido1`, ' ', `apellido2`) AS `nombre`
                 , `cargo` 
                 , `subtipo_empleado`
+                , `bsp` 
             FROM `nom_empleado`
             WHERE  `estado` = '1'";
     $rs = $cmd->query($sql);
@@ -734,7 +735,7 @@ if (isset($_POST['check'])) {
             $dayBSP = 30 - $daylcnr;
             $bsp_salarial = 0;
             $bsp = 0;
-            if ($_SESSION['caracter'] == '2') {
+            if ($_SESSION['caracter'] == '2' && $emple['bsp'] == 1) {
                 $bsp = (($salbase + $gasrep) <= $bbs ? ($salbase + $gasrep) * 0.5 : ($salbase + $gasrep) * 0.35);
                 $keybxsp = array_search($i, array_column($bonxserv, 'id_empleado'));
                 if ($keybxsp !== false) {

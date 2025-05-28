@@ -75,6 +75,7 @@ $tipo_cargo = $_POST['slcTipoCargo'];
 $idus = $_SESSION['id_user'];
 $nit_crea = $_SESSION['nit_emp'];
 $pass = $_POST['pasT'];
+$bsp = isset($_POST['checkBsp']) ? 1 : 0;
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 
 try {
@@ -91,8 +92,8 @@ try {
                                         , `no_documento`, `nombre1`, `nombre2`, `apellido1`, `apellido2`, `fech_inicio`, `salario_integral`, `correo`
                                         , `telefono`, `cargo`, `pais`, `departamento`, `municipio`, `direccion`, `id_banco`, `tipo_cta`, `cuenta_bancaria`
                                         , `estado`, `genero`, `fec_reg`, `sede_emp`, `tipo_cargo`, `pais_exp`,`dpto_exp`,`city_exp`,`fec_exp`,`pais_nac`
-                                        ,`dpto_nac`,`city_nac`,`fec_nac`)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                                        ,`dpto_nac`,`city_nac`,`fec_nac`,`bsp`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $tipoemp, PDO::PARAM_INT);
         $sql->bindParam(2, $subtipemp, PDO::PARAM_INT);
@@ -129,6 +130,7 @@ try {
         $sql->bindParam(33, $dptoNac, PDO::PARAM_STR);
         $sql->bindParam(34, $ciudadNac, PDO::PARAM_STR);
         $sql->bindParam(35, $fechaNac, PDO::PARAM_STR);
+        $sql->bindParam(36, $bsp, PDO::PARAM_INT);
         $sql->execute();
         $idinsert = $cmd->lastInsertId();
         if ($idinsert > 0) {

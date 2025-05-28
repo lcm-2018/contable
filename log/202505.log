@@ -17,3 +17,5 @@
 [2025-05-20 16:15:21] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3093
 [2025-05-20 16:20:02] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3094
 [2025-05-20 16:20:05] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3095
+[2025-05-26 09:19:05] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_factura` WHERE `id_cta_factura` = 1268
+[2025-05-26 11:38:01] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_factura` WHERE `id_cta_factura` = 1269

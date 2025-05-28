@@ -51,6 +51,7 @@ $numcta = $_POST['txtCuentaBanc'];
 $sede = $_POST['slcSedeEmp'];
 $tipo_cargo = $_POST['slcTipoCargo'];
 $idemp = $_POST['idEmpleado'];
+$bsp = isset($_POST['checkBsp']) ? 1 : 0;
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -58,8 +59,8 @@ try {
     $sql = "UPDATE nom_empleado SET tipo_empleado = ?, subtipo_empleado = ?, alto_riesgo_pension = ?, tipo_contrato = ?, tipo_doc = ?, no_documento = ?,
         nombre1= ?, nombre2 = ?, apellido1 = ?, apellido2 = ?, fech_inicio = ?, fec_retiro = ?, salario_integral = ?,
         correo = ?, telefono = ?, cargo = ?, pais = ?, departamento = ?, municipio = ?, direccion = ?,
-        id_banco = ?, tipo_cta = ?, cuenta_bancaria= ?, genero= ?, 
-        `pais_exp` = ?,`dpto_exp` = ?,`city_exp` = ?,`fec_exp` = ?,`pais_nac` = ?,`dpto_nac` = ?,`city_nac` = ?,`fec_nac` = ?, `sede_emp` = ?, `tipo_cargo` = ?
+        id_banco = ?, tipo_cta = ?, cuenta_bancaria= ?, genero= ?, `pais_exp` = ?,`dpto_exp` = ?,`city_exp` = ?
+        ,`fec_exp` = ?,`pais_nac` = ?,`dpto_nac` = ?,`city_nac` = ?,`fec_nac` = ?, `sede_emp` = ?, `tipo_cargo` = ?, bsp = ?
         WHERE id_empleado = ?";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $tipoemp, PDO::PARAM_INT);
@@ -96,7 +97,8 @@ try {
     $sql->bindParam(32, $fechaNac, PDO::PARAM_STR);
     $sql->bindParam(33, $sede, PDO::PARAM_INT);
     $sql->bindParam(34, $tipo_cargo, PDO::PARAM_INT);
-    $sql->bindParam(35, $idemp, PDO::PARAM_INT);
+    $sql->bindParam(35, $bsp, PDO::PARAM_INT);
+    $sql->bindParam(36, $idemp, PDO::PARAM_INT);
     $sql->execute();
     if ($sql->rowCount() > 0) {
         $updatemp = 1;
