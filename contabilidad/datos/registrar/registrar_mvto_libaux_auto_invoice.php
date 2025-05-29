@@ -83,8 +83,8 @@ try {
     $query->bindParam(6, $iduser, PDO::PARAM_INT);
     $query->bindParam(7, $fecha2);
     $query->bindParam(8, $ref, PDO::PARAM_INT);
-    $valor = $datos['valor_rad'] - $datos['val_causado'];
-    $valor = $valor == 0 ? $facturado : $valor;
+    $valor = $facturado;
+    $valor = $valor == 0 ? $datos['valor_rad'] - $datos['val_causado'] : $valor;
     $debito = $valor;
     $id_cuenta = $datos['id_cuenta'];
     $query->execute();

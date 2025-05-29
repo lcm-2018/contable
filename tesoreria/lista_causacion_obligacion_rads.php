@@ -9,6 +9,9 @@ include '../permisos.php';
 
 $id_cop = $_POST['id_cop'] ?? '';
 $id_pag_doc = $_POST['id_doc'] ?? '';
+$fecha = $_POST['fecha'] ?? date('Y-m-d');
+$objeto = $_POST['objeto'] ?? 'Recaudación de Obligaciones';
+$factura = $_POST['factura'] ?? '000';
 // Consulta tipo de presupuesto
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -21,7 +24,13 @@ try {
                 , (SELECT SUM(`debito`) AS `valor`
                     FROM `ctb_libaux`
                     WHERE (`id_ctb_doc` = $id_cop)) AS `causado`
-                , 0 AS `radicado`
+                , (SELECT
+                        SUM(IFNULL(`pto_rec_detalle`.`valor`,0) - IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `val_recaudado` 
+                    FROM
+                        `pto_rec_detalle`
+                        INNER JOIN `pto_rec` 
+                            ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
+                    WHERE (`pto_rec`.`estado` > 0 AND `pto_rec`.`id_manu` = $id_cop)) AS `radicado`
                 , CONCAT(`pto_cargue`.`cod_pptal`, ' - ', `pto_cargue`.`nom_rubro`) AS `rubro`
                 , `tt`.`id_tercero` AS `id_tercero_api`
             FROM
@@ -62,55 +71,66 @@ try {
     });
     $('#tableContrtacionRpRubros').wrap('<div class="overflow" />');
 </script>
-<div class="pb-3">
-    <form id="rubrosPagar">
-        <input type="hidden" name="id_pto_rp" id="id_pto_rp" value="<?php echo $id_cop; ?>">
-        <input type="hidden" name="id_pag_doc" value="<?php echo $id_pag_doc; ?>">
-        <input type="hidden" name="id_tercero" value="<?php echo $tercero; ?>">
-        <div class="px-3 pt-3">
-            <table id="tableContrtacionRpRubros" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th style="width: 45%;">Rubro</th>
-                        <th style="width: 15%;">Valor RAD</th>
-                        <th style="width: 15%;">Valor Causado</th>
-                        <th style="width: 15%;">Valor Pago</th>
-                        <!--<th style="width: 15%;">Acciones</th>-->
-                    </tr>
-                </thead>
-                <tbody>
+<div class="px-0">
 
-                    <?php
-                    foreach ($rubros as $ce) {
-                        $id_doc = 0;
-                        $valor = 0;
-                        $id_det = $ce['id_pto_rad_det'];
-                        $pagado = $ce['radicado'] > 0 ? $ce['radicado'] : 0;
-                        $obligado = $ce['causado'] * $ce['porcentaje'];
-                        $valor =  $obligado - $pagado;
-                        $valor_mil = number_format($valor, 2, '.', ',');
-
-                        $valor_obl = number_format($obligado, 2, '.', ',');
-                    ?>
-                        <tr>
-                            <td class="text-left"><?php echo $ce['rubro']; ?></td>
-                            <td class="text-right"><?php echo '$ ' . number_format($ce['reconocido'], 2, '.', ','); ?></td>
-                            <td class="text-right"><?php echo '$ ' . number_format($obligado, 2, '.', ','); ?></td>
-                            <td class="text-right">
-                                <input type="text" name="detalle[<?php echo $id_det; ?>]" id="detalle_<?php echo $id_det; ?>" class="form-control form-control-sm detalle-pag" value="<?php echo $valor_mil; ?>" style="text-align: right;" required onkeyup="valorMiles(id)" max="<?php echo $valor; ?>">
-                            </td>
-                        </tr>
-                    <?php
-                    }
-                    ?>
-
-                </tbody>
-            </table>
-            <div class="text-center pt-2">
-                <button type="button" class="btn btn-success btn-sm" onclick="rubrosaPagar(this,1);"> Guardar</button>
-            </div>
+    <div class="shadow">
+        <div class="card-header" style="background-color: #16a085 !important;">
+            <h5 style="color: white;">LISTA DE REGISTROS PRESUPUESTALES PARA RECAUDACIÓN</h5>
         </div>
-    </form>
+        <div class="pb-3"></div>
+        <form id="rubrosPagar">
+            <input type="hidden" name="id_pto_rp" id="id_pto_rp" value="<?= $id_cop; ?>">
+            <input type="hidden" name="id_pag_doc" value="<?= $id_pag_doc; ?>">
+            <input type="hidden" name="id_tercero" value="<?= $tercero; ?>">
+            <input type="hidden" name="fecha" value="<?= $fecha; ?>">
+            <input type="hidden" name="objeto" value="<?= $objeto; ?>">
+            <input type="hidden" name="factura" value="<?= $factura; ?>">
+
+            <div class="px-3 pt-3">
+                <table id="tableContrtacionRpRubros" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 45%;">Rubro</th>
+                            <th style="width: 15%;">Valor RAD</th>
+                            <th style="width: 15%;">Valor Causado</th>
+                            <th style="width: 15%;">Valor Pago</th>
+                            <!--<th style="width: 15%;">Acciones</th>-->
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <?php
+                        foreach ($rubros as $ce) {
+                            $id_doc = 0;
+                            $valor = 0;
+                            $id_det = $ce['id_pto_rad_det'];
+                            $pagado = $ce['radicado'] > 0 ? $ce['radicado'] : 0;
+                            $obligado = ($ce['causado'] - $pagado) * $ce['porcentaje'];
+                            $valor =  $obligado - $pagado;
+                            $valor_mil = number_format($obligado, 2, '.', ',');
+
+                        ?>
+                            <tr>
+                                <td class="text-left"><?= $ce['rubro']; ?></td>
+                                <td class="text-right"><?= '$ ' . number_format($ce['reconocido'], 2, '.', ','); ?></td>
+                                <td class="text-right"><?= '$ ' . number_format($obligado, 2, '.', ','); ?></td>
+                                <td class="text-right">
+                                    <input type="text" name="detalle[<?= $id_det; ?>]" id="detalle_<?= $id_det; ?>" class="form-control form-control-sm detalle-pag" value="<?= $valor_mil; ?>" style="text-align: right;" required onkeyup="valorMiles(id)" max="<?= $valor_mil; ?>">
+                                </td>
+                            </tr>
+                        <?php
+                        }
+                        ?>
+
+                    </tbody>
+                </table>
+                <div class="text-right p-3">
+                    <button type="button" class="btn btn-success btn-sm" onclick="rubrosaPagar(this,1);"> Guardar</button>
+                    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 <?php
 $cmd = null;

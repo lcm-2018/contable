@@ -16,7 +16,7 @@ try {
                     ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
                 LEFT JOIN `tb_bancos` 
                                 ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
-            WHERE (`ctb_pgcp`.`cuenta` LIKE '1110%' OR `ctb_pgcp`.`cuenta` LIKE '1132%')
+            WHERE (`ctb_pgcp`.`cuenta` LIKE '1110%' OR `ctb_pgcp`.`cuenta` LIKE '1132%' OR `ctb_pgcp`.`cuenta` LIKE '110106%')
                 AND `ctb_pgcp`.`tipo_dato` = 'D'
                 AND `tes_cuentas`.`id_tes_cuenta` IS NULL";
     $rs = $cmd->query($sql);

@@ -8,6 +8,7 @@ include '../conexion.php';
 include '../permisos.php';
 include '../terceros.php';
 
+$id_vigencia = $_SESSION['id_vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -23,7 +24,7 @@ try {
                 , `tb_terceros`.`nom_tercero`
                 , `tb_terceros`.`nit_tercero`
                 , `obligado`.`valor`
-                , 0 As `valor_pagado`
+                , IFNULL(`recaudado`.`val_recaudado`, 0) AS `valor_pagado`
             FROM
                 `ctb_doc`
                 INNER JOIN `ctb_fuente` 
@@ -31,14 +32,25 @@ try {
                 LEFT JOIN `tb_terceros` 
                     ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
                 LEFT JOIN 
-                (SELECT
-                    `id_ctb_doc`
-                    , SUM(`debito`) AS `valor`
-                FROM
-                    `ctb_libaux`
-                GROUP BY `id_ctb_doc`) AS `obligado`
-                ON (`ctb_doc`.`id_ctb_doc` = `obligado`.`id_ctb_doc`)
-            WHERE (`ctb_doc`.`id_vigencia` = 9 AND `ctb_fuente`.`cod` = 'FELE' AND `ctb_doc`.`estado` = 2)";
+                    (SELECT
+                        `id_ctb_doc`
+                        , SUM(`debito`) AS `valor`
+                    FROM
+                        `ctb_libaux`
+                    GROUP BY `id_ctb_doc`) AS `obligado`
+                    ON (`ctb_doc`.`id_ctb_doc` = `obligado`.`id_ctb_doc`)
+                LEFT JOIN
+                    (SELECT
+                        SUM(IFNULL(`pto_rec_detalle`.`valor`,0) - IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `val_recaudado` 
+                        , `pto_rec`.`id_manu` AS `id_ctb_doc`
+                    FROM
+                        `pto_rec_detalle`
+                        INNER JOIN `pto_rec` 
+                            ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
+                        WHERE (`pto_rec`.`estado` > 0)
+                        GROUP BY `pto_rec`.`id_manu`) AS `recaudado`
+                    ON (`ctb_doc`.`id_ctb_doc` = `recaudado`.`id_ctb_doc`)
+            WHERE (`ctb_doc`.`id_vigencia` = $id_vigencia AND `ctb_fuente`.`cod` = 'FELE' AND `ctb_doc`.`estado` = 2)";
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -91,7 +103,7 @@ try {
                                 <td class="text-left"><?= $fecha;  ?></td>
                                 <td class="text-left"><?= $ce['nom_tercero']; ?></td>
                                 <td class="text-left"><?= $ce['nit_tercero']; ?></td>
-                                <td class="text-right"><?= number_format($ce['valor'], 2, ',', '.') ?></td>
+                                <td class="text-right"><?= number_format($saldo, 2, ',', '.') ?></td>
                                 <td class=" text-center"> <?= $obligar ?></td>
                             </tr>
                     <?php

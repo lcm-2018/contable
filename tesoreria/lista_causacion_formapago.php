@@ -131,7 +131,7 @@ if ($_SESSION['pto'] == '0') {
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
-    $valor_pagar = $pagos['valor_pagar'] - $pagos['valor_pagado'];
+    $valor_pagar = !empty($pagos) ? $pagos['valor_pagar'] - $pagos['valor_pagado'] : 0;
 }
 
 ?>

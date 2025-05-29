@@ -779,14 +779,21 @@ let cargaRubrosPago = function (dato, boton) {
 	}
 };
 
-let cargaRubroPagInvoice = function (dato, boton) {
+let cargaRubroPagInvoice = function (dato, boton, factura) {
 	let id_doc = id_ctb_doc.value;
+	let fecha = $("#fecha").val();
+	let obj = $("#objeto").val();
 	if (id_doc == 0) {
 		mjeError("Seleccione un documento contable", "Verifique");
 		return false;
 	} else {
-		$.post("lista_causacion_obligacion_rads.php", { id_cop: dato, id_doc: id_doc }, function (he) {
-			$("#detalle-rubros").html(he);
+		$.post("lista_causacion_obligacion_rads.php", { id_cop: dato, id_doc: id_doc, fecha: fecha, objeto: obj, factura: factura }, function (he) {
+			$("#divTamModalForms").removeClass("modal-sm");
+			$("#divTamModalForms").removeClass("modal-3x");
+			$("#divTamModalForms").removeClass("modal-lg");
+			$("#divTamModalForms").addClass("modal-xl");
+			$("#divModalForms").modal("show");
+			$("#divForms").html(he);
 		});
 	}
 };
@@ -813,7 +820,7 @@ let rubrosaPagar = function (boton, opc = 0) {
 		var data = $('#rubrosPagar').serialize();
 		var url = "datos/registrar/registrar_mvto_pago.php";
 		if (opc == 1) {
-			url = "datos/registrar/registrar_mvto_pago_invoice.php";
+			url = "datos/registrar/registrar_mvto_recaudo.php";
 		}
 		$.ajax({
 			type: 'POST',
@@ -824,7 +831,6 @@ let rubrosaPagar = function (boton, opc = 0) {
 				if (r.status == 'ok') {
 					valor = r.valor;
 					$('#valor').val(valor.toLocaleString('es-MX'));
-					$('#divModalForms').modal('hide');
 					mje('Proceso realizado correctamente', 'Exito');
 				} else {
 					mjeError('Error: ' + r.msg);
@@ -1890,12 +1896,21 @@ const eliminarFormaPago = (dato) => {
 // Genera movimiento cuando se hace procesamiento automatico del documento cxp
 const generaMovimientoPag = (boton) => {
 	InactivaBoton(boton);
+	if ($('#valor').length && (Number($('#valor').val()) === 0 || Number($('#forma_pago').val()) === 0)) {
+		mjeError('El valor no puede ser cero o vacío');
+		ActivaBoton(boton);
+		return;
+	}
 	let id = id_ctb_doc.value;
 	let id_cop = id_cop_pag.value;
 	let tipo = $('#tipodato').val();
 	// verificar si los tres valores son iguales
 	let id_crp = $('#id_crp').length ? $('#id_crp').val() : 0;
-	fetch("datos/registrar/registrar_mvto_libaux_auto_pag.php", {
+	var url = "datos/registrar/registrar_mvto_libaux_auto_pag.php";
+	if ($('#id_doc_rad').length) {
+		url = "datos/registrar/registrar_mvto_libaux_auto_rad.php";
+	}
+	fetch(url, {
 		method: "POST",
 		body: JSON.stringify({ id: id, id_crp: id_crp, id_cop: id_cop, tipo: tipo }),
 	})
