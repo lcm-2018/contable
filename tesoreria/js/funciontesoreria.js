@@ -1907,7 +1907,7 @@ const generaMovimientoPag = (boton) => {
 	// verificar si los tres valores son iguales
 	let id_crp = $('#id_crp').length ? $('#id_crp').val() : 0;
 	var url = "datos/registrar/registrar_mvto_libaux_auto_pag.php";
-	if ($('#id_doc_rad').length) {
+	if ($('#id_doc_rad').length && Number($('#id_doc_rad').val()) > 0) {
 		url = "datos/registrar/registrar_mvto_libaux_auto_rad.php";
 	}
 	fetch(url, {
