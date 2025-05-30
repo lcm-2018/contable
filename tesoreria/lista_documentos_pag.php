@@ -93,7 +93,18 @@ if ($id_doc_pag == 0) {
     $id_manu = $datosDoc['id_manu'];
     $id_cop = $datosDoc['id_doc_cop'] > 0 ? $datosDoc['id_doc_cop'] : 0;
     $id_ref = $datosDoc['id_ref'];
-    $id_doc_rad = $datosDoc['id_ctb_doc_tipo3'];
+    if ($id_doc_rad == 0) {
+        $sqls = "SELECT
+                    `ctb_fuente`.`cod`
+                FROM
+                    `ctb_doc`
+                    INNER JOIN `ctb_fuente` 
+                        ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                WHERE (`ctb_doc`.`id_ctb_doc` = {$datosDoc['id_ctb_doc_tipo3']})";
+        $rs = $cmd->query($sqls);
+        $rdss = $rs->fetch();
+        $id_doc_rad = !empty($rdss) && $rdss['cod'] == 'FELE' ? $datosDoc['id_ctb_doc_tipo3'] : 0;
+    }
     if ($id_doc_rad > 0) {
         $sql = "SELECT
                 SUM(IFNULL(`pto_rec_detalle`.`valor`,0) - IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `valor`
