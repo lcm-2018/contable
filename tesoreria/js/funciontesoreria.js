@@ -471,7 +471,8 @@ function recargarConciliacion() {
 // Cargar lista de registros para obligar en contabilidad de
 let CargaObligaPago = function (boton) {
 	InactivaBoton(boton);
-	$.post("lista_causacion_obligaciones.php", {}, function (he) {
+	let id_tipo = $("#id_ctb_tipo").val();
+	$.post("lista_causacion_obligaciones.php", { id_tipo: id_tipo }, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-lg");
 		$("#divTamModalForms").addClass("modal-xl");
@@ -2642,6 +2643,7 @@ const cargaListaReferenciaPago = (id) => {
 		$("#divModalForms").modal("show");
 		$("#divForms").html(he);
 	});
+
 };
 
 // Cambio de estado de referencia de pago
@@ -2675,6 +2677,9 @@ const cargarReporteTesoreria = (id) => {
 	}
 	if (id == 3) {
 		url = "informes/informe_reporte_terceros_cop_pag_form.php";
+	}
+	if (id == 4) {
+		url = "informes/form_consolida_por_terceros.php";
 	}
 	fetch(url, {
 		method: "POST",
@@ -2744,6 +2749,100 @@ const generarReporteTerceros = (id) => {
 	};
 	redireccionar5(ruta);
 };
+
+// Funcion para generar libros presupuestales
+const generarInfPorTercero = (boton) => {
+	InactivaBoton(boton);
+	let fec_ini = fecha_ini.value;
+	let fec_fin = fecha_fin.value;
+	let url = window.urlin + "/tesoreria/php/informes/consolidado_por_terceros.php";
+	$.post(url, { fec_ini: fec_ini, fec_fin: fec_fin }, function (he) {
+		$("#imprimirInforme").html(he);
+	});
+	ActivaBoton(boton);
+};
+
+const CambiaNumResol = (id) => {
+	$.post('datos/registrar/form_num_resolucion.php', { id: id }, function (he) {
+		$("#divTamModalAux").removeClass("modal-lg");
+		$("#divTamModalAux").removeClass("modal-xl");
+		$("#divTamModalAux").addClass("modal-sm");
+		$("#divModalAux").modal("show");
+		$("#divFormsAux").html(he);
+	});
+}
+
+const guardarConsecutivoResolucion = (boton) => {
+	InactivaBoton(boton);
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#numResolucion').val() == '') {
+		$('#numResolucion').addClass('is-invalid');
+		$('#numResolucion').focus();
+		mjeError('Debe digitar un número de resolución');
+	} else {
+		var data = $('#formConsecResol').serialize();
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: "datos/consultar/modifica_num_resolucion.php",
+			data: data,
+			success: function (r) {
+				if (r.status == 'ok') {
+					$('#divModalAux').modal('hide');
+					imprimirFormatoTes($('#id_ctb_doc').val());
+					mje('Número de resolución guardado correctamente');
+				} else {
+					mjeError('Error:', r.msg);
+				}
+			}
+		});
+	}
+	ActivaBoton(boton);
+}
+
+const guardarNumReferencia = (boton) => {
+	InactivaBoton(boton);
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#numRef').val() == '') {
+		$('#numRef').addClass('is-invalid');
+		$('#numRef').focus();
+		mjeError('Debe digitar un número de referencia');
+	} else {
+		var data = $('#formNumReferencia').serialize();
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: "datos/consultar/modifica_num_referencia.php",
+			data: data,
+			success: function (r) {
+				if (r.status == 'ok') {
+					$('#divModalAux').modal('hide');
+					cargaListaReferenciaPago(2);
+					mje('Número de referencia guardado correctamente');
+				} else {
+					mjeError('Error:', r.msg);
+				}
+			}
+		});
+	}
+	ActivaBoton(boton);
+}
+
+const CambiaEstadoReferencia = (id, estado) => {
+	$.ajax({
+		type: 'POST',
+		dataType: 'json',
+		url: "datos/consultar/modifica_estado_referencia.php",
+		data: { id: id, estado: estado },
+		success: function (r) {
+			if (r.status == 'ok') {
+				cargaListaReferenciaPago(2);
+			} else {
+				mjeError('Error:', r.msg);
+			}
+		}
+	});
+}
 
 // Funcion para redireccionar la recarga de la pagina
 function redireccionar4(ruta) {
@@ -2908,3 +3007,45 @@ $('#btnImpLotesTes').on('click', function () {
 		$("#divForms").html(he);
 	});
 });
+
+const checkAll = (check) => {
+	const isChecked = check.checked;
+	$('input[type="checkbox"]').each(function () {
+		this.checked = isChecked;
+	});
+}
+
+const ProcesarLotesPagos = (boton) => {
+	InactivaBoton(boton);
+	var seleccionados = $('input.check-item:checked').length;
+	if (seleccionados === 0) {
+		mjeError("Debe seleccionar al menos un registro");
+	} else {
+		var data = $('#formObligacionesPago').serialize();
+		function hideModalEspera() {
+			$('#divModalEspera').modal('hide');
+			$('.modal-backdrop').remove();
+		}
+		$('#divModalEspera').modal('show');
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: "datos/registrar/registrar_lotes_pagos.php",
+			data: data,
+			success: function (r) {
+				if (r.status == 'ok') {
+					$('#divModalForms').modal('hide');
+					$('#tableMvtoTesoreriaPagos').DataTable().ajax.reload(null, false);
+					mje('Proceso realizado con  éxito.');
+				} else {
+					mjeError('Error:', r.msg);
+				}
+			}
+		}).always(() => {
+			hideModalEspera();
+		});
+
+	}
+	ActivaBoton(boton);
+	return false;
+};

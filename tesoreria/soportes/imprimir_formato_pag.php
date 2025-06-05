@@ -80,9 +80,15 @@ try {
 ?>
 <div class="text-right py-3">
     <?php if (PermisosUsuario($permisos, 5601, 6)  || $id_rol == 1) {
-        if ($tipo == '4') { ?>
+        if ($tipo == '4') {
+            if (strpos($ids, ',') === false) {
+                echo '<a type="button" class="btn btn-warning btn-sm" onclick="CambiaNumResol(' . $ids . ')" title="Cambiar consecutivo de resolución"># Resolución</a>';
+            }
+    ?>
             <a type="button" class="btn btn-info btn-sm" onclick="imprSelecTes('imprimeResolucion','<?= str_replace(',', '|', $ids); ?>');"> Resolución</a>
-        <?php } ?>
+        <?php
+        }
+        ?>
         <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir','<?= str_replace(',', '|', $ids); ?>');"> Imprimir</a>
     <?php } ?>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>

@@ -8,16 +8,16 @@ if (!isset($_SESSION['user'])) {
 include '../conexion.php';
 include '../permisos.php';
 if ($id_rol != 1) {
-    exit('Usuario no autorizado');
+    if (!(PermisosUsuario($permisos, 6001, 0))) {
+        exit('Usuario no autorizado');
+    }
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <?php include '../head.php' ?>
 
-<body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] == '1') {
-                                echo 'sb-sidenav-toggled';
-                            } ?>">
+<body class="sb-nav-fixed <?= $_SESSION['navarlat'] == '1' ? 'sb-sidenav-toggled' : '' ?>">
     <?php include '../navsuperior.php' ?>
     <div id="layoutSidenav">
         <?php include '../navlateral.php' ?>
@@ -32,7 +32,7 @@ if ($id_rol != 1) {
                                     GESTIÓN DUCUMENTAL DEL SISTEMA.
                                 </div>
                                 <?php
-                                if ($id_rol == 1) {
+                                if ($id_rol == 1 || PermisosUsuario($permisos, 6001, 2)) {
                                     echo '<input type="hidden" id="peReg" value="1">';
                                 } else {
                                     echo '<input type="hidden" id="peReg" value="0">';

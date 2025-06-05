@@ -1,6 +1,8 @@
 <?php
-
-include_once '../../conexion.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+//include_once $_SESSION['urlin'].'/conexion.php';
 try {
     $sql = "SELECT
                  `razon_social_ips`AS `nombre`, `nit_ips` AS `nit`, `dv` AS `dig_ver`

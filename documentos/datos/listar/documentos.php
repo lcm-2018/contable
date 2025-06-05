@@ -5,8 +5,19 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../../conexion.php';
+include '../../../permisos.php';
 
 $vigencia = $_SESSION['vigencia'];
+$id_user = $_SESSION['id_user'];
+$modulos = [];
+foreach ($perm_modulos as $mod) {
+    $modulos[] = $mod['id_modulo'];
+}
+$ids = implode(',', $modulos);
+$where = '';
+if ($id_rol != 1) {
+    $where = " AND `fin_maestro_doc`.`id_modulo` IN ($ids)";
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -24,6 +35,7 @@ try {
                     ON (`fin_maestro_doc`.`id_modulo` = `seg_modulos`.`id_modulo`)
                 INNER JOIN `ctb_fuente` 
                     ON (`fin_maestro_doc`.`id_doc_fte` = `ctb_fuente`.`id_doc_fuente`)
+            WHERE '1' = '1' $where
             ORDER BY `seg_modulos`.`nom_modulo` ASC";
     $rs = $cmd->query($sql);
     $documentos = $rs->fetchAll();
@@ -33,12 +45,19 @@ try {
 }
 if (!empty($documentos)) {
     foreach ($documentos as $doc) {
+        $editar = $detalles = $borrar = NULL;
         $id_doc = $doc['id_maestro'];
         $id = base64_encode($id_doc);
         $det = base64_encode($id_doc . '|0');
-        $editar = '<a text="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
-        $detalles = '<a text="' . $det . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" title="Detalles Documento"><span class="far fa-eye fa-lg"></span></a>';
-        $borrar = '<a text="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+        if ($id_rol == 1 || PermisosUsuario($permisos, 6001, 1)) {
+            $detalles = '<a text="' . $det . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" title="Detalles Documento"><span class="far fa-eye fa-lg"></span></a>';
+        }
+        if ($id_rol == 1 || PermisosUsuario($permisos, 6001, 3)) {
+            $editar = '<a text="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+        }
+        if ($id_rol == 1 || PermisosUsuario($permisos, 6001, 4)) {
+            $borrar = '<a text="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+        }
         $estado = $doc['estado'];
         $st = base64_encode($id_doc . '|' . $estado);
         if ($estado == 1) {
@@ -53,7 +72,10 @@ if (!empty($documentos)) {
         if ($estado == 0) {
             $editar =  $borrar = $detalles = NULL;
         }
-        $boton = '<a text="' . $st . '" class="btn btn-sm btn-circle estado" title="' . $title . '"><span class="fas fa-toggle-' . $icono . ' fa-2x" style="color:' . $color . ';"></span></a>';
+        if ($id_rol == 1 || PermisosUsuario($permisos, 6001, 3)) {
+            $boton = '<a text="' . $st . '" class="btn btn-sm btn-circle estado" title="' . $title . '"><span class="fas fa-toggle-' . $icono . ' fa-2x" style="color:' . $color . ';"></span></a>';
+        }
+        
         $data[] = [
             'id' => $doc['id_maestro'],
             'modulo' => mb_strtoupper($doc['nom_modulo']),
