@@ -1,4 +1,7 @@
 <?php
+
+use PhpOffice\PhpWord\Reader\HTML;
+
 session_start();
 if (!isset($_SESSION['user'])) {
     header('Location: ../index.php');
@@ -103,9 +106,7 @@ try {
                             if ((PermisosUsuario($permisos, 5601, 4) || PermisosUsuario($permisos, 5602, 4) || PermisosUsuario($permisos, 5603, 4) || PermisosUsuario($permisos, 5604, 4) || $id_rol == 1)) {
                                 $eliminar = '<a value="' . $id . '" onclick="eliminarReferenciaPago(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                             }
-                            if ((PermisosUsuario($permisos, 5601, 6) || PermisosUsuario($permisos, 5602, 6) || PermisosUsuario($permisos, 5603, 6) || PermisosUsuario($permisos, 5604, 6) || $id_rol == 1)) {
-                                $imprimir = '<a value="' . $id . '" onclick="imprimirReferenciaPago(' . $id . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
-                            }
+                            $imprimir = '<a value="' . $id . '" onclick="imprimirReferenciaPago(' . $id . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Relación de pagos"><span class="fas fa-file-excel fa-lg"></span></a>';
 
                             if ($ce['estado'] == '1') {
                                 $estado = '<button onclick="CambiaEstadoReferencia(' . $id . ',0)" class="btn-estado btn btn-outline-success btn-sm btn-circle estado" title="Activo"><span class="fas fa-toggle-on fa-lg" aria-hidden="true"></span></button>';
@@ -114,9 +115,17 @@ try {
                             }
                             if ($ce['estado'] == '0') {
                                 $editar =  $eliminar = '';
-                            } else {
-                                $id = '<span>' . $id . '</span>';
                             }
+
+                            $acciones =
+                                <<<HTML
+                                    <button  class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v fa-lg"></i>
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <a text="{$id}" class="dropdown-item sombra relPagos" href="javascript:void(0);">Relación Pagos</a>
+                                    </div>
+                                HTML;
                     ?>
                             <tr id="<?= $id; ?>" class="text-center">
                                 <td><?= $id; ?></td>
@@ -124,7 +133,7 @@ try {
                                 <td><?= $ce['fec_reg']; ?></td>
                                 <td> <?= $estado; ?></td>
                                 <td> <?= number_format($ce['valor'], 2, '.', ','); ?></td>
-                                <td> <?= $editar . $imprimir .  $eliminar; ?></td>
+                                <td> <?= $editar . $imprimir .  $eliminar ; ?></td>
 
                             </tr>
                     <?php

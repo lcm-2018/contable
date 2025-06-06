@@ -951,12 +951,20 @@ function GuardaDocPagInvoice(id) {
 	}
 }
 // Procesar causación de cuentas por pagar con boton guardar
-$('#divModalForms').on('click', '#gestionarMvtoCtbPag', function () {
+$('#divModalForms').on('click', '.relPagos', function () {
 	var id = $(this).attr('text');
 	var btn = $(this).get(0);
 	InactivaBoton(btn);
 	GuardaDocPag(id);
 	ActivaBoton(btn);
+});
+
+$('#divModalForms').on('click', '#gestionarMvtoCtbPag', function () {
+	var id = $(this).attr('text');
+	$('<form action="lista_documentos_pag.php" method="post">' +
+		'<input type="hidden" name="id_doc" value="' + id + '" />' +
+		'</form>').appendTo("body").submit();
+
 });
 $('#GuardaDocMvtoPag').on('click', function () {
 	var btn = $(this).get(0);
@@ -2962,7 +2970,7 @@ function GuardaDetalleConciliacion(check) {
 						var valor = Number(salLib) + Number(json.tot_deb) - Number(json.tot_cre) - Number(salExt);
 						$('#saldoConcilia').val(valor.toLocaleString('es-MX'));
 					});
-					mje('Proceso realizado correctamente');
+					//mje('Proceso realizado correctamente');
 				} else {
 					mjeError('Error:', r.msg);
 				}
