@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user'])) {
     header('Location: ../index.php');
     exit();
@@ -94,13 +95,14 @@ if ($id_doc_pag == 0) {
     $id_cop = $datosDoc['id_doc_cop'] > 0 ? $datosDoc['id_doc_cop'] : 0;
     $id_ref = $datosDoc['id_ref'];
     if ($id_doc_rad == 0) {
+        $iddd = $datosDoc['id_ctb_doc_tipo3'] == '' ? 0 : $datosDoc['id_ctb_doc_tipo3'];
         $sqls = "SELECT
                     `ctb_fuente`.`cod`
                 FROM
                     `ctb_doc`
                     INNER JOIN `ctb_fuente` 
                         ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
-                WHERE (`ctb_doc`.`id_ctb_doc` = {$datosDoc['id_ctb_doc_tipo3']})";
+                WHERE (`ctb_doc`.`id_ctb_doc` = $iddd)";
         $rs = $cmd->query($sqls);
         $rdss = $rs->fetch();
         $id_doc_rad = !empty($rdss) && $rdss['cod'] == 'FELE' ? $datosDoc['id_ctb_doc_tipo3'] : 0;

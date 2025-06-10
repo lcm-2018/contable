@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user'])) {
     header("Location: ../../../index.php");
     exit();
@@ -13,7 +14,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "SELECT
                 `id_resol`,`consecutivo`
-            FROM `ips_mun`.`tes_resolucion_pago`
+            FROM `tes_resolucion_pago`
             WHERE `id_ctb_doc` = $id AND `id_vigencia` = $id_vigencia";
     $rs = $cmd->query($sql);
     $resolucion = $rs->fetch(PDO::FETCH_ASSOC);

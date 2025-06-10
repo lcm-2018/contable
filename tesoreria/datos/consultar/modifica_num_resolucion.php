@@ -17,7 +17,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "SELECT
                 `id_resol`,`consecutivo`
-            FROM `ips_mun`.`tes_resolucion_pago`
+            FROM `tes_resolucion_pago`
             WHERE `id_vigencia` = $id_vigencia AND `consecutivo` = $consecutivo AND `id_ctb_doc` <> $id";
     $rs = $cmd->query($sql);
     $data = $rs->fetch(PDO::FETCH_ASSOC);
