@@ -60,9 +60,26 @@
         });
     };
     $('#areaReporte').on('click', '#btnExcelEntrada', function () {
-        let tableHtml = $('#areaImprimir').html();
-        let encodedTable = btoa(unescape(encodeURIComponent(tableHtml)));
-        $('<form action="' + window.urlin + '/financiero/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encodedTable + '" /></form>').appendTo('body').submit();
+        let datos = [];
+        $('#areaImprimir table tr').each(function () {
+            let fila = [];
+            $(this).find('th, td').each(function () {
+                fila.push($(this).text().trim());
+            });
+            datos.push(fila);
+        });
+
+        let form = $('<form>', {
+            action: window.urlin + '/financiero/reporte_excel.php',
+            method: 'post'
+        }).append($('<input>', {
+            type: 'hidden',
+            name: 'datos',
+            value: JSON.stringify(datos)
+        }));
+
+        $('body').append(form);
+        form.submit();
     });
     $('#areaReporte').on('click', '#btnPlanoEntrada', function () {
         let tableHtml = $('#areaImprimir').html();

@@ -178,6 +178,7 @@ try {
                 , CONCAT(`nombre1`, ' ', `nombre2`, ' ',`apellido1`, ' ', `apellido2`) AS `nombre`
                 , `cargo` 
                 , `subtipo_empleado`
+                , `bsp` 
             FROM `nom_empleado`
             WHERE  `estado` = '1'";
     $rs = $cmd->query($sql);
@@ -599,6 +600,7 @@ if (isset($_POST['check'])) {
             $tipo_emp = false !== $key ? $emple[$key]['tipo_empleado'] : 0;
             $subtip_emp = false !== $key ? $emple[$key]['subtipo_empleado'] : 1; //cambio
             $grepresenta = false !== $key ? $emple[$key]['representacion'] : 0;
+            $paga_bsp = false !== $key ? $emple[$key]['bsp'] : 0;
             $salario = 0;
             $empleado = $i;
             $salbase = $_POST['numSalBas_' . $i];
@@ -734,7 +736,7 @@ if (isset($_POST['check'])) {
             $dayBSP = 30 - $daylcnr;
             $bsp_salarial = 0;
             $bsp = 0;
-            if ($_SESSION['caracter'] == '2') {
+            if ($_SESSION['caracter'] == '2' && $paga_bsp == 1) {
                 $bsp = (($salbase + $gasrep) <= $bbs ? ($salbase + $gasrep) * 0.5 : ($salbase + $gasrep) * 0.35);
                 $keybxsp = array_search($i, array_column($bonxserv, 'id_empleado'));
                 if ($keybxsp !== false) {

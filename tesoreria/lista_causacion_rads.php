@@ -10,6 +10,7 @@ include '../permisos.php';
 $id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : 0;
 $id_tercero = isset($_POST['id_tercero']) ? $_POST['id_tercero'] : 0;
 $id_doc_rad = isset($_POST['id_doc_rad']) ? $_POST['id_doc_rad'] : 0;
+$id_vigencia = $_SESSION['id_vigencia'];
 // Consulta tipo de presupuesto
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -20,25 +21,46 @@ try {
                 , `ctb_doc`.`id_manu`
                 , `ctb_doc`.`id_tercero`
                 , `ctb_doc`.`estado`
+                , `ctb_factura`.`num_doc` AS `num_factura`
                 , DATE_FORMAT(`ctb_doc`.`fecha`,'%Y-%m-%d') AS `fecha`
                 , `tb_terceros`.`nom_tercero`
                 , `tb_terceros`.`nit_tercero`
                 , `causado`.`valor` AS `val_causado`
-                , 0 AS `val_recaudado`
+                , `recaudado`.`valor` AS `val_recaudado`
             FROM
                 `ctb_doc`
                 LEFT JOIN `ctb_fuente` 
                     ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
                 LEFT JOIN `tb_terceros` 
                     ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                LEFT JOIN `ctb_factura` 
+                    ON (`ctb_doc`.`id_ctb_doc` = `ctb_factura`.`id_ctb_doc`)
                 LEFT JOIN
-                (SELECT
-                    `id_ctb_doc`, SUM(`debito`) AS `valor`
-                FROM
-                    `ctb_libaux`
-                GROUP BY `id_ctb_doc`) AS `causado`
-                ON (`causado`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-            WHERE (`ctb_fuente`.`cod` = 'FELE' AND `ctb_doc`.`id_tercero` = 2869 AND `ctb_doc`.`id_vigencia` = 9 AND `ctb_doc`.`estado` = 2)";
+                    (SELECT
+                        `id_ctb_doc`, SUM(`debito`) AS `valor`
+                    FROM
+                        `ctb_libaux`
+                    GROUP BY `id_ctb_doc`) AS `causado`
+                    ON (`causado`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN
+                    (SELECT
+                        `ctb_doc`.`id_ctb_doc`
+                        , SUM(IFNULL(`pto_rec_detalle`.`valor`,0) - IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `valor`
+                    FROM
+                        `ctb_doc`
+                        INNER JOIN `pto_rad` 
+                            ON (`ctb_doc`.`id_rad` = `pto_rad`.`id_pto_rad`)
+                        INNER JOIN `pto_rad_detalle` 
+                            ON (`pto_rad_detalle`.`id_pto_rad` = `pto_rad`.`id_pto_rad`)
+                        INNER JOIN `pto_rec_detalle`
+                        ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
+                        INNER JOIN `pto_rec` 
+                            ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
+                    WHERE (`ctb_doc`.`estado` > 0 AND `pto_rad`.`estado` > 0 AND `pto_rec`.`estado` > 0 AND `pto_rec`.`id_manu` = `ctb_doc`.`id_ctb_doc` AND `ctb_doc`.`id_vigencia` = $id_vigencia)
+                    GROUP BY `ctb_doc`.`id_ctb_doc`) AS `recaudado`
+                    ON (`recaudado`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+        
+            WHERE (`ctb_fuente`.`cod` = 'FELE' AND `ctb_doc`.`id_tercero` = $id_tercero AND `ctb_doc`.`id_vigencia` = $id_vigencia AND `ctb_doc`.`estado` = 2)";
     $rs = $cmd->query($sql);
     $causaciones = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -82,9 +104,10 @@ try {
                         foreach ($causaciones as $ce) {
                             $id = $ce['id_ctb_doc'];
                             $fecha = $ce['fecha'];
+                            $fact = $ce['num_factura'];
                             $editar = null;
                             if (PermisosUsuario($permisos, 5601, 2) || $id_rol == 1) {
-                                $editar = '<button value="' . $id_doc . '" onclick="cargaRubrosPago(' . $id . ',this)" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="Causar"><span class="fas fa-chevron-circle-down fa-lg"></span></a>';
+                                $editar = '<button value="' . $id_doc . '" onclick="cargaRubroPagInvoice(' . $id . ',this,' . $fact . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="Imputar"><span class="fas fa-chevron-circle-down fa-lg"></span></a>';
                             }
 
                             $saldo = $ce['val_causado'] - $ce['val_recaudado'];
@@ -106,6 +129,9 @@ try {
                     </div>
                 </tbody>
             </table>
+            <div id="detalle-rubros">
+
+            </div>
             <div class="text-right py-3">
                 <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
             </div>

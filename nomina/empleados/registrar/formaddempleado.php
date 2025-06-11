@@ -402,7 +402,9 @@ $error = "Debe diligenciar este campo";
                                                 <div class="form-control form-control-sm">
                                                     <div class="form-group form-check">
                                                         <input type="checkbox" class="form-check-input" id="checkDependientes" name="checkDependientes">
-                                                        <label class="form-check-label" for="checkDependientes">Dependientes</label>
+                                                        <label class="form-check-label mr-4" for="checkDependientes">Dependientes</label>
+                                                        <input type="checkbox" class="form-check-input" id="checkBsp" name="checkBsp" checked>
+                                                        <label class="form-check-label" for="checkBsp">BSP</label>
                                                     </div>
                                                 </div>
                                             </div>

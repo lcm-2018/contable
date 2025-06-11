@@ -7,7 +7,9 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../../../permisos.php';
 if ($id_rol != 1) {
-    exit('Usuario no autorizado');
+    if (!(PermisosUsuario($permisos, 6001, 0))) {
+        exit('Usuario no autorizado');
+    }
 }
 $data = isset($_POST['data']) ? $_POST['data'] : exit('Acceso no autorizado');
 $data = explode('|', base64_decode($_POST['data']));
@@ -183,9 +185,14 @@ try {
                 <tbody id="modificarDetDocs">
                     <?php
                     foreach ($datos as $dt) {
+                        $editar = $borrar = $boton = NULL;
                         $id = base64_encode($id_maestro . '|' . $dt['id_respon_doc']);
-                        $editar = '<a text="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
-                        $borrar = '<a text="' . base64_encode($dt['id_respon_doc']) . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+                        if ($id_rol == 1 || PermisosUsuario($permisos, 6001, 3)) {
+                            $editar = '<a text="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+                        }
+                        if ($id_rol == 1 || PermisosUsuario($permisos, 6001, 4)) {
+                            $borrar = '<a text="' . base64_encode($dt['id_respon_doc']) . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+                        }
                         $estado = $dt['estado'];
                         $st = base64_encode($dt['id_respon_doc'] . '|' . $estado);
                         if ($estado == 1) {
@@ -197,7 +204,9 @@ try {
                             $icono = 'off';
                             $color = 'gray';
                         }
-                        $boton = '<a text="' . $st . '" class="btn btn-sm btn-circle estado" title="' . $title . '"><span class="fas fa-toggle-' . $icono . ' fa-2x" style="color:' . $color . ';"></span></a>';
+                        if ($id_rol == 1 || PermisosUsuario($permisos, 6001, 3)) {
+                            $boton = '<a text="' . $st . '" class="btn btn-sm btn-circle estado" title="' . $title . '"><span class="fas fa-toggle-' . $icono . ' fa-2x" style="color:' . $color . ';"></span></a>';
+                        }
                         echo '<tr class="text-left">
                                 <td>' . $dt['id_respon_doc'] . '</td>
                                 <td>' . mb_strtoupper($dt['nom_tercero']) . '</td>

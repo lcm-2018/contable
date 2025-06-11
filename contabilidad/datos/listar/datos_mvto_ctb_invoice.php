@@ -240,8 +240,8 @@ if (!empty($listappto)) {
         if ($key !== false && $hash != '') {
             $enviar = '<a onclick="VerSoporteElectronico(' . $equivalente[$key]['id_soporte'] . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="VER DOCUMENTO"><span class="far fa-file-pdf fa-lg"></span></a>';
         } else {
-            /* onclick="EnviaDocumentoSoporte(this)" */
-            $enviar = '<button value="' . $id_ctb . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="REPORTAR FACTURA" ' . $disabled . '><span class="fas fa-paper-plane fa-lg"></span></button>';
+            //EnviaDocumentoSoporte(this,1), this es el boton que se envia y 1 para decir que es factura, sino es doc soporte
+            $enviar = '<button value="' . $id_ctb . '" onclick="EnviaDocumentoSoporte(this,1)" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="REPORTAR FACTURA" ' . $disabled . '><span class="fas fa-paper-plane fa-lg"></span></button>';
         }
         if ($estado == 0) {
             $anular = null;

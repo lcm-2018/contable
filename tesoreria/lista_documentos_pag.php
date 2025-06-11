@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user'])) {
     header('Location: ../index.php');
     exit();
@@ -93,7 +94,31 @@ if ($id_doc_pag == 0) {
     $id_manu = $datosDoc['id_manu'];
     $id_cop = $datosDoc['id_doc_cop'] > 0 ? $datosDoc['id_doc_cop'] : 0;
     $id_ref = $datosDoc['id_ref'];
-    $id_doc_rad = $datosDoc['id_ctb_doc_tipo3'];
+    if ($id_doc_rad == 0) {
+        $iddd = $datosDoc['id_ctb_doc_tipo3'] == '' ? 0 : $datosDoc['id_ctb_doc_tipo3'];
+        $sqls = "SELECT
+                    `ctb_fuente`.`cod`
+                FROM
+                    `ctb_doc`
+                    INNER JOIN `ctb_fuente` 
+                        ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                WHERE (`ctb_doc`.`id_ctb_doc` = $iddd)";
+        $rs = $cmd->query($sqls);
+        $rdss = $rs->fetch();
+        $id_doc_rad = !empty($rdss) && $rdss['cod'] == 'FELE' ? $datosDoc['id_ctb_doc_tipo3'] : 0;
+    }
+    if ($id_doc_rad > 0) {
+        $sql = "SELECT
+                SUM(IFNULL(`pto_rec_detalle`.`valor`,0) - IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `valor`
+            FROM
+                `pto_rec_detalle`
+                INNER JOIN `pto_rec` 
+                    ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
+            WHERE (`pto_rec`.`estado` > 0 AND `pto_rec`.`id_ctb_doc` = $id_doc_pag)";
+        $rs = $cmd->query($sql);
+        $valor = $rs->fetch();
+        $datosDoc['val_pagado'] = !empty($valor) ? $valor['valor'] : 0;
+    }
     if (!empty($datosDoc)) {
         $id_t = ['0' => $datosDoc['id_tercero']];
         $ids = implode(',', $id_t);
@@ -387,11 +412,16 @@ try {
                                         } else {
                                             $campo_req = "readonly";
                                         }
+                                        if ($id_doc_rad > 0) {
+                                            $forma = 'FORMA DE RECAUDO :';
+                                        } else {
+                                            $forma = 'FORMA DE PAGO :';
+                                        }
                                         ?>
 
                                         <div class="row mb-1">
                                             <div class="col-2">
-                                                <label for="forma_pago" class="small">FORMA DE PAGO :</label>
+                                                <label for="forma_pago" class="small"><?php echo $forma; ?></label>
                                             </div>
                                             <div class="col-4">
                                                 <div class="input-group input-group-sm">

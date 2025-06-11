@@ -12,6 +12,7 @@ include '../terceros.php';
 $vigencia = $_SESSION['vigencia'];
 $id_vigencia = $_SESSION['id_vigencia'];
 $id_cop_add = $_POST['id_cop_add'] ?? 0;
+$id_tipo = $_POST['id_tipo'];
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -57,7 +58,7 @@ try {
                         GROUP BY `id_pto_cop_det`)AS `pto_pag_detalle`
                         ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
                     INNER JOIN `ctb_doc` 
-                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc` AND `ctb_doc`.`estado` > 0)
+                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc` AND `ctb_doc`.`estado` = 2)
                     INNER JOIN `pto_crp` 
                         ON ( `pto_crp`.`id_pto_crp` = `ctb_doc`.`id_crp`)
                     INNER JOIN `pto_cdp` 
@@ -130,11 +131,13 @@ $terceros = getTerceros($ids, $cmd);
             [0, "desc"]
         ],
         columnDefs: [{
-            targets: op_caracter == '2' ? [] : [1,2],
+            targets: op_caracter == '2' ? [] : [1, 2],
             "visible": false
         }],
     });
     $('#tableObligacionesPago').wrap('<div class="overflow" />');
+    $('#tableObligacionesPago_filter #verAnulados').remove();
+    $('#tableObligacionesPago_filter label label').remove();
 </script>
 <div class="px-0">
     <div class="shadow">
@@ -143,64 +146,76 @@ $terceros = getTerceros($ids, $cmd);
         </div>
         <div class="pb-3"></div>
         <div class="px-3">
-            <table id="tableObligacionesPago" class="table table-striped table-bordered nowrap table-sm table-hover shadow" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th style="width: 13%;">Causación</th>
-                        <th style="width: 13%;">Rp</th>
-                        <th style="width: 13%;">Num Contrato</th>
-                        <th style="width: 10%;">Fecha</th>
-                        <th style="width: 10%;">Cc / Nit</th>
-                        <th style="width: 20%;">Terceros</th>
-                        <th style="width: 15%;">Valor</th>
-                        <th style="width: 5%;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    foreach ($listado as $ce) {
+            <form id="formObligacionesPago">
+                <input type="hidden" name="id_tipo" value="<?= $id_tipo; ?>">
+                <table id="tableObligacionesPago" class="table table-striped table-bordered nowrap table-sm table-hover shadow" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 7%;" title="Seleccionar todos"><input type="checkbox" id="checkAll" onclick="checkAll(this)"></th>
+                            <th style="width: 10%;">Causación</th>
+                            <th style="width: 10%;">Rp</th>
+                            <th style="width: 13%;">Contrato</th>
+                            <th style="width: 10%;">Fecha</th>
+                            <th style="width: 10%;">Cc / Nit</th>
+                            <th style="width: 20%;">Terceros</th>
+                            <th style="width: 15%;">Valor</th>
+                            <th style="width: 5%;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        foreach ($listado as $ce) {
 
-                        $id_doc = $ce['id_ctb_doc'];
-                        $fecha = date('Y-m-d', strtotime($ce['fecha']));
-                        $editar = null;
+                            $id_doc = $ce['id_ctb_doc'];
+                            $fecha = date('Y-m-d', strtotime($ce['fecha']));
+                            $editar = null;
 
-                        // Consulta terceros en la api
+                            // Consulta terceros en la api
 
-                        $key = array_search($ce['id_tercero'], array_column($terceros, 'id_tercero_api'));
-                        $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '';
-                        $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '';
+                            $key = array_search($ce['id_tercero'], array_column($terceros, 'id_tercero_api'));
+                            $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '';
+                            $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '';
 
-                        // fin api terceros
+                            // fin api terceros
 
-                        $saldo_rp = $ce['valor'] - $ce['valor_pagado'];
+                            $saldo_rp = $ce['valor'] - $ce['valor_pagado'];
 
-                        if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
-                            $editar = '<a value="' . $id_doc . '" onclick="cargarListaDetallePago(' . $id_doc . ',0)" class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-plus-square fa-lg"></span></a>';
+                            if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
+                                $editar = '<a value="' . $id_doc . '" onclick="cargarListaDetallePago(' . $id_doc . ',0)" class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-plus-square fa-lg"></span></a>';
+                            }
+
+                            if ($saldo_rp > 0) {
+                        ?>
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox" name="check[]" class="check-item" value="<?php echo $id_doc; ?>">
+                                    </td>
+                                    <td class="text-left"><?php echo $ce['causacion']; ?></td>
+                                    <td class="text-left"><?php echo $ce['registro'] ?></td>
+                                    <td class="text-left"><?php echo $ce['num_contrato']   ?></td>
+                                    <td class="text-left"><?php echo $fecha; ?></td>
+                                    <td class="text-left"><?php echo $ccnit; ?></td>
+                                    <td class="text-left text-wrap"><?php echo $tercero; ?></td>
+                                    <td class="text-right"> <?php echo number_format($saldo_rp, 2, ',', '.'); ?></td>
+                                    <td class="text-center"> <?php echo $editar; ?></td>
+                                </tr>
+                        <?php
+                            }
                         }
 
-                        if ($saldo_rp > 0) {
-                    ?>
-                            <tr>
-                                <td class="text-left"><?php echo $ce['causacion']; ?></td>
-                                <td class="text-left"><?php echo $ce['registro'] ?></td>
-                                <td class="text-left"><?php echo $ce['num_contrato']   ?></td>
-                                <td class="text-left"><?php echo $fecha; ?></td>
-                                <td class="text-left"><?php echo $ccnit; ?></td>
-                                <td class="text-left"><?php echo $tercero; ?></td>
-                                <td class="text-right"> <?php echo number_format($saldo_rp, 2, ',', '.'); ?></td>
-                                <td class="text-center"> <?php echo $editar; ?></td>
-                            </tr>
-                    <?php
-                        }
-                    }
+                        ?>
 
-                    ?>
-
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </form>
         </div>
     </div>
     <div class="text-right pt-3">
+        <?php
+        if ($id_tipo == 4) {
+            echo '<button type="button" class="btn btn-primary btn-sm" onclick="ProcesarLotesPagos(this)">Procesar lote</button>';
+        }
+        ?>
         <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>

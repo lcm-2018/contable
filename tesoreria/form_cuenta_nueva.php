@@ -55,23 +55,7 @@ if ($id_tes_cuenta > 0) {
 // Consultar el listado de bancos de la tabla tb_bancos
 $cuentas = [];
 if ($id_tes_cuenta  > 0) {
-    try {
-        $sql = "SELECT
-                `ctb_pgcp`.`id_pgcp`
-                , `ctb_pgcp`.`cuenta`
-                , `ctb_pgcp`.`nombre`
-                , `tb_bancos`.`id_banco`
-                , `tes_cuentas`.`id_tes_cuenta`
-            FROM
-                `ctb_pgcp`
-                LEFT JOIN `tes_cuentas` 
-                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-                LEFT JOIN `tb_bancos` 
-                    ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
-            WHERE (`ctb_pgcp`.`cuenta` LIKE '1110%' OR `ctb_pgcp`.`cuenta` LIKE '1132%')
-                AND `ctb_pgcp`.`tipo_dato` = 'D'
-                AND `tes_cuentas`.`id_tes_cuenta` IS NULL
-            UNION ALL
+    $union = "UNION ALL
             SELECT
                 `ctb_pgcp`.`id_pgcp`
                 , `ctb_pgcp`.`cuenta`
@@ -83,12 +67,32 @@ if ($id_tes_cuenta  > 0) {
                 INNER JOIN `ctb_pgcp` 
                     ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
             WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_tes_cuenta)";
-        $rs = $cmd->query($sql);
-        $cuentas = $rs->fetchAll();
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-    }
+} else {
+    $union = '';
 }
+try {
+    $sql = "SELECT
+                    `ctb_pgcp`.`id_pgcp`
+                    , `ctb_pgcp`.`cuenta`
+                    , `ctb_pgcp`.`nombre`
+                    , `tb_bancos`.`id_banco`
+                    , `tes_cuentas`.`id_tes_cuenta`
+                FROM
+                    `ctb_pgcp`
+                    LEFT JOIN `tes_cuentas` 
+                        ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                    LEFT JOIN `tb_bancos` 
+                        ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
+                WHERE (`ctb_pgcp`.`cuenta` LIKE '1110%' OR `ctb_pgcp`.`cuenta` LIKE '1132%'  OR `ctb_pgcp`.`cuenta` LIKE '110106%')
+                    AND `ctb_pgcp`.`tipo_dato` = 'D'
+                    AND `tes_cuentas`.`id_tes_cuenta` IS NULL
+                $union";
+    $rs = $cmd->query($sql);
+    $cuentas = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 try {
     $sql = "SELECT `id_banco`, `nom_banco` FROM `tb_bancos` ORDER BY `nom_banco` ASC";
     $rs = $cmd->query($sql);

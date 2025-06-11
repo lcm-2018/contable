@@ -15,10 +15,7 @@ include '../financiero/consultas.php';
 
 ?>
 
-<body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] === '1') {
-                                echo 'sb-sidenav-toggled';
-                            } ?>">
-
+<body class="sb-nav-fixed <?= $_SESSION['navarlat'] === '1' ? 'sb-sidenav-toggled' : '' ?>">
     <?php include '../navsuperior.php' ?>
     <div id="layoutSidenav">
         <?php include '../navlateral.php' ?>
@@ -41,6 +38,7 @@ include '../financiero/consultas.php';
                                     <a class="dropdown-item sombra" href="#" id="sl_libros_aux_tesoreria">Libros auxiliares de tesorería</a>
                                     <a class="dropdown-item sombra" href="#" id="sl_libros_aux_bancos">Libros auxiliares de bancos</a>
                                     <a class="dropdown-item sombra" href="#" id="sl_historico_pagos_pendientes">Historial de pagos pendientes a terceros</a>
+                                    <a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(4);">Consolidado por terceros</a>
                                     <!--<a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(1);">Libros auxiliares de tesorería</a>-->
                                     <!--<a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(2);">Libros auxiliares de bancos</a>-->
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReporteTesoreria(3);">Reporte por tercero pagos y causaciones pendientes de pago</a>

@@ -930,7 +930,18 @@ $urlin = $_SESSION['urlin'];
                                     </div>
                                 <?php
                                 }
-                                ?>
+                                if (PermisosUsuario($permisos, 5699, 1) || $id_rol == 1) { ?>
+                                    <a class="nav-link sombra opcion_personalizado" href="javascript:void(0)" txt_id_opcion="5699">
+                                        <div class="form-row">
+                                            <div class="div-icono">
+                                                <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
+                                            </div>
+                                            <div>
+                                                Inf. Personalizados
+                                            </div>
+                                        </div>
+                                    </a>
+                                <?php } ?>
                             </nav>
                         </div>
                     <?php

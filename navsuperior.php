@@ -46,10 +46,12 @@ $url = $_SESSION['urlin'];
                     <a class="dropdown-item sombra" href="<?php echo $url ?>/usuarios/listperfiles.php">Perfiles</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item sombra" href="#" id="hrefCierre">Cierre de periodo</a>
-                    <a class="dropdown-item sombra" href="#" id="hrefGestionDocs">Gestión Documentos</a>
 
                 <?php }
+                if ($id_rol == 1 || PermisosUsuario($permisos, 6001, 0)) {
                 ?>
+                    <a class="dropdown-item sombra" href="#" id="hrefGestionDocs">Gestión Documentos</a>
+                <?php } ?>
                 <a class="dropdown-item sombra" href="#" onclick=cambiarFechaSesion(<?php echo $_SESSION['vigencia'] . "," . $_SESSION['id_user'] . ",'" . $url . "'"; ?>) data-target="#divModalPermisos">Fecha de sesión</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item sombra" href="<?php echo $url ?>/cerrar_sesion.php">Cerrar Sesión</a>

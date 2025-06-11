@@ -25,6 +25,12 @@ try {
     $sql->bindParam(4, $estado, PDO::PARAM_INT);
     $sql->bindParam(5, $id_pto_doc, PDO::PARAM_INT);
     if ($sql->execute()) {
+        $sql2 = "UPDATE `pto_rec`
+                    SET `estado` = 0
+                WHERE `id_ctb_doc` = ?";
+        $sql2 = $cmd->prepare($sql2);
+        $sql2->bindParam(1, $id_pto_doc, PDO::PARAM_INT);
+        $sql2->execute();
         $response['status'] = 'ok';
     } else {
         $response['msg'] = $sql->errorInfo()[2];

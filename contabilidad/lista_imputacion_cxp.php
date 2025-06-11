@@ -48,6 +48,9 @@ try {
                         , IFNULL(SUM(`valor_liberado`),0) AS `valor_liberado`
                     FROM
                         `pto_cop_detalle`
+                    INNER JOIN `ctb_doc` 
+                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    WHERE (`ctb_doc`.`estado` > 0)
                     GROUP BY `id_pto_crp_det`) AS `t1`  
                     ON (`t1`.`id_pto_crp_det` = `crp`.`id_pto_crp_det`)
             WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)

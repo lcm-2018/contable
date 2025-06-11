@@ -11293,3 +11293,7 @@ body {
 .fs-95 {
     font-size: 95%;
 }
+
+.table-selectable tbody tr:focus {
+    background-color: #d6e9f9 !important;
+}

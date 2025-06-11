@@ -13,6 +13,7 @@ include_once '../../../financiero/consultas.php';
 
 $id_doc = $_post['id_doc'];
 $id_rad = $_post['id_rad'];
+$facturado = $_post['facturado'];
 $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha2 = $date->format('Y-m-d H:i:s');
@@ -82,7 +83,8 @@ try {
     $query->bindParam(6, $iduser, PDO::PARAM_INT);
     $query->bindParam(7, $fecha2);
     $query->bindParam(8, $ref, PDO::PARAM_INT);
-    $valor = $datos['valor_rad'] - $datos['val_causado'];
+    $valor = $facturado;
+    $valor = $valor == 0 ? $datos['valor_rad'] - $datos['val_causado'] : $valor;
     $debito = $valor;
     $id_cuenta = $datos['id_cuenta'];
     $query->execute();

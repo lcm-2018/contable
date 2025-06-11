@@ -7,7 +7,9 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../../../permisos.php';
 if ($id_rol != 1) {
-    exit('Usuario no autorizado');
+    if (!(PermisosUsuario($permisos, 6001, 0))) {
+        exit('Usuario no autorizado');
+    }
 }
 $ids = isset($_POST['ids']) ? $_POST['ids'] : exit('Acceso no autorizado');
 if ($ids != '0') {
@@ -37,6 +39,17 @@ if ($ids != '0') {
     ];
 }
 
+$mods = [];
+foreach ($perm_modulos as $mod) {
+    $mods[] = $mod['id_modulo'];
+}
+$ids = implode(',', $mods);
+
+$where = '';
+if ($id_rol != 1) {
+    $where = " AND `id_modulo` IN ($ids)";
+}
+
 $vigencia = $_SESSION['vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -44,7 +57,7 @@ try {
     $sql = "SELECT
                 `id_modulo`,`nom_modulo`
             FROM `seg_modulos`
-            WHERE `id_modulo` >= 50
+            WHERE `id_modulo` >= 50 AND `id_modulo` <> 60 $where
             ORDER BY `nom_modulo` ASC";
     $rs = $cmd->query($sql);
     $modulos = $rs->fetchAll(PDO::FETCH_ASSOC);

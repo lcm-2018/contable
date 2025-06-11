@@ -2280,7 +2280,11 @@ const ProcesaFacturas = (boton) => {
 			dataType: "json",
 			success: function (response) {
 				if (response.status == "ok") {
-					FacturarCtasPorPagar(id);
+					if ($('#id_rad').length) {
+						GeneraFormInvoice(id);
+					} else {
+						FacturarCtasPorPagar(id);
+					}
 					$('#valFactura').html(response.acumulado);
 					mje("Registro guardado");
 				} else {
@@ -2303,6 +2307,19 @@ const FacturarCtasPorPagar = (id) => {
 		$("#divForms").html(he);
 	});
 };
+
+const GeneraFormInvoice = (id) => {
+	let url = "lista_invoices.php";
+	var objeto = $('#objeto').length ? $('#objeto').val() : '';
+	$.post(url, { id: id, objeto: objeto }, function (he) {
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-xl");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+};
+
 const ImputacionCtasPorPagar = (id) => {
 	let url = "lista_imputacion_cxp.php";
 	$.post(url, { id: id }, function (he) {
@@ -2424,9 +2441,15 @@ const generaMovimientoInvoice = (boton) => {
 	InactivaBoton(boton);
 	let id_rad = $('#id_rad').val();
 	let id_doc = $('#id_ctb_doc').val();
+	let valorFac = $('#valFactura').text().replace(/[\s$]+/g, "").replace(/\,/g, "");
+	if (valorFac == 0) {
+		mjeError("El valor de la factura debe ser mayor a cero");
+		ActivaBoton(boton);
+		return false;
+	}
 	fetch("datos/registrar/registrar_mvto_libaux_auto_invoice.php", {
 		method: "POST",
-		body: JSON.stringify({ id_doc: id_doc, id_rad: id_rad }),
+		body: JSON.stringify({ id_doc: id_doc, id_rad: id_rad, facturado: valorFac }),
 	})
 		.then((response) => response.json())
 		.then((response) => {
@@ -2776,14 +2799,24 @@ const consecutivoDocumento = (id) => {
 		});
 };
 
-const EnviaDocumentoSoporte = (boton) => {
+/**
+ * Envia un documento soporte a la API de Taxxa para su procesamiento.
+ * @param {HTMLElement} boton - El botón que se presiona para enviar el documento.
+ * @param {number} tipo - El tipo de documento (0 por defecto). Para Doc. Soporte, 1 para Factura.
+ */
+const EnviaDocumentoSoporte = (boton, tipo = 0) => {
 	boton.disabled = true;
 	let id = boton.value;
 	boton.value = "";
 	boton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+	if (tipo == 0) {
+		var url = "soportes/equivalente/enviar_factura.php";
+	} else {
+		var url = "soportes/equivalente/enviar_factura_venta.php";
+	}
 	$.ajax({
 		type: "POST",
-		url: "soportes/equivalente/enviar_factura.php",
+		url: url,
 		data: { id: id },
 		dataType: "json",
 		success: function (response) {
@@ -2812,6 +2845,7 @@ const EnviaDocumentoSoporte = (boton) => {
 	ActivaBoton(boton);
 	return false
 };
+
 const VerSoporteElectronico = (id) => {
 	fetch("soportes/equivalente/ver_html.php", {
 		method: "POST",
