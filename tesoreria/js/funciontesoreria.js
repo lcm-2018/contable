@@ -960,11 +960,17 @@ $('#divModalForms').on('click', '.relPagos', function () {
 });
 
 $('#divModalForms').on('click', '#gestionarMvtoCtbPag', function () {
+	/*
 	var id = $(this).attr('text');
 	$('<form action="lista_documentos_pag.php" method="post">' +
 		'<input type="hidden" name="id_doc" value="' + id + '" />' +
 		'</form>').appendTo("body").submit();
-
+	*/
+	var id = $(this).attr('text');
+	var btn = $(this).get(0);
+	InactivaBoton(btn);
+	GuardaDocPag(id);
+	ActivaBoton(btn);
 });
 $('#GuardaDocMvtoPag').on('click', function () {
 	var btn = $(this).get(0);
