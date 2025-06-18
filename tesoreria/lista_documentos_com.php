@@ -147,9 +147,18 @@ try {
                                                      </div>';
                                                 }
                                                 ?>
-                                                <button type="button" class="btn btn-success" title="Imprimir por Lotes" id="btnImpLotesTes">
-                                                    <i class="fas fa-print fa-lg"></i>
-                                                </button>
+                                                <div class="input-group-prepend px-1">
+                                                    <button type="button" class="btn btn-success" title="Imprimir por Lotes" id="btnImpLotesTes">
+                                                        <i class="fas fa-print fa-lg"></i>
+                                                    </button>
+                                                </div>
+                                                <?php
+                                                if ($tipo_doc > '0') {
+                                                    echo '<div class="input-group-prepend px-1">
+                                                            <button  onclick="cargarConsecutivos(' . $tipo_doc . ')" class="btn btn-outline-info btn-sm btn-circle" title="Consultar Consecutivos"><span class="fas fa-info-circle"></span></button>
+                                                        </div>';
+                                                }
+                                                ?>
                                             </div>
                                         </div>
 

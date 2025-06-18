@@ -84,7 +84,7 @@
                 [0, "desc"]
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4, 8] },
+                { class: 'text-wrap', targets: [6, 9, 10] },
             ],
             "lengthMenu": [
                 [10, 25, 50, -1],

@@ -2771,7 +2771,7 @@ const generarInfPorTercero = (boton) => {
 	let fec_fin = fecha_fin.value;
 	let url = window.urlin + "/tesoreria/php/informes/consolidado_por_terceros.php";
 	$.post(url, { fec_ini: fec_ini, fec_fin: fec_fin }, function (he) {
-		$("#imprimirInforme").html(he);
+		$("#areaImprimir").html(he);
 	});
 	ActivaBoton(boton);
 };
@@ -2842,6 +2842,37 @@ const guardarNumReferencia = (boton) => {
 	ActivaBoton(boton);
 }
 
+const eliminarReferenciaPago = (id) => {
+	Swal.fire({
+		title: "¿Está seguro de eliminar el registro?",
+		text: "No podrá revertir esta acción",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#3085d6",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si, eliminar",
+		cancelButtonText: "Cancelar",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			fetch("datos/eliminar/eliminar_referencia_pago.php", {
+				method: "POST",
+				body: JSON.stringify({ id: id }),
+			})
+				.then((response) => response.json())
+				.then((response) => {
+					if (response.status == "ok") {
+						cargaListaReferenciaPago(2);
+						mje("Registro eliminado");
+					} else {
+						mjeError("Error:", response.msg);
+					}
+				})
+				.catch((error) => {
+					console.log("Error:");
+				});
+		}
+	});
+}
 const CambiaEstadoReferencia = (id, estado) => {
 	$.ajax({
 		type: 'POST',
@@ -2855,6 +2886,16 @@ const CambiaEstadoReferencia = (id, estado) => {
 				mjeError('Error:', r.msg);
 			}
 		}
+	});
+}
+
+const cargarConsecutivos = (id) => {
+	$.post('datos/consultar/cargar_consecutivos.php', { id: id }, function (he) {
+		$("#divTamModalAux").removeClass("modal-lg");
+		$("#divTamModalAux").removeClass("modal-xl");
+		$("#divTamModalAux").removeClass("modal-sm");
+		$("#divModalAux").modal("show");
+		$("#divFormsAux").html(he);
 	});
 }
 
