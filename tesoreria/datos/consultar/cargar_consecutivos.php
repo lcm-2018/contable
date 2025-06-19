@@ -17,7 +17,8 @@ try {
             FROM `ctb_doc`
                 INNER JOIN `ctb_fuente` 
                     ON `ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`
-            WHERE `ctb_fuente`.`tesor` > 0 AND `id_vigencia` = $id_vigencia AND `ctb_doc`.`id_tipo_doc` = $tipo";
+            WHERE `ctb_fuente`.`tesor` > 0 AND `id_vigencia` = $id_vigencia AND `ctb_doc`.`id_tipo_doc` = $tipo
+            GROUP BY `id_tipo_doc`";
     $rs = $cmd->query($sql);
     $datos = $rs->fetch(PDO::FETCH_ASSOC);
     if (!empty($datos)) {
@@ -51,9 +52,6 @@ try {
     $response['msg'] =  $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 
-
-
-
 ?>
 <div class="px-0">
     <div class="shadow">
@@ -86,6 +84,6 @@ try {
         </div>
     </div>
     <div class="text-center">
-        <a type="button" class="btn btn-secondary btn-sm mt-3" data-dismiss="modal"> Cerrar</a>
+        <a type="button" class="btn btn-secondary btn-sm mt-3" data-dismiss="modal">Cerrar</a>
     </div>
 </div>

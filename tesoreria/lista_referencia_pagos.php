@@ -1,8 +1,6 @@
 <?php
-
-use PhpOffice\PhpWord\Reader\HTML;
-
 session_start();
+
 if (!isset($_SESSION['user'])) {
     header('Location: ../index.php');
     exit();
@@ -120,16 +118,6 @@ try {
                             if ($ce['estado'] == '0') {
                                 $editar =  $eliminar = '';
                             }
-
-                            $acciones =
-                                <<<HTML
-                                    <button  class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v fa-lg"></i>
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        <a text="{$id}" class="dropdown-item sombra relPagos" href="javascript:void(0);">Relación Pagos</a>
-                                    </div>
-                                HTML;
                     ?>
                             <tr id="<?= $id; ?>" class="text-center">
                                 <td><?= $id; ?></td>
@@ -150,9 +138,6 @@ try {
             <div class="text-right py-3">
                 <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
             </div>
-
         </div>
-
-
     </div>
-    <?php
+</div>

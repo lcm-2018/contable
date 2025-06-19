@@ -74,7 +74,7 @@ $error = curl_error($ch);
 curl_close($ch);
 $bancos = json_decode($result, true);
 $bancos = $bancos != 0 ? $bancos : [];
-echo "\xEF\xBB\xBF"; 
+echo "\xEF\xBB\xBF";
 ?>
 <table class="table-bordered bg-light" style="width:100% !important;" border=1>
     <tr>
@@ -100,24 +100,20 @@ echo "\xEF\xBB\xBF";
         $detalle_cuenta = $tipo_cuenta != '' ? ($tipo_cuenta == 'Ahorros' ? 'CA' : 'CC') : '';
         $cod_banco = $key !== false ? $bancos[$key]['cod_banco'] : '';
         $val = number_format($c['valor'], 2, ',', '');
-        $fila =
-            <<<HTML
-                <tr>
-                    <td class='text-left'>{$reg}</td>
-                    <td class='text-left'>{$c['nit_tercero']}</td>
-                    <td class='text-left'>{$c['nom_tercero']}</td>
-                    <td class='text-left'>{$c['codigo_ne']}</td>
-                    <td class='text-left'>{$producto}</td>
-                    <td class='text-left'>{$banco}</td>
-                    <td class='text-left'>{$tipo_cuenta}</td>
-                    <td class='text-left'>{$detalle_cuenta}</td>
-                    <td class='text-left'>{$cod_banco}</td>
-                    <td class='text-right'>{$val}</td>
-                    <td class='text-left'>{$c['id_manu']}</td>
-                </tr>
-            HTML;
+        echo "<tr>
+                <td class='text-left'>{$reg}</td>
+                <td class='text-left'>{$c['nit_tercero']}</td>
+                <td class='text-left'>{$c['nom_tercero']}</td>
+                <td class='text-left'>{$c['codigo_ne']}</td>
+                <td class='text-left'>{$producto}</td>
+                <td class='text-left'>{$banco}</td>
+                <td class='text-left'>{$tipo_cuenta}</td>
+                <td class='text-left'>{$detalle_cuenta}</td>
+                <td class='text-left'>{$cod_banco}</td>
+                <td class='text-right'>{$val}</td>
+                <td class='text-left'>{$c['id_manu']}</td>
+            </tr>";
         $reg++;
-        echo $fila;
     }
     ?>
 </table>
