@@ -608,9 +608,12 @@ if (isset($_POST['check'])) {
             //liquida horas extras 
             $devhe = 0;
             $auxtransp = 0;
+            $auxt12 = 0;
+            $auxa12 = 0;
             $basetransporte = ($salbase * 0) + $salbase;
             if ($basetransporte <= $dossml) {
                 $auxtransp = $auxiliotranporte / 30;
+                $auxt12 = $auxiliotranporte;
             } else {
                 $auxtransp = 0;
             }
@@ -619,12 +622,15 @@ if (isset($_POST['check'])) {
 
             if ($salbase <= $basealim) {
                 $auxali = ($auxalim / 30) * $diaslab;
+                $auxt12 = $auxalim;
             } else {
                 $auxali = 0;
             }
             if ($tipo_emp == 12 || $tipo_emp == 8) {
                 $auxali = 0;
                 $auxt = 0;
+                $auxt12 = 0;
+                $auxa12 = 0;
             }
             if ($grepresenta == 1) {
                 $gasrep = $representacion;
@@ -1007,10 +1013,10 @@ if (isset($_POST['check'])) {
                 //modificar liquidación vacaciones. 
                 $bonserpres = 0;
                 //prima de vacaciones
-                $primvacacion  = (($salbase + $gasrep + $auxt + $auxali + $bsp / 12 + $primservicio / 12) * 15) / 30;
+                $primvacacion  = (($salbase + $gasrep + $auxt12 + $auxa12 + $bsp / 12 + $primservicio / 12) * 15) / 30;
                 $primavacn = ($primvacacion / 360) * $diastocalc; //+
                 //liquidacion vacaciones
-                $liqvacacion  = (($salbase + $gasrep + $auxt + $auxali + $bsp / 12 + $primservicio / 12) * $dayvac) / 30;
+                $liqvacacion  = (($salbase + $gasrep + $auxt12 + $auxa12 + $bsp / 12 + $primservicio / 12) * $dayvac) / 30;
                 $vacacion = ($liqvacacion / 360) * $diastocalc; //=
                 $bonrecrea = ($salbase / 30) * 2;
                 $bonrecreacion = ($bonrecrea / 360) * $diastocalc; //+
@@ -1453,22 +1459,22 @@ if (isset($_POST['check'])) {
                     $ant_bon_recreacion = 0;
                 }
                 //prima de vacaciones
-                $prima_sv_dia = ($salbase + $auxt + $auxali + $ant_bsp / 12) / 720;
+                $prima_sv_dia = ($salbase + $auxt12 + $auxa12 + $ant_bsp / 12) / 720;
                 $prima = $prima_sv_dia * $diastocesantias; //=
 
-                $primvacacion  = (($salbase +  $gasrep + $auxt + $auxali + $ant_bsp / 12 + $ant_prima_servicio / 12) * 15) / 30;
+                $primvacacion  = (($salbase +  $gasrep + $auxt12 + $auxa12 + $ant_bsp / 12 + $ant_prima_servicio / 12) * 15) / 30;
                 $privacmes = ($primvacacion / 360) * $diastocesantias; //+
                 //liquidacion vacaciones
-                $liqvacacion  = (($salbase  + $gasrep + $auxt + $auxali + $ant_bsp / 12 + $ant_prima_servicio / 12) * 22) / 30;
+                $liqvacacion  = (($salbase  + $gasrep + $auxt12 + $auxa12 + $ant_bsp / 12 + $ant_prima_servicio / 12) * 22) / 30;
                 $vacacion = ($liqvacacion / 360) * $diastocesantias; //=
                 //prima de navidad
-                $primanavidad = $salbase +  $gasrep + $auxt + $auxali + ($ant_bsp / 12) + ($ant_prima_servicio / 12) + ($ant_prima_vacaciones / 12);
+                $primanavidad = $salbase +  $gasrep + $auxt12 + $auxa12 + ($ant_bsp / 12) + ($ant_prima_servicio / 12) + ($ant_prima_vacaciones / 12);
                 $prinavmes = ($primanavidad / 360) * $diastocesantias; //+
                 //Bonificacion de recreacion
                 $bonrecrea = ($salbase / 30) * 2;
                 $bonrecmes = ($bonrecrea / 360) * $diastocesantias; //+
                 //cesantia e intereses  cesantia
-                $censantias = $salbase + $gasrep +  $auxt + $auxali + $ant_bsp / 12 + $ant_prima_servicio / 12 + $ant_prima_vacaciones / 12 + $ant_prima_navidad / 12;
+                $censantias = $salbase + $gasrep +  $auxt12 + $auxa12 + $ant_bsp / 12 + $ant_prima_servicio / 12 + $ant_prima_vacaciones / 12 + $ant_prima_navidad / 12;
                 $cesantia = ($censantias / 360) * $diastocesantias; //=
                 $icesant = $cesantia * 0.12;
                 if ($_SESSION['caracter'] == '1') {

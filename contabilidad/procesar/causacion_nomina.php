@@ -25,6 +25,7 @@ try {
                 , `nom_liq_dlab_auxt`.`g_representa`
                 , `nom_liq_dlab_auxt`.`horas_ext`
                 , `ccostos`.`id_ccosto`
+                , `t`.`id_tercero_api`
             FROM
                 `nom_liq_dlab_auxt`
                 INNER JOIN `nom_empleado` 
@@ -37,6 +38,8 @@ try {
                         `nom_ccosto_empleado`
                     GROUP BY `id_empleado`) AS `ccostos`
                     ON (`nom_liq_dlab_auxt`.`id_empleado` = `ccostos`.`id_empleado`)
+                LEFT JOIN `tb_terceros` AS `t` 
+                    ON (`nom_empleado`.`no_documento` = `t`.`nit_tercero`)
             WHERE (`nom_liq_dlab_auxt`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $sueldoBasico = $rs->fetchAll(PDO::FETCH_ASSOC);
@@ -44,22 +47,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$ced = [];
-$ced[] = 0;
-foreach ($sueldoBasico as $sb) {
-    $ced[] = $sb['no_documento'];
-}
-$cedulas = implode(',', $ced);
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api`, `nit_tercero` AS `no_doc` FROM `tb_terceros` WHERE (`nit_tercero` IN ($cedulas))";
-    $rs = $cmd->query($sql);
-    $idApi = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -257,7 +245,28 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_empleado` , `val_ret` FROM `nom_retencion_fte` WHERE (`id_nomina` = $id_nomina)";
+    $sql = "SELECT 
+                `ctb_retencion_rango`.`id_rango`
+            FROM 
+                `nom_causacion` 
+                INNER JOIN `tb_centrocostos` 
+                    ON (`nom_causacion`.`centro_costo` = `tb_centrocostos`.`id_centro`)
+                INNER JOIN `ctb_retenciones` 
+                    ON (`ctb_retenciones`.`id_cuenta` = `nom_causacion`.`cuenta`)
+                INNER JOIN `ctb_retencion_rango` 
+                    ON (`ctb_retencion_rango`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
+            WHERE (`tb_centrocostos`.`es_pasivo` = 1 AND `nom_causacion`.`id_tipo` = 30 AND `ctb_retencion_rango`.`id_vigencia` = $id_vigencia)";
+    $rs = $cmd->query($sql);
+    $rango = $rs->fetch(PDO::FETCH_ASSOC);
+    $rango = !empty($rango) ? $rango['id_rango'] : exit('No se encontró el rango de retención  en la fuente para la causación de nómina');
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `id_empleado` , `val_ret`, `base` FROM `nom_retencion_fte` WHERE (`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $rfte = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -481,6 +490,7 @@ try {
     $rs = $cmd->query($sql);
     $tercero = $rs->fetch();
     $id_ter_api = !empty($tercero) ? $tercero['id_tercero_api'] : NULL;
+    $id_ter_api = count($sueldoBasico) == 1 ? $sueldoBasico[0]['id_tercero_api'] : $id_ter_api;
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
@@ -546,8 +556,7 @@ foreach ($sueldoBasico as $sb) {
     $tipoCargo = $sb['tipo_cargo'];
     $ccosto = $sb['id_ccosto'] == '' ? 21 : $sb['id_ccosto'];
     $doc_empleado = $sb['no_documento'];
-    $keyt = array_search($doc_empleado, array_column($idApi, 'no_doc'));
-    $id_ter_api = $keyt !== false ? $idApi[$keyt]['id_tercero_api'] : NULL;
+    $id_ter_api = $sb['id_tercero_api'];
     $restar = 0;
     $rest = 0;
     $liberado = 0;
@@ -680,6 +689,20 @@ foreach ($sueldoBasico as $sb) {
         $query->bindParam(5, $credito, PDO::PARAM_STR);
         $query->bindParam(6, $iduser, PDO::PARAM_INT);
         $query->bindParam(7, $fecha2);
+
+        $sql1 = "INSERT INTO `ctb_causa_retencion`
+                    (`id_ctb_doc`,`id_rango`,`valor_base`,`tarifa`,`valor_retencion`,`id_terceroapi`,`id_user_reg`,`fecha_reg`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql1 = $cmd->prepare($sql1);
+        $sql1->bindParam(1, $id_doc_nom, PDO::PARAM_INT);
+        $sql1->bindParam(2, $rango, PDO::PARAM_INT);
+        $sql1->bindParam(3, $base, PDO::PARAM_STR);
+        $sql1->bindValue(4, 0, PDO::PARAM_STR);
+        $sql1->bindParam(5, $valor_retencion, PDO::PARAM_STR);
+        $sql1->bindParam(6, $id_ter_api, PDO::PARAM_INT);
+        $sql1->bindParam(7, $iduser, PDO::PARAM_INT);
+        $sql1->bindParam(8, $fecha2);
+
         $filtro = [];
         $filtro = array_filter($cuentas_causacion, function ($cuentas_causacion) use ($ccosto) {
             return $cuentas_causacion["centro_costo"] == $ccosto;
@@ -858,6 +881,11 @@ foreach ($sueldoBasico as $sb) {
                         }
                         $key = array_search($id_empleado, array_column($rfte, 'id_empleado'));
                         $valRteFte = $key !== false ? $rfte[$key]['val_ret'] : 0;
+                        if ($key !== false && $valRteFte > 0) {
+                            $base = $rfte[$key]['base'];
+                            $valor_retencion = $rfte[$key]['val_ret'];
+                            $sql1->execute();
+                        }
                         $val_dcto = 0;
                         if (!empty($dcto)) {
                             foreach ($dcto as $d) {

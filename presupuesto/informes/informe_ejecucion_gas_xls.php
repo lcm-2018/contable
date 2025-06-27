@@ -443,7 +443,7 @@ try {
             <?= $detalle_mes == 1 ? '<th>Contracréditos mes</th>' : ''; ?>
             <th>Contracreditos</th>
             <th>Presupuesto definitivo</th>
-            <?= $detalle_mes == 1 ? '<th>Compromisos mes</th>' : ''; ?>
+            <?= $detalle_mes == 1 ? '<th>Disponibilidades mes</th>' : ''; ?>
             <th>Disponibilidades</th>
             <?= $detalle_mes == 1 ? '<th>Registrados mes</th>' : ''; ?>
             <th>Compromisos</th>
@@ -515,7 +515,7 @@ try {
                 echo '<td style="text-align:right">' . pesos($value['registrado_mes']) . '</td>';
             }
             echo '<td style="text-align:right">' . pesos($value['registrado']) . '</td>';
-            echo '<td style="text-align:right">' . round(($value['comprometido'] / ($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito'])) * 100, 2) . '</td>';
+            echo '<td style="text-align:right">' . round(($value['registrado'] / ($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito'])) * 100, 2) . '</td>';
 
             if ($detalle_mes == 1) {
                 echo '<td style="text-align:right">' . pesos($value['causado_mes']) . '</td>';

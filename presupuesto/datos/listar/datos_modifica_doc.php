@@ -10,7 +10,7 @@ include '../../../financiero/consultas.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 4, $cmd);
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
 
 // Div de acciones de la lista
 $tipo_doc = $_POST['id_pto_doc'];
@@ -69,7 +69,7 @@ try {
 $num = 0;
 if (!empty($listappto)) {
     foreach ($listappto as $lp) {
-        $dato = null;
+        $detalles = $cerrar = $editar = $borrar = $anular = $imprimir = '';
         $id_pto = $lp['id_pto_mod'];
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
         $key = array_search($id_pto, array_column($valores, 'id_pto_mod'));
@@ -99,15 +99,28 @@ if (!empty($listappto)) {
             $valor2 = 0;
         }
         $diferencia = $valor1 - $valor2;
-        // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
-        if ($fecha <= $fecha_cierre) {
-            $anular = null;
-        } else {
-            if (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1) {
-                $anular = '<a value="' . $id_pto . '" class="dropdown-item sombra " href="#" onclick="anulacionCrp(' . $id_pto . ');">Anulación</a>';
+        if (PermisosUsuario($permisos, 5401, 1) || $id_rol == 1) {
+            $detalles = '<a value="' . $id_pto . '" onclick="cargarListaDetalleMod(' . $id_pto . ')" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
+        }
+        if (PermisosUsuario($permisos, 5401, 2) || $id_rol == 1) {
+            if ($lp['estado'] == '2') {
+                $cerrar = '<button value="' . $id_pto . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb abrir" onclick="abrirDocumentoMod(' . $id_pto . ')"><span class="fas fa-lock fa-lg"></span></button>';
+            } else {
+                $cerrar = '<button value="' . $id_pto . '" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb cerrar" onclick="cerrarMod(' . $id_pto . ')"><span class="fas fa-unlock fa-lg"></span></button>';
             }
         }
-        // Para el caso de los documentos aplazados
+        if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
+            $editar = '<button id ="eliminar_' . $id_pto . '" value="' . $id_pto . '" onclick="editarModPresupuestal(' . $id_pto . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-pen fa-lg"></span></button>';
+        }
+        if (PermisosUsuario($permisos, 5401, 4) || $id_rol == 1) {
+            $borrar = '<button id ="eliminar_' . $id_pto . '" value="' . $id_pto . '" onclick="eliminarModPresupuestal(' . $id_pto . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></button>';
+        }
+        if (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1) {
+            $anular = '<button text="' . $id_pto . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" onclick="anulacionPtoMod(this);"><span class="fas fa-ban fa-lg"></span></button>';
+        }
+        if (PermisosUsuario($permisos, 5401, 6) || $id_rol == 1) {
+            $imprimir = '<button value="' . $id_pto . '" onclick="imprimirFormatoMod(' . $id_pto . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas fa-print fa-lg"></span></button>';
+        }
         if ($tipo_doc == '4' || $tipo_doc == '5') {
             $diferencia = 0;
         }
@@ -118,73 +131,24 @@ if (!empty($listappto)) {
             $estado = '<div class="text-center"><span class="label text-danger">Incorrecto</span></div>';
         }
 
-        if (PermisosUsuario($permisos, 5401, 2) || $id_rol == 1) {
-            if ($lp['estado'] == 0) {
-                $cerrar = '<a value="' . $id_pto . '" class="dropdown-item sombra carga" onclick="abrirDocumentoMod(' . $id_pto . ')" href="#">Abrir documento</a>';
-            } else {
-                $cerrar = '<a value="' . $id_pto . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoMod(' . $id_pto . ')" href="#">Cerrar documento</a>';
-            }
-            /*
-            if ($fecha < $fecha_cierre) {
-                $cerrar = null;
-            }*/
-        } else {
-            $cerrar = null;
+        if ($lp['estado'] == '0') {
+            $estado = '<div class="text-center"><span class="label text-secondary">Anulado</span></div>';
         }
-        if ($tipo_doc == 4) {
-            $desaplazar = '<a value="' . $id_pto . '" class="dropdown-item sombra carga" onclick="redirecionarListaMod(' . $id_pto . ')" href="#">Desaplazar</a>';;
-        } else {
-            $desaplazar = null;
+        if ($fecha <= $fecha_cierre || $lp['estado'] == '0') {
+            $cerrar = $editar = $borrar = $anular = '';
         }
-        if (PermisosUsuario($permisos, 5401, 2) || $id_rol == 1) {
-            $detalles = '<a value="' . $id_pto . '" onclick="cargarListaDetalleMod(' . $id_pto . ')" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
-            $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-            ...
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            ' . $cerrar . '
-            ' . $desaplazar . '
-            ' . $anular . '
-            </div>';
-            /*
-            if ($fecha < $fecha_cierre) {
-                $detalles = null;
-            }*/
-        } else {
-            $detalles = null;
-        }
-        if (PermisosUsuario($permisos, 5401, 6) || $id_rol == 1) {
-            $imprimir = '<a value="' . $id_pto . '" onclick="imprimirFormatoMod(' . $id_pto . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
+        if ($lp['estado'] == '2') {
+            $editar = $borrar = $anular = '';
         }
 
-        if (PermisosUsuario($permisos, 5401, 4) || $id_rol == 1) {
-            $borrar = '<a id ="eliminar_' . $id_pto . '" value="' . $id_pto . '" onclick="eliminarModPresupuestal(' . $id_pto . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-            /*if ($fecha < $fecha_cierre) {
-                $borrar = null;
-            }*/
-        } else {
-            $borrar = null;
-        }
-        // verifico estado del documento
-        if ($lp['estado'] == '0') {
-            $borrar = null;
-        }
-        if ($lp['estado'] == 5) {
-            $borrar = null;
-            $detalles = null;
-            $acciones = null;
-            $imprimir = null;
-            $dato = 'Anulado';
-        }
         $num = $lp['id_manu'];
-        $acciones = null;
         $data[] = [
             'num' => $num,
             'fecha' => $fecha,
             'documento' => $lp['acto'],
             'numero' => $lp['numero_acto'],
             'valor' => $estado,
-            'botones' => '<div class="text-center" style="position:relative">' . $borrar . $detalles . $imprimir . $acciones . $dato . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $imprimir . $cerrar . $anular . $borrar . '</div>',
 
         ];
     }

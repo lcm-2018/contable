@@ -538,13 +538,7 @@
                             $("#divModalError").modal("show");
                             $("#divMsgError").html("¡Debe seleccionar  un movimiento!");
                         } else {
-                            $.post("datos/registrar/formadd_modifica_presupuesto_doc.php", { id_mov: id_mov, id_pto: id_pto_ppto }, function (he) {
-                                $("#divTamModalForms").removeClass("modal-sm");
-                                $("#divTamModalForms").removeClass("modal-xl");
-                                $("#divTamModalForms").addClass("modal-lg");
-                                $("#divModalForms").modal("show");
-                                $("#divForms").html(he);
-                            });
+                            FormModPto(id_mov, id_pto_ppto, 0);
                         }
                     },
                 },
@@ -1630,7 +1624,7 @@ $('#setHomologacionPto').on('click', '', function () {
     }
     ActivaBoton(btn);
 });
-$('#divModalForms').on('click', '#registrarModificaPto', function () {
+$('#divModalForms').on('click', '#guardaModificaPto', function () {
     var btn = $(this).get(0);
     InactivaBoton(btn);
     $('.is-invalid').removeClass('is-invalid');
@@ -1659,17 +1653,31 @@ $('#divModalForms').on('click', '#registrarModificaPto', function () {
                 if (r == 'ok') {
                     $('#tableModPresupuesto').DataTable().ajax.reload(null, false);
                     $('#divModalForms').modal('hide');
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html('Registrado correctamente');
+                    mje('Modificación guardada correctamente');
                 } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r);
+                    mjeError('Error', r);
                 }
             }
         });
     }
     ActivaBoton(btn);
 });
+
+const editarModPresupuestal = (id) => {
+    let id_pto_ppto = $("#id_pto_ppto").val();
+    let id_mov = $("#id_mov").val();
+    FormModPto(id_mov, id_pto_ppto, id);
+}
+
+function FormModPto(id_mov, id_pto_ppto, id) {
+    $.post("datos/registrar/formadd_modifica_presupuesto_doc.php", { id_mov: id_mov, id_pto: id_pto_ppto, id: id }, function (he) {
+        $("#divTamModalForms").removeClass("modal-sm");
+        $("#divTamModalForms").removeClass("modal-xl");
+        $("#divTamModalForms").addClass("modal-lg");
+        $("#divModalForms").modal("show");
+        $("#divForms").html(he);
+    });
+}
 // genera cdp y rp para nomina
 //--!EDWIN
 $("#divCuerpoPag").on("click", "#btnPtoNomina", function () {
@@ -2380,6 +2388,7 @@ var cerrarRad = function (dato) {
             }
         });
 };
+
 var cerrarMod = function (dato) {
     fetch("datos/actualizar/cerrar_mod.php", {
         method: "POST",
@@ -2453,6 +2462,16 @@ const anulacionPtoRad = (button) => {
     });
 };
 
+const anulacionPtoMod = (button) => {
+    var data = button.getAttribute("text");
+    $.post("form_anula_mod.php", { data: data }, function (he) {
+        $("#divTamModalForms").removeClass("modal-sm");
+        $("#divTamModalForms").removeClass("modal-xl");
+        $("#divTamModalForms").addClass("modal-lg");
+        $("#divModalForms").modal("show");
+        $("#divForms").html(he);
+    });
+};
 function cerrarCdp(id) {
     cerrarCDP(id);
     mje("Documento cerrado");
@@ -2472,8 +2491,7 @@ function abrirCrp(id) {
         },
     });
 };
-let abrirDocumentoMod = function (dato) {
-    let doc = id_pto_doc.value;
+var abrirDocumentoMod = function (dato) {
     fetch("datos/consultar/consultaAbrir.php", {
         method: "POST",
         body: dato,
@@ -2482,8 +2500,7 @@ let abrirDocumentoMod = function (dato) {
         .then((response) => {
             if (response[0].value == "ok") {
                 mje("Documento abierto");
-                let id = "tableModPresupuesto";
-                reloadtable(id);
+                $('#tableModPresupuesto').DataTable().ajax.reload(null, false);
             } else {
                 mjeError("Documento no abierto", "Verifique sumas iguales");
             }
@@ -3451,6 +3468,47 @@ function changeEstadoAnulacionRad() {
                 $.ajax({
                     type: "POST",
                     url: "datos/registrar/registrar_anulacion_rad.php",
+                    data: datos,
+                    success: function (r) {
+                        if (r === "ok") {
+                            $('#divModalForms').modal('hide');
+                            $('#tablePptoRad').DataTable().ajax.reload(null, false);
+                            mje('Proceso realizado correctamente');
+                        } else {
+                            mjeError('Error:', r);
+                        }
+                    },
+                });
+            }
+        });
+    }
+};
+
+function changeEstadoAnulacionMod() {
+    $('.is-invalid').removeClass('is-invalid');
+    if ('fecha' == '') {
+        $('#fecha').focus();
+        $('#fecha').addClass('is-invalid');
+        mjeError('La fecha no puede estar vacia', '');
+    } else if ($('#objeto').val() == '') {
+        $('#objeto').focus();
+        $('#objeto').addClass('is-invalid');
+        mjeError('El Motivo de anulación no puede estar vacio', '');
+    } else {
+        var datos = $("#formAnulaDoc").serialize();
+        Swal.fire({
+            title: "¿Confirma anulación de documento?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: "datos/registrar/registrar_anulacion_mod.php",
                     data: datos,
                     success: function (r) {
                         if (r === "ok") {

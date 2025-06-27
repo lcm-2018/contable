@@ -12,7 +12,10 @@ $fecha_corte = $_POST['f_fin'];
 $cuenta = $_POST['cuenta'];
 $tipo = $_POST['tipo'];
 $saldo = $_POST['saldo'];
+$nit = $_POST['nit'];
 $condicion = $tipo == 'M' ? "LIKE '$cuenta%'" : "= '$cuenta'";
+$where = $_POST['xTercero'] == 1 ? " AND `tb_terceros`.`nit_tercero` = '$nit'" : '';
+
 
 function pesos($valor)
 {
@@ -38,7 +41,9 @@ try {
                 `ctb_fuente`.`nombre` AS `nom_tipo_doc`,
                 `ctb_doc`.`id_manu`,
                 `ctb_doc`.`detalle`,
-                `tes_forma_pago`.`forma_pago`
+                `tes_forma_pago`.`forma_pago`,
+                `tb_terceros`.`nom_tercero`,
+                `tb_terceros`.`nit_tercero`
             FROM 
                 `ctb_libaux`
             INNER JOIN `ctb_doc` 
@@ -51,7 +56,9 @@ try {
                 ON `tes_detalle_pago`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`
             LEFT JOIN `tes_forma_pago` 
                 ON `tes_detalle_pago`.`id_forma_pago` = `tes_forma_pago`.`id_forma_pago`
-            WHERE `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2 AND `ctb_pgcp`.`cuenta` $condicion
+            LEFT JOIN `tb_terceros`
+                ON `ctb_libaux`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`
+            WHERE `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2 AND `ctb_pgcp`.`cuenta` $condicion $where
             ORDER BY `ctb_pgcp`.`fecha`, `ctb_pgcp`.`cuenta` ASC";
     $res = $cmd->query($sql);
     $cuentas = $res->fetchAll();

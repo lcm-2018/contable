@@ -3501,14 +3501,16 @@ const generarInformeCtb = (boton) => {
 $('#areaReporte').on('dblclick', '#tbBalancePrueba tr', function () {
 	var cuenta = $(this).find('td:eq(0)').text();
 	var tipo = $(this).find('td:eq(2)').text();
+	var nit = $(this).find('td:eq(4)').text();
 	var saldo = $(this).find('td:eq(6)').text();
 	var f_ini = $('#fecha_ini').val();
 	var f_fin = $('#fecha_fin').val();
+	var check = $('#xTercero').is(':checked') ? 1 : 0;
 	$('#divModalEspera').modal('show');
 	$.ajax({
 		url: window.urlin + "/contabilidad/informes/informe_libros_auxiliares_detalle.php",
 		type: "POST",
-		data: { cuenta: cuenta, tipo: tipo, saldo: saldo, f_ini: f_ini, f_fin: f_fin },
+		data: { cuenta: cuenta, tipo: tipo, nit: nit, saldo: saldo, f_ini: f_ini, f_fin: f_fin, xTercero: check },
 		success: function (r) {
 			setTimeout(function () {
 				hideModalEspera()
@@ -3580,23 +3582,54 @@ function CausaAuCentroCostos(boton) {
 	InactivaBoton(boton);
 	var id_crp = $('#id_crpp').val();
 	var id_doc = $('#id_ctb_doc').val();
-	var valor = parseFloat($('#valFactura').text().replace(/[\$,]/g, ''));
-	$.ajax({
-		url: 'datos/registrar/registrar_mvto_costos_auto.php',
-		type: 'POST',
-		data: { id_crp: id_crp, id_doc: id_doc, valor: valor },
-		dataType: 'json',
-		success: function (r) {
-			if (r.status == 'ok') {
-				mje('Proceso realizado correctamente');
-				$('#valCentroCosto').html(r.acumulado);
-			} else {
-				mjeError(r.msg);
+	var factura = parseFloat($('#valFactura').text().replace(/[\$,]/g, ''));
+	var imputacion = parseFloat($('#valImputacion').text().replace(/[\$,]/g, ''));
+	var ccosto = parseFloat($('#valCentroCosto').text().replace(/[\$,]/g, ''));
+	var impuestos = parseFloat($('#valDescuentos').text().replace(/[\$,]/g, ''));
+	if (factura <= 0) {
+		mjeError('Debe registrar el valor de la factura');
+	} else if (imputacion > 0 || ccosto > 0 || impuestos > 0) {
+		mjeError('Se encuentran valores  registrados de imputación, centro de costos o impuestos');
+	} else {
+		$.ajax({
+			url: 'datos/registrar/registrar_mvto_costos_auto.php',
+			type: 'POST',
+			data: { id_crp: id_crp, id_doc: id_doc, valor: valor },
+			dataType: 'json',
+			success: function (r) {
+				if (r.status == 'ok') {
+					mje('Proceso realizado correctamente');
+					if (r.msg == 'imp') {
+						sessionStorage.setItem('autoGenerarMovimiento', '1');
+					}
+					setTimeout(function () {
+						location.reload();
+					}, 500);
+
+				} else {
+					mjeError(r.msg);
+				}
 			}
-		}
-	});
+		});
+	}
 	ActivaBoton(boton);
 }
+
+$(document).ready(function () {
+	if (sessionStorage.getItem('autoGenerarMovimiento') === '1') {
+		sessionStorage.removeItem('autoGenerarMovimiento');
+
+		setTimeout(function () {
+			let boton = document.querySelector('[onclick^="generaMovimientoCxp"]');
+			if (boton) {
+				boton.click();
+			} else {
+				console.warn('Botón generaMovimientoCxp no encontrado');
+			}
+		}, 100); // Puedes ajustar este tiempo si el botón tarda más en aparecer
+	}
+});
+
 function RegDocREfDr(datos, id_doc) {
 	$.ajax({
 		url: 'datos/registrar/registrar_referencia_dr.php',

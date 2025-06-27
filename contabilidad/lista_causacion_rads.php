@@ -38,7 +38,7 @@ try {
                 `pto_rad`
                 LEFT JOIN `tb_terceros` 
                     ON (`pto_rad`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
-            WHERE (`pto_rad`.`estado` = 2  AND `id_pto` = {$listappto['id_pto']})";
+            WHERE (`pto_rad`.`estado` = 2  AND `id_pto` = {$listappto['id_pto']} AND `pto_rad`.`tipo_movimiento` IS NULL)";
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();
 } catch (PDOException $e) {
