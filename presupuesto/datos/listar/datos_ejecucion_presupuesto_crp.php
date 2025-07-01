@@ -55,8 +55,7 @@ if (isset($_POST['tercero']) && $_POST['tercero']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     if ($_POST['estado'] == "-1") {
         $andwhere .= " AND pto_crp.estado>=" . $_POST['estado'];
-    } 
-    else {
+    } else {
         $andwhere .= " AND pto_crp.estado=" . $_POST['estado'];
     }
 }
@@ -135,7 +134,7 @@ if (!empty($listappto)) {
         $id_pto = $lp['id_pto_crp'];
         $anular = $dato = $borrar = $imprimir = $detalles = $abrir = null;
         // Sumar el valor del crp de la tabla id_pto_mtvo
-        $valor_crp = $lp['debito'] - $lp['credito'];
+        $valor_crp = $lp['debito'];
         $valor_crp = number_format($valor_crp, 2, ',', '.');
         $tercero  = $lp['nom_tercero'];
         $ccnit = $lp['nit_tercero'];

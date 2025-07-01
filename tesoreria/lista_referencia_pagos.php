@@ -1,8 +1,6 @@
 <?php
-
-use PhpOffice\PhpWord\Reader\HTML;
-
 session_start();
+
 if (!isset($_SESSION['user'])) {
     header('Location: ../index.php');
     exit();
@@ -25,15 +23,18 @@ try {
                 ,  DATE_FORMAT(`tes_referencia`.`fec_reg`, '%Y-%m-%d') AS `fec_reg`
                 , `tes_referencia`.`estado`
                 , SUM(`t1`.`valor`) AS `valor`
+                , `tes_cuentas`.`nombre` AS `banco`
             FROM
                 `tes_referencia`
                 LEFT JOIN `ctb_doc` 
                     ON (`ctb_doc`.`id_ref` = `tes_referencia`.`id_referencia` AND `ctb_doc`.`estado` = 2)
                 LEFT JOIN 
-                (SELECT `id_ctb_doc`, SUM(`credito`) AS `valor`
-                FROM `ctb_libaux`
-                GROUP BY `id_ctb_doc`)AS`t1` 
+                    (SELECT `id_ctb_doc`, SUM(`credito`) AS `valor`
+                    FROM `ctb_libaux`
+                    GROUP BY `id_ctb_doc`)AS`t1` 
                     ON (`t1`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN `tes_cuentas` 
+                    ON (`tes_cuentas`.`id_tes_cuenta` = `tes_referencia`.`id_tes_cuenta`)
             WHERE (DATE_FORMAT(`tes_referencia`.`fec_reg`, '%Y-%m-%d') BETWEEN '$inicio' AND '$fin')
             GROUP BY `tes_referencia`.`id_referencia`";
     $rs = $cmd->query($sql);
@@ -89,6 +90,7 @@ try {
                     <tr>
                         <th class="text-center">#</th>
                         <th class="text-center">Número</th>
+                        <th class="text-center">Banco</th>
                         <th class="text-center">Fecha</th>
                         <th class="text-center">Estado</th>
                         <th class="text-center">Valor</th>
@@ -116,24 +118,15 @@ try {
                             if ($ce['estado'] == '0') {
                                 $editar =  $eliminar = '';
                             }
-
-                            $acciones =
-                                <<<HTML
-                                    <button  class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v fa-lg"></i>
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        <a text="{$id}" class="dropdown-item sombra relPagos" href="javascript:void(0);">Relación Pagos</a>
-                                    </div>
-                                HTML;
                     ?>
                             <tr id="<?= $id; ?>" class="text-center">
                                 <td><?= $id; ?></td>
+                                <td><?= $ce['banco']; ?></td>
                                 <td><?= $ce['numero']; ?></td>
                                 <td><?= $ce['fec_reg']; ?></td>
                                 <td> <?= $estado; ?></td>
                                 <td> <?= number_format($ce['valor'], 2, '.', ','); ?></td>
-                                <td> <?= $editar . $imprimir .  $eliminar ; ?></td>
+                                <td> <?= $editar . $imprimir .  $eliminar; ?></td>
 
                             </tr>
                     <?php
@@ -145,9 +138,6 @@ try {
             <div class="text-right py-3">
                 <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
             </div>
-
         </div>
-
-
     </div>
-    <?php
+</div>

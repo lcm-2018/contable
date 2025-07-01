@@ -56,12 +56,16 @@ $otras = $rs->fetchAll();
                         <div class="col-12">
                             <div class="text-center pt-3">
                                 <a type="button" class="btn btn-primary btn-sm" onclick="generarInfPorTercero(this);">Informe</a>
+                                <a type="" id="btnExcelEntrada" class="btn btn-outline-success" value="01" title="Exprotar a Excel">
+                                    <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
+                                </a>
+                                <a type="button" class="btn btn-danger" title="Imprimir" onclick="imprSelecTes('areaImprimir','<?php echo 0; ?>');"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
-            <div id="imprimirInforme" class="pt-3" style="font-size: 10px;">
+            <div id="areaImprimir" class="pt-3" style="font-size: 10px;">
 
             </div>
         </div>

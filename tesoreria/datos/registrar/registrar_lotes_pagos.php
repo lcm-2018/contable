@@ -45,7 +45,7 @@ try {
                     , `tb_terceros`.`nom_tercero`
                     , `causado`.`ids_det`
                     , `causado`.`valores`
-                    , (SELECT `id_tes_cuenta` AS `cta_contable` FROM `tes_cuentas` WHERE (`est_nomina` = 1)) AS `banco`
+                    , (SELECT `id_tes_cuenta` AS `cta_contable` FROM `tes_referencia` WHERE `id_referencia` = (SELECT MAX(`id_referencia`) AS `id_referencia` FROM `tes_referencia` WHERE (`estado` = 1))) AS `banco`
                     , (SELECT `id_cuenta` AS `cta_contable` FROM `tes_cuentas` WHERE (`est_nomina` = 1)) AS `cta_contable`
                     , 1 AS `forma_pago`
                     , `libros`.`id_cuenta` AS `id_cuenta`

@@ -102,7 +102,7 @@ try {
                             `ctb_libaux`
                             INNER JOIN `ctb_doc` 
                             ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                        WHERE (`ctb_doc`.`id_ctb_doc_tipo3` > 0 AND `ctb_doc`.`estado` > 1)
+                        WHERE (`ctb_doc`.`id_ctb_doc_tipo3` > 0 AND `ctb_doc`.`estado` > 0)
                         GROUP BY `ctb_libaux`.`id_ctb_doc`) AS `pagado`
                         ON(`causado`.`id_ctb_doc` = `pagado`.`id_ctb_doc_tipo3`)";
     }

@@ -27,6 +27,7 @@ try {
                 , `nom_liq_dlab_auxt`.`g_representa`
                 , `nom_liq_dlab_auxt`.`horas_ext`
                 , `ccostos`.`id_ccosto`
+                , `t`.`id_tercero_api`
             FROM
                 `nom_liq_dlab_auxt`
                 INNER JOIN `nom_empleado` 
@@ -39,25 +40,11 @@ try {
                         `nom_ccosto_empleado`
                     GROUP BY `id_empleado`) AS `ccostos`
                     ON (`nom_liq_dlab_auxt`.`id_empleado` = `ccostos`.`id_empleado`)
+                LEFT JOIN `tb_terceros` AS `t` 
+                    ON (`nom_empleado`.`no_documento` = `t`.`nit_tercero`)
             WHERE (`nom_liq_dlab_auxt`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $sueldoBasico = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-$ced = [];
-$ced[] = 0;
-foreach ($sueldoBasico as $sb) {
-    $ced[] = $sb['no_documento'];
-}
-$cedulas = implode(',', $ced);
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api`, `nit_tercero` AS `no_doc` FROM `tb_terceros` WHERE (`nit_tercero` IN ($cedulas))";
-    $rs = $cmd->query($sql);
-    $idApi = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -518,6 +505,7 @@ try {
     $rs = $cmd->query($sql);
     $tercero = $rs->fetch();
     $id_ter_api = !empty($tercero) ? $tercero['id_tercero_api'] : 0;
+    $id_ter_api = count($sueldoBasico) == 1 ? $sueldoBasico[0]['id_tercero_api'] : $id_ter_api;
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
@@ -585,8 +573,7 @@ foreach ($sueldoBasico as $sb) {
     $id_sede = $sb['sede_emp'];
     $tipoCargo = $sb['tipo_cargo'];
     $doc_empleado = $sb['no_documento'];
-    $keyt = array_search($doc_empleado, array_column($idApi, 'no_doc'));
-    $id_ter_api = $keyt !== false ? $idApi[$keyt]['id_tercero_api'] : NULL;
+    $id_ter_api = $sb['id_tercero_api'];
     $restar = 0;
     $rest = 0;
     //administrativos

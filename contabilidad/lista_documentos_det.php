@@ -177,7 +177,12 @@ $ver = 'readonly';
                                                     <div class="input-group-prepend col-2 pr-0">
                                                         <button class="btn btn-outline-primary btn-block text-left" type="button" onclick="ImputacionCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-file-signature fa-lg mr-2"></i>Imputación</button>
                                                     </div>
-                                                    <div class="form-control col-4" readonly id="valImputacion"><?php echo pesos($datosDoc['val_imputacion']); ?></div>
+                                                    <div class="col-4 input-group input-group-sm p-0">
+                                                        <div class="form-control" readonly id="valImputacion"><?php echo pesos($datosDoc['val_imputacion']); ?></div>
+                                                        <div class="input-group-append" title="Asignar Imputacion y Centros de costo automaticamente">
+                                                            <button class="btn btn-outline-primary" type="button" onclick="CausaAuCentroCostos(this)" <?= $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-eject fa-lg"></i></button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             <?php
                                             }
@@ -188,9 +193,6 @@ $ver = 'readonly';
                                                 </div>
                                                 <div class="col-4 input-group input-group-sm p-0">
                                                     <div class="form-control" readonly id="valCentroCosto"><?php echo pesos($datosDoc['val_ccosto']); ?></div>
-                                                    <div class="input-group-append" title="Asignar centros de costo automaticamente">
-                                                        <button class="btn btn-outline-warning" type="button" onclick="CausaAuCentroCostos(this)" <?= $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-eject fa-lg"></i></button>
-                                                    </div>
                                                 </div>
                                             </div>
 

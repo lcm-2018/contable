@@ -518,9 +518,8 @@ file_put_contents($file, $rresponse);
 //chmod($file, 0777);
 $procesado = 0;
 
-
-$err = '';
 $tipo = 1;
+$err = '';
 try {
     $hoy = date('Y-m-d');
     $iduser = $_SESSION['id_user'];
@@ -528,11 +527,11 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     if ($new) {
-        $sql = "INSERT INTO `seg_soporte_fno` (`id_factura_no`, `shash`, `referencia`, `fecha`, `id_user_reg`, `fec_reg`,`tipo`) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO `seg_soporte_fno` (`id_factura_no`, `shash`, `referencia`, `fecha`, `id_user_reg`, `fec_reg`) 
+            VALUES (?, ?, ?, ?, ?, ?)";
     } else {
         $sql = "UPDATE `seg_soporte_fno` 
-                    SET `id_factura_no` = ?,`shash` = ?, `referencia` = ?, `fecha` = ?, `id_user_reg` = ?, `fec_reg` = ?, `tipo` = ?
+                    SET `id_factura_no` = ?,`shash` = ?, `referencia` = ?, `fecha` = ?, `id_user_reg` = ?, `fec_reg` = ? 
                 WHERE `id_soporte` = ?";
     }
     $sql = $cmd->prepare($sql);
@@ -542,9 +541,8 @@ try {
     $sql->bindParam(4, $hoy, PDO::PARAM_STR);
     $sql->bindParam(5, $iduser, PDO::PARAM_INT);
     $sql->bindValue(6, $date->format('Y-m-d H:i:s'));
-    $sql->bindParam(7, $tipo, PDO::PARAM_INT);
     if (!$new) {
-        $sql->bindParam(8, $id_soporte, PDO::PARAM_INT);
+        $sql->bindParam(7, $id_soporte, PDO::PARAM_INT);
     }
     if ($resnom['rerror'] == 0) {
         $shash = $resnom['jret']['scufe'];
@@ -553,8 +551,10 @@ try {
         $shash = NULL;
         $sreference = $pref . '-' . $secuenciaf;
         $err .= '<table>';
-        $filas = count($resnom['smessage']);
-        if ($filas == 1) {
+        $filas = is_array($resnom['smessage']) ? count($resnom['smessage']) : 0;
+        if ($filas == 0) {
+            $err .= '<tr><td>' . $resnom['smessage'] . '</td></tr>';
+        } else if ($filas == 1) {
             $err .= '<tr><td>' . $resnom['smessage']['string'] . '</td></tr>';
         } else {
             foreach ($resnom['smessage']['string'] as $data) {
@@ -583,14 +583,12 @@ try {
 
 if ($new) {
     $sigue = $secuenciaf + 1;
-    $id_sec = $resolucion['id_resol'];
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $query = "UPDATE `nom_resoluciones` SET `consecutivo` = ? WHERE `id_resol` = ?";
+        $query = "UPDATE `tb_datos_ips` SET `num_efacturactual` = ?";
         $query = $cmd->prepare($query);
         $query->bindParam(1, $sigue, PDO::PARAM_INT);
-        $query->bindParam(2, $id_sec, PDO::PARAM_INT);
         $query->execute();
         if (!($query->rowCount() > 0)) {
             $err .= $query->errorInfo()[2];

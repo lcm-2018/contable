@@ -39,13 +39,13 @@ $vigencia = $_SESSION['vigencia'];
                             </div>
                         </div>
                         <div class="card-body" id="divCuerpoPag">
-                        <?php
-                                if (PermisosUsuario($permisos, 5303, 2) || $id_rol == 1) {
-                                    echo '<input type="hidden" id="peReg" value="1">';
-                                } else {
-                                    echo '<input type="hidden" id="peReg" value="0">';
-                                }
-                                ?>
+                            <?php
+                            if (PermisosUsuario($permisos, 5303, 2) || $id_rol == 1) {
+                                echo '<input type="hidden" id="peReg" value="1">';
+                            } else {
+                                echo '<input type="hidden" id="peReg" value="0">';
+                            }
+                            ?>
                             <table id="tableFacurasNoObligados" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                                 <thead>
                                     <tr class="text-center">
@@ -54,12 +54,12 @@ $vigencia = $_SESSION['vigencia'];
                                         <th>Estado</th>
                                         <th>Fecha</th>
                                         <th>Vence</th>
-                                        <th>Método Pago</th>
+                                        <th>Método<br>Pago</th>
                                         <th>Forma Pago</th>
                                         <th>Tipo</th>
-                                        <th>No. Documento</th>
+                                        <th>No. Doc.</th>
                                         <th>Nombre y/o Razón social</th>
-                                        <th>Detalles</th>
+                                        <th style="min-width: 300px;">Detalles</th>
                                         <th>Acción</th>
                                     </tr>
                                 </thead>

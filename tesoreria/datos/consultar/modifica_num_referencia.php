@@ -9,6 +9,7 @@ include '../../../terceros.php';
 
 $id = $_POST['id_referencia'];
 $referencia = $_POST['numRef'];
+$banco = $_POST['banco'];
 $fecha = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha2 = $fecha->format('Y-m-d H:i:s');
 $id_user = $_SESSION['id_user'];
@@ -20,11 +21,12 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     if ($id > 0) {
         $sql = "UPDATE `tes_referencia`
-            SET `numero` = ?
+            SET `numero` = ?, `id_tes_cuenta` = ?
             WHERE `id_referencia` = ?";
         $stmt = $cmd->prepare($sql);
         $stmt->bindParam(1, $referencia, PDO::PARAM_STR);
-        $stmt->bindParam(2, $id, PDO::PARAM_INT);
+        $stmt->bindParam(2, $banco, PDO::PARAM_INT);
+        $stmt->bindParam(3, $id, PDO::PARAM_INT);
         if (!($stmt->execute())) {
             $response['msg'] = 'Error al actualizar el número de referencia';
         } else {
@@ -42,13 +44,14 @@ try {
         }
     } else {
         $estado = 1;
-        $sql = "INSERT INTO `tes_referencia` (`numero`, `fec_reg`, `id_user_reg`,`estado`)
-            VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO `tes_referencia` (`numero`, `fec_reg`, `id_user_reg`,`estado`, `id_tes_cuenta`)
+            VALUES (?, ?, ?, ?, ?)";
         $stmt = $cmd->prepare($sql);
         $stmt->bindParam(1, $referencia, PDO::PARAM_STR);
         $stmt->bindParam(2, $fecha2, PDO::PARAM_STR);
         $stmt->bindParam(3, $id_user, PDO::PARAM_INT);
         $stmt->bindParam(4, $estado, PDO::PARAM_INT);
+        $stmt->bindParam(5, $banco, PDO::PARAM_INT);
         if (!($stmt->execute())) {
             $response['msg'] = 'Error al crear el número de referencia';
         } else {

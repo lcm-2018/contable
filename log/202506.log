@@ -14,3 +14,40 @@
 [2025-06-05 09:47:02] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 8 AND `id_ctb_libaux` = 10538
 [2025-06-05 09:47:04] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 8 AND `id_ctb_libaux` = 10538
 [2025-06-05 09:48:39] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = 8 AND `id_ctb_libaux` = 10538
+[2025-06-17 17:29:57] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3144
+[2025-06-17 17:30:00] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3143
+[2025-06-17 17:35:47] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_referencia` WHERE `id_referencia` = 5
+[2025-06-17 17:35:51] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_referencia` WHERE `id_referencia` = 4
+[2025-06-17 17:38:19] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `tes_referencia` WHERE `id_referencia` = 2
+[2025-06-17 19:19:30] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3071
+[2025-06-17 19:19:33] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3112
+[2025-06-17 19:54:43] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3113
+[2025-06-17 19:58:00] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3154
+[2025-06-17 19:58:06] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3147
+[2025-06-17 19:58:11] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3148
+[2025-06-17 19:58:13] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3149
+[2025-06-17 19:58:16] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3150
+[2025-06-17 19:58:19] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3151
+[2025-06-17 19:58:22] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3152
+[2025-06-17 19:58:24] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_doc` WHERE `id_ctb_doc` = 3153
+[2025-06-26 15:08:09] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `pto_crp` WHERE `id_pto_crp` = 1079
+[2025-06-26 15:08:22] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `pto_cdp` WHERE `id_pto_cdp` = 1120
+[2025-06-26 17:18:23] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 3159
+[2025-06-27 11:11:23] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_causa_costos WHERE id = 1689
+[2025-06-27 11:11:25] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_causa_costos WHERE id = 1690
+[2025-06-27 11:11:28] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_causa_costos WHERE id = 1691
+[2025-06-27 11:11:31] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_causa_costos WHERE id = 1692
+[2025-06-27 11:11:43] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11263
+[2025-06-27 11:11:46] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11262
+[2025-06-27 11:11:49] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11261
+[2025-06-27 11:11:51] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11260
+[2025-06-27 11:11:55] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11264
+[2025-06-27 11:16:04] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 3070
+[2025-06-27 11:16:08] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_doc WHERE id_ctb_doc = 3068
+[2025-06-27 15:22:12] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11661
+[2025-06-27 15:22:15] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11660
+[2025-06-27 15:22:17] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11659
+[2025-06-27 15:22:20] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11662
+[2025-06-27 15:22:22] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11658
+[2025-06-27 15:22:24] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = 11657
+[2025-06-27 15:44:23] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctb_factura` WHERE `id_cta_factura` = 1278

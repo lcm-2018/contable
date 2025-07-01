@@ -30,8 +30,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                 </div>
                 <div class=" form-row">
                     <div class="form-group col-md-12">
-                        <label for="txt_tipo_doc" class="small">Tipo Documento</label>
-                        <input type="text" class="filtro form-control form-control-sm" id="txt_tipo_doc" name="txt_tipo_doc" placeholder="Tipo documento">
+                        <label for="txt_tipo_doc" class="small">Rubro presupuestal</label>
+                        <input type="text" class="filtro form-control form-control-sm" id="txt_tipo_doc" name="txt_tipo_doc" placeholder="Digite el rubro presupuestal" autocomplete="off">
                         <input type="hidden" id="id_cargue" name="id_cargue" class="form-control form-control-sm">
                     </div>
                 </div>
