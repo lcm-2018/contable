@@ -45,7 +45,7 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT MD.id_mant_detalle,
-                HV.placa,FM.nom_medicamento AS nom_articulo,                
+                HV.placa,FM.nom_medicamento AS nom_articulo,HV.des_activo,             
                 CA.nom_area,MD.observacion_mant,
                 CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general,
                 CASE MD.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'EN MANTENIMIENTO' WHEN 3 THEN 'FINALIZADO' END AS estado
@@ -78,6 +78,7 @@ if (!empty($objs)) {
             "id_mant_detalle" => $id,
             "placa" => $obj['placa'],
             "nom_articulo" => $obj['nom_articulo'],
+            "des_activo" => $obj['des_activo'],
             "estado_general" => $obj['estado_general'],
             "nom_area" => $obj['nom_area'],
             "observacion_mant" => $obj['observacion_mant'],            

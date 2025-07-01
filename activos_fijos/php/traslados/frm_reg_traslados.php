@@ -119,6 +119,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <th>Id</th>
                         <th>Placa</th>
                         <th>Articulo</th>
+                        <th>Activo Fijo</th>
                         <th>Estado General</th>
                         <th>Observación</th>
                         <th>Acciones</th>

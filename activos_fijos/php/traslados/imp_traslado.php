@@ -35,7 +35,7 @@ try {
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
 
-    $sql = "SELECT HV.placa,FM.nom_medicamento AS nom_articulo,TD.observacion,
+    $sql = "SELECT HV.placa,FM.nom_medicamento AS nom_articulo,HV.des_activo,TD.observacion,
                 CASE TD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
             FROM acf_traslado_detalle AS TD
             INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = TD.id_activo_fijo)
@@ -123,6 +123,7 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>Placa</th>
                 <th>Articulo</th>
+                <th>Activo Fijo</th>
                 <th>Estado General</th>
                 <th>Observación</th>
             </tr>
@@ -134,6 +135,7 @@ try {
                 $tabla .=  '<tr class="resaltar"> 
                         <td>' . $obj['placa'] . '</td>
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_articulo']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['des_activo']) . '</td>   
                         <td>' . $obj['estado_general'] . '</td>
                         <td>' . $obj['observacion'] . '</td></tr>';
             }
@@ -143,7 +145,7 @@ try {
         <tfoot style="font-size:60%">
             <tr style="background-color:#CED3D3; color:#000000">                
                 <td>TOTAL REGISTROS:<?php echo COUNT($obj_ds); ?> </td>
-                <td colspan="3"></td>
+                <td colspan="4"></td>
             </tr>
         </tfoot>
     </table>

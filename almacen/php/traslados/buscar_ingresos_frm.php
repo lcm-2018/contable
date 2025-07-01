@@ -77,7 +77,7 @@ $fecha_sis = date('Y-m-d');
                     type: 'POST',
                     dataType: 'json',
                     data: function(data) {
-                        data.num_ingido = $('#txt_num_ing_fil').val();
+                        data.num_ingreso = $('#txt_num_ing_fil').val();
                         data.fec_ini = $('#txt_fecini_fil').val();
                         data.fec_fin = $('#txt_fecfin_fil').val()
                     }

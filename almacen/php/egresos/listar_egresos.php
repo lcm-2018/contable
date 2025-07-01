@@ -40,17 +40,20 @@ if (isset($_POST['num_egr']) && $_POST['num_egr']) {
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
     $where .= " AND far_orden_egreso.fec_egreso BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
 }
-if (isset($_POST['id_tercero']) && $_POST['id_tercero']) {
-    $where .= " AND far_orden_egreso.id_cliente=" . $_POST['id_tercero'] . "";
+if (isset($_POST['id_tipegr']) && $_POST['id_tipegr']) {
+    $where .= " AND far_orden_egreso.id_tipo_egreso=" . $_POST['id_tipegr'] . "";
 }
 if (isset($_POST['id_cencost']) && $_POST['id_cencost']) {
     $where .= " AND far_orden_egreso.id_centrocosto=" . $_POST['id_cencost'] . "";
 }
+if (isset($_POST['id_sede_des']) && $_POST['id_sede_des']) {
+    $where .= " AND far_orden_egreso.id_area IN (SELECT id_area FROM far_centrocosto_area WHERE id_sede=" . $_POST['id_sede_des'] . ")";
+}
 if (isset($_POST['id_area']) && $_POST['id_area']) {
     $where .= " AND far_orden_egreso.id_area=" . $_POST['id_area'] . "";
 }
-if (isset($_POST['id_tipegr']) && $_POST['id_tipegr']) {
-    $where .= " AND far_orden_egreso.id_tipo_egreso=" . $_POST['id_tipegr'] . "";
+if (isset($_POST['id_tercero']) && $_POST['id_tercero']) {
+    $where .= " AND far_orden_egreso.id_cliente=" . $_POST['id_tercero'] . "";
 }
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_orden_egreso.estado=" . $_POST['estado'];
@@ -77,8 +80,10 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_orden_egreso.id_egreso,far_orden_egreso.num_egreso,far_orden_egreso.fec_egreso,far_orden_egreso.hor_egreso,
-	            far_orden_egreso.detalle,tb_terceros.nom_tercero,tb_centrocostos.nom_centro,
-                IF(far_centrocosto_area.id_area=0,'',CONCAT_WS(' - ',far_centrocosto_area.nom_area,tb_sedes_area.nom_sede)) AS nom_area,
+	            far_orden_egreso.detalle,tb_centrocostos.nom_centro,
+                IF(far_centrocosto_area.id_area=0,'',tb_sedes_area.nom_sede) AS nom_sede_des,
+                far_centrocosto_area.nom_area,
+                IF(tb_terceros.id_tercero=0,'',tb_terceros.nom_tercero) AS nom_tercero,
 	            far_orden_egreso_tipo.nom_tipo_egreso,far_orden_egreso.val_total,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
                 far_orden_egreso.estado,
 	            CASE far_orden_egreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
@@ -87,7 +92,7 @@ try {
             INNER JOIN tb_terceros ON (tb_terceros.id_tercero=far_orden_egreso.id_cliente)
             INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_orden_egreso.id_centrocosto)
             INNER JOIN far_centrocosto_area ON (far_centrocosto_area.id_area=far_orden_egreso.id_area)
-            INNER JOIN tb_sedes AS tb_sedes_area ON (tb_sedes_area.id_sede=far_centrocosto_area.id_sede)
+            LEFT JOIN tb_sedes AS tb_sedes_area ON (tb_sedes_area.id_sede=far_centrocosto_area.id_sede)
             INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_orden_egreso.id_sede)
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_egreso.id_bodega)
             $where_usr $where ORDER BY $col $dir $limit";
@@ -120,10 +125,11 @@ if (!empty($objs)) {
             "detalle" => $obj['detalle'],
             "nom_tipo_egreso" => mb_strtoupper($obj['nom_tipo_egreso']),
             "nom_sede" => mb_strtoupper($obj['nom_sede']),
-            "nom_bodega" => mb_strtoupper($obj['nom_bodega']),
-            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),
+            "nom_bodega" => mb_strtoupper($obj['nom_bodega']),            
             "nom_centro" => mb_strtoupper($obj['nom_centro']),
-            "nom_area" => mb_strtoupper($obj['nom_area']),            
+            "nom_sede_des" => mb_strtoupper($obj['nom_sede_des']),
+            "nom_area" => mb_strtoupper($obj['nom_area']),    
+            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),        
             "val_total" => formato_valor($obj['val_total']),
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],            

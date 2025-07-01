@@ -36,7 +36,7 @@ if (isset($_POST['codigo']) && $_POST['codigo']) {
     $where .= " AND FM.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";
 }
 if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND FM.nom_medicamento LIKE '" . $_POST['nombre'] . "%'";
+    $where .= " AND (FM.nom_medicamento LIKE '" . $_POST['nombre'] . "%' OR HV.des_activo LIKE '" . $_POST['nombre'] . "%')";
 }
 
 try {
@@ -60,6 +60,7 @@ try {
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT HV.id_activo_fijo,HV.placa,
                 FM.cod_medicamento cod_articulo,FM.nom_medicamento nom_articulo,
+                HV.des_activo,
                 HV.num_serial,MA.descripcion AS nom_marca,HV.valor,
                 SE.nom_sede,AR.nom_area,
                 CONCAT_WS(' ',US.apellido1,US.apellido2,US.nombre1,US.nombre2) AS nom_responsable,
@@ -90,6 +91,7 @@ if (!empty($objs)) {
             "placa" => $obj['placa'],
             "cod_articulo" => $obj['cod_articulo'],
             "nom_articulo" => $obj['nom_articulo'],
+            "des_activo" => $obj['des_activo'],
             "num_serial" => $obj['num_serial'],
             "nom_marca" => $obj['nom_marca'],
             "nom_sede" => $obj['nom_sede'],

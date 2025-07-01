@@ -97,7 +97,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Id</th>
                                         <th>Placa</th>                                        
                                         <th>Cod. Articulo</th>
-                                        <th>Articulo</th>                                        
+                                        <th>Articulo</th>
+                                        <th>Nombre Activo Fijo</th>
                                         <th>No. Serial</th>
                                         <th>Marca</th>
                                         <th>Valor</th>                                        
@@ -105,10 +106,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Area</th>
                                         <th>Responsable</th>
                                         <th>Id.Estado General</th>
-                                        <th>Estado General</th>
-                                        <th>Mant.(Apro.-Eejec.)</th>
+                                        <th>Estado</br>Funcionam.</th>
+                                        <th>Mantenimiento</br>(Apro.-Eejec.)</th>
                                         <th>Id.Estado</th>
-                                        <th>Estado Proceso</th>
+                                        <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>

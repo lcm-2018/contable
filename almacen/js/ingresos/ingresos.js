@@ -185,6 +185,26 @@
         $('#id_tip_ing').val($('#sl_tip_ing').val());
     });
 
+    // Autocompletar Terceros
+    $('#divForms').on("input", "#txt_tercero", function() {
+        $(this).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "../common/cargar_terceros_ls.php",
+                    dataType: "json",
+                    type: 'POST',
+                    data: { term: request.term }
+                }).done(function(data) {
+                    response(data);
+                });
+            },
+            minLength: 2,
+            select: function(event, ui) {
+                $('#id_txt_tercero').val(ui.item.id);
+            }
+        });
+    });
+
     //Editar un registro Orden Ingreso
     $('#tb_ingresos').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');
@@ -205,7 +225,7 @@
         error += verifica_vacio($('#sl_tip_ing'));
 
         if ($('#sl_tip_ing').find('option:selected').attr('data-intext') == 2) {
-            error += verifica_vacio($('#sl_tercero'));
+            error += verifica_valmin_2($('#id_txt_tercero'), $('#txt_tercero'), 1);
         }
         if ($('#sl_tip_ing').find('option:selected').attr('data-ordcom') == 1) {
             error += verifica_vacio($('#txt_des_pedido'));

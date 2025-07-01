@@ -15,7 +15,8 @@ $id_acf = isset($_POST['id_acf']) ? $_POST['id_acf'] : -1;
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 
 $sql = "SELECT acf_baja_detalle.*,
-            acf_hojavida.placa,far_medicamentos.nom_medicamento AS nom_articulo
+            acf_hojavida.placa,far_medicamentos.nom_medicamento AS nom_articulo,
+            acf_hojavida.des_activo
         FROM acf_baja_detalle
         INNER JOIN acf_hojavida ON (acf_hojavida.id_activo_fijo=acf_baja_detalle.id_activo_fijo)
         INNER JOIN far_medicamentos ON (far_medicamentos.id_med=acf_hojavida.id_articulo)
@@ -35,6 +36,7 @@ if (empty($obj)) {
     $obj['id_activo_fijo'] = $activofijo['id_activo_fijo'];
     $obj['placa'] = $activofijo['placa'];
     $obj['nom_articulo'] = $activofijo['nom_articulo'];
+    $obj['des_activo'] = $activofijo['des_activo'];
     $obj['estado_general'] = $activofijo['estado_general'];    
 }
 ?>
@@ -60,6 +62,10 @@ if (empty($obj)) {
                         <label for="txt_nom_art" class="small">Articulo</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly">
                     </div>  
+                    <div class="form-group col-md-12">
+                        <label for="txt_nom_art" class="small">Nombre del Activo Fijo</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['des_activo'] ?>" readonly="readonly">
+                    </div>
                     <div class="form-group col-md-12">
                         <label for="txt_observacion" class="small">Observación del baja</label>                   
                         <textarea class="form-control" id="txt_observacion" name="txt_observacion" rows="4"><?php echo $obj['observacion'] ?></textarea>

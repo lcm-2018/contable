@@ -13,7 +13,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_md = isset($_POST['id_md']) ? $_POST['id_md'] : -1;
 
-$sql = "SELECT MD.*,HV.placa,HV.num_serial,FM.nom_medicamento AS nom_articulo,
+$sql = "SELECT MD.*,HV.placa,HV.num_serial,FM.nom_medicamento AS nom_articulo,HV.des_activo,
             CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general,
             MM.estado AS estado_man
         FROM acf_mantenimiento_detalle AS MD
@@ -46,7 +46,11 @@ $editar = in_array($obj['estado'],[1,2]) && $id_md != -1 && in_array($obj['estad
                     <div class="form-group col-md-9">
                         <label for="txt_nom_art" class="small">Articulo</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly">
-                    </div>  
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label for="txt_nom_art" class="small">Nombre del Activo Fijo</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['des_activo'] ?>" readonly="readonly">
+                    </div>
                     <div class="form-group col-md-3">
                         <label for="txt_nom_art" class="small">No. Serial</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['num_serial'] ?>" readonly="readonly">

@@ -11,10 +11,11 @@ $term = isset($_POST['term']) ? $_POST['term'] : exit('Acción no permitida');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT id_uni,IF(id_uni=0,unidad,CONCAT(unidad,' (',descripcion,')')) AS nom_unidad
-            FROM far_med_unidad
-            WHERE (v_res=2 OR id_uni=0) AND IF(id_uni=0,unidad,CONCAT(unidad,' (',descripcion,')')) LIKE '%$term%'
-            ORDER BY IF(id_uni=0,0,CONCAT('1',unidad,descripcion))";
+    $sql = "SELECT id_tercero,IF(id_tercero=0,'NINGUNO',nom_tercero) AS nom_tercero 
+            FROM tb_terceros
+            WHERE (id_tercero_api IN (SELECT id_tercero_api FROM tb_rel_tercero) OR es_clinico=1) AND
+                nom_tercero LIKE '%$term%'
+            ORDER BY IF(id_tercero=0,0,CONCAT('1',nom_tercero))";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;
@@ -24,8 +25,8 @@ try {
 
 foreach ($objs as $obj) {
     $data[] = [
-        "id" => $obj['id_uni'],
-        "label" => $obj['nom_unidad'],
+        "id" => $obj['id_tercero'],
+        "label" => $obj['nom_tercero'],
     ];
 }
 

@@ -99,6 +99,10 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             <?php marcas($cmd, '', $obj['id_marca']) ?>
                         </select>
                     </div>
+                    <div class="form-group col-md-12">
+                        <label for="des_activo" class="small">Nombre del Activo Fijo</label>
+                        <textarea class="form-control form-control-sm" id="des_activo" name="des_activo" rows="2"><?php echo $obj['des_activo'] ?></textarea>
+                    </div> 
                     <div class="form-group col-md-3">
                         <label for="id_articulo" class="small">Tipo Activo</label>
                         <select class="form-control form-control-sm" id="tipo_activo" name="tipo_activo">
@@ -261,7 +265,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <input type="text" class="form-control form-control-sm" id="cb_trat_mant" name="cb_trat_mant" value="<?php echo $obj['cb_trat_mant'] ?>">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="estado_general" class="small">Estado General</label>
+                        <label for="estado_general" class="small">Estado de Funcionamiento</label>
                         <select class="form-control form-control-sm" id="estado_general" name="estado_general" <?php echo $editar ?>>
                             <?php estado_general_activo('', $obj['estado_general']) ?>
                         </select>
@@ -279,8 +283,12 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <input type="hidden" id="id_estado" name="id_estado" value="<?php echo $obj['estado'] ?>">
                     </div>
                     <div class="form-group col-md-12">
-                        <label for="causa_est_general" class="small">Causa del Estado General</label>
+                        <label for="causa_est_general" class="small">Causa del Estado de Funcionamiento</label>
                         <textarea class="form-control form-control-sm" id="causa_est_general" name="causa_est_general" rows="3"><?php echo $obj['causa_est_general'] ?></textarea>
+                    </div> 
+                    <div class="form-group col-md-12">
+                        <label for="observaciones" class="small">Observaciones Generales</label>
+                        <textarea class="form-control form-control-sm" id="observaciones" name="observaciones" rows="3"><?php echo $obj['observaciones'] ?></textarea>
                     </div>                    
                 </div>
             </form>

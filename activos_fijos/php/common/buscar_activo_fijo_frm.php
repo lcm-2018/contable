@@ -50,6 +50,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <th>Placa</th>
                             <th>Código</th>
                             <th>Artículo</th> 
+                            <th>Activo Fijo</th> 
                             <th>No. Serial</th> 
                             <th>Marca</th> 
                             <th>Sede</th> 
@@ -95,6 +96,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     { 'data': 'placa' },
                     { 'data': 'cod_articulo' },
                     { 'data': 'nom_articulo' },
+                    { 'data': 'des_activo' },
                     { 'data': 'num_serial' },
                     { 'data': 'nom_marca' },
                     { 'data': 'nom_sede' },
@@ -104,8 +106,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     { 'data': 'nom_estado' }
                 ],
                 columnDefs: [
-                    { class: 'text-wrap', targets: [3,8] },
-                    { width: '5%', targets: [0,1,2,4,5,6,7,9,10] }
+                    { class: 'text-wrap', targets: '_all' }
                 ],
                 order: [
                     [0, "desc"]

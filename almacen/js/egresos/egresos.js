@@ -37,10 +37,11 @@
                     data.num_egr = $('#txt_numegr_filtro').val();
                     data.fec_ini = $('#txt_fecini_filtro').val();
                     data.fec_fin = $('#txt_fecfin_filtro').val();
+                    data.id_tipegr = $('#sl_tipegr_filtro').val();
                     data.id_tercero = $('#sl_tercero_filtro').val();
                     data.id_cencost = $('#sl_centrocosto_filtro').val();
+                    data.id_sede_des = $('#sl_sede_des_filtro').val();
                     data.id_area = $('#sl_area_filtro').val();
-                    data.id_tipegr = $('#sl_tipegr_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
                     data.modulo = $('#sl_modulo_origen').val();
                 }
@@ -54,19 +55,20 @@
                 { 'data': 'nom_tipo_egreso' },
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_bodega' },
-                { 'data': 'nom_tercero' },
                 { 'data': 'nom_centro' },
+                { 'data': 'nom_sede_des' },
                 { 'data': 'nom_area' },
+                { 'data': 'nom_tercero' },
                 { 'data': 'val_total' },
                 { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4, 6, 7, 8, 9, 10] },
-                { type: "numeric-comma", targets: 11 },
-                { visible: false, targets: 12 },
-                { orderable: false, targets: 14 }
+                { class: 'text-wrap', targets: [4, 6, 7, 8, 9, 10, 11] },
+                { type: "numeric-comma", targets: 12 },
+                { visible: false, targets: 13 },
+                { orderable: false, targets: 15 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 1) {
@@ -90,12 +92,14 @@
 
     //Filtrar las Bodegas acorde a la Sede y Usuario de sistema
     $('#sl_sede_filtro').on("change", function() {
-        $('#sl_bodega_filtro').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), titulo: '--Bodega--' }, function() {});
+        $('#sl_bodega_filtro').load('../common/cargar_bodegas_usuario.php', { id_sede: $(this).val(), titulo: '--Bodega Origen--' }, function() {});
     });
     $('#sl_sede_filtro').trigger('change');
 
-    $('#sl_centrocosto_filtro').on("change", function() {
-        $('#sl_area_filtro').load('../common/cargar_areas_centrocosto.php', { id_centrocosto: $(this).val(), titulo: '--Areas--' }, function() {});
+    $('#sl_centrocosto_filtro, #sl_sede_des_filtro').on("change", function() {
+        let id_sede = $('#sl_sede_des_filtro').val();
+        let id_cecos = $('#sl_centrocosto_filtro').val();
+        $('#sl_area_filtro').load('../common/cargar_areas_centrocosto_sede.php', { id_cecos: id_cecos, id_sede: id_sede, titulo: '--Areas Destino--' }, function() {});
     });
     $('#sl_centrocosto_filtro').trigger('change');
 
@@ -280,8 +284,30 @@
         $('#id_tip_egr').val($('#sl_tip_egr').val());
     });
 
-    $('#divForms').on("change", "#sl_centrocosto", function() {
-        $('#sl_area').load('../common/cargar_areas_centrocosto.php', { id_centrocosto: $(this).val() }, function() {});
+    $('#divForms').on("change", "#sl_centrocosto, #sl_sede_des", function() {
+        let id_sede = $('#sl_sede_des').val();
+        let id_cecos = $('#sl_centrocosto').val();
+        $('#sl_area').load('../common/cargar_areas_centrocosto_sede.php', { id_cecos: id_cecos, id_sede: id_sede }, function() {});
+    });
+
+    // Autocompletar Terceros
+    $('#divForms').on("input", "#txt_tercero", function() {
+        $(this).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "../common/cargar_terceros_ls.php",
+                    dataType: "json",
+                    type: 'POST',
+                    data: { term: request.term }
+                }).done(function(data) {
+                    response(data);
+                });
+            },
+            minLength: 2,
+            select: function(event, ui) {
+                $('#id_txt_tercero').val(ui.item.id);
+            }
+        });
     });
 
     //Editar un registro Orden Egreso
@@ -312,7 +338,7 @@
             error += verifica_vacio($('#txt_des_ingreso'));
         }
         if (es_intext == 2) {
-            error += verifica_vacio($('#sl_tercero'));
+            error += verifica_valmin_2($('#id_txt_tercero'), $('#txt_tercero'), 1);
         } else {
             error += verifica_vacio($('#sl_centrocosto'));
         }
@@ -589,10 +615,11 @@
                 num_egr: $('#txt_numegr_filtro').val(),
                 fec_ini: $('#txt_fecini_filtro').val(),
                 fec_fin: $('#txt_fecfin_filtro').val(),
-                id_tercero: $('#sl_tercero_filtro').val(),
-                id_cencost: $('#sl_centrocosto_filtro').val(),
-                id_area: $('#sl_area_filtro').val(),
                 id_tipegr: $('#sl_tipegr_filtro').val(),
+                id_cencost: $('#sl_centrocosto_filtro').val(),
+                id_sede_des: $('#sl_sede_des_filtro').val(),
+                id_area: $('#sl_area_filtro').val(),
+                id_tercero: $('#sl_tercero_filtro').val(),
                 estado: $('#sl_estado_filtro').val(),
                 modulo: $('#sl_modulo_origen').val()
             }, function(he) {

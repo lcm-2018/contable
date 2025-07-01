@@ -45,7 +45,8 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT TD.id_traslado_detalle,
-                HV.placa,FM.nom_medicamento AS nom_articulo,TD.observacion,
+                HV.placa,FM.nom_medicamento AS nom_articulo,
+                HV.des_activo,TD.observacion,
                 CASE TD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general
             FROM acf_traslado_detalle AS TD
             INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo = TD.id_activo_fijo)
@@ -75,6 +76,7 @@ if (!empty($objs)) {
             "id_traslado_detalle" => $id,
             "placa" => $obj['placa'],
             "nom_articulo" => $obj['nom_articulo'],
+            "des_activo" => $obj['des_activo'],
             "estado_general" => $obj['estado_general'],
             "observacion" => $obj['observacion'],            
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',

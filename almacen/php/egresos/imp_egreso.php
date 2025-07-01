@@ -17,8 +17,10 @@ try {
     $sql = "SELECT far_orden_egreso.id_egreso,far_orden_egreso.num_egreso,far_orden_egreso.fec_egreso,
             far_orden_egreso.hor_egreso,far_orden_egreso.detalle,far_orden_egreso.val_total,
             tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
-            tb_terceros.nom_tercero,tb_centrocostos.nom_centro,
-            IF(far_centrocosto_area.id_area=0,'',CONCAT_WS(' - ',far_centrocosto_area.nom_area,tb_sedes_area.nom_sede)) AS nom_area,
+            tb_centrocostos.nom_centro,
+            IF(far_centrocosto_area.id_area=0,'',tb_sedes_area.nom_sede) AS nom_sede_des,
+            far_centrocosto_area.nom_area,
+            IF(tb_terceros.id_tercero=0,'',tb_terceros.nom_tercero) AS nom_tercero,
             far_orden_egreso_tipo.nom_tipo_egreso,
             CASE far_orden_egreso.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
             CASE far_orden_egreso.estado WHEN 0 THEN far_orden_egreso.fec_anulacion WHEN 1 THEN far_orden_egreso.fec_creacion WHEN 2 THEN far_orden_egreso.fec_cierre END AS fec_estado,
@@ -29,7 +31,7 @@ try {
         INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_egreso.id_bodega)
         INNER JOIN tb_terceros ON (tb_terceros.id_tercero=far_orden_egreso.id_cliente)
         INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_orden_egreso.id_centrocosto)
-        INNER JOIN far_centrocosto_area ON (far_centrocosto_area.id_area=far_orden_egreso.id_area)
+        LEFT JOIN far_centrocosto_area ON (far_centrocosto_area.id_area=far_orden_egreso.id_area)
         INNER JOIN tb_sedes AS tb_sedes_area ON (tb_sedes_area.id_sede=far_centrocosto_area.id_sede)
         INNER JOIN far_orden_egreso_tipo ON (far_orden_egreso_tipo.id_tipo_egreso=far_orden_egreso.id_tipo_egreso)
         LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_orden_egreso.id_usr_cierre)
@@ -92,7 +94,7 @@ try {
             <td>Fecha Egreso</td>
             <td>Hora Egreso</td>
             <td>Estado</td>
-            <td>Fecha Estado</td>
+            <td colspan="2">Fecha Estado</td>
         </tr>
         <tr>
             <td><?php echo $obj_e['id_egreso']; ?></td>
@@ -100,29 +102,31 @@ try {
             <td><?php echo $obj_e['fec_egreso']; ?></td>
             <td><?php echo $obj_e['hor_egreso']; ?></td>
             <td><?php echo $obj_e['estado']; ?></td>
-            <td><?php echo $obj_e['fec_estado']; ?></td>
+            <td colspan="2"><?php echo $obj_e['fec_estado']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td>Sede</td>
-            <td>Bodega</td>
-            <td>Tipo de Egreso</td>
+            <td>Sede Origen</td>
+            <td>Bodega Origen</td>
+            <td>Tipo de Egreso</td>            
+            <td>Centro de Costo</td>
+            <td>Sede Destino</td>
+            <td>Área Destino</td>
             <td>Tercero</td>
-            <td>Dependencia</td>
-            <td>Área</td>
         </tr>
         <tr>
             <td><?php echo $obj_e['nom_sede']; ?></td>
             <td><?php echo $obj_e['nom_bodega']; ?></td>
             <td><?php echo $obj_e['nom_tipo_egreso']; ?></td>
-            <td><?php echo $obj_e['nom_tercero']; ?></td>
             <td><?php echo $obj_e['nom_centro']; ?></td>
+            <td><?php echo $obj_e['nom_sede_des']; ?></td>
             <td><?php echo $obj_e['nom_area']; ?></td>
+            <td><?php echo $obj_e['nom_tercero']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="6">Detalle</td>
+            <td colspan="7">Detalle</td>
         </tr>
         <tr>
-            <td colspan="6"><?php echo $obj_e['detalle']; ?></td>
+            <td colspan="7"><?php echo $obj_e['detalle']; ?></td>
         </tr>
     </table>
 

@@ -115,6 +115,12 @@ try {
             <td><?php echo $obj_e['num_serial']; ?></td>
             <td><?php echo $obj_e['nom_marca']; ?></td>
         </tr> 
+        <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
+            <td colspan="4" style="text-align:center">Nombre del Activo Fijo</td>
+        </tr>
+        <tr>
+            <td colspan="4"><?php echo $obj_e['des_activo']; ?></td>
+        </tr>
         <?php if($tipo=='todo'): ?>
             <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
                 <td>Tipo Activo</td>
@@ -231,9 +237,9 @@ try {
                 <td><?php echo $obj_e['cb_trat_mant']; ?></td>
             </tr>
             <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-                <td>Estado General</td>
+                <td>Estado de Funcionamiento</td>
                 <td>Fecha Fuera de Servicio</td>
-                <td>Estado Proceso</td>
+                <td>Estado</td>
             </tr>
             <tr>
                 <td><?php echo $obj_e['estado_general']; ?></td>
@@ -241,10 +247,16 @@ try {
                 <td><?php echo $obj_e['estado']; ?></td>
             </tr>
             <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-                <td colspan="4" style="text-align:center">Causa del Estado General</td>
+                <td colspan="4" style="text-align:center">Causa del Estado de Funcionamiento</td>
             </tr>    
             <tr>
                 <td colspan="4"><?php echo $obj_e['causa_est_general']; ?></td>
+            </tr>
+            <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
+                <td colspan="4" style="text-align:center">Observaciones Generales</td>
+            </tr>    
+            <tr>
+                <td colspan="4"><?php echo $obj_e['observaciones']; ?></td>
             </tr>
         <?php endif ?>    
     </table>

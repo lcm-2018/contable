@@ -28,13 +28,14 @@
                 { 'data': 'id_baja_detalle' }, //Index=0
                 { 'data': 'placa' },
                 { 'data': 'nom_articulo' },
+                { 'data': 'des_activo' },
                 { 'data': 'estado_general' },
                 { 'data': 'observacion' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [2, 4] },
-                { orderable: false, targets: 5 }
+                { class: 'text-wrap', targets: [2, 3, 5] },
+                { orderable: false, targets: 6 }
             ],
             order: [
                 [0, "asc"]

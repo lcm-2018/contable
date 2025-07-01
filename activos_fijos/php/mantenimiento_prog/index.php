@@ -107,7 +107,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <tr class="text-center centro-vertical">
                                         <th rowspan="2">Id</th>
                                         <th colspan="3">Orden Mantenimiento</th>
-                                        <th colspan="3">Activo Fijo</th>
+                                        <th colspan="4">Activo Fijo</th>
                                         <th colspan="5">Mantenimiento</th>                                                                                
                                         <th rowspan="2">Acciones</th>
                                     </tr>
@@ -116,6 +116,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Fecha</th>
                                         <th>Estado</th>
                                         <th>Placa</th>
+                                        <th>Articulo</th>
                                         <th>Nombre</th>
                                         <th>Estado General</th>
                                         <th>Tipo</th>
