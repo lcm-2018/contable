@@ -34,7 +34,7 @@ if (isset($_POST['estado']) && strlen($_POST['estado'])) {
 try {
     $sql = "SELECT HV.id_activo_fijo,HV.placa,
                 FM.cod_medicamento cod_articulo,FM.nom_medicamento nom_articulo,
-                HV.num_serial,MA.descripcion marca,HV.valor,
+                HV.des_activo,HV.num_serial,MA.descripcion marca,HV.valor,
                 SE.nom_sede,AR.nom_area,
                 CONCAT_WS(' ',US.apellido1,US.apellido2,US.nombre1,US.nombre2) AS nom_responsable,
                 CASE HV.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' 
@@ -90,15 +90,16 @@ try {
                 <th>Id</th>
                 <th>Placa</th>                                        
                 <th>Cod. Articulo</th>
-                <th>Articulo</th>                                        
+                <th>Articulo</th>
+                <th>Nombre Activo Fijo</th>
                 <th>No. Serial</th>
                 <th>Marca</th>
                 <th>Valor</th>                                        
                 <th>Sede</th>
                 <th>Area</th>
                 <th>Responsable</th>
-                <th>Estado General</th>
-                <th>Estado Proceso</th>
+                <th>Estado Funcionam.</th>
+                <th>Estado</th>
             </tr>
         </thead>
         <tbody style="font-size: 60%;">
@@ -109,7 +110,8 @@ try {
                         <td>' . $obj['id_activo_fijo'] . '</td>
                         <td>' . $obj['placa'] . '</td>
                         <td>' . $obj['cod_articulo'] . '</td>
-                        <td style="text-align:left">' . mb_strtoupper($obj['nom_articulo']) . '</td>                           
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_articulo']) . '</td> 
+                        <td style="text-align:left">' . mb_strtoupper($obj['des_activo']) . '</td> 
                         <td>' . $obj['num_serial'] . '</td>
                         <td>' . $obj['marca'] . '</td>
                         <td>' . formato_valor($obj['valor']) . '</td>   
@@ -124,7 +126,7 @@ try {
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="12" style="text-align:left">
+                <td colspan="13" style="text-align:left">
                     No. de Registros: <?php echo count($objs); ?>  
                 </td>
             </tr>

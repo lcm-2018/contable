@@ -13,7 +13,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_md = isset($_POST['id_md']) ? $_POST['id_md'] : -1;
 
-$sql = "SELECT HV.placa,HV.num_serial,FM.nom_medicamento AS nom_articulo
+$sql = "SELECT HV.placa,HV.num_serial,FM.nom_medicamento AS nom_articulo,HV.des_activo
         FROM acf_mantenimiento_detalle AS MD
         INNER JOIN acf_hojavida AS HV ON (HV.id_activo_fijo=MD.id_activo_fijo)
         INNER JOIN far_medicamentos FM ON (FM.id_med=HV.id_articulo)
@@ -32,13 +32,17 @@ $obj = $rs->fetch();
             <form id="frm_reg_notas">
                 <input type="hidden" id="id_mant_detalle" name="id_mant_detalle" value="<?php echo $id_md ?>">
                 <div class="form-row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label class="small">Placa</label>
                         <input type="text" class="form-control form-control-sm" id="txt_placa_nt" value="<?php echo $obj['placa'] ?>" readonly="readonly">
                     </div>
-                    <div class="form-group col-md-7">
+                    <div class="form-group col-md-3">
                         <label class="small">Articulo</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_articulo_nt" value="<?php echo $obj['nom_articulo'] ?> " readonly="readonly">
+                    </div>                    
+                    <div class="form-group col-md-5">
+                        <label class="small">Nombre del Activo Fijo</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_nom_activo_nt" value="<?php echo $obj['des_activo'] ?> " readonly="readonly">
                     </div>                    
                     <div class="form-group col-md-2">
                         <label class="small">No. Serial</label>

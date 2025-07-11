@@ -46,7 +46,7 @@ try {
                 $sql->bindValue(':observaciones', $_POST['txt_observaciones_mant']);
                 $sql->bindValue(':tipo_mantenimiento', $_POST['sl_tip_mant'], PDO::PARAM_INT);
                 $sql->bindValue(':id_responsable', $_POST['sl_responsable'], PDO::PARAM_INT);
-                $sql->bindValue(':id_tercero', $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0, PDO::PARAM_INT);
+                $sql->bindValue(':id_tercero', $_POST['id_txt_tercero'] ? $_POST['id_txt_tercero'] : 0, PDO::PARAM_INT);
                 $sql->bindValue(':fec_ini_mantenimiento', $_POST['txt_fec_ini_mant'] ? $_POST['txt_fec_ini_mant'] : null);
                 $sql->bindValue(':fec_fin_mantenimiento', $_POST['txt_fec_fin_mant'] ? $_POST['txt_fec_fin_mant'] : null);
                 $sql->bindValue(':estado', 1, PDO::PARAM_INT);
@@ -80,7 +80,7 @@ try {
                     $sql->bindValue(':observaciones', $_POST['txt_observaciones_mant']);
                     $sql->bindValue(':tipo_mantenimiento', $_POST['sl_tip_mant'], PDO::PARAM_INT);
                     $sql->bindValue(':id_responsable', $_POST['sl_responsable'], PDO::PARAM_INT);
-                    $sql->bindValue(':id_tercero', $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0, PDO::PARAM_INT);
+                    $sql->bindValue(':id_tercero', $_POST['id_txt_tercero'] ? $_POST['id_txt_tercero'] : 0, PDO::PARAM_INT);
                     $sql->bindValue(':fec_ini_mantenimiento', $_POST['txt_fec_ini_mant'] ? $_POST['txt_fec_ini_mant'] : null);
                     $sql->bindValue(':fec_fin_mantenimiento', $_POST['txt_fec_fin_mant'] ? $_POST['txt_fec_fin_mant'] : null);
                     $sql->bindValue(':id_mantenimiento', $id);

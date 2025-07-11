@@ -12,12 +12,14 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT acf_orden_ingreso.*,
-            tb_sedes.nom_sede AS nom_sede,
-            CASE acf_orden_ingreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
-        FROM acf_orden_ingreso 
-        INNER JOIN tb_sedes ON (tb_sedes.id_sede=acf_orden_ingreso.id_sede)
-        WHERE id_ingreso=" . $id . " LIMIT 1";
+$sql = "SELECT AI.*,
+            SE.nom_sede AS nom_sede,
+            TE.id_tercero,TE.nom_tercero,
+            CASE AI.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
+        FROM acf_orden_ingreso AS AI
+        INNER JOIN tb_sedes AS SE ON (SE.id_sede=AI.id_sede)
+        INNER JOIN tb_terceros AS TE ON (TE.id_tercero=AI.id_provedor)
+        WHERE AI.id_ingreso=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 
@@ -33,6 +35,8 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     //Inicializa variable por defecto
+    $obj['id_tercero'] = 0;
+    $obj['nom_tercero'] = 'NINGUNO';
     $obj['estado'] = 1;
     $obj['nom_estado'] = 'PENDIENTE';
     $obj['val_total'] = 0;
@@ -114,13 +118,12 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="sl_tercero" class="small">Tercero</label>
-                        <select class="form-control form-control-sm" id="sl_tercero" name="sl_tercero">
-                            <?php terceros($cmd, '', $obj['id_provedor']) ?>
-                        </select>
-                    </div>
+                        <label for="txt_tercero" class="small">Tercero</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_tercero" value="<?php echo $obj['nom_tercero'] ?>">
+                        <input type="hidden" id="id_txt_tercero" name="id_txt_tercero" value="<?php echo $obj['id_tercero'] ?>">
+                    </div>                    
                     <div class="form-group col-md-12">
-                    <label for="txt_det_ing" class="small">Detalle</label>                   
+                        <label for="txt_det_ing" class="small">Detalle</label>                   
                         <textarea class="form-control" id="txt_det_ing" name="txt_det_ing" rows="2"><?php echo $obj['detalle'] ?></textarea>
                     </div>
                 </div>

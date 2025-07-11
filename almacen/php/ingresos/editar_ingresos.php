@@ -36,7 +36,7 @@ try {
             $id_pedido = $_POST['txt_id_pedido'];        
             $num_fac = $_POST['txt_num_fac'];
             $fec_fac = $_POST['txt_fec_fac'];                  
-            $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;            
+            $id_tercero = $_POST['id_txt_tercero'];
             $detalle = $_POST['txt_det_ing'];
 
             $sql = "SELECT orden_compra FROM far_orden_ingreso_tipo WHERE id_tipo_ingreso=" . $id_tiping;

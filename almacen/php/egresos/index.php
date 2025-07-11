@@ -51,7 +51,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <div class="form-row">
                                 <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_sede_filtro">
-                                        <?php sedes_usuario($cmd,'--Sede--') ?>
+                                        <?php sedes_usuario($cmd,'--Sede Origen--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
@@ -75,24 +75,29 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </div>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_tercero_filtro">
-                                        <?php terceros($cmd,'--Tercero--') ?>
+                                    <select class="form-control form-control-sm" id="sl_tipegr_filtro">
+                                        <?php tipo_egreso($cmd,'--Tipo Egreso--') ?>
                                     </select>
-                                </div>
+                                </div>                                
                                 <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_centrocosto_filtro">
                                         <?php centros_costo($cmd,'--Centro Costo--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_area_filtro">
+                                    <select class="form-control form-control-sm" id="sl_sede_des_filtro">
+                                        <?php sedes($cmd,'--Sede Destino--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_tipegr_filtro">
-                                        <?php tipo_egreso($cmd,'--Tipo Egreso--') ?>
+                                    <select class="form-control form-control-sm" id="sl_area_filtro">
                                     </select>
-                                </div>
+                                </div>  
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_tercero_filtro">
+                                        <?php terceros($cmd,'--Tercero--') ?>
+                                    </select>
+                                </div>                              
                                 <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estados_movimientos('--Estado--') ?>
@@ -131,7 +136,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th rowspan="2">Detalle</th>
                                         <th rowspan="2">Tipo Egreso</th>
                                         <th colspan="2">Unidad Origen</th>
-                                        <th colspan="3">Unidad Destino</th>                                        
+                                        <th colspan="4">Unidad Destino</th>                                        
                                         <th rowspan="2">Vr. Total</th>
                                         <th rowspan="2">Id.Estado</th>
                                         <th rowspan="2">Estado</th>
@@ -139,10 +144,11 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </tr>
                                     <tr class="text-center centro-vertical">                                        
                                         <th>Sede</th>
-                                        <th>Bodega</th>
-                                        <th>Tercero</th>
-                                        <th>Dependencia</th>
-                                        <th>Area</th>                                         
+                                        <th>Bodega</th>                                        
+                                        <th>Centro de Costo</th>
+                                        <th>Sede</th>
+                                        <th>Area</th>  
+                                        <th>Tercero</th>                                       
                                     </tr>
                                 </thead>
                             </table>

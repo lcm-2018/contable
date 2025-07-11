@@ -69,15 +69,15 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </div>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_tercero_filtro">
-                                        <?php terceros($cmd,'--Tercero--') ?>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_tiping_filtro">
                                         <?php tipo_ingreso($cmd,'--Tipo Ingreso--') ?>
                                     </select>
                                 </div>
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_tercero_filtro">
+                                        <?php terceros($cmd,'--Tercero--') ?>
+                                    </select>
+                                </div>                                
                                 <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estados_movimientos('--Estado--') ?>

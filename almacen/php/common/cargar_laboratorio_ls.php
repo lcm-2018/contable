@@ -14,7 +14,7 @@ try {
     $sql = "SELECT id_lab,nom_laboratorio
             FROM far_laboratorios
             WHERE nom_laboratorio LIKE '%$term%'
-            ORDER BY nom_laboratorio";
+            ORDER BY IF(id_lab=0,0,CONCAT('1',nom_laboratorio))";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;

@@ -32,7 +32,7 @@ try {
             $hor_egr = $_POST['txt_hor_egr'];
             $id_tipegr = $_POST['id_tip_egr'];
             $id_ingreso_fz = $_POST['txt_id_ingreso'] ? $_POST['txt_id_ingreso'] : 'NULL';
-            $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;
+            $id_tercero = $_POST['id_txt_tercero'];
             $id_cencosto = $_POST['sl_centrocosto'] ? $_POST['sl_centrocosto'] : 0;
             $id_area = $_POST['sl_area'] ? $_POST['sl_area'] : 0;
             $id_sede = $_POST['id_sede_egr'];

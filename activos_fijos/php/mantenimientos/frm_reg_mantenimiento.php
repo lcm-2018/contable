@@ -12,9 +12,11 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT M.*,            
+$sql = "SELECT M.*,      
+            TE.id_tercero,TE.nom_tercero,      
             CASE M.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'APROBADO' WHEN 3 THEN 'EN EJECUCION' WHEN 4 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado     
         FROM acf_mantenimiento M
+        INNER JOIN tb_terceros AS TE ON (TE.id_tercero=M.id_tercero)
         WHERE M.id_mantenimiento=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
@@ -31,6 +33,8 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     //Inicializa variable por defecto
+    $obj['id_tercero'] = 0;
+    $obj['nom_tercero'] = 'NINGUNO';
     $obj['estado'] = 1;
     $obj['nom_estado'] = 'PENDIENTE';
 
@@ -79,18 +83,17 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             <?php tipos_mantenimiento('', $obj['tipo_mantenimiento']) ?>
                         </select>
                     </div>
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <label for="sl_responsable" class="small">Reponsable</label>
                         <select class="form-control form-control-sm" id="sl_responsable" name="sl_responsable">
                             <?php usuarios($cmd, '', $obj['id_responsable']) ?>
                         </select>
                     </div>
-                    <div class="form-group col-md-3">
-                        <label for="sl_tercero" class="small">Tercero</label>
-                        <select class="form-control form-control-sm" id="sl_tercero" name="sl_tercero">
-                            <?php terceros($cmd, '', $obj['id_tercero']) ?>
-                        </select>
-                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="txt_tercero" class="small">Tercero</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_tercero" value="<?php echo $obj['nom_tercero'] ?>">
+                        <input type="hidden" id="id_txt_tercero" name="id_txt_tercero" value="<?php echo $obj['id_tercero'] ?>">
+                    </div> 
                     <div class="form-group col-md-2">
                         <label for="txt_fec_ini_mant" class="small">Inicio Mantenimiento</label>
                         <input type="date" class="form-control form-control-sm" id="txt_fec_ini_mant" name="txt_fec_ini_mant" class="small" value="<?php echo $obj['fec_ini_mantenimiento'] ?>">
@@ -111,6 +114,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <th>Id</th>
                         <th>Placa</th>
                         <th>Articulo</th>
+                        <th>Activo Fijo</th>
                         <th>Estado General</th>
                         <th>Area</th>
                         <th>Observación</th>

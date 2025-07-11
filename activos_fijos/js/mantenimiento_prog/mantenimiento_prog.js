@@ -35,6 +35,7 @@
                 { 'data': 'nom_estado_man' },
                 { 'data': 'placa' },
                 { 'data': 'nom_articulo' },
+                { 'data': 'des_activo' },
                 { 'data': 'estado_general' },
                 { 'data': 'tipo_mantenimiento' },
                 { 'data': 'fec_ini_mantenimiento' },
@@ -44,9 +45,9 @@
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: 5 },
-                { visible: false, targets: 10 },
-                { orderable: false, targets: 12 }
+                { class: 'text-wrap', targets: [5, 6] },
+                { visible: false, targets: 11 },
+                { orderable: false, targets: 13 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 1) {

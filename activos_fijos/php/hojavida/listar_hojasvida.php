@@ -61,7 +61,7 @@ try {
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT HV.id_activo_fijo,
                 FM.cod_medicamento cod_articulo,FM.nom_medicamento nom_articulo,
-                HV.placa,HV.num_serial,
+                HV.des_activo,HV.placa,HV.num_serial,
                 MA.descripcion marca,HV.valor,
                 SE.nom_sede,AR.nom_area,
                 CONCAT_WS(' ',US.apellido1,US.apellido2,US.nombre1,US.nombre2) AS nom_responsable,
@@ -126,7 +126,8 @@ if (!empty($objs)) {
             "id" => $id,
             "placa" => $obj['placa'],            
             "cod_articulo" => $obj['cod_articulo'],
-            "nom_articulo" => $obj['nom_articulo'],            
+            "nom_articulo" => $obj['nom_articulo'],
+            "des_activo" => $obj['des_activo'],
             "num_serial" => $obj['num_serial'],
             "marca" => $obj['marca'],
             "valor" => $obj['valor'],            

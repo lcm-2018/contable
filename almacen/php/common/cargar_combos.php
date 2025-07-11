@@ -495,15 +495,15 @@ function tipo_area($cmd, $titulo ='', $id = 0)
     }
 }
 
-function areas_centrocosto($cmd, $titulo = '', $idcec = 0, $id = -1)
+function areas_centrocosto_sede($cmd, $titulo = '', $idcec = 0, $idsede = 0, $id = -1)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        if ($idcec != 0) {
-            $sql = "SELECT id_area,CONCAT_WS(' - ',nom_area,nom_sede) AS nom_area FROM far_centrocosto_area 
-                    INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_centrocosto_area.id_sede)
-                    WHERE id_centrocosto=$idcec
-                    ORDER BY far_centrocosto_area.es_almacen DESC, far_centrocosto_area.nom_area";
+        if ($idcec != 0 && $idsede != 0) {
+            $sql = "SELECT id_area,nom_area AS nom_area FROM far_centrocosto_area 
+                    WHERE id_centrocosto=$idcec AND id_sede=$idsede
+                    ORDER BY es_almacen DESC, nom_area";
+                    
             $rs = $cmd->query($sql);
             $objs = $rs->fetchAll();
             foreach ($objs as $obj) {

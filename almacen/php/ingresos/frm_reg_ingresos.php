@@ -13,7 +13,9 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT II.fec_ingreso,II.hor_ingreso,II.num_ingreso,II.id_sede,II.id_bodega,II.id_tipo_ingreso,
-            II.num_factura,II.fec_factura,II.id_provedor,II.estado,II.detalle,II.val_total,II.id_pedido,
+            II.num_factura,II.fec_factura,
+            TE.id_tercero,TE.nom_tercero,
+            II.estado,II.detalle,II.val_total,II.id_pedido,
             BO.nombre AS nom_bodega,
             CASE II.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado,
             CONCAT(PP.detalle,'(',PP.fec_pedido,')') AS des_pedido,
@@ -21,6 +23,7 @@ $sql = "SELECT II.fec_ingreso,II.hor_ingreso,II.num_ingreso,II.id_sede,II.id_bod
         FROM far_orden_ingreso AS II
         INNER JOIN far_bodegas AS BO ON (BO.id_bodega=II.id_bodega)
         INNER JOIN far_orden_ingreso_tipo AS IITP ON (IITP.id_tipo_ingreso=II.id_tipo_ingreso)
+        INNER JOIN tb_terceros AS TE ON (TE.id_tercero=II.id_provedor)
         LEFT JOIN far_alm_pedido AS PP ON (PP.id_pedido=II.id_pedido)
         WHERE id_ingreso=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
@@ -34,6 +37,8 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     //Inicializa variable por defecto
+    $obj['id_tercero'] = 0;
+    $obj['nom_tercero'] = 'NINGUNO';
     $obj['estado'] = 1;
     $obj['nom_estado'] = 'PENDIENTE';
     $obj['val_total'] = 0;
@@ -104,13 +109,13 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-2">
                         <label for="txt_fec_fac" class="small">Fecha Fact./Acta/Rem.</label>
                         <input type="date" class="form-control form-control-sm" id="txt_fec_fac" name="txt_fec_fac" class="small" value="<?php echo $obj['fec_factura'] ?>">
-                    </div>
+                    </div>                    
                     <div class="form-group col-md-6">
-                        <label for="sl_tercero" class="small">Tercero</label>
-                        <select class="form-control form-control-sm" id="sl_tercero" name="sl_tercero">
-                            <?php terceros($cmd, '', $obj['id_provedor']) ?>
-                        </select>
+                        <label for="txt_tercero" class="small">Tercero</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_tercero" value="<?php echo $obj['nom_tercero'] ?>">
+                        <input type="hidden" id="id_txt_tercero" name="id_txt_tercero" value="<?php echo $obj['id_tercero'] ?>">
                     </div>
+
                 </div>  
                 <div class="form-row" id="divPedido" <?php echo $obj['orden_compra'] == 1 ? '' : 'style="display: none;"' ?>>
                     <div class="form-group col-md-1">

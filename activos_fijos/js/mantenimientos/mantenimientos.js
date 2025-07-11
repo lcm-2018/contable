@@ -94,6 +94,26 @@
         }
     });
 
+    // Autocompletar Terceros
+    $('#divForms').on("input", "#txt_tercero", function() {
+        $(this).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "../common/cargar_terceros_ls.php",
+                    dataType: "json",
+                    type: 'POST',
+                    data: { term: request.term }
+                }).done(function(data) {
+                    response(data);
+                });
+            },
+            minLength: 2,
+            select: function(event, ui) {
+                $('#id_txt_tercero').val(ui.item.id);
+            }
+        });
+    });
+
     //Editar un registro Orden Ingreso
     $('#tb_mantenimientos').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');

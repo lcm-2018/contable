@@ -37,7 +37,7 @@ if (isset($_POST['estado']) && strlen($_POST['estado'])) {
 try {
     $sql = "SELECT MD.id_mant_detalle,MM.id_mantenimiento,MM.fec_mantenimiento,	
                 CASE MM.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'APROBADO' WHEN 3 THEN 'EN EJECUCION' WHEN 4 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado_man,		
-                HV.placa,FM.nom_medicamento AS nom_articulo,
+                HV.placa,FM.nom_medicamento AS nom_articulo,HV.des_activo,
                 CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general,
                 CASE MM.tipo_mantenimiento WHEN 1 THEN 'PREVENTIVO' WHEN 2 THEN 'CORRECTIVO INTERNO' WHEN 3 THEN 'CORRECTIVO EXTERNO' END AS tipo_mantenimiento, 
                 MM.fec_ini_mantenimiento,MM.fec_fin_mantenimiento,
@@ -88,7 +88,7 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th rowspan="2">Id</th>
                 <th colspan="3">Orden Mantenimiento</th>
-                <th colspan="3">Activo Fijo</th>
+                <th colspan="4">Activo Fijo</th>
                 <th colspan="4">Mantenimiento</th>                                                                                
             </tr>
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
@@ -96,6 +96,7 @@ try {
                 <th>Fecha</th>
                 <th>Estado</th>
                 <th>Placa</th>
+                <th>Articulo</th>
                 <th>Nombre</th>
                 <th>Estado General</th>
                 <th>Tipo</th>
@@ -115,6 +116,7 @@ try {
                         <td>' . $obj['nom_estado_man'] . '</td>   
                         <td>' . $obj['placa'] . '</td>   
                         <td style="text-align:left">' . $obj['nom_articulo']. '</td>   
+                        <td style="text-align:left">' . $obj['des_activo']. '</td>   
                         <td>' . $obj['estado_general'] . '</td>   
                         <td>' . $obj['tipo_mantenimiento'] . '</td>   
                         <td>' . $obj['fec_ini_mantenimiento'] . '</td>   
@@ -126,7 +128,7 @@ try {
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="11" style="text-align:left">
+                <td colspan="12" style="text-align:left">
                     No. de Registros: <?php echo count($objs); ?>
                 </td>
             </tr>

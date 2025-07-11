@@ -20,7 +20,7 @@ try {
                 CASE MM.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'APROBADO' WHEN 3 THEN 'EN EJECUCION' WHEN 4 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS estado_orden,
                 CASE MM.estado WHEN 1 THEN MM.fec_creacion WHEN 2 THEN MM.fec_aprueba WHEN 3 THEN MM.fec_ejecucion WHEN 4 THEN MM.fec_cierre WHEN 0 THEN MM.fec_anulacion END AS fec_estado_orden,
                 MD.id_mant_detalle,MD.observacion_mant,MD.observacion_fin_mant,
-                HV.placa,HV.num_serial,FM.nom_medicamento AS nom_articulo,                
+                HV.placa,HV.num_serial,FM.nom_medicamento AS nom_articulo,HV.des_activo,                
                 CASE MD.estado_general WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_general,
                 CASE MD.estado_fin_mant WHEN 1 THEN 'BUENO' WHEN 2 THEN 'REGULAR' WHEN 3 THEN 'MALO' WHEN 4 THEN 'SIN SERVICIO' END AS estado_fin_mant,
                 CASE MD.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'EN MANTENIMIENTO' WHEN 3 THEN 'FINALIZADO' END AS estado,
@@ -102,7 +102,8 @@ try {
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td>Id. Registro Mantenimiento</td>
             <td>Placa</td>
-            <td colspan="2">Articulo</td>            
+            <td>Articulo</td>
+            <td>Activo Fijo</td>            
             <td>Serial</td>
             <td>Estado</td>
             <td>Fecha Estado</td>
@@ -110,7 +111,8 @@ try {
         <tr>
             <td><?php echo $obj_e['id_mant_detalle']; ?></td>
             <td><?php echo $obj_e['placa']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_articulo']; ?></td>
+            <td><?php echo $obj_e['nom_articulo']; ?></td>
+            <td><?php echo $obj_e['des_activo']; ?></td>
             <td><?php echo $obj_e['num_serial']; ?></td>
             <td><?php echo $obj_e['estado']; ?></td>
             <td><?php echo $obj_e['fec_estado']; ?></td>
@@ -164,7 +166,7 @@ try {
         <tfoot style="font-size:60%">
             <tr style="background-color:#CED3D3; color:#000000">                
                 <td>TOTAL REGISTROS:<?php echo COUNT($obj_ds); ?> </td>
-                <td colspan="3"></td>
+                <td colspan="4"></td>
             </tr>
         </tfoot>
     </table>

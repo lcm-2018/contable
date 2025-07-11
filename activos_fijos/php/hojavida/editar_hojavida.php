@@ -28,19 +28,19 @@ try {
         
             if ($id_hv == -1) {                
                 $sql = "INSERT INTO acf_hojavida (
-                    placa,num_serial,id_marca,valor,tipo_activo,id_articulo,modelo,id_sede,id_area,id_responsable,id_proveedor,lote,fecha_fabricacion,
+                    placa,num_serial,id_marca,des_activo,valor,tipo_activo,id_articulo,modelo,id_sede,id_area,id_responsable,id_proveedor,lote,fecha_fabricacion,
                     reg_invima,fabricante,lugar_origen,representante,dir_representante,tel_representante,recom_fabricante,
                     id_tipo_ingreso,fecha_adquisicion,fecha_instalacion,periodo_garantia,vida_util,calif_4725,calibracion,
                     vol_min,vol_max,frec_min,frec_max,pot_min,pot_max,cor_min,cor_max,temp_min,temp_max,riesgo,uso,
                     cb_diagnostico,cb_prevencion,cb_rehabilitacion,cb_analisis_lab,cb_trat_mant,estado_general,
-                    causa_est_general,fecha_fuera_servicio,id_usr_crea,fec_creacion,id_usr_actualiza,fec_actualiza,estado
+                    causa_est_general,fecha_fuera_servicio,observaciones,id_usr_crea,fec_creacion,id_usr_actualiza,fec_actualiza,estado
                 ) VALUES (
-                    :placa,:num_serial,:id_marca,:valor,:tipo_activo,:id_articulo,:modelo,:id_sede,:id_area,:id_responsable,:id_proveedor,:lote,:fecha_fabricacion,
+                    :placa,:num_serial,:id_marca,:des_activo,:valor,:tipo_activo,:id_articulo,:modelo,:id_sede,:id_area,:id_responsable,:id_proveedor,:lote,:fecha_fabricacion,
                     :reg_invima,:fabricante,:lugar_origen,:representante,:dir_representante,:tel_representante,:recom_fabricante,
                     :id_tipo_ingreso,:fecha_adquisicion,:fecha_instalacion,:periodo_garantia,:vida_util,:calif_4725,:calibracion,
                     :vol_min,:vol_max,:frec_min,:frec_max,:pot_min,:pot_max,:cor_min,:cor_max,:temp_min,:temp_max,:riesgo,:uso,
                     :cb_diagnostico,:cb_prevencion,:cb_rehabilitacion,:cb_analisis_lab,:cb_trat_mant,:estado_general,
-                    :causa_est_general,:fecha_fuera_servicio,:id_usr_crea,:fec_creacion,:id_usr_actualiza,:fec_actualiza,:estado
+                    :causa_est_general,:fecha_fuera_servicio,:observaciones,:id_usr_crea,:fec_creacion,:id_usr_actualiza,:fec_actualiza,:estado
                 )";
                 $sql = $cmd->prepare($sql);
                 
@@ -48,6 +48,7 @@ try {
                     ':placa' => $_POST['placa'],
                     ':num_serial' => $_POST['num_serial'],
                     ':id_marca' => $_POST['id_marca'],
+                    ':des_activo' => $_POST['des_activo'],
                     ':valor' => $_POST['valor'],
                     ':tipo_activo' => $_POST['tipo_activo'] ? $_POST['tipo_activo'] : 0,
                     ':id_articulo' => $_POST['id_articulo'],
@@ -92,11 +93,12 @@ try {
                     ':estado_general' => $_POST['id_estado_general'] ? $_POST['id_estado_general'] : 0,
                     ':causa_est_general' => $_POST['causa_est_general'],
                     ':fecha_fuera_servicio' => $_POST['fecha_fuera_servicio'] ? date('Y-m-d', strtotime($_POST['fecha_fuera_servicio'])) : null,
+                    ':observaciones' => $_POST['observaciones'],
                     ':id_usr_crea' => $id_usr_crea,
                     ':fec_creacion' => $fecha_crea,
                     ':id_usr_actualiza' => $id_usr_crea,
                     ':fec_actualiza' => $fecha_crea,
-                    ':estado' => $_POST['id_estado'],
+                    ':estado' => $_POST['id_estado']                    
                 ];                
                 $inserted = $sql->execute($data);
 
@@ -112,6 +114,7 @@ try {
                     placa = :placa,
                     num_serial = :num_serial,
                     id_marca = :id_marca,
+                    des_activo = :des_activo,
                     valor = :valor,
                     tipo_activo = :tipo_activo,
                     id_articulo = :id_articulo,
@@ -153,6 +156,7 @@ try {
                     estado_general = :estado_general,
                     causa_est_general = :causa_est_general,
                     fecha_fuera_servicio = :fecha_fuera_servicio,
+                    observaciones = :observaciones,
                     id_usr_actualiza = :id_usr_actualiza,
                     fec_actualiza = :fec_actualiza,
                     estado = :estado
@@ -163,6 +167,7 @@ try {
                 $sql->bindValue(':placa', $_POST['placa']);
                 $sql->bindValue(':num_serial', $_POST['num_serial']);
                 $sql->bindValue(':id_marca', $_POST['id_marca'], PDO::PARAM_INT);
+                $sql->bindValue(':des_activo', $_POST['des_activo']);
                 $sql->bindValue(':valor', $_POST['valor']);
                 $sql->bindValue(':tipo_activo', $_POST['tipo_activo'] ? $_POST['tipo_activo'] : 0, PDO::PARAM_INT);
                 $sql->bindValue(':id_articulo', $_POST['id_articulo'], PDO::PARAM_INT);
@@ -204,6 +209,7 @@ try {
                 $sql->bindValue(':estado_general', $_POST['id_estado_general'] ? $_POST['id_estado_general'] : 0, PDO::PARAM_INT);
                 $sql->bindValue(':causa_est_general', $_POST['causa_est_general']);
                 $sql->bindValue(':fecha_fuera_servicio', $_POST['fecha_fuera_servicio'] ? date('Y-m-d', strtotime($_POST['fecha_fuera_servicio'])) : null);
+                $sql->bindValue(':observaciones', $_POST['observaciones']);
                 $sql->bindValue(':id_usr_actualiza', $id_usr_crea, PDO::PARAM_INT);
                 $sql->bindValue(':fec_actualiza', $fecha_crea);
                 $sql->bindValue(':estado', $_POST['id_estado'], PDO::PARAM_INT);

@@ -52,7 +52,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <div class="form-row">
                                 <div class="form-group col-md-2">                        
                                     <select class="form-control form-control-sm" id="sl_cen_costo_filtro" name="sl_cen_costo_filtro">
-                                        <?php centros_costo_usuario($cmd, '--Dependencia--') ?>
+                                        <?php centros_costo_usuario($cmd, '--Dependencia Solicitante--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">

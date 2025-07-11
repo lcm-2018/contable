@@ -28,6 +28,7 @@
                 { 'data': 'id_mant_detalle' }, //Index=0
                 { 'data': 'placa' },
                 { 'data': 'nom_articulo' },
+                { 'data': 'des_activo' },
                 { 'data': 'estado_general' },
                 { 'data': 'nom_area' },
                 { 'data': 'observacion_mant' },
@@ -35,8 +36,8 @@
                 { 'data': 'estado' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [2, 5] },
-                { orderable: false, targets: [6, 7] }
+                { class: 'text-wrap', targets: [2, 3, 6] },
+                { orderable: false, targets: [7, 8] }
             ],
             order: [
                 [0, "asc"]

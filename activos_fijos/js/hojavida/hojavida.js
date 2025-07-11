@@ -44,6 +44,7 @@
                 { 'data': 'placa' },
                 { 'data': 'cod_articulo' },
                 { 'data': 'nom_articulo' },
+                { 'data': 'des_activo' },
                 { 'data': 'num_serial' },
                 { 'data': 'marca' },
                 { 'data': 'valor' },
@@ -57,11 +58,12 @@
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
+            autoWidth: false,
             columnDefs: [
-                { class: 'text-wrap', targets: [3, 5] },
-                { type: "numeric-comma", targets: 6 },
-                { visible: false, targets: [10, 13] },
-                { orderable: false, targets: 15 }
+                { class: 'text-wrap', targets: [3, 4, 6, 8] },
+                { type: "numeric-comma", targets: 7 },
+                { visible: false, targets: [11, 14] },
+                { orderable: false, targets: 16 }
             ],
             rowCallback: function(row, data) {
                 if (data.estado == 2) {
@@ -86,6 +88,8 @@
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
         $('#tb_hojavida').wrap('<div class="overflow"/>');
     });
+
+
 
     //Buascar registros activos fijos
     $('#btn_buscar_filtro').on("click", function() {
@@ -137,7 +141,6 @@
         error += verifica_vacio($('#placa'));
         error += verifica_vacio($('#num_serial'));
         error += verifica_vacio($('#id_marca'));
-        error += verifica_vacio($('#id_proveedor'));
         error += verifica_vacio($('#valor'));
         error += verifica_vacio($('#estado_general'));
         error += verifica_vacio($('#estado'));
