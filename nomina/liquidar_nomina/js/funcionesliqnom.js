@@ -590,7 +590,11 @@
             ],
             "order": [
                 [3, "desc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
         });
         $('#tableLiqPresSociales').wrap('<div class="overflow" />');
         $('#tableLiqPrimaSv').DataTable({
@@ -599,9 +603,9 @@
             "order": [
                 [1, "desc"]
             ],
-            "lengthMenu": [
-                [10, 25, 50, 100, -1],
-                [10, 25, 50, 100, 'TODO'],
+            lengthMenu: [
+                [10, 25, -1],
+                [10, 25, 'TODO'],
             ],
             "pageLength": -1
         });

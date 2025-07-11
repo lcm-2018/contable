@@ -5,34 +5,17 @@ if (!isset($_SESSION['user'])) {
     header("Location: ../../../index.php");
     exit();
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>CONTAFACIL</title>
-    <style>
-        .text {
-            mso-number-format: "\@"
-        }
-    </style>
+header("Content-type: application/vnd.ms-excel charset=utf-8");
+header("Content-Disposition: attachment; filename=Descuentos_municipio.xls");
+header("Pragma: no-cache");
+header("Expires: 0");
 
-    <?php
-
-    header("Content-type: application/vnd.ms-excel charset=utf-8");
-    header("Content-Disposition: attachment; filename=Descuentos_municipio.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
-
-    ?>
-</head>
-<?php
 $vigencia = $_SESSION['vigencia'];
 // estraigo las variables que llegan por post en json
-$fecha_inicial = $_POST['fec_inicial'];
-$fecha_corte = $_POST['fec_final'];
-$id_des = $_POST['mpio'];
+$fecha_inicial = $_POST['fecha_inicial'];
+$fecha_corte = $_POST['fecha_final'];
+
 function pesos($valor)
 {
     return '$' . number_format($valor, 2);
@@ -45,65 +28,43 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // consulto la tabla tb_terceros para obtener el id_tercero_api
 try {
     $sql = "SELECT
-    `ctb_retenciones`.`id_retencion`
-    , `ctb_retenciones`.`nombre_retencion`
-    , `ctb_doc`.`id_manu`
-    , `ctb_doc`.`fecha`
-    , `ctb_doc`.`id_tercero`
-    , `ctb_causa_retencion`.`id_terceroapi`
-    , `ctb_doc`.`detalle`
-    , `ctb_causa_retencion`.`valor_retencion`
-    , `ctb_causa_retencion`.`valor_base`
-FROM
-    `ctb_causa_retencion`
-    INNER JOIN `ctb_retenciones` 
-        ON (`ctb_causa_retencion`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
-    INNER JOIN `ctb_retencion_tipo` 
-        ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
-    INNER JOIN `ctb_doc` 
-        ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-WHERE (`ctb_retenciones`.`id_retencion` = $id_des
-    AND `ctb_doc`.`fecha`  BETWEEN '$fecha_inicial' AND '$fecha_corte');";
+                ctb_doc.fecha,
+                ctb_doc.estado,
+                ctb_doc.id_manu,
+                tb_terceros.nom_tercero,
+                tb_tipos_documento.descripcion,
+                tb_terceros.nit_tercero,
+                ctb_doc.detalle,
+                ctb_causa_retencion.valor_base,
+                ctb_causa_retencion.tarifa,
+                ctb_causa_retencion.valor_retencion,
+                ctb_retenciones.nombre_retencion
+            FROM
+                ctb_causa_retencion
+                INNER JOIN ctb_doc ON (ctb_causa_retencion.id_ctb_doc = ctb_doc.id_ctb_doc)
+                INNER JOIN ctb_retencion_rango ON (ctb_causa_retencion.id_rango = ctb_retencion_rango.id_rango)
+                INNER JOIN ctb_retenciones ON (ctb_retencion_rango.id_retencion = ctb_retenciones.id_retencion)
+                INNER JOIN tb_terceros ON (tb_terceros.id_tercero_api = ctb_doc.id_tercero)
+                LEFT JOIN tb_tipos_documento ON (tb_terceros.tipo_doc = tb_tipos_documento.id_tipodoc)
+            WHERE 
+                ctb_retenciones.id_retencion_tipo = 5
+                AND ctb_doc.fecha BETWEEN '$fecha_inicial' AND '$fecha_corte';";
     $res = $cmd->query($sql);
     $descuentos = $res->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-
-
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 try {
     $sql = "SELECT
-    `nombre`
-    , `nit`
-    , `dig_ver`
-FROM
-    `tb_datos_ips`;";
+                `razon_social_ips`, `nit_ips`, `dv`
+            FROM
+                `tb_datos_ips`";
     $res = $cmd->query($sql);
     $empresa = $res->fetch();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-// Consulto los id de terceros creado en la tabla ctb_doc
-try {
-    $sql = "SELECT DISTINCT
-    `ctb_doc`.`id_tercero`
-FROM
-    `ctb_doc`
-WHERE ( `ctb_doc`.`id_tercero` >0);";
-    $res = $cmd->query($sql);
-    $id_terceros = $res->fetchAll();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-$id_t = [];
-foreach ($id_terceros as $ter) {
-    $id_t[] = $ter['id_tercero'];
-}
-
-$ids = implode(',', $id_t);
-$terceros = getTerceros($ids, $cmd);
-
 
 ?>
 <div class="contenedor bg-light" id="areaImprimir">
@@ -116,10 +77,10 @@ $terceros = getTerceros($ids, $cmd);
             </tr>
 
             <tr>
-                <td colspan="7" style="text-align:center"><?php echo '<h3>' . $empresa['nombre'] . '</h3>'; ?></td>
+                <td colspan="7" style="text-align:center"><?php echo '<h3>' . $empresa['razon_social_ips'] . '</h3>'; ?></td>
             </tr>
             <tr>
-                <td colspan="7" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
+                <td colspan="7" style="text-align:center"><?php echo $empresa['nit_ips'] . '-' . $empresa['dv']; ?></td>
             </tr>
             <tr>
                 <td colspan="7" style="text-align:center"><?php echo 'RELACION DE DESCUENTOS Y RETENCIONES DETALLADO'; ?></td>
@@ -168,15 +129,12 @@ $terceros = getTerceros($ids, $cmd);
             <?php
             $total_ret = 0;
             foreach ($descuentos as $tp) {
-                $key = array_search($tp['id_tercero'], array_column($terceros, 'id_tercero_api'));
-                $nom_ter =  $key === false ? '---' : $terceros[$key]['nom_tercero'];
-                $ced_ter =  $key === false ? '---' : $terceros[$key]['nit_tercero'];
                 $fecha = date('Y-m-d', strtotime($tp['fecha']));
                 echo "<tr>
                     <td class='text-right'>" . $tp['id_manu'] . "</td>
                     <td class='text-right'>" . $fecha . "</td>
-                    <td class='text-right'>" . $nom_ter  . "</td>
-                    <td class='text'>" . $ced_ter . "</td>
+                    <td class='text-right'>" .  $tp['nom_tercero']  . "</td>
+                    <td class='text'>" .  $tp['nit_tercero'] . "</td>
                     <td class='text-right'>" . $tp['detalle'] . "</td>
                     <td class='text-right'>" . number_format($tp['valor_base'], 2, ".", ",")  . "</td>
                     <td class='text-right'>" . number_format($tp['valor_retencion'], 2, ".", ",")  . "</td>
@@ -194,5 +152,3 @@ $terceros = getTerceros($ids, $cmd);
         </table>
     </div>
 </div>
-
-</html>

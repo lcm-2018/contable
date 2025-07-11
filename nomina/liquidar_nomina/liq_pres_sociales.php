@@ -1,5 +1,9 @@
 <?php
 session_start();
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
     header('Location: ../../index.php');
     exit();
@@ -644,7 +648,7 @@ if (count($empleado) > 0) {
             $sql->bindParam(6, $fec_retiro, PDO::PARAM_STR);
             $sql->execute();
             if (!($cmd->lastInsertId() > 0)) {
-                echo $cdm->errorInfo()[2] . 'PS';
+                echo $cmd->errorInfo()[2] . 'PS';
             }
             $cmd = null;
         } catch (PDOException $e) {

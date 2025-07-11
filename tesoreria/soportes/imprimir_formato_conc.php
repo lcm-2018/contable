@@ -27,7 +27,7 @@ try {
     $sql = "SELECT `fin_mes`, `nom_mes` FROM `nom_meses` WHERE (`codigo` = '$mes')";
     $rs = $cmd->query($sql);
     $dia = $rs->fetch(PDO::FETCH_ASSOC);
-    $fin_mes = !(empty($dia)) ? $vigencia . '-' . $mes . '-' . $dia['fin_mes'] : 0;
+    $fin_mes = !(empty($dia)) ? date('Y-m-t', strtotime($vigencia . '-' . $mes . '-01')) : 0;
     $nom_mes = !(empty($dia)) ? mb_strtoupper($dia['nom_mes']) : '';
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
@@ -225,7 +225,7 @@ $anulado = '';
 ?>
 <div class="text-right py-3">
     <?php if (PermisosUsuario($permisos, 5601, 6)  || $id_rol == 1) { ?>
-        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',0);"> Imprimir</a>
+        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir','0');"> Imprimir</a>
     <?php } ?>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>

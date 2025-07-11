@@ -527,8 +527,8 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     if ($new) {
-        $sql = "INSERT INTO `seg_soporte_fno` (`id_factura_no`, `shash`, `referencia`, `fecha`, `id_user_reg`, `fec_reg`) 
-            VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO `seg_soporte_fno` (`id_factura_no`, `shash`, `referencia`, `fecha`, `id_user_reg`, `fec_reg`,`tipo`) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)";
     } else {
         $sql = "UPDATE `seg_soporte_fno` 
                     SET `id_factura_no` = ?,`shash` = ?, `referencia` = ?, `fecha` = ?, `id_user_reg` = ?, `fec_reg` = ? 
@@ -543,6 +543,8 @@ try {
     $sql->bindValue(6, $date->format('Y-m-d H:i:s'));
     if (!$new) {
         $sql->bindParam(7, $id_soporte, PDO::PARAM_INT);
+    } else {
+        $sql->bindValue(7, $tipo, PDO::PARAM_INT);
     }
     if ($resnom['rerror'] == 0) {
         $shash = $resnom['jret']['scufe'];

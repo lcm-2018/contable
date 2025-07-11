@@ -1505,7 +1505,7 @@ $('#tableHomologaPto').on('click', '#desmarcar', function () {
 $('#modificaHomologaPto').on('click', '.dupLine', function () {
     var elemento = $(this);
     var id = $(this).val();
-    var cgr = cpc = fte = tercero = politica = siho = sia = situacion = vig = secc = sect = csia = '0';
+    var cgr = cpc = fte = tercero = politica = siho = sia = situacion = vig = secc = sect = csia = hm = '0';
     var txtcgr = txtcpc = txtfte = txttercero = txtpolitica = txtsiho = txtsia = txtvig = txtsecc = txtsect = txtcsia = '';
     var ppto = $('#id_pto_tipo').val();
     if (elemento.is(':checked')) {
@@ -1536,6 +1536,7 @@ $('#modificaHomologaPto').on('click', '.dupLine', function () {
                     txtsect = $('input[name="cuatro[' + id_pto + ']"]').val();
                     csia = $('input[name="csia[' + id_pto + ']"]').val();
                     txtcsia = $('input[name="once[' + id_pto + ']"]').val();
+                    hm = $('input[name="mmto_h[' + id_pto + ']"]:checked').val();
                 } else {
                     vig = $('select[name="vigencia[' + id_pto + ']"]').val();
                 }
@@ -1568,6 +1569,7 @@ $('#modificaHomologaPto').on('click', '.dupLine', function () {
             $('input[name="cuatro[' + id + ']"]').val(txtsect);
             $('input[name="csia[' + id + ']"]').val(csia);
             $('input[name="once[' + id + ']"]').val(txtcsia);
+            hm == 1 ? $('#si_' + id).prop('checked', true) : $('#no_' + id).prop('checked', true);
         } else {
             $('select[name="vigencia[' + id + ']"]').val(vig)
         }

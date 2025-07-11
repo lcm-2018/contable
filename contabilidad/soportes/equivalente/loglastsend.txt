@@ -1,1 +1,1 @@
-{"rerror":9001,"smessage":"Taxxa - Duplicación de consecutivo de factura para documento: FV23545"}
+{"rerror":9001,"smessage":"Taxxa - Duplicación de consecutivo de factura para documento: FV23547"}

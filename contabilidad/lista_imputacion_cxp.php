@@ -21,6 +21,7 @@ try {
                 , `pto_cargue`.`nom_rubro`
                 , IFNULL(`t1`.`valor`,0) - IFNULL(`t1`.`valor_liberado`,0) AS `valor_cop`
                 , `crp`.`id_pto_crp_det`
+                , `pto_crp`.`id_manu` 
 
             FROM
                 `ctb_doc`
@@ -64,6 +65,7 @@ try {
                 , `rubros`.`nom_rubro`
                 , IFNULL(`val_cop`.`debito`,0) - IFNULL(`val_cop`.`credito`,0) AS `valor_crp`
                 , `val_crp`.`id_pto_crp_det`
+                , `val_crp`.`id_manu`
             FROM 
                 (SELECT
                     `pto_cargue`.`cod_pptal`
@@ -101,6 +103,7 @@ try {
                     , `pto_crp_detalle`.`id_tercero_api`
                     , SUM(`pto_crp_detalle`.`valor`) AS `debito`
                     , SUM(`pto_crp_detalle`.`valor_liberado`) AS `credito`
+                    , `pto_crp`.`id_manu`
                 FROM
                     `pto_crp_detalle`
                 INNER JOIN `pto_crp` 
@@ -181,13 +184,19 @@ try {
                     $max = $key !== false ? $max + $detalles[$key]['valor'] : $max;
                 ?>
                     <div class="form-row">
+                        <div class="form-group col-md-1">
+                            <?php if ($band) { ?>
+                                <span class="small">CRP</span>
+                            <?php } ?>
+                            <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>" readonly><?php echo $l['id_manu'] ?></div>
+                        </div>
                         <div class="form-group col-md-3">
                             <?php if ($band) { ?>
                                 <span class="small">Código presupuestal</span>
                             <?php } ?>
                             <div class="form-control form-control-sm text-left text-muted <?php echo $bg_color ?>" readonly><?php echo $l['cod_pptal'] ?></div>
                         </div>
-                        <div class="form-group col-md-5">
+                        <div class="form-group col-md-4">
                             <?php if ($band) { ?>
                                 <span class="small">Rubro</span>
                             <?php } ?>

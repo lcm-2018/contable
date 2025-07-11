@@ -27,7 +27,7 @@ try {
                 ON (`nom_valxvigencia`.`id_concepto` = `nom_conceptosxvigencia`.`id_concp`)
             WHERE `id_concepto` = '4' LIMIT 1";
     $rs = $cmd->query($sql);
-    $concec = $rs->fetch();
+    $concec = $rs->fetch(PDO::FETCH_ASSOC);
     $iNonce = intval($concec['valor']);
     $idiNonce = $concec['id_valxvig'];
     $sql = "UPDATE `nom_valxvigencia` SET `valor` = '$iNonce'+1 WHERE `id_valxvig` = '$idiNonce'";
@@ -67,7 +67,7 @@ try {
                 INNER JOIN `tb_departamentos`
                     ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departamento`)";
     $rs = $cmd->query($sql);
-    $empresa = $rs->fetch();
+    $empresa = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -113,7 +113,7 @@ try {
                     ON (`ctb_doc`.`id_ref_ctb` = `ctb_referencia`.`id_ctb_referencia`)
             WHERE (`ctb_doc`.`id_ctb_doc` = $id_facno) LIMIT 1";
     $rs = $cmd->query($sql);
-    $contab = $rs->fetch();
+    $contab = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -142,7 +142,7 @@ $factura['fec_compra'] = date('Y-m-d', strtotime($contab['fecha_fact']));
 $factura['fec_vence'] = date('Y-m-d', strtotime($contab['fecha_ven']));
 $factura['met_pago'] = '1';
 $factura['form_pago'] = 'ZZZ';
-$factura['val_retefuente'] = 0; 
+$factura['val_retefuente'] = 0;
 $factura['porc_retefuente'] = 0;
 $factura['val_reteiva'] = 0;
 $factura['porc_reteiva'] = 0;
@@ -166,54 +166,55 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT 
-                   1 AS `id_resol`
-                   , 1 As `id_empresa`
-                   , `resolucion_edian` AS `no_resol`
-                   , `prefijo_edian` AS `prefijo`
-                   , `num_efacturactual` AS `consecutivo`
-                   , `num_efacturafin` AS `fin_concecutivo`
-                   , `fec_inicio_res` AS `fec_inicia`
-                   , `fec_vence_res` AS `fec_termina`
-                   , 1 AS `tipo`
-                   , 'prod' AS `entorno`
-                FROM `tb_datos_ips`";
+                1 AS `id_resol`
+                , 1 As `id_empresa`
+                , `resolucion_edian` AS `no_resol`
+                , `prefijo_edian` AS `prefijo`
+                , `num_efacturactual` AS `consecutivo`
+                , `num_efacturafin` AS `fin_concecutivo`
+                , `fec_inicio_res` AS `fec_inicia`
+                , `fec_vence_res` AS `fec_termina`
+                , 1 AS `tipo`
+                , 'prod' AS `entorno`
+            FROM `tb_datos_ips`";
     $rs = $cmd->query($sql);
-    $resolucion = $rs->fetch();
-    if ($resolucion['id_resol'] == '') {
+    $resolucion = $rs->fetch(PDO::FETCH_ASSOC);
+    if (empty($resolucion)) {
         $fail = 'No se ha registrado una resolución de facturación';
         $response[] = array("value" => "Error", "msg" => json_encode($fail));
         echo json_encode($response);
         exit;
+    }
+    $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+    $fecha_actual = strtotime($date->format('Y-m-d H:i:s'));
+    $fecha_max = strtotime($resolucion['fec_termina'] . ' 23:59:59');
+    if ($fecha_actual > $fecha_max) {
+        $fail = "La fecha máxima de emisión de la resolución ha expirado";
+        $response[] = array("value" => "Error", "msg" => json_encode($fail));
+        echo json_encode($response);
+        exit();
     } else {
-        $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-        $fecha_actual = strtotime($date->format('Y-m-d H:i:s'));
-        $fecha_max = strtotime($resolucion['fec_termina']);
-        if ($fecha_actual > $fecha_max) {
-            $fail = "La fecha máxima de emisión de la resolución ha expirado";
+        $secuenciaf = intval($resolucion['consecutivo']);
+        if ($secuenciaf > $resolucion['fin_concecutivo']) {
+            $fail = "La secuencia de la resolución ha llegado al consecutivo máximo autorizado";
             $response[] = array("value" => "Error", "msg" => json_encode($fail));
             echo json_encode($response);
             exit();
-        } else {
-            $secuenciaf = intval($resolucion['consecutivo']);
-            if ($secuenciaf > $resolucion['fin_concecutivo']) {
-                $fail = "La secuencia de la resolución ha llegado al consecutivo máximo autorizado";
-                $response[] = array("value" => "Error", "msg" => json_encode($fail));
-                echo json_encode($response);
-                exit();
-            }
         }
     }
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
 try {
     $new = true;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_soporte`, `referencia` FROM `seg_soporte_fno` WHERE `id_factura_no` = $id_facno LIMIT 1";
+    $sql = "SELECT `id_soporte`, `referencia` FROM `seg_soporte_fno` 
+            WHERE `id_factura_no` = $id_facno AND `tipo` = 0 LIMIT 1";
     $rs = $cmd->query($sql);
-    $referencia = $rs->fetch();
+    $referencia = $rs->fetch(PDO::FETCH_ASSOC);
     if (!empty($referencia)) {
         $dato = explode('-', $referencia['referencia']);
         $secuenciaf = intval($dato[1]);
@@ -224,6 +225,23 @@ try {
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$err = '';
+if ($new) {
+    $sigue = $secuenciaf + 1;
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+        $query = "UPDATE `tb_datos_ips` SET `num_efacturactual` = ?";
+        $query = $cmd->prepare($query);
+        $query->bindParam(1, $sigue, PDO::PARAM_INT);
+        $query->execute();
+        if (!($query->rowCount() > 0)) {
+            $err .= $query->errorInfo()[2];
+        }
+    } catch (PDOException $e) {
+        $err .= ($e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage());
+    }
 }
 
 $tipo_documento = 'Invoice';
@@ -562,8 +580,6 @@ file_put_contents($file, $rresponse);
 //chmod($file, 0777);
 $procesado = 0;
 
-
-$err = '';
 try {
     $hoy = date('Y-m-d');
     $iduser = $_SESSION['id_user'];
@@ -585,7 +601,7 @@ try {
     $sql->bindParam(4, $hoy, PDO::PARAM_STR);
     $sql->bindParam(5, $iduser, PDO::PARAM_INT);
     $sql->bindValue(6, $date->format('Y-m-d H:i:s'));
-    if (!$new) {
+    if (!($new)) {
         $sql->bindParam(7, $id_soporte, PDO::PARAM_INT);
     }
     if ($resnom['rerror'] == 0) {
@@ -611,7 +627,7 @@ try {
     if ($new) {
         $validacion = $cmd->lastInsertId();
     } else {
-        if ($shash != NULL) {
+        if ($shash !== NULL) {
             $validacion = $sql->rowCount();
         } else {
             $validacion = 0;
@@ -625,22 +641,6 @@ try {
     $err .= ($e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage());
 }
 
-if ($new) {
-    $sigue = $secuenciaf + 1;
-    try {
-        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $query = "UPDATE `tb_datos_ips` SET `num_efacturactual` = ?";
-        $query = $cmd->prepare($query);
-        $query->bindParam(1, $sigue, PDO::PARAM_INT);
-        $query->execute();
-        if (!($query->rowCount() > 0)) {
-            $err .= $query->errorInfo()[2];
-        }
-    } catch (PDOException $e) {
-        $err .= ($e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage());
-    }
-}
 if ($procesado > 0) {
     $response[] = array("value" => "ok", "msg" => json_encode('Documento enviado correctamente'));
 } else {

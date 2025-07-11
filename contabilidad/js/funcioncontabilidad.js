@@ -2325,7 +2325,8 @@ const ImputacionCtasPorPagar = (id) => {
 	$.post(url, { id: id }, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-xl");
-		$("#divTamModalForms").addClass("modal-lg");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divTamModalForms").addClass("modal-xl");
 		$("#divModalForms").modal("show");
 		$("#divForms").html(he);
 	});
