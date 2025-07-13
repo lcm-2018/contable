@@ -1205,19 +1205,7 @@ $urlin = $_SESSION['urlin'];
                                                 </div>
                                             </div>
                                         </a>
-                                    <?php } ?>
-                                    <?php if (PermisosUsuario($permisos, 5014, 1) || $id_rol == 1) { ?>
-                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/movimiento_periodo/index.php">
-                                            <div class="form-row">
-                                                <div class="div-icono">
-                                                    <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
-                                                </div>
-                                                <div>
-                                                    Consumos
-                                                </div>
-                                            </div>
-                                        </a>
-                                    <?php } ?>
+                                    <?php } ?>                                    
                                     <?php if (PermisosUsuario($permisos, 5099, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra opcion_personalizado" href="javascript:void(0)" txt_id_opcion="5099">
                                             <div class="form-row">

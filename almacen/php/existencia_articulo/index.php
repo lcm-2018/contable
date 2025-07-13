@@ -96,7 +96,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <div class="form-row">
                                 <div class="form-group col-md-3">
                                     <select class="filtro form-control form-control-sm text-primary" id="sl_tipo_reporte">
-                                        <?php tipo_reporte_traslados('--TIPO DE REPORTE--') ?>
+                                        <?php tipo_reporte_exi_articulo('--TIPO DE REPORTE--') ?>
                                     </select>
                                 </div> 
                             </div>    
