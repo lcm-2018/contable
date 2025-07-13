@@ -552,3 +552,63 @@ function clasificacion_riesgo($titulo = '',$estado = -1)
     $selected = ($estado == 4) ? 'selected="selected"' : '';
     echo '<option value="4"' . $selected . '>III RIESGO MUY ALTO</option>';
 }
+
+// TIPOS DE REPORTES DE EXISTENCIA A UNA FECHA
+function con_existencia($titulo = '',$estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>Existencia > 0</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>Existencia = 0</option>';
+}
+function lotes_vencidos($titulo = '',$estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>Vencidos</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>No Vencidos</option>';
+}
+
+function tipo_reporte_exi_articulo($titulo = '')
+{
+    echo '<option value="">' . $titulo . '</option>';
+    echo '<option value="1">Detallado por Articulo -> Agrupado por Subgrupo</option>';
+    echo '<option value="2">Totalizado por Subgrupo</option>';
+}
+function tipo_reporte_exi_lote($titulo = '')
+{
+    echo '<option value="">' . $titulo . '</option>';
+    echo '<option value="1">Detallado por Lote -> Agrupado por Sede-Bodega-Subgrupo </option>';   
+    echo '<option value="2">Totalizado por Sede-Bodega-Subgrupo</option>'; 
+    echo '<option value="3">Lotes a vencerse en N días -> Agrupado por Sede-Bodega-Subgrupo </option>';    
+    echo '<option value="4">Captura de Inventario Físico -> Agrupado por Sede-Bodega-Subgrupo-Articulo</option>';
+    echo '<option value="5">Semaforización-vencimiento de Lotes -> Agrupado por Sede-Bodega-Subgrupo </option>';   
+}
+function tipo_reporte_exi_fecha($titulo = '')
+{
+    echo '<option value="">' . $titulo . '</option>';
+    echo '<option value="1">Detallado por Lote -> Agrupado por Sede-Bodega-Subgrupo </option>'; 
+    echo '<option value="2">Detallado por Articulo -> Agrupado por Sede-Bodega-Subgrupo </option>';     
+    echo '<option value="3">Totalizado por Sede-Bodega-Subgrupo</option>'; 
+    echo '<option value="4">Captura de Inventario Físico -> Agrupado por Sede-Bodega-Subgrupo-Articulo</option>';
+}
+
+function tipo_reporte_ingresos($titulo = '')
+{
+    echo '<option value="">' . $titulo . '</option>';
+    echo '<option value="1">Totalizado por Tipo de Ingreso-Tercero-Subgrupo</option>'; 
+}
+
+function tipo_reporte_egresos($titulo = '')
+{
+    echo '<option value="">' . $titulo . '</option>';
+    echo '<option value="1">Totalizado por Tipo de Egreso-Tercero-Subgrupo</option>'; 
+}
+
+function tipo_reporte_traslados($titulo = '')
+{
+    echo '<option value="">' . $titulo . '</option>';
+    echo '<option value="1">Detallado por Subgrupo -> Agrupado por No. Traslado</option>'; 
+}

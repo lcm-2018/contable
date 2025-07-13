@@ -8,11 +8,11 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../common/funciones_generales.php';
 
-$idusr = $_SESSION['id_user'];
-$idrol = $_SESSION['rol'];
-
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$idusr = $_SESSION['id_user'];
+$idrol = $_SESSION['rol'];
 
 $where = "WHERE 1";
 if($idrol !=1){
@@ -124,11 +124,11 @@ try {
                         <td>' . $obj['fec_traslado'] . '</td>
                         <td>' . $obj['hor_traslado'] . '</td>                  
                         <td style="text-align:left">' . $obj['detalle'] . '</td>                      
-                        <td>' . mb_strtoupper($obj['nom_sede_origen']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_bodega_origen']) . '</td> 
-                        <td>' . mb_strtoupper($obj['nom_sede_destino']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_bodega_destino']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']). '</td> 
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_sede_origen']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_bodega_origen']) . '</td> 
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_sede_destino']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_bodega_destino']) . '</td>   
+                        <td style="text-align:right">' . formato_valor($obj['val_total']). '</td> 
                         <td>' . $obj['nom_estado']. '</td></tr>';
             }
             echo $tabla;

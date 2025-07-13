@@ -580,7 +580,15 @@
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe especificar un rango de fechas');
         } else {
-            $.post("imp_traslados.php", {
+            let id_reporte = $('#sl_tipo_reporte').val();
+            let reporte = "imp_traslados.php";
+
+            switch (id_reporte) {
+                case '1':
+                    reporte = "imp_traslados_atsg.php";
+                    break;
+            }
+            $.post(reporte, {
                 id_sedori: $('#sl_sedori_filtro').val(),
                 id_bodori: $('#sl_bodori_filtro').val(),
                 id_tra: $('#txt_idtra_filtro').val(),
@@ -591,7 +599,8 @@
                 id_seddes: $('#sl_seddes_filtro').val(),
                 id_boddes: $('#sl_boddes_filtro').val(),
                 estado: $('#sl_estado_filtro').val(),
-                modulo: $('#sl_modulo_origen').val()
+                modulo: $('#sl_modulo_origen').val(),
+                id_reporte: id_reporte
             }, function(he) {
                 $('#divTamModalImp').removeClass('modal-sm');
                 $('#divTamModalImp').removeClass('modal-lg');

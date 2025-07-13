@@ -37,11 +37,11 @@ if (isset($_POST['codigo']) && $_POST['codigo']) {
 if (isset($_POST['nombre']) && $_POST['nombre']) {
     $where .= " AND far_medicamentos.nom_medicamento LIKE '" . $_POST['nombre'] . "%'";
 }
-if (isset($_POST['tipo_asis']) && strlen($_POST['tipo_asis'])) {
-    $where .= " AND far_medicamentos.es_clinico=" . $_POST['tipo_asis'];
-}
 if (isset($_POST['id_subgrupo']) && $_POST['id_subgrupo']) {
     $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];
+}
+if (isset($_POST['tipo_asis']) && strlen($_POST['tipo_asis'])) {
+    $where .= " AND far_medicamentos.es_clinico=" . $_POST['tipo_asis'];
 }
 if (isset($_POST['artactivo']) && $_POST['artactivo']) {
     $where .= " AND far_medicamentos.estado=1";
@@ -49,9 +49,20 @@ if (isset($_POST['artactivo']) && $_POST['artactivo']) {
 if (isset($_POST['lotactivo']) && $_POST['lotactivo']) {
     $where .= " AND far_medicamento_lote.estado=1";
 }
-if (isset($_POST['conexistencia']) && $_POST['conexistencia']) {
-    $where .= " AND far_medicamento_lote.existencia>=1";
+if (isset($_POST['con_existencia']) && $_POST['con_existencia']) {
+    if ($_POST['con_existencia'] == 1){
+        $where .= " AND far_medicamento_lote.existencia>=1";
+    } else {
+        $where .= " AND far_medicamento_lote.existencia=0";
+    }    
 }
+if (isset($_POST['lote_ven']) && $_POST['lote_ven']) {
+    if ($_POST['lote_ven'] == 1){
+        $where .= " AND DATEDIFF(far_medicamento_lote.fec_vencimiento,NOW())<0";
+    } else {
+        $where .= " AND DATEDIFF(far_medicamento_lote.fec_vencimiento,NOW())>=0";
+    }    
+} 
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

@@ -106,7 +106,7 @@
 
                 var val = $(this).val().trim();
                 if (!val.match(regExp1) && !val.match(regExp2)) {
-                    val = /[a-zA-Z]/.test(val) ? "\'" + val.replace(/,/g, "\',\'") + "\'" : val;
+                    val = /[a-zA-Z]/.test(val) && val.includes(",") ? "\'" + val.replace(/,/g, "\',\'") + "\'" : val;
                 }
 
                 var parametro = new Parametro('P' + i, val);
@@ -143,7 +143,7 @@
 
                 var val = $(this).val().trim();
                 if (!val.match(regExp1) && !val.match(regExp2)) {
-                    val = /[a-zA-Z]/.test(val) ? "\'" + val.replace(/,/g, "\',\'") + "\'" : val;
+                    val = /[a-zA-Z]/.test(val) && val.includes(",") ? "\'" + val.replace(/,/g, "\',\'") + "\'" : val;
                 }
 
                 var parametro = new Parametro('P' + i, val);
@@ -181,7 +181,7 @@
 
                 var val = $(this).val().trim();
                 if (!val.match(regExp1) && !val.match(regExp2)) {
-                    val = /[a-zA-Z]/.test(val) ? "\'" + val.replace(/,/g, "\',\'") + "\'" : val;
+                    val = /[a-zA-Z]/.test(val) && val.includes(",") ? "\'" + val.replace(/,/g, "\',\'") + "\'" : val;
                 }
 
                 var parametro = new Parametro('P' + i, val);
