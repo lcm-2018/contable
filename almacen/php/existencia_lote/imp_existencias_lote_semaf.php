@@ -186,9 +186,9 @@ try {
                         $color = "bg-secondary";
                         if ($obj['dias'] > 365){
                             $color = "bg-success";
-                        } else if ($obj['dias'] > 182){
+                        } else if ($obj['dias'] > 91 && $obj['dias'] <= 365){
                             $color = "bg-warning";
-                        } else if ($obj['dias'] > 0){
+                        } else if ($obj['dias'] > 0 && $obj['dias'] <= 91){
                             $color = "bg-danger";
                         }          
                         $tabla .=  '<tr class="resaltar">
