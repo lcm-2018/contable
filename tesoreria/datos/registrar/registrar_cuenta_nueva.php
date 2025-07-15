@@ -16,6 +16,7 @@ $cuentas = $data[0];
 $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha2 = $date->format('Y-m-d H:i:s');
+$id_fte = $_POST['codigo_fuente'];
 include '../../../conexion.php';
 $response['status'] = 'error';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -24,8 +25,8 @@ try {
     if ($id_tes_cuenta == 0) {
         $estado = 1;
         $query = "INSERT INTO `tes_cuentas`
-                    (`id_banco`,`id_tipo_cuenta`,`id_cuenta`,`nombre`,`numero`,`estado`, `id_user_reg`,`fecha_reg`)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    (`id_banco`,`id_tipo_cuenta`,`id_cuenta`,`nombre`,`numero`,`estado`, `id_user_reg`,`fecha_reg`, `id_fte`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $query = $cmd->prepare($query);
         $query->bindParam(1, $banco, PDO::PARAM_INT);
         $query->bindParam(2, $tipo_cuenta, PDO::PARAM_INT);
@@ -35,6 +36,7 @@ try {
         $query->bindParam(6, $estado, PDO::PARAM_INT);
         $query->bindParam(7, $iduser, PDO::PARAM_INT);
         $query->bindParam(8, $fecha2);
+        $query->bindParam(9, $id_fte, PDO::PARAM_INT);
         $query->execute();
         if ($cmd->lastInsertId() > 0) {
             $id = $cmd->lastInsertId();
@@ -44,7 +46,7 @@ try {
         }
     } else {
         $query = "UPDATE `tes_cuentas`
-                    SET `id_banco` = ?, `id_tipo_cuenta` = ?, `id_cuenta` = ?, `nombre` = ?, `numero` = ?
+                    SET `id_banco` = ?, `id_tipo_cuenta` = ?, `id_cuenta` = ?, `nombre` = ?, `numero` = ?, `id_fte` = ?
                 WHERE `id_tes_cuenta` = ?";
         $query = $cmd->prepare($query);
         $query->bindParam(1, $banco, PDO::PARAM_INT);
@@ -52,7 +54,8 @@ try {
         $query->bindParam(3, $cuentas, PDO::PARAM_INT);
         $query->bindParam(4, $nombre, PDO::PARAM_STR);
         $query->bindParam(5, $numero, PDO::PARAM_STR);
-        $query->bindParam(6, $id_tes_cuenta, PDO::PARAM_INT);
+        $query->bindParam(6, $id_fte, PDO::PARAM_INT);
+        $query->bindParam(7, $id_tes_cuenta, PDO::PARAM_INT);
         if (!($query->execute())) {
             $response['msg'] = $query->errorInfo()[2];
         } else {

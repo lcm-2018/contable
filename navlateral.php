@@ -1438,12 +1438,28 @@ $urlin = $_SESSION['urlin'];
                             </div>
                         </nav>
                     </div>
-                <?php
+                    <?php
                 }
-
+                $key = array_search('61', array_column($perm_modulos, 'id_modulo'));
+                if ($key !== false) {
+                    if (PermisosUsuario($permisos, 6101, 0) || $id_rol == 1) {
+                    ?>
+                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/financiero/informes/lista_informes_financiero.php">
+                            <div class="form-row">
+                                <div class="div-icono">
+                                    <i class="fas fa-hand-holding-usd fa-lg" style="color: #15e838ff;"></i>
+                                </div>
+                                <div>
+                                    Financiero
+                                </div>
+                            </div>
+                        </a>
+                    <?php
+                    }
+                }
                 //$key = array_search('9', array_column($perm_modulos, 'id_modulo'));
                 if (false) {
-                ?>
+                    ?>
                     <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapseCostos" aria-expanded="false" aria-controls="collapsePages2">
                         <div class="form-row">
                             <div class="div-icono">

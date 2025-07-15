@@ -25,6 +25,7 @@ if ($id_tes_cuenta > 0) {
                     , `tes_cuentas`.`numero`
                     , `tes_cuentas`.`estado`
                     , `tes_cuentas`.`id_tes_cuenta`
+                    , `tes_cuentas`.`id_fte`
                     , `ctb_pgcp`.`id_pgcp`
                 FROM
                     `tes_cuentas`
@@ -40,6 +41,7 @@ if ($id_tes_cuenta > 0) {
         $nombre = $cuentas['nombre'];
         $numero = $cuentas['numero'];
         $estado = $cuentas['estado'];
+        $id_fte = $cuentas['id_fte'];
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -51,6 +53,7 @@ if ($id_tes_cuenta > 0) {
     $nombre = '';
     $numero = '';
     $estado = 0;
+    $id_fte = 0;
 }
 // Consultar el listado de bancos de la tabla tb_bancos
 $cuentas = [];
@@ -105,6 +108,13 @@ try {
     $sql = "SELECT `id_tipo_cuenta` , `tipo_cuenta` FROM `tes_tipo_cuenta` ORDER BY `tipo_cuenta` ASC";
     $rs = $cmd->query($sql);
     $listatipocuenta = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $sql = "SELECT `id`,`codigo`,`nombre` FROM `fin_cod_fuente` ORDER BY `nombre` ASC";
+    $rs = $cmd->query($sql);
+    $fuente = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -172,6 +182,20 @@ try {
                     </div>
                     <div class="col-9">
                         <input type="text" id="numero" name="numero" class="form-control form-control-sm" value="<?php echo $numero; ?>">
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-3">
+                        <label for="codigo_fuente" class="small">CÓD. FUENTE: </label>
+                    </div>
+                    <div class="col-9">
+                        <select id="codigo_fuente" name="codigo_fuente" class="form-control form-control-sm">
+                            <option value="0">-- Seleccionar --</option>
+                            <?php foreach ($fuente as $f) {
+                                $slc = $f['id'] == $id_fte ? 'selected' : '';
+                                echo '<option value="' . $f['id'] . '" ' . $slc . '>' . $f['nombre'] . ' | ' . $f['codigo'] . '</option>';
+                            } ?>
+                        </select>
                     </div>
                 </div>
             </div>

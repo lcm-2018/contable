@@ -46,6 +46,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Banco</th>
                                         <th>Tipo de cuenta</th>
                                         <th>Nombre</th>
+                                        <th>SIA</th>
+                                        <th>Fuente</th>
                                         <th>Número</th>
                                         <th>Código</th>
                                         <th>Estado</th>

@@ -276,7 +276,7 @@ var tabla;
 				type: "POST",
 				dataType: "json",
 			},
-			columns: [{ data: "banco" }, { data: "tipo" }, { data: "nombre" }, { data: "numero" }, { data: "cuenta" }, { data: "estado" }, { data: "botones" }],
+			columns: [{ data: "banco" }, { data: "tipo" }, { data: "nombre" }, { data: "sia" }, { data: "fuente" }, { data: "numero" }, { data: "cuenta" }, { data: "estado" }, { data: "botones" }],
 			order: [[0, "desc"]],
 			"pageLength": 10,
 			columnDefs: [{
@@ -2504,41 +2504,42 @@ const guardarCuentaBanco = (boton) => {
 		$("#banco").addClass("is-invalid");
 		$("#banco").focus();
 		mjeError("Debe seleccionar un banco");
+	} else if ($("#cuentas").val() == "0") {
+		$("#cuentas").addClass("is-invalid");
+		$("#cuentas").focus();
+		mjeError("Debe seleccionar una cuenta");
+	} else if ($("#tipo_cuenta").val() == "0") {
+		$("#tipo_cuenta").addClass("is-invalid");
+		$("#tipo_cuenta").focus();
+		mjeError("Debe seleccionar un tipo de cuenta");
+	} else if ($("#numero").val() == "") {
+		$("#numero").addClass("is-invalid'");
+		$("#numero").focus();
+		mjeError("Debe digitar un número de cuenta");
+	} else if ($("#codigo_fuente").val() == "0") {
+		$("#codigo_fuente").addClass("is-invalid");
+		$("#codigo_fuente").focus();
+		mjeError("Debe seleccionar una fuente");
 	} else {
-		if ($("#cuentas").val() == "0") {
-			$("#cuentas").addClass("is-invalid");
-			$("#cuentas").focus();
-			mjeError("Debe seleccionar una cuenta");
-		} else {
-			if ($("#tipo_cuenta").val() == "0") {
-				$("#tipo_cuenta").addClass("is-invalid");
-				$("#tipo_cuenta").focus();
-				mjeError("Debe seleccionar un tipo de cuenta");
-			} else if ($("#numero").val() == "") {
-				$("#numero").addClass("is-invalid'");
-				$("#numero").focus();
-				mjeError("Debe digitar un número de cuenta");
-			} else {
-				var data = $('#formGestionCuenta').serialize();
-				$.ajax({
-					type: 'POST',
-					dataType: 'json',
-					url: "datos/registrar/registrar_cuenta_nueva.php",
-					data: data,
-					success: function (r) {
-						if (r.status == 'ok') {
-							$("#tableCuentasBanco").DataTable().ajax.reload(null, false);
-							mje("Proceso realizado con  éxito.");
-							$("#divModalForms").modal("hide");
-							$("#divModalForms").attr("aria-hidden", "false");
-						} else {
-							mjeError('Error:', r.msg);
-						}
+		var data = $('#formGestionCuenta').serialize();
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			url: "datos/registrar/registrar_cuenta_nueva.php",
+			data: data,
+			success: function (r) {
+				if (r.status == 'ok') {
+					$("#tableCuentasBanco").DataTable().ajax.reload(null, false);
+					mje("Proceso realizado con  éxito.");
+					$("#divModalForms").modal("hide");
+					$("#divModalForms").attr("aria-hidden", "false");
+				} else {
+					mjeError('Error:', r.msg);
+				}
 
-					}
-				});
 			}
-		}
+		});
+
 	}
 	ActivaBoton(boton);
 };
