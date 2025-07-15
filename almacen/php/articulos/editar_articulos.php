@@ -27,7 +27,7 @@ try {
             $cod_art = $_POST['txt_cod_art'];
             $nom_art = $_POST['txt_nom_art'];
             $id_subgrp = $_POST['sl_subgrp_art'] ? $_POST['sl_subgrp_art'] : 0;
-            $vida_util = $_POST['txt_vidautil_art'];
+            $vida_util = $_POST['txt_vidautil_art'] ? "'".$_POST['txt_vidautil_art']."'" : 'NULL';
             $top_min = $_POST['txt_topmin_art'];
             $top_max = $_POST['txt_topmax_art'];
             $id_unimed = $_POST['id_txt_unimed_art'] ? $_POST['id_txt_unimed_art'] : 0;
