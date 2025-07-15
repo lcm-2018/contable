@@ -116,9 +116,9 @@ try {
                         <td style="text-align:left">' . $obj['detalle']. '</td>   
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_tipo_ingreso']) . '</td>   
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>                                                   
-                        <td>' . mb_strtoupper($obj['nom_sede']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_bodega']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']). '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_sede']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_bodega']) . '</td>   
+                        <td style="text-align:right">' . formato_valor($obj['val_total']). '</td>   
                         <td>' . $obj['nom_estado']. '</td></tr>';
             }
             echo $tabla;

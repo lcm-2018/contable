@@ -83,27 +83,32 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </a>
                                 </div>  
                             </div>    
-                            <div class="form-row">  
-                                <div class="form-group col-md-2">
-                                    <select class="filtro form-control form-control-sm" id="sl_tipoasis_filtro">
-                                        <?php estados_sino('--Uso Asistencial--') ?>
-                                    </select>
-                                </div>
+                            <div class="form-row">
                                 <div class="form-group col-md-2">
                                     <select class="filtro form-control form-control-sm" id="sl_subgrupo_filtro">
                                         <?php subgrupo_articulo($cmd,'--Subgrupo--') ?>
                                     </select>
-                                </div>                              
-                                <div class="form-group col-md-2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="filtro form-check-input" type="checkbox" id="chk_artact_filtro" checked>
-                                        <label class="form-check-label small" for="chk_artact_filtro">Articulos Activos</label>
+                                </div>
+                                 <div class="form-group col-md-5"> 
+                                    <div class="form-row">                                  
+                                        <div class="form-group col-md-4">
+                                            <select class="filtro form-control form-control-sm" id="sl_tipoasis_filtro">
+                                                <?php estados_sino('--Uso Asistencial--') ?>
+                                            </select>
+                                        </div>                                        
+                                        <div class="form-group col-md-4">
+                                            <select class="filtro form-control form-control-sm" id="sl_conexi_filtro">
+                                                <?php con_existencia('--Existencia--') ?>
+                                            </select>
+                                        </div>                              
+                                        <div class="form-group col-md-4">
+                                            <div class="form-check form-check-inline">
+                                                <input class="filtro form-check-input" type="checkbox" id="chk_artact_filtro" checked>
+                                                <label class="form-check-label small" for="chk_artact_filtro">Articulos Activos</label>
+                                            </div>    
+                                        </div>
                                     </div>    
-                                </div>                                 
-                                <div class="form-group col-md-2">
-                                    <input class="filtro form-check-input" type="checkbox" id="chk_conexi_filtro" checked>
-                                    <label class="form-check-label small" for="chk_conexi_filtro">Con Existencias</label>
-                                </div>                                                                                              
+                                </div>                                    
                             </div>
 
                             <!--Lista de registros en la tabla-->

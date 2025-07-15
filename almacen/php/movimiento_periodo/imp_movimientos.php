@@ -44,17 +44,21 @@ if (isset($_POST['codigo']) && $_POST['codigo']) {
 if (isset($_POST['nombre']) && $_POST['nombre']) {
     $where_art .= " AND far_medicamentos.nom_medicamento LIKE '" . $_POST['nombre'] . "%'";
 }
-if (isset($_POST['tipo_asis']) && strlen($_POST['tipo_asis'])) {
-    $where_art .= " AND far_medicamentos.es_clinico=" . $_POST['tipo_asis'];
-}
 if (isset($_POST['id_subgrupo']) && $_POST['id_subgrupo']) {
     $where_art .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];
+}
+if (isset($_POST['tipo_asis']) && strlen($_POST['tipo_asis'])) {
+    $where_art .= " AND far_medicamentos.es_clinico=" . $_POST['tipo_asis'];
 }
 if (isset($_POST['artactivo']) && $_POST['artactivo']) {
     $where_art .= " AND far_medicamentos.estado=1";
 }
-if (isset($_POST['conexistencia']) && $_POST['conexistencia']) {
-    $where_art .= " AND ef.existencia_fin>=1";
+if (isset($_POST['con_existencia']) && $_POST['con_existencia']) {
+    if ($_POST['con_existencia'] == 1){
+        $where_art .= " AND ef.existencia_fin>=1";
+    } else {
+        $where_art .= " AND ef.existencia_fin=0";
+    }    
 }
 
 try {

@@ -1201,11 +1201,11 @@ $urlin = $_SESSION['urlin'];
                                                     <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
                                                 </div>
                                                 <div>
-                                                    Mov. por Periodo
+                                                    Mov. Periodo
                                                 </div>
                                             </div>
                                         </a>
-                                    <?php } ?>
+                                    <?php } ?>                                    
                                     <?php if (PermisosUsuario($permisos, 5099, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra opcion_personalizado" href="javascript:void(0)" txt_id_opcion="5099">
                                             <div class="form-row">
@@ -1213,7 +1213,7 @@ $urlin = $_SESSION['urlin'];
                                                     <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
                                                 </div>
                                                 <div>
-                                                    Inf. Personalizados
+                                                    Personalizados
                                                 </div>
                                             </div>
                                         </a>
@@ -1429,7 +1429,7 @@ $urlin = $_SESSION['urlin'];
                                                     <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
                                                 </div>
                                                 <div>
-                                                    Inf. Personalizados
+                                                    Personalizados
                                                 </div>
                                             </div>
                                         </a>
@@ -1514,22 +1514,11 @@ $urlin = $_SESSION['urlin'];
                         <form id="postForm" action="<?php echo $_SESSION['urlin'] ?>/consultas/listado.php" method="POST" style="display: none;">
                             <input type="hidden" name="id_consulta" value="5901">
                         </form>
-                <?php
+                        <?php
                     }
                 }
                 ?>
-                <?php if (PermisosUsuario($permisos, 5099, 1) || $id_rol == 1) { ?>
-                    <a class="nav-link sombra opcion_personalizado" href="javascript:void(0)" txt_id_opcion="5499">
-                        <div class="form-row">
-                            <div class="div-icono">
-                                <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
-                            </div>
-                            <div>
-                                Inf. Personalizados
-                            </div>
-                        </div>
-                    </a>
-                <?php } ?>
+                
             </div>
         </div>
         <div class="sb-sidenav-footer py-0">

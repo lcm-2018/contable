@@ -60,7 +60,7 @@
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [6, 8, 9, 10] },
+                { class: 'text-wrap', targets: [6, 7, 8, 9, 10] },
                 { type: "numeric-comma", targets: 11 },
                 { visible: false, targets: 12 },
                 { orderable: false, targets: 14 }
@@ -606,7 +606,15 @@
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe especificar un rango de fechas');
         } else {
-            $.post("imp_ingresos.php", {
+            let id_reporte = $('#sl_tipo_reporte').val();
+            let reporte = "imp_ingresos.php";
+
+            switch (id_reporte) {
+                case '1':
+                    reporte = "imp_ingresos_attsg.php";
+                    break;
+            }
+            $.post(reporte, {
                 id_ing: $('#txt_iding_filtro').val(),
                 num_ing: $('#txt_numing_filtro').val(),
                 num_fac: $('#txt_numfac_filtro').val(),
@@ -615,7 +623,8 @@
                 id_tercero: $('#sl_tercero_filtro').val(),
                 id_tiping: $('#sl_tiping_filtro').val(),
                 estado: $('#sl_estado_filtro').val(),
-                modulo: $('#sl_modulo_origen').val()
+                modulo: $('#sl_modulo_origen').val(),
+                id_reporte: id_reporte
             }, function(he) {
                 $('#divTamModalImp').removeClass('modal-sm');
                 $('#divTamModalImp').removeClass('modal-lg');

@@ -79,11 +79,6 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
                                         </div>
                                     </div>
-                                </div> 
-                                <div class="form-group col-md-1">
-                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
-                                        <?php estados_pedidos_2('--Estado--') ?>
-                                    </select>
                                 </div>
                                 <div class="form-group col-md-1">
                                     <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
@@ -93,6 +88,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <span class="fas fa-print" aria-hidden="true"></span>                                       
                                     </a>
                                 </div>
+                            </div>    
+                            <div class="form-row">     
+                                <div class="form-group col-md-1">
+                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
+                                        <?php estados_pedidos_2('--Estado--') ?>
+                                    </select>
+                                </div>                                
                             </div>
 
                             <!--Lista de registros en la tabla-->

@@ -23,11 +23,12 @@
                     data.id_bodega = $('#sl_bodega_filtro').val();
                     data.codigo = $('#txt_codigo_filtro').val();
                     data.nombre = $('#txt_nombre_filtro').val();
-                    data.tipo_asis = $('#sl_tipoasis_filtro').val();
                     data.id_subgrupo = $('#sl_subgrupo_filtro').val();
+                    data.tipo_asis = $('#sl_tipoasis_filtro').val();
+                    data.con_existencia = $('#sl_conexi_filtro').val();
+                    data.lote_ven = $('#sl_lotven_filtro').val();
                     data.artactivo = $('#chk_artact_filtro').is(':checked') ? 1 : 0;
                     data.lotactivo = $('#chk_lotact_filtro').is(':checked') ? 1 : 0;
-                    data.conexistencia = $('#chk_conexi_filtro').is(':checked') ? 1 : 0;
                 }
             },
             columns: [
@@ -46,8 +47,8 @@
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4] },
-                { orderable: false, targets: [0, 12] }
+                { class: 'text-wrap', targets: [1, 2, 4, 5] },
+                { orderable: false, targets: [12] }
             ],
             order: [
                 [4, "ASC"]
@@ -100,19 +101,51 @@
     IMPRESORA
     -----------------------------------------------------*/
     //Imprimir listado de registros
+
+    $('#sl_tipo_reporte').on("change", function() {
+        $('#txt_diasven_filtro').hide();
+        if ($(this).val() == 3) {
+            $('#txt_diasven_filtro').show();
+        }
+    });
+
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_lotes');
         $('.is-invalid').removeClass('is-invalid');
-        $.post("imp_existencias_lote.php", {
+        let id_reporte = $('#sl_tipo_reporte').val();
+        let reporte = "imp_existencias_lote.php";
+
+        switch (id_reporte) {
+            case '1':
+                reporte = "imp_existencias_lote_asbsg.php";
+                break;
+            case '2':
+                reporte = "imp_existencias_lote_asbsg.php";
+                break;
+            case '3':
+                reporte = "imp_existencias_lote_vence.php";
+                break;
+            case '4':
+                reporte = "imp_existencias_lote_invfis.php";
+                break;
+            case '5':
+                reporte = "imp_existencias_lote_semaf.php";
+                break;
+        }
+
+        $.post(reporte, {
             id_sede: $('#sl_sede_filtro').val(),
             id_bodega: $('#sl_bodega_filtro').val(),
             codigo: $('#txt_codigo_filtro').val(),
             nombre: $('#txt_nombre_filtro').val(),
-            tipo_asis: $('#sl_tipoasis_filtro').val(),
             id_subgrupo: $('#sl_subgrupo_filtro').val(),
+            tipo_asis: $('#sl_tipoasis_filtro').val(),
+            con_existencia: $('#sl_conexi_filtro').val(),
+            lote_ven: $('#sl_lotven_filtro').val(),
             artactivo: $('#chk_artact_filtro').is(':checked') ? 1 : 0,
             lotactivo: $('#chk_lotact_filtro').is(':checked') ? 1 : 0,
-            conexistencia: $('#chk_conexi_filtro').is(':checked') ? 1 : 0
+            id_reporte: id_reporte,
+            dias_ven: $('#txt_diasven_filtro').val(),
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

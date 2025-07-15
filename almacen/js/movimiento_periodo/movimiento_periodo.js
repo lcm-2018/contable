@@ -25,10 +25,10 @@
                     data.fecfin = $('#txt_fecfin_filtro').val();
                     data.codigo = $('#txt_codigo_filtro').val();
                     data.nombre = $('#txt_nombre_filtro').val();
-                    data.tipo_asis = $('#sl_tipoasis_filtro').val();
                     data.id_subgrupo = $('#sl_subgrupo_filtro').val();
+                    data.tipo_asis = $('#sl_tipoasis_filtro').val();
+                    data.con_existencia = $('#sl_conexi_filtro').val();
                     data.artactivo = $('#chk_artact_filtro').is(':checked') ? 1 : 0;
-                    data.conexistencia = $('#chk_conexi_filtro').is(':checked') ? 1 : 0;
                 }
             },
             columns: [
@@ -46,7 +46,7 @@
                 { 'data': 'valores_fin' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [2] },
+                { class: 'text-wrap', targets: [2, 3] },
                 { orderable: false, targets: [0] }
             ],
             order: [
@@ -93,10 +93,10 @@
             fecfin: $('#txt_fecfin_filtro').val(),
             codigo: $('#txt_codigo_filtro').val(),
             nombre: $('#txt_nombre_filtro').val(),
-            tipo_asis: $('#sl_tipoasis_filtro').val(),
             id_subgrupo: $('#sl_subgrupo_filtro').val(),
-            artactivo: $('#chk_artact_filtro').is(':checked') ? 1 : 0,
-            conexistencia: $('#chk_conexi_filtro').is(':checked') ? 1 : 0
+            tipo_asis: $('#sl_tipoasis_filtro').val(),
+            con_existencia: $('#sl_conexi_filtro').val(),
+            artactivo: $('#chk_artact_filtro').is(':checked') ? 1 : 0
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

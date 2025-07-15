@@ -47,7 +47,7 @@
             ],
             columnDefs: [
                 { orderable: false, targets: [0] },
-                { class: 'text-wrap', targets: [3] }
+                { class: 'text-wrap', targets: [3, 4, 5] }
             ],
             order: [
                 [0, "desc"]

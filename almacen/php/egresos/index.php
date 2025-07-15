@@ -78,26 +78,40 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <select class="form-control form-control-sm" id="sl_tipegr_filtro">
                                         <?php tipo_egreso($cmd,'--Tipo Egreso--') ?>
                                     </select>
-                                </div>                                
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_centrocosto_filtro">
-                                        <?php centros_costo($cmd,'--Centro Costo--') ?>
-                                    </select>
+                                </div> 
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
+                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                    <a type="button" id="btn_imprime_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
+                                        <span class="fas fa-print" aria-hidden="true"></span>                                       
+                                    </a>
                                 </div>
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_sede_des_filtro">
-                                        <?php sedes($cmd,'--Sede Destino--') ?>
-                                    </select>
+                            </div>    
+                            <div class="form-row">                                   
+                                <div class="form-group col-md-7">
+                                    <div class="form-row">
+                                        <div class="form-group col-md-3">    
+                                            <select class="form-control form-control-sm" id="sl_centrocosto_filtro">
+                                                <?php centros_costo($cmd,'--Centro Costo--') ?>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <select class="form-control form-control-sm" id="sl_sede_des_filtro">
+                                                <?php sedes($cmd,'--Sede Destino--') ?>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <select class="form-control form-control-sm" id="sl_area_filtro">
+                                            </select>
+                                        </div>  
+                                        <div class="form-group col-md-3">
+                                            <select class="form-control form-control-sm" id="sl_tercero_filtro">
+                                                <?php terceros($cmd,'--Tercero--') ?>
+                                            </select>
+                                        </div>
+                                    </div>    
                                 </div>
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_area_filtro">
-                                    </select>
-                                </div>  
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_tercero_filtro">
-                                        <?php terceros($cmd,'--Tercero--') ?>
-                                    </select>
-                                </div>                              
                                 <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estados_movimientos('--Estado--') ?>
@@ -107,15 +121,12 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <select class="form-control form-control-sm" id="sl_modulo_origen">
                                     <?php modulo_origen('--Origen--',0) ?>
                                     </select>
-                                </div>
-                                <div class="form-group col-md-1">
-                                    <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
-                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
-                                    </a>
-                                    <a type="button" id="btn_imprime_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
-                                        <span class="fas fa-print" aria-hidden="true"></span>                                       
-                                    </a>
-                                </div>
+                                </div>  
+                                <div class="form-group col-md-3">
+                                    <select class="filtro form-control form-control-sm text-primary" id="sl_tipo_reporte">
+                                        <?php tipo_reporte_egresos('--TIPO DE REPORTE--') ?>
+                                    </select>
+                                </div>                              
                             </div>
 
                             <!--Lista de registros en la tabla-->
