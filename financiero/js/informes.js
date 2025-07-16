@@ -76,8 +76,23 @@ const LoadInforme = (id) => {
         case 4:
             url = 'inf_relingresos.php';
             break;
+        case 5:
+            url = 'inf_epgastos.php';
+            break;
+        case 6:
+            url = 'inf_relcompromisos.php';
+            break;
+        case 7:
+            url = 'inf_modingresos.php';
+            break;
+        case 8:
+            url = 'inf_modgastos.php';
+            break;
+        case 9:
+            url = 'inf_modcompromisos.php';
+            break;
         default:
-            console.error('ID de informe no válido');
+            console.log('ID de informe no válido');
             return;
     }
     if ($('#periodo').val() == '0') {

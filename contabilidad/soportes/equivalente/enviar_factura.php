@@ -235,6 +235,7 @@ try {
 }
 $tipo_documento = 'ReverseInvoice';
 $pref = $resolucion['prefijo'];
+$sreference = $pref . '-' . $secuenciaf;
 $entorno = $resolucion['entorno'];
 $adocumentitems = [];
 $key = 0;
@@ -534,7 +535,6 @@ file_put_contents($file, $rresponse);
 //chmod($file, 0777);
 $procesado = 0;
 
-
 $err = '';
 try {
     $hoy = date('Y-m-d');
@@ -565,7 +565,6 @@ try {
         $sreference = $resnom['jret']['sdocumentreference'];
     } else {
         $shash = NULL;
-        $sreference = $pref . '-' . $secuenciaf;
         $err .= '<table>';
         $filas = is_array($resnom['smessage']) ? count($resnom['smessage']) : 0;
         if ($filas == 0) {

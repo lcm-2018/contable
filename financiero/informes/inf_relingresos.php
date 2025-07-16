@@ -50,38 +50,38 @@ try {
                 INNER JOIN `pto_sia` 
                     ON (`pto_homologa_ingresos`.`id_sia` = `pto_sia`.`id_sia`)
                 LEFT JOIN
-                (SELECT 
-                    `recaudo`.`id_rubro`
-                    , DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') AS `fecha`
-                    , `pto_rec`.`id_manu`
-                    , `tb_terceros`.`nom_tercero`
-                    , `pto_rec`.`objeto`
-                    , `recaudo`.`valor`
-                    , `recaudo`.`liberado`
-                    , '1111' AS `cuenta`
-                    , 'b5' AS `banco`
-                FROM `pto_rec`
-                    INNER JOIN
-                        (SELECT
-                            `pto_rec`.`id_pto_rec`
-                            , CASE
-                            WHEN `pto_rec_detalle`.`id_rubro` IS NULL THEN `pto_rad_detalle`.`id_rubro` 
-                            ELSE `pto_rec_detalle`.`id_rubro`
-                            END AS `id_rubro` 
-                            , SUM(IFNULL(`pto_rec_detalle`.`valor`,0)) AS `valor`
-                            , SUM(IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `liberado`
-                        FROM
-                            `pto_rec_detalle`
-                            INNER JOIN `pto_rec` 
-                            ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
-                            LEFT JOIN `pto_rad_detalle` 
-                            ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
-                        WHERE (DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `pto_rec`.`estado` = 2)
-                        GROUP BY `id_rubro`, `pto_rec`.`id_pto_rec`) AS `recaudo`
-                        ON (`recaudo`.`id_pto_rec` = `pto_rec`.`id_pto_rec`)
-                    LEFT JOIN `tb_terceros`
-                        ON (`tb_terceros`.`id_tercero_api` = `pto_rec`.`id_tercero_api`)) AS `ingresos`
-                ON (`ingresos`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                    (SELECT 
+                        `recaudo`.`id_rubro`
+                        , DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') AS `fecha`
+                        , `pto_rec`.`id_manu`
+                        , `tb_terceros`.`nom_tercero`
+                        , `pto_rec`.`objeto`
+                        , `recaudo`.`valor`
+                        , `recaudo`.`liberado`
+                        , '1111' AS `cuenta`
+                        , 'b5' AS `banco`
+                    FROM `pto_rec`
+                        INNER JOIN
+                            (SELECT
+                                `pto_rec`.`id_pto_rec`
+                                , CASE
+                                WHEN `pto_rec_detalle`.`id_rubro` IS NULL THEN `pto_rad_detalle`.`id_rubro` 
+                                ELSE `pto_rec_detalle`.`id_rubro`
+                                END AS `id_rubro` 
+                                , SUM(IFNULL(`pto_rec_detalle`.`valor`,0)) AS `valor`
+                                , SUM(IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `liberado`
+                            FROM
+                                `pto_rec_detalle`
+                                INNER JOIN `pto_rec` 
+                                ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
+                                LEFT JOIN `pto_rad_detalle` 
+                                ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
+                            WHERE (DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `pto_rec`.`estado` = 2)
+                            GROUP BY `id_rubro`, `pto_rec`.`id_pto_rec`) AS `recaudo`
+                            ON (`recaudo`.`id_pto_rec` = `pto_rec`.`id_pto_rec`)
+                        LEFT JOIN `tb_terceros`
+                            ON (`tb_terceros`.`id_tercero_api` = `pto_rec`.`id_tercero_api`)) AS `ingresos`
+                        ON (`ingresos`.`id_rubro` = `pto_cargue`.`id_cargue`)
             WHERE (`pto_presupuestos`.`id_tipo` = 1 AND `pto_presupuestos`.`id_vigencia` = $id_vigencia AND `ingresos`.`id_rubro` IS NOT NULL)
             ORDER BY `pto_cargue`.`id_cargue` ASC";
     $res = $cmd->query($sql);
