@@ -133,6 +133,8 @@ try {
         </thead>
         <tbody style="font-size: 60%;">
             <?php
+            $total = 0;
+            $numreg = count($objs);
             $tabla = '';
             foreach ($objs as $obj) {
                 $tabla .=  '<tr class="resaltar" style="text-align:center"> 
@@ -150,15 +152,23 @@ try {
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>
                         <td style="text-align:right">' . formato_valor($obj['val_total']). '</td>                             
                         <td>' . $obj['nom_estado']. '</td></tr>';
+                $total += $obj['val_total'];        
             }
             echo $tabla;
             ?>            
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="14" style="text-align:left">
-                    No. de Registros: <?php echo count($objs); ?> 
-                </td>
+                <th colspan="11" style="text-align:left">
+                    No. de Registros: <?php echo $numreg; ?>  
+                </th>
+                <th style="text-align:left">
+                    TOTAL:
+                </th>
+                <th colspan="1" style="text-align:right">
+                    <?php echo formato_valor($total); ?>  
+                </th>
+                <td></td>
             </tr>
         </tfoot>
     </table>
