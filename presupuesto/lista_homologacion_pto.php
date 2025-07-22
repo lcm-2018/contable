@@ -293,6 +293,7 @@ $gasto = empty($homologacion) ? 0 : 1;;
                                                     $centrar = $tp_cta == 'D' ? '' : '';
                                                     echo "<td colspan='" . $colspan . "' class='" . $centrar . "'>" . $rb['nom_rubro'] . "</td>";
                                                     if ($tp_cta == 'D') {
+                                                        $key = false;
                                                         $key = array_search($rb['id_cargue'], array_column($homologacion, 'id_cargue'));
                                                         echo "<td class='text-center'>
                                                             <div class='center-block'>
@@ -353,8 +354,11 @@ $gasto = empty($homologacion) ? 0 : 1;;
                                                             $slc = $val_sit == $s['id_situacion'] ? 'selected' : '';
                                                             echo '<option value="' . $s['id_situacion'] . '" ' . $slc . '>' . $s['concepto'] . '</option>';
                                                         }
-                                                        $cero = $homologacion[$key]['id_mh'] == 0 || $homologacion[$key]['id_mh'] == '' ? 'checked' : '';
-                                                        $uno = $homologacion[$key]['id_mh'] == 1 ? 'checked' : '';
+                                                        $cero = 'checked';
+                                                        $uno = $key !== false && ($homologacion[$key]['id_mh'] == '1') ? 'checked' : '';
+                                                        if ($uno == 'checked') {
+                                                            $cero = '';
+                                                        }
                                                         echo        '</select>
                                                             </td>
                                                             <td class="p-0">

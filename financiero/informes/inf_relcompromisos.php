@@ -90,9 +90,7 @@ try {
 }
 $body = '';
 foreach ($lista as $r) {
-    $body .=
-        <<<HTML
-            <tr>
+    $body .= "<tr>
                 <td>{$r['cod_rubro']}</td>
                 <td>{$r['nom_rubro']}</td>
                 <td>{$r['id_manu']}</td>
@@ -104,8 +102,7 @@ foreach ($lista as $r) {
                 <td>{$r['nom_tercero']}</td>
                 <td>{$r['nit_tercero']}</td>
                 <td>{$r['objeto']}</td>
-            </tr>
-        HTML;
+            </tr>";
 }
 echo "\xEF\xBB\xBF";
 ?>

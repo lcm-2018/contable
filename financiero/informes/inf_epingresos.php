@@ -162,9 +162,7 @@ foreach ($lista as $r) {
     } else {
         $valor = $r['valor_aprobado'];
     }
-    $body .=
-        <<<HTML
-            <tr>
+    $body .= "<tr>
                 <td>{$r['cod_rubro']}</td>
                 <td>{$r['nom_rubro']}</td>
                 <td>{$valor}</td>
@@ -175,8 +173,7 @@ foreach ($lista as $r) {
                 <td>{$r['rec_periodo']}</td>
                 <td>{$r['rec_acumulado']}</td>
                 <td>{$meses}</td>
-            </tr>
-        HTML;
+            </tr>";
 }
 echo "\xEF\xBB\xBF";
 ?>

@@ -198,9 +198,7 @@ try {
 $body = '';
 foreach ($lista as $r) {
     $saldo_con = $r['sf_libros'] - ($r['sf_extracto'] + $r['sf_debito'] - $r['sf_credito']);
-    $body .=
-        <<<HTML
-            <tr>
+    $body .="<tr>
                 <td>{$r['codigo']}</td>
                 <td>{$r['banco']}</td>
                 <td>{$r['numero']}</td>
@@ -216,8 +214,7 @@ foreach ($lista as $r) {
                 <td>{$r['sf_libros']}</td>
                 <td>{$r['sf_extracto']}</td>
                 <td>{$saldo_con}</td>
-            </tr>
-        HTML;
+            </tr>";
 }
 echo "\xEF\xBB\xBF";
 ?>

@@ -585,12 +585,14 @@ try {
 
 if ($new) {
     $sigue = $secuenciaf + 1;
+    $id_sec = $resolucion['id_resol'];
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $query = "UPDATE `tb_datos_ips` SET `num_efacturactual` = ?";
+        $query = "UPDATE `nom_resoluciones` SET `consecutivo` = ? WHERE `id_resol` = ?";
         $query = $cmd->prepare($query);
         $query->bindParam(1, $sigue, PDO::PARAM_INT);
+        $query->bindParam(2, $id_sec, PDO::PARAM_INT);
         $query->execute();
         if (!($query->rowCount() > 0)) {
             $err .= $query->errorInfo()[2];

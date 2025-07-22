@@ -28,9 +28,7 @@ foreach ($formatos as $formato) {
             </td>
         </tr>";
 }
-$tabla =
-    <<<HTML
-        <table class="table table-sm table-striped table-bordered table-hover" id="tablaInformesFinancieros" style="width:100%">
+$tabla = '<table class="table table-sm table-striped table-bordered table-hover" id="tablaInformesFinancieros" style="width:100%">
             <thead>
                 <tr class="text-center">
                     <th>#</th>
@@ -39,9 +37,7 @@ $tabla =
                     <th>Acción</th>
                 </tr>
             </thead>
-            <tbody>
-                $body
+            <tbody>' . $body . '
             </tbody>
-        </table>
-        HTML;
+        </table>';
 echo $tabla;

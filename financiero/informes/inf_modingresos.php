@@ -67,17 +67,14 @@ try {
 }
 $body = '';
 foreach ($lista as $r) {
-    $body .=
-        <<<HTML
-            <tr>
+    $body .="<tr>
                 <td>{$r['nombre']}</td>
                 <td>{$r['cod_pptal']}</td>
                 <td>{$r['numero_acto']}</td>
                 <td>{$r['fecha']}</td>
                 <td>{$r['debito']}</td>
                 <td>{$r['credito']}</td>
-            </tr>
-        HTML;
+            </tr>";
 }
 echo "\xEF\xBB\xBF";
 ?>

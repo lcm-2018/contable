@@ -89,7 +89,14 @@ const LoadInforme = (id) => {
             url = 'inf_modgastos.php';
             break;
         case 9:
-            url = 'inf_modcompromisos.php';
+            mjeError('Informe no disponible');
+            return false;
+            break;
+        case 10:
+            url = 'inf_relpagos.php';
+            break;
+        case 11:
+            url = 'inf_relpagossinpto.php';
             break;
         default:
             console.log('ID de informe no válido');
