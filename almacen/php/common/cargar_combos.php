@@ -604,7 +604,8 @@ function tipo_reporte_ingresos($titulo = '')
 function tipo_reporte_egresos($titulo = '')
 {
     echo '<option value="">' . $titulo . '</option>';
-    echo '<option value="1">Totalizado por Tipo de Egreso-Tercero-Subgrupo</option>'; 
+    echo '<option value="1">Totalizado por Tipo de Egreso-Sede-Bodega-Subgrupo</option>'; 
+    echo '<option value="2">Totalizado por Tipo de Egreso-Centro Costo-Subgrupo</option>'; 
 }
 
 function tipo_reporte_traslados($titulo = '')

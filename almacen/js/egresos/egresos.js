@@ -613,6 +613,9 @@
 
             switch (id_reporte) {
                 case '1':
+                    reporte = "imp_egresos_atbsg.php";
+                    break;
+                case '2':
                     reporte = "imp_egresos_atdsg.php";
                     break;
             }

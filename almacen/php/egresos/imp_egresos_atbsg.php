@@ -17,8 +17,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id_reporte = $_POST['id_reporte'];
 $titulo = '';
  switch($id_reporte){
-    case '2':
-        $titulo = 'REPORTE DE EGRESOS ENTRE:' . $_POST['fec_ini'] . ' y ' .  $_POST['fec_fin'] . ', TOTALIZADOS POR TIPO DE EGRESO-CENTRO COSTO-SUBGRUPO';
+    case '1':
+        $titulo = 'REPORTE DE EGRESOS ENTRE:' . $_POST['fec_ini'] . ' y ' .  $_POST['fec_fin'] . ', TOTALIZADOS POR TIPO DE EGRESO-SEDE-BODEGA-SUBGRUPO';
         break;
 } 
 
@@ -75,16 +75,15 @@ try {
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
 
-    $sql = "SELECT tb_centrocostos.id_centro,tb_centrocostos.nom_centro,
-                tb_terceros.id_tercero,tb_terceros.nom_tercero,
-                SUM(far_orden_egreso.val_total) AS val_total_tr
+    $sql = "SELECT tb_sedes.id_sede,tb_sedes.nom_sede,far_bodegas.id_bodega,far_bodegas.nombre AS nom_bodega,
+                SUM(far_orden_egreso.val_total) AS val_total_sb
             FROM far_orden_egreso
-            INNER JOIN tb_terceros ON (tb_terceros.id_tercero=far_orden_egreso.id_cliente)
-            INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_orden_egreso.id_centrocosto)
+            INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_orden_egreso.id_sede)
+            INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_orden_egreso.id_bodega)
             $where AND far_orden_egreso.id_tipo_egreso=:id_tipo_egreso
-            GROUP BY tb_centrocostos.id_centro,tb_terceros.id_tercero
-            ORDER BY tb_centrocostos.nom_centro,tb_terceros.nom_tercero";
-    $rs_t = $cmd->prepare($sql);
+            GROUP BY tb_sedes.id_sede,far_bodegas.id_bodega
+            ORDER BY tb_sedes.id_sede,far_bodegas.nombre";
+    $rs_b = $cmd->prepare($sql);
 
     $sql = "SELECT far_subgrupos.id_subgrupo,CONCAT_WS(' - ',far_subgrupos.cod_subgrupo,far_subgrupos.nom_subgrupo) AS nom_subgrupo,                
                 SUM(far_orden_egreso_detalle.cantidad*far_orden_egreso_detalle.valor) AS val_total_sg
@@ -94,7 +93,7 @@ try {
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)
             $where AND far_orden_egreso.id_tipo_egreso=:id_tipo_egreso 
-                   AND far_orden_egreso.id_cliente=:id_tercero AND far_orden_egreso.id_centrocosto=:id_centro 
+                   AND far_orden_egreso.id_sede=:id_sede AND far_orden_egreso.id_bodega=:id_bodega
             GROUP BY far_subgrupos.id_subgrupo
             ORDER BY far_subgrupos.id_subgrupo";
     $rs_d = $cmd->prepare($sql);
@@ -138,13 +137,9 @@ try {
             <?php
             $tabla = '';
             switch($id_reporte){
-                case '2':
+                case '1':
                     $tabla = '<tr style="background-color:#CED3D3; text-align:center">
-                        <th style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subgrupo</th>
-                        <th style="text-align:left">Centro de Costo</th>
-                        <th style="text-align:left">Tercero</th>
-                        <th style="text-align:right">Vr. Parcial</th>
-                        <th style="text-align:right">Vr. Total</th></tr>';
+                        <th>Sede-Bodega</th><th>Vr. Parcial</th><th>Vr. Total</th></tr>';
                     break; 
             }
 
@@ -154,31 +149,29 @@ try {
             foreach ($objs as $obj1) {
                 $id_tipo_egreso = $obj1['id_tipo_egreso'];
                 
-                $tabla .= '<tr><th colspan="4" style="text-align:left">TIPO DE EGRESO: ' . mb_strtoupper($obj1['nom_tipo_egreso']) . '</th>
+                $tabla .= '<tr><th colspan="2" style="text-align:left">TIPO DE EGRESO: ' . mb_strtoupper($obj1['nom_tipo_egreso']) . '</th>
                             <th style="text-align:right">' . formato_valor($obj1['val_total_te']) . '</th></tr>';
 
-                $rs_t->bindParam(':id_tipo_egreso',$id_tipo_egreso);
-                $rs_t->execute();
-                $objt = $rs_t->fetchAll();
+                $rs_b->bindParam(':id_tipo_egreso',$id_tipo_egreso);
+                $rs_b->execute();
+                $objb = $rs_b->fetchAll();
 
-                foreach ($objt as $obj2) {
-                    $id_centro = $obj2['id_centro'];
-                    $id_tercero = $obj2['id_tercero'];
+                foreach ($objb as $obj2) {
+                    $id_sede = $obj2['id_sede'];
+                    $id_bodega = $obj2['id_bodega'];
                 
-                    $tabla .= '<tr><td></td>
-                                <th style="text-align:left">' . mb_strtoupper($obj2['nom_centro']) . '</th>
-                                <th style="text-align:left">' . mb_strtoupper($obj2['nom_tercero']) . '</th>
-                                <th style="text-align:right">' . formato_valor($obj2['val_total_tr']) . '</th></tr>';
+                    $tabla .= '<tr><th style="text-align:left">' . mb_strtoupper($obj2['nom_sede'] . ' - ' . $obj2['nom_bodega']) . '</th>
+                                <th style="text-align:right">' . formato_valor($obj2['val_total_sb']) . '</th></tr>';
 
                     $rs_d->bindParam(':id_tipo_egreso',$id_tipo_egreso);
-                    $rs_d->bindParam(':id_centro',$id_centro);
-                    $rs_d->bindParam(':id_tercero',$id_tercero);
+                    $rs_d->bindParam(':id_sede',$id_sede);
+                    $rs_d->bindParam(':id_bodega',$id_bodega);
                     $rs_d->execute();
                     $objd = $rs_d->fetchAll();
 
                     foreach ($objd as $obj) {
                         $tabla .=  '<tr class="resaltar">                                                                                 
-                            <td colspan="3" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . mb_strtoupper($obj['nom_subgrupo']) . '</td>
+                            <td style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . mb_strtoupper($obj['nom_subgrupo']) . '</td>
                             <td style="text-align:right">' . formato_valor($obj['val_total_sg']) . '</td></tr>'; 
                         $total += $obj['val_total_sg'];
                         $numreg += 1;
@@ -190,7 +183,7 @@ try {
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <th colspan="3" style="text-align:left">
+                <th style="text-align:left">
                     No. de Registros: <?php echo $numreg; ?>  
                 </th>
                 <th style="text-align:left">
