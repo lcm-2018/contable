@@ -6,7 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 header("Content-type: application/vnd.ms-excel charset=utf-8");
-header("Content-Disposition: attachment; filename=Relacion_Pagos.xls");
+header("Content-Disposition: attachment; filename=Cuentas_Pagar.xls");
 header("Pragma: no-cache");
 header("Expires: 0");
 
@@ -31,8 +31,9 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
     $sql = "SELECT
                 DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') AS `fecha`
-                , CONCAT(`pto_clase_sia`.`codigo` , `pto_cargue`.`cod_pptal`) AS `cod_ppto`
-                , `pto_clase_sia`.`codigo`
+                , CONCAT(`pto_sia`.`codigo` , `pto_cargue`.`cod_pptal`) AS `cod_ppto`
+                , `pto_cargue`.`nom_rubro`
+                , `pto_sia`.`codigo`
                 , `banco`.`codigo` AS `fte`
                 , `ctb_doc`.`id_manu`
                 , `tb_terceros`.`nom_tercero`
@@ -48,7 +49,7 @@ try {
             FROM
                 `pto_pag_detalle`
                 INNER JOIN `ctb_doc`
-                ON (`ctb_doc`.`id_ctb_doc` = `pto_pag_detalle`.`id_ctb_doc`)
+                    ON (`ctb_doc`.`id_ctb_doc` = `pto_pag_detalle`.`id_ctb_doc`)
                 INNER JOIN `pto_cop_detalle` 
                     ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
                 INNER JOIN `pto_crp_detalle` 
@@ -59,8 +60,8 @@ try {
                     ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 INNER JOIN `pto_homologa_gastos` 
                     ON (`pto_homologa_gastos`.`id_cargue` = `pto_cargue`.`id_cargue`)
-                INNER JOIN `pto_clase_sia` 
-                    ON (`pto_homologa_gastos`.`id_csia` = `pto_clase_sia`.`id_csia`)
+                INNER JOIN `pto_sia` 
+                    ON (`pto_homologa_gastos`.`id_sia` = `pto_sia`.`id_sia`)
                 LEFT JOIN
                     (SELECT
                         `id_ctb_doc`, SUM(`valor`) AS `valor`, `id_tercero_api`
@@ -185,7 +186,7 @@ try {
                     FROM `tes_detalle_pago`
                     GROUP BY `id_ctb_doc`,`documento`) AS `tpdoc`
                     ON (`tpdoc`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-            WHERE DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') BETWEEN $rango AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`id_tipo_doc` = 4
+            WHERE DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') BETWEEN $rango AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`id_tipo_doc` = 4 AND `pto_cargue`.`tipo_pto` = 8 
             GROUP BY `ctb_doc`.`id_ctb_doc`, `tt`.`id_tercero_api`
             ORDER BY `ctb_doc`.`fecha`, `ctb_doc`.`id_manu` ASC";
     $res = $cmd->query($sql);
@@ -196,11 +197,11 @@ try {
 $body = '';
 foreach ($lista as $r) {
     $body .= "<tr>
+                <td>{$r['cod_ppto']}</td>
+                <td>{$r['nom_rubro']}</td>
+                <td>{$r['valor']}</td>
                 <td>{$r['fecha']}</td>
                 <td>{$meses}</td>
-                <td>{$r['cod_ppto']}</td>
-                <td>{$r['codigo']}</td>
-                <td>{$r['fte']}</td>
                 <td>{$r['id_manu']}</td>
                 <td>{$r['nom_tercero']}</td>
                 <td>{$r['nit_tercero']}</td>
@@ -219,7 +220,7 @@ echo "\xEF\xBB\xBF";
 ?>
 <table class="table-bordered bg-light" style="width:100% !important;" border=1>
     <tr>
-        <td colspan="17" style="text-align: center; font-weight: bold;">RELACIÓN DE PAGOS</td>
+        <td colspan="17" style="text-align: center; font-weight: bold;">CUENTAS POR PAGAR</td>
     </tr>
     <tr>
         <td colspan="17" style="text-align: center; font-weight: bold;">AÑO: <?= $vigencia; ?></td>
@@ -228,11 +229,11 @@ echo "\xEF\xBB\xBF";
         <td colspan="17" style="text-align: center; font-weight: bold;">PERIODO: <?= $meses ?></td>
     </tr>
     <tr>
-        <th>Fecha De Pago</th>
-        <th>Periodo reportado</th>
         <th>Código Presupuestal</th>
-        <th>Tipo De Pago</th>
-        <th>Fuente De Financiación</th>
+        <th>Descripción Del Rubro</th>
+        <th>Cuenta Por Pagar Constituida</th>
+        <th>Fecha De Pago</th>
+        <th>Ultimo Mes Periodo Reportado</th>
         <th>No. De Comprobante</th>
         <th>Beneficiario</th>
         <th>Cédula O Nit</th>

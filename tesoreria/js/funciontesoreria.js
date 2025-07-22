@@ -168,6 +168,7 @@ var tabla;
 				},
 				columns: [
 					{ data: "numero" },
+					{ data: "causacion" },
 					{ data: "fecha" },
 					{ data: "ccnit" },
 					{ data: "tercero" },
@@ -175,8 +176,9 @@ var tabla;
 					{ data: "botones" }
 				],
 				columnDefs: [
-					{ class: 'text-wrap', targets: [3] },
+					{ class: 'text-wrap', targets: [1, 4] },
 					{ orderable: false, targets: 5 },
+					{ visible: $('#id_ctb_tipo').val() == '4', targets: 1 }
 				],
 				order: [[0, "desc"]],
 			});

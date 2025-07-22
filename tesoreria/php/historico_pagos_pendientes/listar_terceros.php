@@ -58,7 +58,7 @@ try {
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];*/
-    
+
     //------Consulta los datos para listarlos en la tabla
     $sql = "SELECT 
                 c.id_ctb_doc AS documento_credito,
@@ -123,7 +123,7 @@ try {
                     INNER JOIN ctb_doc ON (ctb_libaux.id_ctb_doc = ctb_doc.id_ctb_doc)
                     INNER JOIN tb_terceros ON (ctb_libaux.id_tercero_api = tb_terceros.id_tercero_api)
                 WHERE ctb_doc.id_tipo_doc = 3
-                    AND DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') <= '$fecha'
+                    AND DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') <= '$fecha'
                     AND ctb_libaux.ref = 1
                     AND ctb_doc.estado = 2
                 GROUP BY 
@@ -135,7 +135,7 @@ try {
                     ctb_doc.id_ctb_doc_tipo3 AS id_ctb_doc_credito,
                     ctb_libaux.id_ctb_doc AS id_ctb_doc_debito,
                     tb_terceros.id_tercero_api,
-                    DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') AS fecha,
+                    DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') AS fecha,
                     SUM(ctb_libaux.debito) AS sumadebito
                 FROM 
                     ctb_libaux
@@ -143,7 +143,7 @@ try {
                     INNER JOIN tb_terceros ON (ctb_libaux.id_tercero_api = tb_terceros.id_tercero_api)
                 WHERE ctb_doc.id_tipo_doc = 4
                     AND ctb_doc.id_ctb_doc_tipo3 IS NOT NULL
-                    AND DATE_FORMAT(ctb_libaux.fecha_reg, '%Y-%m-%d') <= '$fecha'
+                    AND DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') <= '$fecha'
                 GROUP BY 
                     ctb_doc.id_ctb_doc_tipo3
                 ) d ON c.id_ctb_doc = d.id_ctb_doc_credito AND c.id_tercero_api = d.id_tercero_api
@@ -155,7 +155,7 @@ try {
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
 
-    
+
 
     $cmd = null;
 } catch (PDOException $e) {

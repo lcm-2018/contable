@@ -63,10 +63,10 @@ try {
                     ON (`taux`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
                 INNER JOIN `pto_cargue` 
                     ON (`pto_cargue`.`id_cargue` = `taux`.`id_rubro`)
-                INNER JOIN `pto_homologa_ingresos` 
-                    ON (`pto_homologa_ingresos`.`id_cargue` = `pto_cargue`.`id_cargue`)
+                INNER JOIN `pto_homologa_gastos` 
+                    ON (`pto_homologa_gastos`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 INNER JOIN `pto_sia` 
-                    ON (`pto_homologa_ingresos`.`id_sia` = `pto_sia`.`id_sia`)
+                    ON (`pto_homologa_gastos`.`id_sia` = `pto_sia`.`id_sia`)
                 LEFT JOIN
                     (SELECT 
                         `cdp`.`id_pto_cdp`,

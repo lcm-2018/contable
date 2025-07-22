@@ -48,8 +48,7 @@ if (isset($_POST['tercero']) && $_POST['tercero']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     if ($_POST['estado'] == "-1") {
         $andwhere .= " AND ctb_doc.estado>=" . $_POST['estado'];
-    } 
-    else {
+    } else {
         $andwhere .= " AND ctb_doc.estado=" . $_POST['estado'];
     }
 }
@@ -93,6 +92,7 @@ try {
                 , `ctb_doc`.`id_tipo_doc`
                 , `ctb_doc`.`id_vigencia`
                 , `ctb_doc`.`doc_soporte`
+                , `causaciones`.`id_manu` AS `causacion`
             FROM
                 `ctb_doc`
                 LEFT JOIN `nom_nomina_pto_ctb_tes` 
@@ -101,6 +101,18 @@ try {
                     ON (`nom_nomina_pto_ctb_tes`.`id_nomina` = `nom_nominas`.`id_nomina`)
                 LEFT JOIN `tb_terceros`
                     ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                LEFT JOIN 
+                    (SELECT
+                        `pto_pag_detalle`.`id_ctb_doc` AS `pag`
+                        , GROUP_CONCAT(DISTINCT `ctb_doc`.`id_manu` ORDER BY `ctb_doc`.`id_manu` SEPARATOR ', ') AS `id_manu`
+                    FROM
+                        `pto_pag_detalle`
+                        INNER JOIN `pto_cop_detalle` 
+                            ON `pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`
+                        INNER JOIN `ctb_doc` 
+                            ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    GROUP BY `pto_pag_detalle`.`id_ctb_doc`) AS `causaciones`
+                    ON (`ctb_doc`.`id_ctb_doc` = `causaciones`.`pag`)
             WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where) $andwhere  
              ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
@@ -264,6 +276,7 @@ if (!empty($listappto)) {
         }
         $data[] = [
             'numero' => $lp['id_manu'],
+            'causacion' => $lp['causacion'] != '' ? $lp['causacion'] : '',
             'fecha' => $fecha,
             'ccnit' => $ccnit,
             'tercero' => $tercero,

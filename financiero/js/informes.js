@@ -89,8 +89,7 @@ const LoadInforme = (id) => {
             url = 'inf_modgastos.php';
             break;
         case 9:
-            mjeError('Informe no disponible');
-            return false;
+            url = 'inf_ctasxpagar.php';
             break;
         case 10:
             url = 'inf_relpagos.php';

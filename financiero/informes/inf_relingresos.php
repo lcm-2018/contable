@@ -187,7 +187,7 @@ try {
                             ON (`c`.`id_pto_rec` = `pto_rec`.`id_pto_rec`)
                         ) AS `ingresos`
                     ON (`ingresos`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                WHERE (`pto_presupuestos`.`id_tipo` = 1 AND `pto_presupuestos`.`id_vigencia` = 9 AND `ingresos`.`id_rubro` IS NOT NULL)
+                WHERE (`pto_presupuestos`.`id_tipo` = 1 AND `pto_presupuestos`.`id_vigencia` = $id_vigencia AND `ingresos`.`id_rubro` IS NOT NULL)
                 ORDER BY `pto_cargue`.`id_cargue` ASC";
     $res = $cmd->query($sql);
     $lista = $res->fetchAll(PDO::FETCH_ASSOC);

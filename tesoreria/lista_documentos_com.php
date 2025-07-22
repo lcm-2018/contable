@@ -92,7 +92,6 @@ try {
                         </div>
 
                         <div class="card-body" id="divCuerpoPag">
-
                             <div>
                                 <div clas="row">
                                     <div class="center-block">
@@ -209,10 +208,11 @@ try {
                                             <tr class="text-center">
                                                 <?php if ($tipo_doc != '13') { ?>
                                                     <th style="width: 8%;">Numero</th>
+                                                    <th style="width: 8%;">Causación</th>
                                                     <th style="width: 8%;">Fecha</th>
                                                     <th style="width: 8%;">CC/Nit</th>
-                                                    <th style="width: 40%;">Tercero</th>
-                                                    <th style="width: 12%;">Valor</th>
+                                                    <th style="width: 34%;">Tercero</th>
+                                                    <th style="width: 10%;">Valor</th>
                                                     <th style="width: 12%;">Acciones</th>
                                                 <?php
                                                 } else { ?>

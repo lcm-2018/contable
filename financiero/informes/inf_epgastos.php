@@ -68,7 +68,7 @@ try {
                         `pto_mod_detalle`
                         INNER JOIN `pto_mod` 
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
-                    WHERE (`pto_mod`.`id_tipo_mod` IN (1,2,6) AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-05-31' AND `pto_mod`.`estado` = 2)
+                    WHERE (`pto_mod`.`id_tipo_mod` IN (2) AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-05-31' AND `pto_mod`.`estado` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `adicion`
                         ON (`adicion`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN 
@@ -79,7 +79,7 @@ try {
                         `pto_mod_detalle`
                         INNER JOIN `pto_mod` 
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
-                    WHERE (`pto_mod`.`id_tipo_mod` IN (1,3,6) AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-05-31' AND `pto_mod`.`estado` = 2)
+                    WHERE (`pto_mod`.`id_tipo_mod` IN (3) AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-05-31' AND `pto_mod`.`estado` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `reduccion`
                         ON (`reduccion`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN 
@@ -90,7 +90,7 @@ try {
                         `pto_mod_detalle`
                         INNER JOIN `pto_mod` 
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
-                    WHERE (`pto_mod`.`id_tipo_mod` IN (1,2,6) AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `pto_mod`.`estado` = 2)
+                    WHERE (`pto_mod`.`id_tipo_mod` IN (1,6) AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `pto_mod`.`estado` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `cre_periodo`
                         ON (`cre_periodo`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN 
@@ -101,7 +101,7 @@ try {
                         `pto_mod_detalle`
                         INNER JOIN `pto_mod` 
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
-                    WHERE (`pto_mod`.`id_tipo_mod` IN (1,2,6) AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-12-31' AND `pto_mod`.`estado` = 2)
+                    WHERE (`pto_mod`.`id_tipo_mod` IN (1,6) AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `pto_mod`.`estado` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `cre_acumulado`
                         ON (`cre_acumulado`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN 
@@ -123,7 +123,7 @@ try {
                         `pto_mod_detalle`
                         INNER JOIN `pto_mod` 
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
-                    WHERE (`pto_mod`.`id_tipo_mod` IN (1,3,6) AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-12-31' AND `pto_mod`.`estado` = 2)
+                    WHERE (`pto_mod`.`id_tipo_mod` IN (1,3,6) AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `pto_mod`.`estado` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `contra_acumulado`
                         ON (`contra_acumulado`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
@@ -145,7 +145,7 @@ try {
                         `pto_mod_detalle`
                         INNER JOIN `pto_mod` 
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
-                    WHERE (`pto_mod`.`id_tipo_mod` = 3 AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-12-31' AND `pto_mod`.`estado` = 2)
+                    WHERE (`pto_mod`.`id_tipo_mod` = 3 AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `pto_mod`.`estado` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `red_acumulado`
                         ON (`red_acumulado`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
@@ -167,7 +167,7 @@ try {
                         `pto_mod_detalle`
                         INNER JOIN `pto_mod` 
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
-                    WHERE (`pto_mod`.`id_tipo_mod` = 2 AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-12-31' AND `pto_mod`.`estado` = 2)
+                    WHERE (`pto_mod`.`id_tipo_mod` = 2 AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `pto_mod`.`estado` = 2)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `add_acumulado`
                         ON (`add_acumulado`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
@@ -214,7 +214,7 @@ try {
                                 ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
                             INNER JOIN `pto_cdp_detalle` 
                                 ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                        WHERE (DATE_FORMAT(`pto_crp`.`fecha`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-12-31' AND `pto_crp`.`estado` = 2)
+                        WHERE (DATE_FORMAT(`pto_crp`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `pto_crp`.`estado` = 2)
                         GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `t1`
                         LEFT JOIN
                             (SELECT
@@ -226,7 +226,7 @@ try {
                                     ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
                                 INNER JOIN `pto_cdp_detalle` 
                                     ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                            WHERE (DATE_FORMAT(`pto_crp_detalle`.`fecha_libera`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-12-31' AND `pto_crp`.`estado` = 2)
+                            WHERE (DATE_FORMAT(`pto_crp_detalle`.`fecha_libera`,'%Y-%m-%d') BETWEEN $rango AND `pto_crp`.`estado` = 2)
                             GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `t2`
                             ON (`t2`.`id_rubro` = `t1`.`id_rubro`)) AS `compromiso_acumulado`
                     ON (`pto_cargue`.`id_cargue` = `compromiso_acumulado`.`id_rubro`)
@@ -261,7 +261,7 @@ try {
                             ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
                         INNER JOIN `pto_cdp_detalle` 
                             ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                    WHERE (DATE_FORMAT(`ctb_doc`.`fecha`,'%Y-%m-%d') BETWEEN '$vigencia-01-01' AND '$vigencia-12-31' AND `ctb_doc`.`estado` = 2)
+                    WHERE (DATE_FORMAT(`ctb_doc`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `ctb_doc`.`estado` = 2)
                     GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `pago_acumulado`
                         ON (`pto_cargue`.`id_cargue` = `pago_acumulado`.`id_rubro`)
             WHERE (`pto_presupuestos`.`id_tipo` = 2 AND `pto_presupuestos`.`id_vigencia` = $id_vigencia)
