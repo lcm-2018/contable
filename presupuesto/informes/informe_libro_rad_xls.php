@@ -1,6 +1,7 @@
 <?php
 session_start();
-set_time_limit(5600);
+set_time_limit(10000);
+ini_set('memory_limit', '512M');
 if (!isset($_SESSION['user'])) {
     header("Location: ../../../index.php");
     exit();
@@ -30,6 +31,8 @@ try {
                 , `pto_cargue`.`nom_rubro`
                 , `tt`.`id_tercero_api`
                 , `tt`.`id_rubro`
+                , `tt`.`val1`
+                , `tt`.`val2`
                 , `tt`.`valor`
                 , `tb_terceros`.`nom_tercero`
                 , `tb_terceros`.`nit_tercero`
@@ -39,6 +42,8 @@ try {
                     (SELECT
                         `id_pto_rad`
                         , `id_rubro`
+                        , IFNULL(`valor`,0) as `val1`
+                        , IFNULL(`valor_liberado`,0) as `val2`
                         , SUM(IFNULL(`valor`,0) - IFNULL(`valor_liberado`,0)) AS `valor`
                         , `id_tercero_api`
                     FROM
@@ -71,6 +76,8 @@ include_once '../../financiero/encabezado_empresa.php';
             <th>Objeto</th>
             <th>Rubro</th>
             <th>Valor</th>
+            <th>Liberado</th>
+            <th>Neto</th>
         </tr>
     </thead>
     <tbody>
@@ -86,6 +93,8 @@ include_once '../../financiero/encabezado_empresa.php';
                         <td style='text-align:right;white-space: nowrap;'>" .  number_format($rp['nit_tercero'], 0, "", ".") . "</td>
                         <td style='text-align:left'>" . $rp['objeto'] . "</td>
                         <td style='text-align:left'>" .  $rp['rubro'] . "</td>
+                        <td style='text-align:right'>" . number_format($rp['val1'], 2, ".", ",")  . "</td>
+                        <td style='text-align:right'>" . number_format($rp['val2'], 2, ".", ",")  . "</td>
                         <td style='text-align:right'>" . number_format($rp['valor'], 2, ".", ",")  . "</td>
                     </tr>";
                 }

@@ -58,7 +58,7 @@ try {
                     ON (`pto_homologa_ingresos`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 INNER JOIN `pto_sia` 
                     ON (`pto_homologa_ingresos`.`id_sia` = `pto_sia`.`id_sia`)
-            WHERE (`pto_mod`.`estado` = 2 AND `pto_presupuestos`.`id_tipo` = 2 AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN $rango)
+            WHERE (`pto_mod`.`estado` = 2 AND `pto_presupuestos`.`id_tipo` = 1 AND DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN $rango)
             ORDER BY  DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d')";
     $res = $cmd->query($sql);
     $lista = $res->fetchAll(PDO::FETCH_ASSOC);

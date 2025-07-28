@@ -151,7 +151,7 @@ try {
                 LEFT JOIN
                     (SELECT
                         `pto_mod_detalle`.`id_cargue`
-                        , SUM(IFNULL(`pto_mod_detalle`.`valor_cred`,0)) AS `valor`
+                        , SUM(IFNULL(`pto_mod_detalle`.`valor_deb`,0)) AS `valor`
                     FROM
                         `pto_mod_detalle`
                         INNER JOIN `pto_mod` 

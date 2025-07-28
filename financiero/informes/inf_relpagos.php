@@ -31,7 +31,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
     $sql = "SELECT
                 DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') AS `fecha`
-                , CONCAT(`pto_clase_sia`.`codigo` , `pto_cargue`.`cod_pptal`) AS `cod_ppto`
+                , CONCAT(`pto_sia`.`codigo` , `pto_cargue`.`cod_pptal`) AS `cod_ppto`
                 , `pto_clase_sia`.`codigo`
                 , `banco`.`codigo` AS `fte`
                 , `ctb_doc`.`id_manu`
@@ -61,6 +61,8 @@ try {
                     ON (`pto_homologa_gastos`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 INNER JOIN `pto_clase_sia` 
                     ON (`pto_homologa_gastos`.`id_csia` = `pto_clase_sia`.`id_csia`)
+                INNER JOIN `pto_sia` 
+                    ON (`pto_homologa_gastos`.`id_sia` = `pto_sia`.`id_sia`)
                 LEFT JOIN
                     (SELECT
                         `id_ctb_doc`, SUM(`valor`) AS `valor`, `id_tercero_api`
@@ -131,34 +133,18 @@ try {
                     GROUP BY `doc_pag`,`seg`.`id_tercero_api`) AS `retencion`
                     ON (`retencion`.`id_tercero_api` = `tt`.`id_tercero_api` AND `retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                 LEFT JOIN
-                    (SELECT 
-                        `doc_pag` AS `id_ctb_doc`
-                        , `seg`.`id_tercero_api`
-                        , SUM(`seg`.`valor`) AS `valor`
+                    (SELECT
+                        SUM(`ctb_libaux`.`credito`) AS `valor`
+                        , `ctb_doc`.`id_ctb_doc`
+                        , `ctb_libaux`.`id_tercero_api`
                     FROM
-                        (SELECT
-                            `pto_cop_detalle`.`id_ctb_doc` AS `doc_cop`
-                            , `pto_pag_detalle`.`id_ctb_doc` AS `doc_pag`
-                        FROM
-                            `pto_pag_detalle`
-                            INNER JOIN `pto_cop_detalle` 
-                            ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
-                        GROUP BY `pto_pag_detalle`.`id_ctb_doc`, `pto_cop_detalle`.`id_ctb_doc`) AS `id_docs`
-                        INNER JOIN
-                            (SELECT
-                                `ctb_libaux`.`id_ctb_doc`
-                                , `ctb_libaux`.`id_tercero_api`
-                                , SUM(`ctb_libaux`.`credito`) AS `valor`
-                            FROM
-                                `ctb_libaux`
-                                INNER JOIN `ctb_doc` 
-                                ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                                INNER JOIN `ctb_pgcp` 
-                                ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-                            WHERE (`ctb_pgcp`.`cuenta` NOT LIKE '2424%' AND `ctb_pgcp`.`cuenta` NOT LIKE '2436%' AND `ctb_libaux`.`credito` > 0 AND `ctb_doc`.`estado` = 2)
-                            GROUP BY `ctb_libaux`.`id_ctb_doc`, `ctb_libaux`.`id_tercero_api`)  AS `seg`
-                            ON (`id_docs`.`doc_cop` = `seg`.`id_ctb_doc`)
-                    GROUP BY `doc_pag`,`seg`.`id_tercero_api`) AS `neto` 
+                        `ctb_libaux`
+                        INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        INNER JOIN `ctb_pgcp` 
+                            ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                    WHERE (`ctb_pgcp`.`cuenta` LIKE '1110%')
+                    GROUP BY `ctb_doc`.`id_ctb_doc`, `ctb_libaux`.`id_tercero_api`) AS `neto` 
                     ON (`neto`.`id_tercero_api` = `tt`.`id_tercero_api` AND `neto`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                 LEFT JOIN 
                     (SELECT

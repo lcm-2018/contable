@@ -100,6 +100,7 @@ try {
                                 END AS `id_rubro` 
                                 , SUM(IFNULL(`pto_rec_detalle`.`valor`,0)) AS `valor`
                                 , SUM(IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `liberado`
+                                , `pto_rec_detalle`.`id_tercero_api`
                             FROM
                                 `pto_rec_detalle`
                                 INNER JOIN `pto_rec` 
@@ -107,10 +108,10 @@ try {
                                 LEFT JOIN `pto_rad_detalle` 
                                     ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
                                 WHERE (DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN $rango AND `pto_rec`.`estado` = 2)
-                                GROUP BY `id_rubro`, `pto_rec`.`id_pto_rec`) AS `recaudo`
+                                GROUP BY `id_rubro`, `pto_rec`.`id_pto_rec`, `pto_rec_detalle`.`id_tercero_api`) AS `recaudo`
                             ON (`recaudo`.`id_pto_rec` = `pto_rec`.`id_pto_rec`)
                         LEFT JOIN `tb_terceros`
-                            ON (`tb_terceros`.`id_tercero_api` = `pto_rec`.`id_tercero_api`)
+                            ON (`tb_terceros`.`id_tercero_api` = `recaudo`.`id_tercero_api`)
                         LEFT JOIN
                             (SELECT
                                 `tb_bancos`.`cod_sia`
