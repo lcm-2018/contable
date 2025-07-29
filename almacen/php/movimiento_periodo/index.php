@@ -108,6 +108,11 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             </div>    
                                         </div>
                                     </div>    
+                                </div> 
+                                <div class="form-group col-md-3">
+                                    <select class="filtro form-control form-control-sm text-primary" id="sl_tipo_reporte">
+                                        <?php tipo_reporte_movimientos('--TIPO DE REPORTE--') ?>
+                                    </select>
                                 </div>                                    
                             </div>
 

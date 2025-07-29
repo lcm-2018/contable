@@ -14,7 +14,8 @@ $idrol = $_SESSION['rol'];
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$where = "WHERE far_orden_egreso.id_tipo_egreso NOT IN (1,2) AND far_orden_egreso.id_ingreso IS NULL";
+//$where = "WHERE far_orden_egreso.id_tipo_egreso NOT IN (1,2) AND far_orden_egreso.id_ingreso IS NULL";
+$where = "WHERE 1=1";
 if($idrol !=1){
     $where .= " AND far_orden_egreso.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
@@ -34,9 +35,12 @@ if (isset($_POST['num_egr']) && $_POST['num_egr']) {
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
     $where .= " AND far_orden_egreso.fec_egreso BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
 }
-if (isset($_POST['id_tipegr']) && $_POST['id_tipegr']) {
-    $where .= " AND far_orden_egreso.id_tipo_egreso=" . $_POST['id_tipegr'] . "";
-}
+
+$id_tipegr = isset($_POST['id_tipegr']) ? implode(",", array_filter($_POST['id_tipegr'])) : '';
+if ($id_tipegr) {
+    $where .= " AND far_orden_egreso.id_tipo_egreso IN (" . $id_tipegr . ")";    
+}  
+
 if (isset($_POST['id_cencost']) && $_POST['id_cencost']) {
     $where .= " AND far_orden_egreso.id_centrocosto=" . $_POST['id_cencost'] . "";
 }
@@ -165,7 +169,7 @@ try {
                 <th style="text-align:left">
                     TOTAL:
                 </th>
-                <th colspan="1" style="text-align:right">
+                <th style="text-align:right">
                     <?php echo formato_valor($total); ?>  
                 </th>
                 <td></td>

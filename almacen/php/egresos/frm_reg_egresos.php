@@ -117,7 +117,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-2">
                         <label for="sl_tip_egr" class="small" required>Tipo egreso</label>
                         <select class="form-control form-control-sm" id="sl_tip_egr" name="sl_tip_egr" <?php echo $editar ?>>
-                            <?php tipo_egreso($cmd, '', $obj['id_tipo_egreso']) ?>
+                            <?php tipo_egreso($cmd, '', 0, $obj['id_tipo_egreso']) ?>
                         </select>
                         <input type="hidden" id="id_tip_egr" name="id_tip_egr" value="<?php echo $obj['id_tipo_egreso'] ?>">
                     </div>                                       

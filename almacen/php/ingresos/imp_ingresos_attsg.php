@@ -142,7 +142,7 @@ try {
                 foreach ($objt as $obj2) {
                     $id_tercero = $obj2['id_tercero'];
                 
-                    $tabla .= '<tr><th style="text-align:left">' . $obj2['codigo_ne'] . ' ' . $obj2['nit_tercero'] . '</th>
+                    $tabla .= '<tr><th style="text-align:left">' . str_repeat('&nbsp',10) . $obj2['codigo_ne'] . ' ' . $obj2['nit_tercero'] . '</th>
                                 <th style="text-align:left">' . mb_strtoupper($obj2['nom_tercero']) . '</th>
                                 <th style="text-align:left">' . mb_strtoupper($obj2['dir_tercero']) . '</th>
                                 <th style="text-align:left">' . mb_strtoupper($obj2['nom_municipio']) . ' - ' . mb_strtoupper($obj2['nom_departamento']) .  '</th>
@@ -155,7 +155,7 @@ try {
 
                     foreach ($objd as $obj) {
                         $tabla .=  '<tr class="resaltar">                                                                                 
-                            <td colspan="4" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . mb_strtoupper($obj['nom_subgrupo']) . '</td>
+                            <td colspan="4" style="text-align:left">' . str_repeat('&nbsp',20) . mb_strtoupper($obj['nom_subgrupo']) . '</td>
                             <td style="text-align:right">' . formato_valor($obj['val_total_sg']) . '</td></tr>'; 
                         $total += $obj['val_total_sg'];
                         $numreg += 1;
@@ -173,7 +173,7 @@ try {
                 <th style="text-align:left">
                     TOTAL:
                 </th>
-                <th colspan="1" style="text-align:right">
+                <th style="text-align:right">
                     <?php echo formato_valor($total); ?>  
                 </th>
             </tr>

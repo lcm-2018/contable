@@ -186,12 +186,16 @@ function centros_costo_usuario($cmd, $titulo = '', $id = 0)
     }
 }
 
-function tipo_egreso($cmd, $titulo = '', $id = 0)
+function tipo_egreso($cmd, $titulo = '', $todos=0, $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
         $sql = "SELECT id_tipo_egreso,nom_tipo_egreso,es_int_ext,con_pedido,fianza,dev_fianza
                 FROM far_orden_egreso_tipo WHERE id_tipo_egreso NOT IN (1,2)";
+        if ($todos == 1){
+            $sql = "SELECT id_tipo_egreso,nom_tipo_egreso,es_int_ext,con_pedido,fianza,dev_fianza
+                FROM far_orden_egreso_tipo";
+        }        
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
@@ -595,6 +599,13 @@ function tipo_reporte_exi_fecha($titulo = '')
     echo '<option value="4">Captura de Inventario Físico -> Agrupado por Sede-Bodega-Subgrupo-Articulo</option>';
 }
 
+function tipo_reporte_movimientos($titulo = '')
+{
+    echo '<option value="">' . $titulo . '</option>';
+    echo '<option value="1">Detallado por Articulo -> Agrupado por Subgrupo</option>';
+    echo '<option value="2">Totalizado por Subgrupo</option>';
+}
+
 function tipo_reporte_ingresos($titulo = '')
 {
     echo '<option value="">' . $titulo . '</option>';
@@ -605,7 +616,10 @@ function tipo_reporte_egresos($titulo = '')
 {
     echo '<option value="">' . $titulo . '</option>';
     echo '<option value="1">Totalizado por Tipo de Egreso-Sede-Bodega-Subgrupo</option>'; 
-    echo '<option value="2">Totalizado por Tipo de Egreso-Centro Costo-Subgrupo</option>'; 
+    echo '<option value="2">Totalizado por Sede-Bodega-Subgrupo</option>'; 
+    echo '<option value="3">Totalizado por Sede-Bodega</option>'; 
+    echo '<option value="4">Totalizado por Sede-Bodega-Centro Costo-Subgrupo</option>'; 
+    echo '<option value="5">Totalizado por Tipo de Egreso-Sede-Bodega-Centro Costo-Subgrupo</option>'; 
 }
 
 function tipo_reporte_traslados($titulo = '')

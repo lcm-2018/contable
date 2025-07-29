@@ -616,8 +616,17 @@
                     reporte = "imp_egresos_atbsg.php";
                     break;
                 case '2':
-                    reporte = "imp_egresos_atdsg.php";
+                    reporte = "imp_egresos_absg.php";
                     break;
+                case '3':
+                    reporte = "imp_egresos_absg.php";
+                    break;        
+                case '4':
+                    reporte = "imp_egresos_absgcc.php";
+                    break;
+                 case '5':
+                    reporte = "imp_egresos_atbsgcc.php";
+                    break;    
             }
             $.post(reporte, {
                 id_sede: $('#sl_sede_filtro').val(),
@@ -644,10 +653,24 @@
         }
     });
 
-    //Imprimit una Orden de Egreso
+    //Imprimit una Orden de Egreso desde el formulario donde se crea
     $('#divForms').on("click", "#btn_imprimir", function() {
         $.post("imp_egreso.php", {
             id: $('#id_egreso').val()
+        }, function(he) {
+            $('#divTamModalImp').removeClass('modal-sm');
+            $('#divTamModalImp').removeClass('modal-lg');
+            $('#divTamModalImp').addClass('modal-xl');
+            $('#divModalImp').modal('show');
+            $("#divImp").html(he);
+        });
+    });
+
+    //Imprimit una Orden de Egreso desde el formulario principal
+    $('#tb_egresos').on('click', '.btn_imprimir', function() {
+        let id = $(this).attr('value');
+        $.post("imp_egreso.php", {
+            id: id
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

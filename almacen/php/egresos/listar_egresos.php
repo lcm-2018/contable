@@ -19,7 +19,8 @@ $dir = $_POST['order'][0]['dir'];
 $idusr = $_SESSION['id_user'];
 $idrol = $_SESSION['rol'];
 
-$where_usr = " WHERE far_orden_egreso.id_tipo_egreso NOT IN (1,2) AND far_orden_egreso.id_ingreso IS NULL";
+//$where_usr = " WHERE far_orden_egreso.id_tipo_egreso NOT IN (1,2) AND far_orden_egreso.id_ingreso IS NULL";
+$where_usr = "WHERE 1=1";
 if($idrol !=1){
     $where_usr .= " AND far_orden_egreso.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
@@ -40,9 +41,12 @@ if (isset($_POST['num_egr']) && $_POST['num_egr']) {
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
     $where .= " AND far_orden_egreso.fec_egreso BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
 }
-if (isset($_POST['id_tipegr']) && $_POST['id_tipegr']) {
-    $where .= " AND far_orden_egreso.id_tipo_egreso=" . $_POST['id_tipegr'] . "";
-}
+
+$id_tipegr = isset($_POST['id_tipegr']) ? implode(",", array_filter($_POST['id_tipegr'])) : '';
+if ($id_tipegr) {
+    $where .= " AND far_orden_egreso.id_tipo_egreso IN (" . $id_tipegr . ")";    
+}    
+
 if (isset($_POST['id_cencost']) && $_POST['id_cencost']) {
     $where .= " AND far_orden_egreso.id_centrocosto=" . $_POST['id_cencost'] . "";
 }
@@ -73,7 +77,10 @@ try {
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(*) AS total FROM far_orden_egreso $where_usr $where";
+    $sql = "SELECT COUNT(*) AS total 
+            FROM far_orden_egreso 
+            INNER JOIN far_orden_egreso_tipo ON (far_orden_egreso_tipo.id_tipo_egreso=far_orden_egreso.id_tipo_egreso)
+            $where_usr $where";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
@@ -84,7 +91,8 @@ try {
                 IF(far_centrocosto_area.id_area=0,'',tb_sedes_area.nom_sede) AS nom_sede_des,
                 far_centrocosto_area.nom_area,
                 IF(tb_terceros.id_tercero=0,'',tb_terceros.nom_tercero) AS nom_tercero,
-	            far_orden_egreso_tipo.nom_tipo_egreso,far_orden_egreso.val_total,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
+	            far_orden_egreso_tipo.id_tipo_egreso,far_orden_egreso_tipo.nom_tipo_egreso,
+                far_orden_egreso.val_total,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
                 far_orden_egreso.estado,
 	            CASE far_orden_egreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
             FROM far_orden_egreso
@@ -104,18 +112,23 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 
-$editar = NULL;
-$eliminar = NULL;
 $data = [];
 if (!empty($objs)) {
     foreach ($objs as $obj) {
         $id = $obj['id_egreso'];
+        $id_te = $obj['id_tipo_egreso'];
+        $editar = NULL;
+        $eliminar = NULL;
+        $imprimir = NULL;
         //Permite crear botones en la cuadricula si tiene permisos de 1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir
-        if (PermisosUsuario($permisos, 5007, 3) || $id_rol == 1) {
+        if ((PermisosUsuario($permisos, 5007, 3) || $id_rol == 1) && !in_array($id_te,[1,2])){
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }
-        if (PermisosUsuario($permisos, 5007, 4) || $id_rol == 1) {
+        if ((PermisosUsuario($permisos, 5007, 4) || $id_rol == 1) && !in_array($id_te,[1,2])) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+        }
+        if (PermisosUsuario($permisos, 5007, 1) || $id_rol == 1) {
+            $imprimir =  '<a value="' . $id . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_imprimir" title="Imprimir"><span class="fas fa-print fa-lg"></span></a>';
         }
         $data[] = [
             "id_egreso" => $id,
@@ -133,7 +146,7 @@ if (!empty($objs)) {
             "val_total" => formato_valor($obj['val_total']),
             "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],            
-            "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
+            "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . $imprimir . '</div>',
         ];
     }
 }

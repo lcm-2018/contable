@@ -86,7 +86,18 @@
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_articulos');
         $('.is-invalid').removeClass('is-invalid');
-        $.post("imp_movimientos.php", {
+        let id_reporte = $('#sl_tipo_reporte').val();
+        let reporte = "imp_movimientos.php";
+
+        switch (id_reporte) {
+            case '1':
+                reporte = "imp_movimientos_asg.php";
+                break;
+            case '2':
+                reporte = "imp_movimientos_asg.php";
+                break;    
+        }
+        $.post(reporte, {    
             id_sede: $('#sl_sede_filtro').val(),
             id_bodega: $('#sl_bodega_filtro').val(),
             fecini: $('#txt_fecini_filtro').val(),
@@ -96,7 +107,8 @@
             id_subgrupo: $('#sl_subgrupo_filtro').val(),
             tipo_asis: $('#sl_tipoasis_filtro').val(),
             con_existencia: $('#sl_conexi_filtro').val(),
-            artactivo: $('#chk_artact_filtro').is(':checked') ? 1 : 0
+            artactivo: $('#chk_artact_filtro').is(':checked') ? 1 : 0,
+            id_reporte: id_reporte
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');
