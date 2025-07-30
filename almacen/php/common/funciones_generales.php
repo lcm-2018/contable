@@ -170,10 +170,10 @@ function sede_unica_usuario($cmd){
 
 //BITACORA DE MENSAJES A UN ARCHIVO DE ACCIONES REALIZADAS
 function bitacora($accion, $opcion, $detalle, $id_usuario, $login) {
-    $fecha = date('Y-m-d h:i:s A');
+    $fecha = '[' . date('Y-m-d h:i:s A') . ']';
     $usuario = $id_usuario . '-' . $login;
     $ip=$_SERVER['REMOTE_ADDR'];    
     $archivo = $_SESSION['ruta_logs'] . date('Ym') . '.log';
-    $log= "Fecha: $fecha, Id Usuario-Login: $usuario, Accion: $accion, Opcion: $opcion, Registro: $detalle,IP:$ip\r\n";
+    $log= "$fecha Usuario: $usuario, IP: $ip, Accion: $accion, Opcion: $opcion, Registro: $detalle\r\n";
     file_put_contents("$archivo", $log, FILE_APPEND | LOCK_EX);
 }

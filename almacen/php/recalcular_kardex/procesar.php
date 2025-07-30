@@ -38,7 +38,7 @@ if (isset($_POST['tipo'])) {
                 if (!$errores) {
                     $cmd->commit();
                     $res['mensaje'] = 'ok';
-                    $accion = 'Actualizar kardex';
+                    $accion = 'Actualizar';
                     $opcion = 'Recalcular Kardex';
                     $detalle = 'Recalcular Kardex en la fecha : ' . date('Y-m-d H:i:s');
                     bitacora($accion, $opcion, $detalle, $_SESSION['id_user'], $_SESSION['user']);
