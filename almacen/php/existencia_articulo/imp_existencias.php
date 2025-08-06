@@ -128,10 +128,10 @@ try {
                 <td style="text-align:left">
                     TOTAL:
                 </td>
-                <td colspan="1" style="text-align:center">
+                <td style="text-align:center">
                     <?php echo formato_valor($obj_tot['val_total']); ?>  
                 </td>
-                <td colspan="1"></td>
+                <td></td>
             </tr>
         </tfoot>
     </table>

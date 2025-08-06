@@ -150,7 +150,7 @@ try {
 
                 foreach ($objd as $obj) {                        
                     $tabla .=  '<tr class="resaltar">                                                                                 
-                        <td colspan="4" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . mb_strtoupper($obj['nom_subgrupo']) . '</td>
+                        <td colspan="4" style="text-align:left">' . str_repeat('&nbsp',10) . mb_strtoupper($obj['nom_subgrupo']) . '</td>
                         <td style="text-align:right">' . formato_valor($obj['val_total_sg']) . '</td></tr>'; 
                     $total += $obj['val_total_sg'];                    
                 }                
@@ -166,7 +166,7 @@ try {
                 <th style="text-align:left">
                     TOTAL:
                 </th>
-                <th colspan="1" style="text-align:right">
+                <th style="text-align:right">
                     <?php echo formato_valor($total); ?>  
                 </th>
             </tr>

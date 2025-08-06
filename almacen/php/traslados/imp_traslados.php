@@ -145,7 +145,7 @@ try {
                 <th style="text-align:left">
                     TOTAL:
                 </th>
-                <th colspan="1" style="text-align:right">
+                <th style="text-align:right">
                     <?php echo formato_valor($total); ?>  
                 </th>
                 <td></td>

@@ -180,7 +180,7 @@ try {
                 $id_sede = $obj1['id_sede'];
                 $id_bodega = $obj1['id_bodega'];
                 
-                $tabla .= '<tr><th colspan="8" style="text-align:left">' . strtoupper($obj1['nom_sede'] . ' - ' . $obj1['nom_bodega']) . '</th><th>' . formato_valor($obj1['val_total_sb']) . '</th></tr>';
+                $tabla .= '<tr><th colspan="8" style="text-align:left">' . strtoupper($obj1['nom_sede'] . ' - ' . $obj1['nom_bodega']) . '</th><th style="text-align:right">' . formato_valor($obj1['val_total_sb']) . '</th></tr>';
 
                 $rs_g->bindParam(':id_sede',$id_sede);
                 $rs_g->bindParam(':id_bodega',$id_bodega);
@@ -191,7 +191,7 @@ try {
                     if ($id_reporte == 1){
 
                         $id_subgrupo = $obj2['id_subgrupo'];
-                        $tabla .= '<tr><th colspan="7" style="text-align:left">' . strtoupper($obj2['nom_subgrupo']) . '</th><th>' . formato_valor($obj2['val_total_sg']) . '</th></tr>';
+                        $tabla .= '<tr><th colspan="7" style="text-align:left">' . str_repeat('&nbsp',10) . strtoupper($obj2['nom_subgrupo']) . '</th><th style="text-align:right">' . formato_valor($obj2['val_total_sg']) . '</th></tr>';
 
                         $rs_d->bindParam(':id_sede',$id_sede);
                         $rs_d->bindParam(':id_bodega',$id_bodega);
@@ -203,24 +203,22 @@ try {
                             $sw = $na != $obj['nom_medicamento'] ? 1 : 0;
                             $na = $obj['nom_medicamento'];
                             $tabla .=  '<tr class="resaltar">                                 
-                                <td>' . $obj['cod_medicamento'] . '</td>
+                                <td>' . str_repeat('&nbsp',20) . $obj['cod_medicamento'] . '</td>
                                 <td style="text-align:left">' . ($sw == 1 ? mb_strtoupper($obj['nom_medicamento']) : '-') . '</td>
                                 <td>' . $obj['id_lote'] . '</td>
                                 <td>' . $obj['lote'] . '</td>   
                                 <td>' . $obj['fec_vencimiento'] . '</td>    
                                 <td>' . $obj['existencia_lote'] . '</td>   
-                                <td>' . formato_valor($obj['val_promedio']) . '</td>   
-                                <td>' . formato_valor($obj['val_total']) . '</td></tr>';   
+                                <td style="text-align:right">' . formato_valor($obj['val_promedio']) . '</td>   
+                                <td style="text-align:right">' . formato_valor($obj['val_total']) . '</td></tr>';   
+                            $total += $obj['val_total'];
+                            $numreg += 1;    
                         }
                     } else {
-                        $tabla .= '<tr><td colspan="7" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . strtoupper($obj2['nom_subgrupo']) . '</td><td>' . formato_valor($obj2['val_total_sg']) . '</td></tr>';
-                    }   
-                    $total += $obj2['val_total_sg'];
-                    if ($id_reporte == 1){
-                        $numreg += count($objd);
-                    } else {
+                        $tabla .= '<tr><td colspan="7" style="text-align:left">' . str_repeat('&nbsp',10) . strtoupper($obj2['nom_subgrupo']) . '</td><td style="text-align:right">' . formato_valor($obj2['val_total_sg']) . '</td></tr>';
+                        $total += $obj2['val_total_sg'];
                         $numreg += 1;
-                    }    
+                    }   
                 } 
             }    
             echo $tabla;                   
@@ -234,7 +232,7 @@ try {
                 <th style="text-align:left">
                     TOTAL:
                 </th>
-                <th colspan="1" style="text-align:center">
+                <th style="text-align:center">
                     <?php echo formato_valor($total); ?>  
                 </th>
             </tr>
