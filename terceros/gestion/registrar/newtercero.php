@@ -43,6 +43,9 @@ $iduser = $_SESSION['id_user'];
 $tipouser = 'user';
 $nit_crea = $_SESSION['nit_emp'];
 $pass = $_POST['passT'];
+$planilla = $_POST['rdo_planilla'];
+$riesgo = isset($_POST['slcRiesgoLab']) ? $_POST['slcRiesgoLab'] : 0;
+$riesgo = $planilla == 0 ? NULL : $riesgo;
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 //API URL
 $url = $api . 'terceros/datos/res/lista/' . $cc_nit;
@@ -130,8 +133,8 @@ if ($res > 1 || $regAtTerc == 'SI') {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
         $sql = "INSERT INTO `tb_terceros`
-                    (`tipo_doc`,`nom_tercero`,`nit_tercero`,`dir_tercero`,`tel_tercero`,`id_municipio`,`email`,`id_usr_crea`,`id_tercero_api`,`estado`,`fec_inicio`,es_clinico)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    (`tipo_doc`,`nom_tercero`,`nit_tercero`,`dir_tercero`,`tel_tercero`,`id_municipio`,`email`,`id_usr_crea`,`id_tercero_api`,`estado`,`fec_inicio`,`es_clinico`,`planilla`, `id_riesgo`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $tipodoc, PDO::PARAM_STR);
         $sql->bindParam(2, $nombre, PDO::PARAM_STR);
@@ -145,6 +148,8 @@ if ($res > 1 || $regAtTerc == 'SI') {
         $sql->bindParam(10, $estado, PDO::PARAM_INT);
         $sql->bindParam(11, $fecInicio, PDO::PARAM_STR);
         $sql->bindParam(12, $es_clinic, PDO::PARAM_INT);
+        $sql->bindParam(13, $planilla, PDO::PARAM_INT);
+        $sql->bindParam(14, $riesgo, PDO::PARAM_INT);
         $sql->execute();
         if ($cmd->lastInsertId() > 0) {
             $cmd = NULL;

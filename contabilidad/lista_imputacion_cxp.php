@@ -63,7 +63,7 @@ try {
                 , `rubros`.`id_rubro`
                 , `rubros`.`cod_pptal`
                 , `rubros`.`nom_rubro`
-                , IFNULL(`val_cop`.`debito`,0) - IFNULL(`val_cop`.`credito`,0) AS `valor_crp`
+                , IFNULL(`val_cop`.`debito`,0) - IFNULL(`val_cop`.`credito`,0) AS `valor_cop`
                 , `val_crp`.`id_pto_crp_det`
                 , `val_crp`.`id_manu`
             FROM 
@@ -122,7 +122,7 @@ try {
                 INNER JOIN `pto_crp_detalle` 
                     ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
                 GROUP BY `pto_crp_detalle`.`id_pto_crp`, `pto_cop_detalle`.`id_pto_crp_det`) AS `val_cop`
-                ON(`val_cop`.`id_pto_crp` = `val_crp`.`id_pto_crp`)";
+                ON (`val_cop`.`id_pto_crp_det` = `val_crp`.`id_pto_crp_det`)";
     $rs = $cmd->query($sql);
     $listado = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -212,7 +212,7 @@ try {
                             <?php if ($band) { ?>
                                 <span for="valor" class="small">Valor CxP</span>
                             <?php } ?>
-                            <input type="text" name="valor[<?php echo $id_detalle ?>]" id="valor" onkeyup="valorMiles(id)" class="form-control form-control-sm text-right ValImputacion" min="0" max="<?php echo $max ?>" value="<?php echo number_format($val_sugerido, 2) ?>">
+                            <input type="text" name="valor[<?php echo $id_detalle ?>]" id="valor" onkeyup="valorMiles(id)" class="form-control form-control-sm text-right ValImputacion" min="0" max="<?php echo $max ?>" value="<?php echo number_format($max, 2) ?>">
                         </div>
                     </div>
                 <?php

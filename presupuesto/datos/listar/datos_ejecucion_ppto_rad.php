@@ -128,7 +128,7 @@ if (!empty($listappto)) {
         }
         if (PermisosUsuario($permisos, 5401, 4) || $id_rol == 1) {
             $borrar = '<a value="' . $id_pto . '"    onclick="eliminarRad(' . $id_pto . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb " title="Registrar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-            if ($fecha < $fecha_cierre) {
+            if ($fecha <= $fecha_cierre) {
                 $borrar = null;
             }
         }
@@ -139,9 +139,9 @@ if (!empty($listappto)) {
             } else {
                 $abrir = '<a onclick="cerrarRad(' . $id_pto . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb " title="Cerrar"><span class="fas fa-unlock fa-lg"></span></a>';
             }
-            if ($fecha < $fecha_cierre) {
-                $abrir = null;
-            }
+        }
+        if ($fecha <= $fecha_cierre) {
+            $abrir = null;
         }
         if ($lp['estado'] == 0) {
             $borrar = null;

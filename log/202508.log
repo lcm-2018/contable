@@ -1,0 +1,10 @@
+[2025-08-04 16:26:08] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_causa_arqueo WHERE id_causa_arqueo = 177
+[2025-08-04 16:27:54] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_causa_arqueo WHERE id_causa_arqueo = 178
+[2025-08-04 16:33:02] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_causa_arqueo WHERE id_causa_arqueo = 179
+[2025-08-04 16:36:07] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_causa_arqueo WHERE id_causa_arqueo = 180
+[2025-08-04 16:37:15] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM tes_causa_arqueo WHERE id_causa_arqueo = 181
+[2025-08-06 10:31:33] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctt_documentos` WHERE `id_soportester` = 5
+[2025-08-06 10:32:29] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctt_documentos` WHERE `id_soportester` = 7
+[2025-08-06 10:33:06] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctt_documentos` WHERE `id_soportester` = 3
+[2025-08-06 10:34:41] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctt_documentos` WHERE `id_soportester` = 9
+[2025-08-06 11:31:29] Usuario: 365-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `ctt_perfil_tercero` WHERE `id_perfil` = 3

@@ -107,7 +107,7 @@ try {
                             $fact = $ce['num_factura'];
                             $editar = null;
                             if (PermisosUsuario($permisos, 5601, 2) || $id_rol == 1) {
-                                $editar = '<button value="' . $id_doc . '" onclick="cargaRubroPagInvoice(' . $id . ',this,' . $fact . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="Imputar"><span class="fas fa-chevron-circle-down fa-lg"></span></a>';
+                                $editar = '<button value="' . $id_doc . '" onclick="cargaRubroPagInvoice(' . $id . ', this, \'' . $fact . '\')" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="Imputar"><span class="fas fa-chevron-circle-down fa-lg"></span></button>';
                             }
 
                             $saldo = $ce['val_causado'] - $ce['val_recaudado'];

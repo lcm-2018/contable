@@ -84,11 +84,22 @@ if (isset($tercero['id_tercero'])) {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "SELECT tb_terceros.es_clinico
+        $sql = "SELECT tb_terceros.es_clinico, planilla, id_riesgo
                 FROM tb_terceros
                 WHERE tb_terceros.id_tercero_api = $id_api";
         $rs = $cmd->query($sql);
         $terclinico = $rs->fetch();
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+        $sql = "SELECT * FROM nom_riesgos_laboral ORDER BY clase";
+        $rs = $cmd->query($sql);
+        $riesgos = $rs->fetchAll();
         $cmd = null;
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -229,21 +240,44 @@ if (isset($tercero['id_tercero'])) {
                         <label for="txtTelEmp" class="small">Contacto</label>
                         <input type="text" class="form-control form-control-sm" id="txtTelEmp" name="txtTelEmp" placeholder="Teléfono/celular" value="<?php echo $tercero['telefono'] ?>">
                     </div>
-
-                    <div class="form-group col-md-2">
-                        <label class="small">Es asistencial</label>
-                        <div class="form-control form-control-sm" id="rdo_esasist">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="rdo_esasist" id="rdo_esasist_si" value="1" <?php echo $terclinico['es_clinico'] == 1 ? 'checked' : '' ?>>
+                    <div class="form-group col-md-2 text-center mt-1">
+                        <label class="small d-block" for="rdo_esasist_si">Es asistencial</label>
+                        <div class="form-control-sm border rounded px-2 py-1">
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="rdo_esasist" id="rdo_esasist_si" value="1" <?= $terclinico['es_clinico'] == 1 ? 'checked' : '' ?>>
                                 <label class="form-check-label small" for="rdo_esasist_si">SI</label>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="rdo_esasist" id="rdo_esasist_no" value="0" <?php echo $terclinico['es_clinico'] == 0 ? 'checked' : '' ?>>
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="rdo_esasist" id="rdo_esasist_no" value="0" <?= $terclinico['es_clinico'] == 0 ? 'checked' : '' ?>>
                                 <label class="form-check-label small" for="rdo_esasist_no">NO</label>
                             </div>
                         </div>
                     </div>
-
+                    <div class="form-group col-md-2 text-center mt-1">
+                        <label class="small d-block" for="rdo_planilla_si">Planilla</label>
+                        <div class="form-control-sm border rounded px-2 py-1">
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="rdo_planilla" id="rdo_planilla_si" value="1" <?= $terclinico['planilla'] == 1 ? 'checked' : '' ?>>
+                                <label class="form-check-label small" for="rdo_planilla_si">SI</label>
+                            </div>
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="rdo_planilla" id="rdo_planilla_no" value="0" <?= $terclinico['planilla'] == 0 ? 'checked' : '' ?>>
+                                <label class="form-check-label small" for="rdo_planilla_no">NO</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="txtTelEmp" class="small">Riesgo Laboral</label>
+                        <select id="slcRiesgoLab" name="slcRiesgoLab" class="form-control form-control-sm py-0 sm" aria-label="Default select example">
+                            <option selected value="0">--Selecionar--</option>
+                            <?php
+                            foreach ($riesgos as $r) {
+                                $slc = $r['id_rlab'] !== $terclinico['id_riesgo'] ? '' : 'selected';
+                                echo '<option value="' . $r['id_rlab'] . '" ' . $slc . '>' . $r['clase'] . ' - ' . $r['riesgo'] . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
                 </div>
                 <div class="text-center pb-3">
                     <button class="btn btn-primary btn-sm" id="btnUpTercero">Actualizar</button>

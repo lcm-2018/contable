@@ -29,57 +29,55 @@ try {
 try {
     $sql = "SELECT 
                 `tb_terceros`.`id_tercero_api`
+                , `tr`.`id_arqueo`
                 , `tr`.`nro_factura`
                 , `tr`.`tipo_atencion`
                 , `tr`.`fec_factura`
                 , `tr`.`valor`
-                , `tr`.`valor_anulado`
+                , 0 as `valor_anulado`
                 , `tr`.`fec_anulado`
             FROM
-                (SELECT
-                    `seg_usuarios_sistema`.`num_documento`
-                    , IF(`fac_facturacion`.`num_efactura` IS NULL, `fac_facturacion`.`num_factura`, CONCAT(`fac_facturacion`.`prefijo`, `fac_facturacion`.`num_efactura`)) AS `nro_factura`
-                    , `adm_tipo_atencion`.`nombre` AS `tipo_atencion`
-                    , `fac_facturacion`.`fec_factura`
-                    , `fac_facturacion`.`val_copago` AS `valor`
-                    , CASE `fac_facturacion`.`estado` WHEN 0 THEN `fac_facturacion`.`val_copago` ELSE 0 END  AS `valor_anulado`      
-                    , DATE_FORMAT(`fac_facturacion`.`fec_anulacion`, '%Y-%m-%d') AS `fec_anulado`
-                FROM `fac_facturacion` 
-                    INNER JOIN `seg_usuarios_sistema` 
-                        ON (`fac_facturacion`.`id_usr_crea` = `seg_usuarios_sistema`.`id_usuario`)
-                    INNER JOIN `adm_ingresos` 
-                        ON (`fac_facturacion`.`id_ingreso`=`adm_ingresos`.`id_ingreso`)
-                    INNER JOIN `adm_tipo_atencion` 
-                        ON (`adm_ingresos`.`id_tipo_atencion`=`adm_tipo_atencion`.`id_tipo`)
-                WHERE `fac_facturacion`.`val_copago` >0 AND `fac_facturacion`.`estado` <> 1 AND `fac_facturacion`.`fec_factura` BETWEEN '$fecha_ini' AND '$fecha_fin'
+                (SELECT   
+                    `fac_arqueo`.`id_arqueo`
+                    , `fac_facturacion`.`prefijo`
+                    , `fac_facturacion`.`num_efactura` AS `nro_factura`
+                    , `fac_facturacion`.`fec_factura` AS `fec_factura`
+                    , `adm_tipo_atencion`.`nombre` AS `tipo_atencion` 
+                    , `fac_facturacion`.`val_factura` AS `valor`
+                    , `fac_facturacion`.`val_copago` 
+                    , `fac_facturacion`.`val_subsidio`
+                    , `fac_facturacion`.`fec_anulacion` AS `fec_anulado`
+                    , DATE_FORMAT(`fac_arqueo`.`fec_creacion`, '%Y-%m-%d') AS `fec_creacion`
+                    , `tb_terceros`.`nit_tercero` AS `num_documento`
+                FROM
+                    `fac_arqueo_detalles`
+                    INNER JOIN `fac_arqueo` ON (`fac_arqueo_detalles`.`id_arqueo` = `fac_arqueo`.`id_arqueo`)
+                    INNER JOIN `fac_facturacion` ON (`fac_arqueo_detalles`.`id_factura` = `fac_facturacion`.`id_factura`)
+                    INNER JOIN `adm_ingresos` ON (`fac_facturacion`.`id_ingreso` = `adm_ingresos`.`id_ingreso`)
+                    INNER JOIN `adm_tipo_atencion` ON (`adm_ingresos`.`id_tipo_atencion` = `adm_tipo_atencion`.`id_tipo`)
+                    INNER JOIN `seg_usuarios_sistema` ON (`fac_arqueo`.`id_facturador` = `seg_usuarios_sistema`.`id_usuario`)
+                    INNER JOIN `tb_terceros` ON (`seg_usuarios_sistema`.`num_documento` = `tb_terceros`.`nit_tercero`)
+                WHERE  DATE_FORMAT(`fac_arqueo`.`fec_creacion`, '%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_fin'   
                 UNION ALL
                 SELECT
-                    `seg_usuarios_sistema`.`num_documento`
-                    , IF(`far_ventas`.`num_efactura` IS NULL,`far_ventas`.`num_factura`,CONCAT(`far_ventas`.`prefijo`,`far_ventas`.`num_efactura`)) AS `nro_factura` 
-                    , 'VENTA PARTICULAR FARMACIA' AS `tipo_atencion`
+                    `fac_arqueo`.`id_arqueo`
+                    , `far_ventas`.`prefijo`
+                    , `far_ventas`.`num_efactura`  AS `nro_factura` 
                     , `far_ventas`.`fec_venta` AS `fec_factura`
+                    , 'Venta de medicamentos' AS `tipo_atencion` 
                     , `far_ventas`.`val_factura` AS `valor`
-                    , CASE `far_ventas`.`estado` WHEN 0 THEN `far_ventas`.`val_factura` ELSE 0 END `valor_anulado`    
-                    , DATE_FORMAT(`far_ventas`.`fec_anulacion`, '%Y-%m-%d') AS `fec_anulado`
+                    , `far_ventas`.`val_factura`
+                    , 0 AS `val_subsidio`
+                    , `far_ventas`.`fec_anulacion` AS `fec_anulado`
+                    , DATE_FORMAT(`fac_arqueo`.`fec_creacion`, '%Y-%m-%d') AS `fec_creacion`
+                    , `tb_terceros`.`nit_tercero` as `num_documento`
                 FROM
-                    far_ventas 
-                    INNER JOIN seg_usuarios_sistema  
-                        ON (far_ventas.id_usr_crea = seg_usuarios_sistema.id_usuario)
-                WHERE far_ventas.estado <> 1 AND far_ventas.fec_venta BETWEEN '$fecha_ini' AND '$fecha_fin' 
-                UNION ALL
-                SELECT
-                    seg_usuarios_sistema.num_documento
-                    , IF(num_efactura IS NULL,fac_otros.num_factura, CONCAT(fac_otros.prefijo,fac_otros.num_efactura)) AS nro_factura   
-                    , fac_otros.detalle    
-                    , fac_otros.fec_factura
-                    , fac_otros.val_factura AS valor
-                    , CASE fac_otros.estado WHEN 0 THEN fac_otros.val_factura ELSE 0 END valor_anulado   
-                    , DATE_FORMAT(fac_otros.fec_anulacion, '%Y-%m-%d') AS fec_anulado
-                FROM
-                    fac_otros 
-                    INNER JOIN seg_usuarios_sistema 
-                        ON (fac_otros.id_usr_crea = seg_usuarios_sistema.id_usuario)
-                WHERE fac_otros.id_eps = 1 AND fac_otros.estado <> 1 AND fac_otros.val_factura>0 AND fac_otros.fec_factura BETWEEN '$fecha_ini' AND '$fecha_fin') AS `tr`
+                    `fac_arqueo_detalles`
+                    INNER JOIN `fac_arqueo` ON (`fac_arqueo_detalles`.`id_arqueo` = `fac_arqueo`.`id_arqueo`)
+                    INNER JOIN `far_ventas` ON (`fac_arqueo_detalles`.`id_venta` = `far_ventas`.`id_venta`)
+                    INNER JOIN `seg_usuarios_sistema` ON (`fac_arqueo`.`id_facturador` = `seg_usuarios_sistema`.`id_usuario`)
+                    INNER JOIN `tb_terceros` ON (`seg_usuarios_sistema`.`num_documento` = `tb_terceros`.`nit_tercero`)
+                WHERE  DATE_FORMAT(`fac_arqueo`.`fec_creacion`, '%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_fin') AS `tr`
                 LEFT JOIN `tb_terceros`
                     ON(`tb_terceros`.`nit_tercero` = `tr`.`num_documento`)
             WHERE `tb_terceros`.`id_tercero_api` = $tercero";
@@ -112,10 +110,11 @@ try {
             <table id="tableArqueoFacturador" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th colspan="5">TOTAL</th>
+                        <th colspan="6">TOTAL</th>
                         <th>$ <?= number_format($data['valor_fac'], 2) ?></th>
                     </tr>
                     <tr>
+                        <th>ID Arqueo</th>
                         <th>No. Factura</th>
                         <th>Atención</th>
                         <th>Fecha</th>
@@ -128,6 +127,7 @@ try {
                     <?php
                     foreach ($facturado as $row) {
                         echo "<tr class='text-left'>";
+                        echo "<td>{$row['id_arqueo']}</td>";
                         echo "<td>{$row['nro_factura']}</td>";
                         echo "<td>{$row['tipo_atencion']}</td>";
                         echo "<td>{$row['fec_factura']}</td>";

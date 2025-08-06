@@ -89,16 +89,16 @@ foreach ($lista as $r) {
     $body .= "<tr>
                 <td>{$r['id_manu']}</td>
                 <td>{$r['fecha']}</td>
-                <td>{$r['deb_cuenta']}</td>
-                <td>{$r['deb_sia']}</td>
-                <td>{$r['deb_numero']}</td>
-                <td>{$r['deb_codigo']}</td>
-                <td>{$r['debito']}</td>
+                <td>{$r['cre_cuenta']}</td>
                 <td>{$r['cre_sia']}</td>
                 <td>{$r['cre_numero']}</td>
                 <td>{$r['cre_codigo']}</td>
+                <td>{$r['debito']}</td>
+                <td>{$r['deb_sia']}</td>
+                <td>{$r['deb_numero']}</td>
+                <td>{$r['deb_codigo']}</td>
                 <td>{$meses}</td>
-                <td>{$r['cre_cuenta']}</td>
+                <td>{$r['deb_cuenta']}</td>
             </tr>";
 }
 echo "\xEF\xBB\xBF";

@@ -13,6 +13,10 @@ $id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no disponibl
 $id_detalle = $_POST['id_detalle'] ?? 0;
 $fecha_doc = $_POST['fecha'] ?? '';
 $vigencia = $_SESSION['vigencia'];
+$fecha1 = $_POST['fecha1'] ?? date('Y-m-d');
+$fecha2 = $_POST['fecha2'] ?? date('Y-m-d');
+$id_facturador = $_POST['id_facturador'] ?? 0;
+$valor = $_POST['valor'] ?? 0;
 // Consulta tipo de presupuesto
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -21,6 +25,35 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $fecha_cierre = fechaCierre($vigencia, 5, $cmd);
 $fecha = fechaSesion($vigencia, $_SESSION['id_user'], $cmd);
 $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
+
+function pesos($valor)
+{
+    return '$ ' . number_format($valor, 2, '.', ',');
+}
+
+try {
+    $sql = "SELECT
+                `fac_arqueo`.`id_arqueo`
+                , DATE_FORMAT(`fac_arqueo`.`fec_creacion`,'%Y-%m-%d') AS `fecha`
+                , SUM(`fac_arqueo_detalles`.`valor`) AS `valor`
+                , SUM(`fac_arqueo_detalles`.`valor_dif`) AS `anulado`
+                , 0 AS `descuento`
+            FROM
+                `fac_arqueo_detalles`
+                INNER JOIN `fac_arqueo` 
+                    ON (`fac_arqueo_detalles`.`id_arqueo` = `fac_arqueo`.`id_arqueo`)
+                INNER JOIN `seg_usuarios_sistema` 
+                    ON (`seg_usuarios_sistema`.`id_usuario` = `fac_arqueo`.`id_facturador`)
+                INNER JOIN `tb_terceros` 
+                    ON (`seg_usuarios_sistema`.`num_documento` = `tb_terceros`.`nit_tercero`)
+            WHERE  `fac_arqueo`.`estado` = 2  AND `tb_terceros`.`id_tercero_api` = $id_facturador 
+                    AND DATE_FORMAT(`fac_arqueo`.`fec_creacion`,'%Y-%m-%d') BETWEEN '$fecha1' AND '$fecha2'
+            GROUP BY  `fac_arqueo`.`id_arqueo`";
+    $rs = $cmd->query($sql);
+    $tabla = $rs->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 
 try {
     $sql = "SELECT 
@@ -106,11 +139,11 @@ if ($id_detalle > 0) {
 } else {
     $detalle = [
         'id_causa_arqueo' => 0,
-        'fecha_ini' => $fecha_doc,
-        'fecha_fin' => $fecha_doc,
-        'id_tercero' => 0,
+        'fecha_ini' => $fecha1,
+        'fecha_fin' => $fecha2,
+        'id_tercero' => $id_facturador,
         'valor_arq' => 0,
-        'valor_fac' => 0,
+        'valor_fac' => $valor,
         'observaciones' => '',
         'facturador' => ''
     ];
@@ -154,8 +187,8 @@ $valor_pagar = 0;
                         </div>
                         <div class="form-group col-md-6">
                             <label for="id_facturador" class="small">FACTURADOR:</label>
-                            <div class="col" id="divBanco">
-                                <select name="id_facturador" id="id_facturador" class="form-control form-control-sm" required onchange="calcularCopagos2(this)">
+                            <div class="col input-group input-group-sm" id="divBanco">
+                                <select name="id_facturador" id="id_facturador" class="custom-select" required onchange="calcularCopagos2(this)">
                                     <option value="0">--Seleccione--</option>
                                     <?php foreach ($terceros as $tc) {
                                         $slc = $tc['id_tercero_api'] == $detalle['id_tercero'] ? 'selected' : '';
@@ -163,8 +196,54 @@ $valor_pagar = 0;
                                     }
                                     ?>
                                 </select>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-success" type="button" title="Buscar Arqueos para Facturador" onclick="calcularCopagos2(this)"><i class="fas fa-arrow-right"></i></button>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="form-row">
+                        <?php
+                        if (!empty($tabla)) {
+                        ?>
+                            <table class="table table-striped table-bordered table-sm table-hover shadow" id="tableArqueos" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>No. Arqueo</th>
+                                        <th>Fecha</th>
+                                        <th>Valor Total</th>
+                                        <th>Descuento</th>
+                                        <th>Anulado</th>
+                                        <th>Neto</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $vt = $des = $anul = $net = 0;
+                                    foreach ($tabla as $row) {
+                                        $vt += $row['valor'];
+                                        $des += $row['descuento'];
+                                        $anul += $row['anulado'];
+                                        $tot = $row['valor'] - $row['descuento'] - $row['anulado'];
+                                        $net += $tot;
+                                        echo '<tr>';
+                                        echo '<td>' . $row['id_arqueo'] . '</td>';
+                                        echo '<td>' . $row['fecha'] . '</td>';
+                                        echo '<td class="text-right">' . pesos($row['valor']) . '</td>';
+                                        echo '<td class="text-right">' . pesos($row['descuento']) . '</td>';
+                                        echo '<td class="text-right">' . pesos($row['anulado']) . '</td>';
+                                        echo '<td class="text-right">' . pesos($tot) . '</td>';
+                                        echo '<td><input onchange="SumarArqueos()" type="checkbox" name="arqueo[' . $row['id_arqueo'] . ']" value="' . $tot . '" checked></td>';
+                                        echo '</tr>';
+                                    }
+                                    $detalle['valor_fac'] += $net;
+                                    ?>
+                                </tbody>
+                            </table>
+                        <?php
+                        }
+                        ?>
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-2">

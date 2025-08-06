@@ -569,7 +569,11 @@ let CargaListaRads = function () {
 };
 let CargaArqueoCajaTes = function (id, detalle) {
 	var fecha = $("#fecha").val();
-	$.post("lista_causacion_arqueo.php", { id_doc: id, id_detalle: detalle, fecha: fecha }, function (he) {
+	var id_facturador = $("#id_facturador").length ? $("#id_facturador").val() : 0;
+	var fecha1 = $("#fecha_arqueo_ini").length ? $("#fecha_arqueo_ini").val() : new Date().toISOString().split("T")[0];
+	var fecha2 = $("#fecha_arqueo_fin").length ? $("#fecha_arqueo_fin").val() : new Date().toISOString().split("T")[0];
+	var valor = $("#valor_fact").length ? $("#valor_fact").val() : 0;
+	$.post("lista_causacion_arqueo.php", { id_doc: id, id_detalle: detalle, fecha: fecha, id_facturador: id_facturador, fecha1: fecha1, fecha2: fecha2, valor: valor }, function (he) {
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-lg");
 		$("#divTamModalForms").addClass("modal-xl");
@@ -1575,20 +1579,15 @@ let cargaFormaPago = (cop, detalle, boton) => {
 
 // Calcular copagos por cajero
 const calcularCopagos2 = (postData) => {
-	$.ajax({
-		type: "POST",
-		url: "datos/consultar/consulta_copagos.php",
-		data: { tercero: postData.value, fecha_ini: fecha_arqueo_ini.value, fecha_fin: fecha_arqueo_fin.value },
-		dataType: "json",
-		success: function (data) {
-			if (data.status == "ok") {
-				valor_fact.value = data.facturado;
-			} else {
-				mjeError("Sin valor facturado", "No se encontraron registros");
-				valor_fact.value = 0;
-			}
-		},
+	CargaArqueoCajaTes($('#id_ctb_doc').val(), 0);
+};
+
+const SumarArqueos = () => {
+	let total = 0;
+	$('input[name^="arqueo"]:checked').each(function () {
+		total += parseFloat($(this).val()) || 0;
 	});
+	$('#valor_fact').val(total);
 };
 // validar diferencia de arqueo a consignación
 let validarDiferencia = () => {
@@ -1693,24 +1692,35 @@ document.addEventListener("submit", async (e) => {
 	}
 });
 //Eliminar arqueo de caja en la tabla tes_causa_arqueo
-let eliminarRecaduoArqeuo = async (id) => {
-	try {
-		const response = await fetch("datos/eliminar/eliminar_causa_arqueo.php", {
-			method: "POST",
-			body: JSON.stringify({ id: id }),
-		});
-		const data = await response.json();
-		if (data[0].value == "ok") {
-			mje("Registro eliminado");
-			// recargar tabla tableCausacionArqueo
-			$("#" + data[0].id).remove();
-			valor_fact.value = 0;
-		} else {
-			mjeError("No se pudo eliminar el registro");
+let eliminarRecaduoArqeuo = (id) => {
+	Swal.fire({
+		title: "¿Confirma Causación de Nómina?",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#00994C",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si!",
+		cancelButtonText: "NO",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			let ruta = "datos/eliminar/eliminar_causa_arqueo.php";
+			let data = new FormData();
+			data.append("id", id);
+			fetch(ruta, {
+				method: "POST",
+				body: data,
+			})
+				.then((response) => response.json())
+				.then((response) => {
+					if (response.status == "ok") {
+						mje("Registro eliminado");
+						CargaArqueoCajaTes($('#id_ctb_doc').val(), 0);
+					} else {
+						mjeError("No se pudo eliminar el registro");
+					}
+				});
 		}
-	} catch (error) {
-		console.error(error);
-	}
+	});
 };
 
 //=====================================================================================================================*/

@@ -47,7 +47,7 @@ try {
                 WHERE `ctb_doc`.`estado` = 2
                     AND ((SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('1', '2', '3', '8', '9') AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') < '$fecha_inicial')
                         OR
-                    (SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('4', '5', '6') AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') < '$fecha_inicial' AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') >= '$inicio'))
+                    (SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('4', '5', '6', '7') AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') < '$fecha_inicial' AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') >= '$inicio'))
                 GROUP BY `ctb_libaux`.`id_cuenta`, `ctb_libaux`.`id_tercero_api`
                 UNION ALL 
                 SELECT

@@ -1,5 +1,5 @@
 <?php
-function UpTercerosEmpresa($api, $ids, $cmd, $fecInicio, $es_clinic)
+function UpTercerosEmpresa($api, $ids, $cmd, $fecInicio, $es_clinic, $planilla = 0, $id_riesgo = NULL)
 {
     $payload = json_encode($ids);
     //API URL
@@ -19,7 +19,8 @@ function UpTercerosEmpresa($api, $ids, $cmd, $fecInicio, $es_clinic)
     try {
         $sql = "UPDATE `tb_terceros` 
                     SET `tipo_doc` = ?, `nom_tercero` = ?, `nit_tercero` = ?, `dir_tercero` = ?
-                        , `tel_tercero` = ?, `id_municipio` = ?, `email` = ?, `fec_inicio` = ? , es_clinico = ?
+                        , `tel_tercero` = ?, `id_municipio` = ?, `email` = ?, `fec_inicio` = ? , `es_clinico` = ?
+                        , `planilla` = ?, `id_riesgo` = ?
                 WHERE `id_tercero_api` = ?";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $tipodoc, PDO::PARAM_INT);
@@ -31,7 +32,9 @@ function UpTercerosEmpresa($api, $ids, $cmd, $fecInicio, $es_clinic)
         $sql->bindParam(7, $email, PDO::PARAM_STR);
         $sql->bindParam(8, $fecInicio, PDO::PARAM_STR);
         $sql->bindParam(9, $es_clinic, PDO::PARAM_INT);
-        $sql->bindParam(10, $idter, PDO::PARAM_INT);
+        $sql->bindParam(10, $planilla, PDO::PARAM_INT);
+        $sql->bindParam(11, $id_riesgo, PDO::PARAM_INT);
+        $sql->bindParam(12, $idter, PDO::PARAM_INT);
         foreach ($ids as $i) {
             $key = array_search($i, array_column($terceros, 'id_tercero'));
             if ($key !== false) {

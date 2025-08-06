@@ -45,9 +45,9 @@ try {
                         INNER JOIN `ctb_pgcp`
                             ON `ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`
                     WHERE `ctb_doc`.`estado` = 2
-                        AND ((SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('1', '2', '3') AND `ctb_doc`.`fecha` < '$fecha_inicial')
+                        AND ((SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('1', '2', '3', '8', '9') AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') < '$fecha_inicial')
                             OR
-                        (SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('4', '5', '6') AND `ctb_doc`.`fecha` < '$fecha_inicial' AND `ctb_doc`.`fecha` > '$inicio'))
+                        (SUBSTRING(`ctb_pgcp`.`cuenta`, 1, 1) IN ('4', '5', '6', '7') AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') < '$fecha_inicial' AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') >= '$inicio'))
                     GROUP BY `ctb_libaux`.`id_cuenta`
                     UNION ALL 
                     SELECT
@@ -62,7 +62,7 @@ try {
                             ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                         INNER JOIN `ctb_pgcp` 
                             ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-                    WHERE (`ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2)
+                    WHERE (DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2)
                     GROUP BY `ctb_libaux`.`id_cuenta`) AS `t1`
                     INNER JOIN `ctb_pgcp`
                         ON `t1`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`

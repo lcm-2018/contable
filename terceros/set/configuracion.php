@@ -83,6 +83,38 @@ $vigencia = $_SESSION['vigencia'];
                                         </div>
                                     </div>
                                 </div>
+                                <div class="card">
+                                    <div class="card-header card-header-detalles py-0 headings" id="headingTwo">
+                                        <h5 class="mb-0">
+                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configTwo" aria-expanded="true" aria-controls="collapseTwo">
+                                                <div class="form-row">
+                                                    <div class="div-icono">
+                                                        <span class="fas fa-id-badge fa-lg" style="color: #1fc0e9ff;"></span>
+                                                    </div>
+                                                    <div>
+                                                        <?php echo $contador;
+                                                        $contador++ ?>. PERFILES DE TERCEROS
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </h5>
+                                    </div>
+                                    <div id="configTwo" class="collapse" aria-labelledby="headingTwo">
+                                        <div class="card-body">
+                                            <table id="tablePerfilTercero" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                <thead class="text-center">
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>DESCRIPCIÓN</th>
+                                                        <th>ACCIONES</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="modificaPerfilTercero">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
