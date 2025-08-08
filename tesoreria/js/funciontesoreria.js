@@ -2834,6 +2834,14 @@ const guardarNumReferencia = (boton) => {
 		$('#numRef').addClass('is-invalid');
 		$('#numRef').focus();
 		mjeError('Debe digitar un número de referencia');
+	} else if ($('#banco').val() == '0') {
+		$('#banco').addClass('is-invalid');
+		$('#banco').focus();
+		mjeError('Debe seleccionar una cuenta bancaria');
+	} else if ($('#fecha').val() == '') {
+		$('#fecha').addClass('is-invalid');
+		$('#fecha').focus();
+		mjeError('La fecha no puede estar vacía');
 	} else {
 		var data = $('#formNumReferencia').serialize();
 		$.ajax({

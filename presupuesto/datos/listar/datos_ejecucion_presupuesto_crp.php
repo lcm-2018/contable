@@ -142,7 +142,7 @@ if (!empty($listappto)) {
             $tercero = 'NOMINA DE EMPLEADOS';
         }
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
-        // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
+        // si $fecha es menor o igual a $fecha_cierre no se puede editar ni eliminar
         $info = base64_encode($id_pto . '|crp');
         $id_cdp = $lp['id_cdp'];
         if (PermisosUsuario($permisos, 5401, 1) || $id_rol == 1) {

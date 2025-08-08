@@ -119,8 +119,8 @@ if ($id_otro > 0) {
     $objeto = "OTRO SI " . $objeto;
     $valoradq = $valorotro;
 }
-// Consulta funcion fechaCierre del modulo 4
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 4, $cmd);
+// Consulta funcion fechaCierre del modulo 54
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
 $cmd = null;
 $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 ?>

@@ -19,7 +19,7 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // Control de fechas
 //$fecha_doc = date('Y-m-d');
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 5, $cmd);
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 56, $cmd);
 $fecha = fechaSesion($_SESSION['vigencia'], $_SESSION['id_user'], $cmd);
 $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 
@@ -132,8 +132,9 @@ $valor_pagar = 0;
                         <?php
                         foreach ($arqueos as $ce) {
                             //$id_doc = $ce['id_ctb_doc'];
+                            $fecha = date("Y-m-d", strtotime($ce['fecha']));
                             $id = $ce['id_causa_arqueo'];
-                            if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
+                            if ($fecha > $fecha_cierre && (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1)) {
                                 $borrar = '<a value="' . $id_doc . '" onclick="eliminarRecaduoArqeuo(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
@@ -145,7 +146,6 @@ $valor_pagar = 0;
                                 $editar = null;
                                 $detalles = null;
                             }
-                            $fecha = date("Y-m-d", strtotime($ce['fecha']));
                         ?>
                             <tr id="<?php echo $id; ?>">
                                 <td><?php echo $fecha; ?></td>

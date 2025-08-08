@@ -113,7 +113,7 @@ if (!empty($listappto)) {
         $val_cdp = $lp['val_cdp'] - $lp['val_lib_cdp'];
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
         $info = base64_encode($id_pto);
-        if (!($fecha <= $fecha_cierre) && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1)) {
+        if ($fecha > $fecha_cierre && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1)) {
             $anular = '<button text="' . $info . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Anular" onclick="anulacionPtoRad(this);"><span class="fas fa-ban fa-lg"></span></button>';
         }
         if (PermisosUsuario($permisos, 5401, 2) || $id_rol == 1) {

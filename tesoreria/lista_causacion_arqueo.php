@@ -22,7 +22,7 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // Control de fechas
 //$fecha_doc = date('Y-m-d');
-$fecha_cierre = fechaCierre($vigencia, 5, $cmd);
+$fecha_cierre = fechaCierre($vigencia, 56, $cmd);
 $fecha = fechaSesion($vigencia, $_SESSION['id_user'], $cmd);
 $fecha_max = date("Y-m-d", strtotime($vigencia . '-12-31'));
 

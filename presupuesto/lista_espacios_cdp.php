@@ -9,8 +9,8 @@ include '../permisos.php';
 include '../financiero/consultas.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-// Consulta funcion fechaCierre del modulo 4
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 4, $cmd);
+// Consulta funcion fechaCierre del modulo 54
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
 ?>
 <!DOCTYPE html>
 <html lang="es">
