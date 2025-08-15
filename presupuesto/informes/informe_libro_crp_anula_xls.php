@@ -66,7 +66,7 @@ FROM
 WHERE `pto_documento_detalles`.`tipo_mov` ='CRP' AND `pto_documento`.`estado` = 5 AND `pto_documento`.`fecha` <= '$fecha_corte' 
 ORDER BY `pto_documento`.`fecha` ASC;
 ";
-    echo $sql;
+    //echo $sql;
     $res = $cmd->query($sql);
     $causaciones = $res->fetchAll();
 } catch (PDOException $e) {

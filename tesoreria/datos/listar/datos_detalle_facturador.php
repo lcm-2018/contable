@@ -34,6 +34,8 @@ try {
                 , `tr`.`tipo_atencion`
                 , `tr`.`fec_factura`
                 , `tr`.`valor`
+                , `tr`.`val_subsidio`
+                , `tr`.`val_copago`
                 , 0 as `valor_anulado`
                 , `tr`.`fec_anulado`
             FROM
@@ -110,7 +112,7 @@ try {
             <table id="tableArqueoFacturador" class="table table-striped table-bordered table-sm table-hover shadow" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th colspan="6">TOTAL</th>
+                        <th colspan="8">TOTAL</th>
                         <th>$ <?= number_format($data['valor_fac'], 2) ?></th>
                     </tr>
                     <tr>
@@ -119,6 +121,8 @@ try {
                         <th>Atención</th>
                         <th>Fecha</th>
                         <th>Valor</th>
+                        <th>Val. Subsidio</th>
+                        <th>Val. Copago</th>
                         <th>Valor anulado</th>
                         <th>Fecha anula</th>
                     </tr>
@@ -132,6 +136,8 @@ try {
                         echo "<td>{$row['tipo_atencion']}</td>";
                         echo "<td>{$row['fec_factura']}</td>";
                         echo "<td class='text-right'>$ " . number_format($row['valor'], 2) . "</td>";
+                        echo "<td class='text-right'>$ " . number_format($row['val_subsidio'], 2) . "</td>";
+                        echo "<td class='text-right'>$ " . number_format($row['val_copago'], 2) . "</td>";
                         echo "<td class='text-right'>$ " . number_format($row['valor_anulado'], 2) . "</td>";
                         echo "<td>{$row['fec_anulado']}</td>";
                         echo "</tr>";

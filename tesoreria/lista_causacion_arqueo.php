@@ -35,8 +35,8 @@ try {
     $sql = "SELECT
                 `fac_arqueo`.`id_arqueo`
                 , DATE_FORMAT(`fac_arqueo`.`fec_creacion`,'%Y-%m-%d') AS `fecha`
-                , SUM(`fac_arqueo_detalles`.`valor`) AS `valor`
-                , SUM(`fac_arqueo_detalles`.`valor_dif`) AS `anulado`
+                , SUM(IF(`fac_arqueo_detalles`.`valor_dif`<0,0,`fac_arqueo_detalles`.`valor_dif`)) AS `valor`
+                , SUM(`fac_arqueo_detalles`.`valor`-IF(`fac_arqueo_detalles`.`valor_dif`<0,0,`fac_arqueo_detalles`.`valor_dif`)) AS `anulado`
                 , 0 AS `descuento`
             FROM
                 `fac_arqueo_detalles`
