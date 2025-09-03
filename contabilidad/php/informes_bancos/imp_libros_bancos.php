@@ -39,9 +39,42 @@ try {
             AND ctb_pgcp.id_pgcp BETWEEN '$id_cuenta_ini' AND '$id_cuenta_fin'";
     $rs = $cmd->query($sql);
     $obj_cuentas = $rs->fetchAll();
+
+    $sql = 'SELECT razon_social_ips,nit_ips FROM tb_datos_ips LIMIT 1';
+    $rs = $cmd->query($sql);
+    $obj_ent = $rs->fetch();
+    $razhd = $obj_ent['razon_social_ips'];
+    $nithd = $obj_ent['nit_ips'];
     $cmd = null;
 
+?>
 
+    <div class="text-right py-3">
+        <a type="button" id="btnExcelEntrada" class="btn btn-outline-success btn-sm" value="01" title="Exportar a Excel">
+            <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
+        </a>
+        <a type="button" class="btn btn-primary btn-sm" id="btnImprimir">Imprimir</a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
+    </div>
+    <div class="content bg-light" id="areaImprimirrr">
+        <style>
+            @media print {
+                body {
+                    font-family: Arial, sans-serif;
+                }
+            }
+
+            .resaltar:nth-child(even) {
+                background-color: #F8F9F9;
+            }
+
+            .resaltar:nth-child(odd) {
+                background-color: #ffffff;
+            }
+        </style>
+    </div>
+    <?php
+    $reg = 0;
     foreach ($obj_cuentas as $obj_c) {
         try {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -72,10 +105,12 @@ try {
                     WHERE ctb_doc.fecha BETWEEN $fec_ini AND $fec_fin AND ctb_doc.estado = 2 
                         AND ctb_pgcp.id_pgcp IN ('" . $obj_c['id_pgcp'] . "','" . $obj_c['id_pgcp'] . "')
                         $and_where
-                    ORDER BY ctb_pgcp.fecha,ctb_pgcp.cuenta ASC";
-
+                    ORDER BY DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') ASC, ctb_libaux.debito DESC, ctb_libaux.credito DESC";
             $rs = $cmd->query($sql);
             $obj_informe = $rs->fetchAll();
+            if (empty($obj_informe)) {
+                continue;
+            }
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
@@ -120,73 +155,60 @@ try {
             $total_deb = 0;
             $total_cre = 0;
         }
-?>
-
-        <div class="text-right py-3">
-            <a type="button" id="btnExcelEntrada" class="btn btn-outline-success btn-sm" value="01" title="Exportar a Excel">
-                <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
-            </a>
-            <a type="button" class="btn btn-primary btn-sm" id="btnImprimir">Imprimir</a>
-            <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
-        </div>
-        <div class="content bg-light" id="areaImprimirrr">
-            <style>
-                @media print {
-                    body {
-                        font-family: Arial, sans-serif;
-                    }
-                }
-
-                .resaltar:nth-child(even) {
-                    background-color: #F8F9F9;
-                }
-
-                .resaltar:nth-child(odd) {
-                    background-color: #ffffff;
-                }
-            </style>
-        </div>
-        <?php include('reporte_header.php'); ?>
+    ?>
         <div class="content bg-light" id="areaImprimir">
-            <table style="width:100%; font-size:70%">
-                <tr style="text-align:center">
-                    <label>LIBROS AUXILIARES DE BANCOS</label>
-                </tr>
-            </table>
-            <table style="width:100%; font-size:70%">
-                <tr style="text-align:center">
-                    <label style="text-align:center">
-                        <b><?php
-                            // if ($obj_saldos[0]['filas'] > 0) {
-                            //echo  $obj_saldos[0]['cuenta'] . ' - ' . $obj_saldos[0]['nombre'];
-                            echo  $obj_c['cuenta'] . ' - ' . $obj_c['nombre'];
-                            //   }
-                            ?></b></label>
-                </tr>
-            </table>
-
-            <table style="width:100% !important; border:#A9A9A9 1px solid;">
-                <thead style="font-size:70%; border:#A9A9A9 1px solid;">
-                    <tr style="background-color:#CED3D3; color:#000000; text-align:center; border:#A9A9A9 1px solid;">
-                        <th style="border:#A9A9A9 1px solid;">Fecha</th>
-                        <th style="border:#A9A9A9 1px solid;">Tipo<br>Documento</th>
-                        <th style="border:#A9A9A9 1px solid;">Documento</th>
-                        <th style="border:#A9A9A9 1px solid;">Referencia</th>
-                        <th style="border:#A9A9A9 1px solid;" colspan="2">Tercero</th>
-                        <th style="border:#A9A9A9 1px solid;">CC/nit</th>
-                        <th style="border:#A9A9A9 1px solid;" colspan="2">Detalle</th>
-                        <th style="border:#A9A9A9 1px solid;">Debito</th>
-                        <th style="border:#A9A9A9 1px solid;">Credito</th>
-                        <th style="border:#A9A9A9 1px solid;">Saldo</th>
+            <table style="width:100% !important; font-size:70%;">
+                <?php
+                if ($reg == 0) {
+                    $reg++;
+                ?>
+                    <tr style="text-align: left;">
+                        <th colspan="2">ENTIDAD</th>
+                        <td colspan="10"><?= $razhd; ?></td>
                     </tr>
-                </thead>
-                <tbody style="font-size: 70%;">
+                    <tr style="text-align: left;">
+                        <th colspan="2">NIT</th>
+                        <td colspan="10"><?= "'" . $nithd . "'"; ?></td>
+                    </tr>
+                    <tr style="text-align: left;">
+                        <th colspan="2">REPORTE</th>
+                        <td colspan="10">LIBROS AUXILIARES DE BANCOS</td>
+                    </tr>
+                    <tr style="text-align: left;">
+                        <th colspan="2">FECHA INICIAL</th>
+                        <td colspan="10"><?= $fec_ini; ?></td>
+                    </tr>
+                    <tr style="text-align: left;">
+                        <th colspan="2">FECHA FINAL</th>
+                        <td colspan="10"><?= $fec_fin; ?></td>
+                    </tr>
+                <?php
+                }
+                $reg++;
+                ?>
+                <tr style="text-align: left;">
+                    <th colspan="2" style="font-weight: bold;">CUENTA</th>
+                    <td colspan="10" style="font-weight: bold;"><?= strval($obj_c['cuenta'] . ' - ' . $obj_c['nombre']); ?></td>
+                </tr>
+                <tr style="background-color:#CED3D3; color:#000000; text-align:center;">
+                    <th style="border: 1px solid #A9A9A9;">Fecha</th>
+                    <th style="border: 1px solid #A9A9A9;">Tipo<br>Documento</th>
+                    <th style="border: 1px solid #A9A9A9;">Documento</th>
+                    <th style="border: 1px solid #A9A9A9;">Referencia</th>
+                    <th colspan="2" style="border: 1px solid #A9A9A9;">Tercero</th>
+                    <th style="border: 1px solid #A9A9A9;">CC/nit</th>
+                    <th colspan="2" style="border: 1px solid #A9A9A9;">Detalle</th>
+                    <th style="border: 1px solid #A9A9A9;">Debito</th>
+                    <th style="border: 1px solid #A9A9A9;">Credito</th>
+                    <th style="border: 1px solid #A9A9A9;">Saldo</th>
+                </tr>
+                <tbody>
                     <?php
                     $tabla = '';
                     echo "<tr>
-                    <td class='text-right' colspan='11'>Saldo inicial: </td>
-                    <td class='text-right'>" . number_format($saldo_inicial, 2, ".", ",") . "</td>
-                    </tr>";
+                            <td style='text-align: center; border: 1px solid #A9A9A9;' colspan='11'>Saldo inicial: </td>
+                            <td style='text-align: right; border: 1px solid #A9A9A9;'>" . number_format($saldo_inicial, 2, ".", ",") . "</td>
+                        </tr>";
                     foreach ($obj_informe as $obj) {
 
                         $primer_caracter = substr($obj['cuenta'], 0, 1);
@@ -198,16 +220,16 @@ try {
 
                         //-------------------------------
                         $tabla .=  '<tr class="resaltar"> 
-                                <td style="border:#A9A9A9 1px solid;">' . $obj['fecha'] . '</td>
-                                <td style="border:#A9A9A9 1px solid;">' . $obj['cod_tipo_doc'] . '</td>
-                                <td style="border:#A9A9A9 1px solid;">' . $obj['id_manu'] . '</td>
-                                <td style="border:#A9A9A9 1px solid;">' . mb_strtoupper($obj['forma_pago']) . '</td>
-                                <td style="border:#A9A9A9 1px solid; text-align:left;" colspan="2">' . mb_strtoupper($obj['nom_tercero']) . '</td>
-                                <td style="border:#A9A9A9 1px solid;">' . $obj['nit_tercero'] . '</td>
-                                <td style="border:#A9A9A9 1px solid;"text-align:left;" colspan="2">' . mb_strtoupper($obj['detalle']) . '</td>
-                                <td style="border:#A9A9A9 1px solid;">' . $obj['debito'] . '</td>
-                                <td style="border:#A9A9A9 1px solid;">' . $obj['credito'] . '</td>
-                                <td style="border:#A9A9A9 1px solid;">' . $saldo_inicial . '</td></tr>';
+                                <td style="border: 1px solid #A9A9A9;">' . $obj['fecha'] . '</td>
+                                <td style="border: 1px solid #A9A9A9;">' . $obj['cod_tipo_doc'] . '</td>
+                                <td style="border: 1px solid #A9A9A9;">' . $obj['id_manu'] . '</td>
+                                <td style="border: 1px solid #A9A9A9;">' . mb_strtoupper($obj['forma_pago']) . '</td>
+                                <td colspan="2" style="border: 1px solid #A9A9A9;">' . mb_strtoupper($obj['nom_tercero']) . '</td>
+                                <td style="border: 1px solid #A9A9A9;">' . $obj['nit_tercero'] . '</td>
+                                <td colspan="2" style="border: 1px solid #A9A9A9;">' . mb_strtoupper($obj['detalle']) . '</td>
+                                <td style="border: 1px solid #A9A9A9;">' . $obj['debito'] . '</td>
+                                <td style="border: 1px solid #A9A9A9;">' . $obj['credito'] . '</td>
+                                <td style="border: 1px solid #A9A9A9;">' . $saldo_inicial . '</td></tr>';
 
                         $total_deb += $obj['debito'];
                         $total_cre += $obj['credito'];
@@ -215,11 +237,12 @@ try {
                     echo $tabla;
 
                     echo "<tr>
-                        <td class='text-right' colspan='9'> Total</td>
-                        <td class='text-right'>Debito: " . number_format($total_deb, 2, ".", ",") . "</td>
-                        <td class='text-right'>Credito: " . number_format($total_cre, 2, ".", ",") . "</td>
-                        <td class='text-right'>Saldo: " . number_format($saldo_inicial, 2, ".", ",") . "</td>
-                        </tr>";
+                        <td style='text-align: center; border: 1px solid #A9A9A9;' colspan='9'> Total</td>
+                        <td style='text-align: center; border: 1px solid #A9A9A9;'>Debito: " . number_format($total_deb, 2, ".", ",") . "</td>
+                        <td style='text-align: center; border: 1px solid #A9A9A9;'>Credito: " . number_format($total_cre, 2, ".", ",") . "</td>
+                        <td style='text-align: center; border: 1px solid #A9A9A9;'>Saldo: " . number_format($saldo_inicial, 2, ".", ",") . "</td>
+                        </tr>
+                        <tr><td colspan='12'>&nbsp;</td></tr>";
                     ?>
                 </tbody>
             </table>

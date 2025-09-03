@@ -2827,6 +2827,49 @@ const guardarConsecutivoResolucion = (boton) => {
 	ActivaBoton(boton);
 }
 
+const AbrirConciliacion = (id) => {
+	var estado = 1;
+	CambiarConciliacion(id, estado);
+};
+
+const CerrarConciliacion = (id) => {
+	var estado = 2;
+	CambiarConciliacion(id, estado);
+};
+
+const CambiarConciliacion = (id, estado) => {
+	var mes = $('#slcMesConcBanc').val();
+	Swal.fire({
+		title: "¿Está seguro de realizar esta acción?",
+		text: "",
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#3085d6",
+		cancelButtonColor: "#d33",
+		confirmButtonText: "Si",
+		cancelButtonText: "No",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			fetch("datos/consultar/cambiaConciliacion.php", {
+				method: "POST",
+				body: JSON.stringify({ id: id, estado: estado, mes: mes }),
+			})
+				.then((response) => response.text())
+				.then((response) => {
+					if (response == "ok") {
+						$('#tableConcBancaria').DataTable().ajax.reload(null, false);
+						mje("Registro Actualizado Correctamente");
+					} else {
+						mjeError("Error:", response);
+					}
+				})
+				.catch((error) => {
+					console.log("Error:");
+				});
+		}
+	});
+}
+
 const guardarNumReferencia = (boton) => {
 	InactivaBoton(boton);
 	$('.is-invalid').removeClass('is-invalid');

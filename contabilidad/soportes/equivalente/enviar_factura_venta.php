@@ -346,6 +346,8 @@ curl_setopt($ch, CURLOPT_URL, $url_taxxa);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $datatoken);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $restoken = curl_exec($ch);
 $rst = json_decode($restoken);
 $tokenApi = $rst->jret->stoken;
@@ -432,7 +434,7 @@ $jDocument = [
     //'wdocdescriptionCode' => 1,
     'sauthorizationprefix' => $pref,
     'sdocumentsuffix' => $secuenciaf, //ACTIVAR CUANDO SE TENGA EL NUMERO DE SECUENCIA
-    'tissuedate' => $factura['fec_compra'] . 'T' . date('H:i:s', strtotime('-5 hour', strtotime(date('H:i:s')))),
+    'tissuedate' => $date->format('Y-m-d') . 'T' . date('H:i:s', strtotime('-5 hour', strtotime(date('H:i:s')))),
     'tduedate' => $factura['fec_vence'],
     'wpaymentmeans' => $factura['met_pago'],
     'wpaymentmethod' => $factura['form_pago'],
@@ -573,6 +575,8 @@ curl_setopt($ch, CURLOPT_URL, $url_taxxa);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $json_string);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $rresponse = curl_exec($ch);
 $resnom = json_decode($rresponse, true);
 $file = 'loglastsend.txt';

@@ -5,9 +5,9 @@ insert  into `seg_modulos`(`id_modulo`,`nom_modulo`,`fec_mensaje`,`fec_caduca`,`
 */
 INSERT  INTO `seg_modulos`
 (`id_modulo`,`nom_modulo`,`fec_mensaje`,`fec_caduca`,`estado`) 
-VALUES (50,'Almacén',NULL,NULL,1),(51,'Nómina',NULL,NULL,1),(52,'Terceros',NULL,NULL,1),(53,'Contratación',NULL,NULL,1),(54,'Presupuesto',NULL,NULL,1),(55,'Contabilidad',NULL,NULL,1),(56,'Tesorería',NULL,NULL,1),(57,'Activos fijos',NULL,NULL,1);
+VALUES (50,'Almacén',NULL,NULL,1),(51,'Nómina',NULL,NULL,1),(52,'Terceros',NULL,NULL,1),(53,'Contratación',NULL,NULL,1),(54,'Presupuesto',NULL,NULL,1),(55,'Contabilidad',NULL,NULL,1),(56,'Tesorería',NULL,NULL,1),(57,'Activos fijos',NULL,NULL,1),(60,'Activos fijos',NULL,NULL,1),(61,'Activos fijos',NULL,NULL,1);
 
-insert  into `seg_permisos_modulos`(`id_per_mod`,`id_usuario`,`id_modulo`) values (1,1,50),(2,1,51),(3,1,52),(4,1,53),(5,1,54),(6,1,55),(7,1,56),(8,1,57);
+insert  into `seg_permisos_modulos`(`id_per_mod`,`id_usuario`,`id_modulo`) values (1,1,50),(2,1,51),(3,1,52),(4,1,53),(5,1,54),(6,1,55),(7,1,56),(8,1,57),(9,1,60),(10,1,61);
 
 update tb_datos_ips set caracter = 2;
 

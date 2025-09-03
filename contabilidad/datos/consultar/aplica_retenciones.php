@@ -42,6 +42,10 @@ if ($id_retencion_tipo == 6) {
 if ($id_retencion_tipo == 5) {
     $descuento =  $valor_base * $rango['tarifa'];
 }
+
+if ($id_retencion_tipo == 8) {
+    $descuento =  $valor_base * $rango['tarifa'];
+}
 $response[] = array("value" => "ok", "desc" => $descuento, "tarifa" => $rango['tarifa'], "terceroapi" => $terceroapi, "id_rango" => $rango['id_rango']);
 echo json_encode($response);
 exit;

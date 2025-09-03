@@ -40,13 +40,15 @@ curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $result = curl_exec($ch);
 curl_close($ch);
 $datos = json_decode($result, true);
 $head = '';
 if (!empty($datos)) {
     foreach ($datos[0] as $key => $value) {
-        if($key == 'resposabilidades') continue;
+        if ($key == 'resposabilidades') continue;
         $head .= '<th>' . mb_convert_encoding($key, 'UTF-8', 'ISO-8859-1') . '</th>';
     }
     $head .= '<th>Responsabilidades</th>';

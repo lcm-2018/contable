@@ -67,6 +67,8 @@ if (isset($_REQUEST['check'])) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $json_string);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             $res_api = curl_exec($ch);
             curl_close($ch);
             $res = json_decode($res_api, true);
