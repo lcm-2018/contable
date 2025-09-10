@@ -1,5 +1,8 @@
 <?php
 session_start();
+ini_set('post_max_size', '100M');
+ini_set('upload_max_filesize', '100M');
+ini_set("memory_limit", "-1");
 if (!isset($_SESSION['user'])) {
     header('Location: ../index.php');
     exit();

@@ -1,5 +1,6 @@
 <?php
 session_start();
+ini_set("memory_limit", "-1");
 if (!isset($_SESSION['user'])) {
     header('Location: ../../index.php');
     exit();
@@ -38,8 +39,9 @@ try {
             WHERE ctb_pgcp.estado = 1
             AND ctb_pgcp.id_pgcp BETWEEN '$id_cuenta_ini' AND '$id_cuenta_fin'";
     $rs = $cmd->query($sql);
-    $obj_cuentas = $rs->fetchAll();
-
+    $obj_cuentas = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
     $sql = 'SELECT razon_social_ips,nit_ips FROM tb_datos_ips LIMIT 1';
     $rs = $cmd->query($sql);
     $obj_ent = $rs->fetch();
@@ -75,10 +77,10 @@ try {
     </div>
     <?php
     $reg = 0;
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     foreach ($obj_cuentas as $obj_c) {
         try {
-            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             //-----libros auxiliares de bancos -----------------------
             $sql = "SELECT
                         DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') AS fecha,
@@ -90,7 +92,7 @@ try {
                         ctb_fuente.cod AS cod_tipo_doc,
                         ctb_fuente.nombre AS nom_tipo_doc,
                         ctb_doc.id_manu,
-                        ctb_doc.detalle,
+                        CONCAT(IFNULL(facturas.num_factura,''),' - ',ctb_doc.detalle) AS detalle,
                         tes_forma_pago.forma_pago,
                         tb_terceros.nom_tercero,
                         tb_terceros.nit_tercero
@@ -102,12 +104,34 @@ try {
                     LEFT JOIN tes_detalle_pago ON (tes_detalle_pago.id_ctb_doc = ctb_doc.id_ctb_doc)
                     LEFT JOIN tes_forma_pago ON (tes_detalle_pago.id_forma_pago = tes_forma_pago.id_forma_pago)
                     LEFT JOIN tb_terceros ON (tb_terceros.id_tercero_api = ctb_libaux.id_tercero_api)
+                    LEFT JOIN
+                        (SELECT 
+                            doc.id_manu,
+                            doc.tipo_movimiento AS tipo,
+                            CASE doc.tipo_movimiento
+                                WHEN 1 THEN CONCAT(ff.prefijo, IFNULL(ff.num_efactura, ff.num_factura))
+                                WHEN 2 THEN CONCAT(fo.prefijo, IFNULL(fo.num_efactura, fo.num_factura))
+                                WHEN 3 THEN CONCAT(fv.prefijo, IFNULL(fv.num_efactura, fv.num_factura))
+                                WHEN 4 THEN CONCAT(fc.prefijo, fc.num_factura)
+                            END AS num_factura
+                        FROM ctb_doc doc
+                        LEFT JOIN fac_facturacion ff ON doc.tipo_movimiento = 1 AND doc.id_manu = ff.id_factura
+                        LEFT JOIN fac_otros fo       ON doc.tipo_movimiento = 2 AND doc.id_manu = fo.id_factura
+                        LEFT JOIN far_ventas fv      ON doc.tipo_movimiento = 3 AND doc.id_manu = fv.id_venta
+                        LEFT JOIN fac_cartera fc     ON doc.tipo_movimiento = 4 AND doc.id_manu = fc.id_facturac
+                        WHERE (doc.tipo_movimiento = 1 AND ff.id_factura IS NOT NULL)
+                            OR (doc.tipo_movimiento = 2 AND fo.id_factura IS NOT NULL)
+                            OR (doc.tipo_movimiento = 3 AND fv.id_venta IS NOT NULL)
+                            OR (doc.tipo_movimiento = 4 AND fc.id_facturac IS NOT NULL)) AS facturas
+                            ON (facturas.id_manu = ctb_doc.id_manu AND facturas.tipo = ctb_doc.tipo_movimiento)
                     WHERE ctb_doc.fecha BETWEEN $fec_ini AND $fec_fin AND ctb_doc.estado = 2 
                         AND ctb_pgcp.id_pgcp IN ('" . $obj_c['id_pgcp'] . "','" . $obj_c['id_pgcp'] . "')
                         $and_where
                     ORDER BY DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') ASC, ctb_libaux.debito DESC, ctb_libaux.credito DESC";
             $rs = $cmd->query($sql);
-            $obj_informe = $rs->fetchAll();
+            $obj_informe = $rs->fetchAll(PDO::FETCH_ASSOC);
+            $rs->closeCursor();
+            unset($rs);
             if (empty($obj_informe)) {
                 continue;
             }
@@ -133,7 +157,9 @@ try {
                     AND ctb_doc.estado=2 limit 1";
 
             $rs = $cmd->query($sql);
-            $obj_saldos = $rs->fetchAll();
+            $obj_saldos = $rs->fetchAll(PDO::FETCH_ASSOC);
+            $rs->closeCursor();
+            unset($rs);
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }

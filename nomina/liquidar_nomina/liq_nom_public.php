@@ -1499,9 +1499,8 @@ if (isset($_POST['check'])) {
             try {
                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                $sql = "INSERT INTO `nom_liq_prestaciones_sociales` (`id_empleado`, `val_vacacion`, `val_cesantia`, `val_interes_cesantia`
-                                                                    , `val_prima`, `val_prima_vac`,`val_prima_nav`,`val_bonifica_recrea`
-                                                                    , `mes_prestaciones`, `anio_prestaciones`, `fec_reg`, `id_nomina`) 
+                $sql = "INSERT INTO `nom_liq_prestaciones_sociales` 
+                            (`id_empleado`, `val_vacacion`, `val_cesantia`, `val_interes_cesantia` , `val_prima`, `val_prima_vac`,`val_prima_nav`,`val_bonifica_recrea`, `mes_prestaciones`, `anio_prestaciones`, `fec_reg`, `id_nomina`) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $sql = $cmd->prepare($sql);
                 $sql->bindParam(1, $empleado, PDO::PARAM_INT);
@@ -1835,14 +1834,4 @@ if (isset($_POST['check'])) {
     }
 } else {
     echo 'No se selecionó ningún empleado';
-}
-function redondeoSind($numero)
-{
-    $residuo = $numero % 100;
-
-    if ($residuo < 50) {
-        return $numero - $residuo;
-    } else {
-        return $numero + (100 - $residuo);
-    }
 }
