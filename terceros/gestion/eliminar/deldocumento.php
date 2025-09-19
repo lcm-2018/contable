@@ -13,7 +13,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "SELECT
                     `ruta_doc`,`nombre_doc`
-                FROM `bd_cronhis`.`ctt_documentos`
+                FROM `ctt_documentos`
                 WHERE `id_soportester` = $id";
     $rs = $cmd->query($sql);
     $pdf = $rs->fetch(PDO::FETCH_ASSOC);

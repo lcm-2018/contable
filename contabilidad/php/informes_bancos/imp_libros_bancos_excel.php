@@ -49,34 +49,16 @@ try {
     $nithd = $obj_ent['nit_ips'];
     $cmd = null;
 
-?>
-
-    <div class="text-right py-3">
-        <a type="button" id="btnExcelEntrada" class="btn btn-outline-success btn-sm" value="01" title="Exportar a Excel">
-            <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
-        </a>
-        <a type="button" class="btn btn-primary btn-sm" id="btnImprimir">Imprimir</a>
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
-    </div>
-    <div class="content bg-light" id="areaImprimirrr">
-        <style>
-            @media print {
-                body {
-                    font-family: Arial, sans-serif;
-                }
-            }
-
-            .resaltar:nth-child(even) {
-                background-color: #F8F9F9;
-            }
-
-            .resaltar:nth-child(odd) {
-                background-color: #ffffff;
-            }
-        </style>
-    </div>
-    <?php
     $reg = 0;
+
+    $filename = "reporte_" . date("Y-m-d_H-i-s") . ".csv";
+
+    // Encabezados HTTP para forzar la descarga
+    header("Content-Type: text/csv; charset=UTF-8");
+    header("Content-Disposition: attachment; filename=\"$filename\"");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     foreach ($obj_cuentas as $obj_c) {
@@ -124,15 +106,11 @@ try {
                             OR (doc.tipo_movimiento = 2 AND fo.id_factura IS NOT NULL)
                             OR (doc.tipo_movimiento = 3 AND fv.id_venta IS NOT NULL)
                             OR (doc.tipo_movimiento = 4 AND fc.id_facturac IS NOT NULL)) AS facturas
-                            ON (facturas.id_manu = ctb_doc.id_manu AND facturas.tipo = ctb_doc.tipo_movimiento
-                            AND facturas.id_ctb_doc = ctb_doc.id_ctb_doc)
+                            ON (facturas.id_manu = ctb_doc.id_manu AND facturas.tipo = ctb_doc.tipo_movimiento AND facturas.id_ctb_doc = ctb_doc.id_ctb_doc)
                     WHERE ctb_doc.fecha BETWEEN $fec_ini AND $fec_fin AND ctb_doc.estado = 2 
                         AND ctb_pgcp.id_pgcp IN ('" . $obj_c['id_pgcp'] . "','" . $obj_c['id_pgcp'] . "')
                         $and_where
-                    ORDER BY DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') ASC, ctb_libaux.debito DESC, ctb_libaux.credito DESC
-                    LIMIT 500";
-            echo $sql;
-            exit;
+                    ORDER BY DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') ASC, ctb_libaux.debito DESC, ctb_libaux.credito DESC";
             $rs = $cmd->query($sql);
             $obj_informe = $rs->fetchAll(PDO::FETCH_ASSOC);
             $rs->closeCursor();
@@ -186,100 +164,72 @@ try {
             $total_deb = 0;
             $total_cre = 0;
         }
-    ?>
-        <div class="content bg-light" id="areaImprimir">
-            <table style="width:100% !important; font-size:70%;">
-                <?php
-                if ($reg == 0) {
-                    $reg++;
-                ?>
-                    <tr style="text-align: left;">
-                        <th colspan="2">ENTIDAD</th>
-                        <td colspan="10"><?= $razhd; ?></td>
-                    </tr>
-                    <tr style="text-align: left;">
-                        <th colspan="2">NIT</th>
-                        <td colspan="10"><?= "'" . $nithd . "'"; ?></td>
-                    </tr>
-                    <tr style="text-align: left;">
-                        <th colspan="2">REPORTE</th>
-                        <td colspan="10">LIBROS AUXILIARES DE BANCOS</td>
-                    </tr>
-                    <tr style="text-align: left;">
-                        <th colspan="2">FECHA INICIAL</th>
-                        <td colspan="10"><?= $fec_ini; ?></td>
-                    </tr>
-                    <tr style="text-align: left;">
-                        <th colspan="2">FECHA FINAL</th>
-                        <td colspan="10"><?= $fec_fin; ?></td>
-                    </tr>
-                <?php
-                }
-                $reg++;
-                ?>
-                <tr style="text-align: left;">
-                    <th colspan="2" style="font-weight: bold;">CUENTA</th>
-                    <td colspan="10" style="font-weight: bold;"><?= strval($obj_c['cuenta'] . ' - ' . $obj_c['nombre']); ?></td>
-                </tr>
-                <tr style="background-color:#CED3D3; color:#000000; text-align:center;">
-                    <th style="border: 1px solid #A9A9A9;">Fecha</th>
-                    <th style="border: 1px solid #A9A9A9;">Tipo<br>Documento</th>
-                    <th style="border: 1px solid #A9A9A9;">Documento</th>
-                    <th style="border: 1px solid #A9A9A9;">Referencia</th>
-                    <th colspan="2" style="border: 1px solid #A9A9A9;">Tercero</th>
-                    <th style="border: 1px solid #A9A9A9;">CC/nit</th>
-                    <th colspan="2" style="border: 1px solid #A9A9A9;">Detalle</th>
-                    <th style="border: 1px solid #A9A9A9;">Debito</th>
-                    <th style="border: 1px solid #A9A9A9;">Credito</th>
-                    <th style="border: 1px solid #A9A9A9;">Saldo</th>
-                </tr>
-                <tbody>
-                    <?php
-                    $tabla = '';
-                    echo "<tr>
-                            <td style='text-align: center; border: 1px solid #A9A9A9;' colspan='11'>Saldo inicial: </td>
-                            <td style='text-align: right; border: 1px solid #A9A9A9;'>" . number_format($saldo_inicial, 2, ".", ",") . "</td>
-                        </tr>";
-                    foreach ($obj_informe as $obj) {
 
-                        $primer_caracter = substr($obj['cuenta'], 0, 1);
-                        if ($primer_caracter == 1 || $primer_caracter == 5 || $primer_caracter == 6 || $primer_caracter == 7) {
-                            $saldo_inicial = $saldo_inicial + $obj['debito'] - $obj['credito'];
-                        } else {
-                            $saldo_inicial = $saldo_inicial + $obj['credito'] - $obj['debito'];
-                        }
+        // Abrir salida directa
+        $output = fopen("php://output", "w");
 
-                        //-------------------------------
-                        $tabla .=  '<tr class="resaltar"> 
-                                <td style="border: 1px solid #A9A9A9;">' . $obj['fecha'] . '</td>
-                                <td style="border: 1px solid #A9A9A9;">' . $obj['cod_tipo_doc'] . '</td>
-                                <td style="border: 1px solid #A9A9A9;">' . $obj['id_manu'] . '</td>
-                                <td style="border: 1px solid #A9A9A9;">' . mb_strtoupper($obj['forma_pago']) . '</td>
-                                <td colspan="2" style="border: 1px solid #A9A9A9;">' . mb_strtoupper($obj['nom_tercero']) . '</td>
-                                <td style="border: 1px solid #A9A9A9;">' . $obj['nit_tercero'] . '</td>
-                                <td colspan="2" style="border: 1px solid #A9A9A9;">' . mb_strtoupper($obj['detalle']) . '</td>
-                                <td style="border: 1px solid #A9A9A9;">' . $obj['debito'] . '</td>
-                                <td style="border: 1px solid #A9A9A9;">' . $obj['credito'] . '</td>
-                                <td style="border: 1px solid #A9A9A9;">' . $saldo_inicial . '</td></tr>';
+        // (opcional) Escribir encabezados del CSV
+        if ($reg == 0) {
+            $reg++;
+            fputcsv($output, ["ENTIDAD", $razhd]);
+            fputcsv($output, ["NIT", $nithd]);
+            fputcsv($output, ["REPORTE", "LIBROS AUXILIARES DE BANCOS"]);
+            fputcsv($output, ["FECHA INICIAL", $fec_ini]);
+            fputcsv($output, ["FECHA FINAL", $fec_fin]);
+        }
+        $reg++;
+        fputcsv($output, ["CUENTA", strval($obj_c['cuenta'] . ' - ' . $obj_c['nombre'])]);
+        fputcsv($output, []); // línea en blanco
+        $headers = ["Fecha", "Tipo Documento", "Documento", "Referencia", "Tercero", "CC/nit", "Detalle", "Debito", "Credito", "Saldo"];
+        fputcsv($output, $headers);
+        $saldoInicial = ["", "", "", "", "", "", "Saldo inicial:", "", "", number_format($saldo_inicial, 2, ".", ",")];
+        fputcsv($output, $saldoInicial);
 
-                        $total_deb += $obj['debito'];
-                        $total_cre += $obj['credito'];
-                    }
-                    echo $tabla;
+        foreach ($obj_informe as $obj) {
+            $primer_caracter = substr($obj['cuenta'], 0, 1);
+            if ($primer_caracter == 1 || $primer_caracter == 5 || $primer_caracter == 6 || $primer_caracter == 7) {
+                $saldo_inicial = $saldo_inicial + $obj['debito'] - $obj['credito'];
+            } else {
+                $saldo_inicial = $saldo_inicial + $obj['credito'] - $obj['debito'];
+            }
 
-                    echo "<tr>
-                        <td style='text-align: center; border: 1px solid #A9A9A9;' colspan='9'> Total</td>
-                        <td style='text-align: center; border: 1px solid #A9A9A9;'>Debito: " . number_format($total_deb, 2, ".", ",") . "</td>
-                        <td style='text-align: center; border: 1px solid #A9A9A9;'>Credito: " . number_format($total_cre, 2, ".", ",") . "</td>
-                        <td style='text-align: center; border: 1px solid #A9A9A9;'>Saldo: " . number_format($saldo_inicial, 2, ".", ",") . "</td>
-                        </tr>
-                        <tr><td colspan='12'>&nbsp;</td></tr>";
-                    ?>
-                </tbody>
-            </table>
-        </div>
-<?php
+            $row = [
+                $obj['fecha'],
+                $obj['cod_tipo_doc'],
+                $obj['id_manu'],
+                mb_strtoupper($obj['forma_pago']),
+                mb_strtoupper($obj['nom_tercero']),
+                $obj['nit_tercero'],
+                mb_strtoupper($obj['detalle']),
+                number_format($obj['debito'], 2, ".", ","),
+                number_format($obj['credito'], 2, ".", ","),
+                number_format($saldo_inicial, 2, ".", ",")
+            ];
+            fputcsv($output, $row);
+
+            $total_deb += $obj['debito'];
+            $total_cre += $obj['credito'];
+        }
+
+        // =======================
+        // Totales
+        // =======================
+        fputcsv($output, [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Totales",
+            "Debito: " . number_format($total_deb, 2, ".", ","),
+            "Credito: " . number_format($total_cre, 2, ".", ","),
+            "Saldo: " . number_format($saldo_inicial, 2, ".", ",")
+        ]);
     }
+
+    fclose($output);
+    exit;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }

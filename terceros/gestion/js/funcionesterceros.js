@@ -636,8 +636,8 @@ function FormResponsabilidad(id) {
             if (ext !== '.pdf') {
                 mjeError('¡Solo se permite documentos .pdf!');
                 return false;
-            } else if ($('#fileDoc')[0].files[0].size > 2097152) {
-                mjeError('¡Documento debe tener un tamaño menor a 2Mb!');
+            } else if ($('#fileDoc')[0].files[0].size > 5242880) {
+                mjeError('¡Documento debe tener un tamaño menor a 5Mb!');
                 return false;
             }
             datos.append('idTercero', $('#idTercero').prop('value'));
