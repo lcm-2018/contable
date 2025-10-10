@@ -9,8 +9,12 @@ $id_doc = isset($_POST['id_doc_ref']) ? $_POST['id_doc_ref'] : exit('Acceso no a
 $id_ctb_ref = $_POST['id_ctb_ref'];
 $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 $id_cuenta = isset($_POST['id_codigoCta1']) ? $_POST['id_codigoCta1'] : NULL;
+$id_cuenta = $id_cuenta == 0 ? NULL : $id_cuenta;
 $id_cta_credito = isset($_POST['id_codigoCta2']) ? $_POST['id_codigoCta2'] : NULL;
+$id_cta_credito = $id_cta_credito == 0 ? NULL : $id_cta_credito;
 $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
+$accion_pto = isset($_POST['afectacion']) ? ($accion == 1 ? $_POST['afectacion'] : 0) : 0;
+$id_rubro = isset($_POST['id_rubroCod']) ? ($accion == 1 ? $_POST['id_rubroCod'] : NULL) : NULL;
 $estado = 1;
 $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
@@ -32,8 +36,8 @@ try {
     }
     if ($id_ctb_ref == 0) {
         $query = "INSERT INTO `ctb_referencia`
-                    (`id_ctb_fuente`,`id_cuenta`,`nombre`,`accion`,`estado`,`id_user_reg`,`fecha_reg`,`id_cta_credito`)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    (`id_ctb_fuente`,`id_cuenta`,`nombre`,`accion`,`estado`,`id_user_reg`,`fecha_reg`,`id_cta_credito`,`accion_pto`,`id_rubro`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $query = $cmd->prepare($query);
         $query->bindParam(1, $id_doc, PDO::PARAM_INT);
         $query->bindParam(2, $id_cuenta, PDO::PARAM_INT);
@@ -43,6 +47,8 @@ try {
         $query->bindParam(6, $iduser, PDO::PARAM_INT);
         $query->bindParam(7, $fecha2);
         $query->bindParam(8, $id_cta_credito);
+        $query->bindParam(9, $accion_pto, PDO::PARAM_INT);
+        $query->bindParam(10, $id_rubro, PDO::PARAM_INT);
         $query->execute();
         $id = $cmd->lastInsertId();
         if ($cmd->lastInsertId() > 0) {
@@ -61,14 +67,16 @@ try {
             $query->bindParam(2, $id_ctb_ref, PDO::PARAM_INT);
         } else {
             $query = "UPDATE `ctb_referencia`
-                        SET `id_cuenta` = ?, `nombre` = ?, `accion` = ?, `id_cta_credito` = ?
+                        SET `id_cuenta` = ?, `nombre` = ?, `accion` = ?, `id_cta_credito` = ?, `accion_pto` = ?, `id_rubro` = ?
                     WHERE `id_ctb_referencia` = ?";
             $query = $cmd->prepare($query);
             $query->bindParam(1, $id_cuenta, PDO::PARAM_INT);
             $query->bindParam(2, $nombre, PDO::PARAM_STR);
             $query->bindParam(3, $accion, PDO::PARAM_INT);
             $query->bindParam(4, $id_cta_credito, PDO::PARAM_INT);
-            $query->bindParam(5, $id_ctb_ref, PDO::PARAM_INT);
+            $query->bindParam(5, $accion_pto, PDO::PARAM_INT);
+            $query->bindParam(6, $id_rubro, PDO::PARAM_INT);
+            $query->bindParam(7, $id_ctb_ref, PDO::PARAM_INT);
         }
         if (!($query->execute())) {
             echo $query->errorInfo()[2];

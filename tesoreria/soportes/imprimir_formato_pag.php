@@ -267,10 +267,12 @@ foreach ($documentos_tes as $documento) {
     // consulto el nombre de la empresa de la tabla tb_datos_ips
     try {
         $sql = "SELECT 
-                `tb_datos_ips`.`razon_social_ips` AS `nombre`, `tb_datos_ips`.`nit_ips` AS `nit`, `tb_datos_ips`.`dv` AS `dig_ver`, `tb_municipios`.`nom_municipio`
+                `tb_datos_ips`.`razon_social_ips` AS `nombre`, `tb_datos_ips`.`nit_ips` AS `nit`, `tb_datos_ips`.`dv` AS `dig_ver`, `tb_municipios`.`nom_municipio`, `tb_terceros`.`id_tercero_api`
             FROM `tb_datos_ips`
                 INNER JOIN `tb_municipios`
-                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)";
+                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)
+                LEFT JOIN `tb_terceros`
+                    ON (`tb_datos_ips`.`nit_ips` = `tb_terceros`.`nit_tercero`)";
         $res = $cmd->query($sql);
         $empresa = $res->fetch();
     } catch (PDOException $e) {
@@ -300,6 +302,7 @@ foreach ($documentos_tes as $documento) {
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
+        $ids_terceros = !empty($facturadores) ? implode(',', array_column($facturadores, 'id_tercero')) : '0';
     }
     $fecha = date('Y-m-d', strtotime($documento['fecha']));
     $hora = date('H:i:s', strtotime($documento['fecha_reg']));
@@ -763,6 +766,11 @@ foreach ($documentos_tes as $documento) {
     </div>
     <div class="page-break"></div>
     <?php
+    if ($id_tercero == $empresa['id_tercero_api']) {
+        $id_terceros = $ids_terceros ?? 0;
+    } else {
+        $id_terceros = $id_tercero;
+    }
     try {
         $pdo = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -773,14 +781,14 @@ foreach ($documentos_tes as $documento) {
                     , `val_factura`
                     , `val_copago` AS `vr_arqueo_pendiente`
                     , `fac_facturacion`.`id_usr_crea`
-                FROM fac_facturacion
+                FROM `fac_facturacion`
                     INNER JOIN `seg_usuarios_sistema` ON (`seg_usuarios_sistema`.`id_usuario` = `fac_facturacion`.`id_usr_crea`)
                     INNER JOIN `tb_terceros` ON (`tb_terceros`.`nit_tercero` = `seg_usuarios_sistema`.`num_documento`)
                     LEFT JOIN (SELECT `fac_arqueo_detalles`.`id_factura`   
                         FROM `fac_arqueo_detalles`
                         INNER JOIN `fac_arqueo` ON (`fac_arqueo_detalles`.`id_arqueo` = `fac_arqueo`.`id_arqueo`)
                         WHERE `fac_arqueo`.`estado` >=2 AND `id_factura` IS NOT NULL ) AS `arqueo` ON `fac_facturacion`.`id_factura`=`arqueo`.`id_factura`
-                WHERE `fac_facturacion`.`fec_factura` >= '2025-08-01' AND `fac_facturacion`.`estado` >=2 AND `fac_facturacion`.`val_copago` >0 AND `arqueo`.`id_factura` IS NULL AND `id_tercero_api` = $id_tercero
+                WHERE `fac_facturacion`.`fec_factura` >= '2025-08-01' AND `fac_facturacion`.`estado` >=2 AND `fac_facturacion`.`val_copago` >0 AND `arqueo`.`id_factura` IS NULL AND `id_tercero_api` IN ($id_terceros)
                 UNION ALL     
                 SELECT
                     IF(`num_efactura` IS NULL,`num_factura`,CONCAT(`prefijo`, `num_efactura`)) AS `num_factura` 
@@ -796,7 +804,7 @@ foreach ($documentos_tes as $documento) {
                         FROM `fac_arqueo_detalles`
                         INNER JOIN `fac_arqueo` ON (`fac_arqueo_detalles`.`id_arqueo` = `fac_arqueo`.`id_arqueo`)
                         WHERE `fac_arqueo`.`estado` >=2  AND `id_venta` IS NOT NULL   ) AS `arqueo` ON (`far_ventas`.`id_venta`=`arqueo`.`id_venta`)
-                WHERE `fec_venta` >= '2025-08-01' AND `far_ventas`.`estado` = 2 AND `arqueo`.`id_venta` IS NULL AND `id_tercero_api` = $id_tercero";
+                WHERE `fec_venta` >= '2025-08-01' AND `far_ventas`.`estado` = 2 AND `arqueo`.`id_venta` IS NULL AND `id_tercero_api` IN ($id_terceros)";
         $res = $cmd->query($sql);
         $pendientes = $res->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {

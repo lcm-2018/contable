@@ -20,6 +20,20 @@ $tercero = isset($_POST['tercero']) && strlen($_POST['tercero']) > 0 ? $_POST['t
 $objeto = isset($_POST['objeto']) && strlen($_POST['objeto']) > 0 ? $_POST['objeto'] : '';
 $id_ctb_doc = isset($_POST['id_ctb_doc']) ? $_POST['id_ctb_doc'] : 0;
 
+$sql = "SELECT
+            `ctb_referencia`.`id_rubro`
+            , CONCAT_WS(' -> ',`pto_cargue`.`cod_pptal`, `pto_cargue`.`nom_rubro`) AS `rubro`
+            , `pto_cargue`.`tipo_dato`
+        FROM
+            `ctb_doc`
+            INNER JOIN `ctb_referencia` 
+                ON (`ctb_doc`.`id_ref_ctb` = `ctb_referencia`.`id_ctb_referencia`)
+            INNER JOIN `pto_cargue` 
+                ON (`ctb_referencia`.`id_rubro` = `pto_cargue`.`id_cargue`)
+        WHERE (`ctb_doc`.`id_ctb_doc` = $id_ctb_doc) LIMIT 1";
+$rs = $cmd->query($sql);
+$rubro = $rs->fetch(PDO::FETCH_ASSOC);
+
 // esta consulta es para generar el proximo id_manu
 //------------------------------------
 $sql = "SELECT COUNT(*) + 1 AS id_manu
@@ -86,14 +100,13 @@ if (!empty($obj_id_pto_rec['id_pto_rec'])) {
                         <span class="small">Id Manu</span>
                     </div>
                     <div class="form-group col-md-1">
-                        <input type="text" class="form-control form-control-sm" id="txt_id_manu" name="txt_id_manu" value="<?php 
-                            if($id_pto_rad==0){ 
-                                echo $obj_manu['id_manu'];
-                            }
-                            else{
-                                echo $obj_id_pto_rad['id_manu'];
-                            }
-                         ?>">
+                        <input type="text" class="form-control form-control-sm" id="txt_id_manu" name="txt_id_manu" value="<?php
+                                                                                                                            if ($id_pto_rad == 0) {
+                                                                                                                                echo $obj_manu['id_manu'];
+                                                                                                                            } else {
+                                                                                                                                echo $obj_id_pto_rad['id_manu'];
+                                                                                                                            }
+                                                                                                                            ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <span class="small"></span>
@@ -182,10 +195,10 @@ if (!empty($obj_id_pto_rec['id_pto_rec'])) {
 
                 <div class=" form-row">
                     <div class="form-group col-md-8">
-                        <input type="text" class="form-control form-control-sm" id="txt_rubro" name="txt_rubro" placeholder="Rubro">
-                        <input type="hidden" id="hd_id_txt_rubro" name="hd_id_txt_rubro" class="form-control form-control-sm">
-                        <input type="hidden" id="hd_tipo_dato" name="hd_tipo_dato" class="form-control form-control-sm">
-                        <input type="hidden" id="hd_anio" name="hd_anio" class="form-control form-control-sm">
+                        <input type="text" class="form-control form-control-sm" id="txt_rubro" name="txt_rubro" placeholder="Rubro" value="<?= isset($rubro['rubro']) ? $rubro['rubro'] : ''; ?>">
+                        <input type="hidden" id="hd_id_txt_rubro" name="hd_id_txt_rubro" value="<?= isset($rubro['id_rubro']) ? $rubro['id_rubro'] : '0'; ?>">
+                        <input type="hidden" id="hd_tipo_dato" name="hd_tipo_dato" value="<?= isset($rubro['tipo_dato']) ? $rubro['tipo_dato'] : '0'; ?>">
+                        <input type="hidden" id="hd_anio" name="hd_anio" value="<?= $_SESSION['vigencia'] ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <input type="text" class="form-control form-control-sm" id="txt_valor" name="txt_valor" placeholder="Valor">

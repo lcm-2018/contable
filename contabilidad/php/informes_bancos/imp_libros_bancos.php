@@ -131,7 +131,6 @@ try {
                         $and_where
                     ORDER BY DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') ASC, ctb_libaux.debito DESC, ctb_libaux.credito DESC
                     LIMIT 500";
-            echo $sql;
             exit;
             $rs = $cmd->query($sql);
             $obj_informe = $rs->fetchAll(PDO::FETCH_ASSOC);
@@ -203,7 +202,7 @@ try {
                     </tr>
                     <tr style="text-align: left;">
                         <th colspan="2">REPORTE</th>
-                        <td colspan="10">LIBROS AUXILIARES DE BANCOS</td>
+                        <td colspan="10">LIBROS AUXILIARES</td>
                     </tr>
                     <tr style="text-align: left;">
                         <th colspan="2">FECHA INICIAL</th>

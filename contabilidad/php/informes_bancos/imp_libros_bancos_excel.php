@@ -154,7 +154,8 @@ try {
 
         if ($obj_saldos[0]['filas'] > 0) {
             $primer_caracter_cuenta = substr($obj_saldos[0]['cuenta'], 0, 1);
-            if ($primer_caracter_cuenta == 1 || $primer_caracter_cuenta == 5 || $primer_caracter_cuenta == 6 || $primer_caracter_cuenta == 7) {
+            $segundo_caracter_cuenta = substr($obj_saldos[0]['cuenta'], 0, 2);
+            if ($primer_caracter_cuenta == 1 || $primer_caracter_cuenta == 5 || $primer_caracter_cuenta == 6 || $primer_caracter_cuenta == 7 || $segundo_caracter_cuenta == 81 || $segundo_caracter_cuenta == 83 || $segundo_caracter_cuenta == 99) {
                 $saldo_inicial = $obj_saldos[0]['debito'] - $obj_saldos[0]['credito'];
             } else {
                 $saldo_inicial = $obj_saldos[0]['credito'] - $obj_saldos[0]['debito'];
@@ -173,7 +174,7 @@ try {
             $reg++;
             fputcsv($output, ["ENTIDAD", $razhd]);
             fputcsv($output, ["NIT", $nithd]);
-            fputcsv($output, ["REPORTE", "LIBROS AUXILIARES DE BANCOS"]);
+            fputcsv($output, ["REPORTE", "LIBROS AUXILIARES"]);
             fputcsv($output, ["FECHA INICIAL", $fec_ini]);
             fputcsv($output, ["FECHA FINAL", $fec_fin]);
         }
@@ -187,7 +188,8 @@ try {
 
         foreach ($obj_informe as $obj) {
             $primer_caracter = substr($obj['cuenta'], 0, 1);
-            if ($primer_caracter == 1 || $primer_caracter == 5 || $primer_caracter == 6 || $primer_caracter == 7) {
+            $segundo_caracter = substr($obj['cuenta'], 0, 2);
+            if ($primer_caracter == 1 || $primer_caracter == 5 || $primer_caracter == 6 || $primer_caracter == 7 || $segundo_caracter == 81 || $segundo_caracter == 83 || $segundo_caracter == 99) {
                 $saldo_inicial = $saldo_inicial + $obj['debito'] - $obj['credito'];
             } else {
                 $saldo_inicial = $saldo_inicial + $obj['credito'] - $obj['debito'];
@@ -222,9 +224,9 @@ try {
             "",
             "",
             "Totales",
-            "Debito: " . number_format($total_deb, 2, ".", ","),
-            "Credito: " . number_format($total_cre, 2, ".", ","),
-            "Saldo: " . number_format($saldo_inicial, 2, ".", ",")
+            "" . number_format($total_deb, 2, ".", ","),
+            "" . number_format($total_cre, 2, ".", ","),
+            "" . number_format($saldo_inicial, 2, ".", ",")
         ]);
     }
 

@@ -15,7 +15,7 @@ $tipo_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_doc_fuente`, `nombre` FROM `ctb_fuente` WHERE `contab` = 1 ORDER BY `nombre`";
+    $sql = "SELECT `id_doc_fuente`, `nombre` FROM `ctb_fuente` WHERE `contab` = 1 OR `contab` = 3  ORDER BY `nombre`";
     $rs = $cmd->query($sql);
     $docsFuente = $rs->fetchAll();
     $cmd = null;
@@ -201,7 +201,7 @@ $cmd = null;
                                                 <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
                                             </div>
                                         </div>
-                                    </div>                                    
+                                    </div>
                                     <div class="form-group col-md-3">
                                         <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" placeholder="Tercero">
                                     </div>

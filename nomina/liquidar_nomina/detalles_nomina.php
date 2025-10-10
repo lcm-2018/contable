@@ -823,7 +823,7 @@ try {
                                                         <td class="text-right"><?php echo pesos($comp); ?></td>
                                                         <td class="text-right">
                                                             <?php
-                                                            $devengado = $a + $b + $valluto + $c + $d1 + $d + $e + $e1 + $f + $c3 + $c4 + $c5 + $ps + $pn + $ces + $ices + $comp + $gr;
+                                                            $devengado = $a + $b + $c + $d1 + $d + $e + $e1 + $f + $c3 + $c4 + $c5 + $ps + $pn + $ces + $ices + $comp + $gr;
                                                             echo pesos($devengado);
                                                             ?>
                                                         </td>

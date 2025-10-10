@@ -3117,7 +3117,7 @@ function SaldoCuenta(id) {
 
 $('#btnImpLotesTes').on('click', function () {
 	var tipo = $('#id_ctb_tipo').val();
-	$.post("datos/registrar/form_rango_imp", { tipo: tipo }, function (he) {
+	$.post("datos/registrar/form_rango_imp.php", { tipo: tipo }, function (he) {
 		$("#divTamModalForms").removeClass("modal-xl");
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-lg");

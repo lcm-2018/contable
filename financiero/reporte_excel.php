@@ -4,6 +4,7 @@ if (!isset($_SESSION['user'])) {
     header('Location: ../index.php');
     exit();
 }
+echo "\xEF\xBB\xBF";
 if (isset($_POST['datos'])) {
 
     $data = isset($_POST['datos']) ? json_decode($_POST['datos'], true) : exit('Acción no permitida');

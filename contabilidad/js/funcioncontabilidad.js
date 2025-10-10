@@ -324,7 +324,7 @@
 				type: "POST",
 				dataType: "json",
 			},
-			columns: [{ data: "fecha" }, { data: "cuenta" }, { data: "nombre" }, { data: "tipo" }, { data: "nivel" }, { data: "estado" }, { data: "botones" }],
+			columns: [{ data: "fecha" }, { data: "cuenta" }, { data: "nombre" }, { data: "tipo" }, { data: "nivel" }, { data: "desagrega" }, { data: "estado" }, { data: "botones" }],
 			order: [],
 		});
 		$("#tableCuentasBanco").wrap('<div class="overflow" />');
@@ -2438,6 +2438,51 @@ const generaMovimientoCxp = (boton) => {
 	}
 	ActivaBoton(boton);
 };
+
+const generaMovimientoTrasCosto = (boton) => {
+	//validar que las fechas no esten vacias, que esten dentro del randon min y max de cada input y que la fecha inicial no sea mayor a la fecha final
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#fecIniTraslado').val() == '' || $('#fecFinTraslado').val() == '') {
+		mjeError("Debe seleccionar el rango de fechas para el traslado de costos");
+	} else if ($('#fecIniTraslado').val() > $('#fecFinTraslado').val()) {
+		mjeError("La fecha inicial no puede ser mayor a la fecha final");
+	} else if ($('#fecIniTraslado').attr('min') > $('#fecIniTraslado').val() || $('#fecIniTraslado').attr('max') < $('#fecIniTraslado').val()) {
+		$('#fecIniTraslado').addClass('is-invalid');
+		$('#fecIniTraslado').focus();
+		mjeError("La fecha inicial debe estar entre " + $('#fecIniTraslado').attr('min') + " y " + $('#fecIniTraslado').attr('max'));
+	} else if ($('#fecFinTraslado').attr('min') > $('#fecFinTraslado').val() || $('#fecFinTraslado').attr('max') < $('#fecFinTraslado').val()) {
+		$('#fecFinTraslado').addClass('is-invalid');
+		$('#fecFinTraslado').focus();
+		mjeError("La fecha final debe estar entre " + $('#fecFinTraslado').attr('min') + " y " + $('#fecFinTraslado').attr('max'));
+	} else {
+		InactivaBoton(boton);
+		let id_doc = $('#id_ctb_doc').val();
+		let fini = $('#fecIniTraslado').val();
+		let ffin = $('#fecFinTraslado').val();
+		let idtercero = $('#id_tercero').val();
+		fetch("datos/registrar/registrar_mvto_libaux_traslado_costos.php", {
+			method: "POST",
+			body: JSON.stringify({ id_doc: id_doc, fini: fini, ffin: ffin, idtercero: idtercero }),
+		})
+			.then((response) => response.json())
+			.then((response) => {
+				console.log(response);
+				if (response.status == "ok") {
+					mje("Movimiento generado con éxito ");
+					setTimeout(function () {
+						location.reload();
+					}, 300);
+				} else {
+					mjeError("Error al guardar:" + response.msg);
+				}
+			})
+			.catch((error) => {
+				console.log("Error:");
+			});
+	}
+	ActivaBoton(boton);
+};
+
 const generaMovimientoInvoice = (boton) => {
 	InactivaBoton(boton);
 	let id_rad = $('#id_rad').val();
@@ -2821,14 +2866,13 @@ const EnviaDocumentoSoporte = (boton, tipo = 0) => {
 		data: { id: id },
 		dataType: "json",
 		success: function (response) {
-			if (response[0].value == "ok") {
-				boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
+			boton.disabled = false;
+			boton.value = id;
+			boton.innerHTML = '<span class="fas fa-paper-plane fa-lg"></span>';
+			if (response.value == "ok") {
 				$('#tableMvtoContable').DataTable().ajax.reload(null, false);
 				mje("Documento enviado correctamente");
 			} else {
-				boton.disabled = false;
-				boton.value = id;
-				boton.innerHTML = '<span class="fas fa-paper-plane fa-lg"></span>';
 				function mjeError(titulo, mensaje) {
 					Swal.fire({
 						title: titulo,
@@ -2836,15 +2880,13 @@ const EnviaDocumentoSoporte = (boton, tipo = 0) => {
 						icon: "error"
 					});
 				}
-				mjeError('', response[0].msg);
+				mjeError('', response.msg);
 			}
 		},
 		error: function (xhr, status, error) {
 			console.error("Error en la solicitud AJAX:", error);
 		}
 	});
-	ActivaBoton(boton);
-	return false
 };
 
 const VerSoporteElectronico = (id) => {
@@ -3659,22 +3701,26 @@ function GuardarReferenciaDr(boton) {
 		$('#accion').addClass('is-invalid');
 		$('#accion').focus();
 		mjeError('Debe seleccionar una acción');
-	} else if ($('#id_codigoCta1').val() == '0') {
+	} else if ($('#id_codigoCta1').val() == '0' && $('#id_codigoCta2').val() == '0') {
 		$('#codigoCta1').addClass('is-invalid');
 		$('#codigoCta1').focus();
-		mjeError('Debe seleccionar una cuenta contable débito');
-	} else if ($('#tipoDato1').val() !== 'D') {
+		mjeError('Debe seleccionar por lo menos una cuenta contable');
+	} else if ($('#id_codigoCta1').val() != '0' && $('#tipoDato1').val() !== 'D') {
 		$('#codigoCta1').addClass('is-invalid');
 		$('#codigoCta1').focus();
 		mjeError('La cuenta contable debe ser de detalle débito');
-	} else if ($('#id_codigoCta2').val() == '0') {
-		$('#codigoCta2').addClass('is-invalid');
-		$('#codigoCta2').focus();
-		mjeError('Debe seleccionar una cuenta contable crédito');
-	} else if ($('#tipoDato2').val() !== 'D') {
+	} else if ($('#id_codigoCta2').val() != '0' && $('#tipoDato2').val() !== 'D') {
 		$('#codigoCta2').addClass('is-invalid');
 		$('#codigoCta2').focus();
 		mjeError('La cuenta contable debe ser de detalle crédito');
+	} else if ($('#accion').val() == '1' && ($('#rubroCod').val() == '' || $('#rubroCod').val() == '0')) {
+		$('#rubroCod').addClass('is-invalid');
+		$('#rubroCod').focus();
+		mjeError('Debe seleccionar un rubro presupuestal');
+	} else if ($('#accion').val() == '1' && $('#tipoRubro').val() == '0') {
+		$('#rubroCod').addClass('is-invalid');
+		$('#rubroCod').focus();
+		mjeError('El rubro debe ser de detalle');
 	} else {
 		var datos = $('#formRefDr').serialize();
 		var id_doc = $('#id_doc_ft').val();
@@ -3682,6 +3728,14 @@ function GuardarReferenciaDr(boton) {
 	}
 	ActivaBoton(boton);
 
+}
+
+function cambiarTipoRefDr(value) {
+	if (value == 1) {
+		$('#divAfectacion').show();
+	} else {
+		$('#divAfectacion').hide();
+	}
 }
 function cerrarReferencia(id) {
 	var data = { estado: 0, id_doc_ref: $('#id_doc_ft').val(), id_ctb_ref: id };
@@ -3735,7 +3789,7 @@ function eliminarReferencia(id) {
 
 $('#btnImpLotes').on('click', function () {
 	var tipo = $('#id_ctb_doc').val();
-	$.post("datos/registrar/form_rango_imp", { tipo: tipo }, function (he) {
+	$.post("datos/registrar/form_rango_imp.php", { tipo: tipo }, function (he) {
 		$("#divTamModalForms").removeClass("modal-xl");
 		$("#divTamModalForms").removeClass("modal-sm");
 		$("#divTamModalForms").removeClass("modal-lg");
@@ -3744,3 +3798,80 @@ $('#btnImpLotes').on('click', function () {
 		$("#divForms").html(he);
 	});
 });
+
+function formDesagregacion(id) {
+	$.post("datos/registrar/form_desagrega.php", { id: id }, function (he) {
+		$("#divTamModalForms").removeClass("modal-xl");
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").removeClass("modal-lg");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+}
+function formCostos(id) {
+	$.post("datos/registrar/form_costos.php", { id: id }, function (he) {
+		$("#divTamModalForms").removeClass("modal-xl");
+		$("#divTamModalForms").removeClass("modal-sm");
+		$("#divTamModalForms").addClass("modal-lg");
+		$("#divModalForms").modal("show");
+		$("#divForms").html(he);
+	});
+}
+
+function GuardarDesagregacion() {
+	var datos = $('#formDesagregacion').serialize();
+	$.ajax({
+		url: 'datos/registrar/registrar_desagrega.php',
+		type: 'POST',
+		data: datos,
+		success: function (r) {
+			mje(r);
+			$('#tablePlanCuentas').DataTable().ajax.reload(null, false);
+		}
+	});
+}
+
+function GuardarCtasTrasladoCostos() {
+	$('.is-invalid').removeClass('is-invalid');
+	if ($('#codigoCta1').val() == '') {
+		$('#codigoCta1').addClass('is-invalid');
+		$('#codigoCta1').focus();
+		mjeError('Debe seleccionar una cuenta contable débito');
+	} else if ($('#id_codigoCta1').val() == '0') {
+		$('#codigoCta1').addClass('is-invalid');
+		$('#codigoCta1').focus();
+		mjeError('Debe seleccionar una cuenta contable débito');
+	} else if ($('#tipoDato1').val() !== 'D') {
+		$('#codigoCta1').addClass('is-invalid');
+		$('#codigoCta1').focus();
+		mjeError('La cuenta contable debe ser de detalle débito');
+	} else if ($('#codigoCta2').val() == '') {
+		$('#codigoCta2').addClass('is-invalid');
+		$('#codigoCta2').focus();
+		mjeError('Debe seleccionar una cuenta contable crédito');
+	} else if ($('#id_codigoCta2').val() == '0') {
+		$('#codigoCta2').addClass('is-invalid');
+		$('#codigoCta2').focus();
+		mjeError('Debe seleccionar una cuenta contable crédito');
+	} else if ($('#tipoDato2').val() !== 'D') {
+		$('#codigoCta2').addClass('is-invalid');
+		$('#codigoCta2').focus();
+		mjeError('La cuenta contable debe ser de detalle crédito');
+	} else {
+		var datos = $('#formTrasladoCostos').serialize();
+		$.ajax({
+			url: 'datos/registrar/registrar_traslado_costos.php',
+			type: 'POST',
+			data: datos,
+			success: function (r) {
+				if (r == 'ok') {
+					$('#divModalForms').modal('hide');
+					mje('Proceso realizado correctamente');
+					$('#tablePlanCuentas').DataTable().ajax.reload(null, false);
+				} else {
+					mjeError(r);
+				}
+			}
+		});
+	}
+}

@@ -32,7 +32,7 @@ try {
         }
     }
 
-    $consecutivo = !empty($datos) ? $datos['num_doc'] + 1 : 1;
+    $consecutivo = !empty($datos) ? intval($datos['num_doc']) + 1 : 1;
     $consecutivo = $siguiente >= $consecutivo ? $siguiente : $consecutivo;
     $response['status'] = 'ok';
     $response['consecutivo'] = $pref . $consecutivo;

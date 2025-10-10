@@ -68,15 +68,16 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </div>
                                 </div>
                                 <table id="tablePlanCuentas" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
-                                    <thead>
+                                    <thead class="text-center">
                                         <tr>
                                             <th style="width: 12%;">Fecha</th>
-                                            <th style="width: 14%;">Cuenta</th>
-                                            <th style="width: 42%;">Nombre</th>
+                                            <th style="width: 12%;">Cuenta</th>
+                                            <th style="width: 40%;">Nombre</th>
                                             <th style="width: 5%;">Tipo</th>
                                             <th style="width: 5%;">Nivel</th>
+                                            <th style="width: 5%;" title="Desagregación de terceros">Des.</th>
                                             <th style="width: 7%;">Estado</th>
-                                            <th style="width: 10%;">Acciones</th>
+                                            <th style="width: 14%;">Acciones</th>
 
                                         </tr>
                                     </thead>
@@ -89,6 +90,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             <th>Nombre</th>
                                             <th>Tipo</th>
                                             <th>Nivel</th>
+                                            <th title="Desagregación de terceros">Des.</th>
                                             <th>Estado</th>
                                             <th>Acciones</th>
                                         </tr>

@@ -22,13 +22,23 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM pto_rad_detalle";
+    $sql = "SELECT
+                COUNT(*) AS total
+            FROM
+                pto_rad_detalle
+                INNER JOIN pto_cargue ON (pto_rad_detalle.id_rubro = pto_cargue.id_cargue)
+            WHERE pto_rad_detalle.id_pto_rad=$id_pto_rad";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(*) AS total FROM pto_rad_detalle $where";
+    $sql = "SELECT
+                COUNT(*) AS total
+            FROM
+                pto_rad_detalle
+                INNER JOIN pto_cargue ON (pto_rad_detalle.id_rubro = pto_cargue.id_cargue)
+            WHERE pto_rad_detalle.id_pto_rad=$id_pto_rad";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
@@ -43,8 +53,7 @@ try {
             FROM
                 pto_rad_detalle
                 INNER JOIN pto_cargue ON (pto_rad_detalle.id_rubro = pto_cargue.id_cargue)
-            WHERE pto_rad_detalle.id_pto_rad=$id_pto_rad";  
-
+            WHERE pto_rad_detalle.id_pto_rad=$id_pto_rad";
     $rs = $cmd->query($sql);
     $obj_rubros = $rs->fetchAll();
     $cmd = null;
