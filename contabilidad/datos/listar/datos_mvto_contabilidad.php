@@ -7,6 +7,8 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../../../permisos.php';
 include '../../../terceros.php';
+//aumentar memoria  toda 
+ini_set('memory_limit', '-1');
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
 $anulados = $_POST['anulados'];

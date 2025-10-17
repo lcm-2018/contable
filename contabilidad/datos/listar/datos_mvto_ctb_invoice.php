@@ -8,6 +8,7 @@ include '../../../conexion.php';
 include '../../../permisos.php';
 include '../../../terceros.php';
 // Div de acciones de la lista
+ini_set('memory_limit', '-1');
 $cod_ctb_doc = $_POST['cod_doc'];
 $anulados = $_POST['anulados'];
 $id_vigencia = $_SESSION['id_vigencia'];
@@ -61,20 +62,22 @@ try {
                 , `ctb_doc`.`estado`
                 , '' AS `pag`
             FROM
-                `ctb_doc`
-                LEFT JOIN `pto_rad` 
+                `pto_rad`
+                INNER JOIN `ctb_doc` 
                     ON (`ctb_doc`.`id_rad` = `pto_rad`.`id_pto_rad`)
-                LEFT JOIN `ctb_libaux` 
+                INNER JOIN `ctb_libaux` 
                     ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                INNER JOIN `ctb_fuente` 
+                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
                 LEFT JOIN `tb_terceros` 
                     ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
-                LEFT JOIN `ctb_fuente` 
-                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
             WHERE (`ctb_fuente`.`cod` = '$cod_ctb_doc' AND `ctb_doc`.`id_vigencia` = $id_vigencia) $andwhere
             GROUP BY `pto_rad`.`id_pto_rad`, `ctb_doc`.`id_ctb_doc`
             ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $listappto = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -145,7 +148,9 @@ try {
                 `ctb_libaux`
             GROUP BY `id_ctb_doc`";
     $rs = $cmd->query($sql);
-    $diferencias = $rs->fetchAll();
+    $diferencias = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -161,6 +166,8 @@ try {
             WHERE (`fecha` BETWEEN '$inicia' AND '$termina')";
     $rs = $cmd->query($sql);
     $equivalente = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }

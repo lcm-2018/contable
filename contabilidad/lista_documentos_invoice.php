@@ -17,7 +17,9 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT `cod`, `nombre` FROM `ctb_fuente` WHERE `contab` = 2 ORDER BY `nombre`";
     $rs = $cmd->query($sql);
-    $docsFuente = $rs->fetchAll();
+    $docsFuente = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
