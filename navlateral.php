@@ -779,6 +779,18 @@ $urlin = $_SESSION['urlin'];
                                                     </div>
                                                 </a>
                                             <?php }
+                                            if (PermisosUsuario($permisos, 5511, 0) || $id_rol == 1) {
+                                            ?>
+                                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/php/tipos_orden_egreso/index.php">
+                                                    <div class="div-icono">
+                                                        <i class="fas fa-layer-group fa-sm" style="color: green;"></i>
+                                                    </div>
+                                                    <div>
+                                                        Tipos Orden Egreso
+                                                    </div>
+                                                </a>
+                                            <?php }
+
                                             if (false) {
                                             ?>
                                                 <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/list_documentos_soporte.php">

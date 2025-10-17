@@ -53,14 +53,15 @@
                 { 'data': 'cta_caja' },
                 { 'data': 'cta_fac_global' },
                 { 'data': 'cta_x_ident' },
+                { 'data': 'cta_baja' },
                 { 'data': 'vigente' },
                 { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [2, 3] },
-                { visible: false, targets: 18 },
-                { orderable: false, targets: 20 },
+                { visible: false, targets: 19 },
+                { orderable: false, targets: 21 },
             ],
             rowCallback: function(row, data, index) {
                 if (data.vigente == 'X') {

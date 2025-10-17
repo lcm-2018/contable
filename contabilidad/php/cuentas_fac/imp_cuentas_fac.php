@@ -34,6 +34,7 @@ try {
                 IF(c_caja.cuenta IS NULL,'',CONCAT_WS(' - ',c_caja.cuenta,c_caja.nombre)) AS cta_caja,
                 IF(c_fac_glo.cuenta IS NULL,'',CONCAT_WS(' - ',c_fac_glo.cuenta,c_fac_glo.nombre)) AS cta_fac_global,
                 IF(c_x_ide.cuenta IS NULL,'',CONCAT_WS(' - ',c_x_ide.cuenta,c_x_ide.nombre)) AS cta_x_ident,
+                IF(c_baja.cuenta IS NULL,'',CONCAT_WS(' - ',c_baja.cuenta,c_baja.nombre)) AS cta_baja,
 	            IF(tb_homologacion.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM tb_homologacion
             INNER JOIN tb_regimenes ON (tb_regimenes.id_regimen=tb_homologacion.id_regimen)
@@ -52,6 +53,7 @@ try {
             LEFT JOIN ctb_pgcp AS c_caja ON (c_caja.id_pgcp=tb_homologacion.id_cta_caja)
             LEFT JOIN ctb_pgcp AS c_fac_glo ON (c_fac_glo.id_pgcp=tb_homologacion.id_cta_fac_global)
             LEFT JOIN ctb_pgcp AS c_x_ide ON (c_x_ide.id_pgcp=tb_homologacion.id_cta_x_ident)
+            LEFT JOIN ctb_pgcp AS c_baja ON (c_baja.id_pgcp=tb_homologacion.id_cta_baja)
             $where ORDER BY tb_homologacion.id_homo DESC";
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
@@ -118,42 +120,58 @@ try {
                                 <tr>
                                     <td>Cta. Presupuesto:</td>
                                     <td>' . $obj['cta_presupuesto'] . '</td>
-                                </tr>
+                                </tr>    
+                                <tr>
                                     <td>Cta. Presupuesto Anterior:</td>
-                                    <td>' . $obj['cta_presupuesto_ant'] . '</td>
+                                    <td>' . $obj['cta_presupuesto_ant'] . '</td>                                    
                                 </tr>
+                                <tr>
                                     <td>Cta. Débito:</td>                                
                                     <td>' . $obj['cta_debito'] . '</td>
                                 </tr>
+                                <tr>
                                     <td>Cta. Crédito:</td>
                                     <td>' . $obj['cta_credito'] . '</td>
                                 </tr>    
+                                <tr>
                                     <td>Cta. Copago:</td>
                                     <td>' . $obj['cta_copago'] . '</td>
                                 </tr>
+                                <tr>
                                     <td>Cta. Copago Capitado:</td>
                                     <td>' . $obj['cta_copago_capitado'] . '</td>
                                 </tr>
+                                <tr>
                                     <td>Cta. Glosa Inicial Débito:</td>
                                     <td>' . $obj['cta_glosaini_debito'] . '</td>
                                 </tr>
+                                <tr>
                                     <td>Cta. Glosa Inicial Crédito:</td>
-                                    <td>' . $obj['cta_glosaini_credito'] . '</td>
+                                    <td>' . $obj['cta_glosaini_credito'] . '</td>                                    
                                 </tr>
+                                <tr>
                                     <td>Cta. Glosa Definitiva:</td>
                                     <td>' . $obj['cta_glosadefinitiva'] . '</td>
                                 </tr>
+                                <tr>
                                     <td>Cta. Devolución:</td>
                                     <td>' . $obj['cta_devolucion'] . '</td>
                                 </tr>
+                                <tr>
                                     <td>Cta. Caja:</td>
                                     <td>' . $obj['cta_caja'] . '</td>
                                 </tr>
+                                <tr>
                                     <td>Cta. Factura Global:</td>
                                     <td>' . $obj['cta_fac_global'] . '</td>
                                 </tr>
+                                <tr>
                                     <td>Cta. Por Identificar:</td>
                                     <td>' . $obj['cta_x_ident'] . '</td>
+                                </tr>
+                                <tr>
+                                    <td>Cta. Baja:</td>
+                                    <td>' . $obj['cta_baja'] . '</td>
                                 </tr>
                             </table>
                         </td>  

@@ -9,32 +9,32 @@ include '../../../permisos.php';
 //Permisos: 1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir
 
 $oper = isset($_POST['oper']) ? $_POST['oper'] : exit('Acción no permitida');
-$fecha_crea = date('Y-m-d H:i:s');
-$id_usr_crea = $_SESSION['id_user'];
+$fecha_crea = new DateTime('now', new DateTimeZone('America/Bogota'));
+$fecha_ope = date('Y-m-d H:i:s');
+$id_usr_ope = $_SESSION['id_user'];
 $res = array();
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-    if ((PermisosUsuario($permisos, 5015, 2) && $oper == 'add' && $_POST['id_area'] == -1) ||
-        (PermisosUsuario($permisos, 5015, 3) && $oper == 'add' && $_POST['id_area'] != -1) ||
-        (PermisosUsuario($permisos, 5015, 4) && $oper == 'del') || $id_rol == 1
+    if ((PermisosUsuario($permisos, 5511, 2) && $oper == 'add' && $_POST['id_subgrupo'] == -1) ||
+        (PermisosUsuario($permisos, 5511, 3) && $oper == 'add' && $_POST['id_subgrupo'] != -1) ||
+        (PermisosUsuario($permisos, 5511, 4) && $oper == 'del') || $id_rol == 1
     ) {
 
         if ($oper == 'add') {
-            $id = $_POST['id_area'];
-            $nom_area = $_POST['txt_nom_area'];
-            $id_cencos = $_POST['sl_centrocosto'] ? $_POST['sl_centrocosto'] : 0;
-            $id_tipare = $_POST['sl_tipo_area'] ? $_POST['sl_tipo_area'] : 0;
-            $id_respon = $_POST['id_txt_responsable'] ? $_POST['id_txt_responsable'] : 0;
-            $id_sede = $_POST['sl_sede'] ? $_POST['sl_sede'] : 1;
-            $id_bodega = $_POST['sl_bodega'] ? $_POST['sl_bodega'] : 'NULL';
+            $id = $_POST['id_subgrupo'];
+            $cod_subgrupo = $_POST['txt_cod_subgrupo'];
+            $nom_subgrupo = $_POST['txt_nom_subgrupo'];
+            $id_grupo = $_POST['sl_grp_subgrupo'] ? $_POST['sl_grp_subgrupo'] : 0;
+            $es_clinico = $_POST['rdo_escli_subgrupo'];
+            $lote_xdef = $_POST['sl_lotexdef'] ? $_POST['sl_lotexdef'] : 0;
             $estado = $_POST['sl_estado'];
 
             if ($id == -1) {
-                $sql = "INSERT INTO far_centrocosto_area(nom_area,id_centrocosto,id_tipo_area,id_responsable,id_sede,id_bodega,estado,id_usr_crea,fec_crea) 
-                        VALUES('$nom_area',$id_cencos,$id_tipare,$id_respon,$id_sede,$id_bodega,$estado,$id_usr_crea,'$fecha_crea')";
+                $sql = "INSERT INTO far_subgrupos(cod_subgrupo,nom_subgrupo,id_grupo,es_clinico,lote_xdef,estado,id_usr_crea,fec_crea) 
+                        VALUES($cod_subgrupo,'$nom_subgrupo',$id_grupo,$es_clinico,$lote_xdef,$estado,$id_usr_ope,'$fecha_ope')";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -47,10 +47,9 @@ try {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }
             } else {
-                $sql = "UPDATE far_centrocosto_area 
-                        SET nom_area='$nom_area',id_centrocosto=$id_cencos,id_tipo_area=$id_tipare,
-                            id_responsable=$id_respon,id_sede=$id_sede,id_bodega=$id_bodega,estado=$estado
-                        WHERE id_area=" . $id;
+                $sql = "UPDATE far_subgrupos 
+                        SET cod_subgrupo=$cod_subgrupo,nom_subgrupo='$nom_subgrupo',id_grupo=$id_grupo,es_clinico=$es_clinico,lote_xdef=$lote_xdef,estado=$estado 
+                        WHERE id_subgrupo=" . $id;
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -64,9 +63,13 @@ try {
 
         if ($oper == 'del') {
             $id = $_POST['id'];
-            $sql = "DELETE FROM far_centrocosto_area WHERE id_area=" . $id;
+            $sql = "DELETE FROM far_subgrupos WHERE id_subgrupo=" . $id;
             $rs = $cmd->query($sql);
             if ($rs) {
+                include '../../../financiero/reg_logs.php';
+                $ruta = '../../../log';
+                $consulta = "DELETE FROM far_subgrupos WHERE id_subgrupo = $id";
+                RegistraLogs($ruta, $consulta);
                 $res['mensaje'] = 'ok';
             } else {
                 $res['mensaje'] = $cmd->errorInfo()[2];

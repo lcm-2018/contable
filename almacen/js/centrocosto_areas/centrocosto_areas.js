@@ -34,6 +34,7 @@
                     data.nom_area = $('#txt_nombre_filtro').val();
                     data.id_cencosto = $('#sl_centrocosto_filtro').val();
                     data.id_sede = $('#sl_sede_filtro').val();
+                    data.estado = $('#sl_estado_filtro').val();
                 }
             },
             columns: [
@@ -44,12 +45,13 @@
                 { 'data': 'nom_sede' },
                 { 'data': 'usr_responsable' },
                 { 'data': 'nom_bodega' },
+                { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [1, 2] },
                 { visible: false, targets: 6 },
-                { orderable: false, targets: 7 }
+                { orderable: false, targets: 8 }
             ],
             order: [
                 [0, "desc"]
@@ -112,6 +114,7 @@
         error += verifica_vacio_2($('#id_txt_responsable'), $('#txt_responsable'));
         error += verifica_vacio($('#sl_centrocosto'));
         error += verifica_vacio($('#sl_sede'));
+        error += verifica_vacio($('#sl_estado'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
@@ -174,7 +177,9 @@
         reloadtable('tb_cencos_areas');
         $.post("imp_cencos_areas.php", {
             nom_area: $('#txt_nombre_filtro').val(),
-            id_cencosto: $('#sl_centrocosto_filtro').val()
+            id_cencosto: $('#sl_centrocosto_filtro').val(),
+            id_sede: $('#sl_sede_filtro').val(),
+            estado: $('#sl_estado_filtro').val()
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

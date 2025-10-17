@@ -14,7 +14,8 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     
     echo '<option value="">' . $titulo . '</option>';    
-    $sql = "SELECT id_area,nom_area,id_responsable FROM far_centrocosto_area WHERE id_area<>0 AND id_sede=$idsede
+    $sql = "SELECT id_area,nom_area,id_responsable FROM far_centrocosto_area 
+            WHERE id_area<>0 AND estado=1 AND id_sede=$idsede
             ORDER BY es_almacen DESC,nom_area";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();

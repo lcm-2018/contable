@@ -14,11 +14,6 @@ if (!isset($_SESSION['user'])) {
 
 include '../../../conexion.php';
 include '../../../permisos.php';
-include '../common/cargar_combos.php';
-
-$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-
 ?>
 
 <!DOCTYPE html>
@@ -39,7 +34,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <div class="row">
                                 <div class="col-md-11">
                                     <i class="fas fa-list-ul fa-lg" style="color:#1D80F7"></i>
-                                    AREAS DE CENTRO DE COSTO
+                                    SUBGRUPOS ARTICULOS
                                 </div>
                             </div>
                         </div>
@@ -52,24 +47,9 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <div class="form-group col-md-2">
                                     <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
                                 </div>
-                                <div class="filtro form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_centrocosto_filtro">
-                                        <?php centros_costo($cmd, '--Centro Costo--') ?>
-                                    </select>
-                                </div>    
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_sede_filtro">
-                                        <?php sedes($cmd, '--Sede--') ?>
-                                    </select>
-                                </div>   
-                                <div class="form-group col-md-1">
-                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
-                                        <?php estados_registros('--Estado--') ?>
-                                    </select>
-                                </div> 
                                 <div class="form-group col-md-1">
                                     <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
-                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>                                       
+                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
                                     </a>
                                     <a type="button" id="btn_imprime_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
                                         <span class="fas fa-print" aria-hidden="true"></span>                                       
@@ -78,32 +58,39 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             </div>
 
                             <!--Lista de registros en la tabla
-                                5015-Opcion [General][Centro Costo-Areas]
+                                5511-Opcion [Articulos][Subgrupos]
                                 1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
                             -->
                             <?php
-                            if (PermisosUsuario($permisos, 5015, 2) || $id_rol == 1) {
+                            if (PermisosUsuario($permisos, 5511, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';
                             } else {
                                 echo '<input type="hidden" id="peReg" value="0">';
                             }
                             ?>
-                            <table id="tb_cencos_areas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <table id="tb_subgrupos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>
                                     <tr class="text-center centro-vertical">
-                                        <th>Id</th>                                        
-                                        <th>Nombre</th>
-                                        <th>Tipo Area</th>
-                                        <th>Centro Costo</th>                                        
-                                        <th>Sede</th>
-                                        <th>Responsable</th>                                        
-                                        <th>Bodega</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
+                                        <th rowspan="2">Id</th>
+                                        <th rowspan="2">Código</th>
+                                        <th rowspan="2">Nombre</th>
+                                        <th colspan="4">Cuentas Contables Vigenetes</th>
+                                        <th rowspan="2">Grupo</th>
+                                        <th rowspan="2">Uso Asistencial</th>
+                                        <th rowspan="2">Lote x Defecto</th>
+                                        <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Acciones</th>
+                                    </tr>
+                                    <tr class="text-center centro-vertical">
+                                        <th>Inventario</th>
+                                        <th>Activo Fijo</th>
+                                        <th>Depreciación Acf</th>
+                                        <th>Gasto Depresc. Acf</th>
                                     </tr>
                                 </thead>
                             </table>
                         </div>
+
                     </div>
                 </div>
             </main>
@@ -112,7 +99,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
         <?php include '../../../modales.php' ?>
     </div>
     <?php include '../../../scripts.php' ?>    
-    <script type="text/javascript" src="../../js/centrocosto_areas/centrocosto_areas.js?v=<?php echo date('YmdHis') ?>"></script>
+    <script type="text/javascript" src="../../js/subgrupos/subgrupos.js?v=<?php echo date('YmdHis') ?>"></script>
 </body>
 
 </html>
