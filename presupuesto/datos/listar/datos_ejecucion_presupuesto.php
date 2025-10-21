@@ -137,7 +137,7 @@ if (!empty($listappto)) {
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
         // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
         $info = base64_encode($id_pto . '|cdp');
-        if (!($fecha <= $fecha_cierre) && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1)) {
+        if ($fecha > $fecha_cierre && (PermisosUsuario($permisos, 5401, 5) || $id_rol == 1)) {
             $anular = '<button text="' . $info . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="Anular" onclick="anulacionPto(this);"><span class="fas fa-ban fa-lg"></span></button>';
         }
         if (PermisosUsuario($permisos, 5401, 2) || $id_rol == 1) {
@@ -162,7 +162,7 @@ if (!empty($listappto)) {
         }
         if (PermisosUsuario($permisos, 5401, 4) || $id_rol == 1) {
             $borrar = '<a value="' . $id_pto . '"    onclick="eliminarCdp(' . $id_pto . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb " title="Registrar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-            if ($fecha < $fecha_cierre) {
+            if ($fecha <= $fecha_cierre) {
                 $borrar = null;
             }
             if ($lp['val_cdp'] ==  $cxregistrar) {
@@ -179,7 +179,7 @@ if (!empty($listappto)) {
             } else {
                 $abrir = '<a onclick="cerrarCdp(' . $id_pto . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb " title="Cerrar CDP"><span class="fas fa-unlock fa-lg"></span></a>';
             }
-            if ($fecha < $fecha_cierre) {
+            if ($fecha <= $fecha_cierre) {
                 $abrir = null;
             }
         }

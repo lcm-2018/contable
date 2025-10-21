@@ -20,6 +20,28 @@
             });
         }
     });
+    $('#frm_libros_aux_bancos').on("click", "#btn_csv", function () {
+        if ($('#id_txt_cuentainicial').val() == "" || $('#id_txt_cuentafinal').val() == "") {
+            mjeError("Debe seleccionar la cuenta inicial y la cuenta final");
+        } else {
+            // Crear un form temporal para enviar el POST
+            let form = $('<form>', {
+                method: 'POST',
+                action: window.urlin + '/contabilidad/php/informes_bancos/imp_libros_bancos_excel.php'
+            });
+
+            form.append($('<input>', { type: 'hidden', name: 'id_cuenta_ini', value: $('#id_txt_cuentainicial').val() }));
+            form.append($('<input>', { type: 'hidden', name: 'id_cuenta_fin', value: $('#id_txt_cuentafinal').val() }));
+            form.append($('<input>', { type: 'hidden', name: 'fec_ini', value: $('#txt_fecini').val() }));
+            form.append($('<input>', { type: 'hidden', name: 'fec_fin', value: $('#txt_fecfin').val() }));
+            form.append($('<input>', { type: 'hidden', name: 'id_tipo_doc', value: $('#sl_tipo_documento').val() }));
+            form.append($('<input>', { type: 'hidden', name: 'id_tercero', value: $('#id_txt_tercero').val() }));
+
+            $('body').append(form);
+            form.submit();
+            form.remove();
+        }
+    });
 })(jQuery);
 
 //buscar con 2 letras cuentas y terceros 

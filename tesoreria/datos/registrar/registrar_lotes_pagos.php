@@ -39,7 +39,7 @@ try {
     $sql = "SELECT 
                     `ctb_doc`.`id_ctb_doc`
                     ,`ctb_doc`.`id_tercero`
-                    , DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') AS `fecha`
+                    , (SELECT `fecha` FROM `tes_referencia` WHERE `id_referencia` = (SELECT MAX(`id_referencia`) AS `id_referencia` FROM `tes_referencia` WHERE (`estado` = 1))) AS `fecha`
                     , `ctb_doc`.`detalle`
                     , (SELECT MAX(`id_referencia`) AS `id_referencia` FROM `tes_referencia` WHERE (`estado` = 1)) AS `id_ref`
                     , `tb_terceros`.`nom_tercero`
@@ -93,7 +93,8 @@ try {
     foreach ($causaciones as $cs) {
         //Insertar en `ctb_doc`
         $id_manu = $id_manu + 1;
-        $fec_doc = $cs['fecha'] < $fecha_cierre ? date('Y-m-d') : $cs['fecha'];
+
+        $fec_doc = $cs['fecha'] > $fecha_cierre ? $cs['fecha'] : date('Y-m-d', strtotime($fecha_cierre . ' +1 day'));
         $query = "INSERT INTO `ctb_doc`
                         (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`,`id_ref`,`id_ctb_doc_tipo3`)
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

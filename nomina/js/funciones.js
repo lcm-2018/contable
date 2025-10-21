@@ -180,7 +180,7 @@
         let accion = $(this).attr('value');
         if (accion == '1') {
             $(this).attr('disabled', 'disabled');
-            $(this).html('<i class="fa fa-spinner fa-spin"></i> Procesando...');
+            $(this).html('<i class="fa fa-spinner fa-spin"></i>');
         }
         $.post('imp_desprendibles_nomina.php', { id_nomina: id_nomina, cedula: cedula, accion: accion, sede: sede }, function (he) {
             $('#divTamModalForms').removeClass('modal-xl');

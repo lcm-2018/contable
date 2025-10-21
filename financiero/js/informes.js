@@ -13,17 +13,23 @@ const FormInfFinanciero = (tipo) => {
         case 4:
             url = 'formulario_informe_financiero.php?tipo=4';
             break;
+        case 5:
+            url = 'form_ejec_pptal.php';
+            break;
+        case 6:
+            url = 'form_ft004.php?tipo=6';
+            break;
         default:
             console.error('Tipo de informe no válido');
             return;
     }
-    //ajax por post 
+
     $.ajax({
         type: 'POST',
         url: url,
         data: { tipo: tipo },
         success: function (response) {
-            $('#form_financiero').html(response);
+            $('#areaReporte').html(response);
         },
         error: function (xhr, status, error) {
             console.error('Error al cargar el formulario:', error);
@@ -34,6 +40,11 @@ const FormInfFinanciero = (tipo) => {
 const InformeFinanciero = (boton) => {
     var tipo = $(boton).val();
     var periodo = $('#periodo').val();
+    var url = '';
+    if ($('#tp_presupuesto').length && $('#tp_presupuesto').val() == '0') {
+        mjeError('Debe seleccionar un tipo de presupuesto');
+        return false;
+    }
     if (periodo === '0') {
         mjeError('Debe seleccionar un periodo');
         return false;
@@ -48,7 +59,18 @@ const InformeFinanciero = (boton) => {
         case '3':
             url = 'informe_ejecucion.php';
             break;
+        case '4':
+            if ($('#tp_presupuesto').val() == '1') {
+                url = 'inf_siho_ingresos.php';
+            } else {
+                url = 'inf_siho_gastos.php';
+            }
+            break;
+        case '5':
+            url = 'inf_ft004.php';
+            break;
     }
+    InactivaBoton(boton);
     $.ajax({
         type: 'POST',
         url: url,
@@ -59,6 +81,8 @@ const InformeFinanciero = (boton) => {
         error: function (xhr, status, error) {
             console.error('Error al cargar el informe:', error);
         }
+    }).always(function () {
+        ActivaBoton(boton);
     });
 }
 

@@ -13,12 +13,14 @@ $fecha_ini = $_POST['fecha_arqueo_ini'];
 $fecha_fin = $_POST['fecha_arqueo_fin'];
 $id_tercero_api = $_POST['id_facturador'];
 $observaciones = $_POST['observaciones'];
+$arqueos = $_POST['arqueo'] ?? [];
 $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $fecha2 = $date->format('Y-m-d H:i:s');
 $response['status'] = 'error';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
 try {
     if ($id_detalle == 0) {
         $query = "INSERT INTO `tes_causa_arqueo`
@@ -36,6 +38,25 @@ try {
         $query->bindParam(9, $fecha2, PDO::PARAM_STR);
         $query->execute();
         if ($cmd->lastInsertId() > 0) {
+            $id = $cmd->lastInsertId();
+            $sq = "INSERT INTO `tes_ids_arqueo` (`id_causa`, `id_arqueo`, `id_user_reg`,`fec_reg`)
+                    VALUES (?, ?, ?, ?)";
+            $sq = $cmd->prepare($sq);
+
+            $sq->bindParam(1, $id, PDO::PARAM_INT);
+            $sq->bindParam(2, $id_arqueo, PDO::PARAM_INT);
+            $sq->bindParam(3, $iduser, PDO::PARAM_INT);
+            $sq->bindParam(4, $fecha2, PDO::PARAM_STR);
+
+            $up = "UPDATE `fac_arqueo` SET `estado` = 3 WHERE `id_arqueo` = ?";
+            $up = $cmd->prepare($up);
+            $up->bindParam(1, $id_arqueo, PDO::PARAM_INT);
+
+            foreach ($arqueos as $key => $value) {
+                $id_arqueo = $key;
+                $sq->execute();
+                $up->execute();
+            }
             $query = "SELECT SUM(`valor_arq`) AS `valor` FROM `tes_causa_arqueo` WHERE `id_ctb_doc` = $id_doc";
             $rs = $cmd->query($query);
             $valor = $rs->fetch();

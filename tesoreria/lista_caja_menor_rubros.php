@@ -15,7 +15,7 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 6, $cmd);
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 56, $cmd);
 $fecha = fechaSesion($_SESSION['vigencia'], $_SESSION['id_user'], $cmd);
 $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 

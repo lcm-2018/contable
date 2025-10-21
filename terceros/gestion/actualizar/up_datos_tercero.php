@@ -28,6 +28,9 @@ $es_clinic = $_POST['rdo_esasist'];
 $iduser = $_SESSION['id_user'];
 $tipouser = 'user';
 $nit_act = $_SESSION['nit_emp'];
+$planilla = $_POST['rdo_planilla'];
+$riesgo = isset($_POST['slcRiesgoLab']) ? $_POST['slcRiesgoLab'] : 0;
+$riesgo = $planilla == 0 ? NULL : $riesgo;
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 //API URL
 $data = [
@@ -57,13 +60,15 @@ curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $result = curl_exec($ch);
 curl_close($ch);
 $res = json_decode($result, true);
 if ($res == '1' || $res == '0' || $fecInicio != '') {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $respuesta = UpTercerosEmpresa($api, [$idter], $cmd, $fecInicio,$es_clinic);
+    $respuesta = UpTercerosEmpresa($api, [$idter], $cmd, $fecInicio, $es_clinic, $planilla, $riesgo);
     if ($respuesta == 'ok') {
         echo 'ok';
     } else {

@@ -7,6 +7,8 @@ if (!isset($_SESSION['user'])) {
 include '../../../conexion.php';
 include '../../../permisos.php';
 include '../../../terceros.php';
+//aumentar memoria  toda 
+ini_set('memory_limit', '-1');
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
 $anulados = $_POST['anulados'];
@@ -47,8 +49,7 @@ if (isset($_POST['tercero']) && $_POST['tercero']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     if ($_POST['estado'] == "-1") {
         $andwhere .= " AND ctb_doc.estado>=" . $_POST['estado'];
-    } 
-    else {
+    } else {
         $andwhere .= " AND ctb_doc.estado=" . $_POST['estado'];
     }
 }
@@ -103,7 +104,9 @@ try {
             GROUP BY `ctb_doc`.`id_ctb_doc`
             ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
-    $listappto = $rs->fetchAll();
+    $listappto = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -170,7 +173,9 @@ try {
                 `ctb_libaux`
             GROUP BY `id_ctb_doc`";
     $rs = $cmd->query($sql);
-    $diferencias = $rs->fetchAll();
+    $diferencias = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -186,6 +191,8 @@ try {
             WHERE (`fecha` BETWEEN '$inicia' AND '$termina')";
     $rs = $cmd->query($sql);
     $equivalente = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }

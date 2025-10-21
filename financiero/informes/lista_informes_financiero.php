@@ -45,9 +45,21 @@ include '../../financiero/consultas.php';
                                     <a class="dropdown-item sombra" href="#" onclick="FormInfFinanciero(4);">Sia Observa</a>
                                 </div>
                             </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle sombra" data-toggle="dropdown" href="#" role="button" aria-expanded="false">SIHO</a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item sombra" href="#" onclick="FormInfFinanciero(5);">Ejecución Presupuestal</a>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle sombra" data-toggle="dropdown" href="#" role="button" aria-expanded="false">SUPERSALUD</a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item sombra" href="#" onclick="FormInfFinanciero(6);" title="Cuentas por pagar">FT004</a>
+                                </div>
+                            </li>
                         </ul>
                     </div>
-                    <div class="contenedor card-body" id="form_financiero">
+                    <div class="contenedor card-body" id="areaReporte">
 
                     </div>
                 </div>

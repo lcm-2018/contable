@@ -14,7 +14,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 <div class="px-0">
     <div class="shadow">
         <div class="card-header mb-3" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">LIBROS AUXILIARES DE BANCOS</h5>
+            <h5 style="color: white;">LIBROS AUXILIARES</h5>
         </div>
         <div class="px-2">
             <form id="frm_libros_aux_bancos">
@@ -41,7 +41,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     </div>
                 </div>
                 <div class=" form-row">
-                    <div class="form-group col-md-5">
+                    <div class="form-group col-md-4">
                         <label for="sl_tipo_documento" class="small">Tipo documento</label>
                         <select class="filtro form-control form-control-sm" id="sl_tipo_documento" name="sl_tipo_documento">
                             <?php tipo_documento($cmd, '--Seleccione--', 0) ?>
@@ -56,6 +56,12 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                         <label for="btn_consultar" class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                         <a type="button" id="btn_consultar" class="btn btn-outline-success btn-sm" title="Consultar">
                             <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label for="btn_csv" class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                        <a type="button" id="btn_csv" class="btn btn-outline-success btn-sm" title="Exportar a CSV">
+                            <span class="fas fa-file-csv fa-lg" aria-hidden="true"></span>
                         </a>
                     </div>
                     <div class="form-group col-md-1">

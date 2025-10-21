@@ -11,14 +11,13 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "SELECT
-                `numero`
-                , `id_tes_cuenta`
+                `numero`, `id_tes_cuenta`, `fecha`
             FROM `tes_referencia`
             WHERE `id_referencia` = $id_referencia";
     $rs = $cmd->query($sql);
     $referencia = $rs->fetch(PDO::FETCH_ASSOC);
     if (empty($referencia)) {
-        $referencia = ['numero' => '', 'id_tes_cuenta' => 0];
+        $referencia = ['numero' => '', 'id_tes_cuenta' => 0, 'fecha' => date('Y-m-d')];
     }
     $cmd = null;
 } catch (PDOException $e) {
@@ -42,15 +41,15 @@ try {
         </div>
         <form id="formNumReferencia" class="px-3">
             <input type="hidden" name="id_referencia" id="id_referencia" value="<?php echo $id_referencia; ?>">
-            <div class="form-row px-12 pt-2">
+            <div class="form-row pt-2">
                 <div class="form-group col-md-12">
                     <label for="numRef" class="small">Número</label>
                     <input type="number" name="numRef" id="numRef" class="form-control form-control-sm" value="<?= $referencia['numero'] ?>" required>
                 </div>
             </div>
-            <div class="form-row px-12 pt-2">
+            <div class="form-row">
                 <div class="form-group col-md-12">
-                    <label for="numRef" class="small">Número</label>
+                    <label for="banco" class="small">Cuenta Bancaria</label>
                     <select name="banco" id="banco" class="form-control form-control-sm" required>
                         <option value="0" class="text-muted">--Seleccionar--</option>
                         <?php foreach ($bancos as $banco) {
@@ -58,6 +57,12 @@ try {
                             echo '<option value="' . $banco['id_tes_cuenta'] . '" ' . $slc . '>' . $banco['nombre'] . '</option>';
                         } ?>
                     </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="fecha" class="small">Fecha</label>
+                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?= $referencia['fecha'] ?>" required>
                 </div>
             </div>
             <div class="text-center">

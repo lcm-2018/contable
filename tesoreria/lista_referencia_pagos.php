@@ -20,7 +20,7 @@ try {
     $sql = "SELECT
                 `tes_referencia`.`id_referencia`
                 , `tes_referencia`.`numero`
-                ,  DATE_FORMAT(`tes_referencia`.`fec_reg`, '%Y-%m-%d') AS `fec_reg`
+                ,  DATE_FORMAT(`tes_referencia`.`fecha`, '%Y-%m-%d') AS `fecha`
                 , `tes_referencia`.`estado`
                 , SUM(`t1`.`valor`) AS `valor`
                 , `tes_cuentas`.`nombre` AS `banco`
@@ -35,7 +35,7 @@ try {
                     ON (`t1`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                 LEFT JOIN `tes_cuentas` 
                     ON (`tes_cuentas`.`id_tes_cuenta` = `tes_referencia`.`id_tes_cuenta`)
-            WHERE (DATE_FORMAT(`tes_referencia`.`fec_reg`, '%Y-%m-%d') BETWEEN '$inicio' AND '$fin')
+            WHERE (DATE_FORMAT(`tes_referencia`.`fecha`, '%Y-%m-%d') BETWEEN '$inicio' AND '$fin')
             GROUP BY `tes_referencia`.`id_referencia`";
     $rs = $cmd->query($sql);
     $referencias = $rs->fetchAll(PDO::FETCH_ASSOC);
@@ -91,7 +91,7 @@ try {
                         <th class="text-center">#</th>
                         <th class="text-center">Número</th>
                         <th class="text-center">Banco</th>
-                        <th class="text-center">Fecha</th>
+                        <th class="text-center" style="min-width: 50px;">Fecha</th>
                         <th class="text-center">Estado</th>
                         <th class="text-center">Valor</th>
                         <th class="text-center">Acciones</th>
@@ -121,9 +121,9 @@ try {
                     ?>
                             <tr id="<?= $id; ?>" class="text-center">
                                 <td><?= $id; ?></td>
-                                <td><?= $ce['banco']; ?></td>
                                 <td><?= $ce['numero']; ?></td>
-                                <td><?= $ce['fec_reg']; ?></td>
+                                <td><?= $ce['banco']; ?></td>
+                                <td><?= $ce['fecha']; ?></td>
                                 <td> <?= $estado; ?></td>
                                 <td> <?= number_format($ce['valor'], 2, '.', ','); ?></td>
                                 <td> <?= $editar . $imprimir .  $eliminar; ?></td>

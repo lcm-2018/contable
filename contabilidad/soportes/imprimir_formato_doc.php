@@ -338,12 +338,6 @@ try {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
 
-        // fechas para factua
-        $fecha_fact = isset($factura['fecha_fact']) ? date('Y-m-d', strtotime($factura['fecha_fact'])) : '';
-        $fecha_ven = isset($factura['fecha_ven']) ? date('Y-m-d', strtotime($factura['fecha_ven'])) : '';
-        if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
-            $prefijo = 'RSC-';
-        }
         $meses = [
             '01' => 'enero',
             '02' => 'febrero',
@@ -531,6 +525,11 @@ try {
                             $t_base = 0;
                             $cr = 0;
                             foreach ($facturas as $factura) {
+                                if ($empresa['nit'] == 844001355 && $factura['tipo_doc'] == 3) {
+                                    $prefijo = 'RSC-';
+                                } else {
+                                    $prefijo = '';
+                                }
                             ?>
 
                                 <tr>

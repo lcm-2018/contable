@@ -1052,7 +1052,8 @@ compensatorios*/
                                 'verify_peer_name' => false,
                                 'allow_self_signed' => true
                             ]
-                        ];                                           //Send using SMTP
+                        ];
+                        $mail->CharSet = 'UTF-8';                                   //Send using SMTP
                         $mail->Host       = 'mail.lcm.com.co';                     //Set the SMTP server to send through
                         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
                         $mail->Username   = 'mail@lcm.com.co';                     //SMTP username

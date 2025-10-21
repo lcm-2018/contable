@@ -341,6 +341,8 @@ curl_setopt($ch, CURLOPT_URL, $url_taxxa);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $datatoken);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $restoken = curl_exec($ch);
 $rst = json_decode($restoken);
 $tokenApi = $rst->jret->stoken;
@@ -413,8 +415,8 @@ $jDocument = [
     'rdocumenttemplate' => 30884303,
     'tissuedate' => $hoy . 'T' . date('H:i:s', strtotime('-5 hour', strtotime(date('H:i:s')))),
     'tduedate' => $factura['fec_vence'],
-    //'wpaymentmeans' => $factura['met_pago'],
-    //'wpaymentmethod' => $factura['form_pago'],
+    'wpaymentmeans' => '1',
+    'wpaymentmethod' => 'ZZZ',
     //'wbusinessregimen' => $factura['reg_fiscal'],
     //'woperationtype' => $factura['procedencia'],
     //'sorderreference' => '',
@@ -532,6 +534,8 @@ curl_setopt($ch, CURLOPT_URL, $url_taxxa);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $json_string);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $rresponse = curl_exec($ch);
 $resnom = json_decode($rresponse, true);
 $file = 'loglastsend.txt';

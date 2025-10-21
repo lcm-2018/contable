@@ -12,7 +12,7 @@ $id = $_POST['id'];
 //Obtener fecha de cierre del módulo
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 4, $cmd);
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
 $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 // Obtener la fecha de sesión del usuario
 $fecha = fechaSesion($_SESSION['vigencia'], $_SESSION['id_user'], $cmd);

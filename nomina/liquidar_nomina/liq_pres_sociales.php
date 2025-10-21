@@ -222,8 +222,17 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT `id_empleado`, `sal_base` AS `salario_basico` FROM `nom_liq_salario` 
-            WHERE `id_sal_liq` IN(SELECT MAX(`id_sal_liq`) FROM  `nom_liq_salario` GROUP BY `id_empleado`)";
+    $sql = "SELECT 
+                `id_empleado`, `sal_base` AS `salario_basico` 
+            FROM `nom_liq_salario` 
+            WHERE `id_sal_liq` IN
+                (SELECT 
+                    MAX(`id_sal_liq`) 
+                FROM  `nom_liq_salario` 
+                    INNER JOIN `nom_nominas`
+                        ON (`nom_liq_salario`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE `nom_nominas`.`tipo` = 'N'
+                GROUP BY `id_empleado`)";
     $rs = $cmd->query($sql);
     $salario = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -1018,7 +1027,7 @@ function PromedioHoras($feci, $fecf, $id)
                         , `tipo`
                     FROM
                         `nom_nominas`
-                    WHERE (`estado` >= 5 AND `tipo` = 'N' AND `id_nomina` > 0)) AS `t1`
+                    WHERE (`estado` = 5 AND `tipo` = 'N' AND `id_nomina` > 0)) AS `t1`
                 WHERE `t1`.`fecha` BETWEEN '$feci' AND '$fecf'";
         $rs = $cmd->query($sql);
         $ids = $rs->fetchAll();

@@ -329,6 +329,7 @@ try {
                     $join_mes
                    WHERE (`pto_presupuestos`.`id_tipo` = 2)
                    ORDER BY `pto_cargue`.`cod_pptal` ASC";
+    //echo $sql;
     $res = $cmd->query($sql);
     $rubros = $res->fetchAll();
 } catch (PDOException $e) {

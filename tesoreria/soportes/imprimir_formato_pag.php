@@ -100,6 +100,7 @@ foreach ($documentos_tes as $documento) {
     $id_doc = $documento['id_ctb_doc'];
     $nom_doc = $documento['nombre'];
     $cod_doc = $documento['cod'];
+    $id_tercero = $documento['id_tercero'];
     $tercero = $documento['nom_tercero'];
     $num_doc = $documento['nit_tercero'];
     // Valor total del registro
@@ -266,10 +267,12 @@ foreach ($documentos_tes as $documento) {
     // consulto el nombre de la empresa de la tabla tb_datos_ips
     try {
         $sql = "SELECT 
-                `tb_datos_ips`.`razon_social_ips` AS `nombre`, `tb_datos_ips`.`nit_ips` AS `nit`, `tb_datos_ips`.`dv` AS `dig_ver`, `tb_municipios`.`nom_municipio`
+                `tb_datos_ips`.`razon_social_ips` AS `nombre`, `tb_datos_ips`.`nit_ips` AS `nit`, `tb_datos_ips`.`dv` AS `dig_ver`, `tb_municipios`.`nom_municipio`, `tb_terceros`.`id_tercero_api`
             FROM `tb_datos_ips`
                 INNER JOIN `tb_municipios`
-                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)";
+                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)
+                LEFT JOIN `tb_terceros`
+                    ON (`tb_datos_ips`.`nit_ips` = `tb_terceros`.`nit_tercero`)";
         $res = $cmd->query($sql);
         $empresa = $res->fetch();
     } catch (PDOException $e) {
@@ -299,6 +302,7 @@ foreach ($documentos_tes as $documento) {
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
+        $ids_terceros = !empty($facturadores) ? implode(',', array_column($facturadores, 'id_tercero')) : '0';
     }
     $fecha = date('Y-m-d', strtotime($documento['fecha']));
     $hora = date('H:i:s', strtotime($documento['fecha_reg']));
@@ -762,6 +766,86 @@ foreach ($documentos_tes as $documento) {
     </div>
     <div class="page-break"></div>
     <?php
+    if ($id_tercero == $empresa['id_tercero_api']) {
+        $id_terceros = $ids_terceros ?? 0;
+    } else {
+        $id_terceros = $id_tercero;
+    }
+    try {
+        $pdo = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $sql = "SELECT
+                    IF(`fac_facturacion`.`num_efactura` IS NULL,`fac_facturacion`.`num_factura`, CONCAT(`prefijo`, `num_efactura`)) AS `num_factura`      
+                    , 'FACTURACION SERVICIOS' AS `detalle` 
+                    , `fec_factura`
+                    , `val_factura`
+                    , `val_copago` AS `vr_arqueo_pendiente`
+                    , `fac_facturacion`.`id_usr_crea`
+                FROM `fac_facturacion`
+                    INNER JOIN `seg_usuarios_sistema` ON (`seg_usuarios_sistema`.`id_usuario` = `fac_facturacion`.`id_usr_crea`)
+                    INNER JOIN `tb_terceros` ON (`tb_terceros`.`nit_tercero` = `seg_usuarios_sistema`.`num_documento`)
+                    LEFT JOIN (SELECT `fac_arqueo_detalles`.`id_factura`   
+                        FROM `fac_arqueo_detalles`
+                        INNER JOIN `fac_arqueo` ON (`fac_arqueo_detalles`.`id_arqueo` = `fac_arqueo`.`id_arqueo`)
+                        WHERE `fac_arqueo`.`estado` >=2 AND `id_factura` IS NOT NULL ) AS `arqueo` ON `fac_facturacion`.`id_factura`=`arqueo`.`id_factura`
+                WHERE `fac_facturacion`.`fec_factura` >= '2025-08-01' AND `fac_facturacion`.`estado` >=2 AND `fac_facturacion`.`val_copago` >0 AND `arqueo`.`id_factura` IS NULL AND `id_tercero_api` IN ($id_terceros)
+                UNION ALL     
+                SELECT
+                    IF(`num_efactura` IS NULL,`num_factura`,CONCAT(`prefijo`, `num_efactura`)) AS `num_factura` 
+                    , 'VENTA FARMACIA' AS `detalle`    
+                    , `fec_venta`
+                    , `val_factura`
+                    , `val_factura`-`val_descuento` AS `vr_arqueo_pendiente`
+                    , `far_ventas`.`id_usr_crea`
+                FROM `far_ventas`
+                INNER JOIN `seg_usuarios_sistema` ON (`seg_usuarios_sistema`.`id_usuario` = `far_ventas`.`id_usr_crea`)
+                INNER JOIN `tb_terceros` ON (`tb_terceros`.`nit_tercero` = `seg_usuarios_sistema`.`num_documento`)
+                    LEFT JOIN ( SELECT `fac_arqueo_detalles`.`id_venta`   
+                        FROM `fac_arqueo_detalles`
+                        INNER JOIN `fac_arqueo` ON (`fac_arqueo_detalles`.`id_arqueo` = `fac_arqueo`.`id_arqueo`)
+                        WHERE `fac_arqueo`.`estado` >=2  AND `id_venta` IS NOT NULL   ) AS `arqueo` ON (`far_ventas`.`id_venta`=`arqueo`.`id_venta`)
+                WHERE `fec_venta` >= '2025-08-01' AND `far_ventas`.`estado` = 2 AND `arqueo`.`id_venta` IS NULL AND `id_tercero_api` IN ($id_terceros)";
+        $res = $cmd->query($sql);
+        $pendientes = $res->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    if (!empty($pendientes)) {
+    ?>
+        <div class="px-2 " style="width:90% !important;margin: 0 auto;">
+            <table style="width: 100%; border-collapse: collapse;" class="page_break_avoid table-bordered bg-light" border="1">
+                <tr>
+                    <th colspan="4">ANEXO</th>
+                </tr>
+                <tr style="text-align: center;">
+                    <td>
+                        No. FACTURA
+                    </td>
+                    <td>
+                        DETALLE
+                    </td>
+                    <td>
+                        FECHA
+                    </td>
+                    <td>
+                        VAL. PENDIENTE
+                    </td>
+                </tr>
+                <tbody style="text-align: left; padding: 2px;">
+                    <?php foreach ($pendientes as $p) { ?>
+                        <tr>
+                            <td><?= $p['num_factura']; ?></td>
+                            <td><?= $p['detalle']; ?></td>
+                            <td><?= $p['fec_factura']; ?></td>
+                            <td style="text-align: right;"><?= '$ ' . number_format($p['vr_arqueo_pendiente'], 2, ',', '.'); ?></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="page-break"></div>
+    <?php
+    }
     $html_doc .= ob_get_clean();
     ob_start();
     if ($tipo == '4') {

@@ -1,8 +1,5 @@
 <?php
 session_start();
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
     header("Location: ../../../index.php");
     exit();
@@ -189,7 +186,7 @@ try {
     $resolucion = $rs->fetch();
     if ($resolucion['id_resol'] == '') {
         $fail = 'No se ha registrado una resolución de facturación';
-        $response[] = array("value" => "Error", "msg" => json_encode($fail));
+        $response = array("value" => "Error", "msg" => json_encode($fail));
         echo json_encode($response);
         exit;
     } else {
@@ -198,14 +195,14 @@ try {
         $fecha_max = strtotime($resolucion['fec_termina']);
         if ($fecha_actual > $fecha_max) {
             $fail = "La fecha máxima de emisión de la resolución ha expirado";
-            $response[] = array("value" => "Error", "msg" => json_encode($fail));
+            $response = array("value" => "Error", "msg" => json_encode($fail));
             echo json_encode($response);
             exit();
         } else {
             $secuenciaf = intval($resolucion['consecutivo']);
             if ($secuenciaf > $resolucion['fin_concecutivo']) {
                 $fail = "La secuencia de la resolución ha llegado al consecutivo máximo autorizado";
-                $response[] = array("value" => "Error", "msg" => json_encode($fail));
+                $response = array("value" => "Error", "msg" => json_encode($fail));
                 echo json_encode($response);
                 exit();
             }
@@ -215,27 +212,50 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+$pref = $resolucion['prefijo'];
+$refi = $pref . '-' . $secuenciaf;
+$hoy = date('Y-m-d');
+$iduser = $_SESSION['id_user'];
+$date = new DateTime('now', new DateTimeZone('America/Bogota'));
 try {
-    $new = true;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "DELETE FROM `seg_soporte_fno` WHERE (`referencia` IS NULL OR `referencia` ='$pref-0')";
+    $sql = $cmd->prepare($sql);
+    $sql->execute();
+
     $sql = "SELECT `id_soporte`, `referencia` FROM `seg_soporte_fno` WHERE `id_factura_no` = $id_facno LIMIT 1";
     $rs = $cmd->query($sql);
     $referencia = $rs->fetch();
     if (!empty($referencia)) {
         $dato = explode('-', $referencia['referencia']);
         $secuenciaf = intval($dato[1]);
-        $new = false;
         $id_soporte = $referencia['id_soporte'];
+    } else {
+        $sql  = "INSERT INTO `seg_soporte_fno` 
+                    (`id_factura_no`, `referencia`, `fecha`, `id_user_reg`, `fec_reg`) 
+                VALUES (?, ?, ?, ?, ?)";
+        $sql = $cmd->prepare($sql);
+        $sql->bindParam(1, $id_facno, PDO::PARAM_INT);
+        $sql->bindParam(2, $refi, PDO::PARAM_STR);
+        $sql->bindParam(3, $hoy, PDO::PARAM_STR);
+        $sql->bindParam(4, $iduser, PDO::PARAM_INT);
+        $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
+        $sql->execute();
+        $id_soporte = $cmd->lastInsertId();
+        if (!($id_soporte > 0)) {
+            $fail = 'No se pudo registrar el soporte de la factura' . $sql->errorInfo()[2];
+            $response = array("value" => "Error", "msg" => json_encode($fail));
+            echo json_encode($response);
+            exit;
+        }
     }
-
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
 $tipo_documento = 'ReverseInvoice';
-$pref = $resolucion['prefijo'];
-$sreference = $pref . '-' . $secuenciaf;
 $entorno = $resolucion['entorno'];
 $adocumentitems = [];
 $key = 0;
@@ -337,6 +357,8 @@ curl_setopt($ch, CURLOPT_URL, $url_taxxa);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $datatoken);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $restoken = curl_exec($ch);
 $rst = json_decode($restoken);
 $tokenApi = $rst->jret->stoken;
@@ -409,8 +431,8 @@ $jDocument = [
     'rdocumenttemplate' => 30884303,
     'tissuedate' => $hoy . 'T' . date('H:i:s', strtotime('-5 hour', strtotime(date('H:i:s')))),
     'tduedate' => $factura['fec_vence'],
-    //'wpaymentmeans' => $factura['met_pago'],
-    //'wpaymentmethod' => $factura['form_pago'],
+    'wpaymentmeans' => '1',
+    'wpaymentmethod' => 'ZZZ',
     //'wbusinessregimen' => $factura['reg_fiscal'],
     //'woperationtype' => $factura['procedencia'],
     //'sorderreference' => '',
@@ -528,6 +550,8 @@ curl_setopt($ch, CURLOPT_URL, $url_taxxa);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $json_string);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $rresponse = curl_exec($ch);
 $resnom = json_decode($rresponse, true);
 $file = 'loglastsend.txt';
@@ -536,20 +560,13 @@ file_put_contents($file, $rresponse);
 $procesado = 0;
 
 $err = '';
+$numero = $pref . $secuenciaf;
 try {
-    $hoy = date('Y-m-d');
-    $iduser = $_SESSION['id_user'];
-    $date = new DateTime('now', new DateTimeZone('America/Bogota'));
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    if ($new) {
-        $sql = "INSERT INTO `seg_soporte_fno` (`id_factura_no`, `shash`, `referencia`, `fecha`, `id_user_reg`, `fec_reg`) 
-            VALUES (?, ?, ?, ?, ?, ?)";
-    } else {
-        $sql = "UPDATE `seg_soporte_fno` 
-                    SET `id_factura_no` = ?,`shash` = ?, `referencia` = ?, `fecha` = ?, `id_user_reg` = ?, `fec_reg` = ? 
-                WHERE `id_soporte` = ?";
-    }
+    $sql = "UPDATE `seg_soporte_fno` 
+                SET `id_factura_no` = ?,`shash` = ?, `referencia` = ?, `fecha` = ?, `id_user_reg` = ?, `fec_reg` = ? 
+            WHERE `id_soporte` = ?";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_facno, PDO::PARAM_INT);
     $sql->bindParam(2, $shash, PDO::PARAM_STR);
@@ -557,14 +574,46 @@ try {
     $sql->bindParam(4, $hoy, PDO::PARAM_STR);
     $sql->bindParam(5, $iduser, PDO::PARAM_INT);
     $sql->bindValue(6, $date->format('Y-m-d H:i:s'));
-    if (!$new) {
-        $sql->bindParam(7, $id_soporte, PDO::PARAM_INT);
-    }
+    $sql->bindParam(7, $id_soporte, PDO::PARAM_INT);
+
     if ($resnom['rerror'] == 0) {
         $shash = $resnom['jret']['scufe'];
         $sreference = $resnom['jret']['sdocumentreference'];
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            $procesado++;
+        }
+    } else if ($resnom['rerror'] == 2) {
+        $jApi = array(
+            'sMethod' => 'classTaxxa.fjDocumentGet',
+            'jParams' => array(
+                'sReference' => $numero,
+            )
+        );
+        $consulta = array(
+            'sToken' => $tokenApi,
+            'jApi' => $jApi
+        );
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_URL, $url_taxxa);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($consulta));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $resface = json_decode(curl_exec($ch), true);
+        if ($resface['rerror'] == 0) {
+            $shash = $resface['jret']['shash'];
+            $sreference = $pref . $secuenciaf;
+            $sql->execute();
+            if ($sql->rowCount() > 0) {
+                $procesado++;
+            }
+        } else {
+            $err .= 'No se pudo enviar la factura electrónica. ';
+            $err .= is_array($resface['smessage']) ? json_encode($resface['smessage']) : $resface['smessage'];
+        }
     } else {
-        $shash = NULL;
         $err .= '<table>';
         $filas = is_array($resnom['smessage']) ? count($resnom['smessage']) : 0;
         if ($filas == 0) {
@@ -578,25 +627,11 @@ try {
         }
         $err .= '</table>';
     }
-    $sql->execute();
-    if ($new) {
-        $validacion = $cmd->lastInsertId();
-    } else {
-        if ($shash != NULL) {
-            $validacion = $sql->rowCount();
-        } else {
-            $validacion = 0;
-        }
-    }
-    if ($validacion > 0 && $resnom['rerror'] == 0) {
-        $procesado++;
-    }
-    $cmd = null;
 } catch (PDOException $e) {
     $err .= ($e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage());
 }
 
-if ($new) {
+if ($procesado > 0) {
     $sigue = $secuenciaf + 1;
     $id_sec = $resolucion['id_resol'];
     try {
@@ -609,15 +644,18 @@ if ($new) {
         $query->execute();
         if (!($query->rowCount() > 0)) {
             $err .= $query->errorInfo()[2];
+        } else {
+            $sql = "UPDATE `ctb_factura` SET `num_doc` = '$numero' WHERE `id_ctb_doc` = $id_facno";
+            $cmd = $cmd->prepare($sql);
+            $cmd->execute();
         }
     } catch (PDOException $e) {
         $err .= ($e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage());
     }
-}
-if ($procesado > 0) {
-    $response[] = array("value" => "ok", "msg" => json_encode('Documento enviado correctamente'));
+    $response = array("value" => "ok", "msg" => json_encode('Documento enviado correctamente'));
 } else {
-    $response[] = array("value" => "Error", "msg" => $err);
+    $response = array("value" => "Error", "msg" => $err);
 }
 echo json_encode($response);
+$cmd = null;
 exit;

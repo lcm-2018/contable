@@ -437,6 +437,8 @@ if ($mes) {
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $datatoken);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     $restoken = curl_exec($ch);
     $rst = json_decode($restoken);
     $tokenApi = $rst->jret->stoken;
@@ -810,6 +812,8 @@ if ($mes) {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($nomina));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             $resnom = json_decode(curl_exec($ch), true);
             if ($resnom['rerror'] == 0) {
                 $shash = $resnom['aresult'][$indicene]['shash'];

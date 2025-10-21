@@ -18,6 +18,7 @@ $id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : 0;
 $id_crp = isset($_POST['id_crp']) ? $_POST['id_crp'] : 0;
 $tipo_dato = $_POST['tipo_dato'];
 $id_vigencia = $_SESSION['id_vigencia'];
+$vigencia = $_SESSION['vigencia'];
 
 $datosCrp = [];
 function pesos($valor)
@@ -26,7 +27,19 @@ function pesos($valor)
 }
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 55, $cmd);
+$fecha_cierre = fechaCierre($vigencia, 55, $cmd);
+
+try {
+    $sql = "SELECT
+                `cod`,`nombre`,`contab`
+            FROM `ctb_fuente`
+            WHERE `id_doc_fuente` = $tipo_dato LIMIT 1";
+    $rs = $cmd->query($sql);
+    $fuente = $rs->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 if ($id_doc == 0) {
     $fecha_doc = date('Y-m-d');
     try {
@@ -133,7 +146,7 @@ $ver = 'readonly';
                                                     <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $id_manu; ?>" required>
                                                     <input type="hidden" id="tipodato" name="tipodato" value="<?php echo $tipo_dato; ?>">
                                                     <input type="hidden" id="id_crpp" name="id_crpp" value="<?php echo $datosDoc['id_crp'] > 0 ? $datosDoc['id_crp'] : 0 ?>">
-
+                                                    <input type="hidden" id="fuente" name="fuente" value="<?php echo $fuente['contab']; ?>">
                                                 </div>
                                             </div>
                                             <div class="row mb-1">
@@ -141,7 +154,7 @@ $ver = 'readonly';
                                                     <div class="col"><span class="small">FECHA:</span></div>
                                                 </div>
                                                 <div class="col-10">
-                                                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo $fecha_doc; ?>" min="<?= date('Y-m-d', strtotime($datosDoc['fecha_crp'])) ?>" max="<?= $_SESSION['vigencia'] . '-12-31' ?>" required>
+                                                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo $fecha_doc; ?>" min="<?= date('Y-m-d', strtotime($datosDoc['fecha_crp'])) ?>" max="<?= $vigencia . '-12-31' ?>" required>
                                                 </div>
                                             </div>
                                             <div class="row mb-1">
@@ -205,13 +218,39 @@ $ver = 'readonly';
                                             </div>
                                         <?php
                                         }
+                                        if ($fuente['contab'] == 3) {
+                                        ?>
+                                            <div class="row mb-1 text-left">
+                                                <div class="col-2">
+                                                    <div class="col"><span class="small">PERIODO TRASLADO:</span></div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="row">
+                                                        <div class="col-3">
+                                                            <div class="col"><span class="small text-muted">FECHA INICIO:</span></div>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <input type="date" name="fecIniTraslado" id="fecIniTraslado" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>" min="<?= $vigencia . '-01-01'; ?>" max="<?= $vigencia . '-12-31' ?>" required>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="col"><span class="small text-muted">FECHA FIN:</span></div>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <input type="date" name="fecFinTraslado" id="fecFinTraslado" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>" min="<?= $vigencia . '-01-01'; ?>" max="<?= $vigencia . '-12-31' ?>" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php
+                                        }
                                         ?>
                                     </div>
                                     <div class="text-center py-2">
                                         <?php
-                                        if ($tipo_dato == '3') {
+                                        $funcion = $fuente['contab'] == 3 ? 'generaMovimientoTrasCosto' : 'generaMovimientoCxp';
+                                        if ($tipo_dato == '3' || $fuente['contab'] == 3) {
                                         ?>
-                                            <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoCxp(this);" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="<?= $funcion; ?>(this);" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>
                                         <?php
                                         }
                                         ?>
