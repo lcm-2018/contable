@@ -157,11 +157,14 @@ try {
         if ($oper == 'annul') {
             $id = $_POST['id'];
 
-            $sql = 'SELECT estado,id_area_origen,id_usr_origen FROM acf_traslado WHERE id_traslado=' . $id . ' LIMIT 1';
+            $sql = 'SELECT estado,id_area_origen,id_sede,id_usr_origen FROM acf_traslado 
+                    INNER JOIN far_centrocosto_area ON (far_centrocosto_area.id_area=acf_traslado.id_area_origen)
+                    WHERE id_traslado=' . $id . ' LIMIT 1';
             $rs = $cmd->query($sql);
             $obj_traslado = $rs->fetch();
             $estado = $obj_traslado['estado'];
             $id_area_origen = isset($obj_traslado['id_area_origen']) ? $obj_traslado['id_area_origen'] : 0;
+            $id_sede_origen = isset($obj_traslado['id_sede']) ? $obj_traslado['id_sede'] : 0;
             $id_usr_origen = isset($obj_traslado['id_usr_origen']) ? $obj_traslado['id_usr_origen'] : 0;
 
             $sql = "SELECT IF(SUM(IF(acf_traslado.id_area_destino=acf_hojavida.id_area,1,0))=COUNT(*),1,0) AS continuar
@@ -189,7 +192,7 @@ try {
                 $sql = "UPDATE acf_traslado SET estado=0,id_usr_anula=$id_usr_ope,fec_anula='$fecha_ope' WHERE id_traslado=$id";
                 $rs1 = $cmd->query($sql);
 
-                $sql = "UPDATE acf_hojavida SET id_area=$id_area_origen,id_responsable=$id_usr_origen
+                $sql = "UPDATE acf_hojavida SET id_area=$id_area_origen,id_sede=$id_sede_origen,id_responsable=$id_usr_origen
                         WHERE id_activo_fijo IN (SELECT id_activo_fijo FROM acf_traslado_detalle WHERE id_traslado=$id)";
                 $rs2 = $cmd->query($sql);
 

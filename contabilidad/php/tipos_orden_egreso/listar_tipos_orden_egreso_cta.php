@@ -27,34 +27,35 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     
     //Consulta la Cuenta Vigente
-    $sql = "SELECT id_subgrupo_cta AS id FROM far_subgrupos_cta
-            WHERE estado=1 AND fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND id_subgrupo=" . $_POST['id_subgrupo'] . " 
+    $sql = "SELECT id_tipo_egreso_cta AS id FROM far_orden_egreso_tipo_cta
+            WHERE estado=1 AND fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND id_tipo_egreso=" . $_POST['id_tipo_egreso'] . " 
             ORDER BY fecha_vigencia DESC LIMIT 1";
+
     $rs = $cmd->query($sql);
     $cuenta = $rs->fetch();
     $id_vig = isset($cuenta['id']) ? $cuenta['id'] : 0;
 
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM far_subgrupos_cta WHERE id_subgrupo=" . $_POST['id_subgrupo'];
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_egreso_tipo_cta WHERE id_tipo_egreso=" . $_POST['id_tipo_egreso'];
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(*) AS total FROM far_subgrupos_cta 
-            INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=far_subgrupos_cta.id_cuenta)
-            WHERE far_subgrupos_cta.id_subgrupo=" . $_POST['id_subgrupo'] . $where; 
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_egreso_tipo_cta 
+            INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=far_orden_egreso_tipo_cta.id_cuenta)
+            WHERE far_orden_egreso_tipo_cta.id_tipo_egreso=" . $_POST['id_tipo_egreso'] . $where; 
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT far_subgrupos_cta.id_subgrupo_cta,far_subgrupos_cta.fecha_vigencia,   
+    $sql = "SELECT far_orden_egreso_tipo_cta.id_tipo_egreso_cta,far_orden_egreso_tipo_cta.fecha_vigencia,   
                 CONCAT_WS(' - ',ctb_pgcp.cuenta,ctb_pgcp.nombre) AS cuenta,             
-                IF(far_subgrupos_cta.estado=1,'ACTIVO','INACTIVO') AS estado
-            FROM far_subgrupos_cta
-            INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=far_subgrupos_cta.id_cuenta)
-            WHERE far_subgrupos_cta.id_subgrupo=" . $_POST['id_subgrupo'] . $where . " ORDER BY $col $dir $limit";
+                IF(far_orden_egreso_tipo_cta.estado=1,'ACTIVO','INACTIVO') AS estado
+            FROM far_orden_egreso_tipo_cta
+            INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=far_orden_egreso_tipo_cta.id_cuenta)
+            WHERE far_orden_egreso_tipo_cta.id_tipo_egreso=" . $_POST['id_tipo_egreso'] . $where . " ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
@@ -68,7 +69,7 @@ if (!empty($objs)) {
     foreach ($objs as $obj) {
         $editar = NULL;
         $eliminar = NULL;
-        $id = $obj['id_subgrupo_cta'];
+        $id = $obj['id_tipo_egreso_cta'];
         //Permite crear botones en la cuadricula si tiene permisos de 3-Editar,4-Eliminar
         if (PermisosUsuario($permisos, 5511, 3) || $id_rol == 1) {    
             $editar = '<a value="' . $id . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb btn_editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
@@ -77,12 +78,12 @@ if (!empty($objs)) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
         $data[] = [
-            "id_subgrupo_cta" => $id,
+            "id_tipo_egreso_cta" => $id,
             "cuenta" => $obj['cuenta'],
             "fecha_vigencia" => $obj['fecha_vigencia'],
             "vigente" => ($id == $id_vig ? 'X' : ''),
             "estado" => $obj['estado'],
-            "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
+            "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>'
         ];
     }
 }

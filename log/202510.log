@@ -1,0 +1,9 @@
+[2025-10-21 08:11:13] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_tipos_orden_egreso WHERE id_subgrupo = 12
+[2025-10-21 08:13:11] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_tipos_orden_egreso WHERE id_subgrupo = 2
+[2025-10-21 08:13:17] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_tipos_orden_egreso WHERE id_subgrupo = 2
+[2025-10-21 08:49:57] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_tipos_orden_egreso WHERE id_subgrupo = 13
+[2025-10-21 08:50:02] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_tipos_orden_egreso WHERE id_subgrupo = 14
+[2025-10-21 08:50:14] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_tipos_orden_egreso WHERE id_subgrupo = 2
+[2025-10-21 09:31:00] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_tipos_orden_egreso WHERE id_subgrupo = 15
+[2025-10-21 09:43:22] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_tipos_orden_egreso WHERE id_subgrupo = 16
+[2025-10-21 09:53:15] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_orden_egreso_tipo_cta WHERE id_tipo_egreso_cta = 19

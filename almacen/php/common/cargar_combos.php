@@ -505,7 +505,7 @@ function areas_centrocosto_sede($cmd, $titulo = '', $idcec = 0, $idsede = 0, $id
         echo '<option value="">' . $titulo . '</option>';
         if ($idcec != 0 && $idsede != 0) {
             $sql = "SELECT id_area,nom_area AS nom_area FROM far_centrocosto_area 
-                    WHERE id_centrocosto=$idcec AND id_sede=$idsede
+                    WHERE (id_centrocosto=$idcec AND id_sede=$idsede AND estado=1) OR id_area=$id
                     ORDER BY es_almacen DESC, nom_area";
                     
             $rs = $cmd->query($sql);

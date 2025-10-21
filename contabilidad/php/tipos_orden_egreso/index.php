@@ -34,7 +34,7 @@ include '../../../permisos.php';
                             <div class="row">
                                 <div class="col-md-11">
                                     <i class="fas fa-list-ul fa-lg" style="color:#1D80F7"></i>
-                                    SUBGRUPOS ARTICULOS
+                                    TIPOS DE ORDENES DE EGRESO
                                 </div>
                             </div>
                         </div>
@@ -58,7 +58,7 @@ include '../../../permisos.php';
                             </div>
 
                             <!--Lista de registros en la tabla
-                                5511-Opcion [Articulos][Subgrupos]
+                                5511-Opcion [Otros][Tipos Ordenes Egreso]
                                 1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
                             -->
                             <?php
@@ -68,29 +68,27 @@ include '../../../permisos.php';
                                 echo '<input type="hidden" id="peReg" value="0">';
                             }
                             ?>
-                            <table id="tb_subgrupos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
+                            <table id="tb_tipos_orden_egreso" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>
                                     <tr class="text-center centro-vertical">
                                         <th rowspan="2">Id</th>
-                                        <th rowspan="2">Código</th>
-                                        <th rowspan="2">Nombre</th>
-                                        <th colspan="4">Cuentas Contables Vigenetes</th>
-                                        <th rowspan="2">Grupo</th>
-                                        <th rowspan="2">Uso Asistencial</th>
-                                        <th rowspan="2">Lote x Defecto</th>
-                                        <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Nombre</th>                                        
+                                        <th rowspan="2">Cuenta Contable Vigenete</th>                                        
+                                        <th rowspan="2">Int/Ext</th>
+                                        <th rowspan="2">Con Pedido</th>
+                                        <th rowspan="2">Dev. Fianza</th>
+                                        <th rowspan="2">De Consumo</th>
+                                        <th colspan="3">Módulos</th>
                                         <th rowspan="2">Acciones</th>
                                     </tr>
                                     <tr class="text-center centro-vertical">
-                                        <th>Inventario</th>
-                                        <th>Activo Fijo</th>
-                                        <th>Depreciación Acf</th>
-                                        <th>Gasto Depresc. Acf</th>
-                                    </tr>
+                                        <th>Farmacia</th>
+                                        <th>Almacén</th>
+                                        <th>Activos Fijos</th>
+                                    </tr>                                        
                                 </thead>
                             </table>
                         </div>
-
                     </div>
                 </div>
             </main>
@@ -99,7 +97,7 @@ include '../../../permisos.php';
         <?php include '../../../modales.php' ?>
     </div>
     <?php include '../../../scripts.php' ?>    
-    <script type="text/javascript" src="../../js/subgrupos/subgrupos.js?v=<?php echo date('YmdHis') ?>"></script>
+    <script type="text/javascript" src="../../js/tipos_orden_egreso/tipos_orden_egreso.js?v=<?php echo date('YmdHis') ?>"></script>
 </body>
 
 </html>

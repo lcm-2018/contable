@@ -16,9 +16,9 @@ if ($length != -1){
 $col = $_POST['order'][0]['column']+1;
 $dir = $_POST['order'][0]['dir'];
 
-$where = "WHERE far_subgrupos.id_subgrupo<>0";
+$where = "WHERE id_tipo_egreso<>0";
 if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND far_subgrupos.nom_subgrupo LIKE '" . $_POST['nombre'] . "%'";
+    $where .= " AND nom_tipo_egreso LIKE '" . $_POST['nombre'] . "%'";
 }
 
 try {
@@ -26,24 +26,27 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM far_subgrupos WHERE id_subgrupo<>0";
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_egreso_tipo WHERE id_tipo_egreso<>0";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
 
     //Consulta el total de registros aplicando el filtro
-    $sql = "SELECT COUNT(*) AS total FROM far_subgrupos $where";
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_egreso_tipo $where";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
 
     //Consulta los datos para listarlos en la tabla
-    $sql = "SELECT far_subgrupos.id_subgrupo,far_subgrupos.cod_subgrupo,far_subgrupos.nom_subgrupo,far_grupos.nom_grupo,
-                IF(far_subgrupos.es_clinico=1,'SI','NO') AS es_clinico,
-                IF(far_subgrupos.lote_xdef=1,'SI','NO') AS lote_xdef,                
-                IF(far_subgrupos.estado=1,'ACTIVO','INACTIVO') AS estado
-            FROM far_subgrupos
-            INNER JOIN far_grupos ON (far_grupos.id_grupo=far_subgrupos.id_grupo)
+    $sql = "SELECT id_tipo_egreso,nom_tipo_egreso,
+                IF(es_int_ext=1,'Interno','Externo') AS es_int_ext,
+                IF(con_pedido=1,'SI','') AS con_pedido,
+                IF(dev_fianza=1,'SI','') AS dev_fianza,
+                IF(consumo=1,'SI','') AS consumo,
+                IF(farmacia=1,'SI','') AS farmacia,
+                IF(almacen=1,'SI','') AS almacen,
+                IF(activofijo=1,'SI','') AS activofijo
+            FROM far_orden_egreso_tipo
             $where ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
@@ -57,9 +60,9 @@ $eliminar = NULL;
 $data = [];
 if (!empty($objs)) {
     foreach ($objs as $obj) {
-        $id = $obj['id_subgrupo'];
+        $id = $obj['id_tipo_egreso'];
         /*Permisos del usuario
-            5511-Opcion [General][Subgrupos]
+            5511-Opcion [General][tipos_orden_egreso]
             1-Consultar, 2-Adicionar, 3-Modificar, 4-Eliminar, 5-Anular, 6-Imprimir
         */    
         if (PermisosUsuario($permisos, 5511, 3) || $id_rol == 1) {
@@ -69,41 +72,26 @@ if (!empty($objs)) {
             $eliminar =  '<a value="' . $id . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb btn_eliminar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
         }
 
-        $sql = "SELECT CACT.cuenta
-                FROM far_subgrupos_cta AS SBG
-                INNER JOIN ctb_pgcp AS CACT ON (CACT.id_pgcp=SBG.id_cuenta)            
-                WHERE SBG.estado=1 AND SBG.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND SBG.id_subgrupo=$id
-                ORDER BY SBG.fecha_vigencia DESC LIMIT 1";
+        $sql = "SELECT CONCAT_WS(' - ',ctb_pgcp.cuenta,ctb_pgcp.nombre) AS cuenta
+                FROM far_orden_egreso_tipo_cta AS TOEGR
+                INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=TOEGR.id_cuenta)            
+                WHERE TOEGR.estado=1 AND TOEGR.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND TOEGR.id_tipo_egreso=$id
+                ORDER BY TOEGR.fecha_vigencia DESC LIMIT 1";
         $rs = $cmd->query($sql);
         $objs_cta = $rs->fetch();
-        $cuenta_cs = isset($objs_cta['cuenta']) ? $objs_cta['cuenta'] : '';
-
-        $sql = "SELECT CACT.cuenta AS cuenta_af,
-                    CDEP.cuenta AS cuenta_dep,CGAS.cuenta AS cuenta_gas
-                FROM far_subgrupos_cta_af AS SBG
-                INNER JOIN ctb_pgcp AS CACT ON (CACT.id_pgcp=SBG.id_cuenta)
-                INNER JOIN ctb_pgcp AS CDEP ON (CDEP.id_pgcp=SBG.id_cuenta_dep)
-                INNER JOIN ctb_pgcp AS CGAS ON (CGAS.id_pgcp=SBG.id_cuenta_gas)
-                WHERE SBG.estado=1 AND SBG.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND SBG.id_subgrupo=$id
-                ORDER BY SBG.fecha_vigencia DESC LIMIT 1";
-        $rs = $cmd->query($sql);
-        $objs_cta = $rs->fetch();
-        $cuenta_af = isset($objs_cta['cuenta_af']) ? $objs_cta['cuenta_af'] : '';
-        $cuenta_dep = isset($objs_cta['cuenta_dep']) ? $objs_cta['cuenta_dep'] : '';
-        $cuenta_gas = isset($objs_cta['cuenta_gas']) ? $objs_cta['cuenta_gas'] : '';
+        $cuenta_c = isset($objs_cta['cuenta']) ? $objs_cta['cuenta'] : '';
 
         $data[] = [
-            "id_subgrupo" => $id,
-            "cod_subgrupo" => $obj['cod_subgrupo'],
-            "nom_subgrupo" => mb_strtoupper($obj['nom_subgrupo']),
-            "cuenta_cs" => $cuenta_cs,
-            "cuenta_af" => $cuenta_af,
-            "cuenta_dep" => $cuenta_dep,
-            "cuenta_gas" => $cuenta_gas,
-            "nom_grupo" => mb_strtoupper($obj['nom_grupo']),
-            "es_clinico" => $obj['es_clinico'],
-            "lote_xdef" => $obj['lote_xdef'],
-            "estado" => $obj['estado'],
+            "id_tipo_egreso" => $id,
+            "nom_tipo_egreso" => mb_strtoupper($obj['nom_tipo_egreso']),
+            "cuenta_c" => $cuenta_c,
+            "es_int_ext" => $obj['es_int_ext'],
+            "con_pedido" => $obj['con_pedido'],
+            "dev_fianza" => $obj['dev_fianza'],
+            "consumo" => $obj['consumo'],
+            "farmacia" => $obj['farmacia'],
+            "almacen" => $obj['almacen'],
+            "activofijo" => $obj['activofijo'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }

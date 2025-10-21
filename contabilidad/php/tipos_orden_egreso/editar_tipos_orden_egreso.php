@@ -18,23 +18,25 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-    if ((PermisosUsuario($permisos, 5511, 2) && $oper == 'add' && $_POST['id_subgrupo'] == -1) ||
-        (PermisosUsuario($permisos, 5511, 3) && $oper == 'add' && $_POST['id_subgrupo'] != -1) ||
+    if ((PermisosUsuario($permisos, 5511, 2) && $oper == 'add' && $_POST['id_tipo_egreso'] == -1) ||
+        (PermisosUsuario($permisos, 5511, 3) && $oper == 'add' && $_POST['id_tipo_egreso'] != -1) ||
         (PermisosUsuario($permisos, 5511, 4) && $oper == 'del') || $id_rol == 1
     ) {
 
         if ($oper == 'add') {
-            $id = $_POST['id_subgrupo'];
-            $cod_subgrupo = $_POST['txt_cod_subgrupo'];
-            $nom_subgrupo = $_POST['txt_nom_subgrupo'];
-            $id_grupo = $_POST['sl_grp_subgrupo'] ? $_POST['sl_grp_subgrupo'] : 0;
-            $es_clinico = $_POST['rdo_escli_subgrupo'];
-            $lote_xdef = $_POST['sl_lotexdef'] ? $_POST['sl_lotexdef'] : 0;
-            $estado = $_POST['sl_estado'];
+            $id = $_POST['id_tipo_egreso'];
+            $nom_tipo_egreso = $_POST['txt_nom_tipoegreso'];
+            $es_int_ext = $_POST['sl_esintext'];
+            $con_pedido = $_POST['sl_conpedido'];
+            $dev_fianza = $_POST['sl_devfianza'];
+            $consumo = $_POST['sl_consumo'];
+            $farmacia = $_POST['sl_farmacia'];
+            $almacen = $_POST['sl_almacen'];
+            $activofijo = $_POST['sl_activofijo'];
 
             if ($id == -1) {
-                $sql = "INSERT INTO far_subgrupos(cod_subgrupo,nom_subgrupo,id_grupo,es_clinico,lote_xdef,estado,id_usr_crea,fec_crea) 
-                        VALUES($cod_subgrupo,'$nom_subgrupo',$id_grupo,$es_clinico,$lote_xdef,$estado,$id_usr_ope,'$fecha_ope')";
+                $sql = "INSERT INTO far_orden_egreso_tipo(nom_tipo_egreso,es_int_ext,con_pedido,dev_fianza,consumo,farmacia,almacen,activofijo,id_usr_crea) 
+                        VALUES('$nom_tipo_egreso',$es_int_ext,$con_pedido,$dev_fianza,$consumo,$farmacia,$almacen,$activofijo,$id_usr_ope)";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -47,9 +49,11 @@ try {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }
             } else {
-                $sql = "UPDATE far_subgrupos 
-                        SET cod_subgrupo=$cod_subgrupo,nom_subgrupo='$nom_subgrupo',id_grupo=$id_grupo,es_clinico=$es_clinico,lote_xdef=$lote_xdef,estado=$estado 
-                        WHERE id_subgrupo=" . $id;
+
+                $sql = "UPDATE far_orden_egreso_tipo 
+                        SET nom_tipo_egreso='$nom_tipo_egreso',es_int_ext=$es_int_ext,con_pedido=$con_pedido,
+                            dev_fianza=$dev_fianza,consumo=$consumo,farmacia=$farmacia,almacen=$almacen,activofijo=$activofijo 
+                        WHERE id_tipo_egreso>2 AND id_tipo_egreso=" . $id;
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -58,17 +62,18 @@ try {
                 } else {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }
+                    
             }
         }
 
         if ($oper == 'del') {
             $id = $_POST['id'];
-            $sql = "DELETE FROM far_subgrupos WHERE id_subgrupo=" . $id;
+            $sql = "DELETE FROM far_orden_egreso_tipo WHERE id_tipo_egreso>2 AND id_tipo_egreso=" . $id;
             $rs = $cmd->query($sql);
             if ($rs) {
                 include '../../../financiero/reg_logs.php';
                 $ruta = '../../../log';
-                $consulta = "DELETE FROM far_subgrupos WHERE id_subgrupo = $id";
+                $consulta = "DELETE FROM far_tipos_orden_egreso WHERE id_subgrupo = $id";
                 RegistraLogs($ruta, $consulta);
                 $res['mensaje'] = 'ok';
             } else {
