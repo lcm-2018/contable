@@ -109,7 +109,8 @@ try {
         if ($oper == 'close') {
             $id = $_POST['id'];
 
-            $sql = 'SELECT estado,id_area_destino,id_sede,id_usr_destino FROM acf_traslado 
+            $sql = 'SELECT acf_traslado.estado,acf_traslado.id_area_destino,far_centrocosto_area.id_sede,acf_traslado.id_usr_destino 
+                    FROM acf_traslado 
                     INNER JOIN far_centrocosto_area ON (far_centrocosto_area.id_area=acf_traslado.id_area_destino)
                     WHERE id_traslado=' . $id . ' LIMIT 1';
             $rs = $cmd->query($sql);
@@ -157,7 +158,8 @@ try {
         if ($oper == 'annul') {
             $id = $_POST['id'];
 
-            $sql = 'SELECT estado,id_area_origen,id_sede,id_usr_origen FROM acf_traslado 
+            $sql = 'SELECT acf_traslado.estado,acf_traslado.id_area_origen,far_centrocosto_area.id_sede,acf_traslado.id_usr_origen 
+                    FROM acf_traslado 
                     INNER JOIN far_centrocosto_area ON (far_centrocosto_area.id_area=acf_traslado.id_area_origen)
                     WHERE id_traslado=' . $id . ' LIMIT 1';
             $rs = $cmd->query($sql);

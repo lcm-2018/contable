@@ -793,10 +793,21 @@ $urlin = $_SESSION['urlin'];
                                             ?>
                                                 <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/php/tipos_orden_egreso/index.php">
                                                     <div class="div-icono">
-                                                        <i class="fas fa-layer-group fa-sm" style="color: green;"></i>
+                                                        <i class="fas fa fa-sign-out fa-sm" style="color: green;"></i>
                                                     </div>
                                                     <div>
                                                         Tipos Orden Egreso
+                                                    </div>
+                                                </a>
+                                            <?php }
+                                            if (PermisosUsuario($permisos, 5512, 0) || $id_rol == 1) {
+                                            ?>
+                                                <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/php/tipos_orden_ingreso/index.php">
+                                                    <div class="div-icono">
+                                                        <i class="fas fa fa-sign-in fa-sm" style="color: green;"></i>
+                                                    </div>
+                                                    <div>
+                                                        Tipos Orden Ingreso
                                                     </div>
                                                 </a>
                                             <?php }

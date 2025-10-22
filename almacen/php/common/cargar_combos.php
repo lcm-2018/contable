@@ -191,10 +191,12 @@ function tipo_egreso($cmd, $titulo = '', $todos=0, $id = 0)
     try {
         echo '<option value="">' . $titulo . '</option>';
         $sql = "SELECT id_tipo_egreso,nom_tipo_egreso,es_int_ext,con_pedido,fianza,dev_fianza
-                FROM far_orden_egreso_tipo WHERE id_tipo_egreso NOT IN (1,2)";
+                FROM far_orden_egreso_tipo 
+                WHERE (id_tipo_egreso NOT IN (1,2) AND almacen = 1) OR id_tipo_egreso = $id";
         if ($todos == 1){
             $sql = "SELECT id_tipo_egreso,nom_tipo_egreso,es_int_ext,con_pedido,fianza,dev_fianza
-                FROM far_orden_egreso_tipo";
+                    FROM far_orden_egreso_tipo
+                    where almacen = 1 OR farmacia = 1";
         }        
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
@@ -242,7 +244,9 @@ function tipo_ingreso($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,es_int_ext,orden_compra,fianza,dev_fianza FROM far_orden_ingreso_tipo";
+        $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,es_int_ext,orden_compra,fianza,dev_fianza 
+                FROM far_orden_ingreso_tipo
+                WHERE almacen = 1 OR farmacia = 1 OR id_tipo_ingreso = $id";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {

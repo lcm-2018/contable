@@ -42,8 +42,8 @@
                 { 'data': 'con_pedido' },
                 { 'data': 'dev_fianza' },
                 { 'data': 'consumo' },
-                { 'data': 'farmacia' },
                 { 'data': 'almacen' },
+                { 'data': 'farmacia' },                
                 { 'data': 'activofijo' },
                 { 'data': 'botones' }
             ],

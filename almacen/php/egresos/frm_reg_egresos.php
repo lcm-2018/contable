@@ -44,6 +44,7 @@ if (empty($obj)) {
     endfor;
     //Inicializa variable por defecto
     $obj['id_sede'] = sede_unica_usuario($cmd)['id_sede'];
+    $obj['id_tipo_egreso'] = 0;
     $obj['id_tercero'] = 0;
     $obj['nom_tercero'] = 'NINGUNO';
     $obj['estado'] = 1;

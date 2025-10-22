@@ -37,6 +37,7 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     //Inicializa variable por defecto
+    $obj['id_tipo_ingreso'] = 0;
     $obj['id_tercero'] = 0;
     $obj['nom_tercero'] = 'NINGUNO';
     $obj['estado'] = 1;

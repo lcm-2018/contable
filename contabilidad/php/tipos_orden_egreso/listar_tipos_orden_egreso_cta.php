@@ -36,7 +36,8 @@ try {
     $id_vig = isset($cuenta['id']) ? $cuenta['id'] : 0;
 
     //Consulta el total de registros de la tabla
-    $sql = "SELECT COUNT(*) AS total FROM far_orden_egreso_tipo_cta WHERE id_tipo_egreso=" . $_POST['id_tipo_egreso'];
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_egreso_tipo_cta 
+            WHERE id_tipo_egreso=" . $_POST['id_tipo_egreso'];
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];

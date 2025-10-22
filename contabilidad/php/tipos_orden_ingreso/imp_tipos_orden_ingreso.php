@@ -11,22 +11,21 @@ include '../common/funciones_generales.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$where = "WHERE id_tipo_egreso<>0";
+$where = "WHERE id_tipo_ingreso<>0";
 if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND nom_tipo_egreso LIKE '" . $_POST['nombre'] . "%'";
+    $where .= " AND nom_tipo_ingreso LIKE '" . $_POST['nombre'] . "%'";
 }
 
 try {
-    $sql = "SELECT id_tipo_egreso,nom_tipo_egreso,
+    $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,
                 IF(es_int_ext=1,'Interno','Externo') AS es_int_ext,
-                IF(con_pedido=1,'SI','') AS con_pedido,
-                IF(dev_fianza=1,'SI','') AS dev_fianza,
-                IF(consumo=1,'SI','') AS consumo,
+                IF(orden_compra=1,'SI','') AS orden_compra,
+                IF(fianza=1,'SI','') AS fianza,
                 IF(farmacia=1,'SI','') AS farmacia,
                 IF(almacen=1,'SI','') AS almacen,
                 IF(activofijo=1,'SI','') AS activofijo
-            FROM far_orden_egreso_tipo
-            $where ORDER BY id_tipo_egreso DESC";
+            FROM far_orden_ingreso_tipo
+            $where ORDER BY id_tipo_ingreso DESC";
     $res = $cmd->query($sql);
     $objs = $res->fetchAll();
 
@@ -60,7 +59,7 @@ try {
 
     <table style="width:100%; font-size:80%">
         <tr style="text-align:center">
-            <th>REPORTE DE TIPOS DE ORDEN DE EGRESO</th>
+            <th>REPORTE DE TIPOS DE ORDEN DE INGRESO</th>
         </tr>     
     </table>
 
@@ -68,12 +67,10 @@ try {
         <thead style="font-size:80%">                
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th rowspan="2">Id</th>
-                <th rowspan="2">Nombre</th>                                        
-                <th rowspan="2">Cuenta Contable Vigenete</th>                                        
+                <th rowspan="2">Nombre</th>
                 <th rowspan="2">Int/Ext</th>
-                <th rowspan="2">Con Pedido</th>
-                <th rowspan="2">Es Dev. Fianza</th>
-                <th rowspan="2">Es Consumo</th>
+                <th rowspan="2">Con Orden Compra</th>
+                <th rowspan="2">Es Fianza</th>
                 <th colspan="3">Modulos</th>
             </tr>
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
@@ -85,26 +82,14 @@ try {
         <tbody style="font-size: 60%;">
             <?php
             $tabla = '';
-            foreach ($objs as $obj) {
-
-                $sql = "SELECT ctb_pgcp.cuenta
-                        FROM far_orden_egreso_tipo_cta AS TOEGR
-                        INNER JOIN ctb_pgcp ON (ctb_pgcp.id_pgcp=TOEGR.id_cuenta)            
-                        WHERE TOEGR.estado=1 AND TOEGR.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND TOEGR.id_tipo_egreso=" . $obj['id_tipo_egreso'] . "
-                        ORDER BY TOEGR.fecha_vigencia DESC LIMIT 1";
-                $rs = $cmd->query($sql);
-                $obj_cta = $rs->fetch();
-                $cuenta_c = isset($obj_cta['cuenta']) ? $obj_cta['cuenta'] : '';
-        
+            foreach ($objs as $obj) {        
                 $tabla .=  
                     '<tr class="resaltar" style="text-align:left"> 
-                        <td>' . $obj['id_tipo_egreso'] . '</td>
-                        <td>' . $obj['nom_tipo_egreso'] . '</td>
-                        <td>' . $cuenta_c . '</td>
+                        <td>' . $obj['id_tipo_ingreso'] . '</td>
+                        <td>' . $obj['nom_tipo_ingreso'] . '</td>
                         <td>' . $obj['es_int_ext'] . '</td>
-                        <td>' . $obj['con_pedido'] . '</td>
-                        <td>' . $obj['dev_fianza'] . '</td>
-                        <td>' . $obj['consumo'] . '</td>
+                        <td>' . $obj['orden_compra'] . '</td>
+                        <td>' . $obj['fianza'] . '</td>
                         <td>' . $obj['almacen'] . '</td>
                         <td>' . $obj['farmacia'] . '</td>                        
                         <td>' . $obj['activofijo'] . '</td></tr>';
@@ -114,7 +99,7 @@ try {
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="10" style="text-align:left">
+                <td colspan="8" style="text-align:left">
                     No. de Registros: <?php echo count($objs); ?>
                 </td>
             </tr>
