@@ -140,17 +140,29 @@ $(function () {
 
     //Dato numerico flotante
     $("#divModalForms,#divModalReg,#divModalBus").on("input", ".numberfloat", function () {
-        var that = $(this);
-        that.val(that.val().replace(/[^0-9\.]/g, ''));
-        if (that.val().substring(0, 1).trim() == '0' && that.val().substring(1, 2).trim() != '.') {
-            that.val('0');
+        let val = $(this).val();
+        val = val.replace(/[^0-9\.\-]/g, '');
+        if ((val.match(/\-/g) || []).length > 1) {
+            val = '-' + val.replace(/\-/g, '');
         }
-        if (that.val().split('.').length >= 3) {
-            that.val(that.val().substring(0, that.val().length - 1));
+        if (val.indexOf('-') > 0) {
+            val = '-' + val.replace(/\-/g, '');
         }
-        if (isNaN(hat.val())) {
-            e.preventDefault();
+
+        let parts = val.split('.');
+        if (parts.length > 2) {
+            val = parts[0] + '.' + parts[1];
         }
+        
+        if (val.length > 1 && val[0] === '0' && val[1] !== '.' && val[1] !== undefined) {
+            val = parseFloat(val).toString();
+        } else if (val.length > 2 && val[0] === '-' && val[1] === '0' && val[2] !== '.') {
+            val = '-' + parseFloat(val).toString();
+        }
+        if (val !== '-' && isNaN(parseFloat(val))) {
+            val = '';
+        }
+        $(this).val(val);
     });
 
     //Dato letras, numeros, y -

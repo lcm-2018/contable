@@ -16,7 +16,8 @@ $id = isset($_POST['id']) ? $_POST['id'] : -1;
 try {
     $sql = "SELECT far_orden_ingreso.id_ingreso,far_orden_ingreso.num_ingreso,far_orden_ingreso.fec_ingreso,
             far_orden_ingreso.hor_ingreso,far_orden_ingreso.num_factura,far_orden_ingreso.fec_factura,
-            far_orden_ingreso.detalle,far_orden_ingreso.val_total,
+            far_orden_ingreso.detalle,
+            (far_orden_ingreso.val_total+far_orden_ingreso.val_aprpeso) AS val_total,
             tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
             tb_terceros.nom_tercero,far_orden_ingreso_tipo.nom_tipo_ingreso,
             CASE far_orden_ingreso.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,

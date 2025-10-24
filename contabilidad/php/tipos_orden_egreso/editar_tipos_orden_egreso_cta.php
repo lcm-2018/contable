@@ -30,7 +30,7 @@ try {
                 $rs = $cmd->query($sql);
                 $obj_tegr = $rs->fetch();
 
-                if ($obj_tegr['consumo'] == 1) {
+                if ($obj_tegr['consumo'] == 0) {
                     $id = $_POST['id_tipo_egreso_cta'];
                     $id_cta = $_POST['id_txt_cta_con'] ? $_POST['id_txt_cta_con'] : 'NULL';
                     $fec_vig = $_POST['txt_fec_vig'] ? "'" . $_POST['txt_fec_vig'] . "'" : 'NULL';
@@ -64,7 +64,7 @@ try {
                         }
                     }
                 } else {
-                    $res['mensaje'] = 'La cuenta se asigna a Tipos de Orden de Egreso de Consumo';
+                    $res['mensaje'] = 'La cuenta se aplica a Tipos de Orden de Egreso NO Consumo';
                 }
             }
 

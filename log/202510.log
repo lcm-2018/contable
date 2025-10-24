@@ -8,3 +8,8 @@
 [2025-10-21 09:43:22] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_tipos_orden_egreso WHERE id_subgrupo = 16
 [2025-10-21 09:53:15] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_orden_egreso_tipo_cta WHERE id_tipo_egreso_cta = 19
 [2025-10-22 12:05:09] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_tipos_orden_ingreso WHERE id_subgrupo = 10
+[2025-10-24 14:21:50] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_orden_egreso_tipo_cta WHERE id_tipo_egreso_cta = 18
+[2025-10-24 14:21:54] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_orden_egreso_tipo_cta WHERE id_tipo_egreso_cta = 20
+[2025-10-24 14:22:00] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_orden_egreso_tipo_cta WHERE id_tipo_egreso_cta = 21
+[2025-10-24 14:22:23] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM tb_centrocostos_cta WHERE id_cec_cta = 20
+[2025-10-24 15:21:50] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, SQL: DELETE FROM far_orden_egreso_tipo_cta WHERE id_tipo_egreso_cta = 22

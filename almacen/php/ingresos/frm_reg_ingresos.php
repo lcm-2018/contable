@@ -15,7 +15,9 @@ $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT II.fec_ingreso,II.hor_ingreso,II.num_ingreso,II.id_sede,II.id_bodega,II.id_tipo_ingreso,
             II.num_factura,II.fec_factura,
             TE.id_tercero,TE.nom_tercero,
-            II.estado,II.detalle,II.val_total,II.id_pedido,
+            II.estado,II.detalle,II.val_total,II.val_aprpeso,
+            (II.val_total+II.val_aprpeso) AS val_total_apr,
+            II.id_pedido,
             BO.nombre AS nom_bodega,
             CASE II.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado,
             CONCAT(PP.detalle,'(',PP.fec_pedido,')') AS des_pedido,
@@ -43,6 +45,7 @@ if (empty($obj)) {
     $obj['estado'] = 1;
     $obj['nom_estado'] = 'PENDIENTE';
     $obj['val_total'] = 0;
+    $obj['val_aprpeso'] = 0;
 
     $bodega = bodega_principal($cmd);
     $obj['id_bodega'] = $bodega['id_bodega'];
@@ -171,15 +174,28 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                 </thead>
                 <tbody class="text-left centro-vertical"></tbody>
             </table>
-            <div class="form-row">
-                <div class="form-group col-md-4"></div>
-                <div class="form-group col-md-2">
-                    <label for="txt_val_tot" class="small">Total Orden Ingreso</label>
-                </div>
-                <div class="form-group col-md-2">
-                    <input type="text" class="form-control form-control-sm" id="txt_val_tot" name="txt_val_tot" class="small" value="<?php echo formato_valor($obj['val_total']) ?>" readonly="readonly">
-                </div>
-            </div>    
+            <form id="frm_reg_orden_ingreso_total">               
+                <div class="form-row">                 
+                    <div class="form-group col-md-2">
+                        <label for="txt_val_aprpeso" class="small">Aproximación al peso</label>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <input type="text" class="form-control form-control-sm numberfloat" id="txt_val_aprpeso" name="txt_val_aprpeso" class="small" value="<?php echo $obj['val_aprpeso'] ?>" >
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="txt_val_tot" class="small">Total Orden Ingreso</label>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <input type="text" class="form-control form-control-sm" id="txt_val_tot" name="txt_val_tot" class="small" value="<?php echo $obj['val_total'] ?>" readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="txt_val_tot_apr" class="small">Total Aproximado</label>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <input type="text" class="form-control form-control-sm" id="txt_val_tot_apr" name="txt_val_tot_apr" class="small" value="<?php echo formato_valor($obj['val_total_apr']) ?>" readonly="readonly">
+                    </div>
+                </div>        
+            </form>                
         </div>
     </div>
     <div class="text-center pt-3">

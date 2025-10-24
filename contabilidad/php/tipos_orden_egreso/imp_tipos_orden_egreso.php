@@ -69,7 +69,7 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th rowspan="2">Id</th>
                 <th rowspan="2">Nombre</th>                                        
-                <th rowspan="2">Cuenta Contable Vigenete</th>                                        
+                <th rowspan="2">Cuenta Contable Gasto</th>                                        
                 <th rowspan="2">Int/Ext</th>
                 <th rowspan="2">Con Pedido</th>
                 <th rowspan="2">Es Dev. Fianza</th>

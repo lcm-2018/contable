@@ -73,7 +73,7 @@ include '../../../permisos.php';
                                     <tr class="text-center centro-vertical">
                                         <th rowspan="2">Id</th>
                                         <th rowspan="2">Nombre</th>                                        
-                                        <th rowspan="2">Cuenta Contable Vigenete</th>                                        
+                                        <th rowspan="2">Cuenta Contable Gasto Vigenete</th>                                        
                                         <th rowspan="2">Int/Ext</th>
                                         <th rowspan="2">Con Pedido</th>
                                         <th rowspan="2">Es Dev. Fianza</th>

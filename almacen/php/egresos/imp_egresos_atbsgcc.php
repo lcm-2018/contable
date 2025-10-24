@@ -75,7 +75,7 @@ try {
     $id_farmacia = isset($obj['id_centro']) ? $obj['id_centro'] : 0;
     $nom_farmacia = isset($obj['id_centro']) ? $obj['nom_centro'] : '';
 
-    $sql = "SELECT far_orden_egreso_tipo.id_tipo_egreso,far_orden_egreso_tipo.nom_tipo_egreso,
+    $sql = "SELECT far_orden_egreso_tipo.id_tipo_egreso,far_orden_egreso_tipo.nom_tipo_egreso,far_orden_egreso_tipo.consumo,
                 SUM(far_orden_egreso.val_total) AS val_total_te
             FROM far_orden_egreso
             INNER JOIN far_orden_egreso_tipo ON (far_orden_egreso_tipo.id_tipo_egreso=far_orden_egreso.id_tipo_egreso)
@@ -95,9 +95,9 @@ try {
             ORDER BY tb_sedes.id_sede,far_bodegas.nombre";
     $rs_b = $cmd->prepare($sql);
 
-    $sql = "SELECT far_subgrupos.id_subgrupo,CONCAT_WS(' - ',far_subgrupos.cod_subgrupo,far_subgrupos.nom_subgrupo) AS nom_subgrupo,  
-                IF(far_orden_egreso.id_centrocosto=0,$id_farmacia,tb_centrocostos.id_centro) AS id_centro,
-                IF(far_orden_egreso.id_centrocosto=0,'$nom_farmacia',tb_centrocostos.nom_centro) AS nom_centro,              
+    $sql = "SELECT IF(far_orden_egreso.id_centrocosto=0,$id_farmacia,tb_centrocostos.id_centro) AS id_centro,
+                IF(far_orden_egreso.id_centrocosto=0,'$nom_farmacia',tb_centrocostos.nom_centro) AS nom_centro, 
+                far_subgrupos.id_subgrupo,CONCAT_WS(' - ',far_subgrupos.cod_subgrupo,far_subgrupos.nom_subgrupo) AS nom_subgrupo,                               
                 SUM(far_orden_egreso_detalle.cantidad*far_orden_egreso_detalle.valor) AS val_total_sg
             FROM far_orden_egreso_detalle
             INNER JOIN far_orden_egreso ON (far_orden_egreso.id_egreso=far_orden_egreso_detalle.id_egreso)
@@ -107,17 +107,11 @@ try {
             INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_orden_egreso.id_centrocosto)
             $where AND far_orden_egreso.id_tipo_egreso=:id_tipo_egreso 
                    AND far_orden_egreso.id_sede=:id_sede AND far_orden_egreso.id_bodega=:id_bodega
-            GROUP BY far_subgrupos.id_subgrupo,IF(far_orden_egreso.id_centrocosto=0,$id_farmacia,tb_centrocostos.id_centro)
-            ORDER BY far_subgrupos.id_subgrupo,IF(far_orden_egreso.id_centrocosto=0,$id_farmacia,tb_centrocostos.id_centro)";
+            GROUP BY IF(far_orden_egreso.id_centrocosto=0,$id_farmacia,tb_centrocostos.id_centro),far_subgrupos.id_subgrupo
+            ORDER BY IF(far_orden_egreso.id_centrocosto=0,$id_farmacia,tb_centrocostos.id_centro),far_subgrupos.id_subgrupo";
     $rs_d = $cmd->prepare($sql);
 
-    $sql = "SELECT CACT.cuenta
-            FROM far_subgrupos_cta AS SBG
-            INNER JOIN ctb_pgcp AS CACT ON (CACT.id_pgcp=SBG.id_cuenta)            
-            WHERE SBG.estado=1 AND SBG.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND SBG.id_subgrupo=:id_subgrupo
-            ORDER BY SBG.fecha_vigencia DESC LIMIT 1";
-    $rs_subg = $cmd->prepare($sql);
-            
+    // Gasto - Cuenta del Subgrupo por Centro de Costo - Egresos de Consumo
     $sql = "SELECT CTA.cuenta
             FROM tb_centrocostos_subgr_cta_detalle AS CSG
             INNER JOIN ctb_pgcp AS CTA ON (CTA.id_pgcp=CSG.id_cuenta)
@@ -126,6 +120,22 @@ try {
                                     ORDER BY fecha_vigencia DESC LIMIT 1)
                 AND CSG.id_subgrupo=:id_subgrupo";        
     $rs_ccos = $cmd->prepare($sql);
+
+    // Gasto - Cuenta del Tipo de Egreso - Otro tipo de Egresos
+    $sql = "SELECT CACT.cuenta
+            FROM far_orden_egreso_tipo_cta AS TEGR
+            INNER JOIN ctb_pgcp AS CACT ON (CACT.id_pgcp=TEGR.id_cuenta)            
+            WHERE TEGR.estado=1 AND TEGR.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND TEGR.id_tipo_egreso=:id_tipo_egreso
+            ORDER BY TEGR.fecha_vigencia DESC LIMIT 1";
+    $rs_tegr = $cmd->prepare($sql);
+
+    //Cuenta contable de Subgrupo
+    $sql = "SELECT CACT.cuenta
+            FROM far_subgrupos_cta AS SBG
+            INNER JOIN ctb_pgcp AS CACT ON (CACT.id_pgcp=SBG.id_cuenta)            
+            WHERE SBG.estado=1 AND SBG.fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d') AND SBG.id_subgrupo=:id_subgrupo
+            ORDER BY SBG.fecha_vigencia DESC LIMIT 1";
+    $rs_subg = $cmd->prepare($sql);
 
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
@@ -177,6 +187,7 @@ try {
 
             foreach ($objs as $obj1) {
                 $id_tipo_egreso = $obj1['id_tipo_egreso'];
+                $consumo = $obj1['consumo'];
                 
                 $tabla .= '<tr><th colspan="5" style="text-align:left">TIPO DE EGRESO : ' . mb_strtoupper($obj1['nom_tipo_egreso']) . '</th>
                             <th style="text-align:right">' . formato_valor($obj1['val_total_te']) . '</th></tr>';
@@ -199,21 +210,30 @@ try {
                     $objd = $rs_d->fetchAll();
 
                     foreach ($objd as $obj) {
+                        $id_cencos = $obj['id_centro'];
                         $id_subgrupo = $obj['id_subgrupo'];
+                        $cuenta_con = "";
+
+                        if ($consumo == 1){
+                            $rs_ccos->bindParam(':id_cencos',$id_cencos);
+                            $rs_ccos->bindParam(':id_subgrupo',$id_subgrupo);
+                            $rs_ccos->execute();
+                            $obj_ccos = $rs_ccos->fetch();
+                            $cuenta_con = isset($obj_ccos['cuenta']) ? $obj_ccos['cuenta'] : '';
+                        } else {
+                            $rs_tegr->bindParam(':id_tipo_egreso',$id_tipo_egreso);
+                            $rs_tegr->execute();
+                            $obj_tegr = $rs_tegr->fetch();
+                            $cuenta_con = isset($obj_tegr['cuenta']) ? $obj_tegr['cuenta'] : '';    
+                        }    
+                        
                         $rs_subg->bindParam(':id_subgrupo',$id_subgrupo);
                         $rs_subg->execute();
                         $obj_subg = $rs_subg->fetch();
                         $cuenta_subg = isset($obj_subg['cuenta']) ? $obj_subg['cuenta'] : '';
 
-                        $id_cencos = $obj['id_centro'];
-                        $rs_ccos->bindParam(':id_cencos',$id_cencos);
-                        $rs_ccos->bindParam(':id_subgrupo',$id_subgrupo);
-                        $rs_ccos->execute();
-                        $obj_ccos = $rs_ccos->fetch();
-                        $cuenta_ccos = isset($obj_ccos['cuenta']) ? $obj_ccos['cuenta'] : 0;
-
-                         $tabla .=  '<tr class="resaltar">
-                            <td style="text-align:left">' . str_repeat('&nbsp',20) . $cuenta_ccos . '</td>
+                        $tabla .=  '<tr class="resaltar">
+                            <td style="text-align:left">' . str_repeat('&nbsp',20) . $cuenta_con . '</td>
                             <td style="text-align:left">' . mb_strtoupper($obj['nom_centro']) . '</td>
                             <td style="text-align:left">' . $cuenta_subg . '</td>
                             <td style="text-align:left">' . mb_strtoupper($obj['nom_subgrupo']) . '</td>

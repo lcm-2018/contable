@@ -95,7 +95,7 @@ if(empty($obj)){
                 <thead>
                     <tr class="text-center centro-vertical">
                         <th>Id</th>
-                        <th>Cuenta Contable</th>
+                        <th>Cuenta Contable Gasto</th>
                         <th>Fecha Inicio de Vigencia</th>
                         <th>Cuenta Vigente</th>
                         <th>Estado</th>
