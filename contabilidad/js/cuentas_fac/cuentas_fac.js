@@ -53,14 +53,15 @@
                 { 'data': 'cta_caja' },
                 { 'data': 'cta_fac_global' },
                 { 'data': 'cta_x_ident' },
+                { 'data': 'cta_baja' },
                 { 'data': 'vigente' },
                 { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [2, 3] },
-                { visible: false, targets: 18 },
-                { orderable: false, targets: 20 },
+                { visible: false, targets: 19 },
+                { orderable: false, targets: 21 },
             ],
             rowCallback: function(row, data, index) {
                 if (data.vigente == 'X') {
@@ -216,6 +217,7 @@
         error += verifica_vacio_2($('#id_txt_cta_caj'), $('#txt_cta_caj'));
         error += verifica_vacio_2($('#id_txt_cta_fac_glo'), $('#txt_cta_fac_glo'));
         error += verifica_vacio_2($('#id_txt_cta_x_ide'), $('#txt_cta_x_ide'));
+        error += verifica_vacio_2($('#id_txt_cta_baja'), $('#txt_cta_baja'));
         error += verifica_vacio($('#txt_fec_vig'));
         error += verifica_vacio($('#sl_estado'));
 
@@ -232,6 +234,7 @@
         error1 += verifica_valmin_2($('#id_txt_cta_caj'), $('#txt_cta_caj'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_fac_glo'), $('#txt_cta_fac_glo'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_x_ide'), $('#txt_cta_x_ide'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_baja'), $('#txt_cta_baja'), 0);
 
         if (error >= 1) {
             $('#divModalError').modal('show');

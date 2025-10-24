@@ -26,6 +26,10 @@ if (isset($_POST['id_cencosto']) && $_POST['id_cencosto']) {
 if (isset($_POST['id_sede']) && $_POST['id_sede']) {
     $where .= " AND far_centrocosto_area.id_sede=" . $_POST['id_sede'];
 }
+if (isset($_POST['estado']) && strlen($_POST['estado'])) {
+    $where .= " AND far_centrocosto_area.estado=" . $_POST['estado'];
+}
+
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -48,7 +52,8 @@ try {
                 tb_centrocostos.nom_centro AS nom_centrocosto, 
                 far_area_tipo.nom_tipo AS nom_tipo_area,              
                 CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_responsable,
-                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega
+                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
+                IF(far_centrocosto_area.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_centrocosto_area    
             INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_centrocosto_area.id_centrocosto)
             INNER JOIN far_area_tipo ON (far_area_tipo.id_tipo=far_centrocosto_area.id_tipo_area)
@@ -88,6 +93,7 @@ if (!empty($objs)) {
             "nom_sede" => mb_strtoupper($obj['nom_sede']), 
             "usr_responsable" => mb_strtoupper($obj['usr_responsable']), 
             "nom_bodega" => mb_strtoupper($obj['nom_bodega']), 
+            "estado" => $obj['estado'], 
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }

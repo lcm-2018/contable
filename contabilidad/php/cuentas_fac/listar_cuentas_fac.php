@@ -56,6 +56,7 @@ try {
                 c_caja.cuenta AS cta_caja,
                 c_fac_glo.cuenta AS cta_fac_global,
                 c_x_ide.cuenta AS cta_x_ident,
+                c_baja.cuenta AS cta_baja,
                 IF(c.id IS NULL,'','X') AS vigente,
 	            IF(tb_homologacion.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM tb_homologacion
@@ -75,6 +76,7 @@ try {
             LEFT JOIN ctb_pgcp AS c_caja ON (c_caja.id_pgcp=tb_homologacion.id_cta_caja)
             LEFT JOIN ctb_pgcp AS c_fac_glo ON (c_fac_glo.id_pgcp=tb_homologacion.id_cta_fac_global)
             LEFT JOIN ctb_pgcp AS c_x_ide ON (c_x_ide.id_pgcp=tb_homologacion.id_cta_x_ident)
+            LEFT JOIN ctb_pgcp AS c_baja ON (c_baja.id_pgcp=tb_homologacion.id_cta_baja)
             LEFT JOIN (SELECT MAX(id_homo) AS id FROM tb_homologacion
                         WHERE estado=1 AND fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d')
                         GROUP BY id_regimen,id_cobertura,id_modalidad) AS c ON (c.id=tb_homologacion.id_homo)
@@ -122,6 +124,7 @@ if (!empty($objs)) {
             "cta_caja" => $obj['cta_caja'],
             "cta_fac_global" => $obj['cta_fac_global'],
             "cta_x_ident" => $obj['cta_x_ident'],
+            "cta_baja" => $obj['cta_baja'],
             "vigente" => $obj['vigente'],
             "estado" => $obj['estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',

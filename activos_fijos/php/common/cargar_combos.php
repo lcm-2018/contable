@@ -121,7 +121,9 @@ function tipo_ingreso($cmd, $titulo = '', $id = 0)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,es_int_ext,orden_compra FROM far_orden_ingreso_tipo";
+        $sql = "SELECT id_tipo_ingreso,nom_tipo_ingreso,es_int_ext,orden_compra 
+                FROM far_orden_ingreso_tipo
+                WHERE activofijo = 1 OR id_tipo_ingreso = $id";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
@@ -368,7 +370,8 @@ function areas_sede($cmd, $titulo = '', $idsede = 0, $id = -1)
     try {
         echo '<option value="">' . $titulo . '</option>';
         if ($idsede != 0) {
-            $sql = "SELECT id_area,nom_area,id_responsable FROM far_centrocosto_area WHERE id_sede=$idsede
+            $sql = "SELECT id_area,nom_area,id_responsable FROM far_centrocosto_area 
+                    WHERE (id_sede=$idsede AND estado=1) OR id_area=$id
                     ORDER BY es_almacen DESC, nom_area";
             $rs = $cmd->query($sql);
             $objs = $rs->fetchAll();

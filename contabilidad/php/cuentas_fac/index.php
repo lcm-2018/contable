@@ -76,7 +76,7 @@ include '../../../permisos.php';
                                         <th rowspan="2">Cobertura</th>
                                         <th rowspan="2">Modalidad</th>
                                         <th rowspan="2">Fecha Inicio de Vigencia</th>
-                                        <th colspan="14">Cuentas Contables</th>
+                                        <th colspan="15">Cuentas Contables</th>
                                         <th rowspan="2">Estado</th>
                                         <th rowspan="2">Acciones</th>
                                     </tr>
@@ -94,6 +94,7 @@ include '../../../permisos.php';
                                         <th>Caja</th>
                                         <th>Fac.Glob.</th>
                                         <th>Por Iden.</th>
+                                        <th>Baja</th>
                                         <th>Vigente</th>
                                     </tr>
                                 </thead>

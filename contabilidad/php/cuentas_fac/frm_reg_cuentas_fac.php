@@ -24,7 +24,8 @@ $sql = "SELECT tb_homologacion.*,
             IF(c_devol.cuenta IS NULL,'',CONCAT_WS(' - ',c_devol.cuenta,c_devol.nombre)) AS cta_devolucion,            
             IF(c_caja.cuenta IS NULL,'',CONCAT_WS(' - ',c_caja.cuenta,c_caja.nombre)) AS cta_caja,
             IF(c_fac_glo.cuenta IS NULL,'',CONCAT_WS(' - ',c_fac_glo.cuenta,c_fac_glo.nombre)) AS cta_fac_global,
-            IF(c_x_ide.cuenta IS NULL,'',CONCAT_WS(' - ',c_x_ide.cuenta,c_x_ide.nombre)) AS cta_x_ident
+            IF(c_x_ide.cuenta IS NULL,'',CONCAT_WS(' - ',c_x_ide.cuenta,c_x_ide.nombre)) AS cta_x_ident,
+            IF(c_baja.cuenta IS NULL,'',CONCAT_WS(' - ',c_baja.cuenta,c_baja.nombre)) AS cta_baja
         FROM tb_homologacion 
         LEFT JOIN pto_cargue  AS c_presto ON (c_presto.id_cargue=tb_homologacion.id_cta_presupuesto)
         LEFT JOIN pto_cargue  AS c_presto_ant ON (c_presto_ant.id_cargue=tb_homologacion.id_cta_presupuesto_ant)
@@ -39,6 +40,7 @@ $sql = "SELECT tb_homologacion.*,
         LEFT JOIN ctb_pgcp AS c_caja ON (c_caja.id_pgcp=tb_homologacion.id_cta_caja)
         LEFT JOIN ctb_pgcp AS c_fac_glo ON (c_fac_glo.id_pgcp=tb_homologacion.id_cta_fac_global)
         LEFT JOIN ctb_pgcp AS c_x_ide ON (c_x_ide.id_pgcp=tb_homologacion.id_cta_x_ident)
+        LEFT JOIN ctb_pgcp AS c_baja ON (c_baja.id_pgcp=tb_homologacion.id_cta_baja)
         WHERE tb_homologacion.id_homo=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
@@ -172,6 +174,13 @@ if(empty($obj)){
                     <div class="form-group col-md-9">                            
                         <input type="text" class="form-control form-control-sm cuenta" id="txt_cta_x_ide" data-campoid="id_txt_cta_x_ide" value="<?php echo $obj['cta_x_ident'] ?>">
                         <input type="hidden" id="id_txt_cta_x_ide" name="id_txt_cta_x_ide" value="<?php echo $obj['id_cta_x_ident'] ?>">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="txt_cta_x_ide" class="small">Cta. de Baja</label>
+                    </div>  
+                    <div class="form-group col-md-9">                            
+                        <input type="text" class="form-control form-control-sm cuenta" id="txt_cta_baja" data-campoid="id_txt_cta_baja" value="<?php echo $obj['cta_baja'] ?>">
+                        <input type="hidden" id="id_txt_cta_baja" name="id_txt_cta_baja" value="<?php echo $obj['id_cta_baja'] ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="txt_fec_vig" class="small">Fecha Inicio de Vigencia</label>

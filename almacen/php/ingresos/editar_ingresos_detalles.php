@@ -146,7 +146,7 @@ try {
                     $sql = "SELECT val_total FROM far_orden_ingreso WHERE id_ingreso=" . $id_ingreso;
                     $rs = $cmd->query($sql);
                     $obj_ingreso = $rs->fetch();
-                    $res['val_total'] = formato_valor($obj_ingreso['val_total']);
+                    $res['val_total'] = $obj_ingreso['val_total'];
                 }
             } else {
                 $res['mensaje'] = 'Solo puede Modificar Ordenes de Ingreso en estado Pendiente';

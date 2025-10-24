@@ -215,6 +215,19 @@
         });
     });
 
+    function valor_aproximado(){
+        var valtot = $('#txt_val_tot').val() ? $('#txt_val_tot').val() : 0,
+            valpes = $('#txt_val_aprpeso').val() ? $('#txt_val_aprpeso').val() : 0;
+        var valapr = parseFloat(valtot) + parseFloat(valpes);
+        $('#txt_val_tot_apr').val(
+          new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 2 }).format(valapr)
+        );
+    }
+
+    $('#divForms').on('input', '#txt_val_aprpeso', function() {
+        valor_aproximado();
+    });
+
     //Guardar registro Orden Ingreso
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
@@ -237,7 +250,7 @@
             $('#divModalError').modal('show');
             $('#divMsgError').html('Los datos resaltados son obligatorios');
         } else {
-            var data = $('#frm_reg_orden_ingreso').serialize();
+            var data = $('#frm_reg_orden_ingreso').serialize() + '&' + $('#frm_reg_orden_ingreso_total').serialize();
             $.ajax({
                 type: 'POST',
                 url: 'editar_ingresos.php',
@@ -473,6 +486,7 @@
 
                     $('#id_detalle').val(r.id);
                     $('#txt_val_tot').val(r.val_total);
+                    valor_aproximado();
 
                     $('#divModalReg').modal('hide');
                     $('#divModalDone').modal('show');
@@ -508,6 +522,7 @@
                 reloadtable('tb_ingresos', pag);
 
                 $('#txt_val_tot').val(r.val_total);
+                valor_aproximado();
 
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");

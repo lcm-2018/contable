@@ -59,7 +59,7 @@ function modalidad($cmd, $titulo = '', $id = 0)
     }
 }
 
-function estados_registros($titulo = '',$estado = 2)
+function estados_registros($titulo = '',$estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';
@@ -68,13 +68,22 @@ function estados_registros($titulo = '',$estado = 2)
     echo '<option value="0"' . $selected . '>INACTIVO</option>';
 }
 
-function estados_sino($titulo = '',$estado = 2)
+function estados_sino($titulo = '',$estado = -1)
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';
     echo '<option value="1"' . $selected . '>SI</option>';
     $selected = ($estado == 0) ? 'selected="selected"' : '';
     echo '<option value="0"' . $selected . '>NO</option>';
+}
+
+function interno_externo($titulo = '',$estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>Interno</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>Externo</option>';
 }
 
 function grupo_articulo($cmd, $titulo = '', $id = 0)

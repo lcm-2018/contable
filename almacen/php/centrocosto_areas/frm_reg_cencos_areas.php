@@ -30,6 +30,7 @@ if (empty($obj)) {
     $obj['id_centrocosto'] = 0;
     $obj['id_tipo_area'] = 0;
     $obj['id_sede'] = 0;
+    $obj['estado'] = 1;    
 }
 
 ?>
@@ -73,6 +74,12 @@ if (empty($obj)) {
                         <label for="sl_bodega" class="small">El Area es Bodega</label>
                         <select class="form-control form-control-sm" id="sl_bodega" name="sl_bodega">
                             <?php bodegas_sede($cmd, '', $obj['id_sede'], $obj['id_bodega']) ?>   
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="sl_estado" class="small">Estado</label>
+                        <select class="form-control form-control-sm" id="sl_estado" name="sl_estado">
+                            <?php estados_registros('', $obj['estado']) ?>
                         </select>
                     </div>
                 </div>    

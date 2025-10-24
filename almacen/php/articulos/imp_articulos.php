@@ -30,10 +30,10 @@ if (isset($_POST['estado']) && strlen($_POST['estado'])) {
 
 try {
     $sql = "SELECT far_medicamentos.id_med,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-            far_subgrupos.nom_subgrupo,far_medicamentos.top_min,far_medicamentos.top_max,
-            far_medicamentos.existencia,far_medicamentos.val_promedio,
-            IF(far_medicamentos.es_clinico=1,'SI','NO') AS es_clinico,
-            IF(far_medicamentos.estado=1,'ACTIVO','INACTIVO') AS estado
+                far_subgrupos.nom_subgrupo,far_medicamentos.top_min,far_medicamentos.top_max,
+                far_medicamentos.existencia,far_medicamentos.val_promedio,
+                IF(far_medicamentos.es_clinico=1,'SI','NO') AS es_clinico,
+                IF(far_medicamentos.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_medicamentos
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo) $where ORDER BY far_medicamentos.id_med DESC ";
     $rs = $cmd->query($sql);

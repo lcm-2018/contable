@@ -9,14 +9,14 @@
 
     $(document).ready(function() {
         //Tabla de Registros
-        $('#tb_cencos_areas').DataTable({
+        $('#tb_tipos_orden_ingreso').DataTable({
             dom: setdom,
             buttons: [{
                 action: function(e, dt, node, config) {
-                    $.post("frm_reg_cencos_areas.php", function(he) {
-                        $('#divTamModalForms').removeClass('modal-xl');
+                    $.post("frm_reg_tipos_orden_ingreso.php", function(he) {
                         $('#divTamModalForms').removeClass('modal-sm');
-                        $('#divTamModalForms').addClass('modal-lg');
+                        $('#divTamModalForms').removeClass('modal-lg');
+                        $('#divTamModalForms').addClass('modal-xl');
                         $('#divModalForms').modal('show');
                         $("#divForms").html(he);
                     });
@@ -27,30 +27,26 @@
             serverSide: true,
             searching: false,
             ajax: {
-                url: 'listar_cencos_areas.php',
+                url: 'listar_tipos_orden_ingreso.php',
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
-                    data.nom_area = $('#txt_nombre_filtro').val();
-                    data.id_cencosto = $('#sl_centrocosto_filtro').val();
-                    data.id_sede = $('#sl_sede_filtro').val();
-                    data.estado = $('#sl_estado_filtro').val();
+                    data.nombre = $('#txt_nombre_filtro').val();
                 }
             },
             columns: [
-                { 'data': 'id_area' }, //Index=0              
-                { 'data': 'nom_area' },
-                { 'data': 'nom_tipo_area' },
-                { 'data': 'nom_centrocosto' },
-                { 'data': 'nom_sede' },
-                { 'data': 'usr_responsable' },
-                { 'data': 'nom_bodega' },
-                { 'data': 'estado' },
+                { 'data': 'id_tipo_ingreso' }, //Index=0
+                { 'data': 'nom_tipo_ingreso' },
+                { 'data': 'es_int_ext' },
+                { 'data': 'orden_compra' },
+                { 'data': 'fianza' },
+                { 'data': 'almacen' },
+                { 'data': 'farmacia' },                
+                { 'data': 'activofijo' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [1, 2] },
-                { visible: false, targets: 6 },
+                { class: 'text-wrap', targets: [1] },
                 { orderable: false, targets: 8 }
             ],
             order: [
@@ -63,45 +59,27 @@
         });
 
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
-        $('#tb_cencos_areas').wrap('<div class="overflow"/>');
+        $('#tb_tipos_orden_ingreso').wrap('<div class="overflow"/>');
     });
 
     //Buascar registros
     $('#btn_buscar_filtro').on("click", function() {
-        reloadtable('tb_cencos_areas');
+        reloadtable('tb_tipos_orden_ingreso');
     });
 
     $('.filtro').keypress(function(e) {
         if (e.keyCode == 13) {
-            reloadtable('tb_cencos_areas');
+            reloadtable('tb_tipos_orden_ingreso');
         }
     });
 
-    // Autocompletar Usuarios reposnables
-    $('#divForms').on("input", "#txt_responsable", function() {
-        $(this).autocomplete({
-            source: function(request, response) {
-                $.ajax({
-                    url: "../common/cargar_usuariosistema_ls.php",
-                    dataType: "json",
-                    type: 'POST',
-                    data: { term: request.term }
-                }).done(function(data) {
-                    response(data);
-                });
-            },
-            minLength: 2,
-            select: function(event, ui) {
-                $('#id_txt_responsable').val(ui.item.id);
-            }
-        });
-    });
-
     //Editar un registro    
-    $('#tb_cencos_areas').on('click', '.btn_editar', function() {
+    $('#tb_tipos_orden_ingreso').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');
-        $.post("frm_reg_cencos_areas.php", { id: id }, function(he) {
-            $('#divTamModalForms').addClass('modal-lg');
+        $.post("frm_reg_tipos_orden_ingreso.php", { id: id }, function(he) {
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
@@ -110,27 +88,29 @@
     //Guardar registro 
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
-        var error = verifica_vacio($('#txt_nom_area'));
-        error += verifica_vacio_2($('#id_txt_responsable'), $('#txt_responsable'));
-        error += verifica_vacio($('#sl_centrocosto'));
-        error += verifica_vacio($('#sl_sede'));
-        error += verifica_vacio($('#sl_estado'));
+        var error = verifica_vacio($('#txt_nom_tipoingreso'));
+        error += verifica_vacio($('#sl_esintext'));
+        error += verifica_vacio($('#sl_ordencompra'));
+        error += verifica_vacio($('#sl_fianza'));
+        error += verifica_vacio($('#sl_farmacia'));
+        error += verifica_vacio($('#sl_almacen'));
+        error += verifica_vacio($('#sl_activofijo'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Los datos resaltados son obligatorios');
         } else {
-            var data = $('#frm_reg_cencos_areas').serialize();
+            var data = $('#frm_reg_tipos_orden_ingreso').serialize();
             $.ajax({
                 type: 'POST',
-                url: 'editar_cencos_areas.php',
+                url: 'editar_tipos_orden_ingreso.php',
                 dataType: 'json',
                 data: data + "&oper=add"
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
-                    let pag = ($('#id_area').val() == -1) ? 0 : $('#tb_cencos_areas').DataTable().page.info().page;
-                    reloadtable('tb_cencos_areas', pag);
-                    $('#id_area').val(r.id);
+                    let pag = ($('#id_tipo_ingreso').val() == -1) ? 0 : $('#tb_tipos_orden_ingreso').DataTable().page.info().page;
+                    reloadtable('tb_tipos_orden_ingreso', pag);
+                    $('#id_tipo_ingreso').val(r.id);
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Proceso realizado con éxito");
                 } else {
@@ -143,24 +123,24 @@
         }
     });
 
-    //Borrar un registro 
-    $('#tb_cencos_areas').on('click', '.btn_eliminar', function() {
+    //Borrarr un registro 
+    $('#tb_tipos_orden_ingreso').on('click', '.btn_eliminar', function() {
         let id = $(this).attr('value');
-        confirmar_del('cencos_area', id);
+        confirmar_del('tipos_orden_ingreso', id);
     });
 
-    $('#divModalConfDel').on("click", "#cencos_area", function() {
+    $('#divModalConfDel').on("click", "#tipos_orden_ingreso", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
-            url: 'editar_cencos_areas.php',
+            url: 'editar_tipos_orden_ingreso.php',
             dataType: 'json',
             data: { id: id, oper: 'del' }
         }).done(function(r) {
             $('#divModalConfDel').modal('hide');
             if (r.mensaje == 'ok') {
-                let pag = $('#tb_cencos_areas').DataTable().page.info().page;
-                reloadtable('tb_cencos_areas', pag);
+                let pag = $('#tb_tipos_orden_ingreso').DataTable().page.info().page;
+                reloadtable('tb_tipos_orden_ingreso', pag);
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
             } else {
@@ -174,12 +154,9 @@
 
     //Imprimir registros
     $('#btn_imprime_filtro').on('click', function() {
-        reloadtable('tb_cencos_areas');
-        $.post("imp_cencos_areas.php", {
-            nom_area: $('#txt_nombre_filtro').val(),
-            id_cencosto: $('#sl_centrocosto_filtro').val(),
-            id_sede: $('#sl_sede_filtro').val(),
-            estado: $('#sl_estado_filtro').val()
+        reloadtable('tb_tipos_orden_ingreso');
+        $.post("imp_tipos_orden_ingreso.php", {
+            nombre: $('#txt_nombre_filtro').val()
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');
