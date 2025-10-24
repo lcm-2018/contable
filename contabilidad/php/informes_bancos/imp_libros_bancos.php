@@ -131,7 +131,6 @@ try {
                         $and_where
                     ORDER BY DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') ASC, ctb_libaux.debito DESC, ctb_libaux.credito DESC
                     LIMIT 500";
-            exit;
             $rs = $cmd->query($sql);
             $obj_informe = $rs->fetchAll(PDO::FETCH_ASSOC);
             $rs->closeCursor();

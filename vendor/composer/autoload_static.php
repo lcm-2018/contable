@@ -37,6 +37,10 @@ class ComposerStaticInitba15adc99a257552817404325d762ec9
         array (
             'Dompdf\\' => 7,
         ),
+        'B' => 
+        array (
+            'Box\\Spout\\' => 10,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -75,6 +79,10 @@ class ComposerStaticInitba15adc99a257552817404325d762ec9
         'Dompdf\\' => 
         array (
             0 => __DIR__ . '/..' . '/dompdf/dompdf/src',
+        ),
+        'Box\\Spout\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/box/spout/src/Spout',
         ),
     );
 

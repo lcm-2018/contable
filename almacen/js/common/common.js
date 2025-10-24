@@ -186,7 +186,7 @@ $(function () {
     //Boton de Excel de formulario Impresión
     $('#divModalImp').on('click', '#btnExcelEntrada', function () {
         let encoded = toBase64($('#areaImprimir').html());
-        $('<form action="php/informes/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
+        $('<form action="' + window.urlin + '/financiero/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
     });
 });
 

@@ -30,7 +30,9 @@ if ($data['id'] == 0) {
                     `ctb_doc`
                 WHERE (`id_manu` BETWEEN '$docIni' AND '$docFin' AND `id_tipo_doc` = $tipo AND `estado` > 0)";
         $res = $cmd->query($sql);
-        $datos = $res->fetchAll();
+        $datos = $res->fetchAll(PDO::FETCH_ASSOC);
+        $res->closeCursor();
+        unset($res);
         $ids = array_map(function ($item) {
             return intval($item['id_ctb_doc']);
         }, $datos);
@@ -74,6 +76,8 @@ try {
             WHERE (`ctb_doc`.`id_ctb_doc` IN ($ids))";
     $res = $cmd->query($sql);
     $documentos_tes = $res->fetchAll(PDO::FETCH_ASSOC);
+    $res->closeCursor();
+    unset($res);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -141,6 +145,7 @@ foreach ($documentos_tes as $documento) {
                     , `pto_cargue`.`nom_rubro`
                     , `pto_cargue`.`cod_pptal` AS `rubro`
                     , `ctb_doc`.`id_manu`
+                    , `pto_crp`.`id_manu` AS `id_rp`
                 FROM
                     `pto_pag_detalle`
                     INNER JOIN `pto_cop_detalle` 
@@ -149,13 +154,17 @@ foreach ($documentos_tes as $documento) {
                         ON (`pto_pag_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                     INNER JOIN `pto_crp_detalle` 
                         ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                    INNER JOIN `pto_crp` 
+                        ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
                     INNER JOIN `pto_cdp_detalle` 
                         ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                     INNER JOIN `pto_cargue` 
                         ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
                 WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
             $res = $cmd->query($sql);
-            $rubros = $res->fetchAll();
+            $rubros = $res->fetchAll(PDO::FETCH_ASSOC);
+            $res->closeCursor();
+            unset($res);
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
@@ -216,6 +225,8 @@ foreach ($documentos_tes as $documento) {
             ORDER BY `ctb_pgcp`.`cuenta` DESC";
         $res = $cmd->query($sql);
         $movimiento = $res->fetchAll(PDO::FETCH_ASSOC);
+        $res->closeCursor();
+        unset($res);
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -260,7 +271,9 @@ foreach ($documentos_tes as $documento) {
                     ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
             WHERE (`tes_detalle_pago`.`id_ctb_doc` = $id_doc)";
         $rs = $cmd->query($sql);
-        $formapago = $rs->fetchAll();
+        $formapago = $rs->fetchAll(PDO::FETCH_ASSOC);
+        $rs->closeCursor();
+        unset($rs);
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -298,7 +311,9 @@ foreach ($documentos_tes as $documento) {
                     ON (`tes_causa_arqueo`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
             WHERE (`tes_causa_arqueo`.`id_ctb_doc` = $id_doc)";
             $res = $cmd->query($sql);
-            $facturadores = $res->fetchAll();
+            $facturadores = $res->fetchAll(PDO::FETCH_ASSOC);
+            $res->closeCursor();
+            unset($res);
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
@@ -338,7 +353,9 @@ foreach ($documentos_tes as $documento) {
                 AND `fin_respon_doc`.`estado` = 1
                 AND `fin_maestro_doc`.`estado` = 1)";
         $res = $cmd->query($sql);
-        $responsables = $res->fetchAll();
+        $responsables = $res->fetchAll(PDO::FETCH_ASSOC);
+        $res->closeCursor();
+        unset($res);
         $key = array_search('4', array_column($responsables, 'tipo_control'));
         $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
         $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
@@ -492,15 +509,17 @@ foreach ($documentos_tes as $documento) {
                 <?php
                 $total_pto = 0;
                 foreach ($rubros as $rp) {
+                    if ($rp['valor'] > 0) {
                 ?>
-                    <tr>
-                        <td class='text-left' style='border: 1px solid black '><?= $rp['id_manu']; ?></td>
-                        <td class='text-left' style='border: 1px solid black '><?= $rp['rubro']; ?></td>
-                        <td class='text-left' style='border: 1px solid black '><?= $rp['nom_rubro']; ?></td>
-                        <td class='text-right' style='border: 1px solid black; text-align: right'><?= number_format($rp['valor'], 2, ",", "."); ?></td>
-                    </tr>
+                        <tr>
+                            <td class='text-left' style='border: 1px solid black '><?= $rp['id_rp']; ?></td>
+                            <td class='text-left' style='border: 1px solid black '><?= $rp['rubro']; ?></td>
+                            <td class='text-left' style='border: 1px solid black '><?= $rp['nom_rubro']; ?></td>
+                            <td class='text-right' style='border: 1px solid black; text-align: right'><?= number_format($rp['valor'], 2, ",", "."); ?></td>
+                        </tr>
                 <?php
-                    $total_pto += $rp['valor'];
+                        $total_pto += $rp['valor'];
+                    }
                 }
                 ?>
                 <tr>
@@ -807,6 +826,8 @@ foreach ($documentos_tes as $documento) {
                 WHERE `fec_venta` >= '2025-08-01' AND `far_ventas`.`estado` = 2 AND `arqueo`.`id_venta` IS NULL AND `id_tercero_api` IN ($id_terceros)";
         $res = $cmd->query($sql);
         $pendientes = $res->fetchAll(PDO::FETCH_ASSOC);
+        $res->closeCursor();
+        unset($res);
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -879,7 +900,9 @@ foreach ($documentos_tes as $documento) {
                     AND `fin_respon_doc`.`estado` = 1
                     AND `fin_maestro_doc`.`estado` = 1)";
             $res = $cmd->query($sql);
-            $responsables = $res->fetchAll();
+            $responsables = $res->fetchAll(PDO::FETCH_ASSOC);
+            $res->closeCursor();
+            unset($res);
             $key = array_search('4', array_column($responsables, 'tipo_control'));
             $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
             $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';

@@ -7,6 +7,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 include '../../../conexion.php';
+include '../../../vendor/autoload.php';
 include 'funciones_generales.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -172,19 +173,19 @@ try {
         // (opcional) Escribir encabezados del CSV
         if ($reg == 0) {
             $reg++;
-            fputcsv($output, ["ENTIDAD", $razhd]);
-            fputcsv($output, ["NIT", $nithd]);
-            fputcsv($output, ["REPORTE", "LIBROS AUXILIARES"]);
-            fputcsv($output, ["FECHA INICIAL", $fec_ini]);
-            fputcsv($output, ["FECHA FINAL", $fec_fin]);
+            fputcsv($output, ["ENTIDAD", $razhd], '|');
+            fputcsv($output, ["NIT", $nithd], '|');
+            fputcsv($output, ["REPORTE", "LIBROS AUXILIARES"], '|');
+            fputcsv($output, ["FECHA INICIAL", $fec_ini], '|');
+            fputcsv($output, ["FECHA FINAL", $fec_fin], '|');
         }
         $reg++;
-        fputcsv($output, ["CUENTA", strval($obj_c['cuenta'] . ' - ' . $obj_c['nombre'])]);
-        fputcsv($output, []); // línea en blanco
+        fputcsv($output, ["CUENTA", strval($obj_c['cuenta'] . ' - ' . $obj_c['nombre'])], '|');
+        fputcsv($output, [], '|'); // línea en blanco
         $headers = ["Fecha", "Tipo Documento", "Documento", "Referencia", "Tercero", "CC/nit", "Detalle", "Debito", "Credito", "Saldo"];
-        fputcsv($output, $headers);
+        fputcsv($output, $headers, '|');
         $saldoInicial = ["", "", "", "", "", "", "Saldo inicial:", "", "", number_format($saldo_inicial, 2, ".", ",")];
-        fputcsv($output, $saldoInicial);
+        fputcsv($output, $saldoInicial, '|');
 
         foreach ($obj_informe as $obj) {
             $primer_caracter = substr($obj['cuenta'], 0, 1);
@@ -207,7 +208,7 @@ try {
                 number_format($obj['credito'], 2, ".", ","),
                 number_format($saldo_inicial, 2, ".", ",")
             ];
-            fputcsv($output, $row);
+            fputcsv($output, $row, '|');
 
             $total_deb += $obj['debito'];
             $total_cre += $obj['credito'];
@@ -227,7 +228,7 @@ try {
             "" . number_format($total_deb, 2, ".", ","),
             "" . number_format($total_cre, 2, ".", ","),
             "" . number_format($saldo_inicial, 2, ".", ",")
-        ]);
+        ], '|');
     }
 
     fclose($output);
