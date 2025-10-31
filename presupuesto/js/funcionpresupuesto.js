@@ -3576,13 +3576,13 @@ const generarInforme = (boton) => {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_gas_xls.php";
         let mes = $("#mes").length ? $("#mes").is(":checked") : false;
         mes = mes ? 1 : 0;
-        data = { fecha_corte: fecha_corte, mes: mes };
+        data = { fecha_corte: fecha_corte, mes: mes, fecha_ini: $('#fecha_ini').val() };
     }
     if (id == 2) {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_ing_xls.php";
         let mes = $("#mes").length ? $("#mes").is(":checked") : false;
         mes = mes ? 1 : 0;
-        data = { fecha_corte: fecha_corte, mes: mes };
+        data = { fecha_corte: fecha_corte, mes: mes, fecha_ini: $('#fecha_ini').val() };
     }
     if (id == 3) {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_gas_xls_mes.php";

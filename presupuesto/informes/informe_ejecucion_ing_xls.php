@@ -7,7 +7,7 @@ if (!isset($_SESSION['user'])) {
 $vigencia = $_SESSION['vigencia'];
 $fecha_corte = $_POST['fecha_corte'];
 $detalle_mes = $_POST['mes'];
-$fecha_ini = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-01-01'));
+$fecha_ini = $_POST['fecha_ini'];
 $mes = date("m", strtotime($fecha_corte));
 $fecha_ini_mes = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-' . $mes . '-01'));
 function pesos($valor)
@@ -265,7 +265,8 @@ try {
             $tipo_dat = $tipo == '0' ? 'M' : 'D';
             $definitivo = $value['inicial'] + $value['adicion'] - $value['reduccion'];
             $saldo_recaudar = $definitivo - $value['recaudo'];
-
+            $div = $value['inicial'] + $value['adicion'] - $value['reduccion'];
+            $div = $div == 0 ? 1 : $div;
             echo '<tr>
                     <td class="text">' . $key . '</td>
                     <td class="text">' . $nomrb . '</td>
@@ -280,7 +281,7 @@ try {
             echo '<td style="text-align:right">' . pesos($value['reconocimiento']) . '</td>';
             echo  $detalle_mes == '1' ? '<td style="text-align:right">' . pesos($value['recaudo_mes']) . '</td>' : '';
             echo '<td style="text-align:right">' . pesos($value['recaudo']) . '</td>
-             <td style="text-align:right">' .  round(($value['recaudo'] / ($value['inicial'] + $value['adicion'] - $value['reduccion'])) * 100, 2) . '</td>
+             <td style="text-align:right">' .  round(($value['recaudo'] / $div) * 100, 2) . '</td>
                     <td style="text-align:right">' .  pesos($saldo_recaudar) . '</td>
                 </tr>';
         }

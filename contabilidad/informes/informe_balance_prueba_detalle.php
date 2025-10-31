@@ -164,8 +164,16 @@ include_once '../../financiero/encabezado_empresa.php';
                     $saldo_ini = $tp['debitoi'] - $tp['creditoi'];
                     $saldo = $saldo_ini + $tp['debito'] - $tp['credito'];
                 } else {
-                    $saldo_ini = $tp['creditoi'] - $tp['debitoi'];
-                    $saldo = $saldo_ini + $tp['credito'] - $tp['debito'];
+                    if ($nat2 == '99') {
+                        $saldo_ini = $tp['debitoi'] - $tp['creditoi'];
+                        $saldo = $saldo_ini + $tp['credito'] - $tp['debito'];
+                    } elseif ($nat2 == '91' || $nat2 == '92'  || $nat2 == '93') {
+                        $saldo_ini = $tp['debitoi'] - $tp['creditoi'];
+                        $saldo = $saldo_ini + $tp['credito'] - $tp['debito'];
+                    } else {
+                        $saldo_ini = $tp['creditoi'] - $tp['debitoi'];
+                        $saldo = $saldo_ini + $tp['credito'] - $tp['debito'];
+                    }
                 }
 
                 if ($_POST['xtercero'] == 1) {

@@ -1,12 +1,16 @@
 <?php
 session_start();
-ini_set("memory_limit", "-1");
 if (!isset($_SESSION['user'])) {
     header('Location: ../../index.php');
     exit();
 }
 
+ini_set('memory_limit', '-1');
+
 include '../../../conexion.php';
+use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
+use Box\Spout\Common\Entity\Row;
+
 include '../../../vendor/autoload.php';
 include 'funciones_generales.php';
 
@@ -50,22 +54,72 @@ try {
     $nithd = $obj_ent['nit_ips'];
     $cmd = null;
 
-    $reg = 0;
+    $filename = "Libro_Auxiliar_Bancos_" . date("Y-m-d_H-i-s") . ".xlsx";
 
-    $filename = "reporte_" . date("Y-m-d_H-i-s") . ".csv";
+    $writer = WriterEntityFactory::createXLSXWriter();
+    $writer->openToBrowser($filename);
 
-    // Encabezados HTTP para forzar la descarga
-    header("Content-Type: text/csv; charset=UTF-8");
-    header("Content-Disposition: attachment; filename=\"$filename\"");
-    header("Pragma: no-cache");
-    header("Expires: 0");
+    // Encabezados del reporte
+    $writer->addRow(WriterEntityFactory::createRowFromArray(["ENTIDAD", $razhd]));
+    $writer->addRow(WriterEntityFactory::createRowFromArray(["NIT", $nithd]));
+    $writer->addRow(WriterEntityFactory::createRowFromArray(["REPORTE", "LIBROS AUXILIARES"]));
+    $writer->addRow(WriterEntityFactory::createRowFromArray(["FECHA INICIAL", $fec_ini]));
+    $writer->addRow(WriterEntityFactory::createRowFromArray(["FECHA FINAL", $fec_fin]));
 
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    foreach ($obj_cuentas as $obj_c) {
-        try {
-            //-----libros auxiliares de bancos -----------------------
-            $sql = "SELECT
+    // Optimización: reducir consultas repetidas por cuenta
+    // Construir lista de ids de cuenta
+    $accountIds = array_column($obj_cuentas, 'id_pgcp');
+    if (!empty($accountIds)) {
+        $inList = implode(',', array_map(function ($v) { return "'" . $v . "'"; }, $accountIds));
+
+    // 1) Obtener saldos iniciales para todas las cuentas en una sola consulta
+        $sqlSaldos = "SELECT
+                        ctb_libaux.id_cuenta AS id_cuenta,
+                        ctb_pgcp.cuenta AS cuenta,
+                        SUM(IFNULL(ctb_libaux.debito,0)) AS debito,
+                        SUM(IFNULL(ctb_libaux.credito,0)) AS credito
+                    FROM ctb_libaux
+                    INNER JOIN ctb_doc ON (ctb_libaux.id_ctb_doc = ctb_doc.id_ctb_doc)
+                    INNER JOIN ctb_pgcp ON (ctb_libaux.id_cuenta = ctb_pgcp.id_pgcp)
+                    WHERE ctb_doc.fecha < $fec_ini
+                        AND ctb_libaux.id_cuenta IN ($inList)
+                        AND ctb_doc.estado = 2
+                    GROUP BY ctb_libaux.id_cuenta";
+
+        // asegurar conexión PDO activa
+        if ($cmd === null) {
+            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        }
+        $rs = $cmd->query($sqlSaldos);
+        if ($rs === false) {
+            $arrSaldos = [];
+        } else {
+            $arrSaldos = $rs->fetchAll(PDO::FETCH_ASSOC);
+            $rs->closeCursor();
+            unset($rs);
+        }
+
+        $saldosMap = [];
+        foreach ($arrSaldos as $s) {
+            $primer = substr($s['cuenta'], 0, 1);
+            $segundo = substr($s['cuenta'], 0, 2);
+            if ($primer == 1 || $primer == 5 || $primer == 6 || $primer == 7 || $segundo == 81 || $segundo == 83 || $segundo == 99) {
+                $saldo = $s['debito'] - $s['credito'];
+            } else {
+                $saldo = $s['credito'] - $s['debito'];
+            }
+            $saldosMap[$s['id_cuenta']] = $saldo;
+        }
+
+        // Crear mapa id_pgcp => 'cuenta - nombre' para búsquedas O(1)
+        $cuentaMap = [];
+        foreach ($obj_cuentas as $c) {
+            $cuentaMap[$c['id_pgcp']] = strval($c['cuenta'] . ' - ' . $c['nombre']);
+        }
+
+        // 2) Obtener todas las transacciones en una sola consulta y procesar por cuenta (streaming)
+        $sqlAll = "SELECT
                         DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') AS fecha,
                         ctb_pgcp.cuenta,
                         ctb_libaux.id_tercero_api,
@@ -78,9 +132,9 @@ try {
                         CONCAT(IFNULL(facturas.num_factura,''),' - ',ctb_doc.detalle) AS detalle,
                         tes_forma_pago.forma_pago,
                         tb_terceros.nom_tercero,
-                        tb_terceros.nit_tercero
-                    FROM 
-                        ctb_libaux 
+                        tb_terceros.nit_tercero,
+                        ctb_libaux.id_cuenta AS id_cuenta
+                    FROM ctb_libaux
                     INNER JOIN ctb_doc ON (ctb_libaux.id_ctb_doc = ctb_doc.id_ctb_doc)
                     INNER JOIN ctb_pgcp ON (ctb_libaux.id_cuenta = ctb_pgcp.id_pgcp)
                     INNER JOIN ctb_fuente ON (ctb_doc.id_tipo_doc = ctb_fuente.id_doc_fuente)
@@ -109,85 +163,50 @@ try {
                             OR (doc.tipo_movimiento = 4 AND fc.id_facturac IS NOT NULL)) AS facturas
                             ON (facturas.id_manu = ctb_doc.id_manu AND facturas.tipo = ctb_doc.tipo_movimiento AND facturas.id_ctb_doc = ctb_doc.id_ctb_doc)
                     WHERE ctb_doc.fecha BETWEEN $fec_ini AND $fec_fin AND ctb_doc.estado = 2 
-                        AND ctb_pgcp.id_pgcp IN ('" . $obj_c['id_pgcp'] . "','" . $obj_c['id_pgcp'] . "')
+                        AND ctb_libaux.id_cuenta IN ($inList)
                         $and_where
-                    ORDER BY DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') ASC, ctb_libaux.debito DESC, ctb_libaux.credito DESC";
-            $rs = $cmd->query($sql);
-            $obj_informe = $rs->fetchAll(PDO::FETCH_ASSOC);
-            $rs->closeCursor();
-            unset($rs);
-            if (empty($obj_informe)) {
-                continue;
-            }
-        } catch (PDOException $e) {
-            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+                    ORDER BY ctb_libaux.id_cuenta ASC, DATE_FORMAT(ctb_doc.fecha, '%Y-%m-%d') ASC, ctb_libaux.debito DESC, ctb_libaux.credito DESC";
+
+        $rs = $cmd->query($sqlAll);
+        if ($rs === false) {
+            $rs = null;
         }
-
-        try {
-            //-----consulta para debito y credito para saldo inicial-----------------------
-            $sql = "SELECT
-                        COUNT(*) AS filas
-                        ,ctb_libaux.id_cuenta
-                        ,ctb_pgcp.cuenta
-                        ,ctb_pgcp.nombre
-                        , SUM(IFNULL(ctb_libaux.debito,0)) AS debito 
-                        , SUM(IFNULL(ctb_libaux.credito,0)) AS credito 
-                    FROM
-                        ctb_libaux
-                        INNER JOIN ctb_doc ON (ctb_libaux.id_ctb_doc = ctb_doc.id_ctb_doc)
-                        INNER JOIN ctb_pgcp ON (ctb_libaux.id_cuenta = ctb_pgcp.id_pgcp)
-                    WHERE ctb_doc.fecha < $fec_ini  
-                    AND ctb_libaux.id_cuenta IN ('" . $obj_c['id_pgcp'] . "','" . $obj_c['id_pgcp'] . "') 
-                    AND ctb_doc.estado=2 limit 1";
-
-            $rs = $cmd->query($sql);
-            $obj_saldos = $rs->fetchAll(PDO::FETCH_ASSOC);
-            $rs->closeCursor();
-            unset($rs);
-        } catch (PDOException $e) {
-            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-        }
-
-        $primer_caracter_cuenta = '';
+        // recorrer en streaming
+        $currentAccount = null;
         $saldo_inicial = 0;
         $total_deb = 0;
         $total_cre = 0;
 
-        if ($obj_saldos[0]['filas'] > 0) {
-            $primer_caracter_cuenta = substr($obj_saldos[0]['cuenta'], 0, 1);
-            $segundo_caracter_cuenta = substr($obj_saldos[0]['cuenta'], 0, 2);
-            if ($primer_caracter_cuenta == 1 || $primer_caracter_cuenta == 5 || $primer_caracter_cuenta == 6 || $primer_caracter_cuenta == 7 || $segundo_caracter_cuenta == 81 || $segundo_caracter_cuenta == 83 || $segundo_caracter_cuenta == 99) {
-                $saldo_inicial = $obj_saldos[0]['debito'] - $obj_saldos[0]['credito'];
-            } else {
-                $saldo_inicial = $obj_saldos[0]['credito'] - $obj_saldos[0]['debito'];
+        if ($rs) {
+            while ($obj = $rs->fetch(PDO::FETCH_ASSOC)) {
+            $acct = $obj['id_cuenta'];
+            // cuando cambie de cuenta escribir cabeceras y saldo inicial
+            if ($currentAccount === null || $currentAccount !== $acct) {
+                // si ya estábamos en otra cuenta, escribir totales de la cuenta anterior
+                if ($currentAccount !== null) {
+                    $totalsRow = ["", "", "", "", "", "", "Totales", $total_deb, $total_cre, $saldo_inicial];
+                    $writer->addRow(WriterEntityFactory::createRowFromArray($totalsRow));
+                }
+
+                // inicializar nueva cuenta
+                $currentAccount = $acct;
+                $total_deb = 0;
+                $total_cre = 0;
+                $saldo_inicial = isset($saldosMap[$acct]) ? $saldosMap[$acct] : 0;
+
+                // obtener descripción desde el mapa (O(1))
+                $cuentaDesc = isset($cuentaMap[$acct]) ? $cuentaMap[$acct] : '';
+
+                $writer->addRow(WriterEntityFactory::createRowFromArray([])); // Línea en blanco
+                $writer->addRow(WriterEntityFactory::createRowFromArray(["CUENTA", $cuentaDesc]));
+                $writer->addRow(WriterEntityFactory::createRowFromArray([])); // línea en blanco
+                $headers = ["Fecha", "Tipo Documento", "Documento", "Referencia", "Tercero", "CC/nit", "Detalle", "Debito", "Credito", "Saldo"];
+                $writer->addRow(WriterEntityFactory::createRowFromArray($headers));
+                $saldoInicialRow = ["", "", "", "", "", "", "Saldo inicial:", "", "", $saldo_inicial];
+                $writer->addRow(WriterEntityFactory::createRowFromArray($saldoInicialRow));
             }
-        } else {
-            $saldo_inicial = 0;
-            $total_deb = 0;
-            $total_cre = 0;
-        }
 
-        // Abrir salida directa
-        $output = fopen("php://output", "w");
-
-        // (opcional) Escribir encabezados del CSV
-        if ($reg == 0) {
-            $reg++;
-            fputcsv($output, ["ENTIDAD", $razhd], '|');
-            fputcsv($output, ["NIT", $nithd], '|');
-            fputcsv($output, ["REPORTE", "LIBROS AUXILIARES"], '|');
-            fputcsv($output, ["FECHA INICIAL", $fec_ini], '|');
-            fputcsv($output, ["FECHA FINAL", $fec_fin], '|');
-        }
-        $reg++;
-        fputcsv($output, ["CUENTA", strval($obj_c['cuenta'] . ' - ' . $obj_c['nombre'])], '|');
-        fputcsv($output, [], '|'); // línea en blanco
-        $headers = ["Fecha", "Tipo Documento", "Documento", "Referencia", "Tercero", "CC/nit", "Detalle", "Debito", "Credito", "Saldo"];
-        fputcsv($output, $headers, '|');
-        $saldoInicial = ["", "", "", "", "", "", "Saldo inicial:", "", "", number_format($saldo_inicial, 2, ".", ",")];
-        fputcsv($output, $saldoInicial, '|');
-
-        foreach ($obj_informe as $obj) {
+            // procesar fila
             $primer_caracter = substr($obj['cuenta'], 0, 1);
             $segundo_caracter = substr($obj['cuenta'], 0, 2);
             if ($primer_caracter == 1 || $primer_caracter == 5 || $primer_caracter == 6 || $primer_caracter == 7 || $segundo_caracter == 81 || $segundo_caracter == 83 || $segundo_caracter == 99) {
@@ -204,34 +223,28 @@ try {
                 mb_strtoupper($obj['nom_tercero']),
                 $obj['nit_tercero'],
                 mb_strtoupper($obj['detalle']),
-                number_format($obj['debito'], 2, ".", ","),
-                number_format($obj['credito'], 2, ".", ","),
-                number_format($saldo_inicial, 2, ".", ",")
+                $obj['debito'],
+                $obj['credito'],
+                $saldo_inicial
             ];
-            fputcsv($output, $row, '|');
+            $writer->addRow(WriterEntityFactory::createRowFromArray($row));
 
             $total_deb += $obj['debito'];
             $total_cre += $obj['credito'];
         }
 
-        // =======================
-        // Totales
-        // =======================
-        fputcsv($output, [
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "Totales",
-            "" . number_format($total_deb, 2, ".", ","),
-            "" . number_format($total_cre, 2, ".", ","),
-            "" . number_format($saldo_inicial, 2, ".", ",")
-        ], '|');
+            // escribir totales de la última cuenta
+            if ($currentAccount !== null) {
+                $totalsRow = ["", "", "", "", "", "", "Totales", $total_deb, $total_cre, $saldo_inicial];
+                $writer->addRow(WriterEntityFactory::createRowFromArray($totalsRow));
+            }
+
+            $rs->closeCursor();
+            unset($rs);
+        }
     }
 
-    fclose($output);
+    $writer->close();
     exit;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();

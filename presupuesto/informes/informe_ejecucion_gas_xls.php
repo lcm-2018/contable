@@ -8,7 +8,7 @@ if (!isset($_SESSION['user'])) {
 $vigencia = $_SESSION['vigencia'];
 $fecha_corte = $_POST['fecha_corte'];
 $detalle_mes = $_POST['mes'];
-$fecha_ini = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-01-01'));
+$fecha_ini = $_POST['fecha_ini'];
 $mes = date("m", strtotime($fecha_corte));
 $fecha_ini_mes = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-' . $mes . '-01'));
 function pesos($valor)
@@ -485,6 +485,8 @@ try {
             } else {
                 $color = '#E74C3C';
             }
+            $div = ($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito']);
+            $div = $div == 0 ? 1 : $div;
             echo '<tr class="resaltar">';
             echo '<td class="text">' . $key . '</td>';
             echo '<td class="text">' . $nomrb . '</td>';
@@ -516,7 +518,7 @@ try {
                 echo '<td style="text-align:right">' . pesos($value['registrado_mes']) . '</td>';
             }
             echo '<td style="text-align:right">' . pesos($value['registrado']) . '</td>';
-            echo '<td style="text-align:right">' . round(($value['registrado'] / ($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito'])) * 100, 2) . '</td>';
+            echo '<td style="text-align:right">' . round(($value['registrado'] / $div) * 100, 2) . '</td>';
 
             if ($detalle_mes == 1) {
                 echo '<td style="text-align:right">' . pesos($value['causado_mes']) . '</td>';
