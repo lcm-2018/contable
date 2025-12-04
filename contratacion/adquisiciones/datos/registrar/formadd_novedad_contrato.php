@@ -7,18 +7,18 @@ if (!isset($_SESSION['user'])) {
 include '../../../../conexion.php';
 $opcion = isset($_POST['opcion']) ? $_POST['opcion'] : exit('Acción no permitida ');
 $id_contrato = $_POST['id'];
-//API URL
-$url = $api . 'terceros/datos/res/listar/tipo_novedad';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-$result = curl_exec($ch);
-curl_close($ch);
-$tip_novedad = json_decode($result, true);
-if ($tip_novedad == 0) {
+
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `id_novedad` , `descripcion` FROM `ctt_tipo_novedad` WHERE `id_novedad` IN (1,2,3)";
+    $rs = $cmd->query($sql);
+    $tip_novedad = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+if (empty($tip_novedad)) {
     echo 'Error al intentar obetener tipos de novedad';
     exit();
 }

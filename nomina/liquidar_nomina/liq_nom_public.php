@@ -1561,27 +1561,29 @@ if (isset($_POST['check'])) {
             if (!empty($tienembg)) {
                 foreach ($tienembg as $te) {
                     $dctoemb = $te['valor_mes'];
-                    $base_valida -= $dctoemb;
-                    if ($base_valida > $dctoemb && $base_valida > $minvit) {
-                        $id_embargo = $te['id_embargo'];
-                        try {
-                            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                            $sql = "INSERT INTO nom_liq_embargo (id_embargo, val_mes_embargo, mes_embargo, anio_embargo, fec_reg, id_nomina) 
+                    if ($base_valida > $dctoemb) {
+                        $base_valida -= $dctoemb;
+                        if ($base_valida > $minvit) {
+                            $id_embargo = $te['id_embargo'];
+                            try {
+                                $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                                $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                                $sql = "INSERT INTO nom_liq_embargo (id_embargo, val_mes_embargo, mes_embargo, anio_embargo, fec_reg, id_nomina) 
                                     VALUES (?, ?, ?, ?, ?, ?)";
-                            $sql = $cmd->prepare($sql);
-                            $sql->bindParam(1, $id_embargo, PDO::PARAM_INT);
-                            $sql->bindParam(2, $dctoemb, PDO::PARAM_STR);
-                            $sql->bindParam(3, $mes, PDO::PARAM_STR);
-                            $sql->bindParam(4, $anio, PDO::PARAM_STR);
-                            $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
-                            $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
-                            $sql->execute();
-                            $base_descuentos -= $dctoemb;
-                            $descEmbargo += $dctoemb;
-                            $cmd = null;
-                        } catch (PDOException $e) {
-                            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                                $sql = $cmd->prepare($sql);
+                                $sql->bindParam(1, $id_embargo, PDO::PARAM_INT);
+                                $sql->bindParam(2, $dctoemb, PDO::PARAM_STR);
+                                $sql->bindParam(3, $mes, PDO::PARAM_STR);
+                                $sql->bindParam(4, $anio, PDO::PARAM_STR);
+                                $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
+                                $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
+                                $sql->execute();
+                                $base_descuentos -= $dctoemb;
+                                $descEmbargo += $dctoemb;
+                                $cmd = null;
+                            } catch (PDOException $e) {
+                                echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                            }
                         }
                     }
                 }
@@ -1633,25 +1635,27 @@ if (isset($_POST['check'])) {
                 $valcuotsind = 0;
             }
             $base_valida = $base_descuentos;
-            $base_valida -= $valcuotsind;
-            if ($base_valida > $valcuotsind && $base_valida > $minvit) {
-                if ($idcuotsind != 0) {
-                    try {
-                        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                        $sql = "INSERT INTO nom_liq_sindicato_aportes (id_cuota_sindical, val_aporte, mes_aporte, anio_aporte, fec_reg, id_nomina) 
+            if ($base_valida > $valcuotsind) {
+                $base_valida -= $valcuotsind;
+                if ($base_valida > $minvit) {
+                    if ($idcuotsind != 0) {
+                        try {
+                            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                            $sql = "INSERT INTO nom_liq_sindicato_aportes (id_cuota_sindical, val_aporte, mes_aporte, anio_aporte, fec_reg, id_nomina) 
                             VALUES (?, ?, ?, ?, ?, ?)";
-                        $sql = $cmd->prepare($sql);
-                        $sql->bindParam(1, $idcuotsind, PDO::PARAM_INT);
-                        $sql->bindParam(2, $valcuotsind, PDO::PARAM_STR);
-                        $sql->bindParam(3, $mes, PDO::PARAM_STR);
-                        $sql->bindParam(4, $anio, PDO::PARAM_STR);
-                        $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
-                        $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
-                        $sql->execute();
-                        $base_descuentos -= $valcuotsind;
-                    } catch (PDOException $e) {
-                        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                            $sql = $cmd->prepare($sql);
+                            $sql->bindParam(1, $idcuotsind, PDO::PARAM_INT);
+                            $sql->bindParam(2, $valcuotsind, PDO::PARAM_STR);
+                            $sql->bindParam(3, $mes, PDO::PARAM_STR);
+                            $sql->bindParam(4, $anio, PDO::PARAM_STR);
+                            $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
+                            $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
+                            $sql->execute();
+                            $base_descuentos -= $valcuotsind;
+                        } catch (PDOException $e) {
+                            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                        }
                     }
                 }
             } else {
@@ -1663,27 +1667,30 @@ if (isset($_POST['check'])) {
                     $idlib = $libranza['id_libranza'];
                     $abonolib = $libranza['val_mes'];
                     $base_valida = $base_descuentos;
-                    $base_valida -= $abonolib;
-                    if ($base_valida > $abonolib && $base_valida > $minvit) {
-                        try {
-                            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                            $sql = "INSERT INTO nom_liq_libranza (id_libranza, val_mes_lib, mes_lib, anio_lib, fec_reg, id_nomina) 
+                    if ($base_valida > $abonolib) {
+                        $base_valida -= $abonolib;
+
+                        if ($base_valida > $minvit) {
+                            try {
+                                $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                                $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                                $sql = "INSERT INTO nom_liq_libranza (id_libranza, val_mes_lib, mes_lib, anio_lib, fec_reg, id_nomina) 
                                 VALUES (?, ?, ?, ?, ?, ?)";
-                            $sql = $cmd->prepare($sql);
-                            $sql->bindParam(1, $idlib, PDO::PARAM_INT);
-                            $sql->bindParam(2, $abonolib, PDO::PARAM_STR);
-                            $sql->bindParam(3, $mes, PDO::PARAM_STR);
-                            $sql->bindParam(4, $anio, PDO::PARAM_STR);
-                            $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
-                            $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
-                            $sql->execute();
-                            $base_descuentos -= $abonolib;
-                            $cmd = null;
-                        } catch (PDOException $e) {
-                            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                                $sql = $cmd->prepare($sql);
+                                $sql->bindParam(1, $idlib, PDO::PARAM_INT);
+                                $sql->bindParam(2, $abonolib, PDO::PARAM_STR);
+                                $sql->bindParam(3, $mes, PDO::PARAM_STR);
+                                $sql->bindParam(4, $anio, PDO::PARAM_STR);
+                                $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
+                                $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
+                                $sql->execute();
+                                $base_descuentos -= $abonolib;
+                                $cmd = null;
+                            } catch (PDOException $e) {
+                                echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                            }
+                            $dctolib += $abonolib;
                         }
-                        $dctolib += $abonolib;
                     }
                 }
             }
@@ -1762,24 +1769,26 @@ if (isset($_POST['check'])) {
                     try {
                         $id_dcto2 = $dcto['id_dcto'];
                         $val_dcto2 = $dcto['valor'];
-                        $base_valida -= $val_dcto2;
-                        if ($base_valida > $val_dcto2 && $base_valida > $minvit) {
-                            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                            $sql = "INSERT INTO `nom_liq_descuento`
+                        if ($base_valida > $val_dcto2) {
+                            $base_valida -= $val_dcto2;
+                            if ($base_valida > $minvit) {
+                                $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                                $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                                $sql = "INSERT INTO `nom_liq_descuento`
                                     (`id_dcto`,`valor`,`id_nomina`,`id_user_reg`,`fec_reg`)
                                 VALUES (?, ?, ?, ?, ?)";
-                            $sql = $cmd->prepare($sql);
-                            $sql->bindParam(1, $id_dcto2, PDO::PARAM_INT);
-                            $sql->bindParam(2, $val_dcto2, PDO::PARAM_STR);
-                            $sql->bindParam(3, $id_nomina, PDO::PARAM_INT);
-                            $sql->bindParam(4, $id_user, PDO::PARAM_INT);
-                            $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
-                            $sql->execute();
-                            if (!($cmd->lastInsertId() > 0)) {
-                                echo $sql->errorInfo()[2] . 'DCTO';
-                            } else {
-                                $otros_dctos += $val_dcto2;
+                                $sql = $cmd->prepare($sql);
+                                $sql->bindParam(1, $id_dcto2, PDO::PARAM_INT);
+                                $sql->bindParam(2, $val_dcto2, PDO::PARAM_STR);
+                                $sql->bindParam(3, $id_nomina, PDO::PARAM_INT);
+                                $sql->bindParam(4, $id_user, PDO::PARAM_INT);
+                                $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
+                                $sql->execute();
+                                if (!($cmd->lastInsertId() > 0)) {
+                                    echo $sql->errorInfo()[2] . 'DCTO';
+                                } else {
+                                    $otros_dctos += $val_dcto2;
+                                }
                             }
                         }
                     } catch (PDOException $e) {

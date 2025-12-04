@@ -203,7 +203,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar País--</option>
                                                 <?php
                                                 foreach ($pais as $p) {
-                                                    echo '<option value="' . $p['id_pais'] . '" selected>' . $p['nom_pais'] . '</option>';
+                                                    echo '<option value="' . $p['id_pais'] . '">' . $p['nom_pais'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -237,7 +237,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar País--</option>
                                                 <?php
                                                 foreach ($pais as $p) {
-                                                    echo '<option value="' . $p['id_pais'] . '" selected>' . $p['nom_pais'] . '</option>';
+                                                    echo '<option value="' . $p['id_pais'] . '">' . $p['nom_pais'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -306,7 +306,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar País--</option>
                                                 <?php
                                                 foreach ($pais as $p) {
-                                                    echo '<option value="' . $p['id_pais'] . '" selected>' . $p['nom_pais'] . '</option>';
+                                                    echo '<option value="' . $p['id_pais'] . '">' . $p['nom_pais'] . '</option>';
                                                 }
                                                 ?>
                                             </select>

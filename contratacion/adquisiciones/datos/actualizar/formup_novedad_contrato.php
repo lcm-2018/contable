@@ -12,7 +12,7 @@ $opcion = $data[1];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_novedad` , `descripcion` FROM `ctt_tipo_novedad`";
+    $sql = "SELECT `id_novedad` , `descripcion` FROM `ctt_tipo_novedad` WHERE `id_novedad` IN (1,2,3)";
     $rs = $cmd->query($sql);
     $tip_novedad = $rs->fetchAll();
     $cmd = null;

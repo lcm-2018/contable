@@ -37,25 +37,22 @@ try {
                 `taux` AS 
                     (SELECT 	
                         `pto_homologa_ingresos`.`id_siho`
-                        , SUM(`vals`.`valor` - `vals`.`valor_liberado`) `valor`
+                        , SUM(`vals`.`valor`) AS `valor`
                         , `vals`.`mes`
                     FROM
                         (SELECT
                             IFNULL(`pto_rec_detalle`.`id_rubro`, `pto_rad_detalle`.`id_rubro`) AS `id_rubro`
-                            , `pto_rec_detalle`.`valor`
-                            , `pto_rec_detalle`.`valor_liberado`
+                            , SUM(IFNULL(`pto_rec_detalle`.`valor`, 0) - IFNULL(`pto_rec_detalle`.`valor_liberado`, 0)) AS `valor`
                             , DATE_FORMAT(`pto_rec`.`fecha`,'%m') AS `mes`
                         FROM
                             `pto_rec_detalle`
-                            INNER JOIN `pto_rec` 
-                            ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
-                            INNER JOIN `pto_rad_detalle` 
-                            ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
-                        WHERE (DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN  '$vigencia-01-01' AND '$vigencia-12-31' AND `pto_rec`.`estado` = 2)) AS `vals`
+                            INNER JOIN `pto_rec` ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
+                            LEFT JOIN `pto_rad_detalle` ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
+                        WHERE (DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN  '$vigencia-01-01' AND '$vigencia-12-31' AND `pto_rec`.`estado` = 2)
+                        GROUP BY `pto_rec_detalle`.`id_rubro`, DATE_FORMAT(`pto_rec`.`fecha`,'%m')) AS `vals`
                         INNER JOIN `pto_homologa_ingresos`
                             ON (`pto_homologa_ingresos`.`id_cargue` = `vals`.`id_rubro`)
                     GROUP BY `pto_homologa_ingresos`.`id_siho`, `vals`.`mes`)
-
             SELECT 
                 DISTINCT(`pto_homologa_ingresos`.`id_siho`) AS `id_siho`
                 , `pto_siho`.`nombre`
@@ -141,22 +138,25 @@ try {
 }
 $body = '';
 foreach ($lista as $r) {
-    $total = $r['val_enero'] + $r['val_febrero'] + $r['val_marzo'] + $r['val_abril'] + $r['val_mayo'] + $r['val_junio'] + $r['val_julio'] + $r['val_agosto'] + $r['val_septiembre'] + $r['val_octubre'] + $r['val_noviembre'] + $r['val_diciembre'];
+    $total = $r['val_enero'] + $r['val_febrero'] + $r['val_marzo'];
     $mas = '';
     if ($periodo == '06' || $periodo == '09' || $periodo == '12') {
         $mas .= "<td>{$r['val_abril']}</td>
                 <td>{$r['val_mayo']}</td>
                 <td>{$r['val_junio']}</td>";
+        $total += $r['val_abril'] + $r['val_mayo'] + $r['val_junio'];
     }
     if ($periodo == '09' || $periodo == '12') {
         $mas .= "<td>{$r['val_julio']}</td>
                 <td>{$r['val_agosto']}</td>
                 <td>{$r['val_septiembre']}</td>";
+        $total += $r['val_julio'] + $r['val_agosto'] + $r['val_septiembre'];
     }
     if ($periodo == '12') {
         $mas .= "<td>{$r['val_octubre']}</td>
                 <td>{$r['val_noviembre']}</td>
                 <td>{$r['val_diciembre']}</td>";
+        $total += $r['val_octubre'] + $r['val_noviembre'] + $r['val_diciembre'];
     }
     $body .= "<tr>
                 <td>{$r['id_siho']}</td>

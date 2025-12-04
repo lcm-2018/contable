@@ -28,13 +28,14 @@ try {
                 , `taux`.`fec_rp`
                 , `taux`.`id_tercero_api`
                 , `taux`.`objeto`
+                , `taux`.`num_contrato`
                 , `taux`.`id_rubro`
                 , `taux`.`rubro`
                 , `taux`.`nom_rubro`
                 , IFNULL(`t1`.`valor`,0) AS `val_crp` 
                 , IFNULL(`t2`.`valor`,0) AS `val_cop`
                 , IFNULL(`t3`.`valor_liberado`,0) AS `val_crp_liberado`
-                , `ctt_contratos`.`num_contrato`
+                
             FROM 
                 (SELECT
                     `pto_cdp`.`id_pto_cdp`
@@ -45,6 +46,7 @@ try {
                     , `pto_crp`.`fecha` AS `fec_rp`
                     , `pto_crp_detalle`.`id_tercero_api`
                     , `pto_crp`.`objeto`
+                    , `pto_crp`.`num_contrato`
                     , `pto_cdp_detalle`.`id_rubro`
                     , `pto_cargue`.`cod_pptal` AS `rubro`
                     , `pto_cargue`.`nom_rubro`

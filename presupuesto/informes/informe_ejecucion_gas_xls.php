@@ -212,7 +212,7 @@ try {
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                         INNER JOIN `pto_presupuestos` 
                             ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 3 AND `pto_presupuestos`.`id_tipo` = 2)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 3)
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `reduccion`
                     ON(`reduccion`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
@@ -225,7 +225,7 @@ try {
                             ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                         INNER JOIN `pto_presupuestos` 
                             ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND (`pto_mod`.`id_tipo_mod` = 6 OR `pto_mod`.`id_tipo_mod` = 1) AND `pto_presupuestos`.`id_tipo` = 2)
+                    WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND (`pto_mod`.`id_tipo_mod` = 6 OR `pto_mod`.`id_tipo_mod` = 1))
                     GROUP BY `pto_mod_detalle`.`id_cargue`) AS `credito`
                     ON(`credito`.`id_cargue` = `pto_cargue`.`id_cargue`)
                 LEFT JOIN
