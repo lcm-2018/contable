@@ -21,14 +21,20 @@ if (isset($_POST['placa']) && $_POST['placa']) {
 if (isset($_POST['num_serial']) && $_POST['num_serial']) {
     $where .= " AND HV.num_serial LIKE '" . $_POST['num_serial'] . "%'";
 }
-if (isset($_POST['marca']) && $_POST['marca']) {
-    $where .= " AND HV.id_marca=" . $_POST['marca'];
+if (isset($_POST['id_marca']) && $_POST['id_marca']) {
+    $where .= " AND HV.id_marca=" . $_POST['id_marca'];
 }
 if (isset($_POST['estado_gen']) && $_POST['estado_gen']) {
     $where .= " AND HV.estado_general=" . $_POST['estado_gen'];
 }
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND HV.estado=" . $_POST['estado'];
+}
+if (isset($_POST['id_sede']) && strlen($_POST['id_sede'])) {
+    $where .= " AND HV.id_sede=" . $_POST['id_sede'];
+}
+if (isset($_POST['id_area']) && strlen($_POST['id_area'])) {
+    $where .= " AND HV.id_area=" . $_POST['id_area'];
 }
 
 try {

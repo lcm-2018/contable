@@ -47,16 +47,16 @@ try {
                 $data = [
                     ':placa' => $_POST['placa'],
                     ':num_serial' => $_POST['num_serial'],
-                    ':id_marca' => $_POST['id_marca'],
+                    ':id_marca' => $_POST['sl_marca'],
                     ':des_activo' => $_POST['des_activo'],
                     ':valor' => $_POST['valor'],
-                    ':tipo_activo' => $_POST['tipo_activo'] ? $_POST['tipo_activo'] : 0,
+                    ':tipo_activo' => $_POST['sl_tipo_activo'] ? $_POST['sl_tipo_activo'] : 0,
                     ':id_articulo' => $_POST['id_articulo'],
                     ':modelo' => $_POST['modelo'],
                     ':id_sede' => $_POST['id_sede'],
                     ':id_area' => $_POST['id_area'],
                     ':id_responsable' => $_POST['id_responsable'],
-                    ':id_proveedor' => $_POST['id_proveedor'] ? $_POST['id_proveedor'] : 0,
+                    ':id_proveedor' => $_POST['sl_proveedor'] ? $_POST['sl_proveedor'] : 0,
                     ':lote' => $_POST['lote'],
                     ':fecha_fabricacion' => $_POST['fecha_fabricacion'] ? date('Y-m-d', strtotime($_POST['fecha_fabricacion'])) : null,
                     ':reg_invima' => $_POST['reg_invima'],
@@ -66,12 +66,12 @@ try {
                     ':dir_representante' => $_POST['dir_representante'],
                     ':tel_representante' => $_POST['tel_representante'],
                     ':recom_fabricante' => $_POST['recom_fabricante'],
-                    ':id_tipo_ingreso' => $_POST['id_tipo_ingreso'] ? $_POST['id_tipo_ingreso'] : null,
+                    ':id_tipo_ingreso' => $_POST['sl_tipo_ingreso'] ? $_POST['sl_tipo_ingreso'] : null,
                     ':fecha_adquisicion' => $_POST['fecha_adquisicion'] ? date('Y-m-d', strtotime($_POST['fecha_adquisicion'])) : null,
                     ':fecha_instalacion' => $_POST['fecha_instalacion'] ? date('Y-m-d', strtotime($_POST['fecha_instalacion'])) : null,
                     ':periodo_garantia' => $_POST['periodo_garantia'],
                     ':vida_util' => $_POST['vida_util'],
-                    ':calif_4725' => $_POST['calif_4725'] ? $_POST['calif_4725'] : 0,
+                    ':calif_4725' => $_POST['sl_calif_4725'] ? $_POST['sl_calif_4725'] : 0,
                     ':calibracion' => $_POST['calibracion'],
                     ':vol_min' => $_POST['vol_min'] ? $_POST['vol_min'] : null,
                     ':vol_max' => $_POST['vol_max'] ? $_POST['vol_max'] : null,
@@ -83,8 +83,8 @@ try {
                     ':cor_max' => $_POST['cor_max'] ? $_POST['cor_max'] : null,
                     ':temp_min' => $_POST['temp_min'] ? $_POST['temp_min'] : null,
                     ':temp_max' => $_POST['temp_max'] ? $_POST['temp_max'] : null,
-                    ':riesgo' => $_POST['riesgo'] ? $_POST['riesgo'] : 0,
-                    ':uso' => $_POST['uso'] ? $_POST['uso'] : 0,
+                    ':riesgo' => $_POST['sl_riesgo'] ? $_POST['sl_riesgo'] : 0,
+                    ':uso' => $_POST['sl_uso'] ? $_POST['sl_uso'] : 0,
                     ':cb_diagnostico' => $_POST['cb_diagnostico'],
                     ':cb_prevencion' => $_POST['cb_prevencion'],
                     ':cb_rehabilitacion' => $_POST['cb_rehabilitacion'],
@@ -119,6 +119,9 @@ try {
                     tipo_activo = :tipo_activo,
                     id_articulo = :id_articulo,
                     modelo = :modelo,
+                    id_sede = :id_sede,
+                    id_area = :id_area,
+                    id_responsable = :id_responsable,
                     id_proveedor = :id_proveedor,
                     lote = :lote,
                     fecha_fabricacion = :fecha_fabricacion,
@@ -166,13 +169,16 @@ try {
                 // Asignar valores utilizando bindValue
                 $sql->bindValue(':placa', $_POST['placa']);
                 $sql->bindValue(':num_serial', $_POST['num_serial']);
-                $sql->bindValue(':id_marca', $_POST['id_marca'], PDO::PARAM_INT);
+                $sql->bindValue(':id_marca', $_POST['sl_marca'], PDO::PARAM_INT);
                 $sql->bindValue(':des_activo', $_POST['des_activo']);
                 $sql->bindValue(':valor', $_POST['valor']);
-                $sql->bindValue(':tipo_activo', $_POST['tipo_activo'] ? $_POST['tipo_activo'] : 0, PDO::PARAM_INT);
+                $sql->bindValue(':tipo_activo', $_POST['sl_tipo_activo'] ? $_POST['sl_tipo_activo'] : 0, PDO::PARAM_INT);
                 $sql->bindValue(':id_articulo', $_POST['id_articulo'], PDO::PARAM_INT);
                 $sql->bindValue(':modelo', $_POST['modelo']);
-                $sql->bindValue(':id_proveedor', $_POST['id_proveedor'] ? $_POST['id_proveedor'] : 0, PDO::PARAM_INT);
+                $sql->bindValue(':id_sede', $_POST['id_sede'], PDO::PARAM_INT);
+                $sql->bindValue(':id_area', $_POST['id_area'], PDO::PARAM_INT);
+                $sql->bindValue(':id_responsable', $_POST['id_responsable'], PDO::PARAM_INT);
+                $sql->bindValue(':id_proveedor', $_POST['sl_proveedor'] ? $_POST['sl_proveedor'] : 0, PDO::PARAM_INT);
                 $sql->bindValue(':lote', $_POST['lote']);
                 $sql->bindValue(':fecha_fabricacion', $_POST['fecha_fabricacion'] ? date('Y-m-d', strtotime($_POST['fecha_fabricacion'])) : null);                
                 $sql->bindValue(':reg_invima', $_POST['reg_invima']);
@@ -182,12 +188,12 @@ try {
                 $sql->bindValue(':dir_representante', $_POST['dir_representante']);
                 $sql->bindValue(':tel_representante', $_POST['tel_representante']);
                 $sql->bindValue(':recom_fabricante', $_POST['recom_fabricante']);
-                $sql->bindValue(':id_tipo_ingreso', $_POST['id_tipo_ingreso'] ? $_POST['id_tipo_ingreso'] : null, PDO::PARAM_INT);
+                $sql->bindValue(':id_tipo_ingreso', $_POST['sl_tipo_ingreso'] ? $_POST['sl_tipo_ingreso'] : null, PDO::PARAM_INT);
                 $sql->bindValue(':fecha_adquisicion', $_POST['fecha_adquisicion'] ? date('Y-m-d', strtotime($_POST['fecha_adquisicion'])) : null);
                 $sql->bindValue(':fecha_instalacion', $_POST['fecha_instalacion'] ? date('Y-m-d', strtotime($_POST['fecha_instalacion'])) : null);
                 $sql->bindValue(':periodo_garantia', $_POST['periodo_garantia']);
                 $sql->bindValue(':vida_util', $_POST['vida_util']);
-                $sql->bindValue(':calif_4725', $_POST['calif_4725'] ? $_POST['calif_4725'] : 0, PDO::PARAM_INT);
+                $sql->bindValue(':calif_4725', $_POST['sl_calif_4725'] ? $_POST['sl_calif_4725'] : 0, PDO::PARAM_INT);
                 $sql->bindValue(':calibracion', $_POST['calibracion']);
                 $sql->bindValue(':vol_min', $_POST['vol_min'] ? $_POST['vol_min'] : null, PDO::PARAM_INT);
                 $sql->bindValue(':vol_max', $_POST['vol_max'] ? $_POST['vol_max'] : null, PDO::PARAM_INT);
@@ -199,8 +205,8 @@ try {
                 $sql->bindValue(':cor_max', $_POST['cor_max'] ? $_POST['cor_max'] : null, PDO::PARAM_INT);
                 $sql->bindValue(':temp_min', $_POST['temp_min'] ? $_POST['temp_min'] : null, PDO::PARAM_INT);
                 $sql->bindValue(':temp_max', $_POST['temp_max'] ? $_POST['temp_max'] : null, PDO::PARAM_INT);
-                $sql->bindValue(':riesgo', $_POST['riesgo'] ? $_POST['riesgo'] : 0, PDO::PARAM_INT);
-                $sql->bindValue(':uso', $_POST['uso'] ? $_POST['uso'] : 0, PDO::PARAM_INT);
+                $sql->bindValue(':riesgo', $_POST['sl_riesgo'] ? $_POST['sl_riesgo'] : 0, PDO::PARAM_INT);
+                $sql->bindValue(':uso', $_POST['sl_uso'] ? $_POST['sl_uso'] : 0, PDO::PARAM_INT);
                 $sql->bindValue(':cb_diagnostico', $_POST['cb_diagnostico']);
                 $sql->bindValue(':cb_prevencion', $_POST['cb_prevencion']);
                 $sql->bindValue(':cb_rehabilitacion', $_POST['cb_rehabilitacion']);

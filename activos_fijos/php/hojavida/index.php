@@ -48,7 +48,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                         <div class="card-body" id="divCuerpoPag">
 
                             <!--Opciones de filtros -->
-                            <div class="form-row">                                
+                            <div class="form-row">
                                 <div class="form-group col-md-1">
                                     <input type="text" class="filtro form-control form-control-sm" id="txt_placa_filtro" placeholder="Placa">
                                 </div>
@@ -83,6 +83,18 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 </div>
                             </div>
 
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_sede_filtro">
+                                        <?php sedes($cmd, '--Sede--') ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_area_filtro">
+                                    </select>
+                                </div> 
+                            </div>
+                            
                             <!--Lista de registros-->                            
                             <?php
                             if (PermisosUsuario($permisos, 5704, 2) || $id_rol == 1) {

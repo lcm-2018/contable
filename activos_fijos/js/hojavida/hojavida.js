@@ -34,9 +34,11 @@
                     data.placa = $('#txt_placa_filtro').val();
                     data.nombre = $('#txt_nombre_filtro').val();
                     data.num_serial = $('#txt_serial_filtro').val();
-                    data.marca = $('#sl_marcas_filtro').val();
+                    data.id_marca = $('#sl_marcas_filtro').val();
                     data.estado_gen = $('#sl_estadogen_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
+                    data.id_sede = $('#sl_sede_filtro').val();
+                    data.id_area = $('#sl_area_filtro').val();
                 }
             },
             columns: [
@@ -89,7 +91,14 @@
         $('#tb_hojavida').wrap('<div class="overflow"/>');
     });
 
-
+    $('#sl_sede_filtro').on("change", function() {
+        $('#sl_area_filtro').load('../common/cargar_areas_sede.php', { id_sede: $(this).val(), titulo: '--Area--' }, function() {});
+    });
+    $('#sl_sede_filtro').trigger('change');
+    
+    $('#divForms').on("change", "#sl_sede", function() {
+        $('#sl_area').load('../common/cargar_areas_sede.php', { id_sede: $(this).val() }, function() {});
+    });
 
     //Buascar registros activos fijos
     $('#btn_buscar_filtro').on("click", function() {
@@ -114,7 +123,7 @@
     });
 
     $('#divForms').on("dblclick", "#nom_articulo", function() {
-        $.post("../common/buscar_articulos_act_frm.php", function(he) {
+        $.post("../common/buscar_articulos_act_frm.php", { proceso: 'hovi' },  function(he) {
             $('#divTamModalBus').removeClass('modal-sm');
             $('#divTamModalBus').removeClass('modal-xl');
             $('#divTamModalBus').addClass('modal-lg');
@@ -123,27 +132,38 @@
         });
     });
 
-    $('#divForms').on("change", "#estado_general", function() {
-        $('#id_estado_general').val($('#estado_general').val());
+    $('#divForms').on("change", "#sl_sede", function() {
+        $('#id_sede').val($('#sl_sede').val());
     });
-
-    $('#divForms').on("change", "#estado", function() {
-        $('#id_estado').val($('#estado').val());
+    $('#divForms').on("change", "#sl_area", function() {
+        $('#id_area').val($('#sl_area').val());
+    });
+    $('#divForms').on("change", "#sl_responsable", function() {
+        $('#id_responsable').val($('#sl_responsable').val());
+    });
+    $('#divForms').on("change", "#sl_estado_general", function() {
+        $('#id_estado_general').val($('#sl_estado_general').val());
+    });
+    $('#divForms').on("change", "#sl_estado", function() {
+        $('#id_estado').val($('#sl_estado').val());
     });
 
     //Guardar hoja de vida
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
 
-        var error = verifica_vacio_2($('#id_sede'), $('#nom_sede'));
-        error += verifica_vacio_2($('#id_area'), $('#nom_area'));
-        error += verifica_vacio_2($('#id_articulo'), $('#nom_articulo'));
+        var error = verifica_vacio($('#sl_sede'));
+        error += verifica_vacio($('#sl_area'));
+        error += verifica_vacio($('#sl_responsable'));
         error += verifica_vacio($('#placa'));
+        error += verifica_vacio_2($('#id_articulo'), $('#nom_articulo'));        
         error += verifica_vacio($('#num_serial'));
-        error += verifica_vacio($('#id_marca'));
+        error += verifica_vacio($('#sl_marca'));
+        error += verifica_vacio($('#des_activo'));
         error += verifica_vacio($('#valor'));
-        error += verifica_vacio($('#estado_general'));
-        error += verifica_vacio($('#estado'));
+        error += verifica_vacio($('#sl_tipo_ingreso'));
+        error += verifica_vacio($('#sl_estado_general'));
+        error += verifica_vacio($('#sl_estado'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
@@ -527,9 +547,11 @@
             placa: $('#txt_placa_filtro').val(),
             nombre: $('#txt_nombre_filtro').val(),
             num_serial: $('#txt_serial_filtro').val(),
-            marca: $('#sl_marcas_filtro').val(),
+            id_marca: $('#sl_marcas_filtro').val(),
             estado_gen: $('#sl_estadogen_filtro').val(),
-            estado: $('#sl_estado_filtro').val()
+            estado: $('#sl_estado_filtro').val(),
+            id_sede: $('#sl_sede_filtro').val(),
+            id_area: $('#sl_area_filtro').val()
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

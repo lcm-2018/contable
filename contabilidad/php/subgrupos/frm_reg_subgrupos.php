@@ -23,6 +23,7 @@ if(empty($obj)){
         $obj[$name]=NULL;
     endfor;    
     //Inicializa variable por defecto
+    $obj['af_menor_cuantia'] = 0;
     $obj['es_clinico'] = 0;
     $obj['lote_xdef'] = 1;
     $obj['estado'] = 1;    
@@ -50,6 +51,12 @@ if(empty($obj)){
                         <label for="sl_grp_subgrupo" class="small">Grupo</label>
                         <select class="form-control form-control-sm" id="sl_grp_subgrupo" name="sl_grp_subgrupo" required>
                             <?php grupo_articulo($cmd,'',$obj['id_grupo']) ?>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="sl_actfij_mencua" class="small">Activo Fijo Menor Cuantia</label>
+                        <select class="form-control form-control-sm" id="sl_actfij_mencua" name="sl_actfij_mencua">
+                            <?php estados_sino('',$obj['af_menor_cuantia']) ?>
                         </select>
                     </div>
                     <div class="form-group col-md-2">

@@ -18,6 +18,10 @@ $dir = $_POST['order'][0]['dir'];
 
 $where_gen = " WHERE far_medicamentos.estado=1 AND far_subgrupos.id_grupo IN (3,4,5)";
 
+if ($_POST['proceso']== "hovi") {
+    $where_gen = " WHERE far_medicamentos.estado=1 AND (far_subgrupos.id_grupo IN (3,4,5) OR far_subgrupos.af_menor_cuantia=1)";
+}
+
 $where = $where_gen;
 if (isset($_POST['codigo']) && $_POST['codigo']) {
     $where .= " AND far_medicamentos.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";

@@ -28,13 +28,14 @@ try {
             $cod_subgrupo = $_POST['txt_cod_subgrupo'];
             $nom_subgrupo = $_POST['txt_nom_subgrupo'];
             $id_grupo = $_POST['sl_grp_subgrupo'] ? $_POST['sl_grp_subgrupo'] : 0;
+            $af_menor_cuantia = $_POST['sl_actfij_mencua'] ? $_POST['sl_actfij_mencua'] : 0;
             $es_clinico = $_POST['rdo_escli_subgrupo'];
             $lote_xdef = $_POST['sl_lotexdef'] ? $_POST['sl_lotexdef'] : 0;
             $estado = $_POST['sl_estado'];
 
             if ($id == -1) {
-                $sql = "INSERT INTO far_subgrupos(cod_subgrupo,nom_subgrupo,id_grupo,es_clinico,lote_xdef,estado,id_usr_crea,fec_crea) 
-                        VALUES($cod_subgrupo,'$nom_subgrupo',$id_grupo,$es_clinico,$lote_xdef,$estado,$id_usr_ope,'$fecha_ope')";
+                $sql = "INSERT INTO far_subgrupos(cod_subgrupo,nom_subgrupo,id_grupo,af_menor_cuantia,es_clinico,lote_xdef,estado,id_usr_crea,fec_crea) 
+                        VALUES($cod_subgrupo,'$nom_subgrupo',$id_grupo,$af_menor_cuantia,$es_clinico,$lote_xdef,$estado,$id_usr_ope,'$fecha_ope')";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -48,7 +49,7 @@ try {
                 }
             } else {
                 $sql = "UPDATE far_subgrupos 
-                        SET cod_subgrupo=$cod_subgrupo,nom_subgrupo='$nom_subgrupo',id_grupo=$id_grupo,es_clinico=$es_clinico,lote_xdef=$lote_xdef,estado=$estado 
+                        SET cod_subgrupo=$cod_subgrupo,nom_subgrupo='$nom_subgrupo',id_grupo=$id_grupo,af_menor_cuantia=$af_menor_cuantia,es_clinico=$es_clinico,lote_xdef=$lote_xdef,estado=$estado 
                         WHERE id_subgrupo=" . $id;
                 $rs = $cmd->query($sql);
 

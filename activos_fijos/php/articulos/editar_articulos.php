@@ -48,16 +48,28 @@ try {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }
             } else {
-                $sql = "UPDATE far_medicamentos SET cod_medicamento='$cod_art',nom_medicamento='$nom_art',
+                $sql = "SELECT COUNT(*) AS existe
+                        FROM far_medicamentos
+                        INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)
+                        INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_med=far_medicamentos.id_med)
+                        WHERE far_subgrupos.af_menor_cuantia=1 AND far_medicamentos.id_med=" . $id;
+                $rs = $cmd->query($sql);
+                $obj_existe = $rs->fetch();
+
+                if ($obj_existe['existe'] == 0) {
+                    $sql = "UPDATE far_medicamentos SET cod_medicamento='$cod_art',nom_medicamento='$nom_art',
                             id_subgrupo=$id_subgrp,top_min=$top_min,top_max=$top_max,id_unidadmedida_2=$id_unimed,estado=$estado,vida_util=$vid_uti
                         WHERE id_med=" . $id;
-                $rs = $cmd->query($sql);
+                    $rs = $cmd->query($sql);
 
-                if ($rs) {
-                    $res['mensaje'] = 'ok';
-                    $res['id'] = $id;
+                    if ($rs) {
+                        $res['mensaje'] = 'ok';
+                        $res['id'] = $id;
+                    } else {
+                        $res['mensaje'] = $cmd->errorInfo()[2];
+                    }
                 } else {
-                    $res['mensaje'] = $cmd->errorInfo()[2];
+                    $res['mensaje'] = 'El Articulo tiene registrado lotes. Modifique el registro desde le Módulo de Almacén';
                 }
             }
         }

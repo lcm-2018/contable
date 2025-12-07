@@ -43,6 +43,7 @@
                 { 'data': 'cuenta_dep' },
                 { 'data': 'cuenta_gas' },
                 { 'data': 'nom_grupo' },
+                { 'data': 'af_menor_cuantia' },                
                 { 'data': 'es_clinico' },
                 { 'data': 'lote_xdef' },
                 { 'data': 'estado' },
@@ -50,7 +51,7 @@
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [2, 7] },
-                { orderable: false, targets: 11 }
+                { orderable: false, targets: 12 }
             ],
             order: [
                 [0, "desc"]
@@ -94,6 +95,7 @@
         var error = verifica_vacio($('#txt_cod_subgrupo'));
         error += verifica_vacio($('#txt_nom_subgrupo'));
         error += verifica_vacio($('#sl_grp_subgrupo'));
+        error += verifica_vacio($('#sl_actfij_mencua'));
         error += verifica_vacio($('#sl_lotexdef'));
         error += verifica_vacio($('#sl_estado'));
 

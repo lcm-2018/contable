@@ -18,6 +18,7 @@ if (isset($_POST['nombre']) && $_POST['nombre']) {
 
 try {
     $sql = "SELECT far_subgrupos.id_subgrupo,far_subgrupos.cod_subgrupo,far_subgrupos.nom_subgrupo,far_grupos.id_grupo,far_grupos.nom_grupo,
+                IF(far_subgrupos.af_menor_cuantia=1,'SI','NO') AS af_menor_cuantia,
                 IF(far_subgrupos.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_subgrupos
             INNER JOIN far_grupos ON (far_grupos.id_grupo=far_subgrupos.id_grupo)
@@ -65,6 +66,7 @@ try {
                 <th>Código</th>
                 <th>Nombre</th>
                 <th>Grupo</th>
+                <th>Act. Fij. Menor Cuantia</th>
                 <th>Estado</th>
             </tr>
         </thead>
@@ -103,6 +105,7 @@ try {
                         <td>' . $obj['cod_subgrupo'] . '</td>
                         <td>' . $obj['nom_subgrupo'] . '</td>
                         <td>' . $obj['nom_grupo'] . '</td>
+                        <td>' . $obj['af_menor_cuantia'] . '</td>
                         <td>' . $obj['estado'] . '</td></tr>
                     <tr class="resaltar" style="text-align:left"> 
                         <td colspan="5">

@@ -6,6 +6,8 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 
+$proceso = isset($_POST['proceso']) && $_POST['proceso'] ? $_POST['proceso'] : '';
+
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
@@ -21,6 +23,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             <!--Formulario de busqueda de articulos-->
             <form id="frm_buscar_articulos">
                 <div class="form-row">
+                    <input type="hidden" id="proceso_fil" value="<?php echo $proceso ?>">
                     <div class="form-group col-md-3">
                         <input type="text" class="filtro_art form-control form-control-sm" id="txt_codigo_art_fil" placeholder="Codigo">
                     </div>
@@ -69,6 +72,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                     type: 'POST',
                     dataType: 'json',
                     data: function(data) {
+                        data.proceso = $('#proceso_fil').val();
                         data.codigo = $('#txt_codigo_art_fil').val();
                         data.nombre = $('#txt_nombre_art_fil').val();                        
                     }

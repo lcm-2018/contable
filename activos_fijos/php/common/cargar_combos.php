@@ -324,7 +324,7 @@ function subgrupo_articulo($cmd, $titulo = '', $id = -1)
 {
     try {
         echo '<option value="">' . $titulo . '</option>';
-        $sql = "SELECT id_subgrupo,nom_subgrupo FROM far_subgrupos WHERE id_grupo IN (3,4,5)";
+        $sql = "SELECT id_subgrupo,nom_subgrupo FROM far_subgrupos WHERE id_grupo IN (3,4,5) OR far_subgrupos.af_menor_cuantia=1";
         $rs = $cmd->query($sql);
         $objs = $rs->fetchAll();
         foreach ($objs as $obj) {
@@ -371,7 +371,7 @@ function areas_sede($cmd, $titulo = '', $idsede = 0, $id = -1)
         echo '<option value="">' . $titulo . '</option>';
         if ($idsede != 0) {
             $sql = "SELECT id_area,nom_area,id_responsable FROM far_centrocosto_area 
-                    WHERE (id_sede=$idsede AND estado=1) OR id_area=$id
+                    WHERE (id_sede=$idsede AND estado=1 AND id_area<>0) OR id_area=$id
                     ORDER BY es_almacen DESC, nom_area";
             $rs = $cmd->query($sql);
             $objs = $rs->fetchAll();

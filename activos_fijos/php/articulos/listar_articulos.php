@@ -17,7 +17,7 @@ if ($length != -1) {
 $col = $_POST['order'][0]['column'] + 1;
 $dir = $_POST['order'][0]['dir'];
 
-$where_ta = " WHERE far_subgrupos.id_grupo IN (3,4,5)";
+$where_ta = " WHERE (far_subgrupos.id_grupo IN (3,4,5) OR far_subgrupos.af_menor_cuantia=1)";
 $where = "";
 if (isset($_POST['codigo']) && $_POST['codigo']) {
     $where .= " AND far_medicamentos.cod_medicamento LIKE '" . $_POST['codigo'] . "%'";
