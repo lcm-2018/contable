@@ -644,7 +644,22 @@ $urlin = $_SESSION['urlin'];
                                         </div>
                                     </a>
                                 <?php }
+
+                                if (PermisosUsuario($permisos, 5499, 1) || $id_rol == 1) { ?>
+                                    <a class="nav-link sombra opcion_personalizado" href="javascript:void(0)" txt_id_opcion="5499">
+                                        <div class="form-row">
+                                            <div class="div-icono">
+                                                <i class="fas fa-chart-bar" style="color: #E74C3C;"></i>
+                                            </div>
+                                            <div>
+                                                Inf. Personalizados
+                                            </div>
+                                        </div>
+                                    </a>
+                                <?php
+                                }
                                 ?>
+
                             </nav>
                         </div>
                     <?php
@@ -1492,10 +1507,10 @@ $urlin = $_SESSION['urlin'];
                     <?php
                     }
                 }
-                
+
                 //$key = array_search('9', array_column($perm_modulos, 'id_modulo'));
                 if (false) {
-                ?>
+                    ?>
                     <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapseCostos" aria-expanded="false" aria-controls="collapsePages2">
                         <div class="form-row">
                             <div class="div-icono">

@@ -40,11 +40,13 @@ try {
         foreach ($array_rubros as $key => $value) {
             $id_rubro = $array_rubros[$key];
             $valor_liberado = $array_valores_liberacion[$key];
-            $query->execute();
-            if ($cmd->lastInsertId() > 0) {
-                $inserta++;
-            } else {
-                echo $query->errorInfo()[2];
+            if ($valor_liberado > 0) {
+                $query->execute();
+                if ($cmd->lastInsertId() > 0) {
+                    $inserta++;
+                } else {
+                    echo $query->errorInfo()[2];
+                }
             }
         }
         if ($inserta > 0) {

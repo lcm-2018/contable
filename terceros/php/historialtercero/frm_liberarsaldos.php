@@ -24,26 +24,54 @@ $sql = "SELECT
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 //----------------------------------------------------- hago la consulta aqui para que los saldos sean cajas de texto
-// sino utilizo el script para llamar a listar_saldos.php
-$sql = "SELECT
-                pto_cdp_detalle2.id_pto_cdp
-                , pto_cdp_detalle2.id_rubro
-                , pto_cargue.cod_pptal
-                , pto_cdp_detalle2.id_pto_cdp_det
-                ,SUM(pto_cdp_detalle2.valor) AS valorcdp
-                ,SUM(IFNULL(pto_cdp_detalle2.valor_liberado,0)) AS cdpliberado
-                ,SUM(pto_crp_detalle2.valor) AS valorcrp
-                ,SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)) AS crpliberado
-                ,((SUM(pto_cdp_detalle2.valor) - SUM(IFNULL(pto_cdp_detalle2.valor_liberado,0))) - (SUM(pto_crp_detalle2.valor) - SUM(IFNULL(pto_crp_detalle2.valor_liberado,0)))) AS saldo_final
-            FROM
-                pto_cdp
-                INNER JOIN (SELECT id_pto_cdp,id_rubro,id_pto_cdp_det,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_cdp_detalle GROUP BY id_pto_cdp) AS pto_cdp_detalle2 ON (pto_cdp_detalle2.id_pto_cdp = pto_cdp.id_pto_cdp)
-		        INNER JOIN pto_crp ON (pto_crp.id_cdp = pto_cdp.id_pto_cdp)
-                INNER JOIN (SELECT id_pto_crp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2 ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)  
-                INNER JOIN pto_cargue ON (pto_cdp_detalle2.id_rubro = pto_cargue.id_cargue)
-            WHERE pto_cdp_detalle2.id_pto_cdp = $id_cdp 
-            AND pto_crp.estado=2
-            GROUP BY pto_cdp.id_pto_cdp limit 1";
+$sql = "WITH
+            cdp_por_rubro AS (
+            SELECT
+                p.id_pto_cdp,
+                p.id_rubro,
+                SUM(p.valor) AS valorcdp,
+                SUM(IFNULL(p.valor_liberado,0)) AS cdpliberado
+            FROM pto_cdp_detalle p
+            WHERE p.id_pto_cdp = $id_cdp
+            GROUP BY p.id_pto_cdp, p.id_rubro
+            ),
+            crp_por_cdp_det AS (
+            SELECT
+                pcd.id_pto_cdp_det,
+                SUM(pcd.valor) AS valorcrp,
+                SUM(IFNULL(pcd.valor_liberado,0)) AS crpliberado
+            FROM pto_crp_detalle pcd
+            JOIN pto_crp pc ON pcd.id_pto_crp = pc.id_pto_crp
+            WHERE pc.estado = 2
+            GROUP BY pcd.id_pto_cdp_det
+            ),
+            crp_por_rubro AS (
+            SELECT
+                pcd.id_rubro,
+                SUM(IFNULL(crp.valorcrp,0))     AS valorcrp,
+                SUM(IFNULL(crp.crpliberado,0))  AS crpliberado
+            FROM (
+                SELECT id_pto_cdp_det, id_rubro
+                FROM pto_cdp_detalle
+                WHERE id_pto_cdp = $id_cdp
+            ) pcd
+            LEFT JOIN crp_por_cdp_det crp ON crp.id_pto_cdp_det = pcd.id_pto_cdp_det
+            GROUP BY pcd.id_rubro
+            )
+            SELECT
+            c.id_pto_cdp,
+            c.id_rubro,
+            pc.cod_pptal,
+            c.valorcdp,
+            c.cdpliberado,
+            IFNULL(r.valorcrp,0)    AS valorcrp,
+            IFNULL(r.crpliberado,0) AS crpliberado,
+            ((c.valorcdp - c.cdpliberado) - (IFNULL(r.valorcrp,0) - IFNULL(r.crpliberado,0))) AS saldo_final,
+            GREATEST(0, ((c.valorcdp - c.cdpliberado) - (IFNULL(r.valorcrp,0) - IFNULL(r.crpliberado,0)))) AS puede_liberar
+            FROM cdp_por_rubro c
+            LEFT JOIN crp_por_rubro r ON r.id_rubro = c.id_rubro
+            LEFT JOIN pto_cargue pc ON pc.id_cargue = c.id_rubro
+            ORDER BY c.id_rubro";
 
 $rs = $cmd->query($sql);
 $obj_saldos = $rs->fetchAll();
@@ -122,73 +150,7 @@ $obj_saldos = $rs->fetchAll();
         </div>
     </div>
     <div class="text-center pt-3">
-        <button type="button" class="btn btn-primary btn-sm" id="btn_liquidar">Liberar</button>
+        <a type="button" class="btn btn-primary btn-sm" onclick="RegLiberacionCdp()">Liberar</a>
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>
-
-<script>/*
-    (function($) {
-        $(document).ready(function() {
-            $('#tb_saldos').DataTable({
-                language: setIdioma,
-                processing: true,
-                serverSide: true,
-                searching: false,
-                autoWidth: false,
-                ajax: {
-                    url: window.urlin + '/terceros/php/historialtercero/listar_saldos.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: function(data) {
-                        data.id_cdp = $('#id_cdp').val();
-                    }
-                },
-                columns: [{
-                        'data': 'id_rubro'
-                    }, //Index=0
-                    {
-                        'data': 'cod_pptal'
-                    },
-                    {
-                        'data': 'saldo_final'
-                    },
-                ],
-                columnDefs: [{
-                        class: 'text-wrap',
-                        targets: []
-                    } //,
-                    //{ width: '5%', targets: [0,1,3,4] }
-                ],
-                order: [
-                    [2, "asc"]
-                ],
-                lengthMenu: [
-                    [10, 25, 50, -1],
-                    [10, 25, 50, 'TODO'],
-                ]
-            });
-            $('#tb_saldos').wrap('<div class="overflow"/>');
-        });
-    })(jQuery);
-
-    //Buascar registros de articulos de Articulos
-    /*
-    $('#btn_buscar_articulo_fil').on("click", function() {
-        reloadtable('tb_articulos_activos');
-    });
-
-    $('.filtro_art').keypress(function(e) {
-        if (e.keyCode == 13) {
-            reloadtable('tb_articulos_activos');
-        }
-    });
-
-    $('.filtro_art').mouseup(function(e) {
-        reloadtable('tb_articulos_activos');
-    });
-
-    $('#sl_subgrupo_art_fil').on("change", function() {
-        sessionStorage.setItem("id_subgrupo", $(this).val());
-    });*/
-</script>
