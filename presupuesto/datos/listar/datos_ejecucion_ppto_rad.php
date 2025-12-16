@@ -42,7 +42,7 @@ if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) &&
     $andwhere .= " AND pto_rad.fecha BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
 }
 if (isset($_POST['objeto']) && $_POST['objeto']) {
-    $andwhere .= " AND pto_rad.objeto LIKE '%" . $_POST['objeto'] . "%'";
+    $andwhere .= " AND (pto_rad.objeto LIKE '%" . $_POST['objeto'] . "%' OR  `tb_terceros`.`nom_tercero` LIKE '%" . $_POST['objeto'] . "%')";
 }
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     if ($_POST['estado'] == "-1") {
@@ -86,7 +86,12 @@ try {
 
 // obtener el numero total de registros de la anterior consulta
 try {
-    $sql = "SELECT COUNT(*) AS `total` FROM `pto_rad` WHERE `id_pto` = $id_pto_presupuestos $buscar $andwhere";
+    $sql = "SELECT 
+                COUNT(*) AS `total` 
+            FROM `pto_rad` 
+                LEFT JOIN `tb_terceros`
+                ON(`pto_rad`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            WHERE `id_pto` = $id_pto_presupuestos $buscar $andwhere";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecordsFiltered = $total['total'];

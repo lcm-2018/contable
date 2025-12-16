@@ -13,6 +13,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id_tercero = isset($_POST['idt']) ? $_POST['idt'] : -1;
 $otro_form = isset($_POST['otro_form']) ? $_POST['otro_form'] : 0;
+$idcdp = isset($_POST['idcdp']) ? $_POST['idcdp'] : 0;
 
 // se vuelve a consultar los datos del tercero con el id que viene del boton
 //------------------------------------
@@ -21,6 +22,9 @@ $sql = "SELECT tb_terceros.id_tercero_api,tb_terceros.nom_tercero
         WHERE id_tercero_api= $id_tercero LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
+if (empty($obj)) {
+    $obj = ['id_tercero_api' => '', 'nom_tercero' => ''];
+}
 //---------------------------------------------------
 ?>
 <div class="px-0">
@@ -31,11 +35,11 @@ $obj = $rs->fetch();
         <div class="px-2">
             <form id="frm_historialtercero">
                 <input type="hidden" id="id_tercero" name="id_tercero" value="<?php echo $id_tercero ?>">
-                <input type="hidden" id="id_cdp" name="id_cdp">
+                <input type="hidden" id="id_cdp" name="id_cdp" value="<?php echo $idcdp ?>">
                 <div class=" form-row">
                     <div class="form-group col-md-4">
                         <label for="txt_tercero_filtro" class="small">Tercero</label>
-                        <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" name="txt_tercero_filtro" readonly="true" value="<?php echo $obj['nom_tercero']?>">
+                        <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" name="txt_tercero_filtro" readonly="true" value="<?php echo $obj['nom_tercero'] ?>">
                         <input type="hidden" id="id_txt_tercero" name="id_txt_tercero" class="form-control form-control-sm" value="<?php echo $id_tercero ?>">
                     </div>
                     <div class="form-group col-md-3">
@@ -114,9 +118,9 @@ $obj = $rs->fetch();
                                     <th>ID CRP</th>
                                     <th>No Registro</th>
                                     <th>Fecha</th>
-                                    <th>Tipo</th>   
-                                    <th>No Contrato</th>                                 
-                                    <th>Valor registro</th>                                    
+                                    <th>Tipo</th>
+                                    <th>No Contrato</th>
+                                    <th>Valor registro</th>
                                     <th>Saldo</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
@@ -133,8 +137,8 @@ $obj = $rs->fetch();
                                 <tr class="text-center centro-vertical">
                                     <th>No causacion</th>
                                     <th>Fecha</th>
-                                    <th>Soporte</th>                                    
-                                    <th>Valor causado</th>                                    
+                                    <th>Soporte</th>
+                                    <th>Valor causado</th>
                                     <th>Descuentos</th>
                                     <th>Neto</th>
                                     <th>Estado</th>
@@ -151,8 +155,8 @@ $obj = $rs->fetch();
                                 <tr class="text-center centro-vertical">
                                     <th>Consecutivo</th>
                                     <th>Fecha</th>
-                                    <th style="min-width: 70%;">Detalle</th>                                    
-                                    <th>Valor pagado</th>                                    
+                                    <th style="min-width: 70%;">Detalle</th>
+                                    <th>Valor pagado</th>
                                 </tr>
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
@@ -170,17 +174,15 @@ $obj = $rs->fetch();
 </div>
 
 <?php
-if($otro_form==0)
-{
-echo '<script type="text/javascript" src= "../../terceros/js/historialtercero/historialtercero.js?v=' . date('YmdHis') . '"></script>';
-echo '<script type="text/javascript" src="../../terceros/js/historialtercero/historialtercero_reg.js?v=' . date('YmdHis') . '"></script>';
+if ($otro_form == 0) {
+    echo '<script type="text/javascript" src= "../../terceros/js/historialtercero/historialtercero.js?v=' . date('YmdHis') . '"></script>';
+    echo '<script type="text/javascript" src="../../terceros/js/historialtercero/historialtercero_reg.js?v=' . date('YmdHis') . '"></script>';
 }
 
 //----1 lo llamo desde presupuesto de gastos
-if($otro_form==1)
-{
-echo '<script type="text/javascript" src= "../terceros/js/historialtercero/historialtercero.js?v=' . date('YmdHis') . '"></script>';
-echo '<script type="text/javascript" src="../terceros/js/historialtercero/historialtercero_reg.js?v=' . date('YmdHis') . '"></script>';
+if ($otro_form == 1) {
+    echo '<script type="text/javascript" src= "../terceros/js/historialtercero/historialtercero.js?v=' . date('YmdHis') . '"></script>';
+    echo '<script type="text/javascript" src="../terceros/js/historialtercero/historialtercero_reg.js?v=' . date('YmdHis') . '"></script>';
 }
 
 ?>

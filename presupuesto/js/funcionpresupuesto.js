@@ -1241,17 +1241,36 @@
             });
         }
     });
+    $('#modificarEjecPresupuesto').on('click', '.btn_liberar_cdp', function () {
+        idCdp = $(this).attr('value');
+        $.post("../terceros/php/historialtercero/frm_historialtercero.php", { idcdp: idCdp, otro_form: 1 }, function (he) {
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-xl');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+            $('#slcActEcon').focus();
+        });
+    });
 
     //------------------------------
     //filtros
     $('#btn_buscar_filtro').on("click", function () {
         $('.is-invalid').removeClass('is-invalid');
-        reloadtable('tableEjecPresupuesto');
+        if ($('#tableEjecPresupuesto').length) {
+            reloadtable('tableEjecPresupuesto');
+        } else if ($('#tablePptoRad').length) {
+            reloadtable('tablePptoRad');
+        }
     });
 
     $('.filtro').keypress(function (e) {
         if (e.keyCode == 13) {
-            reloadtable('tableEjecPresupuesto');
+            if ($('#tablePptoRad').length) {
+                reloadtable('tablePptoRad');
+            } else if ($('#tableEjecPresupuesto').length) {
+                reloadtable('tableEjecPresupuesto');
+            }
         }
     });
 

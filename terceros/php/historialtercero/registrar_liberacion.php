@@ -24,30 +24,36 @@ try {
         $date = new DateTime('now', new DateTimeZone('America/Bogota'));
         $inserta = 0;
 
-        $query = "INSERT INTO pto_cdp_detalle (id_pto_cdp, id_rubro, valor, valor_liberado, fecha_libera, concepto_libera, id_user_reg, fecha_reg, id_user_act, fecha_act) 
+        $sql = "INSERT INTO pto_cdp_detalle (id_pto_cdp, id_rubro, valor, valor_liberado, fecha_libera, concepto_libera, id_user_reg, fecha_reg, id_user_act, fecha_act) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_cdp, PDO::PARAM_INT);
-        $query->bindParam(2, $id_rubro, PDO::PARAM_INT);
-        $query->bindParam(3, $valor, PDO::PARAM_STR);
-        $query->bindParam(4, $valor_liberado, PDO::PARAM_STR);
-        $query->bindParam(5, $fec_lib, PDO::PARAM_STR);
-        $query->bindParam(6, $concepto_lib, PDO::PARAM_STR);
-        $query->bindParam(7, $iduser, PDO::PARAM_INT);
-        $query->bindValue(8, $date->format('Y-m-d H:i:s'));
-        $query->bindParam(9, $iduser, PDO::PARAM_INT);
-        $query->bindValue(10, $date->format('Y-m-d H:i:s'));
+        $sql = $cmd->prepare($sql);
+        $sql->bindParam(1, $id_cdp, PDO::PARAM_INT);
+        $sql->bindParam(2, $id_rubro, PDO::PARAM_INT);
+        $sql->bindParam(3, $valor, PDO::PARAM_STR);
+        $sql->bindParam(4, $valor_liberado, PDO::PARAM_STR);
+        $sql->bindParam(5, $fec_lib, PDO::PARAM_STR);
+        $sql->bindParam(6, $concepto_lib, PDO::PARAM_STR);
+        $sql->bindParam(7, $iduser, PDO::PARAM_INT);
+        $sql->bindValue(8, $date->format('Y-m-d H:i:s'));
+        $sql->bindParam(9, $iduser, PDO::PARAM_INT);
+        $sql->bindValue(10, $date->format('Y-m-d H:i:s'));
+        
         foreach ($array_rubros as $key => $value) {
             $id_rubro = $array_rubros[$key];
+            $valor_liberado = 0;
             $valor_liberado = $array_valores_liberacion[$key];
-            $query->execute();
-            if ($cmd->lastInsertId() > 0) {
-                $inserta++;
-            } else {
-                echo $query->errorInfo()[2];
+            if ($valor_liberado > 0) {
+                $sql->execute();
+                if ($cmd->lastInsertId() > 0) {
+                    $inserta++;
+                } else {
+                    echo $sql->errorInfo()[2];
+                }
             }
         }
         if ($inserta > 0) {
+            $sql = null;
+            $cmd = null;
             echo '1';
         }
     }

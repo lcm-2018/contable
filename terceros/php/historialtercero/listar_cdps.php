@@ -8,6 +8,7 @@ include '../../../conexion.php';
 include '../../../permisos.php';
 
 $id_tercero = $_POST['id_tercero'];
+$idcdp = $_POST['idcdp'];
 
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0;
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10;
@@ -50,7 +51,13 @@ try {
     $total = $rs->fetch();
     $totalRecordsFilter = $total['total'];
     */
-
+    if ($id_tercero > 0) {
+        $where = " pto_crp.id_tercero_api=$id_tercero AND pto_crp.estado= 2";
+        $join = "INNER";
+    } else {
+        $where = " pto_cdp.id_pto_cdp = $idcdp AND pto_cdp.estado= 2";
+        $join = "LEFT";
+    }
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT
                 tb_terceros.id_tercero_api
@@ -69,16 +76,20 @@ try {
             FROM
                 pto_cdp
                 INNER JOIN (SELECT id_pto_cdp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_cdp_detalle GROUP BY id_pto_cdp) AS pto_cdp_detalle2 ON (pto_cdp_detalle2.id_pto_cdp = pto_cdp.id_pto_cdp)
-                INNER JOIN pto_crp ON (pto_crp.id_cdp = pto_cdp.id_pto_cdp)
-                INNER JOIN (SELECT id_pto_crp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2 ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)  
-                INNER JOIN tb_terceros ON (pto_crp.id_tercero_api = tb_terceros.id_tercero_api)      
-            WHERE pto_crp.id_tercero_api=$id_tercero  
-            AND pto_crp.estado=2
-            $and_where
+                $join JOIN pto_crp ON (pto_crp.id_cdp = pto_cdp.id_pto_cdp)
+                $join JOIN (SELECT id_pto_crp,SUM(valor) AS valor,SUM(valor_liberado) AS valor_liberado FROM pto_crp_detalle GROUP BY id_pto_crp) AS pto_crp_detalle2 ON (pto_crp_detalle2.id_pto_crp = pto_crp.id_pto_crp)  
+                $join JOIN tb_terceros ON (pto_crp.id_tercero_api = tb_terceros.id_tercero_api)      
+            WHERE $where $and_where
             GROUP BY pto_cdp.id_pto_cdp";
-
+    //echo $sql;
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
+    $sql1 = "SELECT SUM(`valor_liberado`) AS `valor` FROM `pto_cdp_detalle` WHERE `id_pto_cdp` = $idcdp";
+    $rs1 = $cmd->query($sql1);
+    $obj1 = $rs1->fetch();
+    if (empty($obj1)) {
+        $obj1 = ['valor' => 0];
+    }
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -94,6 +105,9 @@ if (!empty($objs)) {
     foreach ($objs as $obj) {
         $id_cdp = $obj['id_pto_cdp'];
         $saldo = $obj['saldo'];
+        if ($id_cdp > 0 && $id_tercero == -1 && $saldo <= 0) {
+            $saldo = $obj['saldo'] = $obj['valor_cdp'] - $obj1['valor'];
+        }
         $totalRecords = $obj['filas'];
         $totalRecordsFilter = $obj['filas'];
 

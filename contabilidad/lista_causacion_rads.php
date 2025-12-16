@@ -127,14 +127,15 @@ $fecha = date('Y-m-d', strtotime($listado[0]['fecha']));
                             $key2 = array_search($id_rad, array_column($causados, 'id_rad'));
                             $sum_rad = $key !== false ? $radicados[$key]['valor'] : 0;
                             $sum_cau = $key2 !== false ? $causados[$key2]['valor'] : 0;
-                            $saldo_rad = pesos($sum_rad - $sum_cau);
+                            $saldoo = $sum_rad - $sum_cau;
+                            $saldo_rad = pesos($saldoo);
 
                             $numeroc = $ce['num_factura'];
                             if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
                                 $editar = '<a value="' . $id_rad . '" onclick="cargarListaDetalleCtbInvoice(' . $id_rad . ', 0)" class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-plus-square fa-lg"></span></a>';
                             }
                             $fecha = date('Y-m-d', strtotime($ce['fecha']));
-                            if ($saldo_rad > 0) {
+                            if ($saldoo > 0) {
                     ?>
                                 <tr>
                                     <td class="text-center"><input type="checkbox" value="" id="defaultCheck1"></td>

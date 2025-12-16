@@ -49,11 +49,12 @@ $sql = "SELECT
                 SUM(valor) AS vr_cop,
                 SUM(valor_liberado) AS vr_cop_liberado
             FROM pto_cop_detalle
+                INNER JOIN ctb_doc ON pto_cop_detalle.id_ctb_doc = ctb_doc.id_ctb_doc
+            WHERE ctb_doc.estado = 2
             GROUP BY id_pto_crp_det
         ) cop_sum ON cop_sum.id_pto_crp_det = pto_crp_detalle2.id_pto_crp_det
         WHERE pto_crp.estado = 2
-        GROUP BY pto_crp.id_pto_crp, pto_cdp_detalle.id_pto_cdp_det, pto_cargue.cod_pptal
-        LIMIT 1";
+        GROUP BY pto_crp.id_pto_crp, pto_cdp_detalle.id_pto_cdp_det, pto_cargue.cod_pptal";
 
 $rs = $cmd->query($sql);
 $obj_saldos = $rs->fetchAll();
@@ -132,7 +133,7 @@ $obj_saldos = $rs->fetchAll();
         </div>
     </div>
     <div class="text-center pt-3">
-        <button type="button" class="btn btn-primary btn-sm" id="btn_liquidar_saldos_crp">Liberar</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="RegLiberacionCrp()">Liberar</button>
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>

@@ -47,8 +47,7 @@ if (isset($_POST['objeto']) && $_POST['objeto']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     if ($_POST['estado'] == "-1") {
         $andwhere .= " AND pto_cdp.estado>=" . $_POST['estado'];
-    } 
-    else {
+    } else {
         $andwhere .= " AND pto_cdp.estado=" . $_POST['estado'];
     }
 }
@@ -123,7 +122,7 @@ try {
 
 if (!empty($listappto)) {
     foreach ($listappto as $lp) {
-        $anular = $dato = $borrar = $imprimir = $historial = $abrir = null;
+        $anular = $dato = $borrar = $imprimir = $historial = $abrir = $liberar = null;
         $id_pto = $lp['id_pto_cdp'];
         // Sumar el valor del cdp de la tabla id_pto_mtvo
         $valor_cdp = number_format($lp['val_cdp'], 2, ',', '.');
@@ -149,6 +148,10 @@ if (!empty($listappto)) {
             }
             if ($cxregistrar  == 0) {
                 $registrar = '--';
+            } else {
+                if ($lp['estado'] == 2) {
+                    $liberar = '<a value="' . $id_pto . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_liberar_cdp" title="Liberar"><span class="fas fa-arrow-alt-circle-left fa-lg"></span></a>';
+                }
             }
             if ($fecha <= $fecha_cierre || $val_crp > 0) {
                 $anular = null;
@@ -193,6 +196,7 @@ if (!empty($listappto)) {
             $dato = '<span class="badge badge-pill badge-secondary">Anulado</span>';
             $registrar = '';
             $xregistrar = '';
+            $liberar = null;
         }
         if ($lp['estado'] >= 2) {
             $borrar = null;
@@ -207,7 +211,7 @@ if (!empty($listappto)) {
             'liberado' =>  '<div class="text-right">' . $valor_cdp_lib . '</div>',
             'xregistrar' =>  '<div class="text-right">' . $xregistrar  . '</div>',
             'accion' => '<div class="text-center">' . $registrar . '</div>',
-            'botones' => '<div class="text-center">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . $historial . $abrir . '</div>',
+            'botones' => '<div class="text-center">' . $editar . $detalles . $imprimir . $anular . $borrar . $dato . $historial . $abrir . $liberar . '</div>',
         ];
     }
 } else {
