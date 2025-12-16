@@ -16,14 +16,11 @@ $id = isset($_POST['id']) ? $_POST['id'] : -1;
 try {
     $sql = "SELECT far_pedido.id_pedido,far_pedido.num_pedido,far_pedido.fec_pedido,far_pedido.hor_pedido,far_pedido.detalle,far_pedido.val_total,
             ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
-            sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
             CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS estado,
             CASE far_pedido.estado WHEN 0 THEN far_pedido.fec_anulacion WHEN 1 THEN far_pedido.fec_creacion ELSE far_pedido.fec_cierre END AS fec_estado
         FROM far_pedido             
         INNER JOIN tb_sedes AS ss ON (ss.id_sede = far_pedido.id_sede_destino)
         INNER JOIN far_bodegas AS bs ON (bs.id_bodega = far_pedido.id_bodega_destino)           
-        INNER JOIN tb_sedes AS sp ON (sp.id_sede = far_pedido.id_sede_origen)
-        INNER JOIN far_bodegas AS bp ON (bp.id_bodega = far_pedido.id_bodega_origen)
         WHERE id_pedido=" . $id . " LIMIT 1";
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
@@ -37,8 +34,8 @@ try {
         INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_pedido_detalle.id_medicamento)
         LEFT JOIN (SELECT TRD.id_ped_detalle,SUM(TRD.cantidad) AS cantidad,
                         SUM(TRD.cantidad*TRD.valor) AS valor     
-                    FROM far_traslado_detalle AS TRD
-                    INNER JOIN far_traslado AS TR ON (TR.id_traslado=TRD.id_traslado)
+                    FROM far_traslado_r_detalle AS TRD
+                    INNER JOIN far_traslado_r AS TR ON (TR.id_traslado=TRD.id_traslado)
                     WHERE TR.estado<>0 AND TRD.id_ped_detalle IS NOT NULL
                     GROUP BY TRD.id_ped_detalle
                    ) AS TRASLADO ON (TRASLADO.id_ped_detalle=far_pedido_detalle.id_ped_detalle) 
@@ -77,7 +74,7 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>ORDEN DE PEDIDO DE BODEGA PARA TRASLADADO</th>
+            <th>ORDEN DE PEDIDO DE SEDE-BODEGA PARA TRASLADADO</th>
         </tr>
     </table>
 
@@ -99,14 +96,11 @@ try {
             <td><?php echo $obj_e['fec_estado']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="3">Sede y Bodega DE donde se solicita  (Destinatario del Traslado)</td>
-            <td colspan="3">Sede y Bodega Proveedor  (Origen del Traslado)</td>
+            <td colspan="6">Sede y Bodega DE donde se solicita (Destinatario del Traslado)</td>
         </tr>
         <tr>
             <td colspan="2"><?php echo $obj_e['nom_sede_solicita']; ?></td>
             <td><?php echo $obj_e['nom_bodega_solicita']; ?></td>
-            <td colspan="2"><?php echo $obj_e['nom_sede_provee']; ?></td>
-            <td><?php echo $obj_e['nom_bodega_provee']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td colspan="6">Detalle</td>

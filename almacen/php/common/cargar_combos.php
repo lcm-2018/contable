@@ -631,3 +631,27 @@ function tipo_reporte_traslados($titulo = '')
     echo '<option value="">' . $titulo . '</option>';
     echo '<option value="1">Detallado por Subgrupo -> Agrupado por No. Traslado</option>'; 
 }
+
+// ESTADOS DE LOS TRASLADOS REMOTOS
+function estados_traslado_sp($titulo = '', $estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>PENDIENTE</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>CERRADO-EGRESADO</option>';
+    $selected = ($estado == 3) ? 'selected="selected"' : '';
+    echo '<option value="3"' . $selected . '>ENVIADO</option>';
+    $selected = ($estado == 0) ? 'selected="selected"' : '';
+    echo '<option value="0"' . $selected . '>ANULADO</option>';
+}
+function estados_traslado_sr($titulo = '', $estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>PENDIENTE</option>';
+    $selected = ($estado == 4) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>CERRADO-INGRESADO</option>';
+    $selected = ($estado == 5) ? 'selected="selected"' : '';
+    echo '<option value="3"' . $selected . '>RECHAZADO</option>';    
+}

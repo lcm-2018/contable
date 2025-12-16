@@ -121,7 +121,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <table class="table-bordered table-sm col-md-4">
                                 <tr>
                                     <td style="background-color:yellow">Pendiente</td>
-                                    <td style="background-color:cyan">Aprobado</td>
+                                    <td style="background-color:PaleTurquoise">Aprobado</td>
                                     <td style="background-color:DodgerBlue">En Ejecución</td>
                                     <td>Cerrado</td>
                                     <td style="background-color:gray">Anulado</td>

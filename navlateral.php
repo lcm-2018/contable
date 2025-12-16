@@ -1166,6 +1166,18 @@ $urlin = $_SESSION['urlin'];
                                             </div>
                                         </a>
                                     <?php } ?>
+                                    <?php if (PermisosUsuario($permisos, 5017, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/traslados_spsr/index.php">
+                                            <div class="form-row">
+                                                <div class="div-icono">
+                                                    <i class="fas fa-dolly-flatbed" style="color: #E74C3C;"></i>
+                                                </div>
+                                                <div>
+                                                    Traslados SPSR
+                                                </div>
+                                            </div>
+                                        </a>
+                                    <?php } ?>
                                     <?php if (PermisosUsuario($permisos, 5009, 1) || $id_rol == 1) { ?>
                                         <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/recalcular_kardex/index.php">
                                             <div class="form-row">

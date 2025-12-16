@@ -254,7 +254,7 @@ try {
                         $obj = $rs->fetch();
                         $lotes = $obj['lotes'];
 
-                        recalcular_kardex($cmd,$lotes,'I',$id,'','','','');                        
+                        recalcular_kardex($cmd, $lotes, 'I', $id, '', '', '', '', '', '');                        
                     }
                     if ($rs) {
                         $cmd->commit();
