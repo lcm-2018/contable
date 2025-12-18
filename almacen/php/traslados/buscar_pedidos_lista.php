@@ -18,8 +18,27 @@ $dir = $_POST['order'][0]['dir'];
 $idusr = $_SESSION['id_user'];
 $idrol = $_SESSION['rol'];
 
-$where_usr = " WHERE PP.estado=2";
+$where_usr = " WHERE  PP.es_pedido_spsr=0 AND PP.estado=2";
 
+if (isset($_POST['ped_parcial']) && $_POST['ped_parcial']) {
+    $where_usr.= " AND PP.id_pedido NOT IN 
+                    (SELECT far_pedido_detalle.id_pedido
+                    FROM far_pedido_detalle
+                    LEFT JOIN (SELECT TRD.id_ped_detalle,SUM(TRD.cantidad) AS cantidad     
+                                FROM far_traslado_detalle AS TRD
+                                INNER JOIN far_traslado AS TR ON (TR.id_traslado=TRD.id_traslado)
+                                WHERE TR.estado<>0 AND TRD.id_ped_detalle IS NOT NULL
+                                GROUP BY TRD.id_ped_detalle
+                        ) AS TRASLADO ON (TRASLADO.id_ped_detalle=far_pedido_detalle.id_ped_detalle)
+                    GROUP BY far_pedido_detalle.id_pedido
+                    HAVING SUM(IF(far_pedido_detalle.cantidad>IFNULL(TRASLADO.cantidad,0),1,0))=0)";    
+} else {
+    $where_usr.= " AND PP.id_pedido NOT IN 
+                    (SELECT PD.id_pedido FROM far_pedido_detalle AS PD 
+                    INNER JOIN far_traslado_detalle AS TD ON (TD.id_ped_detalle=PD.id_ped_detalle)
+                    INNER JOIN far_traslado AS TT ON (TT.id_traslado=TD.id_traslado)
+                    WHERE TT.estado<>0)";
+}
 
 if($idrol !=1){
     $where_usr .= " AND PP.id_bodega_origen IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";

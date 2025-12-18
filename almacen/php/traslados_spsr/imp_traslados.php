@@ -18,7 +18,7 @@ try {
     $bodega = bodega_principal($cmd);
     $id_bodega_origen = $bodega['id_bodega'] ? $bodega['id_bodega'] : 0;
 
-    $where = " WHERE far_traslado_r.id_bodega_origen=$id_bodega_origen";
+    $where = " WHERE far_traslado_r.id_traslado_origen IS NULL AND far_traslado_r.id_bodega_origen=$id_bodega_origen";
     if($idrol !=1){
         $where .= " AND far_traslado_r.id_bodega_origen IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
     }
@@ -100,7 +100,7 @@ try {
                 <th rowspan="2">Fecha Traslado</th>
                 <th rowspan="2">Hora Traslado</th>
                 <th rowspan="2">Detalle</th>
-                <th colspan="2">Unidad Principal</th>
+                <th colspan="2">Unidad Principal (Origen)</th>
                 <th colspan="2">Unidad Destino</th>
                 <th rowspan="2">Vr. Total</th>
                 <th colspan="2">Estado</th>

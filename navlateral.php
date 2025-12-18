@@ -1130,6 +1130,18 @@ $urlin = $_SESSION['urlin'];
                                             </div>
                                         </a>
                                     <?php } ?>
+                                    <?php if (PermisosUsuario($permisos, 5018, 1) || $id_rol == 1) { ?>
+                                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/php/pedidos_spsr/index.php">
+                                            <div class="form-row">
+                                                <div class="div-icono">
+                                                    <i class="fas fa-coins" style="color: #E74C3C;"></i>
+                                                </div>
+                                                <div>
+                                                    Bodega SPSR
+                                                </div>
+                                            </div>
+                                        </a>
+                                    <?php } ?>
                                 </nav>
                             </div>
                             <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#pagesCollapseMovimientos" aria-expanded="false" aria-controls="pagesCollapseMovimientos">

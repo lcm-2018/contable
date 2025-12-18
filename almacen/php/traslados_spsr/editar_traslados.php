@@ -490,12 +490,13 @@ try {
         if ($oper == 'annul') {
             $id = $_POST['id'];
 
-            $sql = "SELECT estado FROM far_traslado_r WHERE id_traslado=" . $id;
+            $sql = "SELECT estado, estado2 FROM far_traslado_r WHERE id_traslado=" . $id;
             $rs = $cmd->query($sql);
             $obj_tra = $rs->fetch();
             $estado = $obj_tra['estado'];
+            $estado2 = $obj_tra['estado2'];
 
-            if ($estado == 2) {
+            if ($estado == 2 || ($estado==3 && $estado2 == 5)) {
 
                 $cmd->beginTransaction();
 
@@ -526,7 +527,7 @@ try {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }
             } else {
-                $res['mensaje'] = 'Solo puede Anular Traslados SPSR en estado Cerrado';
+                $res['mensaje'] = 'Solo puede Anular Traslados SPSR en estado Cerrado, o Enviados Rechazados';
             }
         }
     } else {

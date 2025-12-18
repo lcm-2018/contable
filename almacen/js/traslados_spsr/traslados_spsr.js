@@ -75,10 +75,10 @@
 
                 if (data.estado2 == 1) {
                     $($(row).find("td")[11]).css("background-color", "yellow");
-                } else if (data.estado == 4) {
+                } else if (data.estado2 == 4) {
                     $($(row).find("td")[11]).css("background-color", "DodgerBlue");
-                } else if (data.estado == 5) {
-                    $($(row).find("td")[11]).css("background-color", "green");
+                } else if (data.estado2 == 5) {
+                    $($(row).find("td")[11]).css("background-color", "gray");
                 }
             },
             order: [
@@ -608,7 +608,6 @@
                 num_tra: $('#txt_numtra_filtro').val(),
                 fec_ini: $('#txt_fecini_filtro').val(),
                 fec_fin: $('#txt_fecfin_filtro').val(),
-                id_tercero: $('#sl_tercero_filtro').val(),
                 id_seddes: $('#sl_seddes_filtro').val(),
                 id_boddes: $('#sl_boddes_filtro').val(),
                 estado: $('#sl_estado_filtro').val(),
@@ -635,6 +634,58 @@
             $('#divModalImp').modal('show');
             $("#divImp").html(he);
         });
+    });
+    
+    // Actualizar estado remoto
+    $('#btn_actualizar_r_filtro').on("click", function() {        
+        $('.is-invalid').removeClass('is-invalid');
+        var verifica = verifica_vacio($('#txt_fecini_filtro'));
+        verifica += verifica_vacio($('#txt_fecfin_filtro'));
+        verifica += verifica_vacio($('#sl_seddes_filtro'));
+        verifica += verifica_vacio($('#sl_boddes_filtro'));
+
+        if (verifica >= 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Los datos resaltados son obligatorios');
+        } else {
+            
+            let filas = $('#tb_traslados').DataTable().rows().count();
+            if (filas == 0) {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html('No hay registros para actualizar estado de Sede Remota');
+            } else {
+                $('#divModalEspera').modal('show');
+                var data = {
+                    id_tra: $('#txt_idtra_filtro').val(),
+                    num_tra: $('#txt_numtra_filtro').val(),
+                    fec_ini: $('#txt_fecini_filtro').val(),
+                    fec_fin: $('#txt_fecfin_filtro').val(),
+                    id_seddes: $('#sl_seddes_filtro').val(),
+                    id_boddes: $('#sl_boddes_filtro').val(),
+                    estado: $('#sl_estado_filtro').val(),
+                    estado2: $('#sl_estado2_filtro').val()
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: 'actualizar_sr.php',
+                    dataType: 'json',
+                    data: data
+                }).done(function(r) {
+                    if (r.mensaje == 'ok') {
+                        reloadtable('tb_traslados');
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html("Proceso realizado con éxito");
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r.mensaje);
+                    }
+                    setTimeout(function() { $('#divModalEspera').modal('hide'); }, 1000);          
+                }).always(function() {}).fail(function() {
+                    $('#divModalEspera').modal('hide');
+                    alert('Ocurrió un error');
+                });
+            }    
+        }    
     });
 
 })(jQuery);

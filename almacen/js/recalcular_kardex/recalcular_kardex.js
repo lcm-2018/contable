@@ -143,8 +143,10 @@
         let filas = $('#tb_lotes').DataTable().rows().count();
         if (filas == 0) {
             $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe seleccionar un registro para reclacular kardex');
-        } else {
+            $('#divMsgError').html('No hay registros para reclacular kardex');
+        } else {            
+            $('#divModalEspera').modal('show');
+
             var data = $('#frm_lotes').serialize();
             var tipo = $("input[name='rdo_opcion']:checked").val(),
                 id_ing = $("#txt_id_ing_filtro").val(),
@@ -158,7 +160,7 @@
                 url: 'procesar.php',
                 dataType: 'json',
                 data: data + '&tipo=' + tipo + '&id_ing=' + id_ing + '&id_egr=' + id_egr + '&id_tra=' + id_tra + '&id_egr_r=' + id_egr_r + '&fec_ini=' + fec_ini
-            }).done(function(r) {
+            }).done(function(r) {                
                 if (r.mensaje == 'ok') {
                     $('#chk_sel_filtro').prop('checked', false)
                     reloadtable('tb_lotes');
@@ -167,8 +169,10 @@
                 } else {
                     $('#divModalError').modal('show');
                     $('#divMsgError').html(r.mensaje);
-                }
+                }                  
+                setTimeout(function() { $('#divModalEspera').modal('hide'); }, 1000);          
             }).always(function() {}).fail(function() {
+                $('#divModalEspera').modal('hide');
                 alert('Ocurrió un error');
             });
         }

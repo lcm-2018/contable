@@ -26,7 +26,9 @@ try {
     $id_bodega = $bodega['id_bodega'] ? $bodega['id_bodega'] : 0;
 
     $where_usr = " WHERE OI.estado=2 AND OI.id_bodega=$id_bodega";
-    $where_usr.= " AND OI.id_ingreso NOT IN (SELECT id_ingreso FROM far_traslado_r WHERE id_ingreso IS NOT NULL AND estado<>0)";
+    $where_usr.= " AND OI.id_ingreso NOT IN (SELECT id_ingreso FROM far_traslado WHERE id_ingreso IS NOT NULL AND estado<>0)
+                   AND OI.id_ingreso NOT IN (SELECT id_ingreso FROM far_traslado_r WHERE id_ingreso IS NOT NULL AND estado<>0)";
+                   
     if($idrol !=1){
         $where_usr .= " AND OI.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
     }

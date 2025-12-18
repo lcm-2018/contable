@@ -14,7 +14,10 @@ $idrol = $_SESSION['rol'];
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$where = " WHERE far_pedido.es_pedido_spsr=0";
+$bodega = bodega_principal($cmd);
+$id_bodega_origen = $bodega['id_bodega'] ? $bodega['id_bodega'] : 0;
+
+$where = " WHERE far_pedido.es_pedido_spsr=1 AND far_pedido.id_bodega_origen=$id_bodega_origen";
 if($idrol !=1){
     $where .= " AND far_pedido.id_bodega_destino IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
@@ -34,17 +37,8 @@ if (isset($_POST['num_pedido']) && $_POST['num_pedido']) {
 if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
     $where .= " AND far_pedido.fec_pedido BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
 }
-if (isset($_POST['id_sedpro']) && $_POST['id_sedpro']) {
-    $where .= " AND far_pedido.id_sede_origen='" . $_POST['id_sedpro'] . "'";
-}
-if (isset($_POST['id_bodpro']) && $_POST['id_bodpro']) {
-    $where .= " AND far_pedido.id_bodega_origen='" . $_POST['id_bodpro'] . "'";
-}
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_pedido.estado=" . $_POST['estado'];
-}
-if (isset($_POST['modulo']) && strlen($_POST['modulo'])) {
-    $where .= " AND far_pedido.creado_far=" . $_POST['modulo'];
 }
 
 try {
@@ -104,7 +98,7 @@ try {
                 <th rowspan="2">Hora Pedido</th>
                 <th rowspan="2">Detalle</th>
                 <th colspan="2">Unidad DE donde se solicita</th>
-                <th colspan="2">Unidad Proveedor</th>
+                <th colspan="2">Unidad Principal (Proveedor)</th>
                 <th rowspan="2">Valor Total</th>
                 <th rowspan="2">Estado</th>
             </tr>

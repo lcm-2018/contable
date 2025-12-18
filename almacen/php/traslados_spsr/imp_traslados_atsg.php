@@ -25,7 +25,7 @@ $titulo = '';
 $bodega = bodega_principal($cmd);
 $id_bodega_origen = $bodega['id_bodega'] ? $bodega['id_bodega'] : 0;
 
-$where = " WHERE far_traslado_r.id_bodega_origen=$id_bodega_origen";
+$where = " WHERE far_traslado_r.id_traslado_origen IS NULL AND far_traslado_r.id_bodega_origen=$id_bodega_origen";
 if($idrol !=1){
     $where .= " AND far_traslado_r.id_bodega_origen IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }

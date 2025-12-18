@@ -25,7 +25,7 @@ try {
     $bodega = bodega_principal($cmd);
     $id_bodega_origen = $bodega['id_bodega'] ? $bodega['id_bodega'] : 0;
 
-    $where_usr = " WHERE PP.estado=2 AND PP.id_bodega_origen=$id_bodega_origen";
+    $where_usr = " WHERE PP.es_pedido_spsr=1 AND PP.estado=2 AND PP.id_bodega_origen=$id_bodega_origen";
 
     if (isset($_POST['ped_parcial']) && $_POST['ped_parcial']) {
         $where_usr.= " AND PP.id_pedido NOT IN 

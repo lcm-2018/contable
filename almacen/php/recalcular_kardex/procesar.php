@@ -14,7 +14,8 @@ if (isset($_POST['tipo'])) {
         if (PermisosUsuario($permisos, 5009, 2) || PermisosUsuario($permisos, 5009, 3) || $id_rol == 1) {
 
             $idlot = isset($_POST['art']) ? implode(",",$_POST['art']) : '';
-
+            $res['mensaje'] = 'Error';
+            
             if ($idlot != ''){            
                 $tipo = $_POST['tipo'];
                 $iding = $_POST['id_ing'];

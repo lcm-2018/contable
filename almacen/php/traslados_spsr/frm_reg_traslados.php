@@ -19,7 +19,8 @@ $sql = "SELECT TT.fec_traslado,TT.hor_traslado,TT.num_traslado,TT.tipo,
             TT.estado,TT.detalle,TT.val_total,
             CASE TT.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO-EGRESADO' WHEN 3 THEN 'ENVIADO' END AS nom_estado,
             PEDIDO.id_pedido,CONCAT(PEDIDO.detalle,'(',PEDIDO.fec_pedido,')') AS des_pedido,
-            OI.id_ingreso,CONCAT(OI.detalle,'(',OI.fec_ingreso,')') AS des_ingreso 
+            OI.id_ingreso,CONCAT(OI.detalle,'(',OI.fec_ingreso,')') AS des_ingreso,
+            TT.estado2
         FROM far_traslado_r AS TT
         INNER JOIN tb_sedes AS SP ON (SP.id_sede=TT.id_sede_origen)
         INNER JOIN far_bodegas AS BP ON (BP.id_bodega=TT.id_bodega_origen)        
@@ -61,7 +62,7 @@ if (empty($obj)) {
 $guardar = in_array($obj['estado'],[1]) ? '' : 'disabled="disabled"';
 $cerrar = in_array($obj['estado'],[1]) && $id != -1 ? '' : 'disabled="disabled"';
 $enviar = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
-$anular = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
+$anular = in_array($obj['estado'],[3]) && in_array($obj['estado2'],[5]) ? '' : 'disabled="disabled"';
 $imprimir = $id != -1 ? '' : 'disabled="disabled"';
 
 ?>
