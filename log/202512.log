@@ -1,0 +1,2 @@
+[2025-12-16 11:33:09] Usuario: 1-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 5652
+[2025-12-18 17:26:14] Usuario: 1-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `fin_chequeras` WHERE `id_chequera` = 1

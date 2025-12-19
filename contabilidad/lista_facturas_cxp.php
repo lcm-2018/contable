@@ -111,6 +111,9 @@ $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 $fecha_fact = $fecha;
 $fecha_ven = strtotime('+30 day', strtotime($fecha_doc));
 $fecha_ven = date('Y-m-d', $fecha_ven);
+if ($fecha_ven > $vigencia . '-12-31') {
+    $fecha_ven = $vigencia . '-12-31';
+}
 $cmd = null;
 if (empty($detalle)) {
     $detalle = [

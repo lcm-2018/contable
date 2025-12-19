@@ -1,63 +1,65 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user'])) {
     header("Location: ../../../index.php");
     exit();
 }
-include '../../../conexion.php';
-$tipo = $_POST['id'];
-$id_vigencia = $_SESSION['id_vigencia'];
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `id_tipo_doc`,
-                MIN(`id_manu`) AS `min`,
-                MAX(`id_manu`) AS `max`
-            FROM `ctb_doc`
-                INNER JOIN `ctb_fuente` 
-                    ON `ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`
-            WHERE `ctb_fuente`.`tesor` > 0 AND `id_vigencia` = $id_vigencia AND `ctb_doc`.`id_tipo_doc` = $tipo
-            GROUP BY `id_tipo_doc`";
-    $rs = $cmd->query($sql);
-    $datos = $rs->fetch(PDO::FETCH_ASSOC);
-    if (!empty($datos)) {
-        $min = $datos['min'];
-        $max = $datos['max'];
 
-        $cmd->exec("CREATE TABLE IF NOT EXISTS `tmp_secuencia` (`consecutivo` INT)");
-        $con = "INSERT INTO `tmp_secuencia` (`consecutivo`) VALUES (?)";
-        $stmt = $cmd->prepare($con);
-        $stmt->bindParam(1, $i, PDO::PARAM_INT);
-        for ($i = $min; $i <= $max; $i++) {
-            $stmt->execute();
-        }
-        $sql2 = "SELECT
-                    `tmp_secuencia`.`consecutivo`
-                FROM `tmp_secuencia`
-                    LEFT JOIN 
-                        (SELECT `id_manu` FROM `ctb_doc` WHERE `id_vigencia` = $id_vigencia AND `ctb_doc`.`id_tipo_doc` = $tipo) AS`ctb_doc` 
-                        ON `ctb_doc`.`id_manu` = `tmp_secuencia`.`consecutivo`
-                WHERE `ctb_doc`.`id_manu` IS NULL 
-                ORDER BY `id_manu`";
-        $rs2 = $cmd->query($sql2);
-        $consecutivos = $rs2->fetchAll(PDO::FETCH_ASSOC);
-        $consecutivos = !empty($consecutivos) ? $consecutivos : [0 => ['consecutivo' => $max + 1]];
-    } else {
-        $consecutivos = [0 => ['consecutivo' => 1]];
+include '../../../conexion.php';
+
+$tipo = (int)$_POST['id'];
+$id_vigencia = (int)$_SESSION['id_vigencia'];
+
+try {
+    $cmd = new PDO(
+        "$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset",
+        $bd_usuario,
+        $bd_clave,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+    $sql = "SELECT d1.id_manu + 1 AS consecutivo
+            FROM ctb_doc d1
+            LEFT JOIN ctb_doc d2
+            ON d2.id_manu = d1.id_manu + 1
+            AND d2.id_vigencia = d1.id_vigencia
+            AND d2.id_tipo_doc = d1.id_tipo_doc
+            WHERE d1.id_vigencia = :vigencia
+            AND d1.id_tipo_doc = :tipo
+            AND d1.id_manu < (
+                SELECT MAX(id_manu)
+                FROM ctb_doc
+                WHERE id_vigencia = :vigencia
+                    AND id_tipo_doc = :tipo
+            )
+            AND d2.id_manu IS NULL
+            ORDER BY consecutivo
+            LIMIT 100";
+
+    $stmt = $cmd->prepare($sql);
+    $stmt->execute([
+        ':vigencia' => $id_vigencia,
+        ':tipo'     => $tipo
+    ]);
+
+    $consecutivos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    /* Si no existen documentos aún */
+    if (empty($consecutivos)) {
+        $consecutivos = [];
     }
-    $cmd->exec("DROP TABLE IF EXISTS `tmp_secuencia`");
+
     $cmd = null;
 } catch (PDOException $e) {
-    $response['msg'] =  $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    die('Error de base de datos: ' . $e->getMessage());
 }
-
 ?>
 <div class="px-0">
     <div class="shadow">
         <div class="card-header" style="background-color: #16a085 !important;">
             <h5 style="color: white;" class="mb-0">CONSECUTIVOS DISPONIBLES</h5>
         </div>
+
         <div class="p-3">
             <table class="w-100">
                 <tr>
@@ -71,18 +73,22 @@ try {
                                 echo "</tr><tr>";
                             }
                         }
-                        // Si la última fila tiene menos de 5 celdas, rellenar con celdas vacías
+
+                        /* Rellenar última fila */
                         if ($count % 5 != 0) {
                             for ($i = $count % 5; $i < 5; $i++) {
                                 echo "<td></td>";
                             }
                             echo "</tr>";
                         }
+                    } else {
+                        echo "<td class='text-muted'>No hay consecutivos disponibles</td></tr>";
                     }
                     ?>
             </table>
         </div>
     </div>
+
     <div class="text-center">
         <a type="button" class="btn btn-secondary btn-sm mt-3" data-dismiss="modal">Cerrar</a>
     </div>

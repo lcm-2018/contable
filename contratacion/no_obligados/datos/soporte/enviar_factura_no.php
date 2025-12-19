@@ -200,9 +200,15 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 try {
+    $pref = $resolucion['prefijo'];
     $new = true;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    
+    $sql = "DELETE FROM `seg_soporte_fno` WHERE `referencia` ='$pref-0'";
+    $sql = $cmd->prepare($sql);
+    $sql->execute();
+
     $sql = "SELECT `id_soporte`, `referencia` FROM `seg_soporte_fno` WHERE `id_factura_no` = $id_facno LIMIT 1";
     $rs = $cmd->query($sql);
     $referencia = $rs->fetch();
@@ -218,7 +224,6 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 $tipo_documento = 'ReverseInvoice';
-$pref = $resolucion['prefijo'];
 $entorno = $resolucion['entorno'];
 $adocumentitems = [];
 $key = 0;
