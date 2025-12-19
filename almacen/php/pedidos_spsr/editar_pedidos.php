@@ -18,12 +18,12 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-    if ((PermisosUsuario($permisos, 5003, 2) && $oper == 'add' && $_POST['id_pedido'] == -1) ||
-        (PermisosUsuario($permisos, 5003, 3) && $oper == 'add' && $_POST['id_pedido'] != -1) ||
-        (PermisosUsuario($permisos, 5003, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5003, 3) && $oper == 'conf') ||
-        (PermisosUsuario($permisos, 5003, 3) && $oper == 'close') ||
-        (PermisosUsuario($permisos, 5003, 5) && $oper == 'annul' || $id_rol == 1)
+    if ((PermisosUsuario($permisos, 5018, 2) && $oper == 'add' && $_POST['id_pedido'] == -1) ||
+        (PermisosUsuario($permisos, 5018, 3) && $oper == 'add' && $_POST['id_pedido'] != -1) ||
+        (PermisosUsuario($permisos, 5018, 4) && $oper == 'del') ||
+        (PermisosUsuario($permisos, 5018, 3) && $oper == 'conf') ||
+        (PermisosUsuario($permisos, 5018, 3) && $oper == 'close') ||
+        (PermisosUsuario($permisos, 5018, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
 
         if ($oper == 'add') {
@@ -31,29 +31,17 @@ try {
             $fec_pedido = $_POST['txt_fec_pedido'];
             $hor_pedido = $_POST['txt_hor_pedido'];
             $detalle = $_POST['txt_det_pedido']; //detalle pedido
-
-            //Verifica si los datos estas activos o bloqueados en el formulario
-            if (isset($_POST['sl_sede_proveedor'])){
-                $id_sede_origen = $_POST['sl_sede_proveedor'];
-                $id_bodega_origen = $_POST['sl_bodega_proveedor'];
-                $id_sede_destino = $_POST['sl_sede_solicitante'];
-                $id_bodega_destino = $_POST['sl_bodega_solicitante'];
-            }else{
-                $sql = "SELECT id_sede_origen,id_bodega_origen,id_sede_destino,id_bodega_destino FROM far_pedido WHERE id_pedido=" . $id;
-                $rs = $cmd->query($sql);
-                $obj_pedido = $rs->fetch();
-                $id_sede_origen = $obj_pedido['id_sede_origen'];    
-                $id_bodega_origen = $obj_pedido['id_bodega_origen'];                
-                $id_sede_destino = $obj_pedido['id_sede_destino'];    
-                $id_bodega_destino = $obj_pedido['id_bodega_destino'];                
-            }
+            $id_sede_origen = $_POST['id_sede_proveedor'];
+            $id_bodega_origen = $_POST['id_bodega_proveedor'];
+            $id_sede_destino = $_POST['id_sede_solicitante'];
+            $id_bodega_destino = $_POST['id_bodega_solicitante'];
 
             if($id_bodega_origen != $id_bodega_destino){
                 if ($id == -1) {                
                     $sql = "INSERT INTO far_pedido(fec_pedido,hor_pedido,detalle,id_sede_origen,id_bodega_origen,
                             id_sede_destino,id_bodega_destino,val_total,id_usr_crea,fec_creacion,creado_far,es_pedido_spsr,estado) 
                         VALUES('$fec_pedido','$hor_pedido','$detalle',$id_sede_origen,$id_bodega_origen,
-                            $id_sede_destino,$id_bodega_destino,0,$id_usr_ope,'$fecha_ope',0,0,1)";
+                            $id_sede_destino,$id_bodega_destino,0,$id_usr_ope,'$fecha_ope',0,1,1)";
                     $rs = $cmd->query($sql);
 
                     if ($rs) {
@@ -188,9 +176,9 @@ try {
             $estado = $obj_pedido['estado'];
 
             $sql = 'SELECT COUNT(*) AS total FROM far_pedido_detalle
-                    INNER JOIN far_traslado_detalle ON (far_traslado_detalle.id_ped_detalle = far_pedido_detalle.id_ped_detalle) 
-                    INNER JOIN far_traslado ON (far_traslado.id_traslado = far_traslado_detalle.id_traslado)
-                    WHERE far_pedido_detalle.id_pedido=' . $id . ' AND far_traslado.estado>=1';
+                    INNER JOIN far_traslado_r_detalle ON (far_traslado_r_detalle.id_ped_detalle = far_pedido_detalle.id_ped_detalle) 
+                    INNER JOIN far_traslado_r ON (far_traslado_r.id_traslado = far_traslado_r_detalle.id_traslado)
+                    WHERE far_pedido_detalle.id_pedido=' . $id . ' AND far_traslado_r.estado>=1';
             $rs = $cmd->query($sql);
             $obj_pedido = $rs->fetch();
             $det_traslado = $obj_pedido['total'];

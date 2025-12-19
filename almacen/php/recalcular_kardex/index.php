@@ -52,20 +52,20 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
                             <!--Opciones de filtros -->
                             <div class="form-row">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-5">
                                     <div class="form-row">
                                         <div class="form-group col-md-6">
                                             <select class="filtro form-control form-control-sm" id="sl_sede_filtro">
                                                 <?php sedes_usuario($cmd, '--Sede--') ?>
                                             </select>
                                         </div>
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group col-md-5">
                                             <select class="filtro form-control form-control-sm" id="sl_bodega_filtro">
                                             </select>
                                         </div>    
                                     </div>
                                     <div class="form-row">
-                                        <div class="form-group col-md-4">
+                                        <div class="form-group col-md-3">
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion1" value="O" checked="checked">
                                                 <label class="form-check-label small" for="rdo_opcion1">Datos Articulo</label>
@@ -79,7 +79,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         </div>
                                     </div>
                                     <div class="form-row">    
-                                        <div class="form-group col-md-8">
+                                        <div class="form-group col-md-7">
                                             <label class="form-control-sm">Fecha Inicial de proceso Recalcular Kardex</label>
                                         </div>
                                         <div class="form-group col-md-4">
@@ -87,9 +87,9 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         </div>
                                     </div>   
                                 </div>
-                                <div class="form-group col-md-4">                                    
+                                <div class="form-group col-md-3">                                    
                                     <div class="form-row">
-                                        <div class="form-group col-md-5">
+                                        <div class="form-group col-md-6">
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion2" value="I">
                                                 <label class="form-check-label small" for="rdo_opcion2">Id. Orden Ingreso</label>
@@ -100,7 +100,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         </div>
                                     </div>
                                     <div class="form-row">
-                                        <div class="form-group col-md-5">
+                                        <div class="form-group col-md-6">
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion3" value="E">
                                                 <label class="form-check-label small" for="rdo_opcion3">Id. Orden Egreso</label>
@@ -111,10 +111,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         </div>
                                     </div>
                                     <div class="form-row">
-                                        <div class="form-group col-md-5">
+                                        <div class="form-group col-md-6">
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion4" value="T">
-                                                <label class="form-check-label small" for="rdo_opcion4">Id. Orden Traslado</label>
+                                                <label class="form-check-label small" for="rdo_opcion4">Id. Traslado</label>
                                             </div>
                                         </div>    
                                         <div class="form-group col-md-4">
@@ -122,17 +122,33 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         </div>
                                     </div>                              
                                 </div> 
+                                <div class="form-group col-md-3">                                    
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input chk_aplica" type="radio" name="rdo_opcion" id="rdo_opcion5" value="ER">
+                                                <label class="form-check-label small" for="rdo_opcion5">Id. Traslado SPSR Egreso</label>
+                                            </div>
+                                        </div>    
+                                        <div class="form-group col-md-4">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_id_egr_r_filtro" placeholder="Id. Traslado" disabled="disabled">
+                                        </div>
+                                    </div>
+                                </div>    
                                 <div class="form-group col-md-1">
-                                    <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
-                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
-                                    </a>
-                                </div>
-                                    <div class="form-group col-md-1">    
-                                    <a type="button" id="btn_recalcular_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
-                                        <span class="fas fa-cog fa-lg" aria-hidden="true"></span>
-                                        <label class="form-check-label small">Recalcular Lotes</label>
-                                    </a>
-                                </div>   
+                                    <div class="form-row">
+                                        <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
+                                            <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                        </a>
+                                    </div>        
+                                    <div class="form-row">&nbsp;</div>
+                                    <div class="form-row">                                        
+                                        <a type="button" id="btn_recalcular_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
+                                            <span class="fas fa-cog fa-lg" aria-hidden="true"></span>
+                                            <label class="form-check-label small">Recalcular Lotes</label>
+                                        </a>
+                                    </div>        
+                                </div>    
                             </div>
                            
                             <!--Lista de registros en la tabla-->

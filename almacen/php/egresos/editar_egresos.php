@@ -380,7 +380,7 @@ try {
                     $obj = $rs->fetch();
                     $lotes = $obj['lotes'];
 
-                    recalcular_kardex($cmd, $lotes, 'E', '', $id, '', '', '');
+                    recalcular_kardex($cmd, $lotes, 'E', '', $id, '', '', '', '', '');
                 }
                 if ($rs) {
                     $cmd->commit();

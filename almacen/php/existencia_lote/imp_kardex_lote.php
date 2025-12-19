@@ -64,6 +64,24 @@ try {
                 INNER JOIN tb_sedes ON (far_kardex.id_sede = tb_sedes.id_sede)
                 INNER JOIN far_bodegas ON (far_kardex.id_bodega = far_bodegas.id_bodega)
                 INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where
+                UNION ALL
+                SELECT far_kardex.id_kardex,far_kardex.fec_movimiento,CONCAT_WS('-','TER',far_traslado_r.num_traslado) AS comprobante,
+			        tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,far_medicamento_lote.lote,far_kardex.detalle,
+			        far_kardex.val_ingreso,far_kardex.val_promedio,far_kardex.can_ingreso,far_kardex.can_egreso,far_kardex.existencia_lote
+                FROM far_kardex
+                INNER JOIN far_traslado_r ON (far_kardex.id_egreso_tra_r = far_traslado_r.id_traslado)
+                INNER JOIN tb_sedes ON (far_kardex.id_sede = tb_sedes.id_sede)
+                INNER JOIN far_bodegas ON (far_kardex.id_bodega = far_bodegas.id_bodega)
+                INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where 
+                UNION ALL
+                SELECT far_kardex.id_kardex,far_kardex.fec_movimiento,CONCAT_WS('-','TIR',far_traslado_r.num_traslado) AS comprobante,
+			        tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,far_medicamento_lote.lote,far_kardex.detalle,
+			        far_kardex.val_ingreso,far_kardex.val_promedio,far_kardex.can_ingreso,far_kardex.can_egreso,far_kardex.existencia_lote
+                FROM far_kardex
+                INNER JOIN far_traslado_r ON (far_kardex.id_ingreso_tra_r = far_traslado_r.id_traslado)
+                INNER JOIN tb_sedes ON (far_kardex.id_sede = tb_sedes.id_sede)
+                INNER JOIN far_bodegas ON (far_kardex.id_bodega = far_bodegas.id_bodega)
+                INNER JOIN far_medicamento_lote ON (far_kardex.id_lote= far_medicamento_lote.id_lote) $where 
             ) AS t ORDER BY id_kardex ASC";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();

@@ -14,20 +14,23 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
 
 try {
-    $sql = "SELECT far_traslado.id_traslado,far_traslado.num_traslado,far_traslado.fec_traslado,
-            far_traslado.hor_traslado,far_traslado.detalle,far_traslado.val_total,       
+    $sql = "SELECT far_traslado_r.id_traslado,far_traslado_r.num_traslado,far_traslado_r.fec_traslado,
+            far_traslado_r.hor_traslado,far_traslado_r.detalle,far_traslado_r.val_total,       
             tb_so.nom_sede AS nom_sede_origen,tb_bo.nombre AS nom_bodega_origen,
             tb_sd.nom_sede AS nom_sede_destino,tb_bd.nombre AS nom_bodega_destino,
-            CASE far_traslado.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
-            CASE far_traslado.estado WHEN 0 THEN far_traslado.fec_anulacion WHEN 1 THEN far_traslado.fec_creacion WHEN 2 THEN far_traslado.fec_cierre END AS fec_estado,
+            CASE far_traslado_r.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO-EGRESADO' WHEN 3 THEN 'ENVIADO' END AS estado,
+            CASE far_traslado_r.estado WHEN 0 THEN far_traslado_r.fec_anulacion 
+                                       WHEN 1 THEN far_traslado_r.fec_creacion 
+                                       WHEN 2 THEN far_traslado_r.fec_cierre 
+                                       WHEN 2 THEN far_traslado_r.fec_envio END AS fec_estado,
             CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
             usr.descripcion AS usr_perfil,usr.nom_firma
-        FROM far_traslado       
-        INNER JOIN tb_sedes AS tb_so ON (tb_so.id_sede=far_traslado.id_sede_origen)
-        INNER JOIN far_bodegas AS tb_bo ON (tb_bo.id_bodega=far_traslado.id_bodega_origen)
-        INNER JOIN tb_sedes AS tb_sd ON (tb_sd.id_sede=far_traslado.id_sede_destino)
-        INNER JOIN far_bodegas AS tb_bd ON (tb_bd.id_bodega=far_traslado.id_bodega_destino)
-        LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_traslado.id_usr_cierre)
+        FROM far_traslado_r       
+        INNER JOIN tb_sedes AS tb_so ON (tb_so.id_sede=far_traslado_r.id_sede_origen)
+        INNER JOIN far_bodegas AS tb_bo ON (tb_bo.id_bodega=far_traslado_r.id_bodega_origen)
+        INNER JOIN tb_sedes AS tb_sd ON (tb_sd.id_sede=far_traslado_r.id_sede_destino)
+        INNER JOIN far_bodegas AS tb_bd ON (tb_bd.id_bodega=far_traslado_r.id_bodega_destino)
+        LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_traslado_r.id_usr_cierre)
         WHERE id_traslado=" . $id . " LIMIT 1";
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
@@ -35,13 +38,13 @@ try {
     $sql = "SELECT far_medicamentos.cod_medicamento,
                 CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion))) AS nom_medicamento,
                 far_medicamento_lote.lote,
-                far_medicamento_lote.fec_vencimiento,far_traslado_detalle.cantidad,far_traslado_detalle.valor,
-                (far_traslado_detalle.cantidad*far_traslado_detalle.valor) AS val_total
-            FROM far_traslado_detalle
-            INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_traslado_detalle.id_lote_origen)
+                far_medicamento_lote.fec_vencimiento,far_traslado_r_detalle.cantidad,far_traslado_r_detalle.valor,
+                (far_traslado_r_detalle.cantidad*far_traslado_r_detalle.valor) AS val_total
+            FROM far_traslado_r_detalle
+            INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_traslado_r_detalle.id_lote_origen)
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_medicamento_lote.id_med)
             INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
-            WHERE far_traslado_detalle.id_traslado=" . $id . " ORDER BY far_traslado_detalle.id_tra_detalle";    
+            WHERE far_traslado_r_detalle.id_traslado=" . $id . " ORDER BY far_traslado_r_detalle.id_tra_detalle";    
     $rs = $cmd->query($sql);
     $obj_ds = $rs->fetchAll();
 
@@ -77,7 +80,7 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>ORDEN DE TRASLADO</th>
+            <th>ORDEN DE TRASLADO SPSR</th>
         </tr>
     </table>
 
@@ -99,7 +102,7 @@ try {
             <td><?php echo $obj_e['fec_estado']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="3">Sede y Bodega Origen</td>
+            <td colspan="3">Sede y Bodega Principal</td>
             <td colspan="3">Sede y Bodega Destino (De donde se solicita)</td>
         </tr>
         <tr>

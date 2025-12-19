@@ -18,30 +18,24 @@ try {
             ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
             sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
             CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS estado,
-            CASE far_pedido.estado WHEN 0 THEN far_pedido.fec_anulacion WHEN 1 THEN far_pedido.fec_creacion ELSE far_pedido.fec_cierre END AS fec_estado
+            CASE far_pedido.estado WHEN 0 THEN far_pedido.fec_anulacion WHEN 1 THEN far_pedido.fec_creacion ELSE far_pedido.fec_cierre END AS fec_estado,
+            CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_cierra,
+            usr.descripcion AS usr_perfil,usr.nom_firma
         FROM far_pedido             
         INNER JOIN tb_sedes AS ss ON (ss.id_sede = far_pedido.id_sede_destino)
         INNER JOIN far_bodegas AS bs ON (bs.id_bodega = far_pedido.id_bodega_destino)           
         INNER JOIN tb_sedes AS sp ON (sp.id_sede = far_pedido.id_sede_origen)
         INNER JOIN far_bodegas AS bp ON (bp.id_bodega = far_pedido.id_bodega_origen)
+        LEFT JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_pedido.id_usr_cierre)
         WHERE id_pedido=" . $id . " LIMIT 1";
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
 
     $sql = "SELECT far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
             far_pedido_detalle.cantidad,far_pedido_detalle.valor,
-            (far_pedido_detalle.cantidad*far_pedido_detalle.valor) AS val_total,
-            IFNULL(TRASLADO.cantidad,0) AS cantidad_tr,
-            IFNULL(TRASLADO.valor,0) AS val_total_tr
+            (far_pedido_detalle.cantidad*far_pedido_detalle.valor) AS val_total
         FROM far_pedido_detalle
         INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_pedido_detalle.id_medicamento)
-        LEFT JOIN (SELECT TRD.id_ped_detalle,SUM(TRD.cantidad) AS cantidad,
-                        SUM(TRD.cantidad*TRD.valor) AS valor     
-                    FROM far_traslado_detalle AS TRD
-                    INNER JOIN far_traslado AS TR ON (TR.id_traslado=TRD.id_traslado)
-                    WHERE TR.estado<>0 AND TRD.id_ped_detalle IS NOT NULL
-                    GROUP BY TRD.id_ped_detalle
-                   ) AS TRASLADO ON (TRASLADO.id_ped_detalle=far_pedido_detalle.id_ped_detalle) 
         WHERE far_pedido_detalle.id_pedido=" . $id . " ORDER BY far_pedido_detalle.id_ped_detalle";
     $rs = $cmd->query($sql);
     $obj_ds = $rs->fetchAll();
@@ -77,7 +71,7 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>ORDEN DE PEDIDO DE BODEGA PARA TRASLADADO</th>
+            <th>ORDEN DE PEDIDO DE BODEGA SPSR</th>
         </tr>
     </table>
 
@@ -99,8 +93,8 @@ try {
             <td><?php echo $obj_e['fec_estado']; ?></td>
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
-            <td colspan="3">Sede y Bodega DE donde se solicita  (Destinatario del Traslado)</td>
-            <td colspan="3">Sede y Bodega Proveedor  (Origen del Traslado)</td>
+            <td colspan="3">Sede y Bodega DE donde se solicita</td>
+            <td colspan="3">Sede y Bodega Principal (Proveedor)</td>
         </tr>
         <tr>
             <td colspan="2"><?php echo $obj_e['nom_sede_solicita']; ?></td>
@@ -121,17 +115,13 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>Código</th>
                 <th>Descripción</th>
-                <th>Cantidad Solicitada</th>                
+                <th>Cantidad</th>
                 <th>Valor Promedio</th>
                 <th>Valor Total</th>
-                <th>Cantidad Entregada</th>
-                <th>Valor Total</th>
-                <th>Cantidad Pendiente</th>
             </tr>
         </thead>
         <tbody style="font-size: 60%;">
             <?php
-            $val_total_tr = 0;
             $tabla = '';
             foreach ($obj_ds as $obj) {
                 $tabla .=  '<tr class="resaltar"> 
@@ -139,11 +129,7 @@ try {
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_medicamento']) . '</td>   
                         <td>' . $obj['cantidad'] . '</td>
                         <td>' . formato_valor($obj['valor']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']) . '</td>
-                        <td>' . $obj['cantidad_tr'] . '</td>
-                        <td>' . formato_valor($obj['val_total_tr']) . '</td>
-                        <td>' . ($obj['cantidad'] - $obj['cantidad_tr']) . '</td></tr>';
-                $val_total_tr +=$obj['val_total_tr'];
+                        <td>' . formato_valor($obj['val_total']) . '</td></tr>';
             }
             echo $tabla;
             ?>
@@ -153,11 +139,30 @@ try {
                 <td colspan="3"></td>
                 <td>TOTAL:</td>
                 <td><?php echo formato_valor($obj_e['val_total']); ?> </td>
-                <td></td>
-                <td><?php echo formato_valor($val_total_tr); ?> </td>
-                <td></td>
             </tr>
         </tfoot>
     </table>
-    
+
+    <table style="width:100%; font-size:70%; text-align:center">
+        <tr>
+            <td style="width:50%">
+                <?php if ($obj_e['nom_firma']) : ?>
+                    <img src="<?php echo $ruta_firmas . $obj_e['nom_firma'] ?>">
+                <?php endif; ?>
+            </td>
+            <td style="width:50%">               
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                <div>-------------------------------------------------</div>
+                <div><?php echo $obj_e['usr_cierra']; ?></div>
+                <div><?php echo $obj_e['usr_perfil']; ?></div>
+            </td>
+            <td style="vertical-align: top">
+                <div>-------------------------------------------------</div>
+                <div>Aceptado Por</div>
+            </td>
+        </tr>        
+    </table>
 </div>

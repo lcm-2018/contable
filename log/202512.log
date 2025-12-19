@@ -1,2 +1,49 @@
-[2025-12-16 11:33:09] Usuario: 1-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM ctb_causa_retencion WHERE id_causa_retencion = 5652
-[2025-12-18 17:26:14] Usuario: 1-ADMINN ADMINP, IP: ::1, SQL: DELETE FROM `fin_chequeras` WHERE `id_chequera` = 1
+[2025-12-09 11:37:55 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-09 23:37:55
+[2025-12-09 11:38:04 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-09 23:38:04
+[2025-12-09 11:40:35 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-09 23:40:35
+[2025-12-09 11:43:04 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-09 23:43:04
+[2025-12-09 11:44:33 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-09 23:44:33
+[2025-12-09 11:45:33 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-09 23:45:33
+[2025-12-09 11:45:58 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-09 23:45:58
+[2025-12-09 11:46:18 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-09 23:46:18
+[2025-12-09 11:46:38 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-09 23:46:38
+[2025-12-09 11:55:18 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Anular, Opcion: Traslado SPSR , Registro: Anulo Traslado SPSR Id: 5
+[2025-12-09 11:56:42 PM] Usuario: 365-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-09 23:56:42
+[2025-12-10 11:37:24 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Enviar, Opcion: Traslado SPSR , Registro: Enviado Traslado SPSR Id: 4
+[2025-12-11 12:14:26 AM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Enviar, Opcion: Traslado SPSR , Registro: Enviado Traslado SPSR Id: 4
+[2025-12-12 11:06:28 AM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Enviar, Opcion: Traslado SPSR , Registro: Enviado Traslado SPSR Id: 6
+[2025-12-12 11:08:01 AM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Enviar, Opcion: Traslado SPSR , Registro: Enviado Traslado SPSR Id: 7
+[2025-12-15 02:27:49 PM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-15 14:27:49
+[2025-12-15 02:55:07 PM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Enviar, Opcion: Traslado SPSR , Registro: Enviado Traslado SPSR Id: 8
+[2025-12-15 03:00:07 PM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Enviar, Opcion: Traslado SPSR , Registro: Enviado Traslado SPSR Id: 10
+[2025-12-16 01:17:19 AM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 01:17:19
+[2025-12-16 01:17:27 AM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 01:17:27
+[2025-12-16 01:23:43 AM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 01:23:43
+[2025-12-16 01:31:27 AM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 01:31:27
+[2025-12-16 02:01:46 AM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 02:01:46
+[2025-12-16 02:07:34 AM] Usuario: 1-ADMINN ADMINP, IP: ::1, Accion: Enviar, Opcion: Traslado SPSR , Registro: Enviado Traslado SPSR Id: 11
+[2025-12-16 04:20:13 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 16:20:13
+[2025-12-16 04:20:50 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 16:20:50
+[2025-12-16 04:42:09 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 16:42:09
+[2025-12-16 05:11:20 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:11:20
+[2025-12-16 05:17:14 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:17:14
+[2025-12-16 05:17:42 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:17:42
+[2025-12-16 05:17:47 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:17:47
+[2025-12-16 05:22:00 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:22:00
+[2025-12-16 05:27:02 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:27:02
+[2025-12-16 05:28:32 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:28:32
+[2025-12-16 05:28:39 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:28:39
+[2025-12-16 05:28:54 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:28:54
+[2025-12-16 05:29:25 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:29:25
+[2025-12-16 05:29:53 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:29:53
+[2025-12-16 05:30:35 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:30:35
+[2025-12-16 05:38:56 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:38:56
+[2025-12-16 05:45:38 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:45:38
+[2025-12-16 05:46:13 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:46:13
+[2025-12-16 05:46:56 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:46:56
+[2025-12-16 05:48:30 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:48:30
+[2025-12-16 05:57:32 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-16 17:57:32
+[2025-12-17 05:39:45 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Enviar, Opcion: Traslado SPSR , Registro: Enviado Traslado SPSR Id: 5
+[2025-12-17 06:17:10 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Enviar, Opcion: Traslado SPSR , Registro: Enviado Traslado SPSR Id: 13
+[2025-12-17 06:23:50 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Anular, Opcion: Traslado SPSR , Registro: Anulo Traslado SPSR Id: 8
+[2025-12-18 02:30:15 PM] Usuario: 1-ADMINN ADMINP, IP: 127.0.0.1, Accion: Actualizar, Opcion: Recalcular Kardex, Registro: Recalcular Kardex en la fecha : 2025-12-18 14:30:15

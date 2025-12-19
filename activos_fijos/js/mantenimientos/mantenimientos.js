@@ -62,7 +62,7 @@
                 if (data.estado == 1) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
                 } else if (data.estado == 2) {
-                    $($(row).find("td")[0]).css("background-color", "cyan");
+                    $($(row).find("td")[0]).css("background-color", "PaleTurquoise");
                 } else if (data.estado == 3) {
                     $($(row).find("td")[0]).css("background-color", "DodgerBlue");
                 } else if (data.estado == 0) {

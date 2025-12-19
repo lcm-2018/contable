@@ -18,25 +18,28 @@ $dir = $_POST['order'][0]['dir'];
 $idusr = $_SESSION['id_user'];
 $idrol = $_SESSION['rol'];
 
-$where_usr = " WHERE OI.estado=2";
-$where_usr.= " AND OI.id_ingreso NOT IN (SELECT id_ingreso FROM far_traslado WHERE id_ingreso IS NOT NULL AND estado<>0)
-               AND OI.id_ingreso NOT IN (SELECT id_ingreso FROM far_traslado_r WHERE id_ingreso IS NOT NULL AND estado<>0)";
-               
-if($idrol !=1){
-    $where_usr .= " AND OI.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
-}
-
-$where = $where_usr;
-if (isset($_POST['num_ingreso']) && $_POST['num_ingreso']) {
-    $where .= " AND OI.num_ingreso='" . $_POST['num_ingreso'] . "'";
-}
-if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
-    $where .= " AND OI.fec_ingreso BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
-}
-
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+    $bodega = bodega_principal($cmd);
+    $id_bodega = $bodega['id_bodega'] ? $bodega['id_bodega'] : 0;
+
+    $where_usr = " WHERE OI.estado=2 AND OI.id_bodega=$id_bodega";
+    $where_usr.= " AND OI.id_ingreso NOT IN (SELECT id_ingreso FROM far_traslado WHERE id_ingreso IS NOT NULL AND estado<>0)
+                   AND OI.id_ingreso NOT IN (SELECT id_ingreso FROM far_traslado_r WHERE id_ingreso IS NOT NULL AND estado<>0)";
+                   
+    if($idrol !=1){
+        $where_usr .= " AND OI.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
+    }
+
+    $where = $where_usr;
+    if (isset($_POST['num_ingreso']) && $_POST['num_ingreso']) {
+        $where .= " AND OI.num_ingreso='" . $_POST['num_ingreso'] . "'";
+    }
+    if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
+        $where .= " AND OI.fec_ingreso BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+    }
        
     //Consulta el total de registros de la tabla
     $sql = "SELECT COUNT(*) AS total FROM far_orden_ingreso AS OI" . $where_usr;
@@ -52,11 +55,11 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT OI.*,TE.nom_tercero,
-                SO.id_sede AS id_sede_origen,SO.nom_sede AS nom_sede_origen,
-                BO.id_bodega AS id_bodega_origen,BO.nombre AS nom_bodega_origen
+                SE.id_sede,SE.nom_sede,
+                BO.id_bodega,BO.nombre AS nom_bodega
             FROM far_orden_ingreso AS OI
             INNER JOIN tb_terceros AS TE ON (TE.id_tercero = OI.id_provedor)
-            INNER JOIN tb_sedes AS SO ON (SO.id_sede = OI.id_sede)
+            INNER JOIN tb_sedes AS SE ON (SE.id_sede = OI.id_sede)
             INNER JOIN far_bodegas AS BO ON (BO.id_bodega = OI.id_bodega)"
             . $where . " ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
@@ -77,10 +80,10 @@ if (!empty($objs)) {
             "fec_ingreso" => $obj['fec_ingreso'],
             "detalle" => $obj['detalle'],
             "nom_tercero" => $obj['nom_tercero'],
-            "id_sede_origen" => $obj['id_sede_origen'],
-            "nom_sede_origen" => $obj['nom_sede_origen'],
-            "id_bodega_origen" => $obj['id_bodega_origen'],
-            "nom_bodega_origen" => $obj['nom_bodega_origen'],
+            "id_sede" => $obj['id_sede'],
+            "nom_sede" => $obj['nom_sede'],
+            "id_bodega" => $obj['id_bodega'],
+            "nom_bodega" => $obj['nom_bodega'],
             "botones" => '<div class="text-center centro-vertical">' . $imprimir . '</div>'
         ];
     }

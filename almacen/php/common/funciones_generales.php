@@ -6,9 +6,10 @@ function bodega_principal($cmd){
         $idusr = $_SESSION['id_user'];
         $idrol = $_SESSION['rol'];
         $res = array();
-        $sql = "SELECT far_bodegas.id_bodega,far_bodegas.nombre,tb_sedes_bodega.id_sede,seg_bodegas_usuario.id_usuario
+        $sql = "SELECT far_bodegas.id_bodega,far_bodegas.nombre,tb_sedes.id_sede,tb_sedes.nom_sede,seg_bodegas_usuario.id_usuario
                 FROM far_bodegas 
                 LEFT JOIN tb_sedes_bodega ON (tb_sedes_bodega.id_bodega=far_bodegas.id_bodega)
+                LEFT JOIN tb_sedes ON (tb_sedes.id_sede = tb_sedes_bodega.id_sede)
                 LEFT JOIN seg_bodegas_usuario ON (seg_bodegas_usuario.id_bodega=far_bodegas.id_bodega AND seg_bodegas_usuario.id_usuario=$idusr)
                 WHERE far_bodegas.es_principal=1";
         $rs = $cmd->query($sql);
@@ -16,15 +17,15 @@ function bodega_principal($cmd){
         if (isset($obj['id_bodega'])) {
             if (isset($obj['id_sede'])) {
                 if (isset($obj['id_usuario']) || $idrol == 1) {
-                    $res = array('id_bodega' => $obj['id_bodega'], 'nom_bodega' => $obj['nombre'], 'id_sede' => $obj['id_sede']);
+                    $res = array('id_bodega' => $obj['id_bodega'], 'nom_bodega' => $obj['nombre'], 'id_sede' => $obj['id_sede'], 'nom_sede' => $obj['nom_sede']);
                 } else {
-                    $res = array('id_bodega' => '', 'nom_bodega' => 'La Bodega Principal no esta asociada al Usuario', 'id_sede' => '');        
+                    $res = array('id_bodega' => '', 'nom_bodega' => 'La Bodega Principal no esta asociada al Usuario', 'id_sede' => '', 'nom_sede' => '');        
                 }    
             } else {
-                $res = array('id_bodega' => '', 'nom_bodega' => 'La Bodega Principal no tiene Sede', 'id_sede' => '');    
+                $res = array('id_bodega' => '', 'nom_bodega' => 'La Bodega Principal no tiene Sede', 'id_sede' => '', 'nom_sede' => '');    
             }    
         } else {
-            $res = array('id_bodega' => '', 'nom_bodega' => 'No Existe Bodega Principal', 'id_sede' => '');
+            $res = array('id_bodega' => '', 'nom_bodega' => 'No Existe Bodega Principal', 'id_sede' => '', 'nom_sede' => '');
         }
         $cmd = null;
         return $res;
@@ -176,4 +177,34 @@ function bitacora($accion, $opcion, $detalle, $id_usuario, $login) {
     $archivo = $_SESSION['ruta_logs'] . date('Ym') . '.log';
     $log= "$fecha Usuario: $usuario, IP: $ip, Accion: $accion, Opcion: $opcion, Registro: $detalle\r\n";
     file_put_contents("$archivo", $log, FILE_APPEND | LOCK_EX);
+}
+
+//FUNCIONES DE CONEXION A SEDE REMOTA
+function isHostReachable($host): bool {
+    // Si el SO empieza por "WIN" → Windows, si no → asumimos Linux/Unix
+    $cmd = (stripos(PHP_OS, 'WIN') === 0) ? "ping -n 1 " : "ping -c 1 ";
+    $cmd .= escapeshellarg($host);
+    exec($cmd, $output, $status);
+    return $status === 0;
+}
+
+function isMySQLPortOpen(string $host, int $port, int $timeout = 2): bool {
+    $errno  = 0;
+    $errstr = '';
+    $fp = @fsockopen($host, $port, $errno, $errstr, $timeout);
+    if ($fp) {
+        fclose($fp);
+        return true;
+    }
+    return false;
+}
+
+function canConnectToDatabase(string $host, int $port, string $user, string $password, string $database): array {
+    $mysqli = @new mysqli($host, $user, $password, $database, $port);
+   if ($mysqli->connect_errno) {
+        $error = $mysqli->connect_error;
+        return [false, $error];
+    }
+    $mysqli->close();
+    return [true, 'Conexión a la base de datos exitosa.'];
 }
