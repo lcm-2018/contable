@@ -133,8 +133,8 @@
                 $('#sl_modalidad').val('')
             }
         } else if (id == 5) {
-            $('#sl_cobertura').find('option').not('[value=""],[value="1"],[value="8"],[value="9"],[value="15"]').prop('disabled', false).show();
-            if (cobertura == "1" || cobertura == "8" || cobertura == "9" || cobertura == "15") {
+            $('#sl_cobertura').find('option').not('[value=""],[value="1"],[value="8"],[value="15"]').prop('disabled', false).show();
+            if (cobertura == "1" || cobertura == "8" || cobertura == "15") {
                 $('#sl_cobertura').val('')
             }
             $('#sl_modalidad').find('option').prop('disabled', false).show();
