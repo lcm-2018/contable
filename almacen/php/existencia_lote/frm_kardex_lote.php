@@ -19,7 +19,7 @@ $sql = "SELECT far_medicamento_lote.id_lote,far_medicamento_lote.lote,
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 
-if (empty($obj)) {    
+if (empty($obj)) {
     //Inicializa variable por defecto
     $obj['id_lote'] = 0;
 }
@@ -60,7 +60,7 @@ if (empty($obj)) {
                         <a type="button" id="btn_buscar_fil_kar" class="btn btn-outline-success btn-sm" title="Buscar">
                             <span class="fas fa-search fa-lg" aria-hidden="true"></span>
                         </a>
-                    </div>    
+                    </div>
                 </div>
             </form>
 
@@ -88,7 +88,7 @@ if (empty($obj)) {
             </div>
         </div>
     </div>
-    <div class="text-center pt-3">    
+    <div class="text-center pt-3">
         <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir">Imprimir</button>
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Salir</a>
     </div>
@@ -112,22 +112,51 @@ if (empty($obj)) {
                         data.fec_fin = $('#txt_fecfin_fil').val();
                     }
                 },
-                columns: [
-                    { 'data': 'id_kardex' }, //Index=0
-                    { 'data': 'fec_movimiento' },
-                    { 'data': 'comprobante' },
-                    { 'data': 'nom_sede' },
-                    { 'data': 'nom_bodega' },
-                    { 'data': 'lote' },
-                    { 'data': 'detalle' },
-                    { 'data': 'val_ingreso' },
-                    { 'data': 'val_promedio' },
-                    { 'data': 'can_ingreso' },
-                    { 'data': 'can_egreso' },
-                    { 'data': 'existencia_lote' }
+                columns: [{
+                        'data': 'id_kardex'
+                    }, //Index=0
+                    {
+                        'data': 'fec_movimiento'
+                    },
+                    {
+                        'data': 'comprobante'
+                    },
+                    {
+                        'data': 'nom_sede'
+                    },
+                    {
+                        'data': 'nom_bodega'
+                    },
+                    {
+                        'data': 'lote'
+                    },
+                    {
+                        'data': 'detalle'
+                    },
+                    {
+                        'data': 'val_ingreso'
+                    },
+                    {
+                        'data': 'val_promedio'
+                    },
+                    {
+                        'data': 'can_ingreso'
+                    },
+                    {
+                        'data': 'can_egreso'
+                    },
+                    {
+                        'data': 'existencia_lote'
+                    }
                 ],
-                columnDefs: [
-                    {  orderable: false, targets: [0,1,2,3,4,5,6,7,8,9,10,11] }
+                columnDefs: [{
+                        orderable: false,
+                        targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+                    },
+                    {
+                        targets: [4, 6],
+                        className: 'text-wrap'
+                    }
                 ],
                 order: [
                     [0, "ASC"]
@@ -140,5 +169,4 @@ if (empty($obj)) {
             $('#tb_kardex').wrap('<div class="overflow"/>');
         });
     })(jQuery);
-    
 </script>

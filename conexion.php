@@ -2,8 +2,8 @@
 date_default_timezone_set('America/Bogota');
 
 $bd_driver = "mysql";
-$bd_servidor = "localhost";
-$bd_base = "bd_redsalud";
+$bd_servidor = "localhost:3308";
+$bd_base = "otra";
 $api =  "https://200.7.107.59/api_terceros/";
 $charset = "charset=utf8";
 $bd_usuario = "root";

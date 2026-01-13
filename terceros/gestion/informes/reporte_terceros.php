@@ -21,6 +21,16 @@ try {
             GROUP BY `id_tercero_api`";
     $rs = $cmd->query($sql);
     $responsabilidades = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $sql = "SELECT
+                `trt`.`id_tercero_api`
+                , GROUP_CONCAT(`ttt`.`descripcion`) AS `tipo`
+            FROM
+                `tb_rel_tercero` AS `trt`
+                INNER JOIN `tb_tipo_tercero` AS `ttt` 
+                    ON (`trt`.`id_tipo_tercero` = `ttt`.`id_tipo`)
+            GROUP BY `trt`.`id_tercero_api`";
+    $rs = $cmd->query($sql);
+    $tipos = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -31,6 +41,7 @@ foreach ($terEmpr as $l) {
         $id_t[] = $l['id_tercero_api'];
     }
 }
+$tipos = array_column($tipos, 'tipo', 'id_tercero_api');
 $payload = json_encode($id_t);
 //API URL
 $url = $api . 'terceros/datos/res/lista/reportes';
@@ -52,6 +63,7 @@ if (!empty($datos)) {
         $head .= '<th>' . mb_convert_encoding($key, 'UTF-8', 'ISO-8859-1') . '</th>';
     }
     $head .= '<th>Responsabilidades</th>';
+    $head .= '<th>Tipo Tercero</th>';
 } else {
     echo 'No hay datos para mostrar';
     exit();
@@ -67,6 +79,7 @@ foreach ($datos as $d) {
         $tbody .= '<td>' . mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1') . '</td>';
     }
     $tbody .= '<td>' . $resp . '</td>';
+    $tbody .= '<td>' . ($tipos[$id_ter] ?? '') . '</td>';
     $tbody .= '</tr>';
 }
 $tabla = <<<EOT
@@ -78,6 +91,12 @@ $tabla = <<<EOT
     </table>
 EOT;
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-header('Content-type:application/xls');
+header('Content-Type: application/vnd.ms-excel; charset=utf-8');
 header('Content-Disposition: attachment; filename=reporte' . $date->format('mdHms') . '.xls');
+header('Pragma: no-cache');
+header('Expires: 0');
+
+echo "\xEF\xBB\xBF";
+
+echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
 echo $tabla;

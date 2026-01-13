@@ -12,7 +12,8 @@ function fechaCierre($vigencia, $modulo, $cmd)
         $rs = $cmd->query($sql);
         $cierre = $rs->fetch();
         if (empty($cierre) || $cierre['mes'] == '') {
-            $fecha_cierre = date('Y-m-d', strtotime($vigencia . '-01-01'));
+            $vigencia = intval($vigencia) - 1;
+            $fecha_cierre = date('Y-m-d', strtotime($vigencia . '-12-31'));
         } else {
             $fecha_cierre = date('Y-m-d', strtotime($vigencia . '-' . $cierre['mes'] . '-' . ultimoDiaMes($cierre['mes'], $vigencia)));
         }

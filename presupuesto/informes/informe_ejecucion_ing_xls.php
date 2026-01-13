@@ -10,6 +10,7 @@ $detalle_mes = $_POST['mes'];
 $fecha_ini = $_POST['fecha_ini'];
 $mes = date("m", strtotime($fecha_corte));
 $fecha_ini_mes = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-' . $mes . '-01'));
+$id_vigencia = $_SESSION['id_vigencia'];
 function pesos($valor)
 {
     return number_format($valor, 2, ".", ",");
@@ -151,7 +152,7 @@ try {
                     WHERE (DATE_FORMAT(`pto_rad`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND `pto_rad`.`estado` = 2)
                     GROUP BY `pto_rad_detalle`.`id_rubro`) AS `reconocimiento_mes`
                     ON(`reconocimiento_mes`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                WHERE (`pto_presupuestos`.`id_tipo` = 1)
+                WHERE (`pto_presupuestos`.`id_tipo` = 1 AND `pto_presupuestos`.`id_vigencia` = $id_vigencia)
                 ORDER BY `pto_cargue`.`cod_pptal` ASC";
     $res = $cmd->query($sql);
     $rubros = $res->fetchAll();

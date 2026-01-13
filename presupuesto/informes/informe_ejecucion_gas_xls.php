@@ -11,6 +11,7 @@ $detalle_mes = $_POST['mes'];
 $fecha_ini = $_POST['fecha_ini'];
 $mes = date("m", strtotime($fecha_corte));
 $fecha_ini_mes = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-' . $mes . '-01'));
+$id_vigencia = $_SESSION['id_vigencia'];
 function pesos($valor)
 {
     return number_format($valor, 2, ".", ",");
@@ -327,7 +328,7 @@ try {
                     GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `pagado`
                     ON(`pagado`.`id_rubro` = `pto_cargue`.`id_cargue`)
                     $join_mes
-                   WHERE (`pto_presupuestos`.`id_tipo` = 2)
+                   WHERE (`pto_presupuestos`.`id_tipo` = 2 AND `pto_presupuestos`.`id_vigencia` = $id_vigencia)
                    ORDER BY `pto_cargue`.`cod_pptal` ASC";
     //echo $sql;
     $res = $cmd->query($sql);
