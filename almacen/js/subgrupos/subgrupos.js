@@ -87,6 +87,7 @@
         var error = verifica_vacio($('#txt_cod_subgrupo'));
         error += verifica_vacio($('#txt_nom_subgrupo'));
         error += verifica_vacio($('#sl_grp_subgrupo'));
+        error += verifica_vacio($('#sl_estado'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');

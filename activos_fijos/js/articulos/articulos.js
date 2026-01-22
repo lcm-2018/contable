@@ -117,6 +117,7 @@
         error += verifica_vacio($('#txt_topmin_art'));
         error += verifica_vacio($('#txt_topmax_art'));
         error += verifica_vacio_2($('#id_txt_unimed_art'), $('#txt_unimed_art'));
+        error += verifica_vacio($('#sl_estado'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');

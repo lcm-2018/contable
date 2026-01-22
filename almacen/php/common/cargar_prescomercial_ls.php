@@ -13,7 +13,8 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT id_prescom,nom_presentacion,IFNULL(cantidad,1) AS cantidad
             FROM far_presentacion_comercial
-            WHERE nom_presentacion LIKE '%$term%'";
+            WHERE nom_presentacion LIKE '%$term%'
+            ORDER BY nom_presentacion";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;

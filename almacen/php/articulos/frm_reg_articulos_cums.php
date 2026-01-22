@@ -62,8 +62,8 @@ if (empty($obj)) {
                         <input type="hidden" id="id_txt_precom_cum" name="id_txt_precom_cum" value="<?php echo $obj['id_prescom'] ?>">
                     </div>                    
                     <div class="form-group col-md-3">
-                        <label for="sl_estado" class="small">Estado</label>
-                        <select class="form-control form-control-sm" id="sl_estado" name="sl_estado">
+                        <label for="sl_estado_cum" class="small">Estado</label>
+                        <select class="form-control form-control-sm" id="sl_estado_cum" name="sl_estado_cum">
                             <?php estados_registros('', $obj['estado']) ?>
                         </select>
                     </div>

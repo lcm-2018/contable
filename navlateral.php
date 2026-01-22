@@ -613,6 +613,17 @@ $rol = $_SESSION['rol'];
                                                     </div>
                                                 </a>
                                             <?php }
+                                            if (PermisosUsuario($permisos, 5507, 0) || $id_rol == 1) {
+                                                ?>
+                                                    <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/contabilidad/php/cuentas_fac/index.php">
+                                                    <div class="div-icono">
+                                                        <i class="fas fas fa-clipboard-check fa-sm" style="color: black;"></i>
+                                                    </div>
+                                                    <div>
+                                                        Cuentas Facturación
+                                                    </div>
+                                                </a>
+                                            <?php }
                                             ?>
                                         </nav>
                                     </div>
