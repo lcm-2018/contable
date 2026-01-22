@@ -47,8 +47,8 @@ if (empty($obj)) {
                         <input type="text" class="form-control form-control-sm" id="txt_placa" name="txt_placa" value="<?php echo $obj['placa'] ?>">
                     </div>
                     <div class="form-group col-md-4">
-                        <label for="txt_serial" class="small">Serial</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_serial" name="txt_serial" value="<?php echo $obj['serial'] ?>">
+                        <label for="txt_serial" class="small">No. Serial</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_serial" name="txt_serial" value="<?php echo $obj['num_serial'] ?>">
                     </div>
                     <div class="form-group col-md-4">
                         <label for="txt_val_uni" class="small">Vr. Unitario</label>

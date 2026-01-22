@@ -1,12 +1,18 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
 include '../../../../permisos.php';
+$anulados = isset($_POST['anulados']) ? $_POST['anulados'] : 0;
 $vigencia = $_SESSION['vigencia'];
+if ($anulados == 0) {
+    $where = '> 0';
+} else {
+    $where = '>= 0';
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -22,7 +28,7 @@ try {
                 `nom_nominas`
                 LEFT JOIN `nom_meses` 
                     ON (`nom_nominas`.`mes` = `nom_meses`.`codigo`)
-            WHERE `nom_nominas`.`vigencia` = '$vigencia'";
+            WHERE `nom_nominas`.`vigencia` = '$vigencia' AND `nom_nominas`.`estado` $where";
     $rs = $cmd->query($sql);
     $nominas = $rs->fetchAll();
     $cmd = null;
@@ -31,6 +37,7 @@ try {
 }
 if (!empty($nominas)) {
     foreach ($nominas as $n) {
+        $enviar = null;
         $detalle = '<button value="' . $n['id_nomina'] . '" type="button" class="btn btn-outline-warning btn-sm btn-circle detalle"><i class="fa fa-eye"></i></button>';
         $compare = '<button value="' . $n['id_nomina'] . '" type="button" class="btn btn-outline-light btn-sm btn-circle comparePatronal" title="Comparar Seguridad Social y Parafiscales"><i class="fas fa-not-equal"></i></button>';
         if (PermisosUsuario($permisos, 5104, 3) || $id_rol == 1) {
@@ -48,19 +55,22 @@ if (!empty($nominas)) {
         }
         if ($n['estado'] == 0) {
             $estado = '<span class="badge badge-bill badge-secondary">OTRO</span>';
-            $solcdp = $cdpPatron = $pdf =  $compare = $cargue_patron = NULL;
+            $solcdp = $cdpPatron = $pdf = $compare = $cargue_patron = NULL;
         }
         if ($n['estado'] > 1) {
             $compare = $cargue_patron = null;
         }
         $pdf = '<button value="' . $n['id_nomina'] . '" type="button" class="btn btn-outline-danger btn-sm btn-circle impPDF" title="Exportar a PDF"><i class="far fa-file-pdf"></i></button>';
+        if ($n['tipo'] == 'N' && $n['estado'] > 1 && false) {
+            $enviar = '<button value="' . $n['id_nomina'] . '" onclick="EnviarNomina(this)" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Procesar nómina (Soporte Electrónico)"><span class="fas fa-paper-plane fa-lg"></span></button>';
+        }
         $data[] = [
             'id_nomina' => $n['id_nomina'],
             'descripcion' => $n['descripcion'],
             'mes' => $n['nom_mes'],
             'tipo' => $n['tipo'],
             'estado' => '<div class="text-center">' . $estado . '</div>',
-            'botones' => '<div class="text-center">' . $detalle . $solcdp . $cdpPatron . $pdf .  $compare . $cargue_patron . '</div>'
+            'botones' => '<div class="text-center">' . $detalle . $solcdp . $cdpPatron . $enviar . $pdf . $compare . $cargue_patron . '</div>'
         ];
     }
 } else {

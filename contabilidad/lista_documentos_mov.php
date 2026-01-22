@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -15,7 +15,7 @@ $tipo_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_doc_fuente`, `nombre` FROM `ctb_fuente` WHERE `contab` = 1 ORDER BY `nombre`";
+    $sql = "SELECT `id_doc_fuente`, `nombre` FROM `ctb_fuente` WHERE `contab` = 1 OR `contab` = 3  ORDER BY `nombre`";
     $rs = $cmd->query($sql);
     $docsFuente = $rs->fetchAll();
     $cmd = null;
@@ -58,12 +58,49 @@ try {
             WHERE (`nom_nominas`.`planilla` = 3 AND `nom_nomina_pto_ctb_tes`.`tipo` = 'PL')";
     $rs = $cmd->query($sql);
     $nominas = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $total = count($nominas);
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-
+$rp = [];
+foreach ($nominas as $nm) {
+    if ($nm['crp'] != '') {
+        $rp[] = $nm['crp'];
+    }
+}
+$rp = implode(',', $rp);
+if (!empty($nominas)) {
+    try {
+        $sql = "SELECT 
+                        `pto_crp`.`id_pto_crp`
+                        , `t1`.`valor`
+                        , `pto_crp`.`id_manu`
+                        , `pto_crp`.`fecha`
+                        , `pto_crp`.`objeto`
+                    FROM 
+                        (SELECT
+                            `id_pto_crp`
+                            , SUM(`valor`) AS `valor`
+                        FROM
+                            `pto_crp_detalle`
+                        WHERE `id_pto_crp` IN ($rp) GROUP BY `id_pto_crp`) AS `t1`
+                    INNER JOIN `pto_crp`
+                        ON(`pto_crp`.`id_pto_crp` = `t1`.`id_pto_crp`)";
+        $rs = $cmd->query($sql);
+        $valores = $rs->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+}
+$total = 0;
+if (isset($valores)) {
+    foreach ($valores as $vl) {
+        $key = array_search($vl['id_pto_crp'], array_column($nominas, 'crp'));
+        if ($key !== false && $nominas[$key]['estado'] == 3) {
+            $total++;
+        }
+    }
+}
+$cmd = null;
 ?>
 
 <body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] === '1') {
@@ -84,7 +121,7 @@ try {
                                     REGISTRO DE MOVIMIENTOS CONTABLES
                                 </div>
                                 <?php
-                                if ((PermisosUsuario($permisos, 5501, 2)  || $id_rol == 1) && !($tipo_doc == '5' || $tipo_doc == '3')) {
+                                if ((PermisosUsuario($permisos, 5501, 2)  || $id_rol == 1) && !($tipo_doc == '5' || $tipo_doc == '3') || ($_SESSION['caracter'] == '1' && $tipo_doc == '3')) {
                                     echo '<input type="hidden" id="peReg" value="1">';
                                 } else {
                                     echo '<input type="hidden" id="peReg" value="0">';
@@ -113,14 +150,15 @@ try {
                                                     </select>
                                                 </form>
                                                 <?php
-                                                if ($tipo_doc == '3') {
+                                                if ($tipo_doc == '3' && $_SESSION['caracter'] == '2') {
                                                     echo '<div class="input-group-prepend px-1">
                                                         <button type="button" class="btn btn-primary" onclick ="CargaObligaCrp(2)">
                                                           Ver Listado <span class="badge badge-light"><?php echo $tipo_doc; ?></span>
                                                         </button>
                                                      </div>';
                                                 }
-                                                if ($tipo_doc == '1') {
+
+                                                if (false && $tipo_doc == '1') {
                                                     echo '<div class="input-group-prepend px-1">
                                                         <button type="button" class="btn btn-primary" onclick ="CargaObligaCrp(2)">
                                                           Nota <span class="badge badge-light"><?php echo $tipo_doc; ?></span>
@@ -136,12 +174,52 @@ try {
                                                      </div>';
                                                 }
                                                 ?>
+                                                <button type="button" class="btn btn-success" title="Imprimir por Lotes" id="btnImpLotes">
+                                                    <i class="fas fa-print fa-lg"></i>
+                                                </button>
                                             </div>
                                         </div>
 
                                     </div>
                                 </div>
                                 <br>
+
+                                <!--Opciones de filtros -->
+                                <div class="form-row">
+                                    <div class="form-group col-md-1">
+                                        <input type="text" class="filtro form-control form-control-sm" id="txt_idmanu_filtro" placeholder="Id. Manu">
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <input type="text" class="filtro form-control form-control-sm" id="txt_rp_filtro" placeholder="RP">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <input type="date" class="form-control form-control-sm" id="txt_fecini_filtro" name="txt_fecini_filtro" placeholder="Fecha Inicial">
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" placeholder="Tercero">
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <select class="form-control form-control-sm" id="sl_estado_filtro">
+                                            <option value="0">--Estado--</option>
+                                            <option value="1">Abierto</option>
+                                            <option value="2">Cerrado</option>
+                                            <option value="3">Anulado</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
+                                            <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                        </a>
+                                    </div>
+                                </div>
+
                                 <?php if ($tipo_doc > 0) { ?>
                                     <table id="tableMvtoContable" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
                                         <thead>

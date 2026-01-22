@@ -45,7 +45,7 @@
                 { 'data': 'top_min' },
                 { 'data': 'top_max' },
                 { 'data': 'existencia' },
-                { 'data': 'val_promedio' },
+                { 'data': 'valor' },
                 { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
@@ -116,7 +116,10 @@
         error += verifica_vacio($('#sl_subgrp_art'));
         error += verifica_vacio($('#txt_topmin_art'));
         error += verifica_vacio($('#txt_topmax_art'));
+<<<<<<< HEAD
         error += verifica_vacio_2($('#id_txt_unimed_art'), $('#txt_unimed_art'));
+=======
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
         error += verifica_vacio($('#sl_estado'));
 
         if (error >= 1) {
@@ -185,19 +188,6 @@
             nombre: $('#txt_nombre_filtro').val(),
             subgrupo: $('#sl_subgrupo_filtro').val(),
             estado: $('#sl_estado_filtro').val()
-        }, function(he) {
-            $('#divTamModalImp').removeClass('modal-sm');
-            $('#divTamModalImp').removeClass('modal-lg');
-            $('#divTamModalImp').addClass('modal-xl');
-            $('#divModalImp').modal('show');
-            $("#divImp").html(he);
-        });
-    });
-
-    //Imprimit un Articulo
-    $('#divForms').on("click", "#btn_imprimir", function() {
-        $.post("imp_articulo.php", {
-            id: $('#id_articulo').val()
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

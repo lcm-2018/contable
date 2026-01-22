@@ -13,7 +13,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT id_usuario,CONCAT_WS(' ',nombre1,nombre2,apellido1,apellido2) AS nom_usuario
             FROM seg_usuarios_sistema
-            WHERE CONCAT(nombre1,nombre2,apellido1,apellido2) LIKE '%$term%'";
+            WHERE CONCAT(nombre1,nombre2,apellido1,apellido2) LIKE '$term%'";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;

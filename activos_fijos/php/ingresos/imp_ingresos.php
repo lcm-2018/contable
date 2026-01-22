@@ -77,7 +77,7 @@ try {
     
     <table style="width:100%; font-size:80%">
         <tr style="text-align:center">
-            <th>REPORTE DE ORDENES DE INGRESO ENTRE: <?php echo $_POST['fec_ini'].' y '. $_POST['fec_fin'] ?></th>
+            <th>REPORTE DE ORDENES DE INGRESO DE ACTIVOS FIJOS ENTRE: <?php echo $_POST['fec_ini'].' y '. $_POST['fec_fin'] ?></th>
         </tr>     
     </table>
 
@@ -88,13 +88,13 @@ try {
                 <th>No. Ingreso</th>
                 <th>Fecha Ingreso</th>
                 <th>Hora Ingreso</th>
-                <th>No. Factura</th>
-                <th>Fecha Factura</th>
+                <th>No. Fact./Acta/Rem.</th>
+                <th>Fecha Fact./Acta/Rem.</th>
                 <th>Detalle</th>
                 <th>Tercero</th>
-                <th>Tipo Ingreso</th>
-                <th>Vr. Total</th>
+                <th>Tipo Ingreso</th>                
                 <th>Sede</th>
+                <th>Vr. Total</th>
                 <th>Estado</th>
             </tr>    
         </thead>
@@ -111,9 +111,9 @@ try {
                         <td>' . $obj['fec_factura'] . '</td> 
                         <td style="text-align:left">' . $obj['detalle']. '</td>   
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_tipo_ingreso']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']). '</td>   
+                        <td>' . mb_strtoupper($obj['nom_tipo_ingreso']) . '</td>                           
                         <td>' . mb_strtoupper($obj['nom_sede']) . '</td>   
+                        <td>' . formato_valor($obj['val_total']). '</td>   
                         <td>' . $obj['nom_estado']. '</td></tr>';
             }
             echo $tabla;

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -17,9 +17,19 @@ $col = $_POST['order'][0]['column']+1;
 $dir = $_POST['order'][0]['dir'];
 
 $where = "WHERE far_centrocosto_area.id_area<>0";
-if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND far_centrocosto_area.nom_area LIKE '" . $_POST['nombre'] . "%'";
+if (isset($_POST['nom_area']) && $_POST['nom_area']) {
+    $where .= " AND far_centrocosto_area.nom_area LIKE '" . $_POST['nom_area'] . "%'";
 }
+if (isset($_POST['id_cencosto']) && $_POST['id_cencosto']) {
+    $where .= " AND far_centrocosto_area.id_centrocosto=" . $_POST['id_cencosto'];
+}
+if (isset($_POST['id_sede']) && $_POST['id_sede']) {
+    $where .= " AND far_centrocosto_area.id_sede=" . $_POST['id_sede'];
+}
+if (isset($_POST['estado']) && strlen($_POST['estado'])) {
+    $where .= " AND far_centrocosto_area.estado=" . $_POST['estado'];
+}
+
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -42,7 +52,8 @@ try {
                 tb_centrocostos.nom_centro AS nom_centrocosto, 
                 far_area_tipo.nom_tipo AS nom_tipo_area,              
                 CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_responsable,
-                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega
+                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
+                IF(far_centrocosto_area.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_centrocosto_area    
             INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_centrocosto_area.id_centrocosto)
             INNER JOIN far_area_tipo ON (far_area_tipo.id_tipo=far_centrocosto_area.id_tipo_area)
@@ -76,12 +87,13 @@ if (!empty($objs)) {
         }
         $data[] = [
             "id_area" => $id,          
-            "nom_area" => mb_strtoupper($obj['nom_area']), 
+            "nom_area" => mb_strtoupper($obj['nom_area']),             
+            "nom_tipo_area" => mb_strtoupper($obj['nom_tipo_area']),             
             "nom_centrocosto" => mb_strtoupper($obj['nom_centrocosto']), 
-            "nom_tipo_area" => mb_strtoupper($obj['nom_tipo_area']), 
-            "usr_responsable" => mb_strtoupper($obj['usr_responsable']), 
             "nom_sede" => mb_strtoupper($obj['nom_sede']), 
+            "usr_responsable" => mb_strtoupper($obj['usr_responsable']), 
             "nom_bodega" => mb_strtoupper($obj['nom_bodega']), 
+            "estado" => $obj['estado'], 
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }

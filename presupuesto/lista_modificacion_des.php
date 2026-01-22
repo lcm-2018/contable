@@ -2,7 +2,7 @@
 session_start();
 header("Pragma: no-cache");
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -57,7 +57,7 @@ try {
 $dif = ($datos2['valorsum'] - $datos3['valorsum']);
 $dif = abs($dif);
 $fecha = date('Y-m-d', strtotime($datos['fecha']));
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 4, $cmd);
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
 $cmd = null;
 $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 $consulta = $sql;

@@ -96,9 +96,9 @@ try {
         </tr>
         <tr style="background-color:#CED3D3; border:#A9A9A9 1px solid">
             <td>Sede</td>
-            <td>Tipo de Ingreso</td>
-            <td>No. Factura</td>
-            <td>Fecha Factura</td>
+            <td>Tipo de Ingreso</td>            
+            <td>No. Fact./Acta/Rem.</td>
+            <td>Fecha Fact./Acta/Rem.</td>
             <td colspan="2">Proveedor</td>
         </tr>
         <tr>

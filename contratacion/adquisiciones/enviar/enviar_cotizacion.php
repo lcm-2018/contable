@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -67,6 +67,8 @@ if (isset($_REQUEST['check'])) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $json_string);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             $res_api = curl_exec($ch);
             curl_close($ch);
             $res = json_decode($res_api, true);
@@ -82,7 +84,7 @@ if (isset($_REQUEST['check'])) {
                     $sql->execute();
                     $cambio = $sql->rowCount();
                     if (!($sql->execute())) {
-                        print_r($sql->errorInfo()[2]);
+                        echo $sql->errorInfo()[2];
                         exit();
                     } else {
                         if ($cambio > 0) {
@@ -99,7 +101,7 @@ if (isset($_REQUEST['check'])) {
                             if ($sql->rowCount() > 0) {
                                 echo  1;
                             } else {
-                                print_r($sql->errorInfo()[2]);
+                                echo $sql->errorInfo()[2];
                             }
                         } else {
                             echo 'No se registró ningún nuevo dato';

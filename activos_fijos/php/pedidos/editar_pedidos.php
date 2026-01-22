@@ -21,13 +21,13 @@ try {
     if ((PermisosUsuario($permisos, 5702, 2) && $oper == 'add' && $_POST['id_pedido'] == -1) ||
         (PermisosUsuario($permisos, 5702, 3) && $oper == 'add' && $_POST['id_pedido'] != -1) ||
         (PermisosUsuario($permisos, 5702, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5702, 2) && PermisosUsuario($permisos, 5702, 3) && $oper == 'close') ||
+        (PermisosUsuario($permisos, 5702, 3) && $oper == 'close') ||
         (PermisosUsuario($permisos, 5702, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
 
         if ($oper == 'add') {
             $id = $_POST['id_pedido'];
-            $id_sede = $_POST['id_txt_sede'];
+            $id_sede = $_POST['id_txt_nom_sed'];
             $fec_ped = $_POST['txt_fec_ped'];
             $hor_ped = $_POST['txt_hor_ped'];            
             $detalle = $_POST['txt_det_ped'];

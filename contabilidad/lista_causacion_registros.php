@@ -1,12 +1,14 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
+include '../terceros.php';
 $id_vigencia = $_SESSION['id_vigencia'];
+unset($_SESSION['id_doc']);
 // Consulta tipo de presupuesto
 function pesos($valor)
 {
@@ -30,7 +32,8 @@ try {
                 , `pto_crp`.`fecha`
                 , `pto_crp`.`objeto`
                 , `pto_crp`.`id_cdp`
-                , `ctt_contratos`.`num_contrato`
+                , `pto_crp`.`num_contrato`
+                , `ctt_contratos`.`id_contrato_compra`
             FROM
                 `pto_crp`
                 LEFT JOIN `ctt_adquisiciones` 
@@ -75,7 +78,20 @@ try {
             GROUP BY `pto_crp`.`id_pto_crp`";
     $rs = $cmd->query($sql);
     $causados = $rs->fetchAll();
-    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $sql = "SELECT
+                `pto_crp`.`id_pto_crp`
+                , `ctt_novedad_adicion_prorroga`.`id_adq`
+            FROM
+                `ctt_novedad_adicion_prorroga`
+                INNER JOIN `pto_crp` 
+                    ON (`ctt_novedad_adicion_prorroga`.`id_cdp` = `pto_crp`.`id_cdp`)
+            WHERE (`pto_crp`.`estado` = 2 AND `pto_crp`.`id_pto` = {$listappto['id_pto']})";
+    $rs = $cmd->query($sql);
+    $adiciones = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -106,7 +122,7 @@ if ($id_r == 3) {
                     , `nom_nomina_pto_ctb_tes`.`tipo`
                     , `nom_nomina_pto_ctb_tes`.`cdp`
                     , `nom_nomina_pto_ctb_tes`.`crp`
-                    , `nom_nominas`.`descripcion`
+                    , 'PLANILLA PATRONAL' AS `descripcion`
                     , `nom_nominas`.`mes`
                     , `nom_nominas`.`vigencia`
                     , `nom_nominas`.`planilla` AS `estado`
@@ -150,6 +166,18 @@ if ($id_r == 3) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
         }
     }
+    if ($_SESSION['pto'] != '1') {
+        $valores = [];
+        foreach ($nominas as $n) {
+            $valores[] = [
+                'id_pto_crp' => $n['crp'],
+                'valor' => '0',
+                'id_manu' => '',
+                'fecha' => date('Y-m-d'),
+                'objeto' => $n['descripcion'] . ' ' . $n['mes'] . ' ' . $n['vigencia'] . ' No. ' . $n['id_nomina'],
+            ];
+        }
+    }
 }
 ?>
 <script>
@@ -157,29 +185,14 @@ if ($id_r == 3) {
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
-        ]
+        ],
+        columnDefs: [{
+            class: 'text-wrap',
+            targets: [4]
+        }],
     });
     $('#tableContrtacionCdp').wrap('<div class="overflow" />');
 </script>
@@ -194,45 +207,56 @@ if ($id_r == 3) {
                 <thead>
                     <tr>
                         <th>Num</th>
-                        <th>Rp</th>
-                        <th>Contrato</th>
+                        <?= $_SESSION['pto'] == '1' ? '<th>Rp</th><th>Contrato</th>' : ''; ?>
                         <th>Fecha</th>
                         <th>Terceros</th>
-                        <th>Valor</th>
+                        <?= $_SESSION['pto'] == '1' ? '<th>Valor</th>' : ''; ?>
                         <th>Acciones</th>
 
                     </tr>
                 </thead>
                 <tbody>
                     <?php
+                    $acciones = null;
                     if ($id_r == 1 || $id_r == 2) {
                         $id_t = [];
                         foreach ($listado as $rp) {
-                            $id_t[] = $rp['id_tercero_api'];
+                            if ($rp['id_tercero_api'] != '') {
+                                $id_t[] = $rp['id_tercero_api'];
+                            }
                         }
-                        $payload = json_encode($id_t);
-                        //API URL
-                        $url = $api . 'terceros/datos/res/lista/terceros';
-                        $ch = curl_init($url);
-                        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        $result = curl_exec($ch);
-                        curl_close($ch);
-                        $terceros = json_decode($result, true);
+                        $id_t = implode(',', $id_t);
+                        $terceros = getTerceros($id_t, $cmd);
+
                         foreach ($listado as $ce) {
                             $id_ter = $ce['id_tercero_api'];
                             $id_crp = $ce['id_pto_crp'];
-                            $key = array_search($id_ter, array_column($terceros, 'id_tercero'));
-                            $tercero = $key !== false ? ltrim($terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['razon_social']) : '---';
+                            $id_ctt = $ce['id_contrato_compra'];
+                            $filtro = [];
+                            $sum_lq = 0;
+                            $sum_cs = 0;
+                            $filtro = array_filter($adiciones, function ($adiciones) use ($id_ctt) {
+                                return $adiciones["id_adq"] == $id_ctt;
+                            });
+                            if (!empty($filtro)) {
+                                foreach ($filtro as $f) {
+                                    //por cada adicion se debe buscar el id_crp_pto en $liquidados y $causados para determinar el valor que falta por causar
+                                    $key = array_search($f['id_pto_crp'], array_column($liquidados, 'id_pto_crp'));
+                                    $valor_liquidado = $key !== false ? $liquidados[$key]['valor'] : 0;
+                                    $key = array_search($f['id_pto_crp'], array_column($causados, 'id_pto_crp'));
+                                    $valor_causado = $key !== false ? $causados[$key]['valor'] : 0;
+                                    $sum_lq += $valor_liquidado;
+                                    $sum_cs += $valor_causado;
+                                }
+                            }
+                            $key = array_search($id_ter, array_column($terceros, 'id_tercero_api'));
+                            $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
                             // Obtener el saldo del registro por obligar valor del registro - el valor obligado efectivamente
                             $key = array_search($id_crp, array_column($liquidados, 'id_pto_crp'));
                             $valor_liquidado = $key !== false ? $liquidados[$key]['valor'] : 0;
                             $key = array_search($id_crp, array_column($causados, 'id_pto_crp'));
                             $valor_causado = $key !== false ? $causados[$key]['valor'] : 0;
-                            $saldo_rp = $valor_liquidado - $valor_causado;
+                            $saldo_rp = $valor_liquidado + $sum_lq - $sum_cs - $valor_causado;
                             if ($ce['num_contrato'] != '') {
                                 $numeroc = $ce['num_contrato'];
                                 if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
@@ -247,6 +271,8 @@ if ($id_r == 3) {
                                     $editar = null;
                                     $detalles = null;
                                 }
+                                $acciones = null;
+                                $fecha = date('Y-m-d', strtotime($ce['fecha']));
                                 if ($saldo_rp > 0) {
                     ?>
                                     <tr>
@@ -273,11 +299,10 @@ if ($id_r == 3) {
                                 ?>
                                     <tr>
                                         <td class="text-center"><?php echo $nominas[$key]['id_nomina'] ?></td>
-                                        <td class="text-left"><?php echo $vl['id_manu']; ?></td>
-                                        <td class="text-left"><?php echo '-'  ?></td>
-                                        <td class="text-left"><?php echo date('Y-m-d', strtotime($vl['fecha'])); ?></td>
+                                        <?= $_SESSION['pto'] == '1' ? '<td class="text-left">' . $vl['id_manu'] . '</td><td class="text-left">-</td>' : ''; ?>
+                                        <td class="text-left"><?php echo '<input type="date" class="form-control form-control-sm" name="fec_doc[]" value="' . date('Y-m-d', strtotime($vl['fecha'])) . '" min="' . date('Y-m-d', strtotime($vl['fecha'])) . '" max="' . $_SESSION['vigencia'] . '-12-31">'; ?></td>
                                         <td class="text-left"><?php echo $vl['objeto']; ?></td>
-                                        <td class="text-right"> <?php echo  pesos($vl['valor']); ?></td>
+                                        <?= $_SESSION['pto'] == '1' ? '<td class="text-right">' . pesos($vl['valor']) . '</td>' : ''; ?>
                                         <td class="text-center"> <?php echo $causar ?></td>
                                     </tr>
                     <?php
@@ -295,8 +320,10 @@ if ($id_r == 3) {
         </div>
     </div>
     <div class="text-right pt-3">
-        <a type="button" class="btn btn-primary btn-sm" data-dismiss="modal"> Procesar lote</a>
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <?php if (false) { ?>
+            <a type="button" class="btn btn-primary btn-sm" data-dismiss="modal"> Procesar lote</a>
+        <?php } ?>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>
 <?php

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../../conexion.php';
@@ -13,7 +13,7 @@ try {
                 , `concepto`
             FROM
                 `nom_conceptosxvigencia`
-            WHERE (`id_concp` <> 4 AND `id_concp` <> 5)";
+            WHERE (`id_concp` <> 4 AND `id_concp` <> 5 AND `habilitado` = 1)";
     $rs = $cmd->query($sql);
     $conceptos = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;

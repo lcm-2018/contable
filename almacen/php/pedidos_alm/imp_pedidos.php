@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -32,7 +32,7 @@ try {
 	            far_alm_pedido.detalle,far_alm_pedido.val_total,
                 tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
 	            CASE far_alm_pedido.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' 
-                    WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
+                    WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'FINALIZADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
             FROM far_alm_pedido
             INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_alm_pedido.id_sede)
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_alm_pedido.id_bodega)

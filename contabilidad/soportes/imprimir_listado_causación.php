@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(3600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 ?>
@@ -18,6 +18,7 @@ function pesos($valor)
 }
 include '../../conexion.php';
 include '../../financiero/consultas.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
@@ -74,31 +75,20 @@ $hora = date('H:i:s', strtotime($cdp['fec_reg']));
                 ?>
             </tr>
             <?php
+            $id_t = [];
+            foreach ($rubros as $rp) {
+                $id_t[] = $rp['id_tercero_api'];
+            }
+            $id_t = implode(',', $id_t);
+            $terceros = getTerceros($id_t, $cmd);
             $total_pto = 0;
             if ($cdp['tipo_doc'] == 'CNOM') {
-                $id_t = [];
                 foreach ($rubros as $rp) {
-                    $id_t[] = $rp['id_tercero_api'];
-                }
-                $payload = json_encode($id_t);
-                //API URL
-                $url = $api . 'terceros/datos/res/lista/terceros';
-                $ch = curl_init($url);
-                //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                $result = curl_exec($ch);
-                curl_close($ch);
-                $terceros = json_decode($result, true);
-
-                foreach ($rubros as $rp) {
-                    $key = array_search($rp['id_tercero_api'], array_column($terceros, 'id_tercero'));
+                    $key = array_search($rp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
                     if ($rp['tipo_mov'] == 'COP') {
                         echo "<tr>
                     <td class='text-left' style='border: 1px solid black '>" . $rp['id_manu'] . "</td>
-                    <td class='text-left' style='border: 1px solid black '>" . $terceros[$key]['cc_nit'] . "</td>
+                    <td class='text-left' style='border: 1px solid black '>" . $terceros[$key]['nit_tercero'] . "</td>
                     <td class='text-left' style='border: 1px solid black '>" . $rp['rubro'] . "</td>
                     <td class='text-left' style='border: 1px solid black '>" . $rp['nom_rubro'] . "</td>
                     <td class='text-right' style='border: 1px solid black; text-align: right'>" . number_format($rp['valor'], 2, ",", ".")  . "</td>
@@ -191,8 +181,8 @@ $hora = date('H:i:s', strtotime($cdp['fec_reg']));
             $total_rete = 0;
             foreach ($retenciones as $re) {
                 // Consulto el valor del tercero de la api
-                $key = array_search($re['id_tercero_api'], array_column($terceros, 'id_tercero'));
-                $tercero = $dat_ter[$key]['apellido1'] . ' ' . $dat_ter[$key]['apellido2'] . ' ' . $dat_ter[$key]['nombre1'] . ' ' . $dat_ter[$key]['nombre2'] . ' ' . $dat_ter[$key]['razon_social'];
+                $key = array_search($re['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+                $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
 
                 echo "<tr>
                 <td style='text-align: left;border: 1px solid black'>" . $tercero . "</td>
@@ -233,9 +223,9 @@ $hora = date('H:i:s', strtotime($cdp['fec_reg']));
                 $tot_cre = 0;
                 foreach ($movimiento as $mv) {
                     // Consulta terceros en la api ********************************************* API
-                    $key = array_search($mv['id_tercero'], array_column($terceros, 'id_tercero'));
+                    $key = array_search($mv['id_tercero'], array_column($terceros, 'id_tercero_api'));
 
-                    $ccnit = $terceros[$key]['cc_nit'];
+                    $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
 
                     echo "<tr style='border: 1px solid black'>
                 <td class='text-left' style='border: 1px solid black'>" . $mv['cuenta'] . "</td>

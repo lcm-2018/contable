@@ -1,10 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
+include '../../../../terceros.php';
 $id_cc = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida ');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -61,34 +62,18 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`, `seg_terceros`.`no_doc`
+                `tb_terceros`.`id_tercero_api`
+                , `tb_terceros`.`nom_tercero`
             FROM
                 `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-            WHERE `seg_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
+                INNER JOIN `tb_terceros` 
+                    ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            WHERE `tb_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
     $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetchAll();
+    $supervisor = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-if (!empty($terceros_sup)) {
-    $ced = '0';
-    foreach ($terceros_sup as $tE) {
-        $ced .= ',' . $tE['no_doc'];
-    }
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/' . $ced;
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $supervisor = json_decode($result, true);
-} else {
-    echo "No se ha registrado ningun tercero" . '<br><br><a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal"> Cancelar</a>';
 }
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -130,10 +115,17 @@ try {
                 $meses = intval($diferencia->format('%m')) > 0 ? intval($diferencia->format('%m')) . ' mes(es) ' : '';
                 ?>
                 <div class="form-group col-md-4">
-                    <label for="numDuracionContrato" class="small">DURACIÓN DEL CONTRATO</label>
+                    <label for="divDuraContrato" class="small">DURACIÓN DEL CONTRATO</label>
                     <div id="divDuraContrato" class="form-control form-control-sm">
                         <?php echo $meses . $dias . ' día(s)' ?>
                     </div>
+                </div>
+            </div>
+            <div class="form-row px-4">
+                <div class="form-group col-md-12">
+                    <label for="SeaTercer" class="small">TERCERO</label>
+                    <input type="text" id="SeaTercer" class="form-control form-control-sm py-0 sm" placeholder="Buscar tercero" value="<?php echo '' ?>">
+                    <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo 0 ?>">
                 </div>
             </div>
             <div class="form-row px-4">
@@ -172,17 +164,17 @@ try {
                         <?php
                         foreach ($supervisor as $s) {
                             $selecionada = '';
-                            if ($s['id_tercero'] == $estudio_prev['id_supervisor']) {
+                            if ($s['id_tercero_api'] == $estudio_prev['id_supervisor']) {
                                 $selecionada = 'selected';
                             }
-                            echo '<option ' . $selecionada . ' value="' . $s['id_tercero'] . '">' . $s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . '</option>';
+                            echo '<option ' . $selecionada . ' value="' . $s['id_tercero_api'] . '">' . $s['nom_tercero'] . '</option>';
                         }
                         ?>
                     </select>
                 </div>
             </div>
             <label for="slcSupervisor" class="small">PÓLIZAS</label>
-            <div class="form-row px-4">
+            <div class="form-row px-4" id="slcSupervisor">
 
                 <?php
                 $cant = 1;
@@ -211,7 +203,7 @@ try {
             </div>
             <div class="text-center pb-3">
                 <button class="btn btn-primary btn-sm" id="btnAddContratoCompra">Registrar</button>
-                <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal"> Cancelar</a>
+                <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>
             </div>
         </form>
     </div>

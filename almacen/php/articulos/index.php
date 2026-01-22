@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -57,7 +57,12 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 </div>
                                 <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_subgrupo_filtro">
-                                        <?php subgrupo_articulo($cmd,'--Subgrupo--') ?>
+                                        <?php subgrupo_articulo($cmd,'--Subgrupo--') ?> 
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_clinico_filtro">
+                                        <?php estados_sino('--Uso Asistencial--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
@@ -95,7 +100,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Tope Máximo</th>
                                         <th>Existencia</th>
                                         <th>Vr. Promedio</th>
-                                        <th>Es Clínico</th>
+                                        <th>Uso Asistencial</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>

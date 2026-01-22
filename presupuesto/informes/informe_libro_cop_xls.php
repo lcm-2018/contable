@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
@@ -13,6 +13,7 @@ function pesos($valor)
     return '$' . number_format($valor, 2);
 }
 include '../../conexion.php';
+include '../../terceros.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -52,7 +53,7 @@ try {
                         ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                     INNER JOIN `pto_cargue` 
                         ON (`pto_cdp_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                WHERE (`ctb_doc`.`fecha` BETWEEN '2024-01-01' AND '2024-06-19' AND `ctb_doc`.`estado` <> 0)) AS `taux`
+                WHERE (`ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `ctb_doc`.`estado` <> 0)) AS `taux`
                 LEFT JOIN 
                     (SELECT
                         `ctb_doc`.`id_ctb_doc`
@@ -66,7 +67,7 @@ try {
                             ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                         INNER JOIN `ctb_doc` 
                             ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                    WHERE (`ctb_doc`.`fecha` BETWEEN '2024-01-01' AND '2024-06-19' AND `ctb_doc`.`estado` <> 0)
+                    WHERE (`ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `ctb_doc`.`estado` <> 0)
                     GROUP BY `ctb_doc`.`id_ctb_doc`, `pto_cdp_detalle`.`id_rubro`) AS `t1`
                     ON (`taux`.`id_ctb_doc` = `t1`.`id_ctb_doc` AND `taux`.`id_rubro` = `t1`.`id_rubro`)
                 LEFT JOIN
@@ -86,7 +87,7 @@ try {
                             ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                         INNER JOIN `ctb_doc` AS `ctb_doc_pag`
                             ON (`pto_pag_detalle`.`id_ctb_doc` = `ctb_doc_pag`.`id_ctb_doc`)
-                    WHERE (`ctb_doc_pag`.`fecha` BETWEEN '2024-01-01' AND '2024-06-19' AND `ctb_doc_pag`.`estado` <> 0)
+                    WHERE (`ctb_doc_pag`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `ctb_doc_pag`.`estado` <> 0)
                     GROUP BY `pto_cdp_detalle`.`id_rubro`, `ctb_doc`.`id_ctb_doc`) AS `t2`
                     ON (`taux`.`id_ctb_doc` = `t2`.`id_ctb_doc` AND `taux`.`id_rubro` = `t2`.`id_rubro`)
             ORDER BY `taux`.`fec_cop` ASC";
@@ -103,18 +104,8 @@ if (!empty($causaciones)) {
             $id_t[] = $ca['id_tercero_api'];
         }
     }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
 }
 $nom_informe = "RELACION DE OBLIGACIONES PRESUPUESTALES";
 include_once '../../financiero/encabezado_empresa.php';
@@ -137,9 +128,9 @@ include_once '../../financiero/encabezado_empresa.php';
     <tbody>
         <?php
         foreach ($causaciones as $rp) {
-            $key = array_search($rp['id_tercero_api'], array_column($terceros, 'id_tercero'));
-            $tercero = $key !== false ? ltrim($terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['razon_social']) : '---';
-            $ccnit = $key !== false ? number_format($terceros[$key]['cc_nit'], 0, "", ".") : '---';
+            $key = array_search($rp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+            $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
+            $ccnit = $key !== false ? number_format($terceros[$key]['nit_tercero'], 0, "", ".") : '---';
 
             $fecha = date('Y-m-d', strtotime($rp['fec_cop']));
             $saldo = $rp['valor_cop'] - $rp['valor_pag'];

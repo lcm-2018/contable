@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -68,7 +68,7 @@ try {
                     if ($cmd->lastInsertId() > 0) {
                         $cant++;
                     } else {
-                        print_r($sql->errorInfo()[2]);
+                        echo $sql->errorInfo()[2];
                     }
                 }
                 $cmd = null;
@@ -89,7 +89,7 @@ try {
                 $sql->bindParam(4, $id_compra, PDO::PARAM_INT);
                 $sql->execute();
                 if (!($sql->rowCount() > 0)) {
-                    print_r($sql->errorInfo()[2]);
+                    echo $sql->errorInfo()[2];
                 } else {
                     echo 1;
                 }
@@ -101,7 +101,7 @@ try {
             echo 'No se registró ninguna póliza';
         }
     } else {
-        print_r($sql->errorInfo()[2]);
+        echo $sql->errorInfo()[2];
     }
     $cmd = null;
 } catch (PDOException $e) {

@@ -26,8 +26,9 @@
                     data.codigo = $('#txt_codigo_filtro').val();
                     data.nombre = $('#txt_nombre_filtro').val();
                     data.id_subgrupo = $('#sl_subgrupo_filtro').val();
+                    data.tipo_asis = $('#sl_tipoasis_filtro').val();
+                    data.con_existencia = $('#sl_conexi_filtro').val();
                     data.artactivo = $('#chk_artact_filtro').is(':checked') ? 1 : 0;
-                    data.conexistencia = $('#chk_conexi_filtro').is(':checked') ? 1 : 0;
                 }
             },
             columns: [
@@ -45,7 +46,7 @@
                 { 'data': 'valores_fin' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [2] },
+                { class: 'text-wrap', targets: [2, 3] },
                 { orderable: false, targets: [0] }
             ],
             order: [
@@ -85,7 +86,18 @@
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_articulos');
         $('.is-invalid').removeClass('is-invalid');
-        $.post("imp_movimientos.php", {
+        let id_reporte = $('#sl_tipo_reporte').val();
+        let reporte = "imp_movimientos.php";
+
+        switch (id_reporte) {
+            case '1':
+                reporte = "imp_movimientos_asg.php";
+                break;
+            case '2':
+                reporte = "imp_movimientos_asg.php";
+                break;    
+        }
+        $.post(reporte, {    
             id_sede: $('#sl_sede_filtro').val(),
             id_bodega: $('#sl_bodega_filtro').val(),
             fecini: $('#txt_fecini_filtro').val(),
@@ -93,8 +105,10 @@
             codigo: $('#txt_codigo_filtro').val(),
             nombre: $('#txt_nombre_filtro').val(),
             id_subgrupo: $('#sl_subgrupo_filtro').val(),
+            tipo_asis: $('#sl_tipoasis_filtro').val(),
+            con_existencia: $('#sl_conexi_filtro').val(),
             artactivo: $('#chk_artact_filtro').is(':checked') ? 1 : 0,
-            conexistencia: $('#chk_conexi_filtro').is(':checked') ? 1 : 0
+            id_reporte: id_reporte
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

@@ -1,14 +1,23 @@
 <?php
 // Función para consuiltar fecha de cierre por modulo
-function fechaCierre($vigencia, $modulo, $cx)
+function ultimoDiaMes($mes, $anio)
 {
-    $vigencia = $_SESSION['vigencia'];
+    return date("d", mktime(0, 0, 0, $mes + 1, 0, $anio));
+}
+function fechaCierre($vigencia, $modulo, $cmd)
+{
+    $date = new DateTime('now', new DateTimeZone('America/Bogota'));
     try {
-        $sql = "SELECT fecha_cierre FROM tb_fin_periodos WHERE id_modulo = $modulo AND vigencia = $vigencia";
-        $rs = $cx->query($sql);
+        $sql = "SELECT MAX(`mes`) AS `mes`  FROM `tb_fin_periodos` WHERE `id_modulo` = '$modulo' AND `vigencia` = '$vigencia'";
+        $rs = $cmd->query($sql);
         $cierre = $rs->fetch();
-        $fecha_cierre = empty($cierre) ? date('Y-m-d') : date('Y-m-d', strtotime($cierre['fecha_cierre']));
-        $cx = null;
+        if (empty($cierre) || $cierre['mes'] == '') {
+            $vigencia = intval($vigencia) - 1;
+            $fecha_cierre = date('Y-m-d', strtotime($vigencia . '-12-31'));
+        } else {
+            $fecha_cierre = date('Y-m-d', strtotime($vigencia . '-' . $cierre['mes'] . '-' . ultimoDiaMes($cierre['mes'], $vigencia)));
+        }
+        $cmd = null;
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
@@ -144,6 +153,51 @@ function saldoRubroGastos($vigencia, $id_cargue, $cx)
     return $saldos;
 }
 
+function SaldoRubro($cmd, $id_rubro, $fecha, $id_cdp)
+{
+
+    try {
+        $sql = "SELECT
+                    `pto_cargue`.`id_cargue`
+                    ,`pto_cargue`.`valor_aprobado`
+                    , IFNULL(`cdp`.`debito_cdp`, 0) AS `debito_cdp`
+                    , IFNULL(`cdp`.`credito_cdp`,0) AS `credito_cdp`
+                    , IFNULL(`mod`.`debito_mod`, 0) AS `debito_mod`
+                    , IFNULL(`mod`.`credito_mod`,0) AS `credito_mod`
+                FROM
+                    `pto_cargue`
+                LEFT JOIN 
+                        (SELECT
+                            `pto_cdp_detalle`.`id_rubro`
+                            , SUM(`pto_cdp_detalle`.`valor`) AS `debito_cdp`
+                            , SUM(`pto_cdp_detalle`.`valor_liberado`) AS `credito_cdp`
+                        FROM
+                            `pto_cdp_detalle`
+                        INNER JOIN `pto_cdp` 
+                            ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
+                        WHERE (`pto_cdp`.`fecha` <='$fecha' AND `pto_cdp`.`estado` > 0 AND `pto_cdp`.`id_pto_cdp` <> $id_cdp)
+                        GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `cdp`
+                    ON (`cdp`.`id_rubro` = `pto_cargue`.`id_cargue`)
+                LEFT JOIN 
+                        (SELECT
+                            `pto_mod_detalle`.`id_cargue`
+                            , SUM(`pto_mod_detalle`.`valor_deb`) AS `debito_mod`
+                            , SUM(`pto_mod_detalle`.`valor_cred`) AS `credito_mod`
+                        FROM
+                            `pto_mod_detalle`
+                        INNER JOIN `pto_mod` 
+                            ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
+                        WHERE (`pto_mod`.`fecha` <= '$fecha' AND `pto_mod`.`estado` > 0 AND `pto_mod`.`id_tipo_mod` <> 1)
+                        GROUP BY `pto_mod_detalle`.`id_cargue`) AS `mod`
+                    ON (`mod`.`id_cargue` = `pto_cargue`.`id_cargue`)
+            WHERE `pto_cargue`.`id_cargue` = $id_rubro";
+        $rs = $cmd->query($sql);
+        $saldo = $rs->fetch();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+    return $saldo;
+};
 // Funcion para determinar el saldo que tiene un cdp para registrar
 function saldoCdp($cdp, $rubro, $cx)
 {
@@ -179,6 +233,7 @@ function Nivel($numero)
         4 => 3,
         6 => 4,
         8 => 5,
+        9 => 5,
         10 => 6,
         12 => 7,
     ];
@@ -203,18 +258,23 @@ function GetValoresCxP($id_doc, $cmd)
                     , `ctb_doc`.`id_tercero`
                     , `ctb_doc`.`estado`
                     , `ctb_doc`.`id_crp`
+                    , `ctb_doc`.`id_rad`
+                    , `ctb_doc`.`id_ref_ctb`
                     , IFNULL(`factura`.`val_factura`,0) AS `val_factura`
                     , IFNULL(`imputacion`.`val_imputacion`,0) AS `val_imputacion`
                     , IFNULL(`centro_costo`.`val_ccosto`,0) AS `val_ccosto`
                     , IFNULL(`retencion`.`val_retencion`,0) AS `val_retencion`
+                    , `pto_crp`.`fecha` AS `fecha_crp`
                 FROM
                     `ctb_doc`
                     INNER JOIN `ctb_fuente` 
                         ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                    LEFT JOIN `pto_crp` 
+                        ON (`ctb_doc`.`id_crp` = `pto_crp`.`id_pto_crp`)
                     LEFT JOIN
                         (SELECT
                             `id_ctb_doc`
-                            , SUM(`valor_base`) AS `val_factura`
+                            , SUM(`valor_pago`) AS `val_factura`
                         FROM
                             `ctb_factura`
                         WHERE (`id_ctb_doc` = $id_doc)) AS `factura`
@@ -265,6 +325,7 @@ function GetValoresCeva($id_pag, $cmd)
                     , `ctb_doc`.`estado`
                     , `ctb_doc`.`id_ref`
                     , `ctb_doc`.`id_ref_ctb`
+                    , `ctb_doc`.`id_ctb_doc_tipo3`
                     , `tes_rel_pag_cop`.`id_doc_cop`
                     , IFNULL(`pagado`.`valor`,0) AS `val_pagado`
                 FROM

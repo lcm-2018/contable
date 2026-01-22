@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $id_conciliacion = isset($_POST['id_conciliacion']) ? $_POST['id_conciliacion'] : exit('Acceso no disponible');
@@ -16,15 +16,28 @@ $response['status'] = 'error';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    // Genero la fecha de marca conciderando el periodo y el mes de id_conciliación 
+    try {
+        $sql = "SELECT 
+                    LAST_DAY(STR_TO_DATE(CONCAT(vigencia, '-', mes, '-01'), '%Y-%m-%d')) AS fecha_marca
+                FROM 
+                    tes_conciliacion where id_conciliacion =$id_conciliacion;";
+        $rs = $cmd->query($sql);
+        $fecham = $rs->fetch(PDO::FETCH_ASSOC);
+        $fecha_marca = $fecham['fecha_marca'];
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
     //consulto la id_tes_cuenta  con el id_cuenta
     if ($opc == 1) {
+
         $query = "INSERT INTO `tes_conciliacion_detalle`
                     (`id_concilia`,`id_ctb_libaux`,`fecha_marca`,`id_user_reg`,`fec_reg`)
                 VALUES (?, ?, ?, ?, ?)";
         $query = $cmd->prepare($query);
         $query->bindParam(1, $id_conciliacion, PDO::PARAM_INT);
         $query->bindParam(2, $id_libaux, PDO::PARAM_INT);
-        $query->bindParam(3, $fecha2);
+        $query->bindParam(3, $fecha_marca);
         $query->bindParam(4, $iduser, PDO::PARAM_INT);
         $query->bindParam(5, $fecha2);
         $query->execute();
@@ -41,6 +54,10 @@ try {
         $query->bindParam(2, $id_libaux, PDO::PARAM_INT);
         $query->execute();
         if ($query->rowCount()) {
+            include '../../../financiero/reg_logs.php';
+            $ruta = '../../../log';
+            $consulta = "DELETE FROM `tes_conciliacion_detalle` WHERE `id_concilia` = $id_conciliacion AND `id_ctb_libaux` = $id_libaux";
+            RegistraLogs($ruta, $consulta);
             $response['status'] = 'ok';
         } else {
             $response['msg'] = $query->errorInfo()[2];

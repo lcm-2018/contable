@@ -106,7 +106,7 @@ try {
                 <th>Código</th>
                 <th>Descripción</th>
                 <th>Cantidad</th>
-                <th>Valor Promedio</th>
+                <th>Valor Última Compra</th>
                 <th>Valor Total</th>
             </tr>
         </thead>

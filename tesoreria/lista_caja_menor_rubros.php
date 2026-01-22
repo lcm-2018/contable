@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -15,7 +15,7 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 6, $cmd);
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 56, $cmd);
 $fecha = fechaSesion($_SESSION['vigencia'], $_SESSION['id_user'], $cmd);
 $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 
@@ -26,7 +26,27 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-
+try {
+    $sql = "SELECT
+                `tes_caja_const`.`id_caja_const`
+                , `tes_caja_const`.`valor_total`
+                , IFNULL(`t1`.`valor`,0) AS `valor` 
+            FROM
+                `tes_caja_const`
+                INNER JOIN
+                (SELECT
+                    `id_caja_const`
+                    , SUM(`valor`) AS `valor`
+                FROM `tes_caja_rubros`
+                GROUP BY `id_caja_const`) AS `t1` 
+                    ON (`t1`.`id_caja_const` = `tes_caja_const`.`id_caja_const`)
+            WHERE `tes_caja_const`.`id_caja_const` = $id_caja";
+    $rs = $cmd->query($sql);
+    $valores = $rs->fetch(PDO::FETCH_ASSOC);
+    $max = $valores['valor_total'] - $valores['valor'];
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 try {
     $sql = "SELECT
                 `tes_caja_rubros`.`id_caja_rubros`
@@ -100,7 +120,7 @@ if (empty($detalle)) {
         'id_cta_contable' => 0,
         'id_caja_concepto' => 0,
         'concepto' => '',
-        'valor' => 0
+        'valor' => $max
     ];
 }
 ?>
@@ -109,26 +129,7 @@ if (empty($detalle)) {
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ]
@@ -159,7 +160,7 @@ if (empty($detalle)) {
                 </div>
                 <div class="form-group col-md-6">
                     <label for="numValor" class="small">Valor</label>
-                    <input type="number" name="numValor" id="numValor" class="form-control form-control-sm" value="<?php echo $detalle['valor']; ?>">
+                    <input type="number" name="numValor" id="numValor" class="form-control form-control-sm" value="<?php echo $detalle['valor']; ?>" min="0" max="<?= $max; ?>">
                 </div>
             </div>
             <div class="form-row">

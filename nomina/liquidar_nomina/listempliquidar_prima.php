@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
@@ -75,6 +75,22 @@ $carcater_empresa = $_SESSION['caracter'] == 2 ? $_SESSION['caracter'] : 1;
                         <div class="card-body" id="divCuerpoPag">
                             <div class="">
                                 <form id="formLiqNomina">
+                                    <?php
+                                    if ($_SESSION['caracter'] == '1') {
+                                    ?>
+                                        <div class="text-left mb-2">
+                                            <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons" id="divmesreg">
+                                                <label class="btn btn-outline-info active">
+                                                    <input type="radio" name="mesreg" checked value="06">Julio
+                                                </label>
+                                                <label class="btn btn-outline-info">
+                                                    <input type="radio" name="mesreg" value="12">Diciembre
+                                                </label>
+                                            </div>
+                                        </div>
+                                    <?php
+                                    }
+                                    ?>
                                     <input type="hidden" id="tipo" value="<?php echo $tipo ?>">
                                     <input type="hidden" id="caracter_empresa" value="<?php echo $carcater_empresa ?>">
                                     <table id="tableLiqPrimaSv" class="table table-striped table-bordered table-sm nowrap" style="width:100%">

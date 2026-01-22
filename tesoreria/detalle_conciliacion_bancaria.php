@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -19,7 +19,53 @@ try {
     $sql = "SELECT `fin_mes`, `nom_mes` FROM `nom_meses` WHERE (`codigo` = '$mes')";
     $rs = $cmd->query($sql);
     $dia = $rs->fetch(PDO::FETCH_ASSOC);
-    $fin_mes = !(empty($dia)) ? $vigencia . '-' . $mes . '-' . $dia['fin_mes'] : 0;
+    $last = $mes == '02' ? cal_days_in_month(CAL_GREGORIAN, 2, $vigencia) : $dia['fin_mes'];
+    $fin_mes = !(empty($dia)) ? $vigencia . '-' . $mes . '-' . $last : 0;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $sql = "SELECT
+                `ctb_doc`.`fecha`
+                , `ctb_fuente`.`cod`
+                , `ctb_doc`.`id_manu`
+                , `ctb_libaux`.`id_tercero_api`
+                , `ctb_libaux`.`debito`
+                , `ctb_libaux`.`credito`
+                , '--' AS `documento`
+                , `ctb_libaux`.`id_ctb_libaux`
+                , `tes_conciliacion_detalle`.`id_ctb_libaux` AS `conciliado`
+                , `tes_conciliacion_detalle`.`fecha_marca` AS `marca`
+            FROM
+                `ctb_libaux`
+                INNER JOIN `ctb_pgcp` 
+                    ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                INNER JOIN `tes_cuentas` 
+                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                INNER JOIN `ctb_doc` 
+                    ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                INNER JOIN `ctb_fuente` 
+                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                LEFT JOIN `tes_conciliacion_detalle`
+                    ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)   
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id AND `ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes' ) ";
+    $sql2 = $sql;
+    $rs = $cmd->query($sql);
+    $lista = $rs->fetchAll();
+    $tot_deb = 0;
+    $tot_cre = 0;
+    $tdc = 0;
+    $tcc = 0;
+    foreach ($lista as $lp) {
+        $tot_deb += $lp['debito'];
+        $tot_cre += $lp['credito'];
+        if ($lp['conciliado'] > 0 && $lp['marca'] <= $fin_mes) {
+            $tdc += $lp['debito'];
+            $tcc += $lp['credito'];
+        }
+    }
+    $tot_deb = $tot_deb - $tdc;
+    $tot_cre = $tot_cre - $tcc;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -28,8 +74,8 @@ try {
                 `tes_conciliacion`.`id_conciliacion`
                 , `tes_conciliacion`.`saldo_extracto`
                 , `tes_conciliacion`.`estado`
-                , `t1`.`debito`
-                , `t1`.`credito`
+                , IFNULL(`t1`.`debito`,0) AS `debito`
+                , IFNULL(`t1`.`credito`,0) AS `credito`
             FROM
                 `tes_conciliacion`
                 INNER JOIN `tes_cuentas` 
@@ -45,7 +91,7 @@ try {
                         ON (`tes_conciliacion_detalle`.`id_ctb_libaux` = `ctb_libaux`.`id_ctb_libaux`)
                 GROUP BY `tes_conciliacion_detalle`.`id_concilia`) AS `t1`
                 ON (`t1`.`id_concilia` = `tes_conciliacion`.`id_conciliacion`)
-            WHERE (`tes_cuentas`.`id_cuenta` = $id AND `tes_conciliacion`.`vigencia` = '$vigencia' AND `tes_conciliacion`.`mes` = '$mes')";
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id AND `tes_conciliacion`.`vigencia` = '$vigencia' AND `tes_conciliacion`.`mes` = '$mes')";
     $rs = $cmd->query($sql);
     $data = $rs->fetch(PDO::FETCH_ASSOC);
     if (!empty($data)) {
@@ -64,6 +110,31 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+
+try {
+    $sql = "SELECT
+                `tes_cuentas`.`id_tes_cuenta`
+                , SUM(IFNULL(`ctb_libaux`.`debito`,0) - IFNULL(`ctb_libaux`.`credito`,0)) AS `saldo_lib`
+            FROM
+                `ctb_libaux`
+                INNER JOIN `ctb_pgcp` 
+                    ON (`ctb_libaux`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                INNER JOIN `tes_cuentas` 
+                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                INNER JOIN `ctb_doc` 
+                    ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+            WHERE (`tes_cuentas`.`id_tes_cuenta`  = $id AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') <= '$fin_mes'  AND `ctb_doc`.`estado` = 2)";
+    $rs = $cmd->query($sql);
+    $libros = $rs->fetch(PDO::FETCH_ASSOC);
+    if (!empty($libros)) {
+        $saldo_libros = $libros['saldo_lib'];
+    } else {
+        $saldo_libros = 0;
+    }
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 try {
     $sql = "SELECT
                     `tb_bancos`.`id_banco`
@@ -94,7 +165,13 @@ try {
                             `ctb_libaux`
                             INNER JOIN `ctb_doc` 
                                 ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                        WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes')
+                            LEFT JOIN `tes_conciliacion_detalle`
+                                ON (`ctb_libaux`.`id_ctb_libaux` = `tes_conciliacion_detalle`.`id_ctb_libaux`)
+                            LEFT JOIN `tes_conciliacion`
+                                ON (`tes_conciliacion`.`id_conciliacion` = `tes_conciliacion_detalle`.`id_concilia`)
+                        WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` <= '$fin_mes' 
+                                AND (`tes_conciliacion`.`mes` = '$mes' OR `tes_conciliacion`.`mes` IS NULL)
+                                AND (`tes_conciliacion`.`vigencia` = '$vigencia' OR `tes_conciliacion`.`vigencia` IS NULL))
                         GROUP BY `ctb_libaux`.`id_cuenta`)AS `t1`  
                         ON (`t1`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
                 WHERE `tes_cuentas`.`id_tes_cuenta` = $id";
@@ -103,7 +180,8 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$conciliar = $detalles['debito'] - $detalles['credito'] + $debito - $credito;
+$conciliar = $saldo_libros - ($saldo + $tot_deb - $tot_cre);
+
 $ver = 'readonly';
 ?>
 <!DOCTYPE html>
@@ -123,11 +201,13 @@ $ver = 'readonly';
                             <div class="row">
                                 <div class="col-md-md-11">
                                     <i class="fas fa-users fa-lg" style="color:#1D80F7"></i>
-                                    DETALLES CONCILIACIÓN BANCARIA
+                                    DETALLES CONCILIACIÓN BANCARIA <?php echo "saldo " . $saldo_libros . " debitos " . $tot_deb . " creditos " . $tot_cre . " saldo " . $saldo; ?>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body" id="divCuerpoPag">
+                            <input type="hidden" id="tot_deb" value="<?= $tot_deb; ?>">
+                            <input type="hidden" id="tot_cre" value="<?= $tot_cre; ?>">
                             <form id="formAddDetallePag">
                                 <input type="hidden" id="id_cuenta" value="<?php echo $id; ?>">
                                 <input type="hidden" id="cod_mes" value="<?php echo $mes; ?>">
@@ -144,8 +224,8 @@ $ver = 'readonly';
                                             <span class="small">SALDO LIBROS </span>
                                         </div>
                                         <div class="col-md-4">
-                                            <div class="form-control form-control-sm text-right" readonly><?php echo pesos($detalles['debito'] - $detalles['credito']) ?></div>
-                                            <input type="hidden" id="salLib" value="<?php echo $detalles['debito'] - $detalles['credito'] ?>">
+                                            <div class="form-control form-control-sm text-right" readonly><?php echo pesos($saldo_libros) ?></div>
+                                            <input type="hidden" id="salLib" value="<?php echo $saldo_libros ?>">
                                         </div>
                                     </div>
                                     <div class="row mb-1">
@@ -204,8 +284,8 @@ $ver = 'readonly';
 
                     </table>
                     <div class="text-center pt-4">
-                        <a type="button" class="btn btn-primary btn-sm" onclick="imprimirFormatoCons();" style="width: 5rem;"> <span class="fas fa-print "></span></a>
-                        <a onclick="terminarDetalleCons()" class="btn btn-danger btn-sm" style="width: 7rem;" href="#"> Terminar</a>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="ImpConcBanc(<?= $id; ?>);" style="width: 5rem;"> <span class="fas fa-print "></span></button>
+                        <a class="btn btn-danger btn-sm" style="width: 7rem;" href="conciliacion_bancaria.php"> Terminar</a>
                     </div>
                 </div>
         </div>

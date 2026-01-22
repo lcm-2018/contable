@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -15,7 +15,14 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 try {
-    $sql = "SELECT * 
+    if ($_SESSION['pto'] == '1') {
+        $sql = "SELECT
+                `t1`.`id_pto_cop_det`
+                , SUM(`t1`.`val_cop`) AS `val_cop`
+                , SUM(`t1`.`val_pag`) AS `val_pag`
+                , `t1`.`id_manu`
+                , `t1`.`id_ctb_doc`
+                , `t1`.`fecha`
             FROM 
                 (SELECT
                     `pto_cop_detalle`.`id_pto_cop_det`
@@ -31,7 +38,7 @@ try {
                 LEFT JOIN 
                     (SELECT
                         `id_pto_cop_det`
-                        , IFNULL(`valor`,0) - IFNULL(`valor_liberado`,0) AS `val_pag`
+                        , SUM(IFNULL(`valor`,0) - IFNULL(`valor_liberado`,0)) AS `val_pag`
                     FROM
                         `pto_pag_detalle`
                         INNER JOIN `ctb_doc` 
@@ -40,7 +47,43 @@ try {
                     GROUP BY `id_pto_cop_det`) AS `pagado`
                     ON (`pto_cop_detalle`.`id_pto_cop_det` = `pagado`.`id_pto_cop_det`)
                 WHERE `pto_cop_detalle`.`id_tercero_api` = $id_tercero AND `ctb_doc`.`estado` = 2) AS `t1`
-            WHERE `val_cop` > `val_pag`";
+            WHERE `val_cop` > `val_pag`
+            GROUP BY `t1`.`id_ctb_doc`";
+    } else {
+        $sql = "SELECT 
+                    'e' AS `id_pto_cop_det`
+                    , `causado`.`valor` AS `val_cop`
+                    , IFNULL(`pagado`.`valor`,0) AS `val_pag`
+                    , `ctb_doc`.`id_manu` 
+                    , `ctb_doc`.`id_ctb_doc`
+                    , `ctb_doc`.`fecha`
+                FROM 
+                    `ctb_doc`
+                    INNER JOIN
+                        (SELECT
+                            `ctb_libaux`.`id_ctb_doc`
+                            , SUM(`ctb_libaux`.`debito`) AS `valor`
+                        FROM
+                            `ctb_libaux`
+                            INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_doc`.`id_ctb_doc_tipo3` IS NULL AND `ctb_doc`.`id_tipo_doc` = 3 AND `ctb_doc`.`estado` = 2)
+                        GROUP BY `ctb_libaux`.`id_ctb_doc`) AS `causado`
+                        ON(`causado`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    LEFT JOIN
+                        (SELECT
+                            `ctb_libaux`.`id_ctb_doc`
+                            , `ctb_doc`.`id_ctb_doc_tipo3`
+                            , SUM(`ctb_libaux`.`debito`) AS `valor`
+                        FROM
+                            `ctb_libaux`
+                            INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_doc`.`id_ctb_doc_tipo3` > 0 AND `ctb_doc`.`estado` > 1)
+                        GROUP BY `ctb_libaux`.`id_ctb_doc`) AS `pagado`
+                        ON(`causado`.`id_ctb_doc` = `pagado`.`id_ctb_doc_tipo3`)
+                WHERE `ctb_doc`.`id_tercero` = $id_tercero";
+    }
     $rs = $cmd->query($sql);
     $causaciones = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -53,26 +96,7 @@ try {
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ]
@@ -105,7 +129,7 @@ try {
                             $fecha = $ce['fecha'];
 
                             if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
-                                $editar = '<a value="' . $id_doc . '" onclick="cargaRubrosPago(' . $id . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+                                $editar = '<button value="' . $id_doc . '" onclick="cargaRubrosPago(' . $id . ',this)" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="Causar"><span class="fas fa-chevron-circle-down fa-lg"></span></a>';
                                 $borrar = '<a value="' . $id_doc . '" onclick="eliminarFormaPago(' . $id_doc . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
@@ -117,6 +141,7 @@ try {
                                 $editar = null;
                                 $detalles = null;
                             }
+                            $acciones = null;
                             $saldo = $ce['val_cop'] - $ce['val_pag'];
                             if ($saldo == 0) {
                                 $editar = null;

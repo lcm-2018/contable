@@ -1,7 +1,10 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 $_post = json_decode(file_get_contents('php://input'), true);
@@ -18,6 +21,7 @@ $fecha2 = $date->format('Y-m-d H:i:s');
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 $response['status'] = 'error';
+$response['msg'] = '<br>Ningún registro afectado';
 $datosDoc = GetValoresCxP($id_doc, $cmd);
 try {
     $query = "SELECT `id_ctb_libaux` FROM `ctb_libaux` WHERE `id_ctb_doc` = ?";
@@ -47,7 +51,7 @@ try {
                     ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                 INNER JOIN `pto_cdp` 
                     ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                INNER JOIN `ctt_adquisiciones` 
+                LEFT JOIN `ctt_adquisiciones` 
                     ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
             WHERE (`ctb_libaux`.`id_ctb_libaux` 
                 IN (SELECT
@@ -64,7 +68,7 @@ try {
                             ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                         INNER JOIN `pto_cdp` 
                             ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                        INNER JOIN `ctt_adquisiciones` 
+                        LEFT JOIN `ctt_adquisiciones` 
                             ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
                     WHERE (`ctb_libaux`.`debito` > 0)
                     GROUP BY `ctt_adquisiciones`.`id_tipo_bn_sv`))";
@@ -85,7 +89,7 @@ try {
                     ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                 INNER JOIN `pto_cdp` 
                     ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                INNER JOIN `ctt_adquisiciones` 
+                LEFT JOIN `ctt_adquisiciones` 
                     ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
             WHERE (`ctb_libaux`.`id_ctb_libaux` 
                 IN (SELECT
@@ -102,7 +106,7 @@ try {
                             ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
                         INNER JOIN `pto_cdp` 
                             ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                        INNER JOIN `ctt_adquisiciones` 
+                        LEFT JOIN `ctt_adquisiciones` 
                             ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
                     WHERE (`ctb_libaux`.`credito` > 0)
                     GROUP BY `ctt_adquisiciones`.`id_tipo_bn_sv`))";
@@ -110,21 +114,17 @@ try {
     $ctas_credito = $rs->fetchAll();
     // Consulto en la tabla de costos cuantos registros tiene asociados
     $sq2 = "SELECT
-                `ctb_causa_costos`.`valor`
-                , `ctt_adquisiciones`.`id_tipo_bn_sv`
+                `ctt_adquisiciones`.`id_tipo_bn_sv`
+                , `ctb_causa_costos`.`valor`
             FROM
-                `ctb_causa_costos`
-                INNER JOIN `pto_cop_detalle` 
-                    ON (`ctb_causa_costos`.`id_ctb_doc` = `pto_cop_detalle`.`id_ctb_doc`)
-                INNER JOIN `pto_crp_detalle` 
-                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
-                INNER JOIN `pto_cdp_detalle` 
-                    ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                INNER JOIN `pto_cdp` 
-                    ON (`pto_cdp_detalle`.`id_pto_cdp` = `pto_cdp`.`id_pto_cdp`)
-                INNER JOIN `ctt_adquisiciones` 
-                    ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
-            WHERE (`ctb_causa_costos`.`id_ctb_doc` = $id_doc)";
+                `ctb_doc`
+                INNER JOIN `pto_crp` 
+                    ON (`ctb_doc`.`id_crp` = `pto_crp`.`id_pto_crp`)
+                LEFT JOIN `ctt_adquisiciones` 
+                    ON (`pto_crp`.`id_cdp` = `ctt_adquisiciones`.`id_cdp`)
+                INNER JOIN `ctb_causa_costos` 
+                    ON (`ctb_causa_costos`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sq2);
     $datoscostos = $rs->fetchAll();
 
@@ -133,45 +133,60 @@ try {
                 `ctb_causa_retencion`.`valor_retencion`
                 , `ctb_causa_retencion`.`id_terceroapi`
                 , `ctb_retencion_rango`.`id_retencion`
+                , `ctb_retenciones`.`id_cuenta`
             FROM
                 `ctb_causa_retencion`
                 INNER JOIN `ctb_retencion_rango` 
                     ON (`ctb_causa_retencion`.`id_rango` = `ctb_retencion_rango`.`id_rango`)
+                LEFT JOIN `ctb_retenciones`
+                    ON (`ctb_retencion_rango`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
             WHERE (`ctb_causa_retencion`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sq2);
     $datosretencion = $rs->fetchAll();
-    $sqln = "SELECT
-                `ctb_libaux`.`id_ctb_libaux`
-                , `ctb_retencion_rango`.`id_retencion`
-                , `ctb_libaux`.`id_cuenta`
-            FROM
-                `ctb_causa_retencion`
-                INNER JOIN `ctb_retencion_rango` 
-                    ON (`ctb_causa_retencion`.`id_rango` = `ctb_retencion_rango`.`id_rango`)
-                INNER JOIN `ctb_doc` 
-                    ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                INNER JOIN `ctb_libaux` 
-                    ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-            WHERE (`ctb_libaux`.`id_ctb_libaux` 
-                IN (SELECT
-                        MAX(`ctb_libaux`.`id_ctb_libaux`)
-                    FROM
-                        `ctb_causa_retencion`
-                        INNER JOIN `ctb_retencion_rango` 
-                            ON (`ctb_causa_retencion`.`id_rango` = `ctb_retencion_rango`.`id_rango`)
-                        INNER JOIN `ctb_doc` 
-                            ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                        INNER JOIN `ctb_libaux` 
-                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-                    GROUP BY `ctb_retencion_rango`.`id_retencion`)
-                )";
-    $rs = $cmd->query($sqln);
-    $ctas_ret = $rs->fetchAll();
+
+    $sqla = "SELECT
+                SUM(`vl`.`cantidad` * `vl`.`valor_sin_iva`) AS `base`
+                , SUM(`vl`.`cantidad`*`vl`.`valor_sin_iva` * `vl`.`iva`/100) AS `iva`
+                , `vl`.`id_cuenta` 
+            FROM	
+                (SELECT
+                    `far_orden_ingreso_detalle`.`cantidad`
+                    ,`far_orden_ingreso_detalle`.`valor_sin_iva`
+                    , `far_orden_ingreso_detalle`.`iva`
+                    , `far_orden_ingreso_detalle`.`id_ingreso`
+                    , `taux`.`id_cuenta`
+                FROM
+                    `far_orden_ingreso_detalle`
+                    INNER JOIN `far_orden_ingreso` 
+                        ON (`far_orden_ingreso_detalle`.`id_ingreso` = `far_orden_ingreso`.`id_ingreso`)
+                    INNER JOIN `far_medicamento_lote` 
+                        ON (`far_orden_ingreso_detalle`.`id_lote` = `far_medicamento_lote`.`id_lote`)
+                    INNER JOIN `far_medicamentos` 
+                        ON (`far_medicamento_lote`.`id_med` = `far_medicamentos`.`id_med`)
+                    LEFT JOIN `far_subgrupos` 
+                        ON (`far_medicamentos`.`id_subgrupo` = `far_subgrupos`.`id_subgrupo`)
+                    LEFT JOIN
+                        (SELECT 
+                            `id_subgrupo`,`id_cuenta`
+                        FROM `far_subgrupos_cta`
+                        WHERE `id_subgrupo_cta` IN 
+                            (SELECT 
+                                MAX(`id_subgrupo_cta`) 
+                            FROM `far_subgrupos_cta` 
+                            WHERE `fecha_vigencia` <= DATE_FORMAT(NOW(), '%Y-%m-%d') 
+                            GROUP BY `id_subgrupo`)
+                        ) AS `taux`
+                    ON (`taux`.`id_subgrupo` = `far_subgrupos`.`id_subgrupo`)
+                WHERE (`far_orden_ingreso`.`id_ctb_doc` = $id_doc)) AS `vl`
+            GROUP BY `vl`.`id_cuenta`";
+    $rs = $cmd->query($sqla);
+    $ingresos = $rs->fetchAll(PDO::FETCH_ASSOC);
     $credito = 0;
     $acumulador = 0;
+    $ref = 0;
     $query = "INSERT INTO `ctb_libaux`
-	            (`id_ctb_doc`,`id_tercero_api`,`id_cuenta`,`debito`,`credito`,`id_user_reg`,`fecha_reg`)
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
+	            (`id_ctb_doc`,`id_tercero_api`,`id_cuenta`,`debito`,`credito`,`id_user_reg`,`fecha_reg`,`ref`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $query = $cmd->prepare($query);
     $query->bindParam(1, $id_doc, PDO::PARAM_INT);
     $query->bindParam(2, $id_tercero, PDO::PARAM_INT);
@@ -180,28 +195,41 @@ try {
     $query->bindParam(5, $credito, PDO::PARAM_STR);
     $query->bindParam(6, $iduser, PDO::PARAM_INT);
     $query->bindParam(7, $fecha2);
+    $query->bindParam(8, $ref, PDO::PARAM_INT);
     $total_debito = 0;
     $total_credito = 0;
-    foreach ($datoscostos as $dc) {
-        $id_tipo_bn_sv = $dc['id_tipo_bn_sv'];
-        $key = array_search($id_tipo_bn_sv, array_column($ctas_debito, 'id_tipo_bn_sv'));
-        $id_cuenta = $key !== false ? $ctas_debito[$key]['id_cuenta'] : NULL;
-        $debito = $dc['valor'];
-        $query->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $total_debito += $debito;
-            $acumulador++;
-        } else {
-            $response['msg'] = $query->errorInfo()[2];
+    if (empty($ingresos)) {
+        foreach ($datoscostos as $dc) {
+            $id_tipo_bn_sv = $dc['id_tipo_bn_sv'];
+            $key = array_search($id_tipo_bn_sv, array_column($ctas_debito, 'id_tipo_bn_sv'));
+            $id_cuenta = $key !== false ? $ctas_debito[$key]['id_cuenta'] : NULL;
+            $debito = $dc['valor'];
+            $query->execute();
+            if ($cmd->lastInsertId() > 0) {
+                $total_debito += $debito;
+                $acumulador++;
+            } else {
+                $response['msg'] = $query->errorInfo()[2];
+            }
+        }
+    } else {
+        foreach ($ingresos as $ingreso) {
+            $id_cuenta = $ingreso['id_cuenta'];
+            $debito = $ingreso['base'] + $ingreso['iva'];
+            $query->execute();
+            if ($cmd->lastInsertId() > 0) {
+                $total_debito += $debito;
+                $acumulador++;
+            } else {
+                $response['msg'] = $query->errorInfo()[2];
+            }
         }
     }
     $debito = 0;
     foreach ($datosretencion as $dr) {
         $id_rte = $dr['id_retencion'];
-        $key = array_search($id_rte, array_column($ctas_ret, 'id_retencion'));
-        $id_cuenta = $key !== false ? $ctas_ret[$key]['id_cuenta'] : NULL;
+        $id_cuenta = $dr['id_cuenta'];
         $credito = $dr['valor_retencion'];
-        $id_tercero = $dr['id_terceroapi'];
         $query->execute();
         if ($cmd->lastInsertId() > 0) {
             $total_credito += $credito;
@@ -210,19 +238,30 @@ try {
             $response['msg'] = $query->errorInfo()[2];
         }
     }
-    foreach ($datoscostos as $dc) {
-        $id_tipo_bn_sv = $dc['id_tipo_bn_sv'];
-        $key = array_search($id_tipo_bn_sv, array_column($ctas_credito, 'id_tipo_bn_sv'));
-        $id_cuenta = $key !== false ? $ctas_credito[$key]['id_cuenta'] : NULL;
+    if (empty($ingresos)) {
+        foreach ($datoscostos as $dc) {
+            $id_tipo_bn_sv = $dc['id_tipo_bn_sv'];
+            $key = array_search($id_tipo_bn_sv, array_column($ctas_credito, 'id_tipo_bn_sv'));
+            $id_cuenta = $key !== false ? $ctas_credito[$key]['id_cuenta'] : NULL;
+            $credito = $total_debito - $total_credito;
+            $ref = 1;
+            $query->execute();
+            if ($cmd->lastInsertId() > 0) {
+                $acumulador++;
+            } else {
+                $response['msg'] = $query->errorInfo()[2];
+            }
+            break;
+        }
+    } else {
         $credito = $total_debito - $total_credito;
-        $id_tercero = $id_tercero_ant;
+        $ref = 1;
         $query->execute();
         if ($cmd->lastInsertId() > 0) {
             $acumulador++;
         } else {
             $response['msg'] = $query->errorInfo()[2];
         }
-        break;
     }
 } catch (PDOException $e) {
     $response['msg'] = $e->getMessage();
@@ -232,65 +271,3 @@ if ($acumulador > 0) {
 }
 echo json_encode($response);
 exit();
-if (isset($_POST)) {
-    // Busco en el tipo de bien o servicio que corresponde
-
-    foreach ($datosretencion as $key => $value) {
-        $id_rte = $value['id_causa_retencion'];
-        $credito = $value['valor_retencion'];
-        $id_terceroapi = $value['id_terceroapi'];
-        // consultar el id del tercero refernciado por el id_terceroapi
-        $sql = $cmd->prepare("SELECT id_tercero FROM seg_terceros WHERE id_tercero_api = ? ;");
-        $sql->bindParam(1, $id_terceroapi, PDO::PARAM_INT);
-        $sql->execute();
-        $result = $sql->fetch();
-        $id_tercero = $result['id_tercero'];
-        // Consultar el numero de cuenta para un registro similiar
-        $sql = $cmd->prepare("SELECT cuenta FROM ctb_libaux WHERE id_rte = ? ;");
-        $sql->bindParam(1, $id_rte, PDO::PARAM_INT);
-        $sql->execute();
-        $result = $sql->fetch();
-        $cuenta = $result['cuenta'];
-        $query->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $response[] = array("value" => 'ok');
-        } else {
-            $response[] = array("value" => 'Error del insert');
-            print_r($query->errorInfo()[2]);
-        }
-    }
-    // Liquido el valor de la cuenta por pagar, busco la diferencia debito credito en el libro auxiliar para el documento
-    $sql = $cmd->prepare("SELECT SUM(debito) AS debito, SUM(credito) AS credito FROM ctb_libaux WHERE id_ctb_doc = ? ;");
-    $sql->bindParam(1, $id_doc, PDO::PARAM_INT);
-    $sql->execute();
-    $result = $sql->fetch();
-    $deb = $result['debito'];
-    $cre = $result['credito'];
-    $credito = $deb - $cre;
-    $valor = 0;
-    $id_cc = 0;
-    $id_rte = 0;
-    // buscar id_cta_factura
-    $sql = $cmd->prepare("SELECT id_cta_factura FROM seg_ctb_factura WHERE id_ctb_doc = ? ;");
-    $sql->bindParam(1, $id_doc, PDO::PARAM_INT);
-    $sql->execute();
-    $result = $sql->fetch();
-    $id_fac = $result['id_cta_factura'];
-    // buscar la cuenta asociada al tipo de cuenta por pagar 
-    $sql = $cmd->prepare("SELECT cuenta FROM ctb_libaux WHERE id_tipo_ad = ? AND id_fac >0;");
-    $sql->bindParam(1, $id_tipo_bn_sv, PDO::PARAM_INT);
-    $sql->execute();
-    $result = $sql->fetch();
-    $cuenta = $result['cuenta'];
-    $id_tercero = $id_tercero_ant;
-    $query->execute();
-    if ($cmd->lastInsertId() > 0) {
-        $response[] = array("value" => 'ok');
-    } else {
-        $response[] = array("value" => 'Error del insert');
-        print_r($query->errorInfo()[2]);
-    }
-
-
-    echo json_encode($response);
-}

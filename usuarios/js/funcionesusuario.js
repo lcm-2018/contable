@@ -18,36 +18,7 @@
         });
         return false;
     };
-    var setIdioma = {
-        "decimal": "",
-        "emptyTable": "No hay información",
-        "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-        "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-        "infoPostFix": "",
-        "thousands": ",",
-        "lengthMenu": "_MENU_ Registros",
-        "loadingRecords": "Cargando...",
-        "processing": "Procesando...",
-        "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-        "zeroRecords": "No se encontraron registros",
-        "paginate": {
-            "first": "&#10096&#10096",
-            "last": "&#10097&#10097",
-            "next": "&#10097",
-            "previous": "&#10096"
-        }
-    };
-    var setdom;
-    if ($("#peReg").val() == '1') {
-        setdom = "<'row'<'col-md-5'l><'bttn-plus-dt col-md-2'B><'col-md-5'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-    } else {
-        setdom = "<'row'<'col-md-6'l><'col-md-6'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-    }
+
     $(document).ready(function () {
         $('#tableListUsuarios').DataTable({
             dom: setdom,
@@ -56,14 +27,14 @@
                     $.post("datos/registrar/formadduser.php", function (he) {
                         $('#divTamModalForms').removeClass('modal-xl');
                         $('#divTamModalForms').removeClass('modal-sm');
-                        $('#divTamModalForms').addClass('modal-lg');
+                        $('#divTamModalForms').addClass('modal-xl');
                         $('#divModalForms').modal('show');
                         $("#divForms").html(he);
                     });
                 }
             }],
             language: setIdioma,
-            "ajax": {
+            ajax: {
                 url: 'datos/listar/list_usuarios.php',
                 type: 'POST',
                 dataType: 'json',
@@ -115,21 +86,20 @@
     });
     //agregar usuario del sistema
     $("#divModalForms").on('click', '#btnAddUser', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let login = $("#txtlogin").val();
         let pass = $("#passuser").val();
         let rol = $("#slcRolUser").val();
         if (login == "") {
             $('#divModalError').modal('show');
             $('#divMsgError').html("Login  no puede estar vacio");
-            return false;
         } else if (pass == "") {
             $('#divModalError').modal('show');
             $('#divMsgError').html("Contraseña no puede estar vacia");
-            return false;
         } else if (rol == "0") {
             $('#divModalError').modal('show');
             $('#divMsgError').html("Debe elegir un Rol de usuario");
-            return false;
         } else {
             let duser = $("#formAddUser").serialize();
             let passencrp = hex_sha512(pass);
@@ -158,12 +128,15 @@
                     }
                 }
             });
-            return false;
         }
+        ActivaBoton(btn);
+        return false;
 
     });
     //Actualizar usuario del sistema
     $("#divModalForms").on('click', '#btnAddPerfil', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         var data = $('#txtPerfil').val();
         if (data == '') {
             $('#txtPerfil').addClass('is-invalid');
@@ -188,6 +161,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     $("#modificarListUsers").on('click', '.editar', function () {
         let id = $(this).attr('value');
@@ -210,6 +184,8 @@
         });
     });
     $("#divModalForms").on('click', '#btnUpPerfil', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         var perfil = $('#txtPerfil').val();
         var id_perfil = $('#id_perfil').val();
         if (perfil == '') {
@@ -235,19 +211,20 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     //up usuario del sistema
     $("#divModalForms").on('click', '#btnUpUser', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let login = $("#txtUplogin").val();
         let pass = $("#passUpuser").val();
         if (login === "") {
             $('#divModalError').modal('show');
             $('#divMsgError').html("Login  no puede estar vacio");
-            return false;
         } else if (pass === "") {
             $('#divModalError').modal('show');
             $('#divMsgError').html("Contraseña no puede estar vacia");
-            return false;
         } else {
             let mpass = hex_sha512($('#passUpuser').val());
             if ($('#passAnterior').val() === $('#passUpuser').val()) {
@@ -272,8 +249,9 @@
                     }
                 }
             });
-            return false;
         }
+        ActivaBoton(btn);
+        return false;
 
     });
     //Eliminar usuario (confirmar)
@@ -355,4 +333,61 @@
             $("#icon").css("color", "#2ECC71");
         }
     });
+
+    //-----------------------------------------------
+    $('#divForms').on("change", "#sl_centroCosto", function () {
+        $('#sl_areaCentroCosto').load('../usuarios/common/listar_areas_centroCosto.php', { id_centroCosto: $(this).val(), titulo: '', todas: true }, function () { });
+    });
+    //$('#sl_centroCosto').trigger('change');
+
+    //---------------------------------
+    $('#divModalForms').on('click', '.chk_sedes', function () {
+        let id_sede = $(this).attr('value');
+
+        var sedesSeleccionadas = [];
+
+        $(".chk_sedes:checked").each(function () {
+            sedesSeleccionadas.push($(this).val()); // Guarda los valores de las checkboxes marcadas
+        });
+
+        //var data = $('#formAddUser').serialize();
+        var data = { sed: sedesSeleccionadas };
+
+        if ($.fn.DataTable.isDataTable('#tb_bodegas')) {
+            $('#tb_bodegas').DataTable().destroy();
+        }
+        $('#tb_bodegas').DataTable({
+            language: setIdioma,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            ajax: {
+                url: 'datos/listar/listar_bodegas.php',
+                type: 'POST',
+                dataType: 'json',
+                data: data
+            },
+            columns: [
+                { 'data': 'select' },
+                { 'data': 'id_bodega' }, //Index=1
+                { 'data': 'nombre' },
+                { 'data': 'tipo' },
+                { 'data': 'estado' },
+            ],
+            columnDefs: [
+                { orderable: false, targets: [0] },
+                { class: 'text-wrap', targets: [] }
+            ],
+            order: [
+                [0, "desc"]
+            ],
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+        });
+        $('#tb_bodegas').wrap('<div class="overflow"/>');
+    });
+
+
 })(jQuery);

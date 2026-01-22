@@ -41,7 +41,114 @@ function datos_articulo($cmd, $id_med){
                         'valor_ultima_compra' => $obj['valor']
                     );
         } else {
-            $res = array('id_med' => '', 'nom_articulo' => '', 'val_promedio' => '');
+            $res = array('id_med' => '', 'cod_articulo' => '', 'nom_articulo' => '', 'existencia' => '', 'val_promedio' => '');
+        }
+        $cmd = null;
+        return $res;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+//FUNCION QUE RETORNAR LOS DATOS DE UN ACTIVO FIJO
+function datos_activo_fijo($cmd, $id_acf){
+    try {
+        $res = array();
+        $sql = "SELECT acf_hojavida.id_activo_fijo,acf_hojavida.placa,acf_hojavida.estado_general,acf_hojavida.id_area,
+                    far_medicamentos.cod_medicamento,
+                    far_medicamentos.nom_medicamento,
+                    acf_hojavida.des_activo
+                FROM acf_hojavida
+                INNER JOIN far_medicamentos ON (far_medicamentos.id_med=acf_hojavida.id_articulo)
+                WHERE acf_hojavida.id_activo_fijo=$id_acf";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();
+        if (isset($obj['id_activo_fijo'])) {
+            $res = array('id_activo_fijo' => $obj['id_activo_fijo'],
+                        'placa' => $obj['placa'],
+                        'cod_articulo' => $obj['cod_medicamento'],
+                        'nom_articulo' => $obj['nom_medicamento'],
+                        'des_activo' => $obj['des_activo'],
+                        'estado_general' => $obj['estado_general'],
+                        'id_area' => $obj['id_area']
+                    );
+        } else {
+            $res = array('id_activo_fijo' => '', 'placa' => '', 'cod_articulo' => '', 'nom_articulo' => '');
+        }
+        $cmd = null;
+        return $res;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+//FUNCION QUE ACTIVA O DESACTIVA EL ESTADO DEL ACTIVO FIJO PARA MODIFICAR
+function edit_estados_activo_fijo($cmd, $id_acf){
+    try {
+        $res = array();
+        $edit_ubi = 1;
+        $edit_art = 1;
+        $edit_est = 1;
+        $sql = "SELECT COUNT(*) AS total FROM acf_traslado_detalle
+                INNER JOIN far_traslado ON (far_traslado.id_traslado=acf_traslado_detalle.id_traslado)
+                WHERE far_traslado.estado IN (1,2) AND acf_traslado_detalle.id_activo_fijo=$id_acf";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();
+        if ($obj['total'] > 0) {
+            $edit_ubi = 0;
+        }
+        
+        $sql = "SELECT COUNT(*) AS total FROM acf_baja_detalle
+                INNER JOIN acf_baja ON (acf_baja.id_baja=acf_baja_detalle.id_baja)
+                WHERE acf_baja.estado=2 AND acf_baja_detalle.id_activo_fijo=$id_acf";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();
+        if ($obj['total'] > 0) {
+            $edit_ubi = 0;
+            $edit_art = 0;
+            $edit_est = 0;
+        }    
+
+        $sql = "SELECT COUNT(*) AS total FROM acf_mantenimiento_detalle
+                INNER JOIN acf_mantenimiento ON (acf_mantenimiento.id_mantenimiento=acf_mantenimiento_detalle.id_mantenimiento)
+                WHERE acf_mantenimiento.estado IN (2,3) AND acf_mantenimiento_detalle.id_activo_fijo=$id_acf";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();
+        if ($obj['total'] > 0) {                
+            $edit_est = 0;
+        }            
+        $cmd = null;
+        $res = array('edit_ubi' => $edit_ubi, 'edit_art' => $edit_art, 'edit_est' => $edit_est);
+        return $res;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+//FUNCION QUE RETORNA EL ESTADO DE MANTENIMIENTO DE UN ACTIVO FIJO
+function estados_activo_fijo($cmd, $id_acf){
+    try {
+        $res = array();
+        $sql = "SELECT COUNT(*) AS total FROM acf_mantenimiento_detalle
+                INNER JOIN acf_mantenimiento ON (acf_mantenimiento.id_mantenimiento=acf_mantenimiento_detalle.id_mantenimiento)
+                WHERE acf_mantenimiento.estado=3 AND acf_mantenimiento_detalle.estado IN (1,2) 
+                    AND acf_mantenimiento_detalle.id_activo_fijo=$id_acf";
+        $rs = $cmd->query($sql);
+        $obj = $rs->fetch();
+        if ($obj['total']>0) {
+            $res = array('estado' => 3);
+        } else {        
+            $sql = "SELECT COUNT(*) AS total FROM acf_mantenimiento_detalle
+                    INNER JOIN acf_mantenimiento ON (acf_mantenimiento.id_mantenimiento=acf_mantenimiento_detalle.id_mantenimiento)
+                    WHERE acf_mantenimiento.estado=2 AND acf_mantenimiento_detalle.estado IN (1,2) 
+                        AND acf_mantenimiento_detalle.id_activo_fijo=$id_acf";
+            $rs = $cmd->query($sql);
+            $obj = $rs->fetch();
+            if ($obj['total']>0) {
+                $res = array('estado' => 2);
+            } else {
+                $res = array('estado' => 1);
+            }    
         }
         $cmd = null;
         return $res;
@@ -52,13 +159,12 @@ function datos_articulo($cmd, $id_med){
 
 //BITACORA DE MENSAJES A UN ARCHIVO DE ACCIONES REALIZADAS
 function bitacora($accion, $opcion, $detalle, $id_usuario, $login) {
-    $fecha = date('Y-m-d h:i:s A');
+    $fecha = '[' . date('Y-m-d h:i:s A') . ']';
     $usuario = $id_usuario . '-' . $login;
-    $ip=$_SERVER['REMOTE_ADDR'];
-    $archivo = date('Ym');
-    $dir='C:\wamp64\www\contable\log';
-    $log= "Fecha: $fecha, Id Usuario-Login: $usuario, Accion: $accion, Opcion: $opcion, Registro: $detalle,IP:$ip\r\n";
-    file_put_contents("$dir/$archivo.log", $log, FILE_APPEND | LOCK_EX);
+    $ip=$_SERVER['REMOTE_ADDR'];    
+    $archivo = $_SESSION['ruta_logs'] . date('Ym') . '.log';
+    $log= "$fecha Usuario: $usuario, IP: $ip, Accion: $accion, Opcion: $opcion, Registro: $detalle\r\n";
+    file_put_contents("$archivo", $log, FILE_APPEND | LOCK_EX);
 }
 
 //FUNCION QUE RETORNA LA BODEGA PRINCIPAL DE LA ENTIDAD
@@ -127,15 +233,18 @@ function area_principal($cmd){
     try {
  
         $res = array();
-        $sql = "SELECT id_area,nom_area,id_centrocosto FROM far_centrocosto_area where id_area = 1;";
-
+        $sql = "SELECT far_centrocosto_area.id_area,far_centrocosto_area.nom_area,far_centrocosto_area.id_responsable,
+                    CONCAT_WS(' ',usr.apellido1,usr.apellido2,usr.nombre1,usr.nombre2) AS nom_responsable
+                FROM far_centrocosto_area 
+                INNER JOIN seg_usuarios_sistema AS usr ON (usr.id_usuario=far_centrocosto_area.id_responsable)
+                WHERE far_centrocosto_area.es_almacen=1";
         $rs = $cmd->query($sql);
         $obj = $rs->fetch();
   
         if (isset($obj['id_area'])) {
-            $res = array('id_area' => $obj['id_area'], 'nom_area' => $obj['nom_area']);
+            $res = array('id_area' => $obj['id_area'], 'nom_area' => $obj['nom_area'], 'id_responsable' => $obj['id_responsable'], 'nom_responsable' => $obj['nom_responsable']);
         } else {
-            $res = array('id_area' => '', 'nom_area' => 'No Existe Area Principal', 'id_area' => '');    
+            $res = array('id_area' => '', 'nom_area' => 'No Existe Area Principal', 'id_responsable' => '', 'nom_responsable' => '');    
         }
   
         $cmd = null;
@@ -144,46 +253,3 @@ function area_principal($cmd){
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
 }
-
-function estado_activo_seleccionado($estado)
-{
-    if($estado == 1) {
-        return array('id' => '1', 'nombre' => 'ACTIVO');
-    }
-    if($estado == 1) {
-        return array('id' => '2', 'nombre' => 'EN MANTENIMIENTO');
-    }
-    if($estado == 1) {
-        return array('id' => '3', 'nombre' => 'DADO DE BAJA');
-    }
-}
-
-//FUNCION QUE RETORNAR LOS DATOS DE UN ARTICULO
-function datos_articulo_acf($cmd, $id_med){
-    try {
-        $res = array();
-        $sql = "SELECT FM.id_med,
-                    FM.cod_medicamento,
-                    FM.nom_medicamento,
-                    FM.existencia,
-                    FM.val_promedio
-                FROM far_medicamentos FM WHERE FM.id_med=$id_med";
-        $rs = $cmd->query($sql);
-        $obj = $rs->fetch();
-        if (isset($obj['id_med'])) {
-                $res = array('id_med' => $obj['id_med'],
-                            'cod_articulo' => $obj['cod_medicamento'],
-                            'nom_articulo' => $obj['nom_medicamento'],
-                            'existencia' => $obj['existencia'],
-                            'val_promedio' => $obj['val_promedio']
-                        );
-        } else {
-            $res = array('id_med' => '', 'nom_articulo' => '', 'val_promedio' => '');
-        }
-        $cmd = null;
-        return $res;
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-    }
-}
-

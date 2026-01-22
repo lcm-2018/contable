@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 function pesos($valor)
@@ -11,7 +11,7 @@ function pesos($valor)
 
 include '../conexion.php';
 include '../permisos.php';
-$key = array_search('53', array_column($perm_modulos, 'id_modulo'));
+$key = array_search('59', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
     exit();
@@ -21,10 +21,25 @@ $vigencia = $_SESSION['vigencia'];
 <!DOCTYPE html>
 <html lang="es">
 <?php include '../head.php' ?>
+<link href="css/handsontable.min.css?v=<?php echo date('YmdHis') ?>" rel="stylesheet" />
+<style>
+    .modal-fullscreen {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        margin: 0;
+    }
 
-<body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] == '1') {
-                                echo 'sb-sidenav-toggled';
-                            } ?>">
+    .modal-header,
+    .modal-body {
+        padding: 1rem;
+        height: 100%;
+        overflow-y: auto;
+    }
+</style>
+
+<body class="sb-nav-fixed <?= $_SESSION['navarlat'] == '1' ? 'sb-sidenav-toggled' : ''; ?>">
     <?php include '../navsuperior.php' ?>
     <div id="layoutSidenav">
         <?php include '../navlateral.php' ?>
@@ -41,13 +56,18 @@ $vigencia = $_SESSION['vigencia'];
                             </div>
                         </div>
                         <div class="card-body" id="divCuerpoPag">
-                            <input type="hidden" id="peReg" value="<?php echo $permisos['registrar'] ?>">
+                            <?php if (PermisosUsuario($permisos, 5901, 2) || $id_rol == 1) { ?>
+                                <input type="hidden" id="peReg" value="1">
+                            <?php } else { ?>
+                                <input type="hidden" id="peReg" value="0">
+                            <?php } ?>
+                            <input type="hidden" id="id_consulta" value="<?= $_POST['id_consulta'] ?>">
                             <table id="tableConsultas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
                                         <th>Nombre</th>
-                                        <th>Fecha</th>
+                                        <th>Descripción</th>
                                         <th>Acción</th>
                                     </tr>
                                 </thead>
@@ -64,6 +84,7 @@ $vigencia = $_SESSION['vigencia'];
     </div>
     <?php include '../scripts.php' ?>
     <script src="js/funcionconsultas.js"></script>
+    <script src="js/handsontable.js?v=<?php echo date('YmdHis') ?>"></script>
 </body>
 
 </html>

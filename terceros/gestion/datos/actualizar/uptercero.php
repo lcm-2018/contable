@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -12,17 +12,20 @@ $ch = curl_init($url);
 //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $result = curl_exec($ch);
 curl_close($ch);
 
 $tercero = json_decode($result, true);
 
-if ($tercero !== '0') {
+if (isset($tercero['id_tercero'])) {
     $id_dpto = $tercero['departamento'];
+    $id_api = $tercero['id_tercero'];
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "SELECT * FROM tb_municipios WHERE id_departamento = '$id_dpto' ORDER BY nom_municipio";
+        $sql = "SELECT * FROM `tb_municipios` WHERE `id_departamento` = $id_dpto ORDER BY `nom_municipio`";
         $rs = $cmd->query($sql);
         $municipios = $rs->fetchAll();
         $cmd = null;
@@ -32,7 +35,7 @@ if ($tercero !== '0') {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "SELECT * FROM tb_tipo_tercero";
+        $sql = "SELECT * FROM `tb_tipo_tercero`";
         $rs = $cmd->query($sql);
         $tipoTercero = $rs->fetchAll();
         $cmd = null;
@@ -42,7 +45,7 @@ if ($tercero !== '0') {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "SELECT * FROM tb_tipos_documento";
+        $sql = "SELECT * FROM `tb_tipos_documento`";
         $rs = $cmd->query($sql);
         $tipodoc = $rs->fetchAll();
         $cmd = null;
@@ -52,10 +55,10 @@ if ($tercero !== '0') {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "SELECT * FROM tb_paises";
+        $sql = "SELECT * FROM `tb_paises`";
         $rs = $cmd->query($sql);
         $pais = $rs->fetchAll();
-        $sql = "SELECT * FROM tb_departamentos ORDER BY nom_departamento";
+        $sql = "SELECT * FROM `tb_departamentos` ORDER BY `nom_departamento`";
         $rs = $cmd->query($sql);
         $dpto = $rs->fetchAll();
         $cmd = null;
@@ -65,15 +68,44 @@ if ($tercero !== '0') {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "SELECT * FROM seg_terceros
-                WHERE no_doc = '$idTercero'";
+        $sql = "SELECT
+                    `tb_rel_tercero`.`id_tipo_tercero`
+                    , `tb_terceros`.`fec_inicio`
+                FROM
+                    `tb_terceros`
+                    INNER JOIN `tb_rel_tercero` 
+                        ON (`tb_terceros`.`id_tercero_api` = `tb_rel_tercero`.`id_tercero_api`)
+                WHERE (`tb_terceros`.`id_tercero_api` = $id_api)";
         $rs = $cmd->query($sql);
         $terEmpresa = $rs->fetch();
         $cmd = null;
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
-    $error = "Debe diligenciar este campo";
+    //-------------------------------------------
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+        $sql = "SELECT tb_terceros.es_clinico, planilla, id_riesgo
+                FROM tb_terceros
+                WHERE tb_terceros.id_tercero_api = $id_api";
+        $rs = $cmd->query($sql);
+        $terclinico = $rs->fetch();
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+        $sql = "SELECT * FROM nom_riesgos_laboral ORDER BY clase";
+        $rs = $cmd->query($sql);
+        $riesgos = $rs->fetchAll();
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
 ?>
     <div class="px-0">
         <div class="shadow">
@@ -81,19 +113,15 @@ if ($tercero !== '0') {
                 <h5 style="color: white;">ACTUALIZAR DATOS DE TERCERO</h5>
             </div>
             <form id="formActualizaTercero">
-                <input type="number" id="idTercero" name="idTercero" value="<?php echo $tercero['id_tercero'] ?>" hidden>
-                <input type="number" id="idTerEmp" name="idTerEmp" value="<?php echo $terEmpresa['id_tercero'] ?>" hidden>
+                <input type="number" id="idTercero" name="idTercero" value="<?php echo $id_api ?>" hidden>
                 <div class="form-row px-4 pt-2">
                     <div class="form-group col-md-2">
                         <label for="slcTipoTercero" class="small">Tipo de tercero</label>
                         <select id="slcTipoTercero" name="slcTipoTercero" class="form-control form-control-sm py-0 sm" aria-label="Default select example">
                             <?php
                             foreach ($tipoTercero as $tT) {
-                                if ($tT['id_tipo'] !== $terEmpresa['id_tipo_tercero']) {
-                                    echo '<option value="' . $tT['id_tipo'] . '">' . $tT['descripcion'] . '</option>';
-                                } else {
-                                    echo '<option selected value="' . $tT['id_tipo'] . '">' . $tT['descripcion'] . '</option>';
-                                }
+                                $slc = $tT['id_tipo'] !== $terEmpresa['id_tipo_tercero'] ? '' : 'selected';
+                                echo '<option value="' . $tT['id_tipo'] . '" ' . $slc . '>' . mb_strtoupper($tT['descripcion']) . '</option>';
                             }
                             ?>
                         </select>
@@ -101,9 +129,6 @@ if ($tercero !== '0') {
                     <div class="form-group col-md-2">
                         <label for="datFecInicio" class="small">Fecha de inicio</label>
                         <input type="date" class="form-control form-control-sm" id="datFecInicio" name="datFecInicio" value="<?php echo $terEmpresa['fec_inicio'] ?>">
-                        <div id="edatFecInicio" class="invalid-tooltip">
-                            <?php echo $error ?>
-                        </div>
                     </div>
                     <div class="form-group col-md-2">
                         <label for="slcGenero" class="small">Género</label>
@@ -117,9 +142,6 @@ if ($tercero !== '0') {
                     <div class="form-group col-md-2">
                         <label for="datFecNacimiento" class="small">Fecha de Nacimiento</label>
                         <input type="date" class="form-control form-control-sm" id="datFecNacimiento" name="datFecNacimiento" value="<?php echo $tercero['fec_nacimiento'] ?>">
-                        <div id="edatFecNacimiento" class="invalid-tooltip">
-                            <?php echo $error ?>
-                        </div>
                     </div>
                     <div class="form-group col-md-2">
                         <label for="slcTipoDocEmp" class="small">Tipo de documento</label>
@@ -136,11 +158,9 @@ if ($tercero !== '0') {
                         </select>
                     </div>
                     <div class="form-group col-md-2">
-                        <label for="txtCCempleado" class="small">Identificación</label>
-                        <input type="number" class="form-control form-control-sm" id="txtCCempleado" name="txtCCempleado" min="1" placeholder="C.C., NIT, etc." value="<?php echo $tercero['cc_nit'] ?>">
-                        <div id="etxtCCempleado" class="invalid-tooltip">
-                            <?php echo $error ?>
-                        </div>
+                        <label class="small">Identificación</label>
+                        <div class="form-control form-control-sm bg-light"><?php echo $tercero['cc_nit'] ?></div>
+                        <input type="hidden" name="txtCCempleado" id="txtCCempleado" value="<?php echo $tercero['cc_nit'] ?>">
                     </div>
                 </div>
                 <div class="form-row px-4">
@@ -185,17 +205,14 @@ if ($tercero !== '0') {
                         <select id="slcDptoEmp" name="slcDptoEmp" class="form-control form-control-sm py-0 sm" aria-label="Default select example">
                             <?php
                             foreach ($dpto as $d) {
-                                if ($d['id_dpto'] !== $tercero['departamento']) {
-                                    echo '<option value="' . $d['id_dpto'] . '">' . $d['nom_departamento'] . '</option>';
+                                if ($d['id_departamento'] !== $tercero['departamento']) {
+                                    echo '<option value="' . $d['id_departamento'] . '">' . $d['nom_departamento'] . '</option>';
                                 } else {
-                                    echo '<option selected value="' . $d['id_dpto'] . '">' . $d['nom_departamento'] . '</option>';
+                                    echo '<option selected value="' . $d['id_departamento'] . '">' . $d['nom_departamento'] . '</option>';
                                 }
                             }
                             ?>
                         </select>
-                        <div id="eslcDptoEmp" class="invalid-tooltip">
-                            <?php echo $error ?>
-                        </div>
                     </div>
                     <div class="form-group col-md-3">
                         <label for="slcMunicipioEmp" class="small">Municipio</label>
@@ -210,32 +227,58 @@ if ($tercero !== '0') {
                             }
                             ?>
                         </select>
-                        <div id="eslcMunicipioEmp" class="invalid-tooltip">
-                            <?php echo $error ?>
-                        </div>
                     </div>
                     <div class="form-group col-md-3">
                         <label for="txtDireccion" class="small">Dirección</label>
                         <input type="text" class="form-control form-control-sm" id="txtDireccion" name="txtDireccion" placeholder="Residencial" value="<?php echo $tercero['direccion'] ?>">
-                        <div id="etxtDireccion" class="invalid-tooltip">
-                            <?php echo $error ?>
-                        </div>
                     </div>
                 </div>
                 <div class="form-row px-4">
                     <div class="form-group col-md-3">
                         <label for="mailEmp" class="small">Correo</label>
                         <input type="email" class="form-control form-control-sm" id="mailEmp" name="mailEmp" placeholder="Correo electrónico" value="<?php echo $tercero['correo'] ?>">
-                        <div id="emailEmp" class="invalid-tooltip">
-                            <?php echo $error ?>
-                        </div>
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txtTelEmp" class="small">Contacto</label>
                         <input type="text" class="form-control form-control-sm" id="txtTelEmp" name="txtTelEmp" placeholder="Teléfono/celular" value="<?php echo $tercero['telefono'] ?>">
-                        <div id="etxtTelEmp" class="invalid-tooltip">
-                            <?php echo $error ?>
+                    </div>
+                    <div class="form-group col-md-2 text-center mt-1">
+                        <label class="small d-block" for="rdo_esasist_si">Es asistencial</label>
+                        <div class="form-control-sm border rounded px-2 py-1">
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="rdo_esasist" id="rdo_esasist_si" value="1" <?= $terclinico['es_clinico'] == 1 ? 'checked' : '' ?>>
+                                <label class="form-check-label small" for="rdo_esasist_si">SI</label>
+                            </div>
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="rdo_esasist" id="rdo_esasist_no" value="0" <?= $terclinico['es_clinico'] == 0 ? 'checked' : '' ?>>
+                                <label class="form-check-label small" for="rdo_esasist_no">NO</label>
+                            </div>
                         </div>
+                    </div>
+                    <div class="form-group col-md-2 text-center mt-1">
+                        <label class="small d-block" for="rdo_planilla_si">Planilla</label>
+                        <div class="form-control-sm border rounded px-2 py-1">
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="rdo_planilla" id="rdo_planilla_si" value="1" <?= $terclinico['planilla'] == 1 ? 'checked' : '' ?>>
+                                <label class="form-check-label small" for="rdo_planilla_si">SI</label>
+                            </div>
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="rdo_planilla" id="rdo_planilla_no" value="0" <?= $terclinico['planilla'] == 0 ? 'checked' : '' ?>>
+                                <label class="form-check-label small" for="rdo_planilla_no">NO</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="txtTelEmp" class="small">Riesgo Laboral</label>
+                        <select id="slcRiesgoLab" name="slcRiesgoLab" class="form-control form-control-sm py-0 sm" aria-label="Default select example">
+                            <option selected value="0">--Selecionar--</option>
+                            <?php
+                            foreach ($riesgos as $r) {
+                                $slc = $r['id_rlab'] !== $terclinico['id_riesgo'] ? '' : 'selected';
+                                echo '<option value="' . $r['id_rlab'] . '" ' . $slc . '>' . $r['clase'] . ' - ' . $r['riesgo'] . '</option>';
+                            }
+                            ?>
+                        </select>
                     </div>
                 </div>
                 <div class="text-center pb-3">

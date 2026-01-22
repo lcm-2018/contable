@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
@@ -48,7 +48,7 @@ if ($tipo_pto == 1 && $informe == 1) {
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                     INNER JOIN `pto_presupuestos` 
                         ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 2 AND `pto_presupuestos`.`id_tipo` = 1)
+                WHERE (DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 2 AND `pto_presupuestos`.`id_tipo` = 2)
                 GROUP BY `pto_mod_detalle`.`id_cargue`) AS `adicion`
                 ON(`adicion`.`id_cargue` = `pto_cargue`.`id_cargue`)
             LEFT JOIN
@@ -61,7 +61,7 @@ if ($tipo_pto == 1 && $informe == 1) {
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                     INNER JOIN `pto_presupuestos` 
                         ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 3 AND `pto_presupuestos`.`id_tipo` = 1)
+                WHERE (DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 3 AND `pto_presupuestos`.`id_tipo` = 1)
                 GROUP BY `pto_mod_detalle`.`id_cargue`) AS `reduccion`
                 ON(`reduccion`.`id_cargue` = `pto_cargue`.`id_cargue`)";
 } else if ($tipo_pto == 1 && $informe == 2) {
@@ -86,16 +86,24 @@ if ($tipo_pto == 1 && $informe == 1) {
                 ON (`pto_homologa_ingresos`.`id_politica` = `pto_politica`.`id_politica`)
             LEFT JOIN
                 (SELECT
-                    `pto_rad_detalle`.`id_rubro`
-                    , SUM(IFNULL(`pto_rec_detalle`.`valor`,0)) - SUM(IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `valor`
-                FROM
-                    `pto_rec_detalle`
-                    INNER JOIN `pto_rad_detalle` 
-                        ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
-                    INNER JOIN `pto_rec` 
-                        ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
-                WHERE (`pto_rec`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_rec`.`estado` = 2)
-                GROUP BY `pto_rad_detalle`.`id_rubro`) AS `recaudo`
+                        SUM(IFNULL(`ctt2`.`valor`,0) - IFNULL(`ctt2`.`valor_liberado`,0)) AS `valor`
+                        ,`ctt2`.`id_rubro`
+                    FROM
+                        (SELECT
+                            `pto_rec_detalle`.`valor`
+                            , `pto_rec_detalle`.`valor_liberado`
+                            , CASE
+                                WHEN `pto_rec_detalle`.`id_rubro`IS NULL THEN `pto_rad_detalle`.`id_rubro`
+                                ELSE `pto_rec_detalle`.`id_rubro` 
+                            END AS `id_rubro`
+                        FROM
+                            `pto_rec_detalle`
+                            INNER JOIN `pto_rec` 
+                                ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
+                            LEFT JOIN `pto_rad_detalle` 
+                                ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
+                        WHERE (`pto_rec`.`estado` = 2 AND DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte')) AS `ctt2`
+                    GROUP BY `ctt2`.`id_rubro`) AS `recaudo`
                 ON(`recaudo`.`id_rubro` = `pto_cargue`.`id_cargue`)";
 } else if ($tipo_pto == 2 && $informe == 1) {
     $titulo = "C_PROGRAMACION_DE_GASTOS";
@@ -113,7 +121,7 @@ if ($tipo_pto == 1 && $informe == 1) {
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                     INNER JOIN `pto_presupuestos` 
                         ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 2 AND `pto_presupuestos`.`id_tipo` = 2)
+                WHERE (DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 2)
                 GROUP BY `pto_mod_detalle`.`id_cargue`) AS `adicion`
                 ON(`adicion`.`id_cargue` = `pto_cargue`.`id_cargue`)
             LEFT JOIN
@@ -126,7 +134,7 @@ if ($tipo_pto == 1 && $informe == 1) {
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
                     INNER JOIN `pto_presupuestos` 
                         ON (`pto_mod`.`id_pto` = `pto_presupuestos`.`id_pto`)
-                WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 3 AND `pto_presupuestos`.`id_tipo` = 2)
+                WHERE (DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 3)
                 GROUP BY `pto_mod_detalle`.`id_cargue`) AS `reduccion`
                 ON(`reduccion`.`id_cargue` = `pto_cargue`.`id_cargue`)
             LEFT JOIN
@@ -137,18 +145,18 @@ if ($tipo_pto == 1 && $informe == 1) {
                     `pto_mod_detalle`
                     INNER JOIN `pto_mod` 
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
-                WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 1)
+                WHERE (DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 6)
                 GROUP BY `pto_mod_detalle`.`id_cargue`) AS `credito`
                 ON(`credito`.`id_cargue` = `pto_cargue`.`id_cargue`)
             LEFT JOIN
                 (SELECT
                     `pto_mod_detalle`.`id_cargue`
-                    , SUM(`pto_mod_detalle`.`valor_deb`) AS `valor`
+                    , SUM(`pto_mod_detalle`.`valor_cred`) AS `valor`
                 FROM
                     `pto_mod_detalle`
                     INNER JOIN `pto_mod` 
                         ON (`pto_mod_detalle`.`id_pto_mod` = `pto_mod`.`id_pto_mod`)
-                WHERE (`pto_mod`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 6)
+                WHERE (DATE_FORMAT(`pto_mod`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_mod`.`estado` = 2 AND `pto_mod`.`id_tipo_mod` = 6)
                 GROUP BY `pto_mod_detalle`.`id_cargue`) AS `contracredito`
                 ON(`contracredito`.`id_cargue` = `pto_cargue`.`id_cargue`)";
 } else if ($tipo_pto == 2 && $informe == 2) {
@@ -177,17 +185,22 @@ if ($tipo_pto == 1 && $informe == 1) {
             INNER JOIN `pto_terceros` 
                 ON (`pto_homologa_gastos`.`id_tercero` = `pto_terceros`.`id_tercero`)
             LEFT JOIN
-                (SELECT
-                    `pto_cdp_detalle`.`id_rubro`
-                    , SUM(IFNULL(`pto_crp_detalle`.`valor`,0)) - SUM(IFNULL(`pto_crp_detalle`.`valor_liberado`,0)) AS `valor`
-                FROM
-                    `pto_crp_detalle`
-                    INNER JOIN `pto_crp` 
-                        ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
-                    INNER JOIN `pto_cdp_detalle` 
-                        ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                WHERE (`pto_crp`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_crp`.`estado` = 2)
-                GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `registrado`
+                (SELECT 
+                    d.id_rubro,
+                    SUM(CASE 
+                            WHEN crp.fecha BETWEEN '$fecha_ini' AND '$fecha_corte' THEN IFNULL(det.valor, 0) 
+                            ELSE 0 
+                        END) 
+                    -
+                    SUM(CASE 
+                            WHEN det.fecha_libera BETWEEN '$fecha_ini' AND '$fecha_corte' THEN IFNULL(det.valor_liberado, 0) 
+                            ELSE 0 
+                        END) AS valor
+                FROM pto_crp_detalle det
+                INNER JOIN pto_crp crp ON det.id_pto_crp = crp.id_pto_crp
+                INNER JOIN pto_cdp_detalle d ON det.id_pto_cdp_det = d.id_pto_cdp_det
+                WHERE crp.estado = 2
+                GROUP BY d.id_rubro) AS `registrado`
                 ON(`registrado`.`id_rubro` = `pto_cargue`.`id_cargue`)
             LEFT JOIN
                 (SELECT
@@ -201,7 +214,7 @@ if ($tipo_pto == 1 && $informe == 1) {
                         ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
                     INNER JOIN `pto_cdp_detalle` 
                         ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte')
+                WHERE (`ctb_doc`.`estado` = 2 AND DATE_FORMAT(`ctb_doc`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte')
                 GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `causado`
                 ON(`causado`.`id_rubro` = `pto_cargue`.`id_cargue`)
             LEFT JOIN
@@ -218,7 +231,7 @@ if ($tipo_pto == 1 && $informe == 1) {
                         ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
                     INNER JOIN `pto_cdp_detalle` 
                         ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                WHERE (`ctb_doc`.`estado` = 2 AND `ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte')
+                WHERE (`ctb_doc`.`estado` = 2 AND DATE_FORMAT(`ctb_doc`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte')
                 GROUP BY `pto_cdp_detalle`.`id_rubro`) AS `pagado`
                 ON(`pagado`.`id_rubro` = `pto_cargue`.`id_cargue`)";
 } else {

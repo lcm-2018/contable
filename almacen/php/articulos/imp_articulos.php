@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -21,16 +21,19 @@ if (isset($_POST['nombre']) && $_POST['nombre']) {
 if (isset($_POST['subgrupo']) && $_POST['subgrupo']) {
     $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['subgrupo'];
 }
+if (isset($_POST['clinico']) && strlen($_POST['clinico'])) {
+    $where .= " AND far_medicamentos.es_clinico=" . $_POST['clinico'];
+}
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_medicamentos.estado=" . $_POST['estado'];
 }
 
 try {
     $sql = "SELECT far_medicamentos.id_med,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-            far_subgrupos.nom_subgrupo,far_medicamentos.top_min,far_medicamentos.top_max,
-            far_medicamentos.existencia,far_medicamentos.val_promedio,
-            IF(far_medicamentos.es_clinico=1,'SI','NO') AS es_clinico,
-            IF(far_medicamentos.estado=1,'ACTIVO','INACTIVO') AS estado
+                far_subgrupos.nom_subgrupo,far_medicamentos.top_min,far_medicamentos.top_max,
+                far_medicamentos.existencia,far_medicamentos.val_promedio,
+                IF(far_medicamentos.es_clinico=1,'SI','NO') AS es_clinico,
+                IF(far_medicamentos.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_medicamentos
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo) $where ORDER BY far_medicamentos.id_med DESC ";
     $rs = $cmd->query($sql);

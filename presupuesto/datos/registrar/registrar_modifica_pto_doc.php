@@ -1,6 +1,5 @@
 <?php
 session_start();
-printf('<pre>%s</pre>', var_export($_POST, true));
 if (isset($_POST)) {
     $fecha = $_POST['fecha'];
     $id_pto = $_POST['id_pto'];
@@ -8,6 +7,7 @@ if (isset($_POST)) {
     $numMod = $_POST['numMod'];
     $objeto = $_POST['objeto'];
     $tipo_doc = $_POST['id_mov'];
+    $id = $_POST['id_registro'];
     $iduser = $_SESSION['id_user'];
     $date = new DateTime('now', new DateTimeZone('America/Bogota'));
     $fecha2 = $date->format('Y-m-d H:i:s');
@@ -27,26 +27,43 @@ if (isset($_POST)) {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     if (!isset($_POST['id_pto_mod'])) {
-        $query = "INSERT INTO `pto_mod`
+        if ($id == 0) {
+            $query = "INSERT INTO `pto_mod`
                     (`id_pto`, `id_tipo_mod`,`id_tipo_acto`, `numero_acto`, `fecha`,`id_manu`,`objeto`,`estado`,`id_user_reg`,`fecha_reg`)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_pto, PDO::PARAM_INT);
-        $query->bindParam(2, $tipo_doc, PDO::PARAM_STR);
-        $query->bindParam(3, $tipo_acto, PDO::PARAM_INT);
-        $query->bindParam(4, $numMod, PDO::PARAM_INT);
-        $query->bindParam(5, $fecha, PDO::PARAM_STR);
-        $query->bindParam(6, $id_manu, PDO::PARAM_INT);
-        $query->bindParam(7, $objeto, PDO::PARAM_STR);
-        $query->bindParam(8, $estado, PDO::PARAM_INT);
-        $query->bindParam(9, $iduser, PDO::PARAM_INT);
-        $query->bindParam(10, $fecha2);
-        $query->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $id = $cmd->lastInsertId();
-            $response[] = array("value" => 'ok', "id" => $id);
+            $query = $cmd->prepare($query);
+            $query->bindParam(1, $id_pto, PDO::PARAM_INT);
+            $query->bindParam(2, $tipo_doc, PDO::PARAM_STR);
+            $query->bindParam(3, $tipo_acto, PDO::PARAM_INT);
+            $query->bindParam(4, $numMod, PDO::PARAM_INT);
+            $query->bindParam(5, $fecha, PDO::PARAM_STR);
+            $query->bindParam(6, $id_manu, PDO::PARAM_INT);
+            $query->bindParam(7, $objeto, PDO::PARAM_STR);
+            $query->bindParam(8, $estado, PDO::PARAM_INT);
+            $query->bindParam(9, $iduser, PDO::PARAM_INT);
+            $query->bindParam(10, $fecha2);
+            $query->execute();
+            if ($cmd->lastInsertId() > 0) {
+                echo 'ok';
+            } else {
+                echo $query->errorInfo()[2];
+            }
         } else {
-            echo $query->errorInfo()[2];
+            $query = "UPDATE `pto_mod`
+                    SET  `id_tipo_acto` = ?, `numero_acto` = ?, `fecha` = ?, `objeto` = ?
+                    WHERE `id_pto_mod` = ?";
+            $query = $cmd->prepare($query);
+            $query->bindParam(1, $tipo_acto, PDO::PARAM_INT);
+            $query->bindParam(2, $numMod, PDO::PARAM_INT);
+            $query->bindParam(3, $fecha, PDO::PARAM_STR);
+            $query->bindParam(4, $objeto, PDO::PARAM_STR);
+            $query->bindParam(5, $id, PDO::PARAM_INT);
+            $query->execute();
+            if ($query->rowCount() > 0) {
+                echo 'ok';
+            } else {
+                echo $query->errorInfo()[2] . 'No se actualizó ningún registro';
+            }
         }
         $cmd = null;
     } else {
@@ -58,9 +75,10 @@ if (isset($_POST)) {
         $query->bindParam(":valor", $valorCdp);
         $query->bindParam("id", $id);
         $query->execute();
-        $cmd = null;
-        echo "modificado";
-        $response[] = array("value" => 'no');
+        if ($query->rowCount() > 0) {
+            echo 'ok';
+        } else {
+            echo $query->errorInfo()[2];
+        }
     }
-    echo json_encode($response);
 }

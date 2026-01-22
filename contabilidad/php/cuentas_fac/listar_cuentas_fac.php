@@ -1,7 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
+<<<<<<< HEAD
     echo '<script>window.location.replace("../../../index.php");</script>';
+=======
+    header("Location: ../../../index.php");
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
     exit();
 }
 include '../../../conexion.php';
@@ -18,9 +22,13 @@ $dir = $_POST['order'][0]['dir'];
 
 $where = "WHERE tb_homologacion.id_homo<>0";
 if (isset($_POST['nombre']) && $_POST['nombre']) {
+<<<<<<< HEAD
     $where .= " AND (tb_regimenes.descripcion_reg LIKE '" . $_POST['nombre'] . "%' OR 
                     tb_cobertura.nom_cobertura LIKE '" . $_POST['nombre'] . "%' OR 
                     tb_modalidad.nom_modalidad LIKE '" . $_POST['nombre'] . "%')";
+=======
+    $where .= " AND CONCAT(tb_regimenes.descripcion_reg,tb_cobertura.nom_cobertura,tb_modalidad.nom_modalidad) LIKE '%" . $_POST['nombre'] . "%'";
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
 }
 
 try {
@@ -45,11 +53,49 @@ try {
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT tb_homologacion.id_homo,tb_regimenes.descripcion_reg AS nom_regimen,
 	            tb_cobertura.nom_cobertura,tb_modalidad.nom_modalidad,tb_homologacion.fecha_vigencia,
+<<<<<<< HEAD
+=======
+                c_presto.cod_pptal AS cta_presupuesto,
+                c_presto_ant.cod_pptal AS cta_presupuesto_ant,
+                c_debito.cuenta AS cta_debito,
+                c_credito.cuenta AS cta_credito,
+                c_copago.cuenta AS cta_copago,
+                c_copago_cap.cuenta AS cta_copago_capitado,
+                c_gloini_deb.cuenta AS cta_glosaini_debito,
+                c_gloini_cre.cuenta AS cta_glosaini_credito,
+                c_glo_def.cuenta AS cta_glosadefinitiva,
+                c_devol.cuenta AS cta_devolucion,
+                c_caja.cuenta AS cta_caja,
+                c_fac_glo.cuenta AS cta_fac_global,
+                c_x_ide.cuenta AS cta_x_ident,
+                c_baja.cuenta AS cta_baja,
+                IF(c.id IS NULL,'','X') AS vigente,
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
 	            IF(tb_homologacion.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM tb_homologacion
             INNER JOIN tb_regimenes ON (tb_regimenes.id_regimen=tb_homologacion.id_regimen)
             INNER JOIN tb_cobertura ON (tb_cobertura.id_cobertura=tb_homologacion.id_cobertura)
             INNER JOIN tb_modalidad ON (tb_modalidad.id_modalidad=tb_homologacion.id_modalidad)
+<<<<<<< HEAD
+=======
+            LEFT JOIN pto_cargue  AS c_presto ON (c_presto.id_cargue=tb_homologacion.id_cta_presupuesto)
+            LEFT JOIN pto_cargue  AS c_presto_ant ON (c_presto_ant.id_cargue=tb_homologacion.id_cta_presupuesto_ant)
+            LEFT JOIN ctb_pgcp AS c_debito ON (c_debito.id_pgcp=tb_homologacion.id_cta_debito)
+            LEFT JOIN ctb_pgcp AS c_credito ON (c_credito.id_pgcp=tb_homologacion.id_cta_credito)
+            LEFT JOIN ctb_pgcp AS c_copago ON (c_copago.id_pgcp=tb_homologacion.id_cta_copago)
+            LEFT JOIN ctb_pgcp AS c_copago_cap ON (c_copago_cap.id_pgcp=tb_homologacion.id_cta_copago_capitado)
+            LEFT JOIN ctb_pgcp AS c_gloini_deb ON (c_gloini_deb.id_pgcp=tb_homologacion.id_cta_glosaini_debito)
+            LEFT JOIN ctb_pgcp AS c_gloini_cre ON (c_gloini_cre.id_pgcp=tb_homologacion.id_cta_glosaini_credito)
+            LEFT JOIN ctb_pgcp AS c_glo_def ON (c_glo_def.id_pgcp=tb_homologacion.id_cta_glosadefinitiva)        
+            LEFT JOIN ctb_pgcp AS c_devol ON (c_devol.id_pgcp=tb_homologacion.id_cta_devolucion)
+            LEFT JOIN ctb_pgcp AS c_caja ON (c_caja.id_pgcp=tb_homologacion.id_cta_caja)
+            LEFT JOIN ctb_pgcp AS c_fac_glo ON (c_fac_glo.id_pgcp=tb_homologacion.id_cta_fac_global)
+            LEFT JOIN ctb_pgcp AS c_x_ide ON (c_x_ide.id_pgcp=tb_homologacion.id_cta_x_ident)
+            LEFT JOIN ctb_pgcp AS c_baja ON (c_baja.id_pgcp=tb_homologacion.id_cta_baja)
+            LEFT JOIN (SELECT MAX(id_homo) AS id FROM tb_homologacion
+                        WHERE estado=1 AND fecha_vigencia<=DATE_FORMAT(NOW(), '%Y-%m-%d')
+                        GROUP BY id_regimen,id_cobertura,id_modalidad) AS c ON (c.id=tb_homologacion.id_homo)
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
             $where ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -81,6 +127,24 @@ if (!empty($objs)) {
             "nom_cobertura" => mb_strtoupper($obj['nom_cobertura']),
             "nom_modalidad" => mb_strtoupper($obj['nom_modalidad']),
             "fecha_vigencia" => $obj['fecha_vigencia'],
+<<<<<<< HEAD
+=======
+            "cta_presupuesto" => $obj['cta_presupuesto'],
+            "cta_presupuesto_ant" => $obj['cta_presupuesto_ant'],
+            "cta_debito" => $obj['cta_debito'],
+            "cta_credito" => $obj['cta_credito'],
+            "cta_copago" => $obj['cta_copago'],
+            "cta_copago_capitado" => $obj['cta_copago_capitado'],
+            "cta_glosaini_debito" => $obj['cta_glosaini_debito'],
+            "cta_glosaini_credito" => $obj['cta_glosaini_credito'],
+            "cta_glosadefinitiva" => $obj['cta_glosadefinitiva'],
+            "cta_devolucion" => $obj['cta_devolucion'],
+            "cta_caja" => $obj['cta_caja'],
+            "cta_fac_global" => $obj['cta_fac_global'],
+            "cta_x_ident" => $obj['cta_x_ident'],
+            "cta_baja" => $obj['cta_baja'],
+            "vigente" => $obj['vigente'],
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
             "estado" => $obj['estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];

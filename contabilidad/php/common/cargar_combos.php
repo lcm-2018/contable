@@ -59,7 +59,11 @@ function modalidad($cmd, $titulo = '', $id = 0)
     }
 }
 
+<<<<<<< HEAD
 function estados_registros($titulo = '',$estado = 2)
+=======
+function estados_registros($titulo = '',$estado = -1)
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';
@@ -68,7 +72,11 @@ function estados_registros($titulo = '',$estado = 2)
     echo '<option value="0"' . $selected . '>INACTIVO</option>';
 }
 
+<<<<<<< HEAD
 function estados_sino($titulo = '',$estado = 2)
+=======
+function estados_sino($titulo = '',$estado = -1)
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
 {
     echo '<option value="">' . $titulo . '</option>';
     $selected = ($estado == 1) ? 'selected="selected"' : '';
@@ -76,3 +84,38 @@ function estados_sino($titulo = '',$estado = 2)
     $selected = ($estado == 0) ? 'selected="selected"' : '';
     echo '<option value="0"' . $selected . '>NO</option>';
 }
+<<<<<<< HEAD
+=======
+
+function interno_externo($titulo = '',$estado = -1)
+{
+    echo '<option value="">' . $titulo . '</option>';
+    $selected = ($estado == 1) ? 'selected="selected"' : '';
+    echo '<option value="1"' . $selected . '>Interno</option>';
+    $selected = ($estado == 2) ? 'selected="selected"' : '';
+    echo '<option value="2"' . $selected . '>Externo</option>';
+}
+
+function grupo_articulo($cmd, $titulo = '', $id = 0)
+{
+    /*Tipo  =0  Cuando se utiliza en formularios como filtro de búsqueda
+            !=0 Cuando se utiliza en formularios como dato solicitado */
+    try {
+        echo '<option value="">' . $titulo . '</option>';
+        $sql = "SELECT id_grupo,nom_grupo FROM far_grupos WHERE id_grupo<>0";
+        $rs = $cmd->query($sql);
+        $objs = $rs->fetchAll();
+        foreach ($objs as $obj) {
+            if ($obj['id_grupo']  == $id) {
+                echo '<option value="' . $obj['id_grupo'] . '" selected="selected">' . $obj['nom_grupo'] . '</option>';
+            } else {
+                echo '<option value="' . $obj['id_grupo'] . '">' . $obj['nom_grupo'] . '</option>';
+            }
+        }
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
+
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b

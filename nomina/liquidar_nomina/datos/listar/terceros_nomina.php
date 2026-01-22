@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -49,9 +49,14 @@ try {
                     `nom_juzgados`
                 UNION ALL
                 SELECT
-                    `id_tercero_api`, `nom_sindicato`, `nit`, 7 AS `categoria`
+                    `id_tercero_api`, `nit`, `nom_sindicato`, 7 AS `categoria`
                 FROM
-                    `nom_sindicatos`) AS `t1` 
+                    `nom_sindicatos`
+                UNION ALL
+                SELECT
+                    `id_tercero_api`, `nit`, `nom_parafiscal`, 8 AS `categoria`
+                FROM
+                    `nom_parafiscales`) AS `t1` 
             INNER JOIN `nom_categoria_tercero`
                 ON (`t1`.`categoria` = `nom_categoria_tercero`.`id_cat`)";
     $rs = $cmd->query($sql);

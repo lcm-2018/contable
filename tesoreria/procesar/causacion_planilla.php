@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
@@ -14,9 +14,25 @@ $id_doc = $data[2];
 $id_doc_crp = $data[3];
 $id_ctb_doc = $data[4];
 
-$id_api_sena = 1245;
-$id_api_icbf = 1247;
-$id_api_comfam = 1246;
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT
+                `id_parafiscal`,`id_tercero_api`,`tipo`
+            FROM `nom_parafiscales`
+            ORDER BY `id_parafiscal` DESC";
+    $rs = $cmd->query($sql);
+    $parafiscales = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$kpf = array_search('SENA', array_column($parafiscales, 'tipo'));
+$id_api_sena = $kpf !== false ? $parafiscales[$kpf]['id_tercero_api'] : exit('No se ha configurado el parafiscal SENA');
+$kpf = array_search('ICBF', array_column($parafiscales, 'tipo'));
+$id_api_icbf = $kpf !== false ? $parafiscales[$kpf]['id_tercero_api'] : exit('No se ha configurado el parafiscal ICBF');
+$kpf = array_search('CAJA', array_column($parafiscales, 'tipo'));
+$id_api_comfam = $kpf !== false ? $parafiscales[$kpf]['id_tercero_api'] : exit('No se ha configurado el parafiscal CAJA DE COMPENSACION');
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -131,8 +147,8 @@ foreach ($patronales as $p) {
     $valores[$tipo]['arl'][$id_arl] = $p['aporte_rieslab'] + $valarl;
     $valores[$tipo]['afp'][$id_afp] = $p['aporte_pension_empresa'] + $valafp;
 }
-$administrativo = $valores['administrativo'];
-$operativo = $valores['operativo'];
+$administrativo = isset($valores['administrativo']) ? $valores['administrativo'] : [];
+$operativo = isset($valores['operativo']) ? $valores['operativo'] : [];
 $idsTercer = [];
 foreach ($patronales as $p) {
     $id_eps = $p['id_eps'];
@@ -163,7 +179,6 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$cuentas = [];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -174,66 +189,25 @@ try {
                 , `nom_tipo_rubro`.`nombre`
                 , `nom_causacion`.`cuenta`
                 , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
+                , `tb_centrocostos`.`es_pasivo`
+                FROM
+                    `nom_causacion`
                 INNER JOIN `nom_tipo_rubro` 
                     ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'ADMIN'";
-    $rs = $cmd->query($sql);
-    $cAdmin = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-$cuentas['admin'] = $cAdmin;
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'URG'";
-    $rs = $cmd->query($sql);
-    $cUrg = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-$cuentas['urg'] = $cUrg;
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'PASIVO'";
+                INNER JOIN `tb_centrocostos`
+                    ON (`nom_causacion`.`centro_costo` = `tb_centrocostos`.`id_centro`)
+                WHERE `tb_centrocostos`.`es_pasivo` = 1";
     $rs = $cmd->query($sql);
     $cPasivo = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$cuentas['pasivo'] = $cPasivo;
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_cuenta` AS `cta_contable` FROM `tes_cuentas` WHERE (`estado` = 1)";
+    $sql = "SELECT `id_cuenta` AS `cta_contable` FROM `tes_cuentas` WHERE (`est_nomina` = 1)";
     $rs = $cmd->query($sql);
     $banco = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -259,10 +233,24 @@ if ($nomina['tipo'] == 'N') {
     $cual = 'MENSUAL';
 } else if ($nomina['tipo'] == 'PS') {
     $cual = 'DE PRESTACIONES SOCIALES';
+} else if ($nomina['tipo'] == 'VC') {
+    $cual = 'DE VACACIONES';
+} else if ($nomina['tipo'] == 'PV') {
+    $cual = 'DE PRIMA DE SERVICIOS';
+} else if ($nomina['tipo'] == 'RA') {
+    $cual = 'DE RETROACTIVO';
+} else if ($nomina['tipo'] == 'CE') {
+    $cual = 'DE CESANTIAS';
+} else if ($nomina['tipo'] == 'IC') {
+    $cual = 'DE INTERESES DE CESANTIAS';
+} else if ($nomina['tipo'] == 'VS') {
+    $cual = 'DE VACACIONES';
+} else {
+    $cual = 'OTRAS';
 }
 $nom_mes = isset($meses[$nomina['mes']]) ? 'MES DE ' . mb_strtoupper($meses[$nomina['mes']]) : '';
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-$fecha = $date->format('Y-m-d');
+$fecha = $data[5];
 $objeto = "PAGO NOMINA PATRONAL " . $cual . " N° " . $nomina['id_nomina'] . ' ' . $nom_mes . " VIGENCIA " . $nomina['vigencia'];
 $sede = 1;
 $iduser = $_SESSION['id_user'];
@@ -285,7 +273,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `no_doc` = " . $_SESSION['nit_emp'];
+    $sql = "SELECT `id_tercero_api` FROM `tb_terceros` WHERE `nit_tercero` = " . $_SESSION['nit_emp'];
     $rs = $cmd->query($sql);
     $tercero = $rs->fetch();
     $id_ter_api = !empty($tercero) ? $tercero['id_tercero_api'] : 0;
@@ -357,7 +345,7 @@ try {
         $valor = 0;
         switch ($tipo) {
             case 11:
-                $valor = $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
+                $valor = isset($administrativo['comfam']) && $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
                 $rubro = $rb['r_admin'];
                 $id_tercero = $id_api_comfam;
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
@@ -369,7 +357,7 @@ try {
                 }
                 $rubro = $rb['r_operativo'];
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                $valor = $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
+                $valor = isset($operativo['comfam']) && $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
                 if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
@@ -474,7 +462,7 @@ try {
                 }
                 break;
             case 15:
-                $valor = $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
+                $valor = isset($administrativo['icbf']) && $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
                 $rubro = $rb['r_admin'];
                 $id_tercero = $id_api_icbf;
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
@@ -486,7 +474,7 @@ try {
                 }
                 $rubro = $rb['r_operativo'];
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                $valor = $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
+                $valor = isset($operativo['icbf']) && $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
                 if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
@@ -495,7 +483,7 @@ try {
                 }
                 break;
             case 16:
-                $valor = $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
+                $valor = isset($administrativo['sena']) && $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
                 $rubro = $rb['r_admin'];
                 $id_tercero = $id_api_sena;
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
@@ -507,7 +495,7 @@ try {
                 }
                 $rubro = $rb['r_operativo'];
                 $id_det = IdDetalle($ids_detalle, $rubro, $id_tercero);
-                $valor = $operativo['sena'] > 0 ? $operativo['sena'] : 0;
+                $valor = isset($operativo['sena']) && $operativo['sena'] > 0 ? $operativo['sena'] : 0;
                 if ($valor > 0) {
                     $query->execute();
                     if (!($cmd->lastInsertId() > 0)) {
@@ -537,7 +525,7 @@ try {
     $query->bindParam(5, $credito, PDO::PARAM_STR);
     $query->bindParam(6, $iduser, PDO::PARAM_INT);
     $query->bindParam(7, $fecha2);
-    foreach ($cuentas['pasivo'] as $cp) {
+    foreach ($cPasivo as $cp) {
         $credito = 0;
         $tipo = $cp['id_tipo'];
         $cuenta = $cp['cuenta'];
@@ -692,7 +680,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-//CEVA
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -743,7 +731,7 @@ try {
     $query->bindParam(5, $credito, PDO::PARAM_STR);
     $query->bindParam(6, $iduser, PDO::PARAM_INT);
     $query->bindParam(7, $fecha2);
-    foreach ($cuentas['pasivo'] as $cp) {
+    foreach ($cPasivo as $cp) {
         $credito = 0;
         $tipo = $cp['id_tipo'];
         $cuenta = $cp['cuenta'];

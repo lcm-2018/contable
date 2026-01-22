@@ -1,16 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
-// Consulta tipo de presupuesto
+include '../terceros.php';
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -44,26 +41,7 @@ try {
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ]
@@ -97,28 +75,18 @@ try {
                             $id_t[] = $rp['id_tercero'];
                         }
                     }
-                    $payload = json_encode($id_t);
-                    //API URL
-                    $url = $api . 'terceros/datos/res/lista/terceros';
-                    $ch = curl_init($url);
-                    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    $result = curl_exec($ch);
-                    curl_close($ch);
-                    $terceros = json_decode($result, true);
+                    $ids = implode(',', $id_t);
+                    $terceros = getTerceros($ids, $cmd);
                     foreach ($listado as $ce) {
                         $id_doc = $ce['id_ctb_doc'];
                         $fecha = date('Y-m-d', strtotime($ce['fecha']));
                         // Consulta terceros en la api
-                        $key = array_search($ce['id_tercero'], array_column($terceros, 'id_tercero'));
-                        $tercero = $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['razon_social'];
-                        $ccnit = $terceros[$key]['cc_nit'];
+                        $key = array_search($ce['id_tercero'], array_column($terceros, 'id_tercero_api'));
+                        $tercero = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
+                        $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
                         // fin api terceros
 
-                        if ((intval($permisos['editar'])) === 1) {
+                        if (true) {
                             $editar = '<a value="' . $id_doc . '" onclick="cargarListaArqueoConsignacion(' . $id_doc . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-plus-square fa-lg"></span></a>';
                             $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
@@ -130,6 +98,7 @@ try {
                             $editar = null;
                             $detalles = null;
                         }
+                        $acciones = null;
                     ?>
                         <tr>
                             <td class="text-left"><?php echo $ce['id_manu']  ?></td>
@@ -147,9 +116,6 @@ try {
         </div>
     </div>
     <div class="text-right pt-3">
-        <a type="button" class="btn btn-primary btn-sm" data-dismiss="modal"> Procesar lote</a>
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>
-<?php
-$cmd = null;

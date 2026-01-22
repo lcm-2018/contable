@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
@@ -19,73 +19,54 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 //
 try {
     $sql = "SELECT
-                `pto_rec`.`id_pto_rec`
-                , `pto_rec`.`fecha`
+                `taux`.`id_pto_rec`
+                , DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') AS `fecha`
                 , `pto_rec`.`id_manu`
                 , `pto_rec`.`objeto`
                 , `pto_rec`.`num_factura`
                 , `pto_rec`.`estado`
-                , `pto_rec_detalle`.`id_tercero_api`
+                , `pto_rec`.`id_tercero_api`
                 , `pto_cargue`.`nom_rubro`
                 , `pto_cargue`.`cod_pptal` AS `rubro`
-                , `pto_rad_detalle`.`id_rubro`
-                , IFNULL(`t1`.`valor`,0) AS `valor`
+                , `taux`.`id_rubro`
+                , `taux`.`valor`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
             FROM
-                `pto_rec_detalle`
-                INNER JOIN `pto_rad_detalle` 
-                    ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
-                INNER JOIN `pto_rec` 
-                    ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
-                INNER JOIN `pto_cargue` 
-                    ON (`pto_rad_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                LEFT JOIN
-                (SELECT
-                    `pto_rec`.`id_pto_rec`
-                    , `pto_rad_detalle`.`id_rubro`
-                    , SUM(IFNULL(`pto_rec_detalle`.`valor`,0)) - SUM(IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `valor`
+                (SELECT 	
+                    `tb1`.`id_rubro`
+                    , SUM(`tb1`.`valor`) AS `valor` 
+                    , `tb1`.`id_pto_rec` 
                 FROM
-                    `pto_rec_detalle`
-                    INNER JOIN `pto_rad_detalle` 
-                        ON (`pto_rec_detalle`.`id_pto_rad_detalle` = `pto_rad_detalle`.`id_pto_rad_det`)
-                    INNER JOIN `pto_rec` 
-                        ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
-                    INNER JOIN `pto_cargue` 
-                        ON (`pto_rad_detalle`.`id_rubro` = `pto_cargue`.`id_cargue`)
-                WHERE (`pto_rec`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_rec`.`estado` <> 0)
-                GROUP BY `pto_rec`.`id_pto_rec`, `pto_rad_detalle`.`id_rubro`) AS `t1`
-                ON(`pto_rec`.`id_pto_rec`  = `t1`.`id_pto_rec` AND `t1`.`id_rubro` = `pto_rad_detalle`.`id_rubro`)
-            WHERE (`pto_rec`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_corte' AND `pto_rec`.`estado` <> 0)
-            GROUP BY `pto_rec`.`id_pto_rec`, `pto_rad_detalle`.`id_rubro`";
+                    (SELECT
+                        IF(`rad`.`id_rubro`IS NULL, `rec`.`id_rubro`, `rad`.`id_rubro` ) AS `id_rubro` 
+                        , (IFNULL(`rec`.`valor`,0) - IFNULL(`rec`.`valor_liberado`,0)) AS `valor`
+                        , `pto_rec`.`id_pto_rec`
+                    FROM
+                        `pto_rec_detalle` AS `rec`
+                        INNER JOIN `pto_rec`
+                        ON (`pto_rec`.`id_pto_rec` = `rec`.`id_pto_rac`)
+                        LEFT JOIN `pto_rad_detalle`  AS `rad`
+                        ON (`rec`.`id_pto_rad_detalle` = `rad`.`id_pto_rad_det`)
+                    WHERE `pto_rec`.`estado` = 2 AND DATE_FORMAT(`pto_rec`.`fecha`,'%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_corte') AS `tb1`
+                GROUP BY `tb1`.`id_rubro`,`tb1`.`id_pto_rec`) AS `taux`
+                INNER JOIN `pto_rec`
+                    ON (`taux`.`id_pto_rec` = `pto_rec`.`id_pto_rec`)
+                INNER JOIN `pto_cargue`
+                    ON (`pto_cargue`.`id_cargue` = `taux`.`id_rubro`)
+                LEFT JOIN `tb_terceros`
+                    ON (`pto_rec`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            ORDER BY `pto_rec`.`fecha` ASC, `pto_rec`.`id_manu` ASC";
     $res = $cmd->query($sql);
     $causaciones = $res->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$terceros = [];
-if (!empty($causaciones)) {
-    $id_t = [];
-    foreach ($causaciones as $ca) {
-        if ($ca['id_tercero_api'] != '') {
-            $id_t[] = $ca['id_tercero_api'];
-        }
-    }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
-}
+
 $nom_informe = "RELACION DE RECAUDOS";
 include_once '../../financiero/encabezado_empresa.php';
 ?>
-<table class="table-hover" style="width:100% !important; border-collapse: collapse;" border="1">
+<table class="table-hover table-selectable" style="width:100% !important; border-collapse: collapse;" border="1">
     <thead>
         <tr class="centrar">
             <th>No reconocimiento</th>
@@ -101,25 +82,26 @@ include_once '../../financiero/encabezado_empresa.php';
     <tbody>
         <?php
         if (!empty($causaciones)) {
+            $total = 0;
             foreach ($causaciones as $rp) {
-                $key = array_search($rp['id_tercero_api'], array_column($terceros, 'id_tercero'));
-                $tercero = $key !== false ? ltrim($terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['razon_social']) : '---';
-                $ccnit = $key !== false ? number_format($terceros[$key]['cc_nit'], 0, "", ".") : '---';
-
-                $fecha = date('Y-m-d', strtotime($rp['fecha']));
                 if ($rp['valor'] >= 0) {
+                    $total += $rp['valor'];
                     echo "<tr>
                         <td style='text-align:left'>" . $rp['id_manu'] . "</td>
                         <td style='text-align:left'>" . $rp['num_factura'] . "</td>
-                        <td style='text-align:left;white-space: nowrap;'>" .   $fecha   . "</td>
-                        <td style='text-align:left'>" .  $tercero . "</td>
-                        <td style='text-align:right;white-space: nowrap;'>" .  $ccnit . "</td>
+                        <td style='text-align:left;white-space: nowrap;'>" .   $rp['fecha']   . "</td>
+                        <td style='text-align:left'>" .  $rp['nom_tercero'] . "</td>
+                        <td style='text-align:right;white-space: nowrap;'>" .  $rp['nit_tercero'] . "</td>
                         <td style='text-align:left'>" . $rp['objeto'] . "</td>
                         <td style='text-align:left'>" .  $rp['rubro'] . "</td>
                         <td style='text-align:right'>" . number_format($rp['valor'], 2, ".", ",")  . "</td>
                     </tr>";
                 }
             }
+            echo "<tr>
+                <th colspan='7' style='text-align:center'>TOTAL</th>
+                <th style='text-align:right'>" . number_format($total, 2, ".", ",") . "</th>
+            </tr>";
         } else {
             echo "<tr><td colspan='8'  style='text-align:center'>No hay datos para mostrar</td></tr>";
         }

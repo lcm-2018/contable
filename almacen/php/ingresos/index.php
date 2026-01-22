@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -55,7 +55,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <div class="form-group col-md-1">
                                     <input type="text" class="filtro form-control form-control-sm" id="txt_numing_filtro" placeholder="No. Ingreso">
                                 </div>
-                                <div class="form-group col-md-1">
+                                <div class="form-group col-md-2">
                                     <input type="text" class="filtro form-control form-control-sm" id="txt_numfac_filtro" placeholder="No. Factura">
                                 </div>
                                 <div class="form-group col-md-3">
@@ -69,18 +69,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </div>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_tercero_filtro">
-                                        <?php terceros($cmd,'--Tercero--') ?>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_tiping_filtro">
                                         <?php tipo_ingreso($cmd,'--Tipo Ingreso--') ?>
                                     </select>
                                 </div>
-                                <div class="form-group col-md-1">
-                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
-                                        <?php estados_movimientos('--Estado--') ?>
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_tercero_filtro">
+                                        <?php terceros($cmd,'--Tercero--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
@@ -90,7 +85,24 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <a type="button" id="btn_imprime_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
                                         <span class="fas fa-print" aria-hidden="true"></span>                                       
                                     </a>
+                                </div> 
+                            </div>    
+                            <div class="form-row">                                   
+                                <div class="form-group col-md-1">
+                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
+                                        <?php estados_movimientos('--Estado--') ?>
+                                    </select>
                                 </div>
+                                <div class="form-group col-md-1">
+                                    <select class="form-control form-control-sm" id="sl_modulo_origen">
+                                        <?php modulo_origen('--Origen--',0) ?>
+                                    </select>
+                                </div>   
+                                <div class="form-group col-md-3">
+                                    <select class="filtro form-control form-control-sm text-primary" id="sl_tipo_reporte">
+                                        <?php tipo_reporte_ingresos('--TIPO DE REPORTE--') ?>
+                                    </select>
+                                </div>                              
                             </div>
 
                             <!--Lista de registros en la tabla-->
@@ -108,14 +120,15 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>No. Ingreso</th>
                                         <th>Fecha Ingreso</th>
                                         <th>Hora Ingreso</th>
-                                        <th>No. Factura</th>
-                                        <th>Fecha Factura</th>
+                                        <th>No. Fac./Acta/Rem.</th>
+                                        <th>Fecha Fac./Acta/Rem.</th>
                                         <th>Detalle</th>
-                                        <th>Tercero</th>
                                         <th>Tipo Ingreso</th>
-                                        <th>Vr. Total</th>
+                                        <th>Tercero</th>                                                                                
                                         <th>Sede</th>
                                         <th>Bodega</th>
+                                        <th>Vr. Total</th>
+                                        <th>Id.Estado</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>

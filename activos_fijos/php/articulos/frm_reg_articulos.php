@@ -29,8 +29,6 @@ if (empty($obj)) {
     //Inicializa variable por defecto
     $obj['estado'] = 1;
 }
-$imprimir = $id != -1 ? '' : 'disabled="disabled"';
-
 ?>
 
 <div class="px-0">
@@ -46,7 +44,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                 <div class=" form-row">
                     <div class="form-group col-md-2">
                         <label for="txt_cod_art" class="small">Código</label>
-                        <input type="text" class="form-control form-control-sm number" id="txt_cod_art" name="txt_cod_art" required value="<?php echo $obj['cod_medicamento'] ?>">
+                        <input type="text" class="form-control form-control-sm valcode" id="txt_cod_art" name="txt_cod_art" required value="<?php echo $obj['cod_medicamento'] ?>">
                     </div>
                     <div class="form-group col-md-6">
                         <label for="txt_nom_art" class="small">Nombre</label>
@@ -59,12 +57,16 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-2">
+                        <label for="txt_vidautil_art" class="small">Vida Útil (años)</label>
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_vidautil_art" name="txt_vidautil_art" value="<?php echo $obj['vida_util'] ?>">
+                    </div>
+                    <div class="form-group col-md-2">
                         <label for="txt_topmin_art" class="small">Tope Mínimo</label>
-                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmin_art" name="txt_topmin_art" required value="<?php echo $obj['top_min'] ?>">
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmin_art" name="txt_topmin_art" value="<?php echo $obj['top_min'] ?>">
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_topmax_art" class="small">Tope Máximo</label>
-                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmax_art" name="txt_topmax_art" required value="<?php echo $obj['top_max'] ?>">
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmax_art" name="txt_topmax_art" value="<?php echo $obj['top_max'] ?>">
                     </div>
                     <div class="form-group col-md-4">
                         <label for="txt_unimed_art" class="small">Unidad Medida</label>
@@ -83,7 +85,6 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
     </div>
     <div class="text-center pt-3">    
         <button type="button" class="btn btn-primary btn-sm" id="btn_guardar">Guardar</button>
-        <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir" <?php echo $imprimir ?>>Imprimir</button>
         <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal">Cancelar</a>
     </div>
 </div>

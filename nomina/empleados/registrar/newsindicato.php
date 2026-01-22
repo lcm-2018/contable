@@ -2,13 +2,13 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
 $idemple = isset($_POST['idEmpSindicato']) ? $_POST['idEmpSindicato'] : exit('Acción no permitida');
 $sindicato = $_POST['slcSindicato'];
-$porcentaje = str_replace(',', '.', $_POST['txtPorcentajeSind']) / 100;
+$porcentaje = str_replace(',', '.', $_POST['txtPorcentajeSind']);
 $finsind = date('Y-m-d', strtotime($_POST['datFecInicioSind']));
 if ($_POST['datFecFinSind'] === '') {
     $ffinsind;
@@ -33,7 +33,7 @@ try {
     if ($cmd->lastInsertId() > 0) {
         echo '1';
     } else {
-        print_r($sql->errorInfo()[2]);
+        echo $sql->errorInfo()[2];
     }
     $cmd = null;
 } catch (PDOException $e) {

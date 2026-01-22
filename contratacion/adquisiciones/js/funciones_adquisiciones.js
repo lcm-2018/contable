@@ -39,43 +39,13 @@
         });
         return false;
     };
-    var setIdioma = {
-        "decimal": "",
-        "emptyTable": "No hay información",
-        "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-        "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-        "infoPostFix": "",
-        "thousands": ",",
-        "lengthMenu": "Ver _MENU_ Filas",
-        "loadingRecords": "Cargando...",
-        "processing": "Procesando...",
-        "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-        "zeroRecords": "No se encontraron registros",
-        "paginate": {
-            "first": "&#10096&#10096",
-            "last": "&#10097&#10097",
-            "next": "&#10097",
-            "previous": "&#10096"
-        }
-    };
-    var setdom;
-    if ($("#peReg").val() === '1') {
-        setdom = "<'row'<'col-md-5'l><'bttn-plus-dt col-md-2'B><'col-md-5'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-    } else {
-        setdom = "<'row'<'col-md-6'l><'col-md-6'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-    }
     $(document).ready(function () {
         //dataTable adquisiciones
         $('#tableAdquisiciones').DataTable({
             dom: setdom,
             buttons: [{
                 action: function (e, dt, node, config) {
-                    $.post("datos/registrar/formadd_adquisicion.php", function (he) {
+                    $.post("datos/registrar/formadd_adquisicion.php", { id_adq: 0 }, function (he) {
                         $('#divTamModalForms').removeClass('modal-xl');
                         $('#divTamModalForms').removeClass('modal-sm');
                         $('#divTamModalForms').addClass('modal-lg');
@@ -89,6 +59,10 @@
                 url: 'datos/listar/datos_adquisiciones.php',
                 type: 'POST',
                 dataType: 'json',
+                data: function (d) {
+                    d.anulados = $('#verAnulados').prop('checked') ? '1' : '0';
+                    return d
+                }
             },
             "columns": [
                 { 'data': 'id' },
@@ -116,64 +90,6 @@
         });
         $('#tableAdquisiciones').wrap('<div class="overflow" />');
         $('#tableLisTerCot').wrap('<div class="overflow" />');
-        //dataTable Adquisicion de bienes o servicios
-        $('#tableAdqBnSv').DataTable({
-            dom: "<'row'<'reg-orden col-md-6'B><'col-md-6'f>>" +
-                "<'row'<'col-sm-12'tr>>" +
-                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-            buttons: [{
-                text: 'CREAR ORDEN',
-                action: function () {
-                    let b = 1;
-                    $('input[type=checkbox]:checked').each(function () {
-                        let idcheck = $(this).val();
-                        let idCant = 'bnsv_' + idcheck;
-                        let idVAl = 'val_bnsv_' + idcheck;
-                        if ($('#' + idCant).val() === '' || parseInt($('#' + idCant).val()) <= 0) {
-                            showError(idCant);
-                            bordeError(idCant);
-                            b = 0
-                            return false;;
-                        }
-                        if ($('#' + idVAl).val() === '' || parseInt($('#' + idVAl).val()) <= 0) {
-                            showError(idVAl);
-                            bordeError(idVAl);
-                            b = 0
-                            return false;;
-                        }
-
-                    });
-                    if (b === 1) {
-                        let datos = $('#formDetallesAdq').serialize();
-                        $.ajax({
-                            type: 'POST',
-                            url: 'registrar/new_adquisicion_bn_sv.php',
-                            data: datos,
-                            success: function (r) {
-                                if (r === 0) {
-                                    $('#divModalError').modal('show');
-                                    $('#divMsgError').html("No se agregó ningún bien o servicio");
-                                } else if (r > 0) {
-                                    let id = 'tableAdquisiciones';
-                                    reloadtable(id);
-                                    $('#divModalForms').modal('hide');
-                                    $('#divModalDone').modal('show');
-                                    $('#divEstadoBnSv').html('<div class="p-3 mb-2 bg-success text-white">ORDEN AGREGADA CORRECTAMENTE</div>');
-                                    $('#divMsgDone').html('Se agregaron' + r + 'bien(es) o servicio(s) a la compra actual');
-                                } else {
-                                    $('#divModalError').modal('show');
-                                    $('#divMsgError').html(r);
-                                }
-                            }
-                        });
-                        return false;
-                    }
-                }
-            }],
-            language: setIdioma,
-            paginate: false,
-        });
-        $('#tableAdqBnSv').wrap('<div class="overflow" />');
         $('#tableUpAdqBnSv').DataTable({
             language: setIdioma,
             "lengthMenu": [
@@ -185,11 +101,27 @@
         $('#tableUpAdqBnSv').wrap('<div class="overflow" />');
 
         $('.tableCotRecibidas').DataTable({
+            dom: setdom,
+            buttons: [{
+                action: function (e, dt, node, config) {
+                    $.post("datos/registrar/formadd_servicios.php", { id_adq: $('#id_compra').val(), tipo_servicio: $('#tipo_servicio').val() }, function (he) {
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').removeClass('modal-sm');
+                        $('#divTamModalForms').addClass('modal-lg');
+                        $('#divModalForms').modal('show');
+                        $("#divForms").html(he);
+                    });
+                }
+            }],
             language: setIdioma,
             "lengthMenu": [
                 [10, 25, 50, -1],
                 [10, 25, 50, 'TODO'],
             ],
+            columnDefs: [{
+                class: 'text-wrap',
+                targets: [1]
+            }],
             "pageLength": -1
         });
         $('.tableCotRecibidas').wrap('<div class="overflow" />');
@@ -254,7 +186,11 @@
                 [10, 25, 50, -1],
                 [10, 25, 50, 'TODO'],
             ],
-            "pageLength": -1
+            "pageLength": -1,
+            columnDefs: [{
+                class: 'text-wrap',
+                targets: [6]
+            }],
         });
         $('#tableNovedadesContrato').wrap('<div class="overflow" />');
         $('#divForms').on('change', '#slcTipoBnSv', function () {
@@ -297,8 +233,38 @@
             orderCh();
         });
     });
+    $('#divForms').on('change', '#slcAreaSolicita', function () {
+        var id = $(this).val();
+        $.ajax({
+            type: 'POST',
+            url: 'datos/listar/tipo_bs_adq.php',
+            data: { id: id },
+            dataType: 'json',
+            success: function (r) {
+                if (r.status == 'ok') {
+                    $('#filtro').val(r.filtro);
+                    if (r.tipo == '0') {
+                        $('#slcTipoBnSv').val(0);
+                        $('#txtBuscarTipoBnSv').val('');
+                        $('#txtBuscarTipoBnSv').attr('disabled', false);
+                        $('#txtBuscarTipoBnSv').attr('readonly', false);
+                    } else {
+                        $('#txtBuscarTipoBnSv').attr('disabled', true);
+                        $('#txtBuscarTipoBnSv').attr('readonly', true);
+                        $('#slcTipoBnSv').val(r.id);
+                        $('#txtBuscarTipoBnSv').val(r.nombre);
+                    }
+                } else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r.msg);
+                }
+            }
+        });
+    });
     //Agregar adquisicion
     $('#divForms').on('click', '#btnAddAdquisicion', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#datFecAdq').val() === '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Fecha de aquisición no puede ser Vacía!');
@@ -311,9 +277,6 @@
         } else if ($('#slcAreaSolicita').val() === '0') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Debe seleccionar el área solicitante!');
-        } else if ($('#numTotalContrato').val() == '' || parseInt($('#numTotalContrato').val()) <= 0) {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('¡El valor total del contrato debe ser mayor o igual a cero!');
         } else if ($('#txtObjeto').val() === '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('¡Objeto no puede ser Vacío!');
@@ -337,6 +300,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     //Editar adquisición 
@@ -352,8 +316,14 @@
     });
     $('#modificarAdquisiciones').on('click', '.editar', function () {
         let id_up = $(this).attr('value');
-        $('<form action="actualizar/up_adq_compra.php" method="post"><input type="hidden" name="up_adq_compra" value="' + id_up + '" /></form>')
-            .appendTo('body').submit();
+        $.post("datos/registrar/formadd_adquisicion.php", { id_adq: id_up }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+
     });
     $('#tableAdqBnSv input[type=checkbox]').on('change', function () {
         if ($('#tipo_contrato').val() == '1') {
@@ -386,6 +356,8 @@
         let id_adq = $('#id_compra').val();
         var validar = true;
         var centros = [];
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.form-control').removeClass('border-danger');
         $('#contenedor select').each(function () {
             let val = $(this).val();
@@ -395,6 +367,7 @@
                     $(this).addClass('border-danger');
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Centro de costo ya se encuentra seleccionado');
+                    ActivaBoton(btn);
                     return false;
                 }
                 if (val != '0') {
@@ -407,10 +380,12 @@
                 $(this).addClass('border-danger');
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Seleccionar una opción');
+                ActivaBoton(btn);
                 return false;
             }
         });
         if (!validar) {
+            ActivaBoton(btn);
             return false;
         }
         $('#contenedor input[type="number"]').each(function () {
@@ -420,6 +395,7 @@
                 $(this).addClass('border-danger');
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Ingresar un valor mayor o igual a 1');
+                ActivaBoton(btn);
                 return false;
             }
         });
@@ -444,6 +420,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
     });
     //Actualizar adquisición -> compra
     $('#btnUpDataAdqCompra').on('click', function () {
@@ -551,6 +528,16 @@
         });
         return false;
     });
+    $('.listOrdenes').on('click', function () {
+        let tipo = $(this).attr('text');
+        $.post("datos/listar/ordenes_almacen_activos.php", { tipo: tipo }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
     //Slc tercero cotizacion
     $('#modificarAdquisiciones').on('click', '.enviar', function () {
         let id = $(this).attr('value');
@@ -584,20 +571,29 @@
     });
     $('#modificarAdquisiciones').on('click', '.anular', function () {
         let id = $(this).attr('value');
-        $.ajax({
-            type: 'POST',
-            url: 'datos/actualizar/anula_adq.php',
-            data: { id: id },
-            success: function (r) {
-                if (r == 1) {
-                    let id = 'tableAdquisiciones';
-                    reloadtable(id);
-                    $('#divModalDone').modal('show');
-                    $('#divMsgDone').html('Adquisición anulada correctamente');
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r);
-                }
+        Swal.fire({
+            title: "¿Confirma Anular este Proceso?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'datos/actualizar/anula_adq.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 1) {
+                            $('#tableAdquisiciones').DataTable().ajax.reload(null, false);
+                            mje('Adquisición anulada correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
             }
         });
     });
@@ -935,6 +931,8 @@
         });
     });
     $("#divModalForms").on('click', '#btnDuplicaAdq', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         $('.is-invalid').removeClass('is-invalid');
         if ($('#datFecAdq').val() == '') {
             $('#datFecAdq').focus();
@@ -951,11 +949,6 @@
             $('#txtObjeto').addClass('is-invalid');
             $('#divModalError').modal('show');
             $('#divMsgError').html('Objeto del contrato no puede ser vacío');
-        } else if ($('#id_tercero').val() == '0') {
-            $('#SeaTercer').focus();
-            $('#SeaTercer').addClass('is-invalid');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe seleccionar un tercero');
         } else if ($('#datFecIniEjec').val() == '') {
             $('#datFecIniEjec').focus();
             $('#datFecIniEjec').addClass('is-invalid');
@@ -971,11 +964,6 @@
             $('#numValContrata').addClass('is-invalid');
             $('#divModalError').modal('show');
             $('#divMsgError').html('Valor total del contrato debe ser mayor a cero');
-        } else if ($('#numDS').val() == '') {
-            $('#numDS').focus();
-            $('#numDS').addClass('is-invalid');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Número DC no puede ser vacío');
         } else {
             let validar = false;
             $('.slcCentroCosto').each(function () {
@@ -985,11 +973,13 @@
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Selecccionar centro de costo');
                     validar = true;
+                    ActivaBoton(btn);
                     return false;
                 }
 
             });
             if (validar) {
+                ActivaBoton(btn);
                 return false;
             }
             validar = false;
@@ -1000,10 +990,12 @@
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Cantidad debe ser mayor a cero');
                     validar = true;
+                    ActivaBoton(btn);
                     return false;
                 }
             });
             if (validar) {
+                ActivaBoton(btn);
                 return false;
             }
             var datos = $('#formDuplicaAdq').serialize();
@@ -1024,14 +1016,16 @@
                     }
                 }
             });
+            ActivaBoton(btn);
         }
     });
     $("#divModalForms").on('input', '#SeaTercer', function () {
         $(this).autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: window.urlin + "/almacen/datos/listar/datos_terceros.php",
+                    url: window.urlin + "/terceros/gestion/datos/listar/buscar_terceros.php",
                     dataType: "json",
+                    type: 'POST',
                     data: {
                         term: request.term
                     },
@@ -1046,17 +1040,46 @@
             }
         });
     });
+
+    $("#divModalForms").on('input', '#txtBuscarTipoBnSv', function () {
+        let area = $('#slcAreaSolicita').val();
+        if (Number(area) != 0) {
+            $(this).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "datos/listar/list_tipo_servicio.php",
+                        dataType: "json",
+                        type: 'POST',
+                        data: { term: request.term, area: area },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $('#slcTipoBnSv').val(ui.item.id);
+                    $('#txtObjeto').val(ui.item.objeto);
+                }
+            });
+        } else {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe seleccionar un área solicitante');
+        }
+    });
     $('#btnAddEstudioPrevio').on('click', function () {
         let id = $('#id_compra').val();
         $.post("datos/registrar/formadd_estudio_previo.php", { id: id }, function (he) {
             $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-xl');
-            $('#divTamModalForms').addClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
     });
     $('#divModalForms').on('click', '#btnAddNewEstudioPrevio', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#datFecIniEjec').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Fecha Inicial no puede ser vacío');
@@ -1078,9 +1101,6 @@
             } else if ($('#slcSupervisor').val() == 0) {
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Debe selecionar un supervisor o elegir "PENDIENTE"');
-            } else if ($('#numDS').val() == '' || parseInt($('#numDS').val()) <= 0) {
-                $('#divModalError').modal('show');
-                $('#divMsgError').html('Debe ingresar un número DS');
             } else if ($('#slcFormPago').val() == 3 && $('#check_3').prop("checked") == false) {
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Para Pago Anticipado debe selecionar Póliza de manejo de anticipo');
@@ -1113,20 +1133,23 @@
                 });
             }
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#modificarEstPrev').on('click', '.editar', function () {
         let id = $(this).attr('value');
         $.post("datos/actualizar/formup_estudio_previo.php", { id: id }, function (he) {
             $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-xl');
-            $('#divTamModalForms').addClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').addClass('modal-xl');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
         return false;
     });
     $('#divModalForms').on('click', '#btnUpEstudioPrevio', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#datFecIniEjec').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Fecha Inicial no puede ser vacío');
@@ -1136,9 +1159,6 @@
         } else if ($('#numValContrata').val() == '' || parseInt($('#numValContrata').val()) <= 0) {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Valor de contratación debe ser mayor a cero');
-        } else if ($('#numDS').val() == '' || parseInt($('#numDS').val()) <= 0) {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Número DS debe ser mayor a cero');
         } else if ($('#slcSupervisor').val() == '0') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe seleccionar un supervisor');
@@ -1180,8 +1200,22 @@
                 });
             }
         }
+        ActivaBoton(btn);
         return false;
     });
+    $('.downloadFormsCtt').on('click', function () {
+        let form = $(this).attr('text');
+        let id = $('#id_compra').val();
+        if (form == '0') {
+            mjeError('No se ha cargado un formato para esta documento');
+        } else {
+            $('<form action="soportes/genera_formato.php" method="post">' +
+                '<input type="hidden" name="form" value="' + form + '" />' +
+                '<input type="hidden" name="id_adq" value="' + id + '" />' +
+                '</form>').appendTo('body').submit();
+        }
+    });
+    /*
     $('#btnFormatoEstudioPrevio').on('click', function () {
         let id = $('#id_compra').val();
         $('<form action="soportes/estudios_previos.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
@@ -1194,6 +1228,28 @@
         let id = $('#id_compra').val();
         $('<form action="soportes/anexos.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
     });
+    $('#btnFormatoCompraVenta').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/compraventa.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
+    $('#btnFormatoServicios').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/prestacion_servicios.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
+    $('#btnFormatoDesigSuper').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/designacion_supervisor.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
+    $('#btnFormatoContrato').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/contrato_ps.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
+    $('#btnFormActaInicio').on('click', function () {
+        let id = $('#id_compra').val();
+        $('<form action="soportes/acta_inicio.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    });
+    */
+
     $('#modificarEstPrev').on('click', '.borrar', function () {
         let id = $(this).attr('value');
         let tip = 'EstudPrevio';
@@ -1222,13 +1278,17 @@
     });
     $('#btnAddContrato').on('click', function () {
         let id = $('#id_compra').val();
-        $.post("datos/registrar/formadd_contrato_compra.php", { id: id }, function (he) {
-            $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-xl');
-            $('#divTamModalForms').addClass('modal-lg');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
-        });
+        if ($('#num_cdp').length) {
+            $.post("datos/registrar/formadd_contrato_compra.php", { id: id }, function (he) {
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').removeClass('modal-xl');
+                $('#divTamModalForms').addClass('modal-lg');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            });
+        } else {
+            mjeError('No se ha cargado un CDP para este proceso');
+        }
     });
     $('#divModalForms').on('change', '#datFecIniEjec', function () {
         let i = $('#datFecIniEjec').val();
@@ -1273,6 +1333,8 @@
         return false;
     });
     $('#divModalForms').on('click', '#btnAddContratoCompra', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#datFecIniEjec').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Fecha Inicial no puede ser vacío');
@@ -1282,6 +1344,9 @@
         } else if ($('#txtCodIntern').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe ingresar un número  para el contrato');
+        } else if ($('#id_tercero').val() == '0') {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe seleccionar un tercero');
         } else if ($('#txtCodSecop').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Debe ingresar el código SECOP II para el contrato');
@@ -1307,7 +1372,7 @@
                     url: 'registrar/new_contrato_compra.php',
                     data: datos,
                     success: function (r) {
-                        if (r == 1) {
+                        if (r == '1') {
                             $('#divModalDone a').attr('data-dismiss', '');
                             $('#divModalDone a').attr('href', 'javascript:location.reload()');
                             $('#divModalDone').modal('show');
@@ -1320,6 +1385,7 @@
                 });
             }
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#modificarContraCompra').on('click', '.editar', function () {
@@ -1334,12 +1400,17 @@
         return false;
     });
     $('#divModalForms').on('click', '#btnUpContratoCompra', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         if ($('#datFecIniEjec').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Fecha Inicial no puede ser vacío');
         } else if ($('#datFecFinEjec').val() == '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Fecha final no puede ser vacío');
+        } else if ($('#id_tercero').val() == '0') {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe seleccionar un tercero');
         } else {
             let fecini = new Date($('#datFecIniEjec').val());
             let fecfin = new Date($('#datFecFinEjec').val());
@@ -1350,7 +1421,7 @@
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Para Pago Anticipado debe selecionar Póliza de manejo de anticipo');
             } else {
-                let datos = $('#formUpContraCompra').serialize();
+                let datos = $('#formUpContraCompra').serialize() + "&id_compra=" + $('#id_compra').val();
                 $.ajax({
                     type: 'POST',
                     url: 'actualizar/up_datos_contrato_compra.php',
@@ -1369,6 +1440,7 @@
                 });
             }
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#modificarContraCompra').on('click', '.borrar', function () {
@@ -1397,22 +1469,38 @@
         });
         return false;
     });
-    $('#btnFormatoCompraVenta').on('click', function () {
-        let id = $('#id_compra').val();
-        $('<form action="soportes/compraventa.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
+    $('#btnCerrarContrato').on('click', function () {
+        var id_adq = $('#id_compra').val();
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
+        Swal.fire({
+            title: "¿Confirma cierre de Contrato?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'actualizar/up_cerrar_contrato.php',
+                    data: { id_adq: id_adq },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            location.reload();
+                            mje('Contrato cerrado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+        ActivaBoton(btn);
     });
-    $('#btnFormatoServicios').on('click', function () {
-        let id = $('#id_compra').val();
-        $('<form action="soportes/prestacion_servicios.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
-    });
-    $('#btnFormatoDesigSuper').on('click', function () {
-        let id = $('#id_compra').val();
-        $('<form action="soportes/designacion_supervisor.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
-    });
-    $('#btnFormActaInicio').on('click', function () {
-        let id = $('#id_compra').val();
-        $('<form action="soportes/acta_inicio.php" method="post"><input type="hidden" name="id" value="' + id + '" /></form>').appendTo('body').submit();
-    });
+    /*
     $('#btnEnviarContrato').on('click', function () {
         let id = $('#id_compra').val();
         $.post("datos/registrar/form_subir_contrato.php", { id: id }, function (he) {
@@ -1422,7 +1510,7 @@
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
         });
-    });
+    });*/
     $('#divForms').on('click', '#btnSubirContrato', function () {
         if ($('#fileContrato').val() == '') {
             $('#divModalError').modal('show');
@@ -1597,14 +1685,18 @@
     $('.novedadC').on('click', function () {
         let opcion = $(this).attr('value');
         let id = $('#id_contrato_compra').val();
-        $.post("datos/registrar/formadd_novedad_contrato.php", { opcion: opcion, id: id }, function (he) {
-            $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').removeClass('modal-xl');
-            $('#divTamModalForms').addClass('modal-lg');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
-        });
-        return false;
+        if (Number(id) > 0) {
+            $.post("datos/registrar/formadd_novedad_contrato.php", { opcion: opcion, id: id }, function (he) {
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').removeClass('modal-xl');
+                $('#divTamModalForms').addClass('modal-lg');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            });
+            return false;
+        } else {
+            mjeError('El proceso actual no tiene contrato');
+        }
     });
     $('#modificarAdquisiciones').on('click', '.duplicar', function () {
         let id = $(this).attr('value');
@@ -1618,6 +1710,8 @@
         return false;
     });
     $('#divModalForms').on('click', '#btnNovContrato', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let op = $(this).attr('value');
         let correcto = 0;
         switch (op) {
@@ -1780,6 +1874,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#divModalForms').on('change', '#slcTipoNovedad', function () {
@@ -1859,8 +1954,10 @@
     });
     $('#divModalForms').on('click', '#btnUpNovContrato', function () {
         let correcto = 0;
-        $noved = $('#slcTipoNovedad').val();
-        switch ($noved) {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
+        var noved = $('#slcTipoNovedad').val();
+        switch (noved) {
             case '1':
                 if (parseInt($('#numValAdicion').val()) <= 0 || $('#numValAdicion').val() == '') {
                     $('#divModalError').modal('show');
@@ -1924,7 +2021,7 @@
                 if ($('#datFecCesion').val() == '') {
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Debe Ingresar Fecha cesión');
-                } else if ($('#slcTerceroCesion').val() == '0') {
+                } else if ($('#id_tercero').val() == '0') {
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Debe seleccionar un tercero cesionario nuevo');
                 } else {
@@ -2010,6 +2107,7 @@
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
     $('#detallesXEntrega').on('click', '.details', function () {
@@ -2067,22 +2165,265 @@
         let fila = $(this).parent().parent().parent().parent();
         fila.remove();
     });
-    /*
-    $('#divModalForms').on('change', '#slcTipoBnSv', function () {
-        let id = $(this).val();
-        $.ajax({
-            type: 'POST',
-            url: 'datos/listar/tipo_servicio.php',
-            dataType: 'json',
-            data: { id: id },
-            success: function (r) {
+    $('#guardarOrden').on('click', function () {
+        var next = true;
+        $('.is-invalid').removeClass('is-invalid');
 
-                if (r.msg.trim() === 'ok') {
-                    $('#obligacionesContratista').css('display', 'block');
-                } else {
-                    $('#obligacionesContratista').css('display', 'none');
+        $('.aprobado').each(function () {
+            var fila = $(this).closest('tr');
+
+            if (fila.find('input[type="checkbox"]').is(':checked')) {
+                fila.find('input[type="number"]').each(function () {
+                    var $input = $(this);
+                    var inputValue = Number($input.val());
+                    var maxValue = $input.attr('max') ? Number($input.attr('max')) : null;
+                    if (inputValue <= 0 || (maxValue !== null && inputValue > maxValue)) {
+                        $input.addClass('is-invalid');
+                        mjeError(inputValue <= 0 ? 'El valor debe ser mayor a cero' : `El valor no debe ser mayor a ${maxValue}`);
+                        next = false;
+                        return false;
+                    }
+                });
+                if (!next) {
+                    return false;
                 }
             }
         });
-    });*/
+        if (next) {
+            let data = $('#formOrdenCompra').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'actualizar/up_orden_compra.php',
+                data: data,
+                success: function (r) {
+                    if (r == 'ok') {
+                        location.reload();
+                        mje('Orden actualizada correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
+    $('#divModalForms').on('click', '#btnGuardarOrden', function () {
+        var next = true;
+        var c = 0;
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
+        $('.is-invalid').removeClass('is-invalid');
+
+        $('.aprobado').each(function () {
+            var fila = $(this).closest('tr');
+
+            if (fila.find('input[type="checkbox"]').is(':checked')) {
+                fila.find('input[type="number"]').each(function () {
+                    var $input = $(this);
+                    var inputValue = Number($input.val());
+                    if (inputValue <= 0) {
+                        $input.addClass('is-invalid');
+                        mjeError('El valor debe ser mayor a cero');
+                        next = false;
+                        ActivaBoton(btn);
+                        return false;
+                    }
+                });
+                if (!next) {
+                    ActivaBoton(btn);
+                    return false;
+                }
+                c++;
+            }
+        });
+        if (next && c > 0) {
+            let data = $('#formDetallesAdq').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'actualizar/up_orden_servicio.php',
+                data: data,
+                success: function (r) {
+                    if (r == 'ok') {
+                        location.reload();
+                        mje('Orden guardada correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+        ActivaBoton(btn);
+    });
+    $('.modificarCotizaciones').on('click', '.editar', function () {
+        let id = $(this).attr('value');
+        $.post("datos/actualizar/formup_detalle_orden.php", { id: id }, function (he) {
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+    $('.modificarCotizaciones').on('click', '.borrar', function () {
+        let id = $(this).attr('value');
+        Swal.fire({
+            title: "¿Confirma eliminar detalle de orden?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'eliminar/del_detalle_orden.php',
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            location.reload();
+                            mje('Detalle eliminado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    $('#divModalForms').on('click', '#btnUpDetalleOrdnen', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
+        $('.is-invalid').removeClass('is-invalid');
+        if (Number($('#numCantidad').val()) <= 0) {
+            $('#numCantidad').addClass('is-invalid');
+            mjeError('La cantidad debe ser mayor a cero');
+        } else if (Number($('#numValUnid').val()) <= 0) {
+            $('#numValUnid').addClass('is-invalid');
+            mjeError('El valor unitario debe ser mayor a cero');
+        } else {
+            let data = $('#formUpDetalleOrden').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'actualizar/up_detalle_orden.php',
+                data: data,
+                success: function (r) {
+                    if (r == 'ok') {
+                        location.reload();
+                        mje('Detalle actualizado correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+        ActivaBoton(btn);
+    });
+    $('#cerrarOrden').on('click', function () {
+        Swal.fire({
+            title: "¿Confirma cierre de orden?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var id_orden = $('#id_orden').val();
+                var id_adq = $('#id_compra').val();
+                let suma = 0;
+                if ($('.sumTotal').length) {
+                    $('.sumTotal').each(function () {
+                        suma += Number($(this).val());
+                    });
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: 'actualizar/up_cerrar_orden.php',
+                    data: { id_orden: id_orden, id_adq: id_adq, suma: suma },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            location.reload();
+                            mje('Orden cerrada correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    $('#cerrarOrdenServicio').on('click', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
+        Swal.fire({
+            title: "¿Confirma cierre de orden?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                //sumar todas las inputs de clase sumTotal para saber si es mayor a cero
+                let suma = 0;
+                if ($('.sumTotal').length) {
+                    $('.sumTotal').each(function () {
+                        suma += Number($(this).val());
+                    });
+                }
+                if (suma > 0) {
+                    var id_adq = $('#id_compra').val();
+                    $.ajax({
+                        type: 'POST',
+                        url: 'actualizar/up_cerrar_orden_sv.php',
+                        data: { id_adq: id_adq, suma: suma },
+                        success: function (r) {
+                            if (r == 'ok') {
+                                location.reload();
+                                mje('Orden cerrada correctamente');
+                            } else {
+                                mjeError(r);
+                            }
+                        }
+                    });
+                } else {
+                    mjeError('Debe ingresar al menos un detalle de orden');
+                }
+            }
+        });
+        ActivaBoton(btn);
+    });
 })(jQuery);
+
+function AsociarOrden(id_orden) {
+    Swal.fire({
+        title: "¿Confirma asignación de orden a adquisición?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00994C",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si!",
+        cancelButtonText: "NO",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var ruta = "actualizar/up_adq_orden_compra.php";
+            $.ajax({
+                type: "POST",
+                url: ruta,
+                data: { id_orden: id_orden, id_adq: $('#id_compra').val() },
+                success: function (r) {
+                    if (r == 'ok') {
+                        location.reload();
+                        mje("Orden asignada correctamente");
+                    } else {
+                        mjeError("Error: " + r);
+                    }
+                },
+            });
+        }
+    });
+
+};

@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -49,49 +49,84 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
                             <!--Opciones de filtros -->
                             <div class="form-row">
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_sede_filtro">
-                                        <?php sedes_usuario($cmd,'--Sede--') ?>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_bodega_filtro">
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-1">
-                                    <input type="text" class="filtro form-control form-control-sm" id="txt_idegr_filtro" placeholder="Id. Egreso">
-                                </div>
-                                <div class="form-group col-md-1">
-                                    <input type="text" class="filtro form-control form-control-sm" id="txt_numegr_filtro" placeholder="No. Egreso">
-                                </div>
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-9">
                                     <div class="form-row">
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group col-md-5">
+                                            <div class="form-row">
+                                                <div class="form-group col-md-6">
+                                                    <select class="form-control form-control-sm" id="sl_sede_filtro">
+                                                        <?php sedes_usuario($cmd,'--Sede Origen--') ?>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <select class="form-control form-control-sm" id="sl_bodega_filtro">
+                                                    </select>
+                                                </div>
+                                            </div>    
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <div class="form-row">
+                                                <div class="form-group col-md-6">
+                                                    <input type="text" class="filtro form-control form-control-sm" id="txt_idegr_filtro" placeholder="Id. Egreso">
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <input type="text" class="filtro form-control form-control-sm" id="txt_numegr_filtro" placeholder="No. Egreso">
+                                                </div>                                        
+                                            </div>    
+                                        </div>        
+                                        <div class="form-group col-md-2">
                                             <input type="date" class="form-control form-control-sm" id="txt_fecini_filtro" name="txt_fecini_filtro" placeholder="Fecha Inicial">
                                         </div>
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group col-md-2">
                                             <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
                                         </div>
-                                    </div>
+                                        <div class="form-group col-md-9">
+                                            <div class="form-row">
+                                                <div class="form-group col-md-3">    
+                                                    <select class="form-control form-control-sm" id="sl_centrocosto_filtro">
+                                                        <?php centros_costo($cmd,'--Centro Costo--') ?>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <select class="form-control form-control-sm" id="sl_sede_des_filtro">
+                                                        <?php sedes($cmd,'--Sede Destino--') ?>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <select class="form-control form-control-sm" id="sl_area_filtro">
+                                                    </select>
+                                                </div>  
+                                                <div class="form-group col-md-3">
+                                                    <select class="form-control form-control-sm" id="sl_tercero_filtro">
+                                                        <?php terceros($cmd,'--Tercero--') ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <div class="form-row">
+                                                <div class="form-group col-md-6">
+                                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
+                                                        <?php estados_movimientos('--Estado--') ?>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <select class="form-control form-control-sm" id="sl_modulo_origen">
+                                                    <?php modulo_origen('--Origen--',0) ?>
+                                                    </select>
+                                                </div>  
+                                            </div>        
+                                        </div>    
+                                        <div class="form-group col-md-4">
+                                            <select class="form-control form-control-sm text-primary" id="sl_tipo_reporte">
+                                                <?php tipo_reporte_egresos('--TIPO DE REPORTE--') ?>
+                                            </select>
+                                        </div> 
+                                    </div>                                       
                                 </div>
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_tercero_filtro">
-                                        <?php terceros($cmd,'--Tercero--') ?>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_centrocosto_filtro">
-                                        <?php centros_costo($cmd,'--Centro Costo--') ?>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_tipegr_filtro">
-                                        <?php tipo_egreso($cmd,'--Tipo Egreso--') ?>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-1">
-                                    <select class="form-control form-control-sm" id="sl_estado_filtro">
-                                        <?php estados_movimientos('--Estado--') ?>
+                                <div class="form-group col-md-2">  
+                                    <select class="form-control form-control-sm" name="sl_tipegr_filtro[]" multiple id="sl_tipegr_filtro" style="height: 150px;">
+                                        <?php tipo_egreso($cmd,'--Tipo Egreso--', 1) ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
@@ -102,8 +137,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <span class="fas fa-print" aria-hidden="true"></span>                                       
                                     </a>
                                 </div>
-                            </div>
-
+                            </div>    
+                            
                             <!--Lista de registros en la tabla-->
                             <?php
                             if (PermisosUsuario($permisos, 5007, 2) || $id_rol == 1) {
@@ -115,19 +150,26 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <table id="tb_egresos" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>
                                     <tr class="text-center centro-vertical">
-                                        <th>Id</th>
-                                        <th>No. Egreso</th>
-                                        <th>Fecha Egreso</th>
-                                        <th>Hora Egreso</th>
-                                        <th>Detalle</th>
-                                        <th>Tercero</th>
-                                        <th>Centro Costo</th>
-                                        <th>Tipo Egreso</th>
-                                        <th>Vr. Total</th>
+                                        <th rowspan="2">Id</th>
+                                        <th rowspan="2">No. Egreso</th>
+                                        <th rowspan="2">Fecha Egreso</th>
+                                        <th rowspan="2">Hora Egreso</th>
+                                        <th rowspan="2">Detalle</th>
+                                        <th rowspan="2">Tipo Egreso</th>
+                                        <th colspan="2">Unidad Origen</th>
+                                        <th colspan="4">Unidad Destino</th>                                        
+                                        <th rowspan="2">Vr. Total</th>
+                                        <th rowspan="2">Id.Estado</th>
+                                        <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Acciones</th>
+                                    </tr>
+                                    <tr class="text-center centro-vertical">                                        
                                         <th>Sede</th>
-                                        <th>Bodega</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
+                                        <th>Bodega</th>                                        
+                                        <th>Centro de Costo</th>
+                                        <th>Sede</th>
+                                        <th>Area</th>  
+                                        <th>Tercero</th>                                       
                                     </tr>
                                 </thead>
                             </table>

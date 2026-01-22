@@ -40,35 +40,14 @@
         });
         return false;
     };
-    var setIdioma = {
-        "decimal": "",
-        "emptyTable": "No hay información",
-        "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-        "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-        "infoPostFix": "",
-        "thousands": ",",
-        "lengthMenu": "Ver _MENU_ Filas",
-        "loadingRecords": "Cargando...",
-        "processing": "Procesando...",
-        "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-        "zeroRecords": "No se encontraron registros",
-        "paginate": {
-            "first": "&#10096&#10096",
-            "last": "&#10097&#10097",
-            "next": "&#10097",
-            "previous": "&#10096"
-        }
-    };
-    var setdom;
-    if ($("#peReg").val() === '1') {
-        setdom = "<'row'<'col-md-5'l><'bttn-plus-dt col-md-2'B><'col-md-5'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
-    } else {
-        setdom = "<'row'<'col-md-6'l><'col-md-6'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
+    function FormDocSoporte(id) {
+        $.post("datos/registrar/formadd_factura_no.php", { id: id }, function (he) {
+            $('#divTamModalForms').removeClass('modal-lg');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-xl');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
     }
 
     $(document).ready(function () {
@@ -78,13 +57,7 @@
             buttons: [{
                 //Registar nueva factura no obligado
                 action: function (e, dt, node, config) {
-                    $.post("datos/registrar/formadd_factura_no.php", function (he) {
-                        $('#divTamModalForms').removeClass('modal-lg');
-                        $('#divTamModalForms').removeClass('modal-sm');
-                        $('#divTamModalForms').addClass('modal-xl');
-                        $('#divModalForms').modal('show');
-                        $("#divForms").html(he);
-                    });
+                    FormDocSoporte(0);
                 }
             }],
             language: setIdioma,
@@ -95,6 +68,8 @@
             },
             "columns": [
                 { 'data': 'id_facturano' },
+                { 'data': 'tipo' },
+                { 'data': 'estado' },
                 { 'data': 'fec_compra' },
                 { 'data': 'fec_vence' },
                 { 'data': 'metodo' },
@@ -107,6 +82,9 @@
             ],
             "order": [
                 [0, "desc"]
+            ],
+            columnDefs: [
+                { class: 'text-wrap', targets: [6, 9, 10] },
             ],
             "lengthMenu": [
                 [10, 25, 50, -1],
@@ -142,79 +120,66 @@
     $('#divForms').on('click', '#btnFacturaNO', function () {
         var opcion = $(this).attr('value');
         var aprobar = 1;
-        $(".form-control").removeClass('border-danger');
+        var btn = $(this).attr('id');
+        InactivaBoton(btn);
+        $(".form-control").removeClass('is-invalid');
         if ($('#fecCompraNO').val() == '') {
-            $('#fecCompraNO').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Fecha de compra no puede estar vacía');
+            $('#fecCompraNO').addClass('is-invalid');
+            mjeError('Fecha de compra no puede estar vacía');
         } else if ($('#fecVenceNO').val() == '') {
-            $('#fecVenceNO').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Fecha de compra no puede estar vacía');
+            $('#fecVenceNO').addClass('is-invalid');
+            mjeError('Fecha de Vencimiento no puede estar vacía');
         } else if ($('#fecVenceNO').val() < $('#fecCompraNO').val()) {
-            $('#fecVenceNO').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Fecha de Vencimiento debe ser mayor a la de compra');
+            $('#fecVenceNO').addClass('is-invalid');
+            mjeError('Fecha de Vencimiento no puede ser menor a la de compra');
         } else if ($('#slcMetPago').val() == '0') {
-            $('#slcMetPago').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Metodo de pago no puede estar vacío');
+            $('#slcMetPago').addClass('is-invalid');
+            mjeError('Metodo de pago no puede estar vacío');
         } else if ($('#slcFormaPago').val() == '0') {
-            $('#slcFormaPago').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Forma de pago no puede estar vacía');
+            $('#slcFormaPago').addClass('is-invalid');
+            mjeError('Forma de pago no puede estar vacía');
         } else if ($('#slcProcedencia').val() == '0') {
-            $('#slcProcedencia').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Procedencia no puede estar vacía');
+            $('#slcProcedencia').addClass('is-invalid');
+            mjeError('Procedencia no puede estar vacía');
         } else if ($('#slcTipoOrg').val() == '0') {
-            $('#slcTipoOrg').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Tipo de organización no puede estar vacía');
+            $('#slcTipoOrg').addClass('is-invalid');
+            mjeError('Tipo de organización no puede estar vacía');
         } else if ($('#slcRegFiscal').val() == '0') {
-            $('#slcRegFiscal').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Regimen fiscal no puede estar vacío');
-        } else if ($('#slcRespFiscal').val() == '') {
-            $('#slcRespFiscal').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Responsabilidad fiscal no puede estar vacío');
+            $('#slcRegFiscal').addClass('is-invalid');
+            mjeError('Regimen fiscal no puede estar vacío');
+        } else if ($('#slcRespFiscal').val() == '0') {
+            $('#slcRespFiscal').addClass('is-invalid');
+            mjeError('Responsabilidad fiscal no puede estar vacío');
         } else if ($('#slcTipoDoc').val() == '0') {
-            $('#slcTipoDoc').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Tipo de documento no puede estar vacío');
+            $('#slcTipoDoc').addClass('is-invalid');
+            mjeError('Tipo de documento no puede estar vacío');
         } else if ($('#numNoDoc').val() == '') {
-            $('#numNoDoc').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Número de documento no puede estar vacío');
+            $('#numNoDoc').addClass('is-invalid');
+            mjeError('Número de documento no puede estar vacío');
+        } else if ($('#id_tercero_api').val() == '0') {
+            $('#numNoDoc').addClass('is-invalid');
+            mjeError('El tercero no se encuentra regsitrado, Remitirse al modulos de terceros para registrar el tercero');
         } else if ($('#txtNombreRazonSocial').val() == '') {
-            $('#txtNombreRazonSocial').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Nombre o razón social no puede estar vacío');
+            $('#txtNombreRazonSocial').addClass('is-invalid');
+            mjeError('Nombre o razón social no puede estar vacío');
         } else if ($('#txtCorreoOrg').val() == '') {
-            $('#txtCorreoOrg').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Correo electrónico no puede estar vacío');
+            $('#txtCorreoOrg').addClass('is-invalid');
+            mjeError('Correo electrónico no puede estar vacío');
         } else if ($('#txtTelefonoOrg').val() == '') {
-            $('#txtTelefonoOrg').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Teléfono no puede estar vacío');
+            $('#txtTelefonoOrg').addClass('is-invalid');
+            mjeError('Teléfono no puede estar vacío');
         } else if ($('#slcPaisEmp').val() == '0') {
-            $('#slcPaisEmp').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('País no puede estar vacío');
+            $('#slcPaisEmp').addClass('is-invalid');
+            mjeError('País no puede estar vacío');
         } else if ($('#slcDptoEmp').val() == '0') {
-            $('#slcDptoEmp').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Departamento no puede estar vacío');
+            $('#slcDptoEmp').addClass('is-invalid');
+            mjeError('Departamento no puede estar vacío');
         } else if ($('#slcMunicipioEmp').val() == '0') {
-            $('#slcMunicipioEmp').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Ciudad no puede estar vacío');
+            $('#slcMunicipioEmp').addClass('is-invalid');
+            mjeError('Municipio no puede estar vacío');
         } else if ($('#txtDireccion').val() == '') {
-            $('#txtDireccion').addClass('border-danger');
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Dirección no puede estar vacío');
+            $('#txtDireccion').addClass('is-invalid');
+            mjeError('Dirección no puede estar vacío');
         } else {
             $('input[name="txtDescripcion[]"]').each(function () {
                 let val = $(this).val();
@@ -223,28 +188,25 @@
                 let cant = row.find('input[name="numCantidad[]"]').val();
                 let val_u1 = parseInt(val_u);
                 let cant1 = parseInt(cant);
-                $('#formAddFacturaNO input').removeClass('border-danger')
+                $('#formAddFacturaNO input').removeClass('is-invalid')
                 if (val == '') {
                     aprobar = 0;
                     $(this).focus();
-                    $(this).addClass('border-danger');
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html('Detalle de la factura no puede estar vacío');
+                    $(this).addClass('is-invalid');
+                    mjeError('Detalle de la factura no puede estar vacío');
                 } else if (val_u == '' || val_u1 <= 0) {
                     aprobar = 0;
                     $(row.find('input[name="numValorUnitario[]"]')).focus();
-                    $(row.find('input[name="numValorUnitario[]"]')).addClass('border-danger');
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html('Valor unitario debe ser mayor a cero');
+                    $(row.find('input[name="numValorUnitario[]"]')).addClass('is-invalid');
+                    mjeError('Valor unitario debe ser mayor a cero');
                 } else if (cant == '' || cant1 <= 0) {
                     aprobar = 0;
                     $(row.find('input[name="numCantidad[]"]')).focus();
-                    $(row.find('input[name="numCantidad[]"]')).addClass('border-danger');
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html('Cantidad debe ser mayor a cero');
-
+                    $(row.find('input[name="numCantidad[]"]')).addClass('is-invalid');
+                    mjeError('Cantidad debe ser mayor a cero');
                 }
                 if (aprobar == 0) {
+                    ActivaBoton(btn);
                     return false;
                 }
             });
@@ -252,16 +214,14 @@
                 let val_fac = $('input[name="valfac"]').val();
                 let val_fac1 = parseInt(val_fac);
                 if (val_fac1 <= 0 || val_fac == '') {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html('Valor total de la factura debe ser mayor a cero <div class="alert alert-warning scaled w-100"><i>Debe calcular impuestos para  generar el valor total de la factura</i></div>');
+                    mjeError('Valor total de la factura debe ser mayor a cero <div class="alert alert-warning scaled w-100"><i>Debe calcular impuestos para  generar el valor total de la factura</i></div>');
                 } else {
-                    let datos = $('#formAddFacturaNO').serialize();
+                    let datos = $('#formAddFacturaNO').serialize() + '&id_fno=' + opcion;
                     let url, estado;
+                    url = 'registrar/new_factura_no.php';
                     if (Number(opcion) == 0) {
-                        url = 'registrar/new_factura_no.php';
                         estado = 'Registrada';
                     } else {
-                        url = 'actualizar/up_factura_no.php';
                         estado = 'Actualizada';
                     }
                     $.ajax({
@@ -273,17 +233,16 @@
                                 let id = 'tableFacurasNoObligados';
                                 reloadtable(id);
                                 $('#divModalForms').modal('hide');
-                                $('#divModalDone').modal('show');
-                                $('#divMsgDone').html('Factura ' + estado + ' correctamente');
+                                mje('Documento ' + estado + ' correctamente');
                             } else {
-                                $('#divModalError').modal('show');
-                                $('#divMsgError').html(r);
+                                mjeError(r);
                             }
                         }
                     });
                 }
             }
         }
+        ActivaBoton(btn);
         return false;
     });
     //actualizar factura no obligado
@@ -398,8 +357,7 @@
                     aprobar = 0;
                     $(this).focus();
                     $(this).addClass('border-danger');
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html('Detalle de la factura no puede estar vacío');
+                    mjeError('Detalle de la factura no puede estar vacío');
                 }
                 if (aprobar == 0) {
                     return false;
@@ -407,8 +365,7 @@
             });
             if (parseInt($('#numValIva').val()) > 0 && ($('input[name=iva]').val() <= 0 || !($('input[name=iva]').length))) {
                 $('#numValIva').addClass('border-danger');
-                $('#divModalError').modal('show');
-                $('#divMsgError').html('El valor IVA debe ser mayor o igual a cero o debe desmarcar el IVA');
+                mjeError('El valor IVA debe ser mayor a cero o debe desmarcar el IVA');
                 aprobar = 0;
             }
             if (aprobar == 1) {
@@ -422,11 +379,9 @@
                             let id = 'tableFacurasNoObligados';
                             reloadtable(id);
                             $('#divModalForms').modal('hide');
-                            $('#divModalDone').modal('show');
-                            $('#divMsgDone').html('Factura registrada correctamente');
+                            mje('Documento procesado correctamente');
                         } else {
-                            $('#divModalError').modal('show');
-                            $('#divMsgError').html(r);
+                            mjeError(r);
                         }
                     }
                 });
@@ -445,37 +400,43 @@
     });
     $('#tableFacurasNoObligados').on('click', '.modificar', function () {
         var id = $(this).attr('value');
-        $.post("datos/actualizar/formup_factura_nob.php", { id: id }, function (he) {
-            $('#divTamModalForms').removeClass('modal-lg');
-            $('#divTamModalForms').removeClass('modal-sm');
-            $('#divTamModalForms').addClass('modal-xl');
-            $('#divModalForms').modal('show');
-            $("#divForms").html(he);
-        });
+        FormDocSoporte(id);
+    });
+    $('#tableFacurasNoObligados').on('click', '.verDocumento', function () {
+        var id = $(this).attr('value');
+        FormDocSoporte(id);
+        $('#divModalForms').on('shown.bs.modal', function () {
+            $('#btnFacturaNO').remove();
 
+        });
     });
     $('#tableFacurasNoObligados').on('click', '.borrar', function () {
         var id = $(this).attr('value');
-        let tip = 'FacNoOblig';
-        confdel(id, tip);
-    });
-    $('#tableFacurasNoObligados').on('click', '.verSoporte', function () {
-        var id = $(this).attr('value');
-        $.ajax({
-            type: 'POST',
-            url: 'datos/soporte/ver_html.php',
-            dataType: 'json',
-            data: { id: id },
-            success: function (r) {
-                if (r.status == '1') {
-                    window.open(r.msg, '_blank');
-                } else {
-                    $('#divModalError').modal('show');
-                    $('#divMsgError').html(r.msg);
-                }
+        Swal.fire({
+            title: "¿Confirma anulación de documento?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: "eliminar/del_factura_no.php",
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            $('#tableFacurasNoObligados').DataTable().ajax.reload();
+                            mje('Documento eliminado correctamente');
+                        } else {
+                            mjeError(r);
+                        }
+                    }
+                });
             }
         });
-        return false;
     });
     $('#divModalConfDel').on('click', '#btnConfirDelFacNoOblig', function () {
         let id = $(this).attr('value');
@@ -497,24 +458,6 @@
             }
         });
         return false;
-    });
-    $('#tableFacurasNoObligados').on('click', '.enviar', function () {
-        var id = $(this).attr('value');
-        $('#divModalProcess').modal('show');
-        $.ajax({
-            type: 'POST',
-            url: 'datos/soporte/enviar_factura_no.php',
-            dataType: 'json',
-            data: { id: id },
-            success: function (r) {
-                let id = 'tableFacurasNoObligados';
-                reloadtable(id);
-                $('#divModalProcess').modal('hide');
-                $('#divModalConfDel').modal('show');
-                $('#divMsgConfdel').html('PROCESADO:<br>' + r.procesados + 'ERROR(ES):<br>' + r.error);
-                $('#divBtnsModalDel').html('<div class="text-center w-100"><button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button></div>');
-            }
-        });
     });
     // Agregar fila a la tabla de facturas no obligados
     $('#divModalForms').on('click', '#btnAddRowFNO', function () {
@@ -680,7 +623,7 @@
         $('.valpretiva').html(pesos(val_reteiva, 2));
         $('.valfac').html('<b>' + pesos(val_fac, 2) + '</b>');
     };
-    $('#divModalForms').on('input', '#numNoDoc', function () {
+    $('#divModalForms').on('blur', '#numNoDoc', function () {
         let noDoc = $('#numNoDoc').val();
         $.ajax({
             url: 'datos/listar/tercero_noobligado.php',
@@ -694,13 +637,13 @@
                     $('#slcRegFiscal').val(r.reg_fiscal);
                     $('#slcRespFiscal').val(r.resp_fiscal);
                     $('#slcTipoDoc').val(r.id_tdoc);
-                    $('#numNoDoc').val(r.no_doc);
                     $('#txtNombreRazonSocial').val(r.nombre);
                     $('#txtCorreoOrg').val(r.correo);
                     $('#txtTelefonoOrg').val(r.telefono);
                     $('#slcPaisEmp').val(r.id_pais);
                     $('#slcDptoEmp').val(r.id_dpto);
                     $('#txtDireccion').val(r.direccion);
+                    $('#id_tercero_api').val(r.id_tercero_api);
                     var dpto = r.id_dpto;
                     var city = r.id_municipio;
                     $.ajax({
@@ -712,19 +655,6 @@
                             $('#slcMunicipioEmp').val(city);
                         }
                     });
-                } else {
-                    $('#slcProcedencia').val(0);
-                    $('#slcTipoOrg').val(0);
-                    $('#slcRegFiscal').val(0);
-                    $('#slcRespFiscal').val(0);
-                    $('#slcTipoDoc').val(0);
-                    $('#txtNombreRazonSocial').val('');
-                    $('#txtCorreoOrg').val('');
-                    $('#txtTelefonoOrg').val('');
-                    $('#slcPaisEmp').val(0);
-                    $('#slcDptoEmp').val(0);
-                    $('#txtDireccion').val('');
-                    $('#slcMunicipioEmp').val(0);
                 }
             }
         });
@@ -780,3 +710,96 @@
         calcImpuestos();
     });
 })(jQuery);
+
+function EnviaDocSoporte2(boton, tipo) {
+    var id = boton.value;
+    boton.disabled = true;
+    boton.value = "";
+    boton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+    if (tipo == '1') {
+        url = 'datos/soporte/anula_factura_no.php';
+    } else {
+        url = 'datos/soporte/enviar_factura_no.php';
+    }
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: { id: id },
+        dataType: "json",
+        success: function (response) {
+            if (response[0].value == "ok") {
+                boton.innerHTML = '<span class="fas fa-thumbs-up fa-lg"></span>';
+                $('#tableFacurasNoObligados').DataTable().ajax.reload();
+                mje("Documento enviado correctamente");
+            } else {
+                boton.disabled = false;
+                boton.value = id;
+                boton.innerHTML = '<span class="fas fa-paper-plane fa-lg"></span>';
+                function mjeError(titulo, mensaje) {
+                    Swal.fire({
+                        title: titulo,
+                        html: mensaje, // Renderiza el HTML en el mensaje
+                        icon: "error"
+                    });
+                }
+                mjeError('', response[0].msg);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error en la solicitud AJAX:", error);
+        }
+    });
+    ActivaBoton(boton);
+    return false
+};
+
+const VerSoporteElectronico2 = (id) => {
+    fetch("datos/soporte/ver_html.php", {
+        method: "POST",
+        body: JSON.stringify({ id: id }),
+    })
+        .then((response) => response.json())
+        .then((response) => {
+            console.log(response);
+            if (response[0].value == "ok") {
+                var url = "https://api.taxxa.co/documentGet.dhtml?hash=" + response[0].msg;
+                url = url.replace(/["']/g, "");
+                var win = window.open(url, "_blank");
+                win.focus();
+            } else {
+                mjeError(response[0].msg);
+            }
+        })
+        .catch((error) => {
+            console.log("Error:");
+        });
+};
+
+const AnulaDocSoporte = (id) => {
+    //confimar anulación de documento
+    Swal.fire({
+        title: "¿Confirma anulación de documento?, Esta acción no se puede deshacer",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00994C",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si!",
+        cancelButtonText: "NO",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: "POST",
+                url: "registrar/new_facno_anula.php",
+                data: { id: id },
+                success: function (r) {
+                    if (r == 'ok') {
+                        $('#tableFacurasNoObligados').DataTable().ajax.reload();
+                        mje('Documento Anulado correctamente');
+                    } else {
+                        mjeError(r);
+                    }
+                }
+            });
+        }
+    });
+};

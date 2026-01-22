@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -61,7 +61,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <div class="form-group col-md-2">
                                     <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
                                 </div>                                
-                                <div class="form-group col-md-2">
+                                <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_estado_filtro">
                                         <?php estados_pedidos('--Estado--') ?>
                                     </select>
@@ -91,11 +91,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>No. Pedido</th>
                                         <th>Fecha Pedido</th>
                                         <th>Hora Pedido</th>                                        
-                                        <th>Detalle</th>
-                                        <th>Vr. Total</th>
+                                        <th>Detalle</th>                                        
                                         <th>Sede</th>
                                         <th>Bodega</th>
+                                        <th>Vr. Total</th>
+                                        <th>Id.Estado</th>
                                         <th>Estado</th>
+                                        <th>Ids Ingresos</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -103,9 +105,9 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <table class="table-bordered table-sm col-md-2">
                                 <tr>
                                     <td style="background-color:yellow">Pendiente</td>
-                                    <td style="background-color:cyan">Confirmado</td>
-                                    <td style="background-color:teal">Aceptado</td>
-                                    <td>Cerrado</td>
+                                    <td style="background-color:PaleTurquoise">Confirmado</td>
+                                    <td style="background-color:DodgerBlue">Aceptado</td>
+                                    <td>Finalizado</td>
                                     <td style="background-color:gray">Anulado</td>
                                 </tr>
                             </table>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 //Recibir variables por POST
@@ -41,29 +41,24 @@ try {
     $formapago = $rs->fetchAll();
     if ($tipo != 4) {
         $sql = "SELECT
-                `ctb_referencia`.`id_cuenta` AS `cuenta`
-                , `ctb_referencia`.`accion`
-            FROM
-                `ctb_doc`
-                INNER JOIN `ctb_referencia` 
-                    ON (`ctb_doc`.`id_ref_ctb` = `ctb_referencia`.`id_ctb_referencia`)
-            WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
+                    `ctb_referencia`.`id_cuenta` AS `cuenta`
+                    , `ctb_referencia`.`accion`
+                FROM
+                    `ctb_doc`
+                    INNER JOIN `ctb_referencia` 
+                        ON (`ctb_doc`.`id_ref_ctb` = `ctb_referencia`.`id_ctb_referencia`)
+                WHERE (`ctb_doc`.`id_ctb_doc` = $id_doc)";
         $rs = $cmd->query($sql);
         $cuenta_ctb = $rs->fetch();
     } else {
         $sql = "SELECT
-                    `pto_pag_detalle`.`id_ctb_doc`
-                    , `pto_cop_detalle`.`id_pto_cop_det`
-                    , `ctb_libaux`.`id_cuenta`
-                    , `pto_pag_detalle`.`valor`
+                    `id_ctb_doc`
+                    , `id_cuenta`
+                    , `credito` AS `valor`
+                    , `ref`
                 FROM
-                    `pto_pag_detalle`
-                    INNER JOIN `pto_cop_detalle` 
-                        ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
-                    INNER JOIN `ctb_libaux` 
-                        ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_libaux`.`id_ctb_doc`)
-                WHERE (`pto_pag_detalle`.`id_ctb_doc` = $id_doc
-                    AND `ctb_libaux`.`debito` > 0)";
+                    `ctb_libaux`
+                WHERE (`id_ctb_doc` = $id_cop AND `credito` > 0)";
         $rs = $cmd->query($sql);
         $cuenta_ctb = $rs->fetchAll();
     }
@@ -84,6 +79,10 @@ try {
         $id_cuenta = $fp['cta_contable'];
         $credito = $fp['valor'];
         $total += $credito;
+        if (isset($cuenta_ctb['accion']) && $cuenta_ctb['accion'] == '1') {
+            $debito = $credito;
+            $credito = 0;
+        }
         $sql->execute();
         if ($cmd->lastInsertId() > 0) {
             $registros++;
@@ -99,6 +98,10 @@ try {
             $id_cuenta = $cuenta_ctb['cuenta'];
         }
         $debito = $total;
+        if (isset($cuenta_ctb['accion']) && $cuenta_ctb['accion'] == '1') {
+            $credito = $total;
+            $debito = 0;
+        }
         $sql->execute();
         if ($cmd->lastInsertId() > 0) {
             $registros++;
@@ -109,11 +112,13 @@ try {
         foreach ($cuenta_ctb as $cc) {
             $id_cuenta = $cc['id_cuenta'];
             $debito = $cc['valor'];
-            $sql->execute();
-            if ($cmd->lastInsertId() > 0) {
-                $registros++;
-            } else {
-                $response['msg'] += $sql->errorInfo()[2];
+            if ($cc['ref'] == 1) {
+                $sql->execute();
+                if ($cmd->lastInsertId() > 0) {
+                    $registros++;
+                } else {
+                    $response['msg'] += $sql->errorInfo()[2];
+                }
             }
         }
     }

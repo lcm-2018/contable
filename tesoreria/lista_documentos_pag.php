@@ -1,36 +1,36 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
 include '../financiero/consultas.php';
-
-// Consulta tipo de presupuesto
+include '../terceros.php';
+/*
+cuando se baja id_cop: 87
+id_doc: 0
+tipo_dato: 4
+tipo_var: 1
+*/
+// Consulta tipo de presupuesto$datosDoc
 $id_doc_pag = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no disponible');
 $id_cop = isset($_POST['id_cop']) ? $_POST['id_cop'] : 0;
-$tipo_dato = isset($_POST['tipo_dato']) ? $_POST['tipo_dato'] : 0;
+$tipo_dato = isset($_POST['tipo_dato']) ? $_POST['tipo_dato'] : 0; // tiene el id_doc_fuente ej.  7 - nota bancaria
 $tipo_mov = isset($_POST['tipo_movi']) ? $_POST['tipo_movi'] : 0;
 $tipo_var = isset($_POST['tipo_var']) ? $_POST['tipo_var'] : 0;
 $id_arq = isset($_POST['id_arq']) ? $_POST['id_arq'] : 0;
+$id_doc_rad = isset($_POST['id_doc_rad']) ? $_POST['id_doc_rad'] : 0;
 $id_vigencia = $_SESSION['id_vigencia'];
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 56, $cmd);
+
 if ($id_doc_pag == 0) {
-    try {
-        $sql = "SELECT
-                    `id_tercero`, `fecha`, `detalle`
-                FROM
-                    `ctb_doc`
-                WHERE (`id_ctb_doc` = $id_cop) LIMIT 1";
-        $rs = $cmd->query($sql);
-        $datosCop = $rs->fetch();
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-    }
     try {
         $sql = "SELECT
                     MAX(`id_manu`) AS `id_manu` 
@@ -44,48 +44,91 @@ if ($id_doc_pag == 0) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
     try {
-        $estado = 1;
-        $id_tercero = $datosCop['id_tercero'];
-        $detalle = $datosCop['detalle'];
-        $iduser = $_SESSION['id_user'];
-        $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-        $fecha = $date->format('Y-m-d');
-        $fecha2 = $date->format('Y-m-d H:i:s');
-        $query = "INSERT INTO `ctb_doc`
-                        (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
-        $query->bindParam(2, $tipo_dato, PDO::PARAM_INT);
-        $query->bindParam(3, $id_manu, PDO::PARAM_INT);
-        $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
-        $query->bindParam(5, $fecha, PDO::PARAM_STR);
-        $query->bindParam(6, $detalle, PDO::PARAM_STR);
-        $query->bindParam(7, $estado, PDO::PARAM_INT);
-        $query->bindParam(8, $iduser, PDO::PARAM_INT);
-        $query->bindParam(9, $fecha2);
-        $query->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $id_doc_pag = $cmd->lastInsertId();
-            $sql = "INSERT INTO `tes_rel_pag_cop`
-                        (`id_doc_cop`,`id_doc_pag`)
-                    VALUES (?, ?)";
-            $sql = $cmd->prepare($sql);
-            $sql->bindParam(1, $id_cop, PDO::PARAM_INT);
-            $sql->bindParam(2, $id_doc_pag, PDO::PARAM_INT);
-            $sql->execute();
-            if (!($sql->rowCount() > 0)) {
-                echo $sql->errorInfo()[2];
-                exit();
-            }
-        } else {
-            echo $query->errorInfo()[2];
-            exit();
+        if ($id_cop > 0) {
+            $sql = "SELECT 
+                    `ctb_doc`.`id_tercero`
+                    , `ctb_doc`.`fecha`
+                    , `ctb_doc`.`detalle`
+                    , `ctb_doc`.`id_ref`
+                    , `tb_terceros`.`nom_tercero`
+                    ,  $id_manu AS `id_manu`
+                    , `ctb_fuente`.`nombre` AS `fuente`
+                    , 0 AS `val_pagado`
+                    , 1 AS `estado`
+                    , 0 AS `id_ref_ctb`
+
+                FROM `ctb_doc`
+                    INNER JOIN `ctb_fuente`
+		                ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                    LEFT JOIN `tb_terceros`
+                        ON(`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                WHERE (`ctb_doc`.`id_ctb_doc` =  $id_cop) LIMIT 1";
+        } else if ($id_doc_rad > 0) {
+            $sql = "SELECT 
+                    `ctb_doc`.`id_tercero`
+                    , `ctb_doc`.`fecha`
+                    , `ctb_doc`.`detalle`
+                    , `ctb_doc`.`id_ref`
+                    , `tb_terceros`.`nom_tercero`
+                    ,  $id_manu AS `id_manu`
+                    , `ctb_fuente`.`nombre` AS `fuente`
+                    , 0 AS `val_pagado`
+                    , 1 AS `estado`
+                    , `ctb_doc`.`id_ref_ctb`
+
+                FROM `ctb_doc`
+                    INNER JOIN `ctb_fuente`
+                        ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                    LEFT JOIN `tb_terceros`
+                        ON(`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                WHERE (`ctb_doc`.`id_ctb_doc` =  $id_doc_rad) LIMIT 1";
         }
+        $rs = $cmd->query($sql);
+        $datosDoc = $rs->fetch();
+        $tercero = $datosDoc['nom_tercero'];
     } catch (PDOException $e) {
-        echo $e->getMessage();
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+} else {
+    $datosDoc = GetValoresCeva($id_doc_pag, $cmd);
+    $id_manu = $datosDoc['id_manu'];
+    $id_cop = $datosDoc['id_doc_cop'] > 0 ? $datosDoc['id_doc_cop'] : 0;
+    $id_ref = $datosDoc['id_ref'];
+    if ($id_doc_rad == 0) {
+        $iddd = $datosDoc['id_ctb_doc_tipo3'] == '' ? 0 : $datosDoc['id_ctb_doc_tipo3'];
+        $sqls = "SELECT
+                    `ctb_fuente`.`cod`
+                FROM
+                    `ctb_doc`
+                    INNER JOIN `ctb_fuente` 
+                        ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                WHERE (`ctb_doc`.`id_ctb_doc` = $iddd)";
+        $rs = $cmd->query($sqls);
+        $rdss = $rs->fetch();
+        $id_doc_rad = !empty($rdss) && $rdss['cod'] == 'FELE' ? $datosDoc['id_ctb_doc_tipo3'] : 0;
+    }
+    if ($id_doc_rad > 0) {
+        $sql = "SELECT
+                SUM(IFNULL(`pto_rec_detalle`.`valor`,0) - IFNULL(`pto_rec_detalle`.`valor_liberado`,0)) AS `valor`
+            FROM
+                `pto_rec_detalle`
+                INNER JOIN `pto_rec` 
+                    ON (`pto_rec_detalle`.`id_pto_rac` = `pto_rec`.`id_pto_rec`)
+            WHERE (`pto_rec`.`estado` > 0 AND `pto_rec`.`id_ctb_doc` = $id_doc_pag)";
+        $rs = $cmd->query($sql);
+        $valor = $rs->fetch();
+        $datosDoc['val_pagado'] = !empty($valor) ? $valor['valor'] : 0;
+    }
+    if (!empty($datosDoc)) {
+        $id_t = ['0' => $datosDoc['id_tercero']];
+        $ids = implode(',', $id_t);
+        $dat_ter = getTerceros($ids, $cmd);
+        $tercero = !empty($dat_ter) ? $dat_ter[0]['nom_tercero'] : '---';
+    } else {
+        $tercero = '---';
     }
 }
+$datosDoc['id_ref_ctb'] = $datosDoc['id_ref_ctb'] == '' ? 0 : $datosDoc['id_ref_ctb'];
 try {
     $sql = "SELECT
                 `id_ctb_doc`
@@ -128,7 +171,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-if ($tipo_dato == '9' || $tipo_dato == '11') {
+if ($tipo_dato == '9') {
     if ($tipo_dato == '9') {
         $id_arq = $id_doc_pag;
     }
@@ -158,48 +201,46 @@ if ($tipo_dato == '9' || $tipo_dato == '11') {
     }
 }
 try {
-    $sql = "SELECT
-                `ctb_referencia`.`id_ctb_referencia`
-                , `ctb_referencia`.`nombre`
-            FROM
-                `ctb_referencia`
-                INNER JOIN `ctb_fuente` 
-                    ON (`ctb_referencia`.`id_ctb_fuente` = `ctb_fuente`.`id_doc_fuente`)
-            WHERE (`ctb_fuente`.`id_doc_fuente` = $tipo_dato)";
+    if ($id_doc_rad == 0) {
+        $sql = "SELECT
+                    `ctb_referencia`.`id_ctb_referencia`
+                    , `ctb_referencia`.`nombre`
+                FROM
+                    `ctb_referencia`
+                    INNER JOIN `ctb_fuente` 
+                        ON (`ctb_referencia`.`id_ctb_fuente` = `ctb_fuente`.`id_doc_fuente`)
+                WHERE (`ctb_fuente`.`id_doc_fuente` = $tipo_dato)";
+    } else {
+        $sql = "SELECT `id_ctb_referencia`,`nombre` FROM `ctb_referencia` WHERE `id_ctb_referencia` = {$datosDoc['id_ref_ctb']}";
+    }
     $rs = $cmd->query($sql);
     $referencia = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 
-$datosDoc = GetValoresCeva($id_doc_pag, $cmd);
-$id_manu = $datosDoc['id_manu'];
-$id_cop = $datosDoc['id_doc_cop'] > 0 ? $datosDoc['id_doc_cop'] : 0;
-$id_ref = $datosDoc['id_ref'];
-if (!empty($datosDoc)) {
-    $id_t = ['0' => $datosDoc['id_tercero']];
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res_api = curl_exec($ch);
-    curl_close($ch);
-    $dat_ter = json_decode($res_api, true);
-    $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
-} else {
-    $tercero = '';
+try {
+    $sql = "SELECT
+                ctb_referencia.accion_pto
+            FROM
+                ctb_referencia
+            WHERE ctb_referencia.id_ctb_referencia =" . $datosDoc['id_ref_ctb']
+        . " AND id_ctb_fuente = $tipo_dato";
+    $rs = $cmd->query($sql);
+    $obj_referencia = $rs->fetch();
+    if (empty($obj_referencia)) {
+        $obj_referencia['accion_pto'] = 0;
+    }
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$ver = 'readonly';
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
 
 <?php include '../head.php'; ?>
+
 <body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ?  'sb-sidenav-toggled' : '' ?>">
     <?php include '../navsuperior.php' ?>
     <div id="layoutSidenav">
@@ -207,6 +248,7 @@ $ver = 'readonly';
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid p-2">
+                    <input type="hidden" id="tipo_var" value="<?php echo $tipo_var; ?>">
                     <div class="card mb-4">
                         <div class="card-header" id="divTituloPag">
                             <div class="row">
@@ -225,7 +267,8 @@ $ver = 'readonly';
                         }
                         ?>
                         <input type="hidden" id="valor_teso" value="<?php echo $valor_teso; ?>">
-                        <form id="formAddDetallePag">
+                        <form id="formGetMvtoTes">
+                            <input type="hidden" id="fec_cierre" value="<?php echo $fecha_cierre; ?>">
                             <div class="card-body" id="divCuerpoPag">
                                 <div>
                                     <div class="right-block">
@@ -234,18 +277,20 @@ $ver = 'readonly';
                                                 <span class="small">NUMERO ACTO: </span>
                                             </div>
                                             <div class="col-10">
-                                                <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $id_manu; ?>" required readonly>
+                                                <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $id_manu; ?>">
                                                 <input type="hidden" id="tipodato" name="tipodato" value="<?php echo $tipo_dato; ?>">
                                                 <input type="hidden" id="id_cop_pag" name="id_cop_pag" value="<?php echo $id_cop; ?>">
                                                 <input type="hidden" id="id_arqueo" name="id_arqueo" value="<?php echo $id_arq; ?>">
+                                                <input type="hidden" id="id_doc_rad" name="id_doc_rad" value="<?php echo $id_doc_rad; ?>">
+                                                <input type="hidden" id="hd_accion_pto" name="hd_accion_pto" value="<?php echo $obj_referencia['accion_pto']; ?>">
                                             </div>
                                         </div>
                                         <div class="row mb-1">
                                             <div class="col-2">
-                                                <span class="small">FECHA:</span>
+                                                <span for="fecha" class="small">FECHA:</span>
                                             </div>
                                             <div class="col-10">
-                                                <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datosDoc['fecha'])); ?>" readonly>
+                                                <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datosDoc['fecha'])); ?>">
                                             </div>
                                         </div>
                                         <div class="row mb-1">
@@ -263,13 +308,11 @@ $ver = 'readonly';
                                             </div>
                                             <div class="col-10">
                                                 <select name="ref_mov" id="ref_mov" class="form-control form-control-sm" readonly>
-                                                    <option value="0"></option>
                                                     <?php foreach ($referencia as $rf) {
                                                         if ($datosDoc['id_ref_ctb'] == $rf['id_ctb_referencia']) {
                                                             echo '<option value="' . $rf['id_ctb_referencia'] . '" selected>' . $rf['nombre'] . '</option>';
                                                         }
-                                                    ?>
-                                                    <?php } ?>
+                                                    } ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -286,7 +329,7 @@ $ver = 'readonly';
                                                 <span class="small">OBJETO:</span>
                                             </div>
                                             <div class="col-10">
-                                                <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-label="Default select example" rows="3" required="required" readonly><?php echo $datosDoc['detalle']; ?></textarea>
+                                                <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-label="Default select example" rows="3"><?php echo $datosDoc['detalle']; ?></textarea>
                                             </div>
                                         </div>
                                         <?php if ($tipo_dato == '9') { ?>
@@ -298,8 +341,8 @@ $ver = 'readonly';
                                                     <div class="input-group input-group-sm">
                                                         <input type="text" name="arqueo_caja" id="arqueo_caja" value="<?php echo $valor_teso; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly>
                                                         <div class="input-group-append">
-                                                            <?php if ($datosDoc['estado'] == 1) { ?>
-                                                                <a class="btn btn-outline-success btn-sm" onclick="cargaArqueoCaja('<?php echo $id_cop; ?>')"><span class="fas fa-cash-register fa-lg"></span></a>
+                                                            <?php if ($datosDoc['estado'] == 1 || $tipo_dato == '9') { ?>
+                                                                <a class="btn btn-outline-success btn-sm" onclick="CargaArqueoCajaTes(<?= $id_doc_pag; ?>,0)"><span class="fas fa-cash-register fa-lg"></span></a>
                                                             <?php } ?>
                                                         </div>
                                                     </div>
@@ -323,38 +366,40 @@ $ver = 'readonly';
                                                 </div>
                                             </div>
                                         <?php }
-                                        if ($tipo_dato == '6' || $tipo_dato == '16' || $tipo_dato == '7' || $tipo_dato == '12') { ?>
+                                        if (($tipo_dato == '6' || $tipo_dato == '16' || $tipo_dato == '7' || $tipo_dato == '12') && $id_doc_rad == 0) { ?>
                                             <div class="row mb-1">
                                                 <div class="col-2">
-                                                    <label for="fecha" class="small">PRESUPUESTO:</label>
+                                                    <label for="arqueo_caja" class="small">PRESUPUESTO:</label>
                                                 </div>
                                                 <div class="col-4">
                                                     <div class="input-group input-group-sm">
                                                         <input type="text" name="arqueo_caja" id="arqueo_caja" value="<?php echo $valor_pago; ?>" class="form-control form-control-sm" style="text-align: right;" required readonly>
                                                         <div class="input-group-append">
                                                             <?php if ($datosDoc['estado'] == 1) { ?>
-                                                                <a class="btn btn-outline-success btn-sm" onclick="cargaPresupuestoIng('')"><span class="fas fa-plus fa-lg"></span></a>
+                                                                <!--<a class="btn btn-outline-success btn-sm" onclick="cargaPresupuestoIng('')"><span class="fas fa-plus fa-lg"></span></a>-->
+                                                                <a class="btn btn-outline-success btn-sm" id="btn_cargar_presupuesto"><span class="fas fa-plus fa-lg"></span></a>
                                                             <?php } ?>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        <?php } ?>
-                                        <?php
-                                        if ($id_cop > 0) {
+                                        <?php }
+                                        if ($id_cop > 0 && $_SESSION['pto'] == '1') {
                                         ?>
                                             <div class="row mb-1">
                                                 <div class="col-2">
-                                                    <label for="fecha" class="small">IMPUTACION:</label>
+                                                    <label for="valor" class="small">IMPUTACION:</label>
                                                 </div>
                                                 <div class="col-4">
                                                     <div class="input-group input-group-sm">
                                                         <input type="text" name="valor" id="valor" value="<?php echo $datosDoc['val_pagado']; ?>" class="form-control" style="text-align: right;" required readonly>
                                                         <div class="input-group-append" id="button-addon4">
-                                                            <?php if ($datosDoc['estado'] == 1) { ?>
-                                                                <a class="btn btn-outline-success" onclick="cargaListaCausaciones('<?php echo $id_cop; ?>')"><span class="fas fa-plus fa-lg"></span></a>
-                                                                <a class="btn btn-outline-secondary" onclick="cargaListaInputaciones('<?php echo $id_cop; ?>')"><span class="fas fa-search fa-lg"></span></a>
-                                                            <?php } ?>
+                                                            <?php if ($datosDoc['estado'] == 1 && $id_doc_pag > 0) { ?>
+                                                                <button class="btn btn-outline-success" onclick="cargaListaCausaciones(this)"><span class="fas fa-plus fa-lg"></span></button>
+                                                            <?php
+                                                                /*<a class="btn btn-outline-secondary" onclick="cargaListaInputaciones('<?php echo $id_cop;?>')"><span class="fas fa-search fa-lg"></span></a>*/
+                                                            }
+                                                            ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -367,33 +412,38 @@ $ver = 'readonly';
                                         } else {
                                             $campo_req = "readonly";
                                         }
+                                        if ($id_doc_rad > 0) {
+                                            $forma = 'FORMA DE RECAUDO :';
+                                        } else {
+                                            $forma = 'FORMA DE PAGO :';
+                                        }
                                         ?>
 
                                         <div class="row mb-1">
                                             <div class="col-2">
-                                                <label class="small">FORMA DE PAGO :</label>
+                                                <label for="forma_pago" class="small"><?php echo $forma; ?></label>
                                             </div>
                                             <div class="col-4">
                                                 <div class="input-group input-group-sm">
                                                     <input type="text" name="forma_pago" id="forma_pago" value="<?php echo $valor_pago; ?>" class="form-control" style="text-align: right;" required <?php echo $campo_req; ?>>
                                                     <div class="input-group-append">
-                                                        <?php if ($datosDoc['estado'] == 1) { ?>
-                                                            <a class="btn btn-outline-primary" onclick="cargaFormaPago(<?php echo $id_cop; ?>,0)"><span class="fas fa-wallet fa-lg"></span></a>
+                                                        <?php if ($datosDoc['estado'] == 1 && $id_doc_pag > 0) { ?>
+                                                            <button class="btn btn-outline-primary" onclick="cargaFormaPago(<?php echo $id_cop; ?>,0,this)"><span class="fas fa-wallet fa-lg"></span></button>
                                                         <?php } ?>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <?php if ($datosDoc['estado'] == 1) { ?>
-                                            <div class="row ">
-                                                <div class="col-2">
-                                                    <div><label for="fecha" class="small"></label></div>
-                                                </div>
-                                                <div class="col-2">
-                                                    <div class="text-align: center">
-                                                        <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoPag('<?php echo $id_doc_pag; ?>')">Generar movimiento</button>
-                                                    </div>
-                                                </div>
+                                            <div class="text-center py-2">
+                                                <?php
+                                                if ($id_doc_pag > 0) {
+                                                ?>
+                                                    <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoPag(this)">Generar movimiento</button>
+                                                <?php
+                                                }
+                                                ?>
+                                                <button type="button" class="btn btn-warning btn-sm" id="GuardaDocMvtoPag" text="<?= $id_doc_pag; ?>">Guardar</button>
                                             </div>
                                         <?php } ?>
                                     </div>
@@ -411,14 +461,14 @@ $ver = 'readonly';
                                     </thead>
                                     <tbody id="modificartableMvtoContableDetallePag">
                                     </tbody>
-                                    <?php if ($datosDoc['estado'] == '1') { ?>
+                                    <?php if ($datosDoc['estado'] == '1' && $id_doc_pag > 0) { ?>
                                         <tr>
                                             <td>
                                                 <input type="text" name="codigoCta" id="codigoCta" class="form-control form-control-sm" value="" required>
                                                 <input type="hidden" name="id_codigoCta" id="id_codigoCta" class="form-control form-control-sm" value="0">
                                                 <input type="hidden" name="tipoDato" id="tipoDato" value="0">
                                             </td>
-                                            <td><input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm" required>
+                                            <td><input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm bTercero" required>
                                                 <input type="hidden" name="idTercero" id="idTercero" value="0">
                                             </td>
                                             <td>
@@ -450,13 +500,6 @@ $ver = 'readonly';
     <?php include '../modales.php' ?>
     </div>
     <?php include '../scripts.php' ?>
-    <!-- Script -->
-    <script>
-        window.onload = function() {
-            buscarConsecutivoTeso('<?php echo $tipo_dato; ?>');
-        }
-    </script>
-
 </body>
 
 </html>

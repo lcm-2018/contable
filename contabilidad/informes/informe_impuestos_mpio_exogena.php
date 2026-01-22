@@ -2,32 +2,10 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>CONTAFACIL</title>
-    <style>
-        .text {
-            mso-number-format: "\@"
-        }
-    </style>
-
-    <?php
-
-    header("Content-type: application/vnd.ms-excel charset=utf-8");
-    header("Content-Disposition: attachment; filename=Descuentos_municipio.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
-
-    ?>
-</head>
-<?php
 $vigencia = $_SESSION['vigencia'];
 // estraigo las variables que llegan por post en json
 $fecha_inicial = $_POST['fec_inicial'];
@@ -39,6 +17,7 @@ function pesos($valor)
 }
 include '../../conexion.php';
 include '../../financiero/consultas.php';
+include '../../terceros.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // consulto la tabla seg_terceros para obtener el id_tercero_api
@@ -124,33 +103,17 @@ WHERE ( `ctb_doc`.`id_tercero` >0);";
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $id_t = [];
+$id_t[] = $tercero_api['id_tercero_api'];
+
 foreach ($id_terceros as $ter) {
     $id_t[] = $ter['id_tercero'];
 }
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
-// buscar datos del tercero
-// Consulta terceros en la api ********************************************* API
-$url = $api . 'terceros/datos/res/datos/id/' . $tercero_api['id_tercero_api'];
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$res_api = curl_exec($ch);
-curl_close($ch);
-$dat_ter = json_decode($res_api, true);
-$tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
-$ccnit = $dat_ter[0]['cc_nit'];
+$ids = implode(',', $id_t);
+$terceros = getTerceros($ids, $cmd);
+
+$key = array_search($sede, array_column($terceros, 'id_tercero_api'));
+$tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '---';
+$ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
 ?>
 <div class="contenedor bg-light" id="areaImprimir">
     <div class="px-2 " style="width:90% !important;margin: 0 auto;">
@@ -239,14 +202,15 @@ $ccnit = $dat_ter[0]['cc_nit'];
             // recorrer pagos realizados con for
             foreach ($pagos_realizados as $pr) {
                 // Nombres terceros
-                $key = array_search($pr['id_tercero'], array_column($terceros, 'id_tercero'));
-                $nom_ter =  $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['razon_social'];
+                $key = array_search($pr['id_tercero'], array_column($terceros, 'id_tercero_api'));
+                $nom_ter =  $key !== false ? $terceros[$key]['nom_tercero'] : '---';
+                $ced_ter =  $key !== false ? $terceros[$key]['nit_tercero'] : '---';
                 $fecha = date('Y-m-d', strtotime($pr['fecha']));
                 echo "<tr>
                     <td class='text-right'>" . $pr['id_manu'] . "</td>
                     <td class='text-right'>" . $fecha . "</td>
                     <td class='text-right'>" . $nom_ter  . "</td>
-                    <td class='text'>" . $terceros[$key]['cc_nit'] . "</td>
+                    <td class='text'>" . $ced_ter . "</td>
                     
                     <td class='text-right'>" . number_format($pr['valor_base'], 2, ".", ",")  . "</td>
                     <td class='text-right'>" . number_format($pr['valor_retencion'], 2, ".", ",")  . "</td>
@@ -305,14 +269,15 @@ $ccnit = $dat_ter[0]['cc_nit'];
             // recorrer pagos realizados con for
             foreach ($pagos_realizados as $pr) {
                 // Nombres terceros
-                $key = array_search($pr['id_tercero'], array_column($terceros, 'id_tercero'));
-                $nom_ter =  $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['razon_social'];
+                $key = array_search($pr['id_tercero'], array_column($terceros, 'id_tercero_api'));
+                $nom_ter =  $key !== false ? $terceros[$key]['nom_tercero'] : '---';
+                $ced_ter =  $key !== false ? $terceros[$key]['nit_tercero'] : '---';
                 $fecha = date('Y-m-d', strtotime($pr['fecha']));
                 echo "<tr>
                     <td class='text-right'>" . $pr['id_manu'] . "</td>
                     <td class='text-right'>" . $fecha . "</td>
                     <td class='text-right'>" . $nom_ter  . "</td>
-                    <td class='text'>" . $terceros[$key]['cc_nit'] . "</td>
+                    <td class='text'>" . $ced_ter . "</td>
                     <td class='text-right'>" . number_format($pr['valor_base'], 2, ".", ",")  . "</td>
                     <td class='text-right'>" . number_format($pr['valor_retencion'], 2, ".", ",")  . "</td>
                     </tr>";

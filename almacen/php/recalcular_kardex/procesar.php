@@ -14,12 +14,15 @@ if (isset($_POST['tipo'])) {
         if (PermisosUsuario($permisos, 5009, 2) || PermisosUsuario($permisos, 5009, 3) || $id_rol == 1) {
 
             $idlot = isset($_POST['art']) ? implode(",",$_POST['art']) : '';
-
+            $res['mensaje'] = 'Error';
+            
             if ($idlot != ''){            
                 $tipo = $_POST['tipo'];
                 $iding = $_POST['id_ing'];
                 $idegr = $_POST['id_egr'];
                 $idtra = $_POST['id_tra'];
+                $idegr_r = $_POST['id_egr_r'];
+                $iding_r = 0;
                 $iddev = 0;
                 $fecini = $_POST['fec_ini'];
 
@@ -30,15 +33,15 @@ if (isset($_POST['tipo'])) {
                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
                 $cmd->beginTransaction();
-
-                recalcular_kardex($cmd, $idlot, $tipo, $iding, $idegr, $idtra, $iddev, $fecini);
+                                                                                
+                recalcular_kardex($cmd, $idlot, $tipo, $iding, $idegr, $idtra, $iding_r, $idegr_r, $iddev, $fecini);
 
                 /*Cuenta cuantos errores ocurrieron al ejecutar el script*/
                 $errores = error_get_last();
                 if (!$errores) {
                     $cmd->commit();
                     $res['mensaje'] = 'ok';
-                    $accion = 'Actualizar kardex';
+                    $accion = 'Actualizar';
                     $opcion = 'Recalcular Kardex';
                     $detalle = 'Recalcular Kardex en la fecha : ' . date('Y-m-d H:i:s');
                     bitacora($accion, $opcion, $detalle, $_SESSION['id_user'], $_SESSION['user']);

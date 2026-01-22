@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -51,13 +51,19 @@ try {
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_alm_pedido.id_pedido,far_alm_pedido.num_pedido,far_alm_pedido.fec_pedido,far_alm_pedido.hor_pedido,
 	            far_alm_pedido.detalle,far_alm_pedido.val_total,
-                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
+                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,far_alm_pedido.estado,
 	            CASE far_alm_pedido.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' 
-                                            WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'CERRADO'
-                                            WHEN 0 THEN 'ANULADO' END AS nom_estado
+                                            WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'FINALIZADO'
+                                            WHEN 0 THEN 'ANULADO' END AS nom_estado,
+                PEDIDO.ingresos
             FROM far_alm_pedido
             INNER JOIN tb_sedes ON (tb_sedes.id_sede=far_alm_pedido.id_sede)
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_alm_pedido.id_bodega)
+            LEFT JOIN (SELECT id_pedido,GROUP_CONCAT(id_ingreso) AS ingresos 
+                        FROM far_orden_ingreso
+                        WHERE id_pedido IS NOT NULL
+                        GROUP BY id_pedido
+                        ) AS PEDIDO ON (PEDIDO.id_pedido=far_alm_pedido.id_pedido)
             $where ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -85,11 +91,13 @@ if (!empty($objs)) {
             "num_pedido" => $obj['num_pedido'],
             "fec_pedido" => $obj['fec_pedido'],
             "hor_pedido" => $obj['hor_pedido'],
-            "detalle" => $obj['detalle'],
-            "val_total" => formato_valor($obj['val_total']),
+            "detalle" => $obj['detalle'],            
             "nom_sede" => mb_strtoupper($obj['nom_sede']),
             "nom_bodega" => mb_strtoupper($obj['nom_bodega']),
+            "val_total" => formato_valor($obj['val_total']),
+            "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
+            "ingresos" => $obj['ingresos'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];
     }

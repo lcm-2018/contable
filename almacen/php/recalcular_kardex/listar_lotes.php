@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -57,6 +57,10 @@ if (isset($_POST['opcion']) && $_POST['opcion']){
             $where .= " AND (far_medicamento_lote.id_lote IN (SELECT id_lote_origen FROM far_traslado_detalle WHERE id_traslado=" . $_POST['id_tra'] . ") 
                         OR far_medicamento_lote.id_lote IN (SELECT id_lote_destino FROM far_traslado_detalle WHERE id_traslado=" . $_POST['id_tra'] . "))";
         }                
+    } else if($_POST['opcion'] == 'ER'){ //Opcion Id. de Orden de Traslado Egreso Remoto
+        if ($_POST['id_egr_r']) {
+            $where .= " AND far_medicamento_lote.id_lote IN (SELECT id_lote_origen FROM far_traslado_r_detalle WHERE id_traslado=" . $_POST['id_egr_r'] . ")";
+        }    
     }
 } else {
     $where_usr = " WHERE 1=2";    

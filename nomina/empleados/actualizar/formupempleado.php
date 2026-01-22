@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -128,7 +128,7 @@ function Municipios($iddpto)
                                             <?php
                                             foreach ($sedes as $se) {
                                                 $slc = $se['id_sede'] == $obj['sede_emp'] ? 'selected' : '';
-                                                if ($se['nombre'] != 'CONVENIOS') {
+                                                if ($se['nom_sede'] != 'CONVENIOS') {
                                                     echo '<option value="' . $se['id_sede'] . '" ' . $slc . '>' . $se['nom_sede'] . '</option>';
                                                 }
                                             }
@@ -354,6 +354,7 @@ function Municipios($iddpto)
                                             $id_sb =  '<input type="hidden" name="id_salario" value="' . $salarios[$empkey]['id_salario'] . '">';
                                         }
                                         ?>
+                                        <input type="hidden" name="salAnt" value="<?php echo $val ?>">
                                         <input type="text" class="form-control form-control-sm" id="numSalarioEmp" name="numSalarioEmp" value="<?php echo $val ?>">
                                         <?php echo $id_sb; ?>
                                     </div>
@@ -466,7 +467,9 @@ function Municipios($iddpto)
                                             <div class="form-control form-control-sm">
                                                 <div class="form-group form-check">
                                                     <input type="checkbox" class="form-check-input" id="checkDependientes" name="checkDependientes" <?php echo !empty($dependientes) ? 'checked' : '' ?>>
-                                                    <label class="form-check-label" for="checkDependientes">Dependientes</label>
+                                                    <label class="form-check-label mr-4" for="checkDependientes">Dependientes</label>
+                                                    <input type="checkbox" class="form-check-input" id="checkBsp" name="checkBsp" <?php echo $obj['bsp'] == '1' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="checkBsp">BSP</label>
                                                 </div>
                                             </div>
                                         </div>

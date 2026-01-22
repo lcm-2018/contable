@@ -1,16 +1,23 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
+include '../../../terceros.php';
+include '../../../financiero/consultas.php';
+
+
 $id_ctb_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : exit('Acceso no permitido');
 $id_documento = isset($_POST['id_detalle']) ? $_POST['id_detalle'] : 0;
 $id_vigencia = $_SESSION['id_vigencia'];
+
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 55, $cmd);
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 MAX(`ctb_doc`.`id_manu`) AS `id_manu`, `ctb_fuente`.`nombre`
             FROM
@@ -36,7 +43,6 @@ try {
             WHERE (`id_ctb_doc` = $id_documento)";
     $rs = $cmd->query($sql);
     $datos = $rs->fetch();
-    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -52,20 +58,16 @@ if (empty($datos)) {
     $datos['detalle'] = '';
     $tercero = '';
 } else {
-    $payload = json_encode(array(0 => $datos['id_tercero']));
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
-    $tercero = ltrim($terceros[0]['nombre1'] . ' ' . $terceros[0]['nombre2'] . ' ' . $terceros[0]['apellido1'] . ' ' . $terceros[0]['apellido2'] . ' ' . $terceros[0]['razon_social']);
+    if ($datos['id_tercero'] > 0) {
+        $payload = array(0 => $datos['id_tercero']);
+        $ids = implode(',', $payload);
+        $terceros = getTerceros($ids, $cmd);
+        $tercero = ltrim($terceros[0]['nom_tercero']);
+    } else {
+        $tercero = '---';
+    }
 }
+$cmd = null;
 ?>
 <div class="px-0">
     <div class="shadow">
@@ -74,6 +76,7 @@ if (empty($datos)) {
         </div>
         <form id="formGetMvtoCtb">
             <input type="hidden" name="id_ctb_doc" value="<?php echo $id_ctb_doc; ?>">
+            <input type="hidden" id="fec_cierre" value="<?php echo $fecha_cierre; ?>">
             <div class="form-row px-4 pt-2">
                 <div class="form-group col-md-6">
                     <label for="fecha" class="small">FECHA </label>
@@ -81,7 +84,7 @@ if (empty($datos)) {
                 </div>
                 <div class="form-group col-md-6">
                     <label for="numDoc" class="small">NUMERO</label>
-                    <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" readonly value="<?php echo $datos['id_manu'] ?>">
+                    <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $datos['id_manu'] ?>">
                 </div>
 
             </div>

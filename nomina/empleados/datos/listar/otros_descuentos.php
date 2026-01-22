@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -14,9 +14,11 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `id_dcto`, `id_empleado`, `fecha`, `concepto`, `valor`
+                `id_dcto`, `fecha`, `concepto`, `valor`, `descripcion` AS `tipo`, `estado`
             FROM
                 `nom_otros_descuentos`
+            INNER JOIN `nom_tipo_descuentos` 
+                ON (`nom_otros_descuentos`.`id_tipo_dcto` = `nom_tipo_descuentos`.`id_tipo`)
             WHERE (`id_empleado` = $id)";
     $rs = $cmd->query($sql);
     $descuentos = $rs->fetchAll();
@@ -39,11 +41,22 @@ if (!empty($descuentos)) {
         } else {
             $borrar = null;
         }
+        if ($l['estado'] == 0) {
+            $borrar = $editar = null;
+        }
+
+        $estado = $l['estado'] == 1 ? '<span class="badge badge-success">Activo</span><button value="' . $l['id_dcto'] 
+        . '" class="btn btn-outline-success btn-sm btn-circle estado" title="Cambiar Estado" estado="' . $l['estado'] 
+        . '"><span class="fas fa-exchange-alt"></span></button>' : '<span class="badge badge-secondary">Inactivo</span><button value="' . $l['id_dcto'] 
+        . '" class="btn btn-outline-secondary btn-sm btn-circle estado" title="Cambiar Estado"  estado="' . $l['estado'] 
+        . '"><span class="fas fa-exchange-alt"></span></button>';
         $data[] = [
             'id_dcto' => $id_dcto,
             'fecha' => $l['fecha'],
+            'tipo' => $l['tipo'],
             'concepto' => $l['concepto'],
             'valor' => '<div class="text-right">' . pesos($l['valor']) . '</div>',
+            'estado' => '<div class="text-center">' . $estado . '</div>',
             'botones' => '<div class="text-center">' . $editar . $borrar . '</div>'
         ];
     }

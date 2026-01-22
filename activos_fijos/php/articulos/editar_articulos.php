@@ -28,13 +28,14 @@ try {
             $id_subgrp = $_POST['sl_subgrp_art'] ? $_POST['sl_subgrp_art'] : 0;
             $top_min = $_POST['txt_topmin_art'];
             $top_max = $_POST['txt_topmax_art'];
+            $vid_uti = $_POST['txt_vidautil_art'] ? $_POST['txt_vidautil_art'] : 'NULL';
             $id_unimed = $_POST['id_txt_unimed_art'] ? $_POST['id_txt_unimed_art'] : 0;
             $estado = $_POST['sl_estado'];
 
             if ($id == -1) {
                 $sql = "INSERT INTO far_medicamentos(cod_medicamento,nom_medicamento,id_subgrupo,top_min,top_max,
-                            id_unidadmedida_2,id_unidadmedida,id_formafarmaceutica,id_atc,es_clinico,id_tip_medicamento,estado,id_usr_crea) 
-                        VALUES($cod_art,'$nom_art',$id_subgrp,$top_min,$top_max,$id_unimed,0,0,0,0,NULL,$estado,$id_usr_crea)";
+                            id_unidadmedida_2,id_unidadmedida,id_formafarmaceutica,id_atc,es_clinico,id_tip_medicamento,estado,id_usr_crea,vida_util) 
+                        VALUES('$cod_art','$nom_art',$id_subgrp,$top_min,$top_max,$id_unimed,0,0,0,0,NULL,$estado,$id_usr_crea,$vid_uti)";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -47,16 +48,28 @@ try {
                     $res['mensaje'] = $cmd->errorInfo()[2];
                 }
             } else {
-                $sql = "UPDATE far_medicamentos SET cod_medicamento=$cod_art,nom_medicamento='$nom_art',
-                            id_subgrupo=$id_subgrp,top_min=$top_min,top_max=$top_max,id_unidadmedida_2=$id_unimed,estado=$estado
-                        WHERE id_med=" . $id;
+                $sql = "SELECT COUNT(*) AS existe
+                        FROM far_medicamentos
+                        INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)
+                        INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_med=far_medicamentos.id_med)
+                        WHERE far_subgrupos.af_menor_cuantia=1 AND far_medicamentos.id_med=" . $id;
                 $rs = $cmd->query($sql);
+                $obj_existe = $rs->fetch();
 
-                if ($rs) {
-                    $res['mensaje'] = 'ok';
-                    $res['id'] = $id;
+                if ($obj_existe['existe'] == 0) {
+                    $sql = "UPDATE far_medicamentos SET cod_medicamento='$cod_art',nom_medicamento='$nom_art',
+                            id_subgrupo=$id_subgrp,top_min=$top_min,top_max=$top_max,id_unidadmedida_2=$id_unimed,estado=$estado,vida_util=$vid_uti
+                        WHERE id_med=" . $id;
+                    $rs = $cmd->query($sql);
+
+                    if ($rs) {
+                        $res['mensaje'] = 'ok';
+                        $res['id'] = $id;
+                    } else {
+                        $res['mensaje'] = $cmd->errorInfo()[2];
+                    }
                 } else {
-                    $res['mensaje'] = $cmd->errorInfo()[2];
+                    $res['mensaje'] = 'El Articulo tiene registrado lotes. Modifique el registro desde le Módulo de Almacén';
                 }
             }
         }

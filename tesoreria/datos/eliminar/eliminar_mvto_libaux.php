@@ -11,6 +11,10 @@ try {
     $query->bindParam(1, $id);
     $query->execute();
     if ($query->rowCount() > 0) {
+        include '../../../financiero/reg_logs.php';
+        $ruta = '../../../log';
+        $consulta = "DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = $id";
+        RegistraLogs($ruta, $consulta);
         $response['status'] = 'ok';
     } else {
         $response['msg'] = 'No se eliminó ningún registro';

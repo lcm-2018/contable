@@ -1,13 +1,16 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
+include '../common/cargar_combos.php';
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$id_subgrupo = isset($_POST['id_subgrupo']) ? $_POST['id_subgrupo'] : 0;
 
 $id_sede = isset($_POST['id_sede']) ? $_POST['id_sede'] : -1;
 $id_bodega = isset($_POST['id_bodega']) && $_POST['id_bodega'] ? $_POST['id_bodega'] : -1;
@@ -34,28 +37,37 @@ $nom_bodega = isset($obj['nombre']) ? $obj['nombre'] : '';
                         <input type="text" class="form-control form-control-sm" class="small" value="<?php echo $nom_bodega ?>" readonly="readonly">
                     </div>
                     <div class="form-group col-md-2">
-                        <input type="text" class="filtro_art form-control form-control-sm" id="txt_codigo_art_fil" placeholder="Codigo">
+                        <select class="form-control form-control-sm" id="sl_subgrupo_art_fil">
+                            <?php subgrupo_articulo($cmd,'--Subgrupo--', $id_subgrupo) ?> 
+                        </select>
                     </div>
-                    <div class="form-group col-md-2">
-                        <input type="text" class="filtro_art form-control form-control-sm" id="txt_nombre_art_fil" placeholder="Nombre">
-                    </div>
-                    <div class="form-group col-md-2">
-                        <div class="form-control form-control-sm">
-                            <input class="filtro_art form-check-input" type="checkbox" id="chk_novencido_lot_fil" checked>
-                            <label class="filtro_art form-check-label small" for="chk_novencido_lot_fil">NO Vencidos</label>
-                        </div>
-                    </div>
-                    <div class="form-group col-md-2">
-                        <div class="form-control form-control-sm">
-                            <input class="filtro_art form-check-input" type="checkbox" id="chk_conexistencia_lot_fil" checked>
-                            <label class="filtro_art form-check-label small" for="chk_conexistencia_lot_fil">Con Existencias</label>
-                        </div>
-                    </div>
-                    <div class="form-group col-md-1">
-                        <a type="button" id="btn_buscar_articulo_fil" class="btn btn-outline-success btn-sm" title="Filtrar">
-                            <span class="fas fa-search fa-lg" aria-hidden="true"></span>
-                        </a>
-                    </div>
+                    <div class="form-group col-md-7">
+                        <div class="form-row">
+                            <div class="form-group col-md-2">
+                                <input type="text" class="filtro_art form-control form-control-sm" id="txt_codigo_art_fil" placeholder="Codigo">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <input type="text" class="filtro_art form-control form-control-sm" id="txt_nombre_art_fil" placeholder="Nombre">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <div class="form-control form-control-sm">
+                                    <input class="filtro_art form-check-input" type="checkbox" id="chk_novencido_lot_fil" checked>
+                                    <label class="filtro_art form-check-label small" for="chk_novencido_lot_fil">NO Vencidos</label>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <div class="form-control form-control-sm">
+                                    <input class="filtro_art form-check-input" type="checkbox" id="chk_conexistencia_lot_fil" checked>
+                                    <label class="filtro_art form-check-label small" for="chk_conexistencia_lot_fil">Con Existencias</label>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-1">
+                                <a type="button" id="btn_buscar_articulo_fil" class="btn btn-outline-success btn-sm" title="Filtrar">
+                                    <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                </a>
+                            </div>
+                        </div>    
+                    </div>    
                 </div>
             </form>
             <div style="height:400px" class="overflow-auto"> 
@@ -88,6 +100,7 @@ $nom_bodega = isset($obj['nombre']) ? $obj['nombre'] : '';
                 processing: true,
                 serverSide: true,
                 searching: false,
+                autoWidth: false,
                 ajax: {
                     url: '../common/buscar_articulos_lista.php',
                     type: 'POST',
@@ -95,6 +108,7 @@ $nom_bodega = isset($obj['nombre']) ? $obj['nombre'] : '';
                     data: function(data) {
                         data.id_sede = $('#id_sede_fil').val();
                         data.id_bodega = $('#id_bodega_fil').val();
+                        data.id_subgrupo = $('#sl_subgrupo_art_fil').val();
                         data.codigo = $('#txt_codigo_art_fil').val();
                         data.nombre = $('#txt_nombre_art_fil').val();
                         data.no_vencidos = $('#chk_novencido_lot_fil').is(':checked') ? 1 : 0;
@@ -109,12 +123,12 @@ $nom_bodega = isset($obj['nombre']) ? $obj['nombre'] : '';
                     { 'data': 'val_promedio' },
                     { 'data': 'lotes' },
                 ],
-                columnDefs: [{
-                    targets: [2],
-                    class: 'text-wrap'
-                }],
+                columnDefs: [
+                    { class: 'text-wrap', targets: [2,5] },
+                    { width: '5%', targets: [0,1,3,4] }
+                ],
                 order: [
-                    [0, "desc"]
+                    [2, "asc"]
                 ],
                 lengthMenu: [
                     [10, 25, 50, -1],
@@ -138,6 +152,10 @@ $nom_bodega = isset($obj['nombre']) ? $obj['nombre'] : '';
 
     $('.filtro_art').mouseup(function(e) {
         reloadtable('tb_articulos_bodega');
+    });
+
+    $('#sl_subgrupo_art_fil').on("change", function() {
+        sessionStorage.setItem("id_subgrupo", $(this).val());
     });
     
 </script>

@@ -44,26 +44,28 @@
                 { 'data': 'fec_pedido' },
                 { 'data': 'hor_pedido' },
                 { 'data': 'detalle' },
-                { 'data': 'val_total' },
                 { 'data': 'nom_sede' },
                 { 'data': 'nom_bodega' },
+                { 'data': 'val_total' },
+                { 'data': 'estado' },
                 { 'data': 'nom_estado' },
+                { 'data': 'ingresos' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4] },
-                { type: "numeric-comma", targets: 5 },
-                { orderable: false, targets: 9 }
+                { class: 'text-wrap', targets: [4, 5, 6] },
+                { type: "numeric-comma", targets: 7 },
+                { visible: false, targets: 8 },
+                { orderable: false, targets: 10 }
             ],
             rowCallback: function(row, data) {
-                var estado = $($(row).find("td")[8]).text();
-                if (estado == 'PENDIENTE') {
+                if (data.estado == 1) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
-                } else if (estado == 'CONFIRMADO') {
-                    $($(row).find("td")[0]).css("background-color", "cyan");
-                } else if (estado == 'ACEPTADO') {
-                    $($(row).find("td")[0]).css("background-color", "teal");
-                } else if (estado == 'ANULADO') {
+                } else if (data.estado == 2) {
+                    $($(row).find("td")[0]).css("background-color", "PaleTurquoise");
+                } else if (data.estado == 3) {
+                    $($(row).find("td")[0]).css("background-color", "DodgerBlue");
+                } else if (data.estado == 0) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
             },
@@ -106,7 +108,8 @@
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
 
-        var error = verifica_vacio($('#txt_det_ped'));
+        var error = verifica_vacio_2($('#id_txt_nom_bod'), $('#txt_nom_bod'));
+        error += verifica_vacio($('#txt_det_ped'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
@@ -171,9 +174,9 @@
     //Confirmar un registro Pedido
     $('#divForms').on("click", "#btn_confirmar", function() {
         let id = $(this).attr('value');
-        confirmar_proceso('pedidos_confirmar', id);
+        confirmar_proceso('pedidos_conf', id);
     });
-    $('#divModalConfDel').on("click", "#pedidos_confirmar", function() {
+    $('#divModalConfDel').on("click", "#pedidos_conf", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
@@ -191,7 +194,7 @@
 
                 $('#btn_guardar').prop('disabled', true);
                 $('#btn_confirmar').prop('disabled', true);
-                $('#btn_cerrar').prop('disabled', true);
+                $('#btn_finalizar').prop('disabled', true);
                 $('#btn_anular').prop('disabled', false);
 
                 $('#divModalDone').modal('show');
@@ -205,12 +208,12 @@
         });
     });
 
-    //Cerrar un registro Pedido
-    $('#divForms').on("click", "#btn_cerrar", function() {
+    //finalizar un registro Pedido
+    $('#divForms').on("click", "#btn_finalizar", function() {
         let id = $(this).attr('value');
-        confirmar_proceso('pedidos_cerrar', id);
+        confirmar_proceso('pedidos_finalizar', id);
     });
-    $('#divModalConfDel').on("click", "#pedidos_cerrar", function() {
+    $('#divModalConfDel').on("click", "#pedidos_finalizar", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
@@ -224,11 +227,11 @@
                 reloadtable('tb_pedidos', pag);
 
                 $('#txt_num_ped').val(r.num_pedido);
-                $('#txt_est_ped').val('CONFIRMADO');
+                $('#txt_est_ped').val('FINALIZADO');
 
                 $('#btn_guardar').prop('disabled', true);
                 $('#btn_confirmar').prop('disabled', true);
-                $('#btn_cerrar').prop('disabled', true);
+                $('#btn_finalizar').prop('disabled', true);
                 $('#btn_anular').prop('disabled', true);
 
                 $('#divModalDone').modal('show');
@@ -264,7 +267,7 @@
 
                 $('#btn_guardar').prop('disabled', true);
                 $('#btn_confirmar').prop('disabled', true);
-                $('#btn_cerrar').prop('disabled', true);
+                $('#btn_finalizar').prop('disabled', true);
                 $('#btn_anular').prop('disabled', true);
 
                 $('#divModalDone').modal('show');

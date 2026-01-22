@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -14,7 +14,11 @@ try {
     $sql = "SELECT id_lab,nom_laboratorio
             FROM far_laboratorios
             WHERE nom_laboratorio LIKE '%$term%'
+<<<<<<< HEAD
             ORDER BY nom_laboratorio";
+=======
+            ORDER BY IF(id_lab=0,0,CONCAT('1',nom_laboratorio))";
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;

@@ -1,12 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
-$id_aquisicion = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida ');
 include '../../../../permisos.php';
+include '../../../../terceros.php';
+$id_aquisicion = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida ');
 $key = array_search('53', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
@@ -52,15 +53,16 @@ try {
                 , `ctt_adquisiciones`.`objeto`
                 , `ctt_adquisiciones`.`id_tercero`
                 , `ctt_adquisiciones`.`estado`
-                , `ctt_adquisicion_detalles`.`id_bn_sv`
-                , `ctt_adquisicion_detalles`.`cantidad`
-                , `ctt_adquisicion_detalles`.`val_estimado_unid`
+                , `ctt_orden_compra_detalle`.`id_servicio` AS `id_bn_sv`
+                , `ctt_orden_compra_detalle`.`cantidad`
+                , `ctt_orden_compra_detalle`.`val_unid` AS `val_estimado_unid`
             FROM
-                `ctt_adquisicion_detalles`
-                INNER JOIN `ctt_adquisiciones` 
-                    ON (`ctt_adquisicion_detalles`.`id_adquisicion` = `ctt_adquisiciones`.`id_adquisicion`)
-            WHERE (`ctt_adquisiciones`.`id_adquisicion` = $id_aquisicion)";
-    $rs = $cmd->query($sql);
+                `ctt_orden_compra_detalle`
+            INNER JOIN `ctt_orden_compra` 
+                ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
+            INNER JOIN `ctt_adquisiciones`
+                ON (`ctt_orden_compra`.`id_adq` = `ctt_adquisiciones`.`id_adquisicion`)
+            WHERE (`ctt_orden_compra`.`id_adq` = $id_aquisicion)";
     $detalles = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
@@ -70,8 +72,10 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT 
-                `id_adquisicion`,`id_centro_costo`,`horas_mes` 
+                `id_adquisicion`,`id_area_cc` AS `id_centro_costo`,`horas_mes`, `id_sede`
             FROM `ctt_destino_contrato` 
+            INNER JOIN `far_centrocosto_area` 
+                ON (`ctt_destino_contrato`.`id_area_cc` = `far_centrocosto_area`.`id_area`)
             WHERE `id_adquisicion` = $id_aquisicion";
     $rs = $cmd->query($sql);
     $destino = $rs->fetchAll();
@@ -172,38 +176,19 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`
+                `tb_terceros`.`id_tercero`
                 , `tb_rel_tercero`.`id_tercero_api`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
             FROM
                 `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-            WHERE `seg_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
+                INNER JOIN `tb_terceros` 
+                    ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
+            WHERE `tb_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 3";
     $rs = $cmd->query($sql);
-    $terceros_sup = $rs->fetchAll();
-    $cmd = null;
+    $supervisor = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-if (!empty($terceros_sup)) {
-    $id_t = [];
-    foreach ($terceros_sup as $l) {
-        $id_t[] = $l['id_tercero_api'];
-    }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $supervisor = json_decode($result, true);
-} else {
-    $supervisor = [];
 }
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -300,30 +285,20 @@ try {
                 $num = 1;
                 foreach ($destino as $des) {
                     $id_cc = $des['id_centro_costo'];
-                    try {
-                        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-                        $sql = "SELECT `id_sede` FROM `tb_centro_costo_x_sede` WHERE `id_x_sede` = $id_cc";
-                        $rs = $cmd->query($sql);
-                        $cencos = $rs->fetch();
-                        $cmd = null;
-                    } catch (PDOException $e) {
-                        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-                    }
-                    $id_sede = $cencos['id_sede'];
+                    $id_sede = $des['id_sede'];
                     try {
                         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                         $sql = "SELECT
-                                    `tb_centro_costo_x_sede`.`id_x_sede`
-                                    , `tb_centros_costo`.`descripcion`
+                                    `far_centrocosto_area`.`id_area` AS `id_sede`
+                                    , `tb_centrocostos`.`nom_centro` AS `descripcion`
                                 FROM
-                                    `tb_centro_costo_x_sede`
+                                    `far_centrocosto_area`
                                     INNER JOIN `tb_sedes` 
-                                        ON (`tb_centro_costo_x_sede`.`id_sede` = `tb_sedes`.`id_sede`)
-                                    INNER JOIN `tb_centros_costo` 
-                                        ON (`tb_centro_costo_x_sede`.`id_centro_c` = `tb_centros_costo`.`id_centro`)
-                                WHERE `tb_centro_costo_x_sede`.`id_sede` = $id_sede";
+                                        ON (`far_centrocosto_area`.`id_sede` = `tb_sedes`.`id_sede`)
+                                    INNER JOIN `tb_centrocostos` 
+                                        ON (`far_centrocosto_area`.`id_centrocosto` = `tb_centrocostos`.`id_centro`)
+                                WHERE `far_centrocosto_area`.`id_sede` = $id_sede ORDER BY `descripcion` ASC";
                         $rs = $cmd->query($sql);
                         $centros = $rs->fetchAll();
                         $cmd = null;
@@ -338,7 +313,7 @@ try {
                                 <select name="slcSedeAC[]" class="form-control form-control-sm slcSedeAC">
                                     <?php
                                     foreach ($sedes as $s) {
-                                        $slc = $s['id_sede'] == $id_sede ? 'selected' : '';
+                                        $slc = $s['id_sede'] == $id_cc ? 'selected' : '';
                                         echo '<option value="' . $s['id_sede'] . '" ' . $slc . '>' . $s['nombre'] . '</option>';
                                     }
                                     ?>
@@ -349,8 +324,8 @@ try {
                                 <select name="slcCentroCosto[]" class="form-control form-control-sm slcCentroCosto">
                                     <?php
                                     foreach ($centros as $c) {
-                                        $slc = $c['id_x_sede'] == $des['id_centro_costo'] ? 'selected' : '';
-                                        echo '<option value="' . $c['id_x_sede'] . '" ' . $slc . '>' . $c['descripcion'] . '</option>';
+                                        $slc = $c['id_sede'] == $des['id_centro_costo'] ? 'selected' : '';
+                                        echo '<option value="' . $c['id_sede'] . '" ' . $slc . '>' . $c['descripcion'] . '</option>';
                                     }
                                     ?>
                                 </select>
@@ -383,8 +358,8 @@ try {
                                 <select name="slcCentroCosto[]" class="form-control form-control-sm slcCentroCosto">
                                     <?php
                                     foreach ($centros as $c) {
-                                        $slc = $c['id_x_sede'] == $des['id_centro_costo'] ? 'selected' : '';
-                                        echo '<option value="' . $c['id_x_sede'] . '" ' . $slc . '>' . $c['descripcion'] . '</option>';
+                                        $slc = $c['id_sede'] == $des['id_centro_costo'] ? 'selected' : '';
+                                        echo '<option value="' . $c['id_sede'] . '" ' . $slc . '>' . $c['descripcion'] . '</option>';
                                     }
                                     ?>
                                 </select>
@@ -404,13 +379,15 @@ try {
                 }
                 ?>
             </div>
-            <div class="form-row px-4 pt-2">
-                <div class="form-group col-md-12">
-                    <label for="ccnit" class="small">TERCERO</label>
-                    <input type="text" id="SeaTercer" class="form-control form-control-sm">
-                    <input type="hidden" id="id_tercero" name="id_tercero" value="0">
+            <?php if (false) { ?>
+                <div class="form-row px-4 pt-2">
+                    <div class="form-group col-md-12">
+                        <label for="ccnit" class="small">TERCERO</label>
+                        <input type="text" id="SeaTercer" class="form-control form-control-sm">
+                        <input type="hidden" id="id_tercero" name="id_tercero" value="0">
+                    </div>
                 </div>
-            </div>
+            <?php } ?>
             <div class="form-row px-4 pt-2">
                 <div class="form-group col-md-4">
                     <label for="datFecIniEjec" class="small">FECHA INICIAL</label>
@@ -443,8 +420,8 @@ try {
                         <option value="A">PENDIENTE</option>
                         <?php
                         foreach ($supervisor as $s) {
-                            $slc = $s['id_tercero'] == $estudios['id_supervisor'] ? 'selected' : '';
-                            echo '<option value="' . $s['id_tercero'] . '">' . $s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . '</option>';
+                            $slc = $s['id_tercero_api'] == $estudios['id_supervisor'] ? 'selected' : '';
+                            echo '<option value="' . $s['id_tercero_api'] . '">' . $s['nom_tercero'] . '</option>';
                         }
                         ?>
                     </select>
@@ -481,50 +458,49 @@ try {
                 }
                 ?>
             </div>
-            <div class="form-row text-center px-4 pt-2">
-                <div class="form-group col-md-6">
-                    <label for="txtDescNec" class="small">Descripción de la necesidad</label>
-                    <textarea name="txtDescNec" id="txtDescNec" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['necesidad']))) ?></textarea>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="txtActEspecificas" class="small">Actividades específicas</label>
-                    <textarea name="txtActEspecificas" id="txtActEspecificas" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['act_especificas']))) ?></textarea>
-                </div>
-            </div>
-            <div class="form-row text-center px-4">
-                <div class="form-group col-md-6">
-                    <label for="txtProdEntrega" class="small">PRODUCTOS A ENTREGAR</label>
-                    <textarea name="txtProdEntrega" id="txtProdEntrega" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['prod_entrega']))) ?></textarea>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="txtObligContratista" class="small">Obligaciones del Contratista</label>
-                    <textarea name="txtObligContratista" id="txtObligContratista" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['obligaciones']))) ?></textarea>
-                </div>
-            </div>
-            <div class="form-row text-center px-4">
-                <div class="form-group col-md-6">
-                    <label for="txtDescValor" class="small">Descripción de valor</label>
-                    <textarea name="txtDescValor" id="txtDescValor" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['describe_valor']))) ?></textarea>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="txtFormPago" class="small">Forma de Pago</label>
-                    <textarea name="txtFormPago" id="txtFormPago" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['forma_pago']))) ?></textarea>
-                </div>
-
-            </div>
-            <div class="form-row text-center px-4">
-                <div class="form-group col-md-6">
-                    <label for="txtReqMinHab" class="small">Req. mínimos Habilitantes</label>
-                    <textarea name="txtReqMinHab" id="txtReqMinHab" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['requisitos']))) ?></textarea>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="txtGarantias" class="small">Garantías Contratación</label>
-                    <textarea name="txtGarantias" id="txtGarantias" cols="30" rows="2" class="form-control form-control-sm"><?php echo str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['garantia']))) ?></textarea>
+            <div class="px-4">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link active small text-secondary" id="nav_necesidad-tab" data-toggle="tab" href="#nav_necesidad" role="tab" aria-controls="nav_necesidad" aria-selected="true" title="Descripción de la necesidad">Necesidad</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-actividad-tab" data-toggle="tab" href="#nav-actividad" role="tab" aria-controls="nav-actividad" aria-selected="false">Actividades</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-producto-tab" data-toggle="tab" href="#nav-producto" role="tab" aria-controls="nav-producto" aria-selected="false" title="Productos a entregar">Productos</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-obligacion-tab" data-toggle="tab" href="#nav-obligacion" role="tab" aria-controls="nav-obligacion" aria-selected="false" title="Obligaciones del contratista">Obligaciones</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-valor-tab" data-toggle="tab" href="#nav-valor" role="tab" aria-controls="nav-valor" aria-selected="false" title="Descripción del valor">Valor</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-pago-tab" data-toggle="tab" href="#nav-pago" role="tab" aria-controls="nav-pago" aria-selected="false" title="Forma de Pago">Pago</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-requisito-tab" data-toggle="tab" href="#nav-requisito" role="tab" aria-controls="nav-requisito" aria-selected="false" title="Requisitos mínimos habilitanes">Requisitos</a>
+                        <a class="nav-item nav-link small text-secondary" id="nav-garantia-tab" data-toggle="tab" href="#nav-garantia" role="tab" aria-controls="nav-garantia" aria-selected="false" title="Garantías de Contratación">Garantías</a>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav_necesidad" role="tabpanel" aria-labelledby="nav_regTercro-tab">
+                        <textarea name="txtDescNec" id="txtDescNec" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['necesidad']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-actividad" role="tabpanel" aria-labelledby="nav-actividad-tab">
+                        <textarea name="txtActEspecificas" id="txtActEspecificas" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['act_especificas']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-producto" role="tabpanel" aria-labelledby="nav-producto-tab">
+                        <textarea name="txtProdEntrega" id="txtProdEntrega" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['prod_entrega']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-obligacion" role="tabpanel" aria-labelledby="nav-obligacion-tab">
+                        <textarea name="txtObligContratista" id="txtObligContratista" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['obligaciones']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-valor" role="tabpanel" aria-labelledby="nav-valor-tab">
+                        <textarea name="txtDescValor" id="txtDescValor" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['describe_valor']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-pago" role="tabpanel" aria-labelledby="nav-pago-tab">
+                        <textarea name="txtFormPago" id="txtFormPago" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['forma_pago']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-requisito" role="tabpanel" aria-labelledby="nav-requisito-tab">
+                        <textarea name="txtReqMinHab" id="txtReqMinHab" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['requisitos']))) ?></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="nav-garantia" role="tabpanel" aria-labelledby="nav-garantia-tab">
+                        <textarea name="txtGarantias" id="txtGarantias" cols="30" rows="14" class="form-control form-control-sm"><?= str_replace('<br />', '', nl2br(str_replace('||', "\n", $estudios['garantia']))) ?></textarea>
+                    </div>
                 </div>
             </div>
         </form>
         <div class="text-center">
-            <div class="text-center pb-3">
+            <div class="text-center py-3">
                 <button class="btn btn-primary btn-sm" id="btnDuplicaAdq">Duplicar</button>
                 <a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal"> Cancelar</a>
             </div>

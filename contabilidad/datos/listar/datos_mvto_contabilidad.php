@@ -1,14 +1,61 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../terceros.php';
+//aumentar memoria  toda 
+ini_set('memory_limit', '-1');
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
+$anulados = $_POST['anulados'];
 $id_vigencia = $_SESSION['id_vigencia'];
+$start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+$length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+$limit = "";
+if ($length != -1) {
+    $limit = "LIMIT $start, $length";
+}
+$col = $_POST['order'][0]['column'] + 1;
+$dir = $_POST['order'][0]['dir'];
+
+$where = $_POST['search']['value'] != '' ? "AND (`ctb_doc`.`fecha` LIKE '%{$_POST['search']['value']}%' OR `tb_terceros`.`nom_tercero` LIKE '%{$_POST['search']['value']}%' OR  `pto_crp`.`id_manu` LIKE '%{$_POST['search']['value']}%' OR `ctb_doc`.`id_manu` LIKE '%{$_POST['search']['value']}%')" : '';
+if ($anulados == 1 || $_POST['search']['value'] != '') {
+    $where .= " AND `ctb_doc`.`estado` >= 0";
+} else {
+    $where .= " AND `ctb_doc`.`estado` >= 0";
+}
+
+
+//----------- filtros--------------------------
+
+$andwhere = " ";
+
+if (isset($_POST['id_manu']) && $_POST['id_manu']) {
+    $andwhere .= " AND ctb_doc.id_manu LIKE '%" . $_POST['id_manu'] . "%'";
+}
+if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
+    $andwhere .= " AND ctb_doc.fecha BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+}
+if (isset($_POST['rp']) && $_POST['rp']) {
+    $andwhere .= " AND pto_crp.id_manu LIKE '%" . $_POST['rp'] . "%'";
+}
+if (isset($_POST['tercero']) && $_POST['tercero']) {
+    $andwhere .= " AND tb_terceros.nom_tercero LIKE '%" . $_POST['tercero'] . "%'";
+}
+if (isset($_POST['estado']) && strlen($_POST['estado'])) {
+    if ($_POST['estado'] == "-1") {
+        $andwhere .= " AND ctb_doc.estado>=" . $_POST['estado'];
+    } else {
+        $andwhere .= " AND ctb_doc.estado=" . $_POST['estado'];
+    }
+}
+
+//-------------------------------------------------------------------------
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -16,13 +63,17 @@ try {
                 `pto_crp`.`id_manu` AS `id_crp`
                 , `ctb_doc`.`id_ctb_doc`
                 , `ctb_doc`.`id_manu`
-                , `ctb_doc`.`id_tipo_doc` AS `tipo`
+                , `ctb_factura`.`id_tipo_doc` AS `tipo`
+                , `ctb_factura`.`id_cta_factura` AS `id_fac`
                 , `ctb_doc`.`fecha`
                 , `ctb_doc`.`detalle`
                 , `ctb_doc`.`id_tercero`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
                 , `ctb_doc`.`estado`
                 , `ctb_fuente`.`cod`
                 , `ctb_fuente`.`nombre`
+                , `pag`.`id_ctb_doc` AS `pag`
             FROM
                 `ctb_doc`
                 LEFT JOIN `ctb_fuente` 
@@ -33,16 +84,75 @@ try {
                     ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
                 LEFT JOIN `pto_crp` 
                     ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
-            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia)
-            GROUP BY `ctb_doc`.`id_ctb_doc`";
+                LEFT JOIN `tb_terceros` 
+                    ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                LEFT JOIN `ctb_factura` 
+                    ON (`ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN 
+                    (SELECT
+                        `pto_cop_detalle`.`id_ctb_doc`
+                    FROM
+                        `pto_pag_detalle`
+                        INNER JOIN `pto_cop_detalle` 
+                            ON (`pto_pag_detalle`.`id_pto_cop_det` = `pto_cop_detalle`.`id_pto_cop_det`)
+                        INNER JOIN `ctb_doc`
+                            ON (`pto_pag_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    WHERE `ctb_doc`.`estado` > 0
+                    GROUP BY `pto_cop_detalle`.`id_ctb_doc`) AS `pag`
+                    ON (`pag`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where) $andwhere
+            GROUP BY `ctb_doc`.`id_ctb_doc`
+            ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
-    $listappto = $rs->fetchAll();
+    $listappto = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $sql = "SELECT
+                COUNT(*) AS `total`
+            FROM
+                `ctb_doc`
+                LEFT JOIN `ctb_fuente` 
+                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                LEFT JOIN `pto_cop_detalle` 
+                    ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN `pto_crp_detalle` 
+                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                LEFT JOIN `pto_crp` 
+                    ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                LEFT JOIN `tb_terceros` 
+                    ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia)";
+    $rs = $cmd->query($sql);
+    $total = $rs->fetch();
+    $totalRecords = $total['total'];
+    $sql = "SELECT
+                COUNT(*) AS `total`
+            FROM
+                `ctb_doc`
+                LEFT JOIN `ctb_fuente` 
+                    ON (`ctb_doc`.`id_tipo_doc` = `ctb_fuente`.`id_doc_fuente`)
+                LEFT JOIN `pto_cop_detalle` 
+                    ON (`pto_cop_detalle`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN `pto_crp_detalle` 
+                    ON (`pto_cop_detalle`.`id_pto_crp_det` = `pto_crp_detalle`.`id_pto_crp_det`)
+                LEFT JOIN `pto_crp` 
+                    ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                LEFT JOIN `tb_terceros` 
+                    ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE (`ctb_doc`.`id_tipo_doc` = $id_ctb_doc AND `ctb_doc`.`id_vigencia` = $id_vigencia $where)";
+    $rs = $cmd->query($sql);
+    $total = $rs->fetch();
+    $totalRecordsFilter = $total['total'];
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 // consultar la fecha de cierre del periodo del módulo de presupuesto 
 try {
-    $sql = "SELECT fecha_cierre FROM tb_fin_periodos WHERE id_modulo = 3";
+    $sql = "SELECT MAX(fecha_cierre) AS fecha_cierre  FROM tb_fin_periodos WHERE id_modulo = 55";
     $rs = $cmd->query($sql);
     $fecha_cierre = $rs->fetch();
     $fecha_cierre = !empty($fecha_cierre) ? $fecha_cierre['fecha_cierre'] : date("Y-m-d");
@@ -63,7 +173,9 @@ try {
                 `ctb_libaux`
             GROUP BY `id_ctb_doc`";
     $rs = $cmd->query($sql);
-    $diferencias = $rs->fetchAll();
+    $diferencias = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -79,49 +191,31 @@ try {
             WHERE (`fecha` BETWEEN '$inicia' AND '$termina')";
     $rs = $cmd->query($sql);
     $equivalente = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $rs->closeCursor();
+    unset($rs);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $ids = [];
 foreach ($listappto as $lp) {
-    if ($lp['id_tercero'] !== null) {
+    if ($lp['id_tercero'] != '') {
         $ids[] = $lp['id_tercero'];
     }
 }
-$payload = json_encode($ids);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
+$ids = implode(',', $ids);
+$terceros = getTerceros($ids, $cmd);
 $data = [];
 if (!empty($listappto)) {
     foreach ($listappto as $lp) {
         $valor_debito = 0;
         $id_ctb = $lp['id_ctb_doc'];
+        $id_fac = $lp['id_fac'];
         $estado = $lp['estado'];
-        $dato = null;
-        // Buscar el nombre del tercero
-        if ($lp['id_tercero'] !== null) {
-            $id_ter = $lp['id_tercero'];
-        } else {
-            $id_ter = 0;
-        }
-        $key = array_search($id_ter, array_column($terceros, 'id_tercero'));
-        if ($key !== false) {
-            $tercero = $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social'];
-        } else {
-            $tercero = '';
-        }
-        // consultar la diferencia en array diferencias
+        $tercero = $lp['nom_tercero'] != '' ? $lp['nom_tercero'] : '---';
+
         $key = array_search($id_ctb, array_column($diferencias, 'id_ctb_doc'));
-        if ($key  !== false) {
+        $editar = $detalles = $borrar = $imprimir = $enviar = $acciones = $dato = $imprimir = $anular = null;
+        if ($key !== false) {
             $valor_debito = $diferencias[$key]['debito'];
             $dif = $diferencias[$key]['diferencia'];
         } else {
@@ -137,57 +231,38 @@ if (!empty($listappto)) {
         $id_manu_rp = $lp['id_crp'] != '' ? $lp['id_crp'] : '-';
 
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
-        // Sumar el valor del crp de la tabla id_pto_mtvo asociado al CDP
-        if ($estado == 0) {
-            $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
-        } else {
-            $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoCtb(' . $id_ctb . ')" href="#">Abrir documento</a>';
-        }
-        // si $fecha es menor a $fecha_cierre no se puede editar ni eliminar
-        if ($fecha <= $fecha_cierre) {
-            $anular = null;
-            $cerrar = null;
-        } else {
-            $anular = '<a value="' . $id_ctb . '" class="dropdown-item sombra " href="#" onclick="anularDocumentoCont(' . $id_ctb . ');">Anulación</a>';
-        }
+
         $base = base64_encode($id_ctb . '|' . $id_ctb_doc);
-        if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
-            $editar = '<a class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar" text="' . $id_ctb . '"><span class="fas  fa-pencil-alt fa-lg"></span></a>';
+        if (PermisosUsuario($permisos, 5501, 1) || $id_rol == 1) {
             $detalles = '<a text ="' . $base . '" onclick="cargarListaDetalle(this)" class="btn btn-outline-warning btn-sm btn-circle shadow-gb"  title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
-            $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoDoc(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
-            $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-            ...
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-           ' . $cerrar . '
-           ' . $anular . '
-            <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Duplicar</a>
-            <a value="' . $id_ctb . '" class="dropdown-item sombra" href="#">Parametrizar</a>
-            </div>';
-            // Acciones teniendo en cuenta el tipo de rol
-            //si es lider de proceso puede abrir o cerrar documentos
-            // $acciones = null;
-            if (PermisosUsuario($permisos, 5501, 3)  || $id_rol == 1) {
-                if ($estado == 0) {
-                    $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="cerrarDocumentoCtb(' . $id_ctb . ')" href="#">Cerrar documento</a>';
-                } else {
-                    $cerrar = '<a value="' . $id_ctb . '" class="dropdown-item sombra carga" onclick="abrirDocumentoCtb(' . $id_ctb . ')" href="#">Abrir documento</a>';
-                }
-            } else {
-                $cerrar = null;
-            }
-        } else {
-            $editar = null;
-            $detalles = null;
-            $acciones = null;
         }
-        if (PermisosUsuario($permisos, 5501, 4)  || $id_rol == 1) {
+        if (PermisosUsuario($permisos, 5501, 3) || $id_rol == 1) {
+            //$editar = '<a class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar" text="' . $id_ctb . '"><span class="fas  fa-pencil-alt fa-lg"></span></a>';
+        }
+        if (PermisosUsuario($permisos, 5501, 4) || $id_rol == 1) {
             $borrar = '<a value="' . $id_ctb . '" onclick="eliminarRegistroDoc(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
-        } else {
-            $borrar = null;
+        }
+        if (PermisosUsuario($permisos, 5501, 5) || $id_rol == 1) {
+            if ($fecha < $fecha_cierre) {
+                $anular = null;
+                $cerrar = null;
+            } else if ($lp['pag'] != '') {
+                $anular = null;
+                $cerrar = null;
+            } else {
+                if ($estado == 1) {
+                    $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb" onclick="CierraDocCtb(' . $id_ctb . ')" title="Cerrar"><span class="fas fa-lock fa-lg"></span></a>';
+                } else {
+                    $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" onclick="abrirDocumentoCtb(' . $id_ctb . ')" title="Abrir"><span class="fas fa-unlock fa-lg"></span></a>';
+                }
+                $anular = '<a value="' . $id_ctb . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" onclick="anularDocumentoCont(' . $id_ctb . ');" title="Anular"><span class="fas fa-ban fa-lg"></span></a>';
+            }
+        }
+        if (PermisosUsuario($permisos, 5501, 6) || $id_rol == 1) {
+            $imprimir = '<a value="' . $id_ctb . '" onclick="imprimirFormatoDoc(' . $lp['id_ctb_doc'] . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb " title="Detalles"><span class="fas fa-print fa-lg"></span></a>';
         }
 
-        if ($estado == 2) {
+        if ($estado == 2 || $estado == 0) {
             $editar = null;
             $borrar = null;
         }
@@ -196,36 +271,42 @@ if (!empty($listappto)) {
             $enviar = null;
         } else {
             if ($lp['tipo'] == 3) {
+                $disabled = $estado == 2 ? 'xd' : 'disabled';
                 $key = array_search($id_ctb, array_column($equivalente, 'id_factura_no'));
-                if ($key !== false) {
+                $hash = $key !== false ? $equivalente[$key]['shash'] : '';
+                if ($key !== false && $hash != '') {
                     $enviar = '<a onclick="VerSoporteElectronico(' . $equivalente[$key]['id_soporte'] . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb" title="VER DOCUMENTO"><span class="far fa-file-pdf fa-lg"></span></a>';
                 } else {
-                    $enviar = '<a id="enviaSoporte" onclick="EnviaDocumentoSoporte(' . $id_ctb . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="REPORTAR FACTURA"><span class="fas fa-paper-plane fa-lg"></span></a>';
+                    $enviar = '<button value="' . $id_ctb . '" onclick="EnviaDocumentoSoporte(this)" class="btn btn-outline-info btn-sm btn-circle shadow-gb" title="REPORTAR FACTURA" ' . $disabled . '><span class="fas fa-paper-plane fa-lg"></span></button>';
                 }
             }
         }
-        if ($estado == 5) {
-            $editar = null;
-            $borrar = null;
-            $imprimir = null;
-            $acciones = null;
+        if ($estado == 0) {
+            $anular = null;
             $enviar = null;
-            $dato = '<span class="badge badge-pill badge-danger">Anulado</span>';
+            $cerrar = null;
+            $detalles = null;
+            $dato = '<span class="badge badge-pill badge-secondary">Anulado</span>';
         }
 
         $data[] = [
 
             'numero' => $lp['id_manu'],
-            'rp' =>  $id_manu_rp,
+            'rp' => $id_manu_rp,
             'fecha' => $fecha,
             'tercero' => $tercero,
-            'valor' =>  '<div class="text-right">' . $valor_total . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir  . $enviar . $acciones .  $dato . '</div>',
+            'valor' => '<div class="text-right">' . $valor_total . '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $detalles . $borrar . $imprimir . $enviar . $cerrar . $anular . $dato . '</div>',
         ];
     }
 }
 $cmd = null;
-$datos = ['data' => $data];
+$datos = [
+    "data" => $data,
+    "recordsTotal" => $totalRecords,
+    "recordsFiltered" => $totalRecordsFilter
+
+];
 
 
 echo json_encode($datos);

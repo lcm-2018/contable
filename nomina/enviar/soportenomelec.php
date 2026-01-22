@@ -71,7 +71,7 @@ try {
                 ON (nom_valxvigencia.id_vigencia = tb_vigencias.id_vigencia)
             INNER JOIN nom_conceptosxvigencia 
                 ON (nom_valxvigencia.id_concepto = nom_conceptosxvigencia.id_concp)
-            WHERE anio = '$anio' AND id_concepto = '4'";
+            WHERE anio = '$anio' AND id_concepto = 4";
     $rs = $cmd->query($sql);
     $concec = $rs->fetch();
     $iNonce = intval($concec['valor']);
@@ -119,7 +119,7 @@ try {
                 , nombre1
                 , nombre2
                 , codigo_pais
-                , codigo_dpto
+                , codigo_departamento
                 , nom_departamento
                 , codigo_municipio
                 , nom_municipio
@@ -138,9 +138,9 @@ try {
             INNER JOIN tb_paises 
                 ON (nom_empleado.pais = tb_paises.id_pais)
             INNER JOIN tb_departamentos 
-                ON (tb_departamentos.id_pais = tb_paises.id_pais) AND (nom_empleado.departamento = tb_departamentos.id_dpto)
+                ON (nom_empleado.departamento = tb_departamentos.id_departamento)
             INNER JOIN tb_municipios 
-                ON (tb_municipios.id_departamento = tb_departamentos.id_dpto) AND (nom_empleado.municipio = tb_municipios.id_municipio)
+                ON (nom_empleado.municipio = tb_municipios.id_municipio)
             INNER JOIN nom_tipo_contrato 
                 ON (nom_empleado.tipo_contrato = nom_tipo_contrato.id_tip_contrato)
             INNER JOIN nom_liq_salario 
@@ -155,15 +155,32 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT *
+    $sql = "SELECT
+                `tb_datos_ips`.`id_ips`
+                , `tb_datos_ips`.`nit_ips` AS `nit`
+                , `tb_datos_ips`.`email_ips` AS `correo`
+                , `tb_datos_ips`.`telefono_ips` AS `telefono`
+                , `tb_datos_ips`.`razon_social_fe` AS `nombre`
+                , 'COLOMBIA' AS `nom_pais`
+                , 'CO' AS `codigo_pais`
+                , `tb_departamentos`.`codigo_departamento`
+                , `tb_departamentos`.`nom_departamento`
+                , `tb_municipios`.`codigo_municipio`
+                , `tb_municipios`.`nom_municipio`
+                , `tb_municipios`.`cod_postal`
+                , `tb_datos_ips`.`direccion_ips` AS `direccion`
+                , `tb_datos_ips`.`url_taxxa` AS `endpoint`
+                , '2' AS `tipo_organizacion`
+                , 'R-99-PN' AS `resp_fiscal`
+                , '2' AS `reg_fiscal`
+                , `tb_datos_ips`.`sEmail` AS `user_prov`
+                , `tb_datos_ips`.`sPass` AS `pass_prov`
             FROM
-                tb_datos_ips
-            INNER JOIN tb_departamentos 
-                ON (tb_datos_ips.id_dpto = tb_departamentos.id_dpto)
-            INNER JOIN tb_municipios 
-                ON (tb_municipios.id_departamento = tb_departamentos.id_dpto) AND (tb_datos_ips.id_ciudad = tb_municipios.id_municipio)
-            INNER JOIN tb_paises 
-                ON (tb_departamentos.id_pais = tb_paises.id_pais) AND (tb_datos_ips.id_pais = tb_paises.id_pais)";
+                `tb_datos_ips`
+                INNER JOIN `tb_municipios` 
+                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)
+                INNER JOIN `tb_departamentos`
+                    ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departamento`)";
     $rs = $cmd->query($sql);
     $empresa = $rs->fetch();
     $cmd = null;
@@ -211,7 +228,7 @@ try {
                 nom_liq_incap
             INNER JOIN nom_incapacidad 
                 ON (nom_liq_incap.id_incapacidad = nom_incapacidad.id_incapacidad)
-            WHERE mes = '$mes' AND anios = '$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $incap = $rs->fetchAll();
     $cmd = null;
@@ -226,7 +243,7 @@ try {
                 nom_liq_licmp
             INNER JOIN nom_licenciasmp 
                 ON (nom_liq_licmp.id_licmp = nom_licenciasmp.id_licmp)
-            WHERE mes_lic = '$mes' AND anio_lic ='$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $lic = $rs->fetchAll();
     $cmd = null;
@@ -241,7 +258,7 @@ try {
                 nom_liq_vac
             INNER JOIN nom_vacaciones
                 ON (nom_liq_vac.id_vac = nom_vacaciones.id_vac)
-            WHERE mes_vac = '$mes' AND anio_vac = '$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $vac = $rs->fetchAll();
     $cmd = null;
@@ -255,7 +272,7 @@ try {
                 id_liqpresoc, id_empleado, id_contrato, val_vacacion, val_cesantia, val_interes_cesantia, val_prima,mes_prestaciones, anio_prestaciones, anio_prestaciones
             FROM
                 nom_liq_prestaciones_sociales
-            WHERE mes_prestaciones = '$mes' AND anio_prestaciones = '$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $presoc = $rs->fetchAll();
     $cmd = null;
@@ -267,7 +284,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT id_empleado, cant_dias
             FROM nom_liq_dias_lab
-            WHERE mes = '$mes' AND anio = '$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $diaslaborados = $rs->fetchAll();
     $cmd = null;
@@ -280,7 +297,7 @@ try {
     $sql = "SELECT *
             FROM
                 nom_liq_segsocial_empdo
-            WHERE mes = '$mes' AND anio = '$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $segsoc = $rs->fetchAll();
     $cmd = null;
@@ -295,7 +312,7 @@ try {
                 nom_liq_libranza
             INNER JOIN nom_libranzas 
                 ON (nom_liq_libranza.id_libranza = nom_libranzas.id_libranza)
-            WHERE mes_lib = '$mes' AND anio_lib = '$anio' and estado = 1";
+            WHERE `id_nomina` = $id_nomina AND estado = 1";
     $rs = $cmd->query($sql);
     $lib = $rs->fetchAll();
     $cmd = null;
@@ -310,7 +327,7 @@ try {
                 nom_liq_embargo
             INNER JOIN nom_embargos
                 ON (nom_liq_embargo.id_embargo = nom_embargos.id_embargo)
-            WHERE mes_embargo = '$mes' AND anio_embargo = '$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $emb = $rs->fetchAll();
     $cmd = null;
@@ -325,7 +342,7 @@ try {
                 nom_liq_sindicato_aportes
             INNER JOIN nom_cuota_sindical
                 ON (nom_liq_sindicato_aportes.id_cuota_sindical = nom_cuota_sindical.id_cuota_sindical)
-            WHERE mes_aporte = '$mes' AND anio_aporte = '$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $sind = $rs->fetchAll();
     $cmd = null;
@@ -342,7 +359,7 @@ try {
                 ON (nom_horas_ex_trab.id_he = nom_tipo_horaex.id_he)
             INNER JOIN nom_liq_horex 
                 ON (nom_liq_horex.id_he_lab = nom_horas_ex_trab.id_he_trab)
-            WHERE mes_he = '$mes' AND anio_he = '$anio'
+            WHERE `id_nomina` = $id_nomina
             ORDER BY id_he";
     $rs = $cmd->query($sql);
     $hoex = $rs->fetchAll();
@@ -350,33 +367,16 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT id_viaticos, id_emplead, SUM(valor)AS tot_viat, rango
-            FROM   
-                (SELECT *
-                    FROM 
-                        (SELECT seg_detalle_viaticos.id_viaticos, id_emplead, concepto, valor, SUBSTRING(fviatico,1,7) AS rango
-                        FROM
-                            seg_detalle_viaticos
-                        INNER JOIN nom_viaticos 
-                            ON (seg_detalle_viaticos.id_viaticos = nom_viaticos.id_viaticos))AS t
-                WHERE rango = '$anio-$mes')AS t_res
-            GROUP BY id_emplead";
-    $rs = $cmd->query($sql);
-    $viaticos = $rs->fetchAll();
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
+$viaticos = [];
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT id_rte_fte, id_empleado, val_ret, mes, anio
             FROM
                 nom_retencion_fte
-            WHERE mes = '$mes' AND anio = '$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $retfte = $rs->fetchAll();
     $cmd = null;
@@ -390,7 +390,7 @@ try {
                 id_empleado
             FROM
                 nom_soporte_ne
-            WHERE mes = '$mes' AND anio = '$anio'";
+            WHERE `mes` = $mes AND `anio` = $anio";
     $rs = $cmd->query($sql);
     $electronica = $rs->fetchAll();
     $cmd = null;
@@ -404,7 +404,7 @@ try {
                 `id_empleado`, `val_liq`
             FROM
                 `nom_liq_salario`
-            WHERE `mes` = '$mes' AND `anio` = '$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $neto = $rs->fetchAll();
     $cmd = null;
@@ -413,7 +413,9 @@ try {
 }
 $tipo_envio = 'prod';
 $tipo_ref = 'NE';
-$response = [];
+$response['msg'] = 'ok';
+$response['procesados'] = 'No se envió ningún empleado';
+
 $errores = '';
 if ($mes) {
     $jParams = [
@@ -435,6 +437,8 @@ if ($mes) {
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $datatoken);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     $restoken = curl_exec($ch);
     $rst = json_decode($restoken);
     $tokenApi = $rst->jret->stoken;
@@ -451,6 +455,7 @@ if ($mes) {
         $keyelec = array_search($id, array_column($electronica, 'id_empleado'));
         $keyneto = array_search($id, array_column($neto, 'id_empleado'));
         $pagado = $neto[$keyneto]['val_liq'];
+        $resnom = [];
         if ($keyelec === false && $pagado > 0) {
             $idempleado = $o['no_documento'] . '_' . $o['nombre1'] . '_' . $o['apellido1'] . '_NE_' . $id;
             $key = array_search($id, array_column($bancaria, 'id_empleado'));
@@ -701,7 +706,7 @@ if ($mes) {
                 $sql = "SELECT consecutivo FROM nom_consecutivo_viaticos LIMIT 1";
                 $rs = $cmd->query($sql);
                 $cons = $rs->fetch();
-                $consecutivo = $cons['consecutivo'];
+                $consecutivo = !empty($cons) ? $cons['consecutivo'] : 1;
                 $cmd = null;
             } catch (PDOException $e) {
                 echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -723,8 +728,8 @@ if ($mes) {
                         "semail" => $o['correo'],
                         'jaddress' => [
                             'wCountrycode' => $o['codigo_pais'],
-                            'sStateCode' => $o['codigo_dpto'],
-                            'sCityCode' => $o['codigo_municipio'],
+                            'sStateCode' => $o['codigo_departamento'],
+                            'sCityCode' => $o['codigo_departamento'] . $o['codigo_municipio'],
                             'sstreet' => $o['direccion'],
                         ]
                     ],
@@ -774,8 +779,8 @@ if ($mes) {
                     'jcontact' => [
                         'jAddress' => [
                             'wCountrycode' => $empresa['codigo_pais'],
-                            'sStateCode' => $empresa['codigo_dpto'],
-                            'sCityCode' => $empresa['codigo_dpto'] . $empresa['codigo_municipio'],
+                            'sStateCode' => $empresa['codigo_departamento'],
+                            'sCityCode' => $empresa['codigo_departamento'] . $empresa['codigo_municipio'],
                             'sStreet' => $empresa['direccion'],
                         ]
                     ]
@@ -807,6 +812,8 @@ if ($mes) {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($nomina));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             $resnom = json_decode(curl_exec($ch), true);
             if ($resnom['rerror'] == 0) {
                 $shash = $resnom['aresult'][$indicene]['shash'];
@@ -841,9 +848,7 @@ if ($mes) {
             } else {
                 $incorrectos++;
                 $mnj = '<ul>';
-                foreach ($resnom['smessage'] as $m => $value) {
-                    $mnj .= '<li>' . $value;
-                }
+                $mnj .= '<li>' . $resnom['smessage'] . '</li>';
                 $mnj .= '</ul>';
                 $errores .= 'Error:' . $resnom['rerror'] . '<br>Mensaje: ' . $mnj . '----------<br>';
             }
@@ -851,11 +856,8 @@ if ($mes) {
     }
 }
 $file = 'loglastsend.txt';
-//file_put_contents($file, $resnom);
-$response = [
-    'msg' => 'ok',
-    'procesados' => "Se ha procesado <b>" . $procesado . "</b> soporte(s) para nómina electrónica",
-    'error' => $errores,
-    'incorrec' => $incorrectos,
-];
+file_put_contents($file, json_encode($resnom));
+$response['procesados'] = 'Se han procesado <b>' . $procesado . '</b> soporte(s) para nómina electrónica';
+$response['error'] = $errores;
+$response['incorrec'] = $incorrectos;
 echo json_encode($response);

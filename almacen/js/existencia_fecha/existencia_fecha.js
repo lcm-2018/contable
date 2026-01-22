@@ -25,8 +25,11 @@
                     data.codigo = $('#txt_codigo_filtro').val();
                     data.nombre = $('#txt_nombre_filtro').val();
                     data.id_subgrupo = $('#sl_subgrupo_filtro').val();
+                    data.tipo_asis = $('#sl_tipoasis_filtro').val();
+                    data.con_existencia = $('#sl_conexi_filtro').val();
+                    data.lote_ven = $('#sl_lotven_filtro').val();
                     data.artactivo = $('#chk_artact_filtro').is(':checked') ? 1 : 0;
-                    data.conexistencia = $('#chk_conexi_filtro').is(':checked') ? 1 : 0;
+                    data.lotactivo = $('#chk_lotact_filtro').is(':checked') ? 1 : 0;
                 }
             },
             columns: [
@@ -39,7 +42,7 @@
                 { 'data': 'val_total' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [2] },
+                { class: 'text-wrap', targets: [2, 3] },
                 { orderable: false, targets: [0] }
             ],
             order: [
@@ -79,15 +82,38 @@
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_articulos');
         $('.is-invalid').removeClass('is-invalid');
-        $.post("imp_existencias_fecha.php", {
+
+        let id_reporte = $('#sl_tipo_reporte').val();
+        let reporte = "imp_existencias_fecha.php";
+
+        switch (id_reporte) {
+            case '1':
+                reporte = "imp_existencias_fecha_asbsg_l.php";
+                break;
+            case '2':
+                reporte = "imp_existencias_fecha_asbsg_a.php";
+                break;
+            case '3':
+                reporte = "imp_existencias_fecha_asbsg_l.php";
+                break;
+            case '4':
+                reporte = "imp_existencias_fecha_invfis.php";
+                break;
+        }
+
+        $.post(reporte, {
             id_sede: $('#sl_sede_filtro').val(),
             id_bodega: $('#sl_bodega_filtro').val(),
             fecha: $('#txt_fecha_filtro').val(),
             codigo: $('#txt_codigo_filtro').val(),
             nombre: $('#txt_nombre_filtro').val(),
             id_subgrupo: $('#sl_subgrupo_filtro').val(),
+            tipo_asis: $('#sl_tipoasis_filtro').val(),
+            con_existencia: $('#sl_conexi_filtro').val(),
+            lote_ven: $('#sl_lotven_filtro').val(),
             artactivo: $('#chk_artact_filtro').is(':checked') ? 1 : 0,
-            conexistencia: $('#chk_conexi_filtro').is(':checked') ? 1 : 0
+            lotactivo: $('#chk_lotact_filtro').is(':checked') ? 1 : 0,
+            id_reporte: id_reporte
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -46,6 +46,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th>Banco</th>
                                         <th>Tipo de cuenta</th>
                                         <th>Nombre</th>
+                                        <th>SIA</th>
+                                        <th>Fuente</th>
                                         <th>Número</th>
                                         <th>Código</th>
                                         <th>Estado</th>

@@ -1,11 +1,23 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
+
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT COUNT(*) AS `cantiad` FROM `ctb_libaux`";
+    $rs = $cmd->query($sql);
+    $registros = $rs->fetch();
+    $registros = $registros['cantiad'];
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -42,25 +54,30 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                         </div>
                         <div class="card-body" id="divCuerpoPag">
                             <div>
-                                <div clas="row">
-                                    <div class="center-block">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend px-1">
-                                            </div>
-                                        </div>
+                                <div>
+                                    <div class="text-right mb-2">
+                                        <?php
+                                        if ($registros == 0) {
+                                            if (PermisosUsuario($permisos, 5504, 2) || $id_rol == 1) {
+                                        ?>
+                                                <button class="btn btn-outline-success btn-sm" id="cargaExcelPuc" title="Cargar plande cuentas con archico Excel"><i class="far fa-file-excel fa-lg"></i></button>
+                                                <button class="btn btn-outline-primary btn-sm" id="formatoExcelPuc" title="Descargar formato cargue de plan de cuentas"><i class="fas fa-download fa-lg"></i></button>
+                                        <?php
+                                            }
+                                        } ?>
                                     </div>
                                 </div>
-                                <br>
                                 <table id="tablePlanCuentas" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
-                                    <thead>
+                                    <thead class="text-center">
                                         <tr>
                                             <th style="width: 12%;">Fecha</th>
-                                            <th style="width: 14%;">Cuenta</th>
-                                            <th style="width: 42%;">Nombre</th>
+                                            <th style="width: 12%;">Cuenta</th>
+                                            <th style="width: 40%;">Nombre</th>
                                             <th style="width: 5%;">Tipo</th>
                                             <th style="width: 5%;">Nivel</th>
+                                            <th style="width: 5%;" title="Desagregación de terceros">Des.</th>
                                             <th style="width: 7%;">Estado</th>
-                                            <th style="width: 10%;">Acciones</th>
+                                            <th style="width: 14%;">Acciones</th>
 
                                         </tr>
                                     </thead>
@@ -73,6 +90,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             <th>Nombre</th>
                                             <th>Tipo</th>
                                             <th>Nivel</th>
+                                            <th title="Desagregación de terceros">Des.</th>
                                             <th>Estado</th>
                                             <th>Acciones</th>
                                         </tr>
@@ -89,14 +107,7 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             <?php include '../footer.php' ?>
         </div>
         <!-- Modal formulario-->
-        <div class="modal fade" id="divModalForms" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-            <div id="divTamModalForms" class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-body text-center" id="divForms">
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php include '../modales.php' ?>
     </div>
     <?php include '../scripts.php' ?>
 

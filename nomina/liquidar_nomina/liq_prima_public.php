@@ -2,13 +2,15 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
 $vigencia = $_SESSION['vigencia'];
 $ids = isset($_POST['empleado']) ? $_POST['empleado'] : exit('Acción no permitida');
 $ids = implode(',', $ids);
+$iduser = $_SESSION['id_user'];
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -47,12 +49,17 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 
+$where = '';
+if ($_SESSION['caracter'] == '1') {
+    $perd = $_POST['mesreg'] == '06' ? 1 : 2;
+    $where = "AND `nom_liq_prima`.`periodo` = $perd";
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT `id_empleado`, CONCAT(`anio`, `periodo`) AS `periodo`
             FROM `nom_liq_prima`
-            WHERE `anio` = '$vigencia'";
+            WHERE `anio` = '$vigencia' $where";
     $rs = $cmd->query($sql);
     $primliq = $rs->fetchAll();
     $cmd = null;
@@ -78,10 +85,28 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT 
-                `id_empleado`,`val_bsp`
-            FROM `nom_liq_bsp`
+                `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
+            FROM 
+                `nom_liq_bsp`
             WHERE `id_bonificaciones` IN 
-            (SELECT MAX(`id_bonificaciones`) FROM `nom_liq_bsp` WHERE `id_empleado`IN ($ids) GROUP BY `id_empleado`)";
+                (SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas`
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`
+                UNION ALL
+                SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas` 
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`)
+            GROUP BY `id_empleado`";
     $rs = $cmd->query($sql);
     $bon_servicios = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -138,10 +163,14 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+$where = '';
+if ($_SESSION['caracter'] == '1') {
+    $where = " AND `nom_nominas`.`mes` = '" . $_POST['mesreg'] . "'";
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT `id_nomina` FROM `nom_nominas` WHERE `vigencia` = '$vigencia' AND `tipo` = 'PV'";
+    $sql = "SELECT `id_nomina` FROM `nom_nominas` WHERE `vigencia` = '$vigencia' AND `tipo` = 'PV' $where";
     $rs = $cmd->query($sql);
     $id_nom = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -151,6 +180,9 @@ try {
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $liquidados = 0;
 $perido = 1;
+if ($_SESSION['caracter'] == '1') {
+    $perido = $_POST['mesreg'] == '06' ? 1 : 2;
+}
 $key = array_search('1', array_column($val_vig, 'id_concepto'));
 $smmlv = false !== $key ? $val_vig[$key]['valor'] : 0;
 $key = array_search('2', array_column($val_vig, 'id_concepto'));
@@ -174,16 +206,21 @@ if (isset($empleados)) {
     if (empty($id_nom)) {
         $descripcion = "LIQUIDACIÓN PRIMA DE SERVICIOS";
         $mesreg = '06';
+        if ($_SESSION['caracter'] == '1') {
+            $mesreg = $_POST['mesreg'];
+        }
         try {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-            $sql = "INSERT INTO `nom_nominas` (`tipo`, `vigencia`, `descripcion`,`fec_reg`, `mes`) VALUES (?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO `nom_nominas` (`tipo`, `vigencia`, `descripcion`,`fec_reg`, `mes`, `id_user_reg`) 
+                    VALUES (?, ?, ?, ?, ?, ?)";
             $sql = $cmd->prepare($sql);
             $sql->bindParam(1, $tipo, PDO::PARAM_STR);
             $sql->bindParam(2, $vigencia, PDO::PARAM_STR);
             $sql->bindParam(3, $descripcion, PDO::PARAM_STR);
             $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
-            $sql->bindParam(5, $mesreg, PDO::PARAM_INT);
+            $sql->bindParam(5, $mesreg, PDO::PARAM_STR);
+            $sql->bindParam(6, $iduser, PDO::PARAM_INT);
             $sql->execute();
             $id_nomina = $cmd->lastInsertId();
             if (!($id_nomina > 0)) {
@@ -198,6 +235,9 @@ if (isset($empleados)) {
         $id_nomina = $id_nom['id_nomina'];
     }
     $corte = date('Y-m-d', strtotime($vigencia . '-06-30'));
+    if ($_SESSION['caracter'] == '1' && $_POST['mesreg'] == '12') {
+        $corte = date('Y-m-d', strtotime($vigencia . '-12-31'));
+    }
     foreach ($empleados as $emp) {
         $sal_integ = $emp['salario_integral'];
         $id = $emp['id_empleado'];
@@ -214,6 +254,9 @@ if (isset($empleados)) {
                 $corteant = false !== $key ? $corteprimant[$key]['corte'] : $emp['fech_inicio'];
                 $diastoprima = calcularDias($corteant, $corte);
                 $diastoprima = $diastoprima > 360 ? 360 : $diastoprima;
+                if ($_SESSION['caracter'] == '1') {
+                    $diastoprima = $diastoprima > 180 ? 180 : $diastoprima;
+                }
                 $key = array_search($id, array_column($lic_noremun, 'id_empleado'));
                 $tot_dlic = false !== $key ? $lic_noremun[$key]['tot_dias'] : 0;
                 $diastoprima = $diastoprima - $tot_dlic;
@@ -223,6 +266,9 @@ if (isset($empleados)) {
                 //prima de servicios
                 $prima_sv_dia = ($salbase + $auxt_base + $auxali_base + $gasrep + $bspant / 12) / 720;
                 $prima = $prima_sv_dia * $diastoprima;
+                if ($_SESSION['caracter'] == '1') {
+                    $prima = $diastoprima * ($salbase + $auxt_base) / 360;
+                }
                 try {
                     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -247,8 +293,8 @@ if (isset($empleados)) {
                 try {
                     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                    $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`) 
-                            VALUES (?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`,`sal_base`) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?)";
                     $sql = $cmd->prepare($sql);
                     $sql->bindParam(1, $id, PDO::PARAM_INT);
                     $sql->bindParam(2, $prima, PDO::PARAM_STR);
@@ -256,6 +302,7 @@ if (isset($empleados)) {
                     $sql->bindParam(4, $mpag, PDO::PARAM_STR);
                     $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
                     $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
+                    $sql->bindParam(7, $salbase, PDO::PARAM_STR);
                     $sql->execute();
                 } catch (PDOException $e) {
                     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();

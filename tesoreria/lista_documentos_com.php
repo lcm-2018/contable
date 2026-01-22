@@ -1,17 +1,14 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../head.php';
 $tipo_doc = isset($_POST['id_tipo_doc']) ? $_POST['id_tipo_doc'] : '0';
 $tipo = isset($_POST['var']) ? $_POST['var'] : '';
+unset($_SESSION['id_doc']);
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -65,6 +62,9 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 ?>
+<!DOCTYPE html>
+<html lang="es">
+<?php include '../head.php'; ?>
 
 <body class="sb-nav-fixed <?php echo $_SESSION['navarlat'] === '1' ? 'sb-sidenav-toggled' : '' ?>">
 
@@ -90,6 +90,7 @@ try {
                                 ?>
                             </div>
                         </div>
+
                         <div class="card-body" id="divCuerpoPag">
                             <div>
                                 <div clas="row">
@@ -114,8 +115,8 @@ try {
                                                 <?php
                                                 if ($tipo_doc == '4') {
                                                     echo '<div class="input-group-prepend px-1">
-                                                        <button type="button" class="btn btn-primary" onclick ="CargaObligaPago(2)">
-                                                          Ver Listado <span class="badge badge-light"><?php echo $tipo_doc; ?></span>
+                                                        <button type="button" class="btn btn-primary" onclick ="CargaObligaPago(this)">
+                                                          Ver Listado
                                                         </button>
                                                      </div>
                                                      <div class="input-group-prepend px-1">
@@ -125,7 +126,7 @@ try {
                                                      </div>
                                                      <div class="input-group-prepend px-1">
                                                      <input type="hidden" id="total" value="' . $total . '">
-                                                         <button type="button" class="btn btn-outline-success" onclick ="CegresoNomina()">
+                                                         <button type="button" class="btn btn-outline-success" onclick ="CegresoNomina(this)">
                                                            Nómina <span class="badge badge-light" id="totalCausa">' . $total . '</span>
                                                          </button>
                                                       </div>';
@@ -137,6 +138,25 @@ try {
                                                         </button>
                                                      </div>';
                                                 }
+                                                if ($tipo_doc == '6') {
+                                                    echo '<div class="input-group-prepend px-1">
+                                                        <button type="button" class="btn btn-primary" onclick ="CargaListaRads()">
+                                                          Ver Listado
+                                                        </button>
+                                                     </div>';
+                                                }
+                                                ?>
+                                                <div class="input-group-prepend px-1">
+                                                    <button type="button" class="btn btn-success" title="Imprimir por Lotes" id="btnImpLotesTes">
+                                                        <i class="fas fa-print fa-lg"></i>
+                                                    </button>
+                                                </div>
+                                                <?php
+                                                if ($tipo_doc > '0') {
+                                                    echo '<div class="input-group-prepend px-1">
+                                                            <button  onclick="cargarConsecutivos(' . $tipo_doc . ')" class="btn btn-outline-info btn-sm btn-circle" title="Consultar Consecutivos"><span class="fas fa-info-circle"></span></button>
+                                                        </div>';
+                                                }
                                                 ?>
                                             </div>
                                         </div>
@@ -144,16 +164,55 @@ try {
                                     </div>
                                 </div>
                                 <br>
+
+                                <!--Opciones de filtros -->
+                                <div class="form-row">
+                                    <div class="form-group col-md-1">
+                                        <input type="text" class="filtro form-control form-control-sm" id="txt_idmanu_filtro" placeholder="Id. Manu">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <input type="date" class="form-control form-control-sm" id="txt_fecini_filtro" name="txt_fecini_filtro" placeholder="Fecha Inicial">
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <input type="text" class="filtro form-control form-control-sm" id="txt_ccnit_filtro" placeholder="CC / Nit">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" placeholder="Tercero">
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <select class="form-control form-control-sm" id="sl_estado_filtro">
+                                            <option value="0">--Estado--</option>
+                                            <option value="1">Abierto</option>
+                                            <option value="2">Cerrado</option>
+                                            <option value="3">Anulado</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-1">
+                                        <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
+                                            <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                        </a>
+                                    </div>
+                                </div>
+
+
                                 <?php if ($tipo_doc != '0') { ?>
                                     <table id="tableMvtoTesoreriaPagos" class="table table-striped table-bordered table-sm table-hover shadow" style="width:100%">
                                         <thead>
                                             <tr class="text-center">
                                                 <?php if ($tipo_doc != '13') { ?>
                                                     <th style="width: 8%;">Numero</th>
+                                                    <th style="width: 8%;">Causación</th>
                                                     <th style="width: 8%;">Fecha</th>
                                                     <th style="width: 8%;">CC/Nit</th>
-                                                    <th style="width: 40%;">Tercero</th>
-                                                    <th style="width: 12%;">Valor</th>
+                                                    <th style="width: 34%;">Tercero</th>
+                                                    <th style="width: 10%;">Valor</th>
                                                     <th style="width: 12%;">Acciones</th>
                                                 <?php
                                                 } else { ?>
@@ -194,3 +253,5 @@ try {
 </body>
 
 </html>
+
+<script type="text/javascript" src="js/informes/common.js?v=<?php echo date('YmdHis') ?>"></script>

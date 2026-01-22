@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -30,10 +30,11 @@ try {
             $id_respon = $_POST['id_txt_responsable'] ? $_POST['id_txt_responsable'] : 0;
             $id_sede = $_POST['sl_sede'] ? $_POST['sl_sede'] : 1;
             $id_bodega = $_POST['sl_bodega'] ? $_POST['sl_bodega'] : 'NULL';
+            $estado = $_POST['sl_estado'];
 
             if ($id == -1) {
-                $sql = "INSERT INTO far_centrocosto_area(nom_area,id_centrocosto,id_tipo_area,id_responsable,id_sede,id_bodega,id_usr_crea,fec_crea) 
-                        VALUES('$nom_area',$id_cencos,$id_tipare,$id_respon,$id_sede,$id_bodega,$id_usr_crea,'$fecha_crea')";
+                $sql = "INSERT INTO far_centrocosto_area(nom_area,id_centrocosto,id_tipo_area,id_responsable,id_sede,id_bodega,estado,id_usr_crea,fec_crea) 
+                        VALUES('$nom_area',$id_cencos,$id_tipare,$id_respon,$id_sede,$id_bodega,$estado,$id_usr_crea,'$fecha_crea')";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -48,7 +49,7 @@ try {
             } else {
                 $sql = "UPDATE far_centrocosto_area 
                         SET nom_area='$nom_area',id_centrocosto=$id_cencos,id_tipo_area=$id_tipare,
-                            id_responsable=$id_respon,id_sede=$id_sede,id_bodega=$id_bodega 
+                            id_responsable=$id_respon,id_sede=$id_sede,id_bodega=$id_bodega,estado=$estado
                         WHERE id_area=" . $id;
                 $rs = $cmd->query($sql);
 

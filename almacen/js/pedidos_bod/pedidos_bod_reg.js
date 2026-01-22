@@ -4,7 +4,11 @@
             dom: setdom,
             buttons: [{
                 action: function(e, dt, node, config) {
-                    $.post("../common/buscar_articulos_frm.php", { id_sede: $('#sl_sede_proveedor').val(), id_bodega: $('#sl_bodega_proveedor').val() }, function(he) {
+                    $.post("../common/buscar_articulos_frm.php", {
+                        id_sede: $('#sl_sede_proveedor').val(),
+                        id_bodega: $('#sl_bodega_proveedor').val(),
+                        id_subgrupo: sessionStorage.getItem("id_subgrupo")
+                    }, function(he) {
                         $('#divTamModalBus').removeClass('modal-lg');
                         $('#divTamModalBus').removeClass('modal-sm');
                         $('#divTamModalBus').addClass('modal-xl');
@@ -16,6 +20,7 @@
             language: setIdioma,
             processing: true,
             serverSide: true,
+            autoWidth: false,
             ajax: {
                 url: 'listar_pedidos_detalles.php',
                 type: 'POST',
@@ -38,13 +43,28 @@
                 { orderable: false, targets: 6 }
             ],
             order: [
-                [0, "desc"]
+                [0, "asc"]
             ],
             lengthMenu: [
                 [10, 25, 50, -1],
                 [10, 25, 50, 'TODO'],
             ],
+        }).on('draw', function() {
+            let table = $('#tb_pedidos_detalles').DataTable();
+            let rows = table.rows({ filter: 'applied' }).count();
+            if (rows > 0) {
+                $('#sl_sede_solicitante').prop('disabled', true);
+                $('#sl_bodega_solicitante').prop('disabled', true);
+                $('#sl_sede_proveedor').prop('disabled', true);
+                $('#sl_bodega_proveedor').prop('disabled', true);
+            } else {
+                $('#sl_sede_solicitante').prop('disabled', false);
+                $('#sl_bodega_solicitante').prop('disabled', false);
+                $('#sl_sede_proveedor').prop('disabled', false);
+                $('#sl_bodega_proveedor').prop('disabled', false);
+            }
         });
+
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
         $('#tb_pedidos_detalles').wrap('<div class="overflow"/>');
     });

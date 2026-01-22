@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -16,7 +16,8 @@ $id = isset($_POST['id']) ? $_POST['id'] : -1;
 try {
     $sql = "SELECT far_orden_ingreso.id_ingreso,far_orden_ingreso.num_ingreso,far_orden_ingreso.fec_ingreso,
             far_orden_ingreso.hor_ingreso,far_orden_ingreso.num_factura,far_orden_ingreso.fec_factura,
-            far_orden_ingreso.detalle,far_orden_ingreso.val_total,
+            far_orden_ingreso.detalle,
+            (far_orden_ingreso.val_total+far_orden_ingreso.val_aprpeso) AS val_total,
             tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
             tb_terceros.nom_tercero,far_orden_ingreso_tipo.nom_tipo_ingreso,
             CASE far_orden_ingreso.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS estado,
@@ -33,12 +34,17 @@ try {
     $rs = $cmd->query($sql);
     $obj_e = $rs->fetch();
 
-    $sql = "SELECT far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,far_medicamento_lote.lote,
+    $sql = "SELECT far_medicamentos.cod_medicamento,
+            CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion)),
+                  IF(far_orden_ingreso_detalle.id_presentacion=0,'',CONCAT(' - ',far_presentacion_comercial.nom_presentacion))) as nom_medicamento,
+            far_medicamento_lote.lote,
             far_medicamento_lote.fec_vencimiento,far_orden_ingreso_detalle.cantidad,far_orden_ingreso_detalle.valor_sin_iva,
             far_orden_ingreso_detalle.iva,far_orden_ingreso_detalle.valor,
             (far_orden_ingreso_detalle.cantidad*far_orden_ingreso_detalle.valor) AS val_total
         FROM far_orden_ingreso_detalle
+        INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_orden_ingreso_detalle.id_presentacion)
         INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_ingreso_detalle.id_lote)
+        INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
         INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_medicamento_lote.id_med)
         WHERE far_orden_ingreso_detalle.id_ingreso=" . $id . " ORDER BY far_orden_ingreso_detalle.id_ing_detalle";
     $rs = $cmd->query($sql);
@@ -100,8 +106,8 @@ try {
             <td>Sede</td>
             <td>Bodega</td>
             <td>Tipo de Ingreso</td>
-            <td>No. Factura</td>
-            <td>Fecha Factura</td>
+            <td>No. Factura/Acta/Remisión</td>
+            <td>Fecha Factura/Acta/Remisión</td>
             <td>Proveedor</td>
         </tr>
         <tr>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -27,6 +27,9 @@ if (isset($_POST['nombre']) && $_POST['nombre']) {
 }
 if (isset($_POST['subgrupo']) && $_POST['subgrupo']) {
     $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['subgrupo'];
+}
+if (isset($_POST['clinico']) && strlen($_POST['clinico'])) {
+    $where .= " AND far_medicamentos.es_clinico=" . $_POST['clinico'];
 }
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_medicamentos.estado=" . $_POST['estado'];

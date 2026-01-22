@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -27,6 +27,7 @@ try {
 } catch (PDOException $e) {
     $response['msg'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+/*
 if ($total == 0) {
     $response['msg'] = 'El rubro no tiene valor aprobado';
     echo json_encode($response);
@@ -41,7 +42,7 @@ if ($total < 0) {
     $response['msg'] = 'El rubro no tiene valor disponible';
     echo json_encode($response);
     exit();
- }
+ }*/
 try {
     if ($op == 0) {
         $sql = "INSERT INTO `pto_cdp_detalle`

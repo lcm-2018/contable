@@ -1,11 +1,12 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
+unset($_SESSION['id_doc']);
 $vigencia = $_SESSION['vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -21,28 +22,26 @@ try {
                 , `nom_nominas`.`mes`
                 , `nom_nominas`.`vigencia`
                 , `nom_nominas`.`estado`
+                , DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') AS `fecha`
+                , `tb_terceros`.`nom_tercero`
+                , `valores`.`valor`
             FROM
-                `nom_nomina_pto_ctb_tes`
-                INNER JOIN `nom_nominas` 
+                `nom_nominas`
+                INNER JOIN `nom_nomina_pto_ctb_tes` 
                     ON (`nom_nomina_pto_ctb_tes`.`id_nomina` = `nom_nominas`.`id_nomina`)
-            WHERE (`nom_nominas`.`estado` = 4) AND`nom_nomina_pto_ctb_tes`.`tipo` <> 'PL'
-            UNION 
-            SELECT
-                `nom_nomina_pto_ctb_tes`.`id`
-                , `nom_nomina_pto_ctb_tes`.`id_nomina`
-                , `nom_nomina_pto_ctb_tes`.`tipo`
-                , `nom_nomina_pto_ctb_tes`.`cdp`
-                , `nom_nomina_pto_ctb_tes`.`crp`
-                , `nom_nomina_pto_ctb_tes`.`cnom`
-                , `nom_nominas`.`descripcion`
-                , `nom_nominas`.`mes`
-                , `nom_nominas`.`vigencia`
-                , `nom_nominas`.`planilla` AS `estado`
-            FROM
-                `nom_nomina_pto_ctb_tes`
-                INNER JOIN `nom_nominas` 
-                    ON (`nom_nomina_pto_ctb_tes`.`id_nomina` = `nom_nominas`.`id_nomina`)
-            WHERE (`nom_nominas`.`planilla` = 4 AND `nom_nomina_pto_ctb_tes`.`tipo` = 'PL')";
+                LEFT JOIN `ctb_doc`
+                    ON (`nom_nomina_pto_ctb_tes`.`cnom` = `ctb_doc`.`id_ctb_doc`)
+                LEFT JOIN `tb_terceros`
+                    ON (`ctb_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                LEFT JOIN 
+                    (SELECT
+                        `id_ctb_doc`
+                        , SUM(`valor`) AS `valor` 
+                    FROM
+                        `pto_cop_detalle`
+                    GROUP BY `id_ctb_doc`) AS `valores`
+                    ON (`nom_nomina_pto_ctb_tes`.`cnom` = `valores`.`id_ctb_doc`)
+            WHERE `nom_nominas`.`estado` = 4 OR (`nom_nominas`.`planilla` = 4 AND `nom_nomina_pto_ctb_tes`.`tipo` = 'PL')";
     $rs = $cmd->query($sql);
     $nominas = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -55,29 +54,15 @@ try {
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
-        ]
+        ],
+        columnDefs: [{
+            class: 'text-wrap',
+            targets: [1],
+        }],
+
     });
     $('#tableContrtacionCdp').wrap('<div class="overflow" />');
 </script>
@@ -110,10 +95,10 @@ try {
                     ?>
                             <tr>
                                 <td class="text-center"><?php echo $id_nomina ?></td>
-                                <td class="text-left"><?php echo $nm['descripcion'] . ' ' . $pl . ', NÓMINA No. ' . $nm['id_nomina'] . ' DE ' . $vigencia ?></td>
-                                <td class="text-left"><?php echo ''  ?></td>
-                                <td class="text-left"><?php echo '' ?></td>
-                                <td class="text-left"><?php echo '' ?></td>
+                                <td class="text-left" style="min-width: 300PX;"><?php echo $nm['descripcion'] . ' ' . $pl . ', NÓMINA No. ' . $nm['id_nomina'] . ' DE ' . $vigencia ?></td>
+                                <td class="text-left"><?php echo '<input type="date" name="fec_doc[]" class="form-control form-control-sm" value="' . $nm['fecha'] . '" min="' . $nm['fecha'] . '" max="' . $vigencia . '-12-31">' ?></td>
+                                <td class="text-left"><?php echo $nm['nom_tercero'] ?></td>
+                                <td class="text-left text-right"><?php echo '$ ' . number_format($nm['valor'], 2, ',', '.') ?></td>
                                 <td class="text-center"> <?php echo $causar ?></td>
                             </tr>
                     <?php

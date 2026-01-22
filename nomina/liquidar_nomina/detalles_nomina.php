@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 $anio = $_SESSION['vigencia'];
@@ -17,7 +17,7 @@ if (isset($_POST['id'])) {
 function pesos($valor)
 {
     //$valor = $valor > 0 ? $valor : 0;
-    return '$' . number_format($valor, 2, ",", ".");
+    return number_format($valor, 2, ".", "");
 }
 
 include '../../conexion.php';
@@ -29,49 +29,6 @@ if ($key === false) {
 }
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT 
-                `id_empleado`, `vigencia`, `salario_basico`, `no_documento`, `estado`, CONCAT_WS(' ', `apellido1`, `apellido2`, `nombre1`, `nombre2`) AS `nombre`, `representacion`, `sede_emp`, `sede`, `cargo`, `id_nomina`
-            FROM
-                (SELECT  
-                    `nom_empleado`.`id_empleado`
-                    ,`nom_empleado`.`sede_emp`
-                    , `nom_empleado`.`tipo_doc`
-                    , `nom_empleado`.`no_documento`
-                    , `nom_empleado`.`genero`
-                    , `nom_empleado`.`apellido1`
-                    , `nom_empleado`.`apellido2`
-                    , `nom_empleado`.`nombre2`
-                    , `nom_empleado`.`nombre1`
-                    , `nom_empleado`.`representacion`
-                    , `nom_empleado`.`estado`
-                    , `nom_salarios_basico`.`id_salario`
-                    , `nom_salarios_basico`.`vigencia`
-                    , `nom_salarios_basico`.`salario_basico`
-                    , `nom_liq_salario`.`id_nomina`
-                    , `nom_cargo_empleado`.`descripcion_carg` AS `cargo`
-                    , `tb_sedes`.`nom_sede` AS `sede`
-                FROM `nom_salarios_basico`
-                    INNER JOIN `nom_empleado`
-                        ON(`nom_salarios_basico`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                    INNER JOIN `nom_liq_salario` 
-                        ON (`nom_liq_salario`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                    LEFT JOIN `nom_cargo_empleado` 
-                        ON (`nom_empleado`.`cargo` = `nom_cargo_empleado`.`id_cargo`)
-                    LEFT JOIN `tb_sedes` 
-                        ON (`nom_empleado`.`sede_emp` = `tb_sedes`.`id_sede`)
-                WHERE `nom_salarios_basico`.`id_salario` 
-                    IN(SELECT MAX(`id_salario`) FROM `nom_salarios_basico` WHERE `vigencia` <= '$anio' GROUP BY `id_empleado`)) AS t
-            WHERE `id_nomina` = $id_nomina
-            GROUP BY `id_empleado`";
-    $rs = $cmd->query($sql);
-    $obj = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "SELECT `id_nomina`, `estado`, `planilla`, `mes`, `tipo`  FROM `nom_nominas` WHERE `id_nomina` = $id_nomina LIMIT 1";
     $rs = $cmd->query($sql);
@@ -80,6 +37,41 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT  
+                `nom_empleado`.`id_empleado`
+                ,`nom_empleado`.`sede_emp`
+                , `nom_empleado`.`tipo_doc`
+                , `nom_empleado`.`no_documento`
+                , `nom_empleado`.`genero`
+                ,  CONCAT_WS(' ', `nom_empleado`.`nombre1`
+                , `nom_empleado`.`nombre2`
+                , `nom_empleado`.`apellido1`
+                , `nom_empleado`.`apellido2`) AS `nombre`
+                , `nom_empleado`.`representacion`
+                , `nom_empleado`.`estado`
+                , `nom_liq_salario`.`id_nomina`
+                , `nom_liq_salario`.`sal_base` AS `salario_basico`
+                , `nom_cargo_empleado`.`descripcion_carg` AS `cargo`
+                , `tb_sedes`.`nom_sede` AS `sede`
+            FROM `nom_empleado`
+                INNER JOIN `nom_liq_salario` 
+                    ON (`nom_liq_salario`.`id_empleado` = `nom_empleado`.`id_empleado`)
+                LEFT JOIN `nom_cargo_empleado` 
+                    ON (`nom_empleado`.`cargo` = `nom_cargo_empleado`.`id_cargo`)
+                LEFT JOIN `tb_sedes` 
+                    ON (`nom_empleado`.`sede_emp` = `tb_sedes`.`id_sede`)
+            WHERE `nom_liq_salario`.`id_nomina` = $id_nomina";
+    $rs = $cmd->query($sql);
+    $obj = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+
 $mes = $id_nom['mes'] != '' ? $id_nom['mes'] : '00';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -442,11 +434,38 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `nom_otros_descuentos`.`id_empleado`
+                , SUM(`nom_liq_descuento`.`valor`) AS `valor`
+            FROM
+                `nom_liq_descuento`
+                INNER JOIN `nom_otros_descuentos` 
+                    ON (`nom_liq_descuento`.`id_dcto` = `nom_otros_descuentos`.`id_dcto`)
+            WHERE (`nom_liq_descuento`.`id_nomina` = $id_nomina)
+            GROUP BY `nom_otros_descuentos`.`id_empleado`";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <?php include '../../head.php' ?>
+<style>
+    .DTFC_LeftBodyLiner {
+        overflow-y: unset !important
+    }
+
+    .DTFC_RightBodyLiner {
+        overflow-y: unset !important
+    }
+</style>
 
 <body class="sb-nav-fixed <?php
                             if ($_SESSION['navarlat'] == '1') {
@@ -467,7 +486,7 @@ try {
                                 <div class="row">
                                     <div class="col-md-6">
                                         <i class="fas fa-users fa-lg" style="color:#1D80F7"></i>
-                                        LISTA DE EMPLEADOS NOMINA LIQUIDADA <b> <?php echo isset($nombmes['nom_mes'])? $nombmes['nom_mes']: 'OTRA' ?></b>
+                                        LISTA DE EMPLEADOS NOMINA LIQUIDADA <b> <?php echo isset($nombmes['nom_mes']) ? $nombmes['nom_mes'] : 'OTRA' ?></b>
 
                                         <input type="text" id="fecLiqNomElec" value="<?php echo date('Y-m-d', strtotime($saln[0]['fec_reg'])) ?>" hidden>
                                     </div>
@@ -476,11 +495,6 @@ try {
                                             <input type="hidden" id="mesNomElec" value="<?php echo $mes ?>">
                                             <div>
                                                 <input type="hidden" id="id_nomina" value="<?php echo $id_nom['id_nomina'] ?>">
-                                                <!--<a type="button" id="btnExportaExcelNE" class="btn btn-outline-success btn-sm" value="<?php //echo $mes 
-                                                                                                                                            ?>" title="Exprotar a Excel">
-                                                    <span class="fas fa-file-excel fa-lg"></span>
-                                                </a>-->
-
                                                 <?php
                                                 if ($id_nom['estado'] == 1) {
                                                     if (PermisosUsuario($permisos, 5104, 5) || $id_rol == 1) {
@@ -493,7 +507,6 @@ try {
                                                 }
                                                 if ($id_nom['estado'] == 1) {
                                                     if (PermisosUsuario($permisos, 5104, 3) || $id_rol == 1) {
-                                                        //
                                                     ?>
                                                         <button id="btnConfirmaNomina" class="btn btn-outline-warning btn-sm px-2" value="<?php echo $mes ?>" title="DEFINITIVA">
                                                             <i class="fas fa-certificate"></i>&nbsp;&nbsp;</span>DEFINITIVA
@@ -520,7 +533,7 @@ try {
                                 </div>
                             </div>
                             <div class="card-body" id="divCuerpoPag">
-                                <div class="">
+                                <div>
                                     <table id="dataTableLiqNom" class="table-bordered table-sm  order-column nowrap" style="width:100%">
                                         <thead>
                                             <tr>
@@ -547,7 +560,7 @@ try {
                                                 <th colspan="3" class="text-center centro-vertical">Parafiscales</th>
                                                 <th colspan="4" class="text-center centro-vertical">Apropiaciones</th>
                                                 <th colspan="6" class="text-center centro-vertical">Seguridad Social</th>
-                                                <th colspan="4" class="text-center centro-vertical">Deducciones</th>
+                                                <th colspan="5" class="text-center centro-vertical">Deducciones</th>
                                                 <th rowspan="2" class="text-center centro-vertical">DEDUCIDO</th>
                                                 <th rowspan="2" class="text-center centro-vertical">NETO</th>
                                                 <th rowspan="2" class="text-center centro-vertical">ACCIÓN</th>
@@ -580,6 +593,7 @@ try {
                                                 <th>Embargo</th>
                                                 <th>Sindicato</th>
                                                 <th>Ret. Fte.</th>
+                                                <th>Otros</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -708,7 +722,7 @@ try {
                                                                 echo pesos($vac[$keyvac]['val_liq']);
                                                                 $c = $vac[$keyvac]['val_liq'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $c = 0;
                                                             } ?></td>
                                                         <td class="text-right">
@@ -717,7 +731,7 @@ try {
                                                                 echo pesos($indemnizaciones[$keyIndem]['val_liq']);
                                                                 $d1 = $indemnizaciones[$keyIndem]['val_liq'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $d1 = 0;
                                                             } ?>
                                                         </td>
@@ -733,7 +747,7 @@ try {
                                                                 echo pesos($dlab[$keydlab]['val_liq_auxt']);
                                                                 $e = $dlab[$keydlab]['val_liq_auxt'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $e = 0;
                                                             } ?>
                                                         </td>
@@ -743,7 +757,7 @@ try {
                                                                 echo pesos($dlab[$keydlab]['aux_alim']);
                                                                 $e1 = $dlab[$keydlab]['aux_alim'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $e1 = 0;
                                                             } ?>
                                                         </td>
@@ -753,7 +767,7 @@ try {
                                                                 echo pesos($hoex[$keyhoex]['tot_he']);
                                                                 $f = $hoex[$keyhoex]['tot_he'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $f = 0;
                                                             } ?>
                                                         </td>
@@ -763,7 +777,7 @@ try {
                                                                 echo pesos($bsp[$keybsp]['val_bsp']);
                                                                 $c3 = $bsp[$keybsp]['val_bsp'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $c3 = 0;
                                                             } ?></td>
                                                         <td class="text-right">
@@ -772,7 +786,7 @@ try {
                                                                 echo pesos($vac[$keyvac]['val_prima_vac']);
                                                                 $c4 = $vac[$keyvac]['val_prima_vac'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $c4 = 0;
                                                             } ?></td>
                                                         <td class="text-right">
@@ -791,7 +805,7 @@ try {
                                                                 echo pesos($vac[$keyvac]['val_bon_recrea']);
                                                                 $c5 = $vac[$keyvac]['val_bon_recrea'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $c5 = 0;
                                                             }
                                                             $ps = false !== $keyps ? $prima_sv[$keyps]['val_liq_ps'] : 0;
@@ -809,7 +823,7 @@ try {
                                                         <td class="text-right"><?php echo pesos($comp); ?></td>
                                                         <td class="text-right">
                                                             <?php
-                                                            $devengado = $a + $b + $valluto + $c + $d1 + $d + $e + $e1 + $f + $c3 + $c4 + $c5 + $ps + $pn + $ces + $ices + $comp + $gr;
+                                                            $devengado = $a + $b + $c + $d1 + $d + $e + $e1 + $f + $c3 + $c4 + $c5 + $ps + $pn + $ces + $ices + $comp + $gr;
                                                             echo pesos($devengado);
                                                             ?>
                                                         </td>
@@ -891,7 +905,7 @@ try {
                                                                 echo pesos($sind[$keysind]['val_aporte']);
                                                                 $m = $sind[$keysind]['val_aporte'];
                                                             } else {
-                                                                echo '$0.00';
+                                                                echo '0.00';
                                                                 $m = 0;
                                                             } ?>
                                                         </td>
@@ -904,7 +918,14 @@ try {
                                                         </td>
                                                         <td class="text-right">
                                                             <?php
-                                                            $deducido = $g + $i + $j + $k + $l + $m + $n;
+                                                            $key_dcto = array_search($id, array_column($descuentos, 'id_empleado'));
+                                                            $nda =  false !== $key_dcto ? $descuentos[$key_dcto]['valor'] : 0;
+                                                            echo pesos($nda);
+                                                            ?>
+                                                        </td>
+                                                        <td class="text-right">
+                                                            <?php
+                                                            $deducido = $g + $i + $j + $k + $l + $m + $n + $nda;
                                                             echo pesos($deducido);
                                                             ?>
                                                         </td>
@@ -914,13 +935,15 @@ try {
                                                             ?>
                                                         </td>
                                                         <?php
-                                                        if ($id_nom['estado'] == 1 && $id_nom['planilla'] == 1) {
+                                                        if ($id_nom['estado'] == '1' && $id_nom['planilla'] == '1') {
                                                             if (PermisosUsuario($permisos, 5104, 5) || $id_rol == 1) {
                                                         ?>
                                                                 <td class="text-center">
                                                                     <a value="<?php echo $id ?>" class="btn btn-outline-danger btn-sm btn-circle shadow-gb anular" title="Anular Empleado"><span class="fas fa-ban fa-lg"></span></a>
                                                                 </td>
                                                         <?php
+                                                            } else {
+                                                                echo '<td></td>';
                                                             }
                                                         } else {
                                                             echo '<td></td>';
@@ -950,15 +973,6 @@ try {
         <?php include '../../modales.php' ?>
     </div>
     <?php include '../../scripts.php' ?>
-    <style>
-        .DTFC_LeftBodyLiner {
-            overflow-y: unset !important
-        }
-
-        .DTFC_RightBodyLiner {
-            overflow-y: unset !important
-        }
-    </style>
 </body>
 
 </html>

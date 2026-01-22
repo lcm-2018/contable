@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../../conexion.php';
@@ -9,28 +9,39 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`
-                , `seg_terceros`.`id_tercero_api`
-                , `seg_terceros`.`tipo_doc`
-                , `seg_terceros`.`no_doc`
-                , `seg_terceros`.`estado`
-                , `tb_tipo_tercero`.`descripcion`
+                `id_tercero_api`, `nit_tercero`, `nom_tercero`
             FROM
-                `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-                INNER JOIN `tb_tipo_tercero` 
-                    ON (`tb_rel_tercero`.`id_tipo_tercero` = `tb_tipo_tercero`.`id_tipo`)";
+                `tb_terceros`";
     $rs = $cmd->query($sql);
     $terEmpr = $rs->fetchAll();
+    $sql = "SELECT 
+                `id_tercero_api`, 
+                GROUP_CONCAT(`id_responsabilidad` ORDER BY `id_responsabilidad` SEPARATOR ', ') AS `responsabilidades`
+            FROM `ctt_resposabilidad_terceros`
+            GROUP BY `id_tercero_api`";
+    $rs = $cmd->query($sql);
+    $responsabilidades = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $sql = "SELECT
+                `trt`.`id_tercero_api`
+                , GROUP_CONCAT(`ttt`.`descripcion`) AS `tipo`
+            FROM
+                `tb_rel_tercero` AS `trt`
+                INNER JOIN `tb_tipo_tercero` AS `ttt` 
+                    ON (`trt`.`id_tipo_tercero` = `ttt`.`id_tipo`)
+            GROUP BY `trt`.`id_tercero_api`";
+    $rs = $cmd->query($sql);
+    $tipos = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 $id_t = [];
 foreach ($terEmpr as $l) {
-    $id_t[] = $l['id_tercero_api'];
+    if ($l['id_tercero_api'] > 0) {
+        $id_t[] = $l['id_tercero_api'];
+    }
 }
+$tipos = array_column($tipos, 'tipo', 'id_tercero_api');
 $payload = json_encode($id_t);
 //API URL
 $url = $api . 'terceros/datos/res/lista/reportes';
@@ -40,24 +51,35 @@ curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $result = curl_exec($ch);
 curl_close($ch);
 $datos = json_decode($result, true);
 $head = '';
 if (!empty($datos)) {
     foreach ($datos[0] as $key => $value) {
-        $head .= '<th>' . utf8_decode($key) . '</th>';
+        if ($key == 'resposabilidades') continue;
+        $head .= '<th>' . mb_convert_encoding($key, 'UTF-8', 'ISO-8859-1') . '</th>';
     }
+    $head .= '<th>Responsabilidades</th>';
+    $head .= '<th>Tipo Tercero</th>';
 } else {
     echo 'No hay datos para mostrar';
     exit();
 }
 $tbody = '';
 foreach ($datos as $d) {
+    $id_ter = $d['id_tercero'];
+    $key = array_search($id_ter, array_column($responsabilidades, 'id_tercero_api'));
+    $resp = $key !== false ? $responsabilidades[$key]['responsabilidades'] : '';
     $tbody .= '<tr>';
-    foreach ($d as $key => $value) {
-        $tbody .= '<td>' . utf8_decode($value) . '</td>';
+    foreach ($d as $ds => $value) {
+        if ($ds == 'resposabilidades') continue;
+        $tbody .= '<td>' . mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1') . '</td>';
     }
+    $tbody .= '<td>' . $resp . '</td>';
+    $tbody .= '<td>' . ($tipos[$id_ter] ?? '') . '</td>';
     $tbody .= '</tr>';
 }
 $tabla = <<<EOT
@@ -69,6 +91,12 @@ $tabla = <<<EOT
     </table>
 EOT;
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-header('Content-type:application/xls');
+header('Content-Type: application/vnd.ms-excel; charset=utf-8');
 header('Content-Disposition: attachment; filename=reporte' . $date->format('mdHms') . '.xls');
+header('Pragma: no-cache');
+header('Expires: 0');
+
+echo "\xEF\xBB\xBF";
+
+echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
 echo $tabla;

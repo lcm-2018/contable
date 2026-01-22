@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -22,7 +22,7 @@ $idrol = $_SESSION['rol'];
 $fecha = $_POST['fecha'] ? $_POST['fecha'] : date('Y-m-d');
 
 $where_usr = " WHERE 1";
-if($idrol !=1){
+if ($idrol != 1) {
     $where_usr .= " AND far_kardex.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
 
@@ -36,6 +36,16 @@ if (isset($_POST['id_bodega']) && $_POST['id_bodega']) {
 if (isset($_POST['fecha']) && $_POST['fecha']) {
     $where_kar .= " AND far_kardex.fec_movimiento<='" . $_POST['fecha'] . "'";
 }
+if (isset($_POST['lotactivo']) && $_POST['lotactivo']) {
+    $where_kar .= " AND far_medicamento_lote.estado=1";
+}
+if (isset($_POST['lote_ven']) && $_POST['lote_ven']) {
+    if ($_POST['lote_ven'] == 1) {
+        $where_kar .= " AND DATEDIFF(far_medicamento_lote.fec_vencimiento,'$fecha')<0";
+    } else {
+        $where_kar .= " AND DATEDIFF(far_medicamento_lote.fec_vencimiento,'$fecha')>=0";
+    }
+}
 
 $where_art = " WHERE 1";
 if (isset($_POST['codigo']) && $_POST['codigo']) {
@@ -47,11 +57,18 @@ if (isset($_POST['nombre']) && $_POST['nombre']) {
 if (isset($_POST['id_subgrupo']) && $_POST['id_subgrupo']) {
     $where_art .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];
 }
+if (isset($_POST['tipo_asis']) && strlen($_POST['tipo_asis'])) {
+    $where_art .= " AND far_medicamentos.es_clinico=" . $_POST['tipo_asis'];
+}
 if (isset($_POST['artactivo']) && $_POST['artactivo']) {
     $where_art .= " AND far_medicamentos.estado=1";
 }
-if (isset($_POST['conexistencia']) && $_POST['conexistencia']) {
-    $where_art .= " AND e.existencia_fecha>=1";
+if (isset($_POST['con_existencia']) && $_POST['con_existencia']) {
+    if ($_POST['con_existencia'] == 1) {
+        $where_art .= " AND e.existencia_fecha>=1";
+    } else {
+        $where_art .= " AND e.existencia_fecha=0";
+    }
 }
 
 try {
@@ -61,10 +78,13 @@ try {
     //Consulta el total de registros de la tabla
     $sql = "SELECT COUNT(*) AS total
             FROM far_medicamentos
-            INNER JOIN (SELECT id_med FROM far_kardex
-                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex $where_usr GROUP BY id_lote)                        
-                        GROUP BY id_med	
-                        ) AS e ON (e.id_med = far_medicamentos.id_med)";        
+            INNER JOIN (SELECT ke.id_med 
+                        FROM far_kardex AS ke
+                        WHERE ke.id_kardex IN (SELECT MAX(far_kardex.id_kardex) 
+                                               FROM far_kardex $where_usr 
+                                               GROUP BY far_kardex.id_lote)
+                        GROUP BY ke.id_med	
+                        ) AS e ON (e.id_med = far_medicamentos.id_med)";
     $rs = $cmd->query($sql);
     $total = $rs->fetch();
     $totalRecords = $total['total'];
@@ -73,9 +93,14 @@ try {
     $sql = "SELECT COUNT(*) AS total
             FROM far_medicamentos
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)
-            INNER JOIN (SELECT id_med,SUM(existencia_lote) AS existencia_fecha FROM far_kardex
-                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex $where_kar GROUP BY id_lote)                        
-                        GROUP BY id_med	
+            INNER JOIN (SELECT ke.id_med,SUM(ke.existencia_lote) AS existencia_fecha 
+                        FROM far_kardex AS ke
+                        WHERE ke.id_kardex IN (SELECT MAX(far_kardex.id_kardex) 
+                                               FROM far_kardex 
+                                               INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote=far_kardex.id_lote)
+                                               $where_kar 
+                                               GROUP BY far_kardex.id_lote) 
+                        GROUP BY ke.id_med	
                         ) AS e ON (e.id_med = far_medicamentos.id_med)	
             $where_art";
     $rs = $cmd->query($sql);
@@ -88,18 +113,26 @@ try {
                 (e.existencia_fecha*v.val_promedio_fecha) AS val_total
             FROM far_medicamentos
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo)
-            INNER JOIN (SELECT id_med,SUM(existencia_lote) AS existencia_fecha FROM far_kardex
-                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex $where_kar GROUP BY id_lote)                        
-                        GROUP BY id_med	
+            INNER JOIN (SELECT ke.id_med,SUM(ke.existencia_lote) AS existencia_fecha 
+                        FROM far_kardex AS ke
+                        WHERE ke.id_kardex IN (SELECT MAX(far_kardex.id_kardex) 
+                                               FROM far_kardex 
+                                               INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote=far_kardex.id_lote)
+                                               $where_kar 
+                                               GROUP BY far_kardex.id_lote)
+                        GROUP BY ke.id_med	
                         ) AS e ON (e.id_med = far_medicamentos.id_med)	
-            INNER JOIN (SELECT id_med,val_promedio AS val_promedio_fecha FROM far_kardex
-                        WHERE id_kardex IN (SELECT MAX(id_kardex) FROM far_kardex				
-                                            WHERE fec_movimiento<='$fecha' AND estado=1 
-                                            GROUP BY id_med)
+            INNER JOIN (SELECT kv.id_med,kv.val_promedio AS val_promedio_fecha 
+                        FROM far_kardex AS kv
+                        WHERE kv.id_kardex IN (SELECT MAX(far_kardex.id_kardex) 
+                                               FROM far_kardex				
+                                               WHERE far_kardex.fec_movimiento<='$fecha' AND far_kardex.estado=1 
+                                               GROUP BY far_kardex.id_med)
                         ) AS v ON (v.id_med = far_medicamentos.id_med) 
             $where_art ORDER BY $col $dir $limit";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
+
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();

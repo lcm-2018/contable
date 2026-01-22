@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -25,6 +25,7 @@ if ($id_tes_cuenta > 0) {
                     , `tes_cuentas`.`numero`
                     , `tes_cuentas`.`estado`
                     , `tes_cuentas`.`id_tes_cuenta`
+                    , `tes_cuentas`.`id_fte`
                     , `ctb_pgcp`.`id_pgcp`
                 FROM
                     `tes_cuentas`
@@ -40,6 +41,7 @@ if ($id_tes_cuenta > 0) {
         $nombre = $cuentas['nombre'];
         $numero = $cuentas['numero'];
         $estado = $cuentas['estado'];
+        $id_fte = $cuentas['id_fte'];
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -51,8 +53,49 @@ if ($id_tes_cuenta > 0) {
     $nombre = '';
     $numero = '';
     $estado = 0;
+    $id_fte = 0;
 }
 // Consultar el listado de bancos de la tabla tb_bancos
+$cuentas = [];
+if ($id_tes_cuenta  > 0) {
+    $union = "UNION ALL
+            SELECT
+                `ctb_pgcp`.`id_pgcp`
+                , `ctb_pgcp`.`cuenta`
+                , `ctb_pgcp`.`nombre`
+                , `tes_cuentas`.`id_banco`
+                , `tes_cuentas`.`id_tes_cuenta`
+            FROM
+                `tes_cuentas`
+                INNER JOIN `ctb_pgcp` 
+                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+            WHERE (`tes_cuentas`.`id_tes_cuenta` = $id_tes_cuenta)";
+} else {
+    $union = '';
+}
+try {
+    $sql = "SELECT
+                    `ctb_pgcp`.`id_pgcp`
+                    , `ctb_pgcp`.`cuenta`
+                    , `ctb_pgcp`.`nombre`
+                    , `tb_bancos`.`id_banco`
+                    , `tes_cuentas`.`id_tes_cuenta`
+                FROM
+                    `ctb_pgcp`
+                    LEFT JOIN `tes_cuentas` 
+                        ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
+                    LEFT JOIN `tb_bancos` 
+                        ON (`tes_cuentas`.`id_banco` = `tb_bancos`.`id_banco`)
+                WHERE (`ctb_pgcp`.`cuenta` LIKE '1110%' OR `ctb_pgcp`.`cuenta` LIKE '1132%'  OR `ctb_pgcp`.`cuenta` LIKE '110106%')
+                    AND `ctb_pgcp`.`tipo_dato` = 'D'
+                    AND `tes_cuentas`.`id_tes_cuenta` IS NULL
+                $union";
+    $rs = $cmd->query($sql);
+    $cuentas = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 try {
     $sql = "SELECT `id_banco`, `nom_banco` FROM `tb_bancos` ORDER BY `nom_banco` ASC";
     $rs = $cmd->query($sql);
@@ -65,6 +108,13 @@ try {
     $sql = "SELECT `id_tipo_cuenta` , `tipo_cuenta` FROM `tes_tipo_cuenta` ORDER BY `tipo_cuenta` ASC";
     $rs = $cmd->query($sql);
     $listatipocuenta = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $sql = "SELECT `id`,`codigo`,`nombre` FROM `fin_cod_fuente` ORDER BY `nombre` ASC";
+    $rs = $cmd->query($sql);
+    $fuente = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -100,7 +150,14 @@ try {
                     <div class="col-9">
                         <div id="divBanco">
                             <select id="cuentas" name="cuentas" class="form-control form-control-sm">
-                                <option value="0">--Seleccione--</option>
+                                <option value="0">-- Seleccionar --</option>
+                                <?php
+                                foreach ($cuentas as $cuenta) {
+                                    $value = base64_encode($cuenta['id_pgcp'] . '|' . $cuenta['nombre']);
+                                    $selected = $cuenta['id_tes_cuenta'] == $id_tes_cuenta ? 'selected' : '';
+                                    echo '<option value="' . $value . '" ' . $selected . '>' . $cuenta['cuenta'] . ' | ' . $cuenta['nombre'] . '</option>';
+                                }
+                                ?>
                             </select>
                         </div>
                     </div>
@@ -127,11 +184,25 @@ try {
                         <input type="text" id="numero" name="numero" class="form-control form-control-sm" value="<?php echo $numero; ?>">
                     </div>
                 </div>
+                <div class="row mb-1">
+                    <div class="col-3">
+                        <label for="codigo_fuente" class="small">CÓD. FUENTE: </label>
+                    </div>
+                    <div class="col-9">
+                        <select id="codigo_fuente" name="codigo_fuente" class="form-control form-control-sm">
+                            <option value="0">-- Seleccionar --</option>
+                            <?php foreach ($fuente as $f) {
+                                $slc = $f['id'] == $id_fte ? 'selected' : '';
+                                echo '<option value="' . $f['id'] . '" ' . $slc . '>' . $f['nombre'] . ' | ' . $f['codigo'] . '</option>';
+                            } ?>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
     </form>
     <div class="text-right">
-        <button type="button" class="btn btn-primary btn-sm" onclick="guardarCuentaBanco()">Guardar</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="guardarCuentaBanco(this)">Guardar</button>
         <a class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
     </div>
 </div>

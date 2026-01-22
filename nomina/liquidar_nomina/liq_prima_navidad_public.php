@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
@@ -78,25 +78,27 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT 
-                `id_empleado`
-                ,SUM(`val_bsp`) AS `val_bsp`
-            FROM `nom_liq_bsp`
+                `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
+            FROM 
+                `nom_liq_bsp`
             WHERE `id_bonificaciones` IN 
-            (SELECT 
-                MAX(`id_bonificaciones`)
-            FROM `nom_liq_bsp`
-            INNER JOIN `nom_nominas`
-                ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-            WHERE `nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS'
-            GROUP BY `id_empleado`
-            UNION ALL 
-            SELECT 
-                MAX(`id_bonificaciones`)
-            FROM `nom_liq_bsp`
-            INNER JOIN `nom_nominas`
-                ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
-            WHERE `nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` = '$vigencia'
-            GROUP BY `id_empleado`)
+                (SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas`
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`
+                UNION ALL
+                SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas` 
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`)
             GROUP BY `id_empleado`";
     $rs = $cmd->query($sql);
     $bon_servicios = $rs->fetchAll(PDO::FETCH_ASSOC);
@@ -188,7 +190,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `nom_vacaciones`.`id_empleado`
-                , SUM(`nom_liq_vac`.`val_prima_vac`) AS val_prima_vac
+                , SUM(`nom_liq_vac`.`val_prima_vac`) AS `val_prima_vac`
                 , `nom_liq_vac`.`id_vac`
             FROM
                 `nom_liq_vac`
@@ -346,8 +348,8 @@ if (isset($empleados)) {
                 try {
                     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                    $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`) 
-                            VALUES (?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`,`sal_base`) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?)";
                     $sql = $cmd->prepare($sql);
                     $sql->bindParam(1, $id, PDO::PARAM_INT);
                     $sql->bindParam(2, $prima_nav, PDO::PARAM_STR);
@@ -355,6 +357,7 @@ if (isset($empleados)) {
                     $sql->bindParam(4, $mpag, PDO::PARAM_STR);
                     $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
                     $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
+                    $sql->bindParam(7, $salbase, PDO::PARAM_STR);
                     $sql->execute();
                 } catch (PDOException $e) {
                     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();

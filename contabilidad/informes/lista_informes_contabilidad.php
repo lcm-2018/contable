@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../../conexion.php';
@@ -35,7 +35,8 @@ include '../../permisos.php';
                             <li class="nav-item">
                                 <a class="nav-link dropdown-toggle sombra" data-toggle="dropdown" href="#" role="button" aria-expanded="false">Internos </a>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item sombra" href="#" onclick="cargarReporteContable(11);">Libros auxiliares</a>
+                                    <!--<a class="dropdown-item sombra" href="#" onclick="cargarReporteContable(11);">Libros auxiliares</a>-->
+                                    <a class="dropdown-item sombra" href="#" id="sl_libros_aux_bancos">Libros auxiliares</a>
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReporteContable(12);">Balance de prueba</a>
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReportePresupuesto(3);">Mayor y balance</a>
                                     <a class="dropdown-item sombra" href="#" onclick="abrirLink(2);">Estado financieros</a>

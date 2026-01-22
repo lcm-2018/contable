@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 $id_facno = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida');
@@ -51,7 +51,7 @@ try {
                 , `tb_datos_ips`.`direccion`
                 , `tb_datos_ips`.`endpoint`
                 , `tb_datos_ips`.`tipo_organizacion`
-                , `tb_responsabilidad_fiscal`.`codigo` AS `resp_fiscal`
+                , `fac_e_responsabilidades`.`codigo` AS `resp_fiscal`
                 , `tb_datos_ips`.`reg_fiscal`
                 , `tb_datos_ips`.`user_prov`
                 , `tb_datos_ips`.`pass_prov`
@@ -63,8 +63,8 @@ try {
                     ON (`tb_datos_ips`.`id_dpto` = `tb_departamentos`.`id_departameto`)
                 INNER JOIN `tb_municipios` 
                     ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departameto`) AND (`tb_datos_ips`.`id_ciudad` = `tb_municipios`.`id_municipio`)
-                INNER JOIN `tb_responsabilidad_fiscal` 
-                    ON (`tb_datos_ips`.`resp_fiscal` = `tb_responsabilidad_fiscal`.`id`)
+                INNER JOIN `fac_e_responsabilidades` 
+                    ON (`tb_datos_ips`.`resp_fiscal` = `fac_e_responsabilidades`.`id`)
             WHERE `tb_datos_ips`.`id_empresa` = '$id_empresa'";
     $rs = $cmd->query($sql);
     $empresa = $rs->fetch();
@@ -84,8 +84,8 @@ try {
                 , `tb_terceros_noblig`.`procedencia`
                 , `tb_terceros_noblig`.`tipo_org`
                 , `tb_terceros_noblig`.`reg_fiscal`
-                , `tb_responsabilidad_fiscal`.`codigo` as `resp_fiscal`
-                , `tb_responsabilidad_fiscal`.`descripcion`
+                , `fac_e_responsabilidades`.`codigo` as `resp_fiscal`
+                , `fac_e_responsabilidades`.`descripcion`
                 , `tb_terceros_noblig`.`correo`
                 , `tb_terceros_noblig`.`telefono`
                 , `tb_paises`.`codigo_pais`
@@ -117,8 +117,8 @@ try {
                     ON (`tb_facturas`.`id_tercero_no` = `tb_terceros_noblig`.`id_tercero`)
                 INNER JOIN `tb_tipos_documento` 
                     ON (`tb_terceros_noblig`.`id_tdoc` = `tb_tipos_documento`.`id_tipodoc`)
-                INNER JOIN `tb_responsabilidad_fiscal` 
-                    ON (`tb_terceros_noblig`.`resp_fiscal` = `tb_responsabilidad_fiscal`.`id`)
+                INNER JOIN `fac_e_responsabilidades` 
+                    ON (`tb_terceros_noblig`.`resp_fiscal` = `fac_e_responsabilidades`.`id`)
                 INNER JOIN `tb_paises` 
                     ON (`tb_terceros_noblig`.`id_pais` = `tb_paises`.`id_pais`)
                 INNER JOIN `tb_departamentos` 
@@ -204,7 +204,7 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 $tipo_documento = 'ReverseCreditNote';
-$pref = 'NC' . substr($resolucion['prefijo'],0,2);
+$pref = 'NC' . substr($resolucion['prefijo'], 0, 2);
 $entorno = $resolucion['entorno'];
 $adocumentitems = [];
 $key = 0;
@@ -312,6 +312,8 @@ curl_setopt($ch, CURLOPT_URL, $url_taxxa);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $datatoken);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $restoken = curl_exec($ch);
 $rst = json_decode($restoken);
 $tokenApi = $rst->jret->stoken;
@@ -383,8 +385,8 @@ $jDocument = [
     //'rdocumenttemplate' => '',
     'tissuedate' => $factura['fec_compra'] . 'T' . date('H:i:s', strtotime('-5 hour', strtotime(date('H:i:s')))),
     'tduedate' => $factura['fec_vence'],
-    //'wpaymentmeans' => $factura['met_pago'],
-    //'wpaymentmethod' => $factura['form_pago'],
+    'wpaymentmeans' => '1',
+    'wpaymentmethod' => 'ZZZ',
     //'wbusinessregimen' => $factura['reg_fiscal'],
     //'woperationtype' => $factura['procedencia'],
     //'sorderreference' => '',
@@ -502,6 +504,8 @@ curl_setopt($ch, CURLOPT_URL, $url_taxxa);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $json_string);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $response = curl_exec($ch);
 $resnom = json_decode($response, true);
 $file = 'loglastsend.txt';

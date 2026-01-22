@@ -1,17 +1,24 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
 include '../../../conexion.php';
 include '../common/funciones_generales.php';
 
+$idusr = $_SESSION['id_user'];
+$idrol = $_SESSION['rol'];
+
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$where = "WHERE far_pedido.id_pedido<>0";
+$where = " WHERE far_pedido.es_pedido_spsr=0";
+if($idrol !=1){
+    $where .= " AND far_pedido.id_bodega_destino IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
+}
+
 if (isset($_POST['id_sedsol']) && $_POST['id_sedsol']) {
     $where .= " AND far_pedido.id_sede_destino='" . $_POST['id_sedsol'] . "'";
 }
@@ -36,6 +43,9 @@ if (isset($_POST['id_bodpro']) && $_POST['id_bodpro']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_pedido.estado=" . $_POST['estado'];
 }
+if (isset($_POST['modulo']) && strlen($_POST['modulo'])) {
+    $where .= " AND far_pedido.creado_far=" . $_POST['modulo'];
+}
 
 try {
     $sql = "SELECT far_pedido.id_pedido,far_pedido.num_pedido,
@@ -43,7 +53,7 @@ try {
                     ss.nom_sede AS nom_sede_solicita,bs.nombre AS nom_bodega_solicita,                    
                     sp.nom_sede AS nom_sede_provee,bp.nombre AS nom_bodega_provee,                    
                     far_pedido.val_total,
-                    CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
+                    CASE far_pedido.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' WHEN 3 THEN 'FINALIZADO' END AS nom_estado 
                 FROM far_pedido             
                 INNER JOIN tb_sedes AS ss ON (ss.id_sede = far_pedido.id_sede_destino)
                 INNER JOIN far_bodegas AS bs ON (bs.id_bodega = far_pedido.id_bodega_destino)           
@@ -94,7 +104,7 @@ try {
                 <th rowspan="2">Hora Pedido</th>
                 <th rowspan="2">Detalle</th>
                 <th colspan="2">Unidad DE donde se solicita</th>
-                <th colspan="2">Unidad Proveedora A donde se solicita</th>
+                <th colspan="2">Unidad Proveedor</th>
                 <th rowspan="2">Valor Total</th>
                 <th rowspan="2">Estado</th>
             </tr>

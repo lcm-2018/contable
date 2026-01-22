@@ -1,18 +1,97 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
+include '../../financiero/consultas.php';
+
 $vigencia = $_SESSION['vigencia'];
 $id_vigencia = $_SESSION['id_vigencia'];
 $data = explode('|', file_get_contents("php://input"));
 $id_nomina = $data[0];
 $tipo_nomina = $data[1];
-$id_api_sena = 1245;
-$id_api_icbf = 1247;
-$id_api_comfam = 1246;
+$fec_doc = $data[2];
+
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT
+                `id_parafiscal`,`id_tercero_api`,`tipo`
+            FROM `nom_parafiscales`
+            ORDER BY `id_parafiscal` DESC";
+    $rs = $cmd->query($sql);
+    $parafiscales = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$kpf = array_search('SENA', array_column($parafiscales, 'tipo'));
+$id_api_sena = $kpf !== false ? $parafiscales[$kpf]['id_tercero_api'] : exit('No se ha configurado el parafiscal SENA');
+$kpf = array_search('ICBF', array_column($parafiscales, 'tipo'));
+$id_api_icbf = $kpf !== false ? $parafiscales[$kpf]['id_tercero_api'] : exit('No se ha configurado el parafiscal ICBF');
+$kpf = array_search('CAJA', array_column($parafiscales, 'tipo'));
+$id_api_comfam = $kpf !== false ? $parafiscales[$kpf]['id_tercero_api'] : exit('No se ha configurado el parafiscal CAJA DE COMPENSACION');
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT
+                `nom_cdp_empleados`.`rubro`
+                , `nom_cdp_empleados`.`valor`
+                , `pto_cargue`.`cod_pptal`
+            FROM
+                `nom_cdp_empleados`
+                INNER JOIN `pto_cargue` 
+                    ON (`nom_cdp_empleados`.`rubro` = `pto_cargue`.`id_cargue`)
+            WHERE (`nom_cdp_empleados`.`id_nomina` = $id_nomina AND `nom_cdp_empleados`.`tipo` = 'PL')";
+    $rs = $cmd->query($sql);
+    $valxrubro = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+
+if (empty($valxrubro)) {
+    echo 'No se ha generado una solicitud de CDP para esta nómina';
+    exit();
+} else {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $valida = false;
+    $tabla = '<table class="table table-bordered table-striped table-hover table-sm" style="font-size: 12px; width: 100%">
+                <thead>
+                    <tr>
+                        <th>Rubro</th>
+                        <th>Valor</th>
+                        <th>Saldo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>';
+    foreach ($valxrubro as $vr) {
+        $rubro = $vr['rubro'];
+        $valor = $vr['valor'];
+        $cod_rubro = $vr['cod_pptal'];
+        $respuesta = SaldoRubro($cmd, $rubro, $fec_doc, 0);
+        $saldo = $respuesta['valor_aprobado'] - $respuesta['debito_cdp'] + $respuesta['credito_cdp'] + $respuesta['debito_mod'] - $respuesta['credito_mod'];
+        $estado = $saldo >= $valor ? '<span class="badge badge-success">Disponible</span>' : '<span class="badge badge-danger">Sin Saldo</span>';
+        if ($saldo < $valor) {
+            $valida = true;
+            $tabla .= '<tr>
+                        <td>' . $cod_rubro . '</td>
+                        <td class="text-right">$ ' . number_format($valor, 2, ',', '.') . '</td>
+                        <td class="text-right">$ ' . number_format($saldo, 2, ',', '.') . '</td>
+                        <td>' . $estado . '</td>
+                    </tr>';
+        }
+    }
+    $tabla .= '</tbody></table>';
+    if ($valida) {
+        echo $tabla;
+        exit();
+    }
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -105,6 +184,7 @@ foreach ($patronales as $p) {
     $descuentos['afp'][$id_afp] = $p['aporte_pension_emp'] + $valafp + $p['aporte_solidaridad_pensional'];
 }
 $valore = [];
+
 foreach ($patronales as $p) {
     if ($p['tipo_cargo'] == 1) {
         $tipo = 'administrativo';
@@ -127,8 +207,8 @@ foreach ($patronales as $p) {
     $valores[$tipo]['arl'][$id_arl] = $p['aporte_rieslab'] + $valarl;
     $valores[$tipo]['afp'][$id_afp] = $p['aporte_pension_empresa'] + $valafp;
 }
-$administrativo = $valores['administrativo'];
-$operativo = $valores['operativo'];
+$administrativo = isset($valores['administrativo']) ? $valores['administrativo'] : [];
+$operativo = isset($valores['operativo']) ? $valores['operativo'] : [];
 $idsTercer = [];
 foreach ($patronales as $p) {
     $id_eps = $p['id_eps'];
@@ -236,7 +316,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_pto` FROM `pto_presupuestos` WHERE `id_tipo` = 2";
+    $sql = "SELECT `id_pto` FROM `pto_presupuestos` WHERE `id_tipo` = 2 AND `id_vigencia` = $id_vigencia";
     $rs = $cmd->query($sql);
     $pto = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -262,6 +342,20 @@ if ($nomina['tipo'] == 'N') {
     $cual = 'MENSUAL';
 } else if ($nomina['tipo'] == 'PS') {
     $cual = 'DE PRESTACIONES SOCIALES';
+} else if ($nomina['tipo'] == 'VC') {
+    $cual = 'DE VACACIONES';
+} else if ($nomina['tipo'] == 'PV') {
+    $cual = 'DE PRIMA DE SERVICIOS';
+} else if ($nomina['tipo'] == 'RA') {
+    $cual = 'DE RETROACTIVO';
+} else if ($nomina['tipo'] == 'CE') {
+    $cual = 'DE CESANTIAS';
+} else if ($nomina['tipo'] == 'IC') {
+    $cual = 'DE INTERESES DE CESANTIAS';
+} else if ($nomina['tipo'] == 'VS') {
+    $cual = 'DE VACACIONES';
+} else {
+    $cual = 'OTRAS';
 }
 $nom_mes = isset($meses[$nomina['mes']]) ? 'MES DE ' . mb_strtoupper($meses[$nomina['mes']]) : '';
 $id_pto = $pto['id_pto'];
@@ -295,7 +389,7 @@ try {
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_pto, PDO::PARAM_INT);
     $sql->bindParam(2, $id_manu, PDO::PARAM_INT);
-    $sql->bindParam(3, $fecha, PDO::PARAM_STR);
+    $sql->bindParam(3, $fec_doc, PDO::PARAM_STR);
     $sql->bindParam(4, $objeto, PDO::PARAM_STR);
     $sql->bindParam(5, $iduser, PDO::PARAM_INT);
     $sql->bindParam(6, $fecha2);
@@ -313,7 +407,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `no_doc` = " . $_SESSION['nit_emp'];
+    $sql = "SELECT `id_tercero_api` FROM `tb_terceros` WHERE `nit_tercero` = " . $_SESSION['nit_emp'];
     $rs = $cmd->query($sql);
     $tercero = $rs->fetch();
     $id_ter_api = !empty($tercero) ? $tercero['id_tercero_api'] : 0;
@@ -345,7 +439,7 @@ try {
     $sql->bindParam(1, $id_pto, PDO::PARAM_INT);
     $sql->bindParam(2, $id_cdp, PDO::PARAM_INT);
     $sql->bindParam(3, $id_manu, PDO::PARAM_INT);
-    $sql->bindParam(4, $fecha, PDO::PARAM_STR);
+    $sql->bindParam(4, $fec_doc, PDO::PARAM_STR);
     $sql->bindParam(5, $objeto, PDO::PARAM_STR);
     $sql->bindParam(6, $iduser, PDO::PARAM_INT);
     $sql->bindParam(7, $fecha2);
@@ -394,7 +488,7 @@ foreach ($rubros as $rb) {
     $valor = 0;
     switch ($tipo) {
         case 11:
-            $valor = $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
+            $valor = isset($administrativo['comfam']) && $administrativo['comfam'] > 0 ? $administrativo['comfam'] : 0;
             $rubro = $rb['r_admin'];
             $id_tercero = $id_api_comfam;
             if ($valor > 0) {
@@ -410,7 +504,7 @@ foreach ($rubros as $rb) {
                 }
             }
             $rubro = $rb['r_operativo'];
-            $valor = $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
+            $valor = isset($operativo['comfam']) && $operativo['comfam'] > 0 ? $operativo['comfam'] : 0;
             if ($valor > 0) {
                 $query->execute();
                 $id_detalle_cdp = $cmd->lastInsertId();
@@ -551,7 +645,7 @@ foreach ($rubros as $rb) {
             }
             break;
         case 15:
-            $valor = $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
+            $valor = isset($administrativo['icbf']) && $administrativo['icbf'] > 0 ? $administrativo['icbf'] : 0;
             $rubro = $rb['r_admin'];
             $id_tercero = $id_api_icbf;
             if ($valor > 0) {
@@ -567,7 +661,7 @@ foreach ($rubros as $rb) {
                 }
             }
             $rubro = $rb['r_operativo'];
-            $valor = $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
+            $valor = isset($operativo['icbf']) && $operativo['icbf'] > 0 ? $operativo['icbf'] : 0;
             if ($valor > 0) {
                 $query->execute();
                 $id_detalle_cdp = $cmd->lastInsertId();
@@ -582,7 +676,7 @@ foreach ($rubros as $rb) {
             }
             break;
         case 16:
-            $valor = $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
+            $valor = isset($administrativo['sena']) && $administrativo['sena'] > 0 ? $administrativo['sena'] : 0;
             $rubro = $rb['r_admin'];
             $id_tercero = $id_api_sena;
             if ($valor > 0) {
@@ -598,7 +692,7 @@ foreach ($rubros as $rb) {
                 }
             }
             $rubro = $rb['r_operativo'];
-            $valor = $operativo['sena'] > 0 ? $operativo['sena'] : 0;
+            $valor = isset($operativo['sena']) && $operativo['sena'] > 0 ? $operativo['sena'] : 0;
             if ($valor > 0) {
                 $query->execute();
                 $id_detalle_cdp = $cmd->lastInsertId();

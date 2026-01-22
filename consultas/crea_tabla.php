@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -11,12 +11,11 @@ $parametros = $_POST['p'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `id_consulta`,`nombre`, `parametros`, `consulta`, `fec_reg`
-            FROM
-                `seg_consultas_sql`
+    $query = "SELECT
+                `id_consulta`,`nom_consulta`,`des_consulta`,`consulta`,`parametros`,`tipo`,`id_opcion`
+            FROM `tb_consultas_sql`
             WHERE `id_consulta` = $id_consulta";
-    $rs = $cmd->query($sql);
+    $rs = $cmd->query($query);
     $consulta = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
@@ -25,9 +24,10 @@ try {
 $sql = $consulta['consulta'];
 $x = 1;
 foreach ($parametros as $p) {
-    $sql = str_replace('p' . $x, $p, $sql);
+    $sql = str_replace('[P' . $x . ']', $p, $sql);
     $x++;
 }
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -37,6 +37,9 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+header('Content-Type: application/json');
+echo json_encode($datos);
+/*
 $head = '';
 if (!empty($datos)) {
     foreach ($datos[0] as $key => $value) {
@@ -81,8 +84,9 @@ if (!empty($datos)) {
     $('#tableConsultaExec').wrap('<div class="overflow" />');
     $("#tableConsultaExec_length").addClass("text-left");
 </script>
+
 <div class="px-0">
-    <table id="tableConsultaExec" class="table-striped table-bordered table-sm nowrap" style="width:100%">
+    <table id="tableConsultaExec" class="table-striped table-bordered table-sm nowrap text-left" style="width:100%">
         <thead>
             <tr>
                 <?php echo $head; ?>
@@ -100,4 +104,4 @@ if (!empty($datos)) {
             ?>
         </tbody>
     </table>
-</div>
+</div>*/

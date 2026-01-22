@@ -1,14 +1,16 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header('Location: <?php echo $_SESSION["urlin"] ?>/index.php');
+    header('Location: ../../index.php');
     exit;
 }
-if ($_SESSION['login'] !== 'admin') {
-    header('Location: <?php echo $_SESSION["urlin"] ?>/index.php');
-    exit;
-}
+
 include '../../conexion.php';
+include '../../permisos.php';
+if ($id_rol != 1) {
+    header('Location: ../../index.php');
+    exit;
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $sql = "SELECT

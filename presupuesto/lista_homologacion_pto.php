@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -66,7 +66,8 @@ try {
                     , `pto_sector`.`sector` AS `nombre_sect`
                     , `pto_homologa_gastos`.`id_csia`
                     , `pto_clase_sia`.`codigo` AS `codigo_csia`
-                    , `pto_clase_sia`.`clase_sia` AS `nombre_csia`';
+                    , `pto_clase_sia`.`clase_sia` AS `nombre_csia`
+                    , `pto_homologa_gastos`.`id_mh`';
         $condicion = 'INNER JOIN `pto_vigencias` 
                         ON (`pto_homologa_gastos`.`id_vigencia` = `pto_vigencias`.`id_vigencia`)
                     INNER JOIN `pto_seccion` 
@@ -168,7 +169,7 @@ $gasto = empty($homologacion) ? 0 : 1;;
                                         echo  '<input type="hidden" id="peReg" value="0">';
                                     }
                                     ?>
-                                    <table id="tableHomologaPto" class="table table-striped table-bordered table-sm nowrap shadow" style="width:100%">
+                                    <table id="tableHomologaPto" class="table table-striped table-bordered table-sm nowrap shadow" style="width:100%;font-size:12px;">
                                         <thead style="position: sticky !important; top: 0 !important; z-index: 999 !important;">
                                             <tr class="text-center">
                                                 <?php
@@ -214,6 +215,7 @@ $gasto = empty($homologacion) ? 0 : 1;;
                                                     <th>SIA</th>
                                                     <th>Clase<br>SIA</th>
                                                     <th>Situación<br>Fondos</th>
+                                                    <th title="Mantenimiento hospitalario">MH</th>
 
                                                 <?php
                                                 }
@@ -234,48 +236,48 @@ $gasto = empty($homologacion) ? 0 : 1;;
                                                         $key = array_search($rb['id_cargue'], array_column($homologacion, 'id_cargue'));
                                                         echo "<td class='text-center'>
                                                             <div class='center-block'>
-                                                                <input type='checkbox' class='dupLine' value='" . $rb['id_cargue'] . "' title='Copiar datos de otra linea'>
+                                                                <input type='checkbox' name='pto1[]' class='dupLine' value='" . $rb['id_cargue'] . "' title='Copiar datos de otra linea'>
                                                                 <input type='hidden' value='" . ($key !== false ? $homologacion[$key]['id_homologacion'] : 0) . "' name='idHomol[" . $rb['id_cargue'] . "]'>
                                                             </div>
                                                         </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='1' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='uno[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_cgr'] . ' -> ' . $homologacion[$key]['nombre_cgr'] : '') . "'>
-                                                                <input type='hidden' class='validaPto' name='codCgr[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_cgr'] : 0) . "'>
+                                                                <input tipo='1' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='uno[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_cgr'] . ' -> ' . $homologacion[$key]['nombre_cgr'] : '') . "'>
+                                                                <input type='hidden' class='validaPto srow' name='codCgr[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_cgr'] : 0) . "'>
                                                             </td>";
                                                         $val_vig = $key !== false ? $homologacion[$key]['id_vigencia'] : 0;
                                                         echo "<td class='p-0'>
-                                                            <select class='form-control form-control-sm py-0 px-1 validaPto homologaPTO'  name='vigencia[" . $rb['id_cargue'] . "]'>
+                                                            <select class='form-control form-control-sm border-0 py-0 px-1 validaPto homologaPTO'  name='vigencia[" . $rb['id_cargue'] . "]'>
                                                                 <option value='0' " . ($val_vig == 0 ? 'selected' : '') . ">--Seleccionar--</option>
                                                                 <option value='1' " . ($val_vig == 1 ? 'selected' : '') . ">ACTUAL</option>
                                                                 <option value='2' " . ($val_vig == 2 ? 'selected' : '') . ">ANTERIOR</option>";
                                                         echo "</select>
                                                         </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='5' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='cinco[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_cpc'] . ' -> ' . $homologacion[$key]['nombre_cpc'] : '') . "'>
+                                                                <input tipo='5' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='cinco[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_cpc'] . ' -> ' . $homologacion[$key]['nombre_cpc'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='cpc[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_cpc'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='6' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='seis[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_fte'] . ' -> ' . $homologacion[$key]['nombre_fte'] : '') . "'>
+                                                                <input tipo='6' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='seis[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_fte'] . ' -> ' . $homologacion[$key]['nombre_fte'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='fuente[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_fuente'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='7' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='siete[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_ter'] . ' -> ' . $homologacion[$key]['nombre_ter'] : '') . "'>
+                                                                <input tipo='7' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='siete[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_ter'] . ' -> ' . $homologacion[$key]['nombre_ter'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='tercero[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_tercero'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='8' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='ocho[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_pol'] . ' -> ' . $homologacion[$key]['nombre_pol'] : '') . "'>
+                                                                <input tipo='8' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='ocho[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_pol'] . ' -> ' . $homologacion[$key]['nombre_pol'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='polPub[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_politica'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                            <input tipo='9' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='nueve[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_siho'] . ' -> ' . $homologacion[$key]['nombre_siho'] : '') . "'>
+                                                            <input tipo='9' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='nueve[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_siho'] . ' -> ' . $homologacion[$key]['nombre_siho'] : '') . "'>
                                                             <input type='hidden' class='validaPto' name='siho[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_siho'] : 0) . "'>
                                                         </td>";
                                                         echo "<td class='p-0'>
-                                                            <input tipo='10' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='diez[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_sia'] . ' -> ' . $homologacion[$key]['nombre_sia'] : '') . "'>
+                                                            <input tipo='10' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='diez[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_sia'] . ' -> ' . $homologacion[$key]['nombre_sia'] : '') . "'>
                                                             <input type='hidden' class='validaPto' name='sia[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_sia'] : 0) . "'>
                                                         </td>";
                                                         echo "<td class='p-0'>
-                                                                <select class='form-control form-control-sm py-0 px-1 homologaPTO validaPto'  name='situacion[" . $rb['id_cargue'] . "]'>
+                                                                <select class='form-control form-control-sm border-0 py-0 px-1 homologaPTO validaPto'  name='situacion[" . $rb['id_cargue'] . "]'>
                                                                     <option value='0'>--Seleccionar--</option>";
 
                                                         foreach ($situacion as $s) {
@@ -291,59 +293,60 @@ $gasto = empty($homologacion) ? 0 : 1;;
                                                     $centrar = $tp_cta == 'D' ? '' : '';
                                                     echo "<td colspan='" . $colspan . "' class='" . $centrar . "'>" . $rb['nom_rubro'] . "</td>";
                                                     if ($tp_cta == 'D') {
+                                                        $key = false;
                                                         $key = array_search($rb['id_cargue'], array_column($homologacion, 'id_cargue'));
                                                         echo "<td class='text-center'>
                                                             <div class='center-block'>
-                                                                <input type='checkbox' class='dupLine' value='" . $rb['id_cargue'] . "' title='Copiar datos de otra linea'>
+                                                                <input type='checkbox' name='pto2[]' class='dupLine' value='" . $rb['id_cargue'] . "' title='Copiar datos de otra linea'>
                                                                 <input type='hidden' value='" . ($key !== false ? $homologacion[$key]['id_homologacion'] : 0) . "' name='idHomol[" . $rb['id_cargue'] . "]'>
                                                             </div>
                                                         </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='1' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='uno[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_cgr'] . ' -> ' . $homologacion[$key]['nombre_cgr'] : '') . "'>
-                                                                <input type='hidden' class='validaPto' name='codCgr[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_cgr'] : 0) . "'>
+                                                                <input tipo='1' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='uno[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_cgr'] . ' -> ' . $homologacion[$key]['nombre_cgr'] : '') . "'>
+                                                                <input type='hidden' class='validaPto srow' name='codCgr[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_cgr'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='2' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='dos[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_vig'] . ' -> ' . $homologacion[$key]['nombre_vig'] : '') . "'>
+                                                                <input tipo='2' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='dos[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_vig'] . ' -> ' . $homologacion[$key]['nombre_vig'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='vigencia[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_vigencia'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='3' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='tres[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_secc'] . ' -> ' . $homologacion[$key]['nombre_secc'] : '') . "'>
+                                                                <input tipo='3' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='tres[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_secc'] . ' -> ' . $homologacion[$key]['nombre_secc'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='seccion[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_seccion'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='4' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='cuatro[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_sect'] . ' -> ' . $homologacion[$key]['nombre_sect'] : '') . "'>
+                                                                <input tipo='4' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='cuatro[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_sect'] . ' -> ' . $homologacion[$key]['nombre_sect'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='sector[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['id_sector'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='5' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='cinco[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_cpc'] . ' -> ' . $homologacion[$key]['nombre_cpc'] : '') . "'>
+                                                                <input tipo='5' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='cinco[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_cpc'] . ' -> ' . $homologacion[$key]['nombre_cpc'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='cpc[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_cpc'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='6' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='seis[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_fte'] . ' -> ' . $homologacion[$key]['nombre_fte'] : '') . "'>
+                                                                <input tipo='6' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='seis[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_fte'] . ' -> ' . $homologacion[$key]['nombre_fte'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='fuente[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_fuente'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='7' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='siete[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_ter'] . ' -> ' . $homologacion[$key]['nombre_ter'] : '') . "'>
+                                                                <input tipo='7' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='siete[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_ter'] . ' -> ' . $homologacion[$key]['nombre_ter'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='tercero[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_tercero'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                                <input tipo='8' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='ocho[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_pol'] . ' -> ' . $homologacion[$key]['nombre_pol'] : '') . "'>
+                                                                <input tipo='8' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='ocho[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_pol'] . ' -> ' . $homologacion[$key]['nombre_pol'] : '') . "'>
                                                                 <input type='hidden' class='validaPto' name='polPub[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_politica'] : 0) . "'>
                                                             </td>";
                                                         echo "<td class='p-0'>
-                                                            <input tipo='9' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='nueve[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_siho'] . ' -> ' . $homologacion[$key]['nombre_siho'] : '') . "'>
+                                                            <input tipo='9' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='nueve[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_siho'] . ' -> ' . $homologacion[$key]['nombre_siho'] : '') . "'>
                                                             <input type='hidden' class='validaPto' name='siho[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_siho'] : 0) . "'>
                                                         </td>";
                                                         echo "<td class='p-0'>
-                                                            <input tipo='10' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='diez[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_sia'] . ' -> ' . $homologacion[$key]['nombre_sia'] : '') . "'>
+                                                            <input tipo='10' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='diez[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_sia'] . ' -> ' . $homologacion[$key]['nombre_sia'] : '') . "'>
                                                             <input type='hidden' class='validaPto' name='sia[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_sia'] : 0) . "'>
                                                         </td>";
                                                         echo "<td class='p-0'>
-                                                            <input tipo='11' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='once[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_csia'] . ' -> ' . $homologacion[$key]['nombre_csia'] : '') . "'>
+                                                            <input tipo='11' type='text' class='form-control form-control-sm border-0 py-0 px-1 homologaPTO' name='once[" . $rb['id_cargue'] . "]' value='" . ($key !== false ? $homologacion[$key]['codigo_csia'] . ' -> ' . $homologacion[$key]['nombre_csia'] : '') . "'>
                                                             <input type='hidden' class='validaPto' name='csia[" . $rb['id_cargue'] . "]'  value='" . ($key !== false ? $homologacion[$key]['id_csia'] : 0) . "'>
                                                         </td>";
                                                         echo "<td class='p-0'>
-                                                                <select class='form-control form-control-sm py-0 px-1 homologaPTO validaPto'  name='situacion[" . $rb['id_cargue'] . "]'>
+                                                                <select class='form-control form-control-sm border-0 py-0 px-1 homologaPTO validaPto'  name='situacion[" . $rb['id_cargue'] . "]'>
                                                                     <option value='0'>--Seleccionar--</option>";
 
                                                         foreach ($situacion as $s) {
@@ -351,8 +354,27 @@ $gasto = empty($homologacion) ? 0 : 1;;
                                                             $slc = $val_sit == $s['id_situacion'] ? 'selected' : '';
                                                             echo '<option value="' . $s['id_situacion'] . '" ' . $slc . '>' . $s['concepto'] . '</option>';
                                                         }
-                                                        echo        "</select>
-                                                            </td>";
+                                                        $cero = 'checked';
+                                                        $uno = $key !== false && ($homologacion[$key]['id_mh'] == '1') ? 'checked' : '';
+                                                        if ($uno == 'checked') {
+                                                            $cero = '';
+                                                        }
+                                                        echo        '</select>
+                                                            </td>
+                                                            <td class="p-0">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="form-control form-control-sm d-inline-flex align-items-center border-0">
+                                                                        <div class="custom-control custom-radio custom-control-inline m-0 mr-1">
+                                                                            <input type="radio" id="si_' . $rb['id_cargue'] . '" name="mmto_h[' . $rb['id_cargue'] . ']" class="custom-control-input" ' . $uno . ' value="1">
+                                                                            <label class="custom-control-label" for="si_' . $rb['id_cargue'] . '">Sí</label>
+                                                                        </div>
+                                                                        <div class="custom-control custom-radio custom-control-inline m-0">
+                                                                            <input type="radio" id="no_' . $rb['id_cargue'] . '" name="mmto_h[' . $rb['id_cargue'] . ']" class="custom-control-input" ' . $cero . ' value="0">
+                                                                            <label class="custom-control-label" for="no_' . $rb['id_cargue'] . '">No</label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>';
                                                     } else {
                                                         echo "<td colspan='13'></td>";
                                                     }

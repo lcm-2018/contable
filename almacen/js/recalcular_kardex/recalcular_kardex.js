@@ -27,6 +27,7 @@
                     data.id_ing = $('#txt_id_ing_filtro').val();
                     data.id_egr = $('#txt_id_egr_filtro').val();
                     data.id_tra = $('#txt_id_tra_filtro').val();
+                    data.id_egr_r = $('#txt_id_egr_r_filtro').val();
                     data.opcion = $("input[name='rdo_opcion']:checked").val();
                     data.selfil = $('#chk_sel_filtro').is(':checked') ? 1 : 0;
                 }
@@ -47,7 +48,7 @@
             ],
             columnDefs: [
                 { orderable: false, targets: [0] },
-                { class: 'text-wrap', targets: [3] }
+                { class: 'text-wrap', targets: [3, 4, 5] }
             ],
             order: [
                 [0, "desc"]
@@ -73,6 +74,7 @@
         $('#txt_id_ing_filtro').prop('disabled', true);
         $('#txt_id_egr_filtro').prop('disabled', true);
         $('#txt_id_tra_filtro').prop('disabled', true);
+        $('#txt_id_egr_r_filtro').prop('disabled', true);
         if ($("input[name='rdo_opcion']:checked").val() == 'O') {
             $('#txt_codigo_filtro').prop('disabled', false);
             $('#txt_nombre_filtro').prop('disabled', false);
@@ -87,6 +89,9 @@
         } else if ($("input[name='rdo_opcion']:checked").val() == 'T') {
             $('#txt_id_tra_filtro').prop('disabled', false);
             $('#txt_id_tra_filtro').focus();
+        } else if ($("input[name='rdo_opcion']:checked").val() == 'ER') {
+            $('#txt_id_egr_r_filtro').prop('disabled', false);
+            $('#txt_id_egr_r_filtro').focus();
         }
     });
 
@@ -100,12 +105,15 @@
                 $('.is-invalid').removeClass('is-invalid');
                 error = 0;
             }
+            error += verifica_vacio($('#txt_fecha_filtro'));
         } else if ($("input[name='rdo_opcion']:checked").val() == 'I') {
             error += verifica_vacio($('#txt_id_ing_filtro'));
         } else if ($("input[name='rdo_opcion']:checked").val() == 'E') {
             error += verifica_vacio($('#txt_id_egr_filtro'));
         } else if ($("input[name='rdo_opcion']:checked").val() == 'T') {
             error += verifica_vacio($('#txt_id_tra_filtro'));
+        } else if ($("input[name='rdo_opcion']:checked").val() == 'ER') {
+            error += verifica_vacio($('#txt_id_egr_r_filtro'));
         }
 
         if (error >= 1) {
@@ -135,21 +143,24 @@
         let filas = $('#tb_lotes').DataTable().rows().count();
         if (filas == 0) {
             $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe seleccionar un registro para reclacular kardex');
-        } else {
+            $('#divMsgError').html('No hay registros para reclacular kardex');
+        } else {            
+            $('#divModalEspera').modal('show');
+
             var data = $('#frm_lotes').serialize();
             var tipo = $("input[name='rdo_opcion']:checked").val(),
                 id_ing = $("#txt_id_ing_filtro").val(),
                 id_egr = $("#txt_id_egr_filtro").val(),
                 id_tra = $("#txt_id_tra_filtro").val(),
-                fec_ini = $("#txt_fecha_filtro").val();
+                fec_ini = $("#txt_fecha_filtro").val(),
+                id_egr_r = $("#txt_id_egr_r_filtro").val();
 
             $.ajax({
                 type: 'POST',
                 url: 'procesar.php',
                 dataType: 'json',
-                data: data + '&tipo=' + tipo + '&id_ing=' + id_ing + '&id_egr=' + id_egr + '&id_tra=' + id_tra + '&fec_ini=' + fec_ini
-            }).done(function(r) {
+                data: data + '&tipo=' + tipo + '&id_ing=' + id_ing + '&id_egr=' + id_egr + '&id_tra=' + id_tra + '&id_egr_r=' + id_egr_r + '&fec_ini=' + fec_ini
+            }).done(function(r) {                
                 if (r.mensaje == 'ok') {
                     $('#chk_sel_filtro').prop('checked', false)
                     reloadtable('tb_lotes');
@@ -158,8 +169,10 @@
                 } else {
                     $('#divModalError').modal('show');
                     $('#divMsgError').html(r.mensaje);
-                }
+                }                  
+                setTimeout(function() { $('#divModalEspera').modal('hide'); }, 1000);          
             }).always(function() {}).fail(function() {
+                $('#divModalEspera').modal('hide');
                 alert('Ocurrió un error');
             });
         }

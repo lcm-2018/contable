@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -21,12 +21,15 @@ $where = "";
 if (isset($_POST['search']['value']) && $_POST['search']['value']){
     $where .= " AND far_medicamento_lote.lote LIKE '%" . $_POST['search']['value'] . "%'";
 }
+if (isset($_POST['con_existencia']) && $_POST['con_existencia']){
+    $where .= " AND far_medicamento_lote.existencia>0";
+}
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-    $bodega = bodega_principal($cmd);
+    $bodega = bodega_principal_general($cmd);
     $bodega_pri = $bodega['id_bodega'];
 
     //Consulta el total de registros de la tabla
@@ -44,13 +47,15 @@ try {
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_medicamento_lote.id_lote,far_medicamento_lote.lote,
                 IF(far_medicamento_lote.id_bodega=$bodega_pri,'SI','') as lote_pri,
-                far_medicamento_lote.fec_vencimiento,far_presentacion_comercial.nom_presentacion,
+                far_medicamento_lote.fec_vencimiento,far_medicamento_lote.reg_invima,
+                far_presentacion_comercial.nom_presentacion,acf_marca.descripcion AS nom_marca,
                 ROUND(far_medicamento_lote.existencia/IFNULL(far_presentacion_comercial.cantidad,1),1) AS existencia_umpl,
                 far_medicamento_lote.existencia,far_medicamento_cum.cum,
                 far_bodegas.nombre AS nom_bodega,                
                 IF(far_medicamento_lote.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_medicamento_lote
             INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_medicamento_lote.id_presentacion)
+            INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
             INNER JOIN far_medicamento_cum ON (far_medicamento_cum.id_cum=far_medicamento_lote.id_cum)
             INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_medicamento_lote.id_bodega)
             WHERE far_medicamento_lote.id_med=" . $_POST['id_articulo'] . $where . " ORDER BY $col $dir $limit";
@@ -80,6 +85,8 @@ if (!empty($objs)) {
             "lote" => $obj['lote'],
             "lote_pri" => $obj['lote_pri'],
             "fec_vencimiento" => $obj['fec_vencimiento'],
+            "reg_invima" => $obj['reg_invima'],
+            "nom_marca" => $obj['nom_marca'],
             "nom_presentacion" => $obj['nom_presentacion'],
             "existencia_umpl" => $obj['existencia_umpl'],              
             "existencia" => $obj['existencia'],

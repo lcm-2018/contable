@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -32,9 +32,13 @@ try {
     } else {
         $sql = "DELETE FROM `pto_cargue`  WHERE `id_cargue` = ?";
         $sql = $cmd->prepare($sql);
-        $sql->bindParam(1, $idpto, PDO::PARAM_INT);
+        $sql->bindParam(1, $id_cargue, PDO::PARAM_INT);
         $sql->execute();
         if ($sql->rowCount() > 0) {
+            include '../../../financiero/reg_logs.php';
+            $ruta = '../../../log';
+            $consulta =  "DELETE FROM `pto_cargue`  WHERE `id_cargue` = $id_cargue";
+            RegistraLogs($ruta, $consulta);
             echo 'ok';
         } else {
             echo $sql->errorInfo()[2];

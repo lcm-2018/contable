@@ -4,23 +4,27 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header("Location: ../../../../index.php");
     exit();
 }
+
 $id_facno = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida');
 $vigencia = $_SESSION['vigencia'];
+$id_empresa = 1;
+$response['status'] = 'error';
 include '../../../../conexion.php';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_valxvig`, `id_concepto`, `valor`,`concepto`
+    $sql = "SELECT 
+                `id_valxvig`, `id_concepto`, `valor`,`concepto`
             FROM
                 `nom_valxvigencia`
             INNER JOIN `tb_vigencias` 
                 ON (`nom_valxvigencia`.`id_vigencia` = `tb_vigencias`.`id_vigencia`)
             INNER JOIN `nom_conceptosxvigencia` 
                 ON (`nom_valxvigencia`.`id_concepto` = `nom_conceptosxvigencia`.`id_concp`)
-            WHERE `anio` = '$vigencia' AND `id_concepto` = '4'";
+            WHERE `id_concepto` = '4' LIMIT 1";
     $rs = $cmd->query($sql);
     $concec = $rs->fetch();
     $iNonce = intval($concec['valor']);
@@ -35,33 +39,31 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `tb_datos_ips`.`id_empresa`
-                , `tb_datos_ips`.`nit`
-                , `tb_datos_ips`.`correo`
-                , `tb_datos_ips`.`telefono`
-                , `tb_datos_ips`.`nombre`
-                , `tb_paises`.`nom_pais`
-                , `tb_paises`.`codigo_pais`
+                `tb_datos_ips`.`id_ips`
+                , `tb_datos_ips`.`nit_ips` AS `nit`
+                , `tb_datos_ips`.`email_ips` AS `correo`
+                , `tb_datos_ips`.`telefono_ips` AS `telefono`
+                , `tb_datos_ips`.`razon_social_fe` AS `nombre`
+                , 'COLOMBIA' AS `nom_pais`
+                , 'CO' AS `codigo_pais`
                 , `tb_departamentos`.`codigo_departamento`
                 , `tb_departamentos`.`nom_departamento`
                 , `tb_municipios`.`codigo_municipio`
                 , `tb_municipios`.`nom_municipio`
                 , `tb_municipios`.`cod_postal`
-                , `tb_datos_ips`.`direccion`
-                , `tb_datos_ips`.`endpoint`
-                , `tb_datos_ips`.`tipo_organizacion`
-                , `seg_responsabilidad_fiscal`.`codigo` AS `resp_fiscal`
-                , `tb_datos_ips`.`reg_fiscal`
+                , `tb_datos_ips`.`direccion_ips` AS `direccion`
+                , `tb_datos_ips`.`url_taxxa` AS `endpoint`
+                , '2' AS `tipo_organizacion`
+                , 'R-99-PN' AS `resp_fiscal`
+                , '2' AS `reg_fiscal`
+                , `tb_datos_ips`.`sEmail` AS `user_prov`
+                , `tb_datos_ips`.`sPass` AS `pass_prov`
             FROM
                 `tb_datos_ips`
-                INNER JOIN `tb_paises` 
-                    ON (`tb_datos_ips`.`id_pais` = `tb_paises`.`id_pais`)
-                INNER JOIN `tb_departamentos` 
-                    ON (`tb_datos_ips`.`id_dpto` = `tb_departamentos`.`id_departamento`)
                 INNER JOIN `tb_municipios` 
-                    ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departamento`) AND (`tb_datos_ips`.`id_ciudad` = `tb_municipios`.`id_municipio`)
-                INNER JOIN `seg_responsabilidad_fiscal` 
-                    ON (`tb_datos_ips`.`resp_fiscal` = `seg_responsabilidad_fiscal`.`id`) LIMIT 1";
+                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)
+                INNER JOIN `tb_departamentos`
+                    ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departamento`)";
     $rs = $cmd->query($sql);
     $empresa = $rs->fetch();
     $cmd = null;
@@ -72,60 +74,42 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros_noblig`.`id_tercero`
-                , `tb_tipos_documento`.`codigo_ne`
-                , `tb_tipos_documento`.`descripcion`
-                , `seg_terceros_noblig`.`no_doc`
-                , `seg_terceros_noblig`.`nombre`
-                , `seg_terceros_noblig`.`procedencia`
-                , `seg_terceros_noblig`.`tipo_org`
-                , `seg_terceros_noblig`.`reg_fiscal`
-                , `seg_responsabilidad_fiscal`.`codigo` as `resp_fiscal`
-                , `seg_responsabilidad_fiscal`.`descripcion`
-                , `seg_terceros_noblig`.`correo`
-                , `seg_terceros_noblig`.`telefono`
-                , `tb_paises`.`codigo_pais`
-                , `tb_paises`.`nom_pais`
-                , `tb_departamentos`.`codigo_departamento`
-                , `tb_departamentos`.`nom_departamento`
+                `ctt_fact_noobligado`.`id_facturano` AS `id_ctb_doc`
+                , `ctt_fact_noobligado`.`id_tercero_no` AS `id_tercero`
+                , `ctt_fact_noobligado`.`fec_compra` AS `fecha_fact`
+                , `ctt_fact_noobligado`.`fec_vence` AS`fecha_ven`
+                , `ctt_fact_noobligado`.`observaciones` AS `detalle`
+                , `ctt_fact_noobligado`.`observaciones` AS `nota`
+                , `ctt_fact_noobligado`.`met_pago` AS `met_pago`
+                , `ctt_fact_noobligado`.`forma_pago` AS `forma_pago`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`email`
+                , `tb_terceros`.`tel_tercero`
                 , `tb_municipios`.`codigo_municipio`
                 , `tb_municipios`.`nom_municipio`
                 , `tb_municipios`.`cod_postal`
-                , `seg_terceros_noblig`.`direccion`
-                , `seg_fact_noobligado`.`fec_compra`
-                , `seg_fact_noobligado`.`fec_vence`
-                , `seg_fact_noobligado`.`met_pago`
-                , `nom_metodo_pago`.`codigo` as `form_pago`
-                , `nom_metodo_pago`.`metodo`
-                , `seg_fact_noobligado`.`val_retefuente`
-                , `seg_fact_noobligado`.`porc_retefuente`
-                , `seg_fact_noobligado`.`val_reteiva`
-                , `seg_fact_noobligado`.`porc_reteiva`
-                , `seg_fact_noobligado`.`val_iva`
-                , `seg_fact_noobligado`.`porc_iva`
-                , `seg_fact_noobligado`.`val_dcto`
-                , `seg_fact_noobligado`.`porc_dcto`
-                , `seg_fact_noobligado`.`observaciones`
-                , `seg_fact_noobligado`.`estado`
+                , `tb_departamentos`.`codigo_departamento`
+                , `tb_departamentos`.`nom_departamento`
+                , `tb_terceros`.`dir_tercero`
+                , `tb_terceros`.`procedencia`
+                , `tb_terceros`.`tipo_org`
+                , `tb_terceros`.`reg_fiscal`
+                , `tb_terceros`.`resp_fiscal`
+                , `tb_tipos_documento`.`codigo_ne` AS `codigo_ne`
             FROM
-                `seg_fact_noobligado`
-                INNER JOIN `seg_terceros_noblig` 
-                    ON (`seg_fact_noobligado`.`id_tercero_no` = `seg_terceros_noblig`.`id_tercero`)
-                INNER JOIN `tb_tipos_documento` 
-                    ON (`seg_terceros_noblig`.`id_tdoc` = `tb_tipos_documento`.`id_tipodoc`)
-                INNER JOIN `seg_responsabilidad_fiscal` 
-                    ON (`seg_terceros_noblig`.`resp_fiscal` = `seg_responsabilidad_fiscal`.`id`)
-                INNER JOIN `tb_paises` 
-                    ON (`seg_terceros_noblig`.`id_pais` = `tb_paises`.`id_pais`)
-                INNER JOIN `tb_departamentos` 
-                    ON (`seg_terceros_noblig`.`id_dpto` = `tb_departamentos`.`id_departamento`)
-                INNER JOIN `tb_municipios` 
-                    ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departamento`) AND (`seg_terceros_noblig`.`id_municipio` = `tb_municipios`.`id_municipio`)
-                INNER JOIN `nom_metodo_pago` 
-                    ON (`seg_fact_noobligado`.`forma_pago` = `nom_metodo_pago`.`id_metodo_pago`)
-            WHERE `seg_fact_noobligado`.`id_facturano` = '$id_facno'";
+                `ctt_fact_noobligado`
+                INNER JOIN `tb_terceros`
+                    ON (`ctt_fact_noobligado`.`id_tercero_no` = `tb_terceros`.`id_tercero_api`)
+                INNER JOIN `tb_municipios`
+                    ON (`tb_terceros`.`id_municipio` = `tb_municipios`.`id_municipio`)
+                INNER JOIN `tb_departamentos`
+                    ON (`tb_municipios`.`id_departamento` = `tb_departamentos`.`id_departamento`)
+                LEFT JOIN `tb_tipos_documento`
+                    ON (`tb_terceros`.`tipo_doc` = `tb_tipos_documento`.`id_tipodoc`)
+            WHERE (`ctt_fact_noobligado`.`id_facturano` = $id_facno) LIMIT 1";
     $rs = $cmd->query($sql);
-    $factura = $rs->fetch();
+    $contab = $rs->fetch();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -134,16 +118,113 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `id_detail`, `id_fno`, `codigo`, `detalle`, `val_unitario`, `cantidad`, `p_iva`, `val_iva`, `p_dcto`, `val_dcto`
+                `codigo`, `detalle`, `val_unitario`, `cantidad`, `p_iva`, `val_iva`, `p_dcto`, `val_dcto`
             FROM
-                `seg_fact_noobligado_det`
-            WHERE `id_fno` = '$id_facno'";
+                `ctt_fact_noobligado_det`
+            WHERE (`id_fno` = $id_facno)";
     $rs = $cmd->query($sql);
-    $detalles = $rs->fetchAll();
+    $detalles = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
+$factura['codigo_ne'] = $contab['codigo_ne'];
+$factura['id_tercero'] = $contab['id_tercero'];
+$factura['no_doc'] = $contab['nit_tercero'];
+$factura['nombre'] = str_replace('-', '', trim($contab['nom_tercero']));
+$factura['procedencia'] = $contab['procedencia'];
+$factura['tipo_org'] = $contab['tipo_org'];
+$factura['reg_fiscal'] = $contab['reg_fiscal'];
+$factura['resp_fiscal'] = $contab['resp_fiscal'];
+$factura['correo'] = $contab['email'];
+$factura['telefono'] =  $contab['tel_tercero'];
+$factura['codigo_pais'] = 'CO';
+$factura['codigo_dpto'] = $contab['codigo_departamento'];
+$factura['nom_departamento'] = $contab['nom_departamento'];
+$factura['codigo_municipio'] = $contab['codigo_municipio'];
+$factura['nom_municipio'] = $contab['nom_municipio'];
+$factura['cod_postal'] = $contab['cod_postal'];
+$factura['direccion'] = $contab['dir_tercero'];
+$factura['fec_compra'] = date('Y-m-d', strtotime($contab['fecha_fact']));
+$factura['fec_vence'] = date('Y-m-d', strtotime($contab['fecha_ven']));
+$factura['met_pago'] = $contab['met_pago'];
+$factura['form_pago'] = $contab['forma_pago'];
+$factura['val_retefuente'] = 0;
+$factura['porc_retefuente'] = 0;
+$factura['val_reteiva'] = 0;
+$factura['porc_reteiva'] = 0;
+$factura['val_iva'] = 0;
+$factura['porc_iva'] = 0;
+$factura['val_dcto'] = 0;
+$factura['porc_dcto'] = 0;
+$factura['observaciones'] = $contab['nota'];
+
+$fail = '';
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `id_resol`, `id_empresa`, `no_resol`, `prefijo`, `consecutivo`, `fin_concecutivo`, `fec_inicia`, `fec_termina`, `tipo`, `entorno`
+            FROM
+                `nom_resoluciones`
+            WHERE `id_resol` = (SELECT MAX(`id_resol`) FROM `nom_resoluciones` WHERE `id_empresa` = '$id_empresa' AND `tipo` = 2)";
+    $rs = $cmd->query($sql);
+    $resolucion = $rs->fetch();
+    if ($resolucion['id_resol'] == '') {
+        $fail = 'No se ha registrado una resolución de facturación';
+        $response[] = array("value" => "Error", "msg" => json_encode($fail));
+        echo json_encode($response);
+        exit;
+    } else {
+        $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+        $fecha_actual = strtotime($date->format('Y-m-d H:i:s'));
+        $fecha_max = strtotime($resolucion['fec_termina']);
+        if ($fecha_actual > $fecha_max) {
+            $fail = "La fecha máxima de emisión de la resolución ha expirado";
+            $response[] = array("value" => "Error", "msg" => json_encode($fail));
+            echo json_encode($response);
+            exit();
+        } else {
+            $secuenciaf = intval($resolucion['consecutivo']);
+            if ($secuenciaf > $resolucion['fin_concecutivo']) {
+                $fail = "La secuencia de la resolución ha llegado al consecutivo máximo autorizado";
+                $response[] = array("value" => "Error", "msg" => json_encode($fail));
+                echo json_encode($response);
+                exit();
+            }
+        }
+    }
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $pref = $resolucion['prefijo'];
+    $new = true;
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    
+    $sql = "DELETE FROM `seg_soporte_fno` WHERE `referencia` ='$pref-0'";
+    $sql = $cmd->prepare($sql);
+    $sql->execute();
+
+    $sql = "SELECT `id_soporte`, `referencia` FROM `seg_soporte_fno` WHERE `id_factura_no` = $id_facno LIMIT 1";
+    $rs = $cmd->query($sql);
+    $referencia = $rs->fetch();
+    if (!empty($referencia)) {
+        $dato = explode('-', $referencia['referencia']);
+        $secuenciaf = intval($dato[1]);
+        $new = false;
+        $id_soporte = $referencia['id_soporte'];
+    }
+
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$tipo_documento = 'ReverseInvoice';
+$entorno = $resolucion['entorno'];
 $adocumentitems = [];
 $key = 0;
 $val_subtotal = $val_iva = $val_dcto = 0;
@@ -151,11 +232,11 @@ foreach ($detalles as $dll) {
     $subtotal = $dll['val_unitario'] * $dll['cantidad'];
     if ($dll['p_iva'] > 0 && $dll['p_dcto'] > 0) {
         $adocumentitems[$key + 1] = [
-            //"sstandarditemidentification" => '',
+            "sstandarditemidentification" => $dll['codigo'],
             //"wProductCodeType" => '',
             "scustomname" => $dll['detalle'],
-            "nunitprice" => floatval($dll['val_unitario']),
-            "nprice" => $subtotal,
+            "nusertotal" => $subtotal,
+            "nprice" => floatval($dll['val_unitario']),
             "icount" => intval($dll['cantidad']),
             'jtax' => [
                 "jiva" => [
@@ -169,19 +250,19 @@ foreach ($detalles as $dll) {
                 "1" => [
                     "nrate" => $dll['p_dcto'] * (-1),
                     "scode" => "00",
-                    "nbaseamont" => $dll['val_dcto'] * (-1),
-                    "namount" => floatval($dll['val_unitario'] * $dll['cantidad']),
+                    "namount" => $dll['val_dcto'] * (-1),
+                    "nbaseamont" => floatval($dll['val_unitario'] * $dll['cantidad']),
                     "sreason" => "Descuento parcial Doc. Soporte"
                 ]
             ]
         ];
     } else if ($dll['p_iva'] > 0 && $dll['p_dcto'] == 0) {
         $adocumentitems[$key + 1] = [
-            //"sstandarditemidentification" => '',
+            "sstandarditemidentification" => $dll['codigo'],
             //"wProductCodeType" => '',
             "scustomname" => $dll['detalle'],
-            "nunitprice" => floatval($dll['val_unitario']),
-            "nprice" => $subtotal,
+            "nusertotal" => $subtotal,
+            "nprice" => floatval($dll['val_unitario']),
             "icount" => intval($dll['cantidad']),
             'jtax' => [
                 "jiva" => [
@@ -194,28 +275,28 @@ foreach ($detalles as $dll) {
         ];
     } else if ($dll['p_iva'] == 0 && $dll['p_dcto'] > 0) {
         $adocumentitems[$key + 1] = [
-            //"sstandarditemidentification" => '',
+            "sstandarditemidentification" => $dll['codigo'],
             //"wProductCodeType" => '',
             "scustomname" => $dll['detalle'],
-            "nunitprice" => floatval($dll['val_unitario']),
-            "nprice" => $subtotal,
+            "nusertotal" => $subtotal,
+            "nprice" => floatval($dll['val_unitario']),
             "icount" => intval($dll['cantidad']),
             'aallowancecharge' => [
                 "1" => [
-                    "nrate" => floatval($dll['p_dcto']),
+                    "nrate" => floatval($dll['p_dcto']) * (-1),
                     "scode" => "00",
-                    "nbaseamont" => floatval($dll['val_dcto']),
-                    "namount" => $dll['val_unitario'] * $dll['cantidad']
+                    "namount" => floatval($dll['val_dcto']) * (-1),
+                    "nbaseamont" => $dll['val_unitario'] * $dll['cantidad']
                 ]
             ]
         ];
     } else {
         $adocumentitems[$key + 1] = [
-            //"sstandarditemidentification" => '',
+            "sstandarditemidentification" => $dll['codigo'],
             //"wProductCodeType" => '',
             "scustomname" => $dll['detalle'],
-            "nunitprice" => floatval($dll['val_unitario']),
-            "nprice" => $subtotal,
+            "nusertotal" => $subtotal,
+            "nprice" => floatval($dll['val_unitario']),
             "icount" => intval($dll['cantidad']),
         ];
     }
@@ -231,8 +312,8 @@ $solToken = [
     "jApi" => [
         "sMethod" => "classTaxxa.fjTokenGenerate",
         "jParams" => [
-            "sEmail" => "demo@taxxa.co",
-            "sPass" => "Demo2022*"
+            "sEmail" => $empresa['user_prov'],
+            "sPass" => $empresa['pass_prov'],
         ]
     ]
 ];
@@ -244,6 +325,8 @@ curl_setopt($ch, CURLOPT_URL, $url_taxxa);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $datatoken);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $restoken = curl_exec($ch);
 $rst = json_decode($restoken);
 $tokenApi = $rst->jret->stoken;
@@ -277,10 +360,10 @@ if ($factura['porc_iva'] > 0) {
 $dctog = [];
 if ($factura['porc_dcto'] > 0) {
     $dctog['1'] = [
-        "nrate" => floatval($dll['p_dcto']),
+        "nrate" => floatval($dll['p_dcto']) * (-1),
         "scode" => "01",
-        "nbaseamont" => floatval($dll['val_dcto']),
-        "namount" => $dll['val_unitario'] * $dll['cantidad']
+        "namount" => floatval($dll['val_dcto']) * (-1),
+        "nbaseamont" => $dll['val_unitario'] * $dll['cantidad']
     ];
 }
 
@@ -306,17 +389,18 @@ if (empty($jtaxes) && empty($dctog)) {
         "aallowancecharge" => $dctog,
     ];
 }
+$hoy = date('Y-m-d');
 $jDocument = [
-    'sdoctype' => 'ReverseInvoice',
-    'wdocumentsubtype' => 10,
+    'sdoctype' => $tipo_documento,
+    'wdocumentsubtype' => '9',
     //'wdocdescriptionCode' => 1,
-    'sauthorizationprefix' => 'SEDS',
-    'sdocumentsuffix' => "984134500",
-    //'rdocumenttemplate' => '',
-    'tissuedate' => $factura['fec_compra'],
+    'sauthorizationprefix' => $pref,
+    'sdocumentsuffix' => $secuenciaf,
+    'rdocumenttemplate' => 30884303,
+    'tissuedate' => $hoy . 'T' . date('H:i:s', strtotime('-5 hour', strtotime(date('H:i:s')))),
     'tduedate' => $factura['fec_vence'],
-    //'wpaymentmeans' => $factura['met_pago'],
-    //'wpaymentmethod' => $factura['form_pago'],
+    'wpaymentmeans' => $factura['met_pago'],
+    'wpaymentmethod' => $factura['form_pago'],
     //'wbusinessregimen' => $factura['reg_fiscal'],
     //'woperationtype' => $factura['procedencia'],
     //'sorderreference' => '',
@@ -326,7 +410,6 @@ $jDocument = [
     "yreversebuyerseller" => "N",
     "yaiu" => "N",
     "wdocumenttypecode" => "05",
-    'rdocumenttemplate' => 0,
     /*'snotes' => '',
     'snotetop' => [
         'regimen' => 'Regimen Fiscal',
@@ -340,14 +423,14 @@ $jDocument = [
         'sbillingreferenceuuid' => '',
     ],*/
     'jdocumentitems' => $items['adocumentitems'],
-    'jtax' => isset($items['jtax']) ?  $items['jtax'] : '',
+    'jtax' => isset($items['jtax']) ?  $items['jtax'] : [],
     'jbuyer' => [
         'wlegalorganizationtype' => $empresa['tipo_organizacion'] == 1 ? 'person' : 'company',
         'sbuyername' => $empresa['nombre'],
-        //'stributaryidentificationkey' => '01', // 01 o ZZ ver doc taxxa
-        //'stributaryidentificationname' => 'IVA', // 'IVA' o 'No aplica *' ver doc taxxa
+        'stributaryidentificationkey' => 'ZZ', // 01 o ZZ ver doc taxxa
+        'stributaryidentificationname' => 'No Aplica', // 'IVA' o 'No aplica *' ver doc taxxa
         'staxlevelcode' => $empresa['resp_fiscal'],
-        //'sfiscalregime' => $empresa['reg_fiscal'] == 1 ? '49' : '48',
+        'sfiscalregime' => $empresa['reg_fiscal'] == 1 ? '49' : '48',
         'jpartylegalentity' => [
             'wdoctype' => 'NIT',
             'sdocno' => $empresa['nit'],
@@ -359,8 +442,8 @@ $jDocument = [
             'stelephone' => $empresa['telefono'],
             'jregistrationaddress' => [
                 'scountrycode' => $empresa['codigo_pais'],
-                'wdepartmentcode' => $empresa['codigo_dpto'],
-                'wtowncode' => $empresa['codigo_dpto'] . $empresa['codigo_municipio'],
+                'wdepartmentcode' => $empresa['codigo_departamento'],
+                'wtowncode' => $empresa['codigo_departamento'] . $empresa['codigo_municipio'],
                 'scityname' => ucfirst(mb_strtolower($empresa['nom_municipio'])),
                 'saddressline1' => $empresa['direccion'],
                 'szip' => $empresa['cod_postal'],
@@ -371,9 +454,9 @@ $jDocument = [
         'wlegalorganizationtype' => $factura['tipo_org'] == 1 ? 'person' : 'company',
         'scostumername' => $factura['nombre'],
         'stributaryidentificationkey' => 'ZZ', // 01 o ZZ ver doc taxxa
-        'stributaryidentificationname' => 'No aplica *', // 'IVA' o 'No aplica *' ver doc taxxa
+        'stributaryidentificationname' => 'No Aplica', // 'IVA' o 'No aplica *' ver doc taxxa
         'staxlevelcode' => $factura['resp_fiscal'],
-        "sdoctype" => "NIT",
+        "sdoctype" => 'NIT',
         "sdocid" => $factura['no_doc'],
         "ssellername" => $factura['nombre'],
         "scontactperson" => $factura['nombre'],
@@ -407,12 +490,12 @@ $jDocument = [
         ],*/
     ],
     "idocprecision" => 2,
-    "spaymentid" => "NINGUNA",
+    "spaymentid" => $factura['observaciones'],
     "yisresident" => "Y",
     "sinvoiceperiod" => "1"
 ];
 $jParams = [
-    'sEnvironment' => 'test',
+    'sEnvironment' => $entorno,
     'jDocument' => $jDocument,
 ];
 $factura = [
@@ -427,69 +510,110 @@ $factura = [
 $json_string = json_encode($factura);
 $file = 'factura.json';
 file_put_contents($file, $json_string);
-chmod($file, 0777);
+
+//chmod($file, 0777);
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_URL, $url_taxxa);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $json_string);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$response = curl_exec($ch);
-$resnom = json_decode($response, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+$rresponse = curl_exec($ch);
+$resnom = json_decode($rresponse, true);
 $file = 'loglastsend.txt';
-file_put_contents($file, $response);
-chmod($file, 0777);
-$procesado = $incorrectos = 0;
-if ($resnom['rerror'] == 0) {
-    $shash = $resnom['aresult'][$indicene]['shash'];
-    $sreference = $resnom['aresult'][$indicene]['sreference'];
+file_put_contents($file, $rresponse);
+//chmod($file, 0777);
+$procesado = 0;
+
+$tipo = 1;
+$err = '';
+try {
+    $hoy = date('Y-m-d');
     $iduser = $_SESSION['id_user'];
     $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    if ($new) {
+        $sql = "INSERT INTO `seg_soporte_fno` (`id_factura_no`, `shash`, `referencia`, `fecha`, `id_user_reg`, `fec_reg`,`tipo`) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)";
+    } else {
+        $sql = "UPDATE `seg_soporte_fno` 
+                    SET `id_factura_no` = ?,`shash` = ?, `referencia` = ?, `fecha` = ?, `id_user_reg` = ?, `fec_reg` = ? 
+                WHERE `id_soporte` = ?";
+    }
+    $sql = $cmd->prepare($sql);
+    $sql->bindParam(1, $id_facno, PDO::PARAM_INT);
+    $sql->bindParam(2, $shash, PDO::PARAM_STR);
+    $sql->bindParam(3, $sreference, PDO::PARAM_STR);
+    $sql->bindParam(4, $hoy, PDO::PARAM_STR);
+    $sql->bindParam(5, $iduser, PDO::PARAM_INT);
+    $sql->bindValue(6, $date->format('Y-m-d H:i:s'));
+    if (!$new) {
+        $sql->bindParam(7, $id_soporte, PDO::PARAM_INT);
+    } else {
+        $sql->bindValue(7, $tipo, PDO::PARAM_INT);
+    }
+    if ($resnom['rerror'] == 0) {
+        $shash = $resnom['jret']['scufe'];
+        $sreference = $resnom['jret']['sdocumentreference'];
+    } else {
+        $shash = NULL;
+        $sreference = $pref . '-' . $secuenciaf;
+        $err .= '<table>';
+        $filas = is_array($resnom['smessage']) ? count($resnom['smessage']) : 0;
+        if ($filas == 0) {
+            $err .= '<tr><td>' . $resnom['smessage'] . '</td></tr>';
+        } else if ($filas == 1) {
+            $err .= '<tr><td>' . $resnom['smessage']['string'] . '</td></tr>';
+        } else {
+            foreach ($resnom['smessage']['string'] as $data) {
+                $err .= '<tr><td>' . $data . '</td></tr>';
+            }
+        }
+        $err .= '</table>';
+    }
+    $sql->execute();
+    if ($new) {
+        $validacion = $cmd->lastInsertId();
+    } else {
+        if ($shash != NULL) {
+            $validacion = $sql->rowCount();
+        } else {
+            $validacion = 0;
+        }
+    }
+    if ($validacion > 0 && $resnom['rerror'] == 0) {
+        $procesado++;
+    }
+    $cmd = null;
+} catch (PDOException $e) {
+    $err .= ($e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage());
+}
+
+if ($new) {
+    $sigue = $secuenciaf + 1;
+    $id_sec = $resolucion['id_resol'];
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "INSERT INTO `seg_soporte_fno` (`id_tercero`, `shash`, `referencia`, `fecha`, `id_user_reg`, `fec_reg`) 
-                VALUES (?, ?, ?, ?, ?, ?)";
-        $sql = $cmd->prepare($sql);
-        $sql->bindParam(1, $factura['id_tercero'], PDO::PARAM_INT);
-        $sql->bindParam(2, $shash, PDO::PARAM_STR);
-        $sql->bindParam(3, $sreference, PDO::PARAM_STR);
-        $sql->bindParam(4, date('Y-m-d'), PDO::PARAM_STR);
-        $sql->bindParam(5, $iduser, PDO::PARAM_INT);
-        $sql->bindValue(6, $date->format('Y-m-d H:i:s'));
-        $sql->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $estado = 2;
-            $sql = "UPDATE `seg_fact_noobligado` SET `estado` = ? WHERE `id_facturano` = ?";
-            $sql = $cmd->prepare($sql);
-            $sql->bindParam(1, $estado, PDO::PARAM_INT);
-            $sql->bindParam(2, $id_facno, PDO::PARAM_INT);
-            $sql->execute();
-            $procesado++;
-        } else {
-            echo json_encode($sql->errorInfo()[2]);
+        $query = "UPDATE `nom_resoluciones` SET `consecutivo` = ? WHERE `id_resol` = ?";
+        $query = $cmd->prepare($query);
+        $query->bindParam(1, $sigue, PDO::PARAM_INT);
+        $query->bindParam(2, $id_sec, PDO::PARAM_INT);
+        $query->execute();
+        if (!($query->rowCount() > 0)) {
+            $err .= $query->errorInfo()[2];
         }
-        $cmd = null;
     } catch (PDOException $e) {
-        echo json_encode($e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage());
+        $err .= ($e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage());
     }
+}
+if ($procesado > 0) {
+    $response[] = array("value" => "ok", "msg" => json_encode('Documento enviado correctamente'));
 } else {
-    $incorrectos++;
-    $mnj = '<ul>';
-    foreach ($resnom['smessage']['string'] as $m => $value) {
-        $mnj .= '<li>' . $value;
-    }
-    $mnj .= '</ul>';
-    $errores .= 'Error:' . $resnom['rerror'] . '<br>Mensaje: ' . $mnj . '-------------------------------------------<br>';
+    $response[] = array("value" => "Error", "msg" => $err);
 }
-$response = [];
-$response = [
-    'msg' => '1',
-    'procesados' => "<div class='alert alert-success'>Se ha procesado <b>" . $procesado . "</b> soporte(s) de factura de no obligados.</div>",
-    'error' => '<div class="alert alert-warning">' . $errores . '</div>',
-    'incorrec' => $incorrectos,
-];
-if (!isset($resnom['rerror'])) {
-    $response['rerror'] = $resnom;
-}
-echo json_encode($response, true);
+echo json_encode($response);
+exit;

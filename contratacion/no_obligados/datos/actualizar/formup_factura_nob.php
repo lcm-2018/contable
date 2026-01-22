@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -22,7 +22,7 @@ try {
     $sql = "SELECT
                 `id_facturano`, `id_tercero_no`, `fec_compra`, `fec_vence`, `met_pago`, `forma_pago`, `val_retefuente`, `porc_retefuente`, `val_reteiva`, `porc_reteiva`, `val_iva`, `porc_iva`, `val_dcto`, `porc_dcto`, `observaciones`
             FROM
-                `seg_fact_noobligado`
+                `ctt_fact_noobligado`
             WHERE  `id_facturano` = '$id_fno'";
     $rs = $cmd->query($sql);
     $factura = $rs->fetch();
@@ -51,7 +51,7 @@ try {
     $sql = "SELECT
                 `id_detail`, `id_fno`, `codigo`, `detalle`, `val_unitario`, `cantidad`, `p_iva`, `val_iva`, `p_dcto`, `val_dcto`
             FROM
-                `seg_fact_noobligado_det`
+                `ctt_fact_noobligado_det`
             WHERE `id_fno` = '$id_fno'";
     $rs = $cmd->query($sql);
     $detalles = $rs->fetchAll();
@@ -78,7 +78,7 @@ try {
     $sql = "SELECT
                 `id`, `descripcion`
             FROM
-                `seg_responsabilidad_fiscal` ORDER BY `descripcion` ASC";
+                `fac_e_responsabilidades` ORDER BY `descripcion` ASC";
     $rs = $cmd->query($sql);
     $rep_fiscal = $rs->fetchAll();
     $cmd = null;

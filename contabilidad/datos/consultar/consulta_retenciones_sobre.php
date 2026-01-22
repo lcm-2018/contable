@@ -19,6 +19,6 @@ $response = '
 foreach ($retenciones as $ret) {
     $response .= '<option value="' . $ret['id_retencion'] . '">' . $ret['nombre_retencion'] .  '</option>';
 }
-$response .= "</select> <button type='button' class='btn btn-warning btn-sm' onclick='guardaSobretasa();'>+</button>";
+$response .= "</select>";
 echo $response;
 exit;

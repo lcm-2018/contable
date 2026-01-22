@@ -4,7 +4,7 @@ use Sabberworm\CSS\Value\Value;
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -149,11 +149,29 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT
-            `id_empleado`, `val_bsp`
-        FROM
-            `nom_liq_bsp`
-        WHERE `id_bonificaciones` IN ( SELECT MAX(`id_bonificaciones`) FROM `nom_liq_bsp` WHERE `id_empleado` IN ($ids_emp))";
+    $sql = "SELECT 
+                `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
+            FROM 
+                `nom_liq_bsp`
+            WHERE `id_bonificaciones` IN 
+                (SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas`
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`
+                UNION ALL
+                SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas` 
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`)
+            GROUP BY `id_empleado`";
     $res = $cmd->query($sql);
     $bpserv = $res->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -223,16 +241,18 @@ $dossml = $smmlv * 2;
 $descripcion = 'LIQUIDACIÓN DE VACACIONES';
 $tipo = 'VC';
 $mes = date('m');
+$id_user = $_SESSION['id_user'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "INSERT INTO `nom_nominas` (`mes`, `vigencia`, `descripcion`, `fec_reg`, `tipo`) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO `nom_nominas` (`mes`, `vigencia`, `descripcion`, `fec_reg`, `tipo`, `id_user_reg`) VALUES (?, ?, ?, ?, ?,?)";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $mes, PDO::PARAM_STR);
     $sql->bindParam(2, $vigencia, PDO::PARAM_STR);
     $sql->bindParam(3, $descripcion, PDO::PARAM_STR);
     $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
     $sql->bindParam(5, $tipo, PDO::PARAM_STR);
+    $sql->bindParam(6, $id_user, PDO::PARAM_INT);
     $sql->execute();
     if (!($cmd->lastInsertId() > 0)) {
         echo $sql->errorInfo()[2] . 'NOM';
@@ -257,13 +277,13 @@ foreach ($datos as $d) {
     $key = array_search($id_empleado, array_column($salario, 'id_empleado'));
     $salbase = $key !== false ? $salario[$key]['salario_basico'] : 0;
     if ($salbase <= $dossml) {
-        $auxt = $auxiliotranporte / 30;
+        $auxt = $auxiliotranporte;
     } else {
         $auxt = 0;
     }
 
     if ($salbase <= $basealim) {
-        $auxali = $auxalim / 30;
+        $auxali = $auxalim;
     } else {
         $auxali = 0;
     }
@@ -283,6 +303,10 @@ foreach ($datos as $d) {
     $key = array_search($id_empleado, array_column($bpserv, 'id_empleado'));
     $bsp = $key !== false ? $bpserv[$key]['val_bsp'] : 0;
     //prima de vacaciones
+    if ($_SESSION['caracter'] == '1') {
+        $bsp = $primservicio = $gasrep = $auxt = $auxali = 0;
+        $dayvac = $dayhab;
+    }
     $primvacacion  = (($salbase + $gasrep + $auxt + $auxali + $bsp / 12 + $primservicio / 12) * $dayhab) / 30;
     $primavacn = ($primvacacion / 360) * $diastocalc;
     //liquidacion vacaciones
@@ -291,6 +315,9 @@ foreach ($datos as $d) {
     $bonrecrea = ($salbase / 30) * 2;
     $bonrecreacion = ($bonrecrea / 360) * $diastocalc;
     $bonserpres = 0;
+    if ($_SESSION['caracter'] == '1') {
+        $primavacn = $bonrecreacion = 0;
+    }
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -431,8 +458,8 @@ foreach ($datos as $d) {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `mes`, `anio`, `fec_reg`, `id_nomina`) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `mes`, `anio`, `fec_reg`, `id_nomina`,`sal_base`) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $id_empleado, PDO::PARAM_INT);
         $sql->bindParam(2, $salarioneto, PDO::PARAM_STR);
@@ -442,6 +469,7 @@ foreach ($datos as $d) {
         $sql->bindParam(6, $vigencia, PDO::PARAM_STR);
         $sql->bindValue(7, $date->format('Y-m-d H:i:s'));
         $sql->bindParam(8, $id_nomina, PDO::PARAM_INT);
+        $sql->bindParam(9, $salbase, PDO::PARAM_STR);
         $sql->execute();
         if (!($cmd->lastInsertId() > 0)) {
             echo $sql->errorInfo()[2] . 'NETO';

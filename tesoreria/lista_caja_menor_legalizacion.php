@@ -1,12 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
 include '../financiero/consultas.php';
+include '../terceros.php';
 
 $id_doc = $_POST['id_doc'] ?? '';
 $id_cop = $_POST['id_cop'] ?? '';
@@ -18,7 +19,7 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // Control de fechas
 //$fecha_doc = date('Y-m-d');
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 5, $cmd);
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 56, $cmd);
 $fecha = fechaSesion($_SESSION['vigencia'], $_SESSION['id_user'], $cmd);
 $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 
@@ -39,18 +40,8 @@ if (!empty($facturador)) {
     foreach ($facturador as $fact) {
         $id_t[] = $fact['id_tercero_api'];
     }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
 }
 // consultar los conceptos asociados al recuado del arqueo
 try {
@@ -89,26 +80,7 @@ $valor_pagar = 0;
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ]
@@ -130,9 +102,9 @@ $valor_pagar = 0;
                             <select name="id_facturador" id="id_facturador" class="form-control form-control-sm" required onchange="calcularCopagos2(this)">
                                 <option value="0">--Seleccione--</option>
                                 <?php foreach ($facturador as $fact) {
-                                    $key = array_search($fact['id_tercero_api'], array_column($terceros, 'id_tercero'));
-                                    $nombre = $key !== false ? ltrim($terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social']) : '---';
-                                    $cc = $key !== false ? $terceros[$key]['cc_nit'] : '';
+                                    $key = array_search($fact['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+                                    $nombre = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
+                                    $cc = $key !== false ? $terceros[$key]['cc_nit'] : '---';
                                     echo '<option value="' . $fact['id_tercero_api'] . '">' . $nombre . ' -> ' . $cc . '</option>';
                                 }
                                 ?>
@@ -160,8 +132,9 @@ $valor_pagar = 0;
                         <?php
                         foreach ($arqueos as $ce) {
                             //$id_doc = $ce['id_ctb_doc'];
+                            $fecha = date("Y-m-d", strtotime($ce['fecha']));
                             $id = $ce['id_causa_arqueo'];
-                            if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
+                            if ($fecha > $fecha_cierre && (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1)) {
                                 $borrar = '<a value="' . $id_doc . '" onclick="eliminarRecaduoArqeuo(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
@@ -173,7 +146,6 @@ $valor_pagar = 0;
                                 $editar = null;
                                 $detalles = null;
                             }
-                            $fecha = date("Y-m-d", strtotime($ce['fecha']));
                         ?>
                             <tr id="<?php echo $id; ?>">
                                 <td><?php echo $fecha; ?></td>

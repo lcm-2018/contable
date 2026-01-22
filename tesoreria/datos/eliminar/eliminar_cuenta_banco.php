@@ -21,6 +21,10 @@ try {
             $sql->bindParam(1, $id);
             $sql->execute();
             if ($sql->rowCount() > 0) {
+                include '../../../financiero/reg_logs.php';
+                $ruta = '../../../log';
+                $consulta = "DELETE FROM `tes_cuentas` WHERE `id_tes_cuenta` = $id";
+                RegistraLogs($ruta, $consulta);
                 $response['status'] = 'ok';
             } else {
                 $response['msg'] = $pdo->errorInfo()[2];

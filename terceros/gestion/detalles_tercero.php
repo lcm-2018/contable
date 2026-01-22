@@ -1,7 +1,10 @@
 <?php
+
+use FontLib\Table\Type\head;
+
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
@@ -12,12 +15,21 @@ function pesos($valor)
     return '$' . number_format($valor, 2, ",", ".");
 }
 $id = isset($_POST['id_ter']) ? $_POST['id_ter'] : exit('Acción no permitida');
+$id_t = [
+    'id_tercero' => $id
+];
 //API URL
-$url = $api . 'terceros/datos/res/lista/' . $id;
+$payload = json_encode($id_t);
+//API URL
+$url = $api . 'terceros/datos/res/lista/terceros';
 $ch = curl_init($url);
 //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $result = curl_exec($ch);
 curl_close($ch);
 $tercero = json_decode($result, true);
@@ -25,19 +37,19 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `seg_terceros`.`id_tercero`
-                , `seg_terceros`.`tipo_doc`
-                , `seg_terceros`.`no_doc`
-                , `seg_terceros`.`estado`
+                `tb_terceros`.`id_tercero`
+                , `tb_terceros`.`tipo_doc`
+                , `tb_terceros`.`nit_tercero` AS`no_doc`
+                , `tb_terceros`.`estado`
                 , `tb_tipo_tercero`.`descripcion`
-                , `seg_terceros`.`fec_inicio`
+                , `tb_terceros`.`fec_inicio`
             FROM
                 `tb_rel_tercero`
-                INNER JOIN `seg_terceros` 
-                    ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
+                INNER JOIN `tb_terceros` 
+                    ON (`tb_rel_tercero`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`)
                 INNER JOIN `tb_tipo_tercero` 
                     ON (`tb_rel_tercero`.`id_tipo_tercero` = `tb_tipo_tercero`.`id_tipo`)
-            WHERE `no_doc` = '$id'";
+            WHERE `tb_terceros`.`id_tercero_api` = $id";
     $rs = $cmd->query($sql);
     $terEmpr = $rs->fetch();
     $cmd = null;
@@ -47,7 +59,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT * FROM seg_tipo_docs_tercero";
+    $sql = "SELECT * FROM `tb_tipo_docs_tercero`";
     $rs = $cmd->query($sql);
     $list_docs = $rs->fetchAll();
     $cmd = null;
@@ -55,11 +67,13 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 //API URL
-$url = $api . 'terceros/datos/res/lista/docs/' . $id;
+$url = $api . 'terceros/datos/res/lista/docs/' . $terEmpr['no_doc'];
 $ch = curl_init($url);
 //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 $result = curl_exec($ch);
 curl_close($ch);
 $docs = json_decode($result, true);
@@ -120,65 +134,70 @@ if (isset($_SESSION['navarlat'])) {
                                     <div id="datosperson" class="collapse show" aria-labelledby="headingOne">
                                         <div class="card-body">
                                             <div class="shadow detalles-empleado">
-                                                <input id="peReg" type="hidden" value="<?php echo $permisos['registrar'] ?>">
+                                                <?php if (PermisosUsuario($permisos, 5201, 2) || $id_rol == 1) {
+                                                    echo '<input id="peReg" type="hidden" value = "1">';
+                                                } else {
+                                                    echo '<input id="peReg" type="hidden" value = "0">';
+                                                }
+                                                ?>
                                                 <div class="row">
                                                     <input type="hidden" id="id_tercero" value="<?php echo $tercero[0]['id_tercero'] ?>">
                                                     <div class="div-mostrar bor-top-left col-md-2">
-                                                        <label class="lbl-mostrar">C.C. y/o NIT</label>
+                                                        <span class="lbl-mostrar">C.C. y/o NIT</span>
                                                         <div class="div-cont"><?php echo $tercero[0]['cc_nit'] ?></div>
                                                     </div>
                                                     <div class="div-mostrar col-md-5">
-                                                        <label class="lbl-mostrar">NOMBRE COMPLETO</label>
+                                                        <span class="lbl-mostrar">NOMBRE COMPLETO</span>
                                                         <div class="div-cont"><?php echo mb_strtoupper($tercero[0]['nombre1'] . ' ' . $tercero[0]['nombre2'] . ' ' . $tercero[0]['apellido1'] . ' ' . $tercero[0]['apellido2']) ?></div>
                                                     </div>
                                                     <div class="div-mostrar bor-top-right col-md-5">
-                                                        <label class="lbl-mostrar">RAZÓN SOCIAL</label>
-                                                        <div class="div-cont"><?php echo mb_strtoupper($tercero[0]['razon_social'] ? $tercero[0]['razon_social'] : 'no se registró razón social') ?></div>
+                                                        <span class="lbl-mostrar">RAZÓN SOCIAL</span>
+                                                        <div class="div-cont"><?php echo mb_strtoupper($tercero[0]['razon_social'] ? $tercero[0]['razon_social'] : '') ?></div>
                                                     </div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="div-mostrar  col-md-2">
-                                                        <label class="lbl-mostrar">GENERO</label>
+                                                        <span class="lbl-mostrar">GENERO</span>
                                                         <div class="div-cont"><?php echo $tercero[0]['genero'] ?></div>
                                                     </div>
                                                     <div class="div-mostrar  col-md-3">
-                                                        <label class="lbl-mostrar">TIPO</label>
+                                                        <span class="lbl-mostrar">TIPO</span>
                                                         <div class="div-cont"><?php echo $terEmpr['descripcion'] ?></div>
                                                     </div>
                                                     <div class="div-mostrar  col-md-3">
-                                                        <label class="lbl-mostrar">ESTADO</label>
+                                                        <span class="lbl-mostrar">ESTADO</span>
                                                         <div class="div-cont"><?php echo $terEmpr['estado'] == '1' ? 'ACTIVO' : 'INACTIVO' ?></div>
                                                     </div>
                                                     <div class="div-mostrar  col-md-2">
-                                                        <label class="lbl-mostrar">FECHA DE NACIMIENTO</label>
+                                                        <span class="lbl-mostrar">FECHA DE NACIMIENTO</span>
                                                         <div class="div-cont"><?php echo $tercero[0]['fec_nacimiento'] ?></div>
                                                     </div>
                                                     <div class="div-mostrar  col-md-2">
-                                                        <label class="lbl-mostrar">FECHA INICIO</label>
+                                                        <span class="lbl-mostrar">FECHA INICIO</span>
                                                         <div class="div-cont"><?php echo $terEmpr['fec_inicio'] ?></div>
                                                     </div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="div-mostrar bor-bottom-left col-md-4">
-                                                        <label class="lbl-mostrar">CORREO</label>
+                                                        <span class="lbl-mostrar">CORREO</span>
                                                         <div class="div-cont"><?php echo $tercero[0]['correo'] ?></div>
                                                     </div>
                                                     <div class="div-mostrar col-md-2">
-                                                        <label class="lbl-mostrar">DEPARTAMENTO</label>
-                                                        <div class="div-cont"><?php echo mb_strtoupper($tercero[0]['nom_departamento']) ?>
+                                                        <span class="lbl-mostrar">DEPARTAMENTO</span>
+                                                        <div class="div-cont"><?php echo mb_strtoupper($tercero[0]['nombre_dpto']) ?>
                                                         </div>
                                                     </div>
                                                     <div class="div-mostrar col-md-2">
-                                                        <label class="lbl-mostrar">MUNICIPIO</label>
+                                                        <span class="lbl-mostrar">MUNICIPIO</span>
                                                         <div class="div-cont"><?php echo mb_strtoupper($tercero[0]['nom_municipio']) ?>
                                                         </div>
                                                     </div>
                                                     <div class="div-mostrar col-md-2">
-                                                        <label class="lbl-mostrar">DIRECCIÓN</label>
+                                                        <span class="lbl-mostrar">DIRECCIÓN</span>
                                                         <div class="div-cont"><?php echo mb_strtoupper($tercero[0]['direccion']) ?></div>
                                                     </div>
                                                     <div class="div-mostrar bor-bottom-right col-md-2">
-                                                        <label class="lbl-mostrar">CONTACTO</label>
+                                                        <span class="lbl-mostrar">CONTACTO</span>
                                                         <div class="div-cont"><?php echo $tercero[0]['telefono'] ?></div>
                                                     </div>
                                                 </div>

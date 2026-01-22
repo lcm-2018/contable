@@ -7,14 +7,14 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-    `tb_centro_costo_x_sede`.`id_sede`
-    ,`tb_centros_costo`.`descripcion`
-    ,`tb_centros_costo`.`id_centro`
+    `far_centrocosto_area`.`id_sede`
+    ,`tb_centrocostos`.`descripcion`
+    ,`tb_centrocostos`.`id_centro`
     FROM
-    `tb_centro_costo_x_sede`
-    INNER JOIN `tb_centros_costo` 
-        ON (`tb_centro_costo_x_sede`.`id_centro_c` = `tb_centros_costo`.`id_centro`)
-    WHERE (`tb_centro_costo_x_sede`.`id_sede` =$_post[id])";
+    `far_centrocosto_area`
+    INNER JOIN `tb_centrocostos` 
+        ON (`far_centrocosto_area`.`id_centrocosto` = `tb_centrocostos`.`id_centro`)
+    WHERE (`far_centrocosto_area`.`id_sede` =$_post[id])";
     $rs = $cmd->query($sql);
     $centros = $rs->fetchAll();
     $cmd = null;

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -118,7 +118,7 @@ try {
     $sql = null;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "UPDATE `seg_fact_noobligado`
+    $sql = "UPDATE `ctt_fact_noobligado`
                 SET `id_tercero_no` = ?, `fec_compra`= ?, `fec_vence`= ?, `met_pago`= ?, `forma_pago`= ?, `val_retefuente`= ?, `porc_retefuente`= ?, `val_reteiva`= ?, `porc_reteiva`= ?, `val_iva`= ?, `porc_iva`= ?, `val_dcto`= ?, `porc_dcto`= ?, `observaciones` = ?
             WHERE `id_facturano` = ?";
     $sql = $cmd->prepare($sql);
@@ -146,7 +146,7 @@ try {
             $sql = null;
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-            $sql = "UPDATE `seg_fact_noobligado` SET  `id_user_act` = ?, `fec_act` = ?  WHERE `id_facturano` = ?";
+            $sql = "UPDATE `ctt_fact_noobligado` SET  `id_user_act` = ?, `fec_act` = ?  WHERE `id_facturano` = ?";
             $sql = $cmd->prepare($sql);
             $sql->bindParam(1, $iduser, PDO::PARAM_INT);
             $sql->bindValue(2, $date->format('Y-m-d H:i:s'));
@@ -156,11 +156,11 @@ try {
     }
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $query = "DELETE FROM `seg_fact_noobligado_det` WHERE `id_fno` = ?";
+    $query = "DELETE FROM `ctt_fact_noobligado_det` WHERE `id_fno` = ?";
     $query = $cmd->prepare($query);
     $query->bindParam(1, $id_facno, PDO::PARAM_INT);
     $query->execute();
-    $query = "INSERT INTO `seg_fact_noobligado_det`
+    $query = "INSERT INTO `ctt_fact_noobligado_det`
                     (`id_fno`, `codigo`, `detalle`, `val_unitario`, `cantidad`, `p_iva`, `val_iva`, `p_dcto`, `val_dcto`, `id_user_reg`, `fec_reg`) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $query = $cmd->prepare($query);

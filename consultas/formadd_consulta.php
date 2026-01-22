@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -14,12 +14,18 @@ include '../conexion.php';
         <form id="formAddConsulta">
             <div class="form-row px-4 pt-2">
                 <div class="form-group col-md-6">
-                    <label for="txtNombreConsulta" class="small">Nombre/descripción</label>
+                    <label for="txtNombreConsulta" class="small">Nombre</label>
                     <input type="text" class="form-control form-control-sm" id="txtNombreConsulta" name="txtNombreConsulta">
                 </div>
                 <div class="form-group col-md-6">
                     <label for="jsonParam" class="small">Parámetros</label>
                     <input type="text" class="form-control form-control-sm" id="jsonParam" name="jsonParam">
+                </div>
+            </div>
+            <div class="form-row px-4">
+                <div class="form-group col-md-12">
+                    <label for="txtDescripcionSQL" class="small">Descripción</label>
+                    <textarea class="form-control form-control-sm" id="txtDescripcionSQL" name="txtDescripcionSQL"></textarea>
                 </div>
             </div>
             <div class="form-row px-4">

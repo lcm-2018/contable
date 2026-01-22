@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -45,13 +45,15 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_orden_egreso_detalle.id_egr_detalle,
-	            far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-                far_medicamento_lote.lote,far_medicamento_lote.fec_vencimiento,
+	            far_medicamentos.cod_medicamento,
+                CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion))) AS nom_medicamento,
+                far_medicamento_lote.lote,far_medicamento_lote.existencia,far_medicamento_lote.fec_vencimiento,
 	            far_orden_egreso_detalle.cantidad,far_orden_egreso_detalle.valor,
 	            (far_orden_egreso_detalle.valor*far_orden_egreso_detalle.cantidad) AS val_total
             FROM far_orden_egreso_detalle
             INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_egreso_detalle.id_lote)
             INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_medicamento_lote.id_med)
+            INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
             WHERE far_orden_egreso_detalle.id_egreso=" . $_POST['id_egreso'] . $where . " ORDER BY $col $dir $limit";
 
     $rs = $cmd->query($sql);
@@ -79,6 +81,7 @@ if (!empty($objs)) {
             "cod_medicamento" => $obj['cod_medicamento'],
             "nom_medicamento" => $obj['nom_medicamento'],
             "lote" => $obj['lote'],
+            "existencia" => $obj['existencia'],
             "fec_vencimiento" => $obj['fec_vencimiento'],
             "cantidad" => $obj['cantidad'],
             "valor" => formato_valor($obj['valor']),

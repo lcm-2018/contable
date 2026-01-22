@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -11,8 +11,17 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $where = "WHERE far_centrocosto_area.id_area<>0";
-if (isset($_POST['nombre']) && $_POST['nombre']) {
-    $where .= " AND far_centrocosto_area.nom_area LIKE '" . $_POST['nombre'] . "%'";
+if (isset($_POST['nom_area']) && $_POST['nom_area']) {
+    $where .= " AND far_centrocosto_area.nom_area LIKE '" . $_POST['nom_area'] . "%'";
+}
+if (isset($_POST['id_cencosto']) && $_POST['id_cencosto']) {
+    $where .= " AND far_centrocosto_area.id_centrocosto=" . $_POST['id_cencosto'];
+}
+if (isset($_POST['id_sede']) && $_POST['id_sede']) {
+    $where .= " AND far_centrocosto_area.id_sede=" . $_POST['id_sede'];
+}
+if (isset($_POST['estado']) && strlen($_POST['estado'])) {
+    $where .= " AND far_centrocosto_area.estado=" . $_POST['estado'];
 }
 
 try {
@@ -20,7 +29,8 @@ try {
             tb_centrocostos.nom_centro AS nom_centrocosto, 
             far_area_tipo.nom_tipo AS nom_tipo_area,              
             CONCAT_WS(' ',usr.nombre1,usr.nombre2,usr.apellido1,usr.apellido2) AS usr_responsable,
-            tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega
+            tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
+            IF(far_centrocosto_area.estado=1,'ACTIVO','INACTIVO') AS estado
         FROM far_centrocosto_area    
         INNER JOIN tb_centrocostos ON (tb_centrocostos.id_centro=far_centrocosto_area.id_centrocosto)
         INNER JOIN far_area_tipo ON (far_area_tipo.id_tipo=far_centrocosto_area.id_tipo_area)
@@ -69,11 +79,11 @@ try {
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Centro Costo</th>
                 <th>Tipo Area</th>
-                <th>Responsable</th>
+                <th>Centro Costo</th>                                
                 <th>Sede</th>
-                <th>Bodega</th>
+                <th>Responsable</th>
+                <th>Estado</th>
             </tr>
         </thead>
         <tbody style="font-size: 60%;">
@@ -87,7 +97,7 @@ try {
                     <td>' .$obj['nom_tipo_area'] .'</td>
                     <td>' .$obj['usr_responsable'] .'</td>
                     <td>' .$obj['nom_sede'] .'</td>
-                    <td>' .$obj['nom_bodega'] .'</td></tr>';
+                    <td>' . $obj['estado'] . '</td></tr>';
             }            
             echo $tabla;
             ?>            

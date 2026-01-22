@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -15,6 +15,7 @@ $id_ctb_doc = $_POST['id_doc'];
 $id_tipo_doc = $_POST['tipoDoc'];
 $fecha_fact = $_POST['fechaDoc'];
 $fecha_ven = $_POST['fechaVen'];
+$num_doc = $_POST['numFac'];
 $valor_pago = str_replace(",", "", $_POST['valor_pagar']);
 $valor_iva = str_replace(",", "", $_POST['valor_iva']);
 $valor_base = str_replace(",", "", $_POST['valor_base']);
@@ -24,14 +25,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $response['status'] = 'error';
-try {
-    $sql = "SELECT MAX(`num_doc`) AS `num_doc` FROM `ctb_factura` WHERE (`id_tipo_doc` = $id_tipo_doc)";
-    $rs = $cmd->query($sql);
-    $datos = $rs->fetch();
-    $num_doc = !empty($datos) ? $datos['num_doc'] + 1 : 1;
-} catch (PDOException $e) {
-    $response['msg'] = $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
+
 if ($id_cta_factura == 0) {
     try {
         $sql = "INSERT INTO `ctb_factura`
@@ -40,7 +34,7 @@ if ($id_cta_factura == 0) {
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $id_ctb_doc, PDO::PARAM_INT);
         $sql->bindParam(2, $id_tipo_doc, PDO::PARAM_INT);
-        $sql->bindParam(3, $num_doc, PDO::PARAM_INT);
+        $sql->bindParam(3, $num_doc, PDO::PARAM_STR);
         $sql->bindParam(4, $fecha_fact, PDO::PARAM_STR);
         $sql->bindParam(5, $fecha_ven, PDO::PARAM_STR);
         $sql->bindParam(6, $valor_pago, PDO::PARAM_STR);
@@ -67,7 +61,7 @@ if ($id_cta_factura == 0) {
                 WHERE `id_cta_factura` = ?";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $id_tipo_doc, PDO::PARAM_INT);
-        $sql->bindParam(2, $num_doc, PDO::PARAM_INT);
+        $sql->bindParam(2, $num_doc, PDO::PARAM_STR);
         $sql->bindParam(3, $fecha_fact, PDO::PARAM_STR);
         $sql->bindParam(4, $fecha_ven, PDO::PARAM_STR);
         $sql->bindParam(5, $valor_pago, PDO::PARAM_STR);

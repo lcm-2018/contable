@@ -2,13 +2,15 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
 //API URL
 $id_dcto = isset($_POST['id_dcto']) ? $_POST['id_dcto'] : exit('Acción no permitida');
 $fecha = $_POST['datFecDcto'];
+$fecha2 = $_POST['datFecFinDcto'] == '' ? null : $_POST['datFecFinDcto'];
+$tipo = $_POST['sclTipoDcto'];
 $concepto = $_POST['txtConDcto'];
 $valor = $_POST['numValDcto'];
 $iduser = $_SESSION['id_user'];
@@ -16,12 +18,16 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "UPDATE `nom_otros_descuentos` SET `fecha` = ?, `concepto` = ?, `valor` = ?  WHERE `id_dcto` = ?";
+    $sql = "UPDATE `nom_otros_descuentos` 
+                SET `id_tipo_dcto` = ?, `fecha` = ?, `fecha_fin` = ?, `concepto` = ?, `valor` = ? 
+            WHERE `id_dcto` = ?";
     $sql = $cmd->prepare($sql);
-    $sql->bindParam(1, $fecha, PDO::PARAM_STR);
-    $sql->bindParam(2, $concepto, PDO::PARAM_STR);
-    $sql->bindParam(3, $valor, PDO::PARAM_STR);
-    $sql->bindParam(4, $id_dcto, PDO::PARAM_INT);
+    $sql->bindParam(1, $tipo, PDO::PARAM_INT);
+    $sql->bindParam(2, $fecha, PDO::PARAM_STR);
+    $sql->bindParam(3, $fecha2, PDO::PARAM_STR);
+    $sql->bindParam(4, $concepto, PDO::PARAM_STR);
+    $sql->bindParam(5, $valor, PDO::PARAM_STR);
+    $sql->bindParam(6, $id_dcto, PDO::PARAM_INT);
     if (!($sql->execute())) {
         echo $sql->errorInfo()[2];
         exit();

@@ -1,16 +1,11 @@
 <?php
 
-use Sabberworm\CSS\Value\Value;
-
 session_start();
 if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include '../../../head.php';
+
 function pesos($valor)
 {
     return '$' . number_format($valor, 0, ",", ".");
@@ -21,14 +16,16 @@ $vigencia = $_SESSION['vigencia'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT *
+    $sql = "SELECT 
+                `nom_valxvigencia`.`id_concepto`
+                , `nom_valxvigencia`.`valor`
             FROM
-                nom_valxvigencia
-            INNER JOIN nom_conceptosxvigencia 
-                ON (nom_valxvigencia.id_concepto = nom_conceptosxvigencia.id_concp)
-            INNER JOIN tb_vigencias 
-                ON (nom_valxvigencia.id_vigencia = tb_vigencias.id_vigencia)
-            WHERE anio = '$vigencia';";
+                `nom_valxvigencia`
+            INNER JOIN `nom_conceptosxvigencia` 
+                ON (`nom_valxvigencia`.`id_concepto` = `nom_conceptosxvigencia`.`id_concp`)
+            INNER JOIN `tb_vigencias` 
+                ON (`nom_valxvigencia`.`id_vigencia` = `tb_vigencias`.`id_vigencia`)
+            WHERE `anio` = '$vigencia'";
     $rs = $cmd->query($sql);
     $valxvig = $rs->fetchAll();
     $cmd = null;
@@ -62,9 +59,13 @@ foreach ($valxvig as $vxv) {
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-// consulto el nombre de la empresa de la tabla tb_datos_ips
+// consulto el nombre de la empresa de la tabla seg_empresas
 try {
-    $sql = "SELECT `razon_social_ips`, `nit_ips`, `dv` FROM `tb_datos_ips`";
+    $sql = "SELECT 
+                `razon_social_ips` AS `nombre`, `nit_ips` AS `nit`, `dv` AS `dig_ver`, `nom_municipio`
+            FROM `tb_datos_ips`
+                INNER JOIN `tb_municipios` 
+                    ON (`tb_datos_ips`.`idmcpio` = `tb_municipios`.`id_municipio`)";
     $res = $cmd->query($sql);
     $empresa = $res->fetch();
 } catch (PDOException $e) {
@@ -111,53 +112,113 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "SELECT
-                `salario_basico`
+                `id_empleado`, `salario_basico`
             FROM
                 `nom_salarios_basico`
-            WHERE  `id_salario` = (SELECT MAX(`id_salario`) FROM `nom_salarios_basico` WHERE `id_empleado` = $datos[id_empleado])";
+            WHERE  `id_salario` = (SELECT MAX(`id_salario`) FROM `nom_salarios_basico` WHERE `id_empleado` = {$datos['id_empleado']})";
     $res = $cmd->query($sql);
-    $salario = $res->fetch(PDO::FETCH_ASSOC);
+    $salario = $res->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 try {
-    $sql = "SELECT
-                `val_liq_ps`
-            FROM
-                `nom_liq_prima`
-            WHERE `id_liq_prima` IN ( SELECT MAX(`id_liq_prima`) FROM `nom_liq_prima` WHERE `id_empleado` = $datos[id_empleado])";
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT   
+                `id_empleado`
+                , `corte`
+                , SUM(`val_liq_ps`) AS `val_liq_ps`
+            FROM `nom_liq_prima` 
+            WHERE `id_liq_prima` IN 
+                (SELECT
+                    MAX(`id_liq_prima`) AS `id_lp`
+                FROM
+                    `nom_liq_prima`
+                INNER JOIN `nom_nominas`
+                    ON (`nom_liq_prima`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE `nom_nominas`.`tipo` = 'PV'
+                GROUP BY `id_empleado`
+                UNION ALL 
+                SELECT
+                    MAX(`id_liq_prima`) AS `id_lp`
+                FROM
+                    `nom_liq_prima`
+                INNER JOIN `nom_nominas`
+                    ON (`nom_liq_prima`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE `nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` = '$vigencia'
+                GROUP BY `id_empleado`)
+            GROUP BY `id_empleado`";
     $res = $cmd->query($sql);
-    $prima = $res->fetch(PDO::FETCH_ASSOC);
+    $prima = $res->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 try {
-    $sql = "SELECT
-            `val_bsp`
-        FROM
-            `nom_liq_bsp`
-        WHERE `id_bonificaciones` IN ( SELECT MAX(`id_bonificaciones`) FROM `nom_liq_bsp` WHERE `id_empleado` = $datos[id_empleado])";
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT 
+                `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
+            FROM 
+                `nom_liq_bsp`
+            WHERE `id_bonificaciones` IN 
+                (SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas`
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`
+                UNION ALL
+                SELECT
+                    MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                FROM
+                    `nom_liq_bsp`
+                INNER JOIN `nom_nominas` 
+                    ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                GROUP BY `nom_liq_bsp`.`id_empleado`)
+            GROUP BY `id_empleado`";
     $res = $cmd->query($sql);
-    $bpserv = $res->fetch(PDO::FETCH_ASSOC);
+    $bpserv = $res->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-$meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+$meses = [
+    'enero',
+    'febrero',
+    'marzo',
+    'abril',
+    'mayo',
+    'junio',
+    'julio',
+    'agosto',
+    'septiembre',
+    'octubre',
+    'noviembre',
+    'diciembre'
+];
 $inicia_lab = new DateTime($datos['fech_inicio']);
 $ini_vac = new DateTime($datos['fec_inicial']);
 $fin_vac = new DateTime($datos['fec_fin']);
-$salbase = $salario['salario_basico'];
+$key = array_search($datos['id_empleado'], array_column($salario, 'id_empleado'));
+$salbase = $key !== false ? $salario[$key]['salario_basico'] : 0;
 $dossml = $smmlv * 2;
 if ($salbase <= $dossml) {
-    $auxtransp = $auxiliotranporte / 30;
+    $auxtransp = $auxiliotranporte;
 } else {
     $auxtransp = 0;
 }
 
 if ($salbase <= $basealim) {
-    $auxali = $auxalim / 30;
+    $auxali = $auxalim;
 } else {
     $auxali = 0;
 }
@@ -168,37 +229,39 @@ if ($grepresenta == 1) {
     $gasrep = 0;
 }
 $dayvac = $datos['dias_inactivo'];
-$liasLab = 30 - $dayvac;
-$auxtransp = $auxtransp * $liasLab;
-$auxali = $auxali * $liasLab;
-//bonificacion por servicios prestados 
-//$bsp = (($salbase + $gasrep) <= $bbs ? ($salbase + $gasrep) * 0.5 : ($salbase + $gasrep) * 0.35);
-$diastocalc = $datos['dias_liquidar']; //dias a liquidar
+$dayhab = $datos['dias_habiles'];
+$diastocalc = $datos['dias_liquidar'];
 //prima de servicios
-if ( !empty($prima) && $prima['val_liq_ps'] > 0) {
-    $primservicio = $prima['val_liq_ps'];
-} else {
-    $primservicio = 0;
-};
-if (!empty($bpserv) && $bpserv['val_bsp'] > 0) {
-    $bsp = $bpserv['val_bsp'];
-} else {
-    $bsp = 0;
-};
+$key = array_search($datos['id_empleado'], array_column($prima, 'id_empleado'));
+$primservicio = $key !== false ? $prima[$key]['val_liq_ps'] : 0;
+$doceavaps = $primservicio / 12;
+//bonificacion de servicios prestados
+$key = array_search($datos['id_empleado'], array_column($bpserv, 'id_empleado'));
+$bsp = $key !== false ? $bpserv[$key]['val_bsp'] : 0;
+$doceavabsp = $bsp / 12;
 //prima de vacaciones
-$primvacacion  = (($salbase + $gasrep + $auxtransp + $auxali + $bsp / 12 + $primservicio / 12) * 15) / 30;
-$primavacn = ($primvacacion / 360) * $diastocalc; //+
+if ($_SESSION['caracter'] == '1') {
+    $bsp = $primservicio = $gasrep = $auxtransp = $auxali = 0;
+    $dayvac = $dayhab;
+    $datos['dias_inactivo'] = $dayhab;
+}
+$primvacacion  = (($salbase + $gasrep + $auxtransp + $auxali + $bsp / 12 + $primservicio / 12) * $dayhab) / 30;
+$primavacn = ($primvacacion / 360) * $diastocalc;
 //liquidacion vacaciones
 $liqvacacion  = (($salbase + $gasrep + $auxtransp + $auxali + $bsp / 12 + $primservicio / 12) * $dayvac) / 30;
-$vacacion = ($liqvacacion / 360) * $diastocalc; //=
+$vacacion = ($liqvacacion / 360) * $diastocalc;
 $bonrecrea = ($salbase / 30) * 2;
-$bonrecreacion = ($bonrecrea / 360) * $diastocalc; //+
+$bonrecreacion = ($bonrecrea / 360) * $diastocalc;
+$bonserpres = 0;
+if ($_SESSION['caracter'] == '1') {
+    $primavacn = $bonrecreacion = $doceavaps = 0;
+}
 ?>
 <div class="text-right py-3">
     <!--<a type="button" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
         <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
     </a>-->
-    <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"> Imprimir</a>
+    <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir','<?php echo 0; ?>');"> Imprimir</a>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>
 <div class="contenedor bg-light" id="areaImprimir">
@@ -226,12 +289,12 @@ $bonrecreacion = ($bonrecrea / 360) * $diastocalc; //+
                             <tr>
                                 <td rowspan="3" class='text-center' style="width:18%"><label class="small"><img src="../../images/logos/logo.png" width="100"></label></td>
                                 <td colspan="7" style="text-align:center; font-size: 20px">
-                                    <strong><?php echo $empresa['razon_social_ips']; ?> </strong>
+                                    <strong><?php echo $empresa['nombre']; ?> </strong>
                                 </td>
                             </tr>
                             <tr>
                                 <td colspan="7" style="text-align:center">
-                                    NIT <?php echo $empresa['nit_ips'] . '-' . $empresa['dv']; ?>
+                                    NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?>
                                 </td>
                             </tr>
                             <tr>
@@ -281,18 +344,26 @@ $bonrecreacion = ($bonrecrea / 360) * $diastocalc; //+
                     <td>Días</td>
                     <td style="text-align: center;">Valor</td>
                 </tr>
-                <tr>
-                    <td colspan="2"></td>
-                    <td colspan="4">PRIMA DE VACACIONES</td>
-                    <td><?php echo $datos['dias_habiles'] ?></td>
-                    <td style="text-align: right;"><?php echo pesos($primavacn) ?></td>
-                </tr>
-                <tr>
-                    <td colspan="2"></td>
-                    <td colspan="4">BONIFICACIÓN RECREACIÓN</td>
-                    <td>2</td>
-                    <td style="text-align: right;"><?php echo pesos($bonrecreacion) ?></td>
-                </tr>
+                <?php
+                if ($_SESSION['caracter'] == 2) {
+                ?>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td colspan="4">PRIMA DE VACACIONES</td>
+                        <td><?php echo $datos['dias_habiles'] ?></td>
+                        <td style="text-align: right;"><?php echo pesos($primavacn) ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td colspan="4">BONIFICACIÓN RECREACIÓN</td>
+                        <td>2</td>
+                        <td style="text-align: right;"><?php echo pesos($bonrecreacion) ?></td>
+                    </tr>
+                <?php
+                } else {
+                    $primavacn = $bonrecreacion = 0;
+                }
+                ?>
                 <tr>
                     <td colspan="2"></td>
                     <td colspan="4">VACACIONES</td>
@@ -343,37 +414,37 @@ $bonrecreacion = ($bonrecrea / 360) * $diastocalc; //+
                     </tr>
                 <?php
                 }
-                if ($primservicio > 0) {
+                if ($doceavaps > 0) {
                 ?>
                     <tr>
                         <td colspan="2"></td>
                         <td colspan="4">PRIMA DE SERVICIOS</td>
                         <td></td>
-                        <td style="text-align: right;"><?php echo pesos($primservicio) ?></td>
+                        <td style="text-align: right;"><?php echo pesos($doceavaps) ?></td>
                     </tr>
                 <?php
                 }
-                if ($bsp > 0) {
+                if ($doceavabsp > 0) {
                 ?>
                     <tr>
                         <td colspan="2"></td>
                         <td colspan="4">BONIFICACIÓN POR SERVICIOS</td>
                         <td></td>
-                        <td style="border-bottom-style: double; border-bottom-width: 4px;text-align: right;"><?php echo pesos($bsp) ?></td>
+                        <td style="border-bottom-style: double; border-bottom-width: 4px;text-align: right;"><?php echo pesos($doceavabsp) ?></td>
                     </tr>
                 <?php
                 }
                 ?>
                 <tr>
                     <td colspan="7"></td>
-                    <td style="text-align: right;"><?php echo pesos($bsp + $salbase + $auxtransp + $auxali + $gasrep + $primservicio) ?></td>
+                    <td style="text-align: right;"><?php echo pesos($doceavabsp + $salbase + $auxtransp + $auxali + $gasrep + $doceavaps) ?></td>
                 </tr>
                 <tr>
                     <td colspan="8" style="height: 30px;"></td>
                 </tr>
                 <tr>
                     <td colspan="8">
-                        Dada en Yopal, a los <?php echo $date->format('d') ?> días del mes de <?php echo $meses[date('n') - 1] ?> de <?php echo $date->format('Y') ?>.
+                        Dada en <?= $empresa['nom_municipio']; ?>, a los <?php echo $date->format('d') ?> días del mes de <?php echo $meses[date('n') - 1] ?> de <?php echo $date->format('Y') ?>.
                     </td>
                 </tr>
                 <tr>

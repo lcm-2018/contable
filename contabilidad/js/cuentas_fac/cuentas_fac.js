@@ -14,9 +14,14 @@
             buttons: [{
                 action: function(e, dt, node, config) {
                     $.post("frm_reg_cuentas_fac.php", function(he) {
+<<<<<<< HEAD
                         //$('#divTamModalForms').removeClass('modal-xl');
                         //$('#divTamModalForms').removeClass('modal-sm');
                         //$('#divTamModalForms').removeClass('modal-lg');
+=======
+                        $('#divTamModalForms').removeClass('modal-xl');
+                        $('#divTamModalForms').removeClass('modal-sm');
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
                         $('#divTamModalForms').addClass('modal-lg');
                         $('#divModalForms').modal('show');
                         $("#divForms").html(he);
@@ -41,13 +46,42 @@
                 { 'data': 'nom_cobertura' },
                 { 'data': 'nom_modalidad' },
                 { 'data': 'fecha_vigencia' },
+<<<<<<< HEAD
+=======
+                { 'data': 'cta_presupuesto' },
+                { 'data': 'cta_presupuesto_ant' },
+                { 'data': 'cta_debito' },
+                { 'data': 'cta_credito' },
+                { 'data': 'cta_copago' },
+                { 'data': 'cta_copago_capitado' },
+                { 'data': 'cta_glosaini_debito' },
+                { 'data': 'cta_glosaini_credito' },
+                { 'data': 'cta_glosadefinitiva' },
+                { 'data': 'cta_devolucion' },
+                { 'data': 'cta_caja' },
+                { 'data': 'cta_fac_global' },
+                { 'data': 'cta_x_ident' },
+                { 'data': 'cta_baja' },
+                { 'data': 'vigente' },
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
                 { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [2, 3] },
+<<<<<<< HEAD
                 { orderable: false, targets: 6 }
             ],
+=======
+                { visible: false, targets: 19 },
+                { orderable: false, targets: 21 },
+            ],
+            rowCallback: function(row, data, index) {
+                if (data.vigente == 'X') {
+                    $($(row).find("td")[0]).css("background-color", "#ffc107");
+                }
+            },
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
             order: [
                 [0, "desc"]
             ],
@@ -113,8 +147,13 @@
                 $('#sl_modalidad').val('')
             }
         } else if (id == 5) {
+<<<<<<< HEAD
             $('#sl_cobertura').find('option').not('[value=""],[value="1"],[value="8"],[value="9"],[value="15"]').prop('disabled', false).show();
             if (cobertura == "1" || cobertura == "8" || cobertura == "9" || cobertura == "15") {
+=======
+            $('#sl_cobertura').find('option').not('[value=""],[value="1"],[value="8"],[value="15"]').prop('disabled', false).show();
+            if (cobertura == "1" || cobertura == "8" || cobertura == "15") {
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
                 $('#sl_cobertura').val('')
             }
             $('#sl_modalidad').find('option').prop('disabled', false).show();
@@ -125,7 +164,11 @@
     });
 
     // Autocompletar cuenta contable presupuesto
+<<<<<<< HEAD
     $('#divForms').on("input", "#txt_cta_pre", function() {
+=======
+    $('#divForms').on("input", ".cuenta_pre", function() {
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
@@ -139,12 +182,22 @@
             },
             minLength: 2,
             select: function(event, ui) {
+<<<<<<< HEAD
                 if (ui.item.tipo == 1 || ui.item.id == '') {
                     $('#id_txt_cta_pre').val(ui.item.id);
                 } else {
                     $('#id_txt_cta_pre').val('-1');
                     $('#divModalError').modal('show');
                     $('#divMsgError').html('Debe seleccionar una cuenta detalle');
+=======
+                var that = $(this);
+                if (ui.item.tipo == 1 || ui.item.id == '') {
+                    $('#' + that.attr('data-campoid')).val(ui.item.id);
+                } else {
+                    $('#' + that.attr('data-campoid')).val('-1');
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html('Debe seleccionar una cuenta tipo detalle');
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
                 }
             },
         });
@@ -184,6 +237,7 @@
         error += verifica_vacio($('#sl_cobertura'));
         error += verifica_vacio($('#sl_modalidad'));
         error += verifica_vacio_2($('#id_txt_cta_pre'), $('#txt_cta_pre'));
+<<<<<<< HEAD
         error += verifica_vacio_2($('#id_txt_cta_deb'), $('#txt_cta_deb'));
         error += verifica_vacio_2($('#id_txt_cta_cre'), $('#txt_cta_cre'));
         error += verifica_vacio_2($('#id_txt_cta_cop'), $('#txt_cta_cop'));
@@ -192,10 +246,26 @@
         error += verifica_vacio_2($('#id_txt_cta_gde'), $('#txt_cta_gde'));
         error += verifica_vacio_2($('#id_txt_cta_dev'), $('#txt_cta_dev'));
         error += verifica_vacio_2($('#id_txt_cta_caj'), $('#txt_cta_caj'));
+=======
+        error += verifica_vacio_2($('#id_txt_cta_pre_ant'), $('#txt_cta_pre_ant'));
+        error += verifica_vacio_2($('#id_txt_cta_deb'), $('#txt_cta_deb'));
+        error += verifica_vacio_2($('#id_txt_cta_cre'), $('#txt_cta_cre'));
+        error += verifica_vacio_2($('#id_txt_cta_cop'), $('#txt_cta_cop'));
+        error += verifica_vacio_2($('#id_txt_cta_cop_cap'), $('#txt_cta_cop_cap'));
+        error += verifica_vacio_2($('#id_txt_cta_gli_deb'), $('#txt_cta_gli_deb'));
+        error += verifica_vacio_2($('#id_txt_cta_gli_cre'), $('#txt_cta_gli_cre'));
+        error += verifica_vacio_2($('#id_txt_cta_glo_def'), $('#txt_cta_glo_def'));
+        error += verifica_vacio_2($('#id_txt_cta_dev'), $('#txt_cta_dev'));
+        error += verifica_vacio_2($('#id_txt_cta_caj'), $('#txt_cta_caj'));
+        error += verifica_vacio_2($('#id_txt_cta_fac_glo'), $('#txt_cta_fac_glo'));
+        error += verifica_vacio_2($('#id_txt_cta_x_ide'), $('#txt_cta_x_ide'));
+        error += verifica_vacio_2($('#id_txt_cta_baja'), $('#txt_cta_baja'));
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
         error += verifica_vacio($('#txt_fec_vig'));
         error += verifica_vacio($('#sl_estado'));
 
         var error1 = verifica_valmin_2($('#id_txt_cta_pre'), $('#txt_cta_pre'), 0)
+<<<<<<< HEAD
         error1 += verifica_valmin_2($('#id_txt_cta_deb'), $('#txt_cta_deb'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_cre'), $('#txt_cta_cre'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_cop'), $('#txt_cta_cop'), 0);
@@ -204,6 +274,21 @@
         error1 += verifica_valmin_2($('#id_txt_cta_gde'), $('#txt_cta_gde'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_dev'), $('#txt_cta_dev'), 0);
         error1 += verifica_valmin_2($('#id_txt_cta_caj'), $('#txt_cta_caj'), 0);
+=======
+        error1 += verifica_valmin_2($('#id_txt_cta_pre_ant'), $('#txt_cta_pre_ant'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_deb'), $('#txt_cta_deb'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_cre'), $('#txt_cta_cre'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_cop'), $('#txt_cta_cop'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_cop_cap'), $('#txt_cta_cop_cap'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_gli_deb'), $('#txt_cta_gli_deb'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_gli_cre'), $('#txt_cta_gli_cre'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_glo_def'), $('#txt_cta_glo_def'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_dev'), $('#txt_cta_dev'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_caj'), $('#txt_cta_caj'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_fac_glo'), $('#txt_cta_fac_glo'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_x_ide'), $('#txt_cta_x_ide'), 0);
+        error1 += verifica_valmin_2($('#id_txt_cta_baja'), $('#txt_cta_baja'), 0);
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
 
         if (error >= 1) {
             $('#divModalError').modal('show');

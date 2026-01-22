@@ -1,11 +1,12 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include_once '../../conexion.php';
 include_once '../../permisos.php';
+include_once '../../terceros.php';
 $key = array_search('53', array_column($perm_modulos, 'id_modulo'));
 if ($key === false) {
     echo 'Usuario no autorizado';
@@ -19,6 +20,8 @@ try {
                 `ctt_adquisiciones`.`id_adquisicion`
                 , `tb_tipo_compra`.`id_tipo`
                 , `tb_tipo_compra`.`tipo_compra`
+                , `tb_tipo_bien_servicio`.`id_tipo_cotrato`
+                , `ctt_adquisiciones`.`id_tipo_bn_sv`
             FROM
                 `tb_tipo_contratacion`
                 INNER JOIN `tb_tipo_compra` 
@@ -30,6 +33,25 @@ try {
             WHERE `ctt_adquisiciones`.`id_adquisicion` = $id_adq";
     $rs = $cmd->query($sql);
     $tipo_adq = $rs->fetch();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$tp_bs = $tipo_adq['id_tipo_bn_sv'];
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `id_relacion`, `id_formato`
+            FROM
+                `ctt_formatos_doc_rel`
+            WHERE (`id_tipo_bn_sv` = $tp_bs)";
+    $rs = $cmd->query($sql);
+    $formatos = $rs->fetchAll();
+    $posicion = [];
+    foreach ($formatos as $f) {
+        $posicion[$f['id_formato']] = $f['id_relacion'];
+    }
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -48,12 +70,12 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `tb_centro_costo_x_sede`.`id_x_sede`,`tb_centro_costo_x_sede`.`id_sede`, `tb_centros_costo`.`descripcion`
+                `far_centrocosto_area`.`id_area`,`far_centrocosto_area`.`id_centrocosto`, `tb_centrocostos`.`nom_centro`
             FROM
-                `tb_centro_costo_x_sede`
-                INNER JOIN `tb_centros_costo` 
-                    ON (`tb_centro_costo_x_sede`.`id_centro_c` = `tb_centros_costo`.`id_centro`) 
-            ORDER BY `tb_centros_costo`.`descripcion` ASC";
+                `far_centrocosto_area`
+                INNER JOIN `tb_centrocostos` 
+                    ON (`far_centrocosto_area`.`id_centrocosto` = `tb_centrocostos`.`id_centro`) 
+            ORDER BY `tb_centrocostos`.`nom_centro` ASC";
     $rs = $cmd->query($sql);
     $centros_costo = $rs->fetchAll();
     $cmd = null;
@@ -74,12 +96,16 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `ctt_destino_contrato`.`id_destino`, `tb_centro_costo_x_sede`.`id_sede`, `ctt_destino_contrato`.`id_centro_costo`, `ctt_destino_contrato`.`horas_mes`
+                `ctt_destino_contrato`.`id_destino`
+                , `far_centrocosto_area`.`id_area`
+                , `far_centrocosto_area`.`id_sede`
+                , `far_centrocosto_area`.`id_centrocosto`
+                , `ctt_destino_contrato`.`horas_mes`
             FROM
                 `ctt_destino_contrato`
-                INNER JOIN `tb_centro_costo_x_sede` 
-                    ON (`ctt_destino_contrato`.`id_centro_costo` = `tb_centro_costo_x_sede`.`id_x_sede`)
-            WHERE `ctt_destino_contrato`.`id_adquisicion` = '$id_adq' ORDER BY `ctt_destino_contrato`.`id_destino` ASC";
+            INNER JOIN `far_centrocosto_area` 
+                ON (`ctt_destino_contrato`.`id_area_cc` = `far_centrocosto_area`.`id_area`)
+            WHERE `ctt_destino_contrato`.`id_adquisicion` = $id_adq ORDER BY `ctt_destino_contrato`.`id_destino` ASC";
     $rs = $cmd->query($sql);
     $destinos = $rs->fetchAll();
     $cmd = null;
@@ -90,12 +116,28 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT 
-                *
+                `ctt_adquisiciones`.`id_tipo_bn_sv`
+                , `ctt_modalidad`.`modalidad`
+                , `ctt_adquisiciones`.`id_adquisicion`
+                , `ctt_adquisiciones`.`fecha_adquisicion`
+                , `ctt_adquisiciones`.`estado`
+                , `ctt_adquisiciones`.`objeto`
+                , `ctt_adquisiciones`.`id_cont_api`
+                , `ctt_adquisiciones`.`id_supervision`
+                , `ctt_adquisiciones`.`id_orden`
+                , `tb_tipo_bien_servicio`.`filtro_adq`
+                , `ctt_adquisiciones`.`id_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`nom_tercero`
             FROM
-                ctt_adquisiciones
-            INNER JOIN ctt_modalidad 
-                ON (ctt_adquisiciones.id_modalidad = ctt_modalidad.id_modalidad) 
-            WHERE id_adquisicion = '$id_adq'";
+                `ctt_adquisiciones`
+            INNER JOIN `ctt_modalidad` 
+                ON (`ctt_adquisiciones`.`id_modalidad` = `ctt_modalidad`.`id_modalidad`)
+            INNER JOIN `tb_tipo_bien_servicio` 
+                ON (`ctt_adquisiciones`.`id_tipo_bn_sv` = `tb_tipo_bien_servicio`.`id_tipo_b_s`)
+            LEFT JOIN `tb_terceros` 
+                ON (`ctt_adquisiciones`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+            WHERE `id_adquisicion` = $id_adq";
     $rs = $cmd->query($sql);
     $adquisicion = $rs->fetch();
     $cmd = null;
@@ -114,7 +156,7 @@ try {
                     ON (`ctt_adquisiciones`.`id_tipo_bn_sv` = `tb_tipo_bien_servicio`.`id_tipo_b_s`)
                 INNER JOIN `tb_tipo_contratacion` 
                     ON (`tb_tipo_bien_servicio`.`id_tipo_cotrato` = `tb_tipo_contratacion`.`id_tipo`)
-            WHERE  `ctt_adquisiciones`.`id_adquisicion` = '$id_adq'";
+            WHERE  `ctt_adquisiciones`.`id_adquisicion` = $id_adq";
     $rs = $cmd->query($sql);
     $tipo_compra = $rs->fetch();
     $cmd = null;
@@ -124,22 +166,42 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `seg_terceros`.`no_doc`
-                , `seg_terceros`.`id_tercero_api`
-                , `ctt_adquisiciones`.`id_adquisicion`
-                , `ctt_adquisiciones`.`estado`
-            FROM
-                `ctt_adquisiciones`
-            INNER JOIN `seg_terceros` 
-                ON (`ctt_adquisiciones`.`id_tercero` = `seg_terceros`.`id_tercero`)
-            WHERE  `ctt_adquisiciones`.`id_adquisicion` =  '$id_adq' AND `ctt_adquisiciones`.`estado` >= '5' LIMIT 1";
+
+    if ($adquisicion['id_orden'] == '') {
+        $sql = "SELECT
+                    `ctt_bien_servicio`.`bien_servicio`
+                    , `ctt_orden_compra_detalle`.`cantidad`
+                    , `ctt_orden_compra_detalle`.`val_unid`
+                    , `ctt_orden_compra_detalle`.`id_detalle`
+                    , '0' AS `iva`
+                FROM
+                    `ctt_orden_compra_detalle`
+                    INNER JOIN `ctt_orden_compra` 
+                        ON (`ctt_orden_compra_detalle`.`id_oc` = `ctt_orden_compra`.`id_oc`)
+                    INNER JOIN `ctt_bien_servicio` 
+                        ON (`ctt_orden_compra_detalle`.`id_servicio` = `ctt_bien_servicio`.`id_b_s`)
+                WHERE (`ctt_orden_compra`.`id_adq` = $id_adq)";
+    } else {
+        $sql = "SELECT
+                    `far_alm_pedido_detalle`.`id_ped_detalle` AS `id_detalle`
+                    , `far_medicamentos`.`nom_medicamento` AS `bien_servicio`
+                    , `far_alm_pedido_detalle`.`cantidad`
+                    , `far_alm_pedido_detalle`.`valor` AS `val_unid`
+                    , `far_alm_pedido_detalle`.`iva`
+                    , `far_alm_pedido_detalle`.`aprobado`
+                FROM
+                    `far_alm_pedido_detalle`
+                    INNER JOIN `far_medicamentos` 
+                        ON (`far_alm_pedido_detalle`.`id_medicamento` = `far_medicamentos`.`id_med`)
+                WHERE (`far_alm_pedido_detalle`.`id_pedido` = {$adquisicion['id_orden']})";
+    }
     $rs = $cmd->query($sql);
-    $seleccionada = $rs->fetch();
+    $detalles_orden = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -270,6 +332,31 @@ if (!empty($adquisicion)) {
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid p-2">
+                        <?php
+                        $boton = $guardar = $cerrar = '';
+                        if ((PermisosUsuario($permisos, 5302, 1) || $id_rol == 1) && $adquisicion['estado'] < 6) {
+                            $peRegValue = '0'; // Valor por defecto
+
+                            if ($adquisicion['filtro_adq'] == '0') {
+                                if ($adquisicion['estado'] == 1) {
+                                    $peRegValue = '1';
+                                    $cerrar = '<button type="button" class="btn btn-secondary btn-sm mr-1" id="cerrarOrdenServicio">Cerrar</button>';
+                                }
+                            } elseif (in_array($adquisicion['filtro_adq'], ['1', '2'])) {
+                                if (empty($adquisicion['id_orden'])) {
+                                    $buttonText = $adquisicion['filtro_adq'] == '1' ? 'Orden Almacén' : 'Orden Activos Fijos';
+                                    $boton = '<button type="button" class="btn btn-primary btn-sm listOrdenes mr-1" text="' . $adquisicion['filtro_adq'] . '">' . $buttonText . '</button>';
+                                }
+                                if ($adquisicion['estado'] == 1) {
+                                    $guardar = '<button type="button" class="btn btn-success btn-sm mr-1" id="guardarOrden">Guardar</button>';
+                                    $cerrar = '<button type="button" class="btn btn-secondary btn-sm mr-1" id="cerrarOrden">Cerrar</button>';
+                                }
+                            }
+                            echo '<input type="hidden" id="peReg" value="' . $peRegValue . '">';
+                        } else {
+                            echo '<input type="hidden" id="peReg" value="0">';
+                        }
+                        ?>
                         <div class="card mb-4">
                             <div class="card-header" id="divTituloPag">
                                 <div class="row">
@@ -302,21 +389,21 @@ if (!empty($adquisicion)) {
                                                 <div class="shadow detalles-empleado">
                                                     <div class="row">
                                                         <div class="div-mostrar bor-top-left col-md-4">
-                                                            <label class="lbl-mostrar pb-2">MODALIDAD CONTRATACIÓN</label>
+                                                            <span class="lbl-mostrar pb-2">MODALIDAD CONTRATACIÓN</span>
                                                             <div class="div-cont pb-2"><?php echo $adquisicion['modalidad'] ?></div>
                                                         </div>
                                                         <div class="div-mostrar col-md-2">
-                                                            <label class="lbl-mostrar pb-2">ADQUISICIÓN</label>
+                                                            <span class="lbl-mostrar pb-2">ADQUISICIÓN</span>
                                                             <input type="hidden" id="id_compra" value="<?php echo $id_adq ?>">
                                                             <input type="hidden" id="id_contrato_compra" value="<?php echo isset($contrato['id_contrato_compra']) ? $contrato['id_contrato_compra'] : '' ?>">
                                                             <div class="div-cont pb-2">ADQ-<?php echo mb_strtoupper($adquisicion['id_adquisicion']) ?></div>
                                                         </div>
                                                         <div class="div-mostrar col-md-3">
-                                                            <label class="lbl-mostrar pb-2">FECHA</label>
+                                                            <span class="lbl-mostrar pb-2">FECHA</span>
                                                             <div class="div-cont pb-2"><?php echo $adquisicion['fecha_adquisicion'] ?></div>
                                                         </div>
                                                         <div class="div-mostrar bor-top-right col-md-3">
-                                                            <label class="lbl-mostrar pb-2">ESTADO</label>
+                                                            <span class="lbl-mostrar pb-2">ESTADO</span>
                                                             <?php
                                                             $estad = $adquisicion['estado'];
                                                             $key = array_search($estad, array_column($estado_adq, 'id'));
@@ -326,7 +413,7 @@ if (!empty($adquisicion)) {
                                                     </div>
                                                     <div class="row">
                                                         <div class="div-mostrar bor-down-right bor-down-left col-md-12">
-                                                            <label class="lbl-mostrar pb-2">OBJETO</label>
+                                                            <span class="lbl-mostrar pb-2">OBJETO</span>
                                                             <div class="div-cont text-left pb-2"><?php echo $adquisicion['objeto'] ?></div>
                                                         </div>
                                                     </div>
@@ -335,95 +422,99 @@ if (!empty($adquisicion)) {
                                         </div>
                                     </div>
                                     <!--parte-->
-                                    <div class="card">
-                                        <div class="card-header card-header-detalles py-0 headings" id="headingBnSv">
-                                            <h5 class="mb-0">
-                                                <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapseBnSv" aria-expanded="true" aria-controls="collapseBnSv">
-                                                    <div class="form-row">
-                                                        <div class="div-icono">
-                                                            <span class="fas fa-swatchbook fa-lg" style="color: #EC7063;"></span>
+                                    <?php
+                                    $tipo_contrato = '0';
+                                    foreach ($bnsv as $bs) {
+                                        if ($bs['id_tipo'] == '1') {
+                                            $tipo_contrato = '1';
+                                        }
+                                    }
+                                    if (false) { ?>
+                                        <div class="card">
+                                            <div class="card-header card-header-detalles py-0 headings" id="headingBnSv">
+                                                <h5 class="mb-0">
+                                                    <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapseBnSv" aria-expanded="true" aria-controls="collapseBnSv">
+                                                        <div class="form-row">
+                                                            <div class="div-icono">
+                                                                <span class="fas fa-swatchbook fa-lg" style="color: #EC7063;"></span>
+                                                            </div>
+                                                            <div>
+                                                                <?php $j++;
+                                                                echo $j ?>. ORDEN DE BIEN O SERVICIOS
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <?php $j++;
-                                                            echo $j ?>. ORDEN DE BIEN O SERVICIOS
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </h5>
-                                        </div>
-                                        <div id="collapseBnSv" class="collapse" aria-labelledby="headingBnSv">
-                                            <div class="card-body">
-                                                <?php
-                                                $tipo_contrato = '0';
-                                                foreach ($bnsv as $bs) {
-                                                    if ($bs['id_tipo'] == '10') {
-                                                        $tipo_contrato = '1';
-                                                    }
-                                                }
-                                                ?>
-                                                <div id="divEstadoBnSv">
+                                                    </a>
+                                                </h5>
+                                            </div>
+                                            <div id="collapseBnSv" class="collapse" aria-labelledby="headingBnSv">
+                                                <div class="card-body">
                                                     <?php
-                                                    if ($adquisicion['estado'] == 1) {
                                                     ?>
-                                                        <form id="formDetallesAdq">
-                                                            <input type="hidden" name="idAdq" value="<?php echo $id_adq ?>">
-                                                            <table id="tableAdqBnSv" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Seleccionar</th>
-                                                                        <?php echo $tipo_contrato == '1' ? '<th>Pago</th>' : '' ?>
-                                                                        <th>Bien o Servicio</th>
-                                                                        <th>Cantidad</th>
-                                                                        <th>Valor Unitario</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <?php
-                                                                    foreach ($bnsv as $bs) {
-                                                                    ?>
+                                                    <div id="divEstadoBnSv">
+                                                        <?php
+                                                        if (true) {
+                                                        ?>
+                                                            <form id="formDetallesAdq">
+                                                                <input type="hidden" name="idAdq" value="<?php echo $id_adq ?>">
+                                                                <table id="tableAdqBnSv" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                                    <thead>
                                                                         <tr>
-                                                                            <td>
-                                                                                <div class="text-center listado">
-                                                                                    <input type="checkbox" name="check[]" value="<?php echo $bs['id_b_s'] ?>">
-                                                                                </div>
-                                                                            </td>
-                                                                            <?php if ($tipo_contrato == '1') { ?>
-                                                                                <td>
-                                                                                    <select class="form-control form-control-sm altura py-0" id="tipo_<?php echo $bs['id_b_s'] ?>">
-                                                                                        <option value="H">Horas</option>
-                                                                                        <option value="M">Mensual</option>
-                                                                                    </select>
-                                                                                </td>
-                                                                            <?php } ?>
-                                                                            <td class="text-left"><i><?php echo $bs['bien_servicio'] ?></i></td>
-                                                                            <td><input type="number" name="bnsv_<?php echo $bs['id_b_s'] ?>" id="bnsv_<?php echo $bs['id_b_s'] ?>" class="form-control altura cantidad"></td>
-                                                                            <td><input type="number" name="val_bnsv_<?php echo $bs['id_b_s'] ?>" id="val_bnsv_<?php echo $bs['id_b_s'] ?>" class="form-control altura" value="0"></td>
+                                                                            <th>Seleccionar</th>
+                                                                            <?php echo $tipo_contrato == '1' ? '<th>Pago</th>' : '' ?>
+                                                                            <th>Bien o Servicio</th>
+                                                                            <th>Cantidad</th>
+                                                                            <th>Valor Unitario</th>
                                                                         </tr>
-                                                                    <?php
-                                                                    }
-                                                                    ?>
-                                                                </tbody>
-                                                                <tfoot>
-                                                                    <tr>
-                                                                        <th>Seleccionar</th>
-                                                                        <?php echo $tipo_contrato == '1' ? '<th>Pago</th>' : '' ?>
-                                                                        <th>Bien o Servicio</th>
-                                                                        <th>Cantidad</th>
-                                                                        <th>Valor Unitario</th>
-                                                                    </tr>
-                                                                </tfoot>
-                                                            </table>
-                                                        </form>
-                                                    <?php
-                                                    } else {
-                                                        echo '<div class="p-3 mb-2 bg-success text-white">ORDEN AGREGADA CORRECTAMENTE</div>';
-                                                    }
-                                                    ?>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <?php
+                                                                        foreach ($bnsv as $bs) {
+                                                                        ?>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <div class="text-center listado">
+                                                                                        <input type="checkbox" name="check[]" value="<?php echo $bs['id_b_s'] ?>">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <?php if ($tipo_contrato == '1') { ?>
+                                                                                    <td>
+                                                                                        <select class="form-control form-control-sm altura py-0" id="tipo_<?php echo $bs['id_b_s'] ?>">
+                                                                                            <option value="H">Horas</option>
+                                                                                            <option value="M">Mensual</option>
+                                                                                        </select>
+                                                                                    </td>
+                                                                                <?php } ?>
+                                                                                <td class="text-left"><i><?php echo $bs['bien_servicio'] ?></i></td>
+                                                                                <td><input type="number" name="bnsv_<?php echo $bs['id_b_s'] ?>" id="bnsv_<?php echo $bs['id_b_s'] ?>" class="form-control altura cantidad"></td>
+                                                                                <td><input type="number" name="val_bnsv_<?php echo $bs['id_b_s'] ?>" id="val_bnsv_<?php echo $bs['id_b_s'] ?>" class="form-control altura" value="0"></td>
+                                                                            </tr>
+                                                                        <?php
+                                                                        }
+                                                                        ?>
+                                                                    </tbody>
+                                                                    <tfoot>
+                                                                        <tr>
+                                                                            <th>Seleccionar</th>
+                                                                            <?php echo $tipo_contrato == '1' ? '<th>Pago</th>' : '' ?>
+                                                                            <th>Bien o Servicio</th>
+                                                                            <th>Cantidad</th>
+                                                                            <th>Valor Unitario</th>
+                                                                        </tr>
+                                                                    </tfoot>
+                                                                </table>
+                                                            </form>
+                                                        <?php
+                                                        } else {
+                                                            echo '<div class="p-3 mb-2 bg-success text-white">ORDEN AGREGADA CORRECTAMENTE</div>';
+                                                        }
+                                                        ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    <?php } ?>
                                     <input type="hidden" id="tipo_contrato" value="<?php echo $tipo_contrato ?>">
+                                    <input type="hidden" id="tipo_servicio" value="<?php echo $idtbnsv ?>">
                                     <?php
                                     if ($tipo_contrato == '1' && $adquisicion['estado'] >= 1) { ?>
                                         <!--parte-->
@@ -453,12 +544,13 @@ if (!empty($adquisicion)) {
                                                         <fieldset class="border p-2 bg-light">
                                                             <div id="contenedor">
                                                                 <?php
+                                                                $disabled = $adquisicion['estado'] <= 5 ? '' : 'disabled';
                                                                 if ($value == '0') {
                                                                 ?>
                                                                     <div class="form-row px-4 pt-2">
                                                                         <div class="form-group col-md-4 mb-2">
                                                                             <label class="small">SEDE</label>
-                                                                            <select name="slcSedeAC[]" class="form-control form-control-sm slcSedeAC">
+                                                                            <select name="slcSedeAC[]" class="form-control form-control-sm slcSedeAC" <?php echo $disabled ?>>
                                                                                 <option value="0">--Seleccione--</option>
                                                                                 <?php
                                                                                 foreach ($sedes as $s) {
@@ -469,24 +561,25 @@ if (!empty($adquisicion)) {
                                                                         </div>
                                                                         <div class="form-group col-md-4 mb-2">
                                                                             <label class="small">CENTRO DE COSTO</label>
-                                                                            <select name="slcCentroCosto[]" class="form-control form-control-sm slcCentroCosto">
+                                                                            <select name="slcCentroCosto[]" class="form-control form-control-sm slcCentroCosto" <?php echo $disabled ?>>
                                                                                 <option value="0">--Seleccionar Sede--</option>
                                                                             </select>
                                                                         </div>
                                                                         <div class="form-group col-md-4 mb-2">
-                                                                            <label for="numHorasMes" class="small">Horas asignadas / mes</label>
+                                                                            <label class="small">Horas asignadas / mes</label>
                                                                             <div class="input-group input-group-sm">
-                                                                                <input type="number" name="numHorasMes[]" class="form-control">
-                                                                                <div class="input-group-append">
-                                                                                    <button class="btn btn-outline-success" type="button" id="addRowSedes"><i class="fas fa-plus"></i></button>
-                                                                                </div>
+                                                                                <input type="number" name="numHorasMes[]" class="form-control" <?php echo $disabled ?>>
+                                                                                <?php if ($disabled == '') { ?>
+                                                                                    <div class="input-group-append">
+                                                                                        <button class="btn btn-outline-success" type="button" id="addRowSedes"><i class="fas fa-plus"></i></button>
+                                                                                    </div>
+                                                                                <?php } ?>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                     <?php
                                                                 } else {
                                                                     $control = 0;
-                                                                    $disabled = $adquisicion['estado'] <= 5 ? '' : 'disabled';
                                                                     foreach ($destinos as $d) {
                                                                     ?>
                                                                         <div class="form-row px-4 pt-2">
@@ -509,11 +602,11 @@ if (!empty($adquisicion)) {
                                                                                 <select name="slcCentroCosto[]" class="form-control form-control-sm slcCentroCosto" <?php echo $disabled ?>>
                                                                                     <?php
                                                                                     foreach ($centros_costo as $cc) {
-                                                                                        if ($cc['id_sede'] == $d['id_sede']) {
-                                                                                            if ($cc['id_x_sede'] == $d['id_centro_costo']) {
-                                                                                                echo '<option value="' . $cc['id_x_sede'] . '" selected>' . $cc['descripcion'] . '</option>';
+                                                                                        if ($cc['id_area'] == $d['id_area']) {
+                                                                                            if ($cc['id_area'] == $d['id_area']) {
+                                                                                                echo '<option value="' . $cc['id_area'] . '" selected>' . $cc['nom_centro'] . '</option>';
                                                                                             } else {
-                                                                                                echo '<option value="' . $cc['id_x_sede'] . '">' . $cc['descripcion'] . '</option>';
+                                                                                                echo '<option value="' . $cc['id_area'] . '">' . $cc['nom_centro'] . '</option>';
                                                                                             }
                                                                                         }
                                                                                     }
@@ -560,7 +653,7 @@ if (!empty($adquisicion)) {
                                     }
                                     ?>
                                     <!--parte-->
-                                    <?php if ($adquisicion['estado'] >= 4) { ?>
+                                    <?php if ($adquisicion['estado'] >= 1) { ?>
                                         <div class="card">
                                             <div class="card-header card-header-detalles py-0 headings" id="headingCotRec">
                                                 <h5 class="mb-0">
@@ -571,7 +664,7 @@ if (!empty($adquisicion)) {
                                                             </div>
                                                             <div>
                                                                 <?php $j++;
-                                                                echo $j ?>. COTIZACIONES RECIBIDAS.
+                                                                echo $j ?>. ORDEN DE COMPRA.
                                                             </div>
                                                         </div>
                                                     </a>
@@ -581,118 +674,95 @@ if (!empty($adquisicion)) {
                                                 <div class="card-body">
                                                     <div id="accordion">
                                                         <?php
-                                                        $id_cot_rec = $id_adq . '|' . $_SESSION['nit_emp'];
-                                                        $url = $api . 'terceros/datos/res/listar/cot_recibidas/' . $id_cot_rec;
-                                                        $ch = curl_init($url);
-                                                        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                                                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-                                                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                                                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                                        $result = curl_exec($ch);
-                                                        curl_close($ch);
-                                                        $recibe =  json_decode($result, true);
-                                                        $cstv = 0;
-                                                        if ($recibe != 0) {
-                                                            foreach ($recibe as $rc) {
-                                                                $ter_slc = $cot_slc = '';
-                                                                $seleccionada['no_doc'] = isset($seleccionada['no_doc']) ? $seleccionada['no_doc'] : NULL;
-                                                                if ($rc['cc_nit'] == $seleccionada['no_doc']) {
-                                                                    $ter_slc = '<i class="far fa-check-circle fa-lg" style="color:#8E44AD"></i>';
-                                                                    $cot_slc = 'bg-slc';
-                                                                }
+                                                        echo '<div class="text-right mb-2">' . $boton . $guardar . $cerrar . '</div>';
                                                         ?>
-                                                                <!-- parte-->
-                                                                <div class="card">
-                                                                    <div class="card-header <?php echo $cot_slc != '' ? $cot_slc : 'card-header-detalles' ?> py-0 headings" id="<?php echo 'cotRec' . $cstv ?>" title="<?php echo $cot_slc != '' ? 'COTIZACIÓN SELECCIONADA' : '' ?>">
-                                                                        <h5 class="mb-0">
-                                                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapsecotRec<?php echo $cstv ?>" aria-expanded="true" aria-controls="collapsecotRec<?php echo $cstv ?>">
-                                                                                <div class="form-row">
-                                                                                    <div class="div-icono">
-                                                                                        <span class="fas fa-list-ul fa-lg" style="color: #F1C40F;"></span>
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <?php echo mb_strtoupper($rc['apellido1'] . ' ' . $rc['apellido2'] . ' ' . $rc['nombre1'] . ' ' . $rc['nombre2'] . ' ' . $rc['razon_social'] . ' ' . $rc['cc_nit']) ?>
-                                                                                    </div>
-                                                                                    <div class="ml-auto mr-0 mr-md-3 my-2 my-md-0 con-icon">
-                                                                                        <?php echo $ter_slc ?>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </a>
-                                                                        </h5>
-                                                                    </div>
-                                                                    <div id="collapsecotRec<?php echo $cstv ?>" class="collapse" aria-labelledby="cotRec<?php echo $cstv ?>">
-                                                                        <div class="card-body">
-                                                                            <?php
-                                                                            $dat_cot_rec = $id_adq . '|' . $_SESSION['nit_emp'] . '|' . $rc['id_tercero'];
-                                                                            $url = $api . 'terceros/datos/res/listar/datos_cotiz_recibidas/' . $dat_cot_rec;
-                                                                            $ch = curl_init($url);
-                                                                            //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                                                                            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-                                                                            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                                                                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                                                            $result = curl_exec($ch);
-                                                                            curl_close($ch);
-                                                                            $datos_cotiza =  json_decode($result, true);
-                                                                            if ($datos_cotiza != 0) {
-                                                                                if ($estad == 4) {
-                                                                                    if (PermisosUsuario($permisos, 5302, 2) || $id_rol == 1) {
-                                                                                        echo '<div class="text-center"><button value="' . $id_adq . '|' . $rc['cc_nit'] . '" class="btn btn-info btn-sm btnSlcCot"><i class="far fa-check-square">&nbsp&nbsp;</i>SELECCIONAR COTIZACIÓN</button></div>';
+                                                        <form id="formOrdenCompra">
+                                                            <?php
+                                                            echo $adquisicion['id_orden'] == '' ? '' : '<input type="hidden" name="id_orden" id="id_orden" value="' . $adquisicion['id_orden'] . '">';
+                                                            ?>
+                                                            <table class="table table-striped table-bordered table-sm nowrap table-hover shadow tableCotRecibidas" style="width:100%">
+                                                                <thead>
+                                                                    <tr class="text-center">
+                                                                        <th>TERCERO:</th>
+                                                                        <th colspan="4"><?php echo  $adquisicion['nom_tercero']; ?></th>
+                                                                        <th colspan="2"><?php echo  $adquisicion['nit_tercero']; ?></th>
+                                                                    </tr>
+                                                                    <tr class="text-center">
+                                                                        <th>#</th>
+                                                                        <th>Bien o Servicio</th>
+                                                                        <th><?php echo $adquisicion['id_orden'] > 0 ? 'Solicita/Ordena' : 'Cantidad'; ?></th>
+                                                                        <th>Val. Unidad</th>
+                                                                        <th>IVA</th>
+                                                                        <th>Total</th>
+                                                                        <th><?php echo $adquisicion['id_orden'] == '' ? 'Acciones' : '<input type="checkbox" id="selectAll" title="Desmarcar todos" checked>'; ?></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody class="modificarCotizaciones">
+                                                                    <?php
+                                                                    $total_compra = 0;
+                                                                    $fila = '';
+                                                                    foreach ($detalles_orden as $dc) {
+                                                                        if ($adquisicion['id_orden'] > 0 && $adquisicion['estado'] < 5) {
+                                                                            $aprobado = $dc['aprobado'] > 0 ? $dc['aprobado'] : $dc['cantidad'];
+                                                                            $val_unid = '<input type="number" name="val_unid[' . $dc['id_detalle'] . ']" class="form-control form-control-sm text-right" value="' . $dc['val_unid'] . '">';
+                                                                            $iva = '<select name="iva[' . $dc['id_detalle'] . ']" class="form-control form-control-sm">
+                                                                                        <option value="0" ' . ($dc['iva'] == 0 ? 'selected' : '') . '>0%</option>
+                                                                                        <option value="5" ' . ($dc['iva'] == 5 ? 'selected' : '') . '>5%</option>
+                                                                                        <option value="19" ' . ($dc['iva'] == 19 ? 'selected' : '') . '>19%</option>
+                                                                                    </select>';
+                                                                            $cantidad = '<div class="input-group input-group-sm">
+                                                                                        <div class="input-group-prepend">
+                                                                                            <span class="input-group-text d-flex justify-content-end" style="min-width: 70px;">' . $dc['cantidad'] . '</span>
+                                                                                        </div>
+                                                                                        <input type="number" class="form-control text-right" name="cantidad[' . $dc['id_detalle'] . ']" value="' . $aprobado . '" max="' . $dc['cantidad'] . '">
+                                                                                    </div>';
+                                                                        } else {
+                                                                            $val_unid = pesos($dc['val_unid']);
+                                                                            $iva = $dc['iva'] . '%';
+                                                                            $cantidad = isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad'];
+                                                                        }
+                                                                    ?>
+                                                                        <tr>
+                                                                            <td><?php echo $dc['id_detalle'] ?></td>
+                                                                            <td><?php echo $dc['bien_servicio'] ?></td>
+                                                                            <td><?php echo $cantidad ?></td>
+                                                                            <td class="text-right"><?php echo $val_unid ?></td>
+                                                                            <td> <?= $iva ?></td>
+                                                                            <td class="text-right">
+                                                                                <?php
+                                                                                $tot_l = $dc['val_unid'] * (isset($dc['aprobado']) ? $dc['aprobado'] : $dc['cantidad']);
+                                                                                $tot_con_iva = $tot_l + ($tot_l * $dc['iva'] / 100);
+                                                                                $total_compra += $tot_con_iva;
+                                                                                echo pesos($tot_con_iva);
+                                                                                ?>
+                                                                                <input type="hidden" name="total[]" class="sumTotal" value="<?php echo $tot_con_iva; ?>">
+                                                                            </td>
+                                                                            <td class="text-center">
+                                                                                <?php
+                                                                                if ($adquisicion['id_orden'] == '') {
+                                                                                    if ($adquisicion['estado'] >= 1 && $adquisicion['estado'] < 6 && $adquisicion['id_orden'] == '') { ?>
+                                                                                        <button value="<?php echo $dc['id_detalle'] ?>" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></button>
+                                                                                        <button value="<?php echo $dc['id_detalle'] ?>" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></button>
+                                                                                <?php }
+                                                                                } else {
+                                                                                    if ($adquisicion['estado'] < 5) {
+                                                                                        echo '<input type="checkbox" class="aprobado" name="aprobado[' . $dc['id_detalle'] . ']" checked>';
+                                                                                    } else {
+                                                                                        $fila = '<tr>
+                                                                                                    <th colspan="5" class="text-center">TOTAL</th>
+                                                                                                    <th colspan="2" class="text-center">' . pesos($total_compra) . '</th>
+                                                                                                </tr>';
                                                                                     }
-                                                                                }
-                                                                            ?>
-                                                                                <table class="table table-striped table-bordered table-sm nowrap table-hover shadow tableCotRecibidas" style="width:100%">
-                                                                                    <thead>
-                                                                                        <tr>
-                                                                                            <th>Bien o Servicio</th>
-                                                                                            <th>Cantidad</th>
-                                                                                            <th>Val. Estimado Unidad</th>
-                                                                                            <th>Valor Cotizado Unidad</th>
-                                                                                            <th>Diferencia</th>
-                                                                                        </tr>
-                                                                                    </thead>
-                                                                                    <tbody class="modificarCotizaciones">
-                                                                                        <?php
-                                                                                        foreach ($datos_cotiza as $dc) {
-                                                                                        ?>
-                                                                                            <tr>
-                                                                                                <td><?php echo $dc['bien_servicio'] ?></td>
-                                                                                                <td><?php echo $dc['cantidad'] ?></td>
-                                                                                                <td class="text-right"><?php echo pesos($dc['val_estimado_unid']) ?></td>
-                                                                                                <td class="text-right"><?php echo pesos($dc['valor']) ?></td>
-                                                                                                <?php
-                                                                                                $dif =  $dc['valor'] - $dc['val_estimado_unid'];
-                                                                                                $signo = '';
-                                                                                                if ($dif == 0) {
-                                                                                                    $text_clas = 'text-gray';
-                                                                                                } else if ($dif < 0) {
-                                                                                                    $text_clas = 'text-green';
-                                                                                                } else {
-                                                                                                    $text_clas = 'text-red';
-                                                                                                    $signo = '+';
-                                                                                                }
-                                                                                                ?>
-                                                                                                <td class="<?php echo $text_clas ?> text-right"><?php echo $signo . pesos($dif) ?></td>
-                                                                                            </tr>
-                                                                                        <?php
-                                                                                        }
-                                                                                        ?>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            <?php
-                                                                            } else {
-                                                                            ?>
-                                                                                <div class="p-3 mb-2 bg-warning text-white">NO HAY COTIZACIONES RECIBIDAS</div>
-                                                                            <?php
-                                                                            }
-                                                                            ?>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                        <?php
-                                                                $cstv++;
-                                                            }
-                                                        }
-                                                        ?>
+                                                                                } ?>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php
+                                                                    }
+                                                                    echo $fila;
+                                                                    ?>
+                                                                </tbody>
+                                                            </table>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </div>
@@ -720,6 +790,7 @@ if (!empty($adquisicion)) {
                                                         <?php
                                                         if (!empty($cdp)) {
                                                         ?>
+                                                            <input type="hidden" id="num_cdp" value="<?php echo $cdp['id_manu'] ?>">
                                                             <table class="table table-striped table-bordered table-sm nowrap table-hover shadow tableCDP" style="width:100%">
                                                                 <thead class="text-center">
                                                                     <tr>
@@ -778,9 +849,9 @@ if (!empty($adquisicion)) {
                                                             include 'datos/listar/datos_estudio_previo.php';
                                                             if ($adquisicion['estado'] <= 7) {
                                                             ?>
-                                                                <a type="button" class="btn btn-warning btn-sm" id="btnFormatoEstudioPrevio" style="color:white">DESCARGAR FORMATO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
-                                                                <a type="button" class="btn btn-info btn-sm" id="btnMatrizRiesgo" style="color:white">MATRIZ DE RIESGOS&nbsp&nbsp;<span class="fas fa-download fa-lg"></span></a>
-                                                                <a type="button" class="btn btn-primary btn-sm" id="btnAnexos" style="color:white">ANEXOS&nbsp&nbsp;<span class="far fa-copy fa-lg"></span></a>
+                                                                <a type="button" text="<?= isset($posicion[1]) ? $posicion[1] : 0 ?>" class="btn btn-warning btn-sm downloadFormsCtt" id="btnFormatoEstudioPrevio" style="color:white">DESCARGAR FORMATO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
+                                                                <a type="button" class="btn btn-info btn-sm" id="x-x" style="color:white">MATRIZ DE RIESGOS&nbsp&nbsp;<span class="fas fa-download fa-lg"></span></a>
+                                                                <a type="button" text="<?= isset($posicion[2]) ? $posicion[2] : 0 ?>" class="btn btn-primary btn-sm downloadFormsCtt" id="btnAnexos" style="color:white">ANEXOS&nbsp&nbsp;<span class="far fa-copy fa-lg"></span></a>
                                                         <?php }
                                                         } ?>
                                                     </div>
@@ -814,25 +885,37 @@ if (!empty($adquisicion)) {
                                                                 if (PermisosUsuario($permisos, 5302, 2) || $id_rol == 1) {
                                                             ?>
                                                                     <button type="button" class="btn btn-success btn-sm" id='btnAddContrato' value="<?php echo $id_estudio ?>">INICIAR CONTRATACIÓN</button>
-                                                                    <?php
+                                                                <?php
                                                                 }
                                                             } else if ($adquisicion['estado'] >= 7) {
+                                                                if ($adquisicion['estado'] == 7) {
+                                                                ?>
+                                                                    <div class="text-right">
+                                                                        <a type="button" class="btn btn-secondary btn-sm mb-2" id="btnCerrarContrato">Cerrar</a>
+                                                                    </div>
+                                                                    <?php
+                                                                }
                                                                 include 'datos/listar/datos_contrato_compra.php';
                                                                 if ($adquisicion['estado'] == 7) {
                                                                     if ($tipo_compra['id_tipo_compra'] != '2') {
+                                                                        //btnFormatoCompraVenta
                                                                     ?>
-                                                                        <a type="button" class="btn btn-warning btn-sm" id="btnFormatoCompraVenta" style="color:white">DESCARGAR FORMATO COMPRAVENTA&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
-                                                                    <?php } else { ?>
-                                                                        <a type="button" class="btn btn-warning btn-sm" id="btnFormatoServicios" style="color:white">DESCARGAR FORMATO SERVICIOS&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
+                                                                        <button type="button" class="btn btn-warning btn-sm" id="xx" style="color:white" disabled>DESCARGAR FORMATO COMPRAVENTA&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></button>
+                                                                    <?php } else {
+                                                                        //btnFormatoServicios
+                                                                    ?>
+                                                                        <button type="button" class="btn btn-warning btn-sm" id="xxx" style="color:white" disabled>DESCARGAR FORMATO SERVICIOS&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></button>
                                                                     <?php } ?>
-                                                                    <a type="button" class="btn btn-success btn-sm" id="btnEnviarContrato" style="color:white">ENVIAR CONTRATO&nbsp&nbsp;<span class="fas fa-file-upload fa-lg"></span></a>
                                                             <?php }
                                                             }
                                                         }
                                                         if ($adquisicion['estado'] == 9) { ?>
                                                             <a type="button" class="btn btn-warning btn-sm" id="btnFormatoDesigSuper" style="color:white">DESCARGAR FORMATO DESIGNACIÓN DE SUPERVISIÓN&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
-                                                            <a type="button" class="btn btn-success btn-sm" id="btnEnviarActaSupervision" value="<?php echo $adquisicion['id_supervision'] ?>" style="color:white">ENVIAR SUPERVISIÓN&nbsp&nbsp;<span class="fas fa-file-upload fa-lg"></span></a>
+                                                            <a type="button" text="<?= isset($posicion[3]) ? $posicion[3] : 0 ?>" class="btn btn-success btn-sm downloadFormsCtt" id="btnFormatoContrato" style="color:white">DESCARGAR FORMATO CONTRATO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
+                                                            <?php if (false) { ?>
+                                                                <a type="button" class="btn btn-success btn-sm" id="btnEnviarActaSupervision" value="<?php echo $adquisicion['id_supervision'] ?>" style="color:white">ENVIAR SUPERVISIÓN&nbsp&nbsp;<span class="fas fa-file-upload fa-lg"></span></a>
                                                         <?php
+                                                            }
                                                         }
                                                         ?>
                                                     </div>
@@ -946,7 +1029,7 @@ if (!empty($adquisicion)) {
                                                         <?php
                                                         if ($adquisicion['estado'] >= 9) {
                                                         ?>
-                                                            <a type="button" class="btn btn-warning btn-sm" id="btnFormActaInicio" style="color:white">DESCARGAR FORMATO ACTA DE INICIO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
+                                                            <a type="button" text="<?= isset($posicion[4]) ? $posicion[4] : 0 ?>" class="btn btn-warning btn-sm downloadFormsCtt" id="btnFormActaInicio" style="color:white">DESCARGAR FORMATO ACTA DE INICIO&nbsp&nbsp;<span class="fas fa-file-download fa-lg"></span></a>
                                                         <?php
                                                         } else { ?>
                                                             <div class="alert alert-warning" role="alert">
@@ -982,6 +1065,8 @@ if (!empty($adquisicion)) {
                                                 //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                                                 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
                                                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                                                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
                                                 $result = curl_exec($ch);
                                                 curl_close($ch);
                                                 $nvdds = json_decode($result, true);
@@ -1072,6 +1157,8 @@ if (!empty($adquisicion)) {
                                                             //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                                                             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
                                                             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                                            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                                                            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
                                                             $result = curl_exec($ch);
                                                             curl_close($ch);
                                                             $separar = explode('|', $id_c);
@@ -1083,7 +1170,9 @@ if (!empty($adquisicion)) {
                                                             $ch = curl_init($url);
                                                             //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                                                             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                                                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                                                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
                                                             $result = curl_exec($ch);
                                                             curl_close($ch);
                                                             $datos_empresa = json_decode($result, true);*/

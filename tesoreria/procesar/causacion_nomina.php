@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
@@ -26,29 +26,25 @@ try {
                 , `nom_liq_dlab_auxt`.`aux_alim`
                 , `nom_liq_dlab_auxt`.`g_representa`
                 , `nom_liq_dlab_auxt`.`horas_ext`
+                , `ccostos`.`id_ccosto`
+                , `t`.`id_tercero_api`
             FROM
                 `nom_liq_dlab_auxt`
                 INNER JOIN `nom_empleado` 
                     ON (`nom_liq_dlab_auxt`.`id_empleado` = `nom_empleado`.`id_empleado`)
+                LEFT JOIN 
+                    (SELECT
+                        MAX(`id_ccosto`) AS `id_ccosto`
+                        , `id_empleado`
+                    FROM
+                        `nom_ccosto_empleado`
+                    GROUP BY `id_empleado`) AS `ccostos`
+                    ON (`nom_liq_dlab_auxt`.`id_empleado` = `ccostos`.`id_empleado`)
+                LEFT JOIN `tb_terceros` AS `t` 
+                    ON (`nom_empleado`.`no_documento` = `t`.`nit_tercero`)
             WHERE (`nom_liq_dlab_auxt`.`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $sueldoBasico = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-$ced = [];
-$ced[] = 0;
-foreach ($sueldoBasico as $sb) {
-    $ced[] = $sb['no_documento'];
-}
-$cedulas = implode(',', $ced);
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api`, `no_doc` FROM `seg_terceros` WHERE (`no_doc` IN ($cedulas))";
-    $rs = $cmd->query($sql);
-    $idApi = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -208,16 +204,6 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_empleado` , `val_liq` FROM `nom_liq_salario` WHERE (`id_nomina` = $id_nomina)";
-    $rs = $cmd->query($sql);
-    $salario = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `nom_indemniza_vac`.`id_empleado`
                 , `nom_liq_indemniza_vac`.`val_liq`
@@ -264,53 +250,14 @@ try {
                 , `nom_tipo_rubro`.`nombre`
                 , `nom_causacion`.`cuenta`
                 , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
+                , `tb_centrocostos`.`es_pasivo`
+                FROM
+                    `nom_causacion`
                 INNER JOIN `nom_tipo_rubro` 
                     ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'ADMIN'";
-    $rs = $cmd->query($sql);
-    $cAdmin = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'URG'";
-    $rs = $cmd->query($sql);
-    $cUrg = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'PASIVO'";
+                INNER JOIN `tb_centrocostos`
+                    ON (`nom_causacion`.`centro_costo` = `tb_centrocostos`.`id_centro`)
+                WHERE (`tb_centrocostos`.`es_pasivo` = 1)";
     $rs = $cmd->query($sql);
     $cPasivo = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -330,7 +277,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_cuenta` AS `cta_contable` FROM `tes_cuentas` WHERE (`estado` = 1)";
+    $sql = "SELECT `id_cuenta` AS `cta_contable` FROM `tes_cuentas` WHERE (`est_nomina` = 1)";
     $rs = $cmd->query($sql);
     $banco = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -446,6 +393,29 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+if ($tipo_nomina == 'CE' || $tipo_nomina == 'IC') {
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $sql = "SELECT
+                    SUM(`nom_liq_cesantias`.`val_cesantias`) AS `val_cesantias`
+                    , SUM(`nom_liq_cesantias`.`val_icesantias`) AS `val_icesantias`
+                    , `nom_fondo_censan`.`id_tercero_api`
+                FROM
+                    `nom_liq_cesantias`
+                    INNER JOIN `nom_novedades_fc` 
+                        ON (`nom_liq_cesantias`.`id_empleado` = `nom_novedades_fc`.`id_empleado`)
+                    INNER JOIN `nom_fondo_censan` 
+                        ON (`nom_novedades_fc`.`id_fc` = `nom_fondo_censan`.`id_fc`)
+                WHERE (`nom_liq_cesantias`.`id_nomina` =  $id_nomina)
+                GROUP BY `nom_fondo_censan`.`id_tercero_api`";
+        $rs = $cmd->query($sql);
+        $cesantias2 = $rs->fetchAll(PDO::FETCH_ASSOC);
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -466,6 +436,26 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `nom_liq_descuento`.`valor`
+                , `nom_tipo_descuentos`.`id_cuenta`
+                , `nom_otros_descuentos`.`id_empleado`
+            FROM
+                `nom_liq_descuento`
+                INNER JOIN `nom_otros_descuentos` 
+                    ON (`nom_liq_descuento`.`id_dcto` = `nom_otros_descuentos`.`id_dcto`)
+                INNER JOIN `nom_tipo_descuentos` 
+                    ON (`nom_otros_descuentos`.`id_tipo_dcto` = `nom_tipo_descuentos`.`id_tipo`)
+            WHERE (`nom_liq_descuento`.`id_nomina` = $id_nomina)";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 $meses = array(
     '00' => '',
     '01' => 'Enero',
@@ -482,7 +472,7 @@ $meses = array(
     '12' => 'Diciembre'
 );
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-$fecha = $date->format('Y-m-d');
+$fecha = $data[5];
 if ($tipo_nomina == 'N') {
     $objeto = 'LIQUIDACIÓN MENSUAL EMPLEADOS, ' . mb_strtoupper($meses[$mes]) . ' DE ' . $vigencia;
     $id_nom_ce = $id_nomina;
@@ -502,6 +492,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT MAX(`id_manu`) AS `id_manu` FROM `ctb_doc` WHERE `id_vigencia` = $id_vigencia AND `id_tipo_doc` = $tipo_doc";
     $rs = $cmd->query($sql);
+    $consecutivo = $rs->fetch();
     $id_manu = !empty($consecutivo) ? $consecutivo['id_manu'] + 1 : 1;
     $cmd = null;
 } catch (PDOException $e) {
@@ -510,18 +501,21 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `no_doc` = " . $_SESSION['nit_emp'];
+    $sql = "SELECT `id_tercero_api` FROM `tb_terceros` WHERE `nit_tercero` = " . $_SESSION['nit_emp'];
     $rs = $cmd->query($sql);
     $tercero = $rs->fetch();
     $id_ter_api = !empty($tercero) ? $tercero['id_tercero_api'] : 0;
+    $id_ter_api = count($sueldoBasico) == 1 ? $sueldoBasico[0]['id_tercero_api'] : $id_ter_api;
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
+$ids_detalle = [];
+if ($_SESSION['pto'] == '1') {
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $sql = "SELECT
                 `pto_cop_detalle`.`id_pto_cop_det`
                 , `pto_cdp_detalle`.`id_rubro`
                 , `pto_cop_detalle`.`id_tercero_api`
@@ -532,12 +526,14 @@ try {
                 INNER JOIN `pto_cdp_detalle` 
                     ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
             WHERE (`pto_cop_detalle`.`id_ctb_doc` = $id_ctb_doc)";
-    $rs = $cmd->query($sql);
-    $ids_detalle = $rs->fetchAll();
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+        $rs = $cmd->query($sql);
+        $ids_detalle = $rs->fetchAll();
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
 }
+
 try {
     $estado = 2;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -564,6 +560,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+$con_ces = 0;
 foreach ($sueldoBasico as $sb) {
     $id_empleado = $sb['id_empleado'];
     $key = array_search($id_empleado, array_column($compensatorios, 'id_empleado'));
@@ -576,138 +573,139 @@ foreach ($sueldoBasico as $sb) {
     $id_sede = $sb['sede_emp'];
     $tipoCargo = $sb['tipo_cargo'];
     $doc_empleado = $sb['no_documento'];
-    $keyt = array_search($doc_empleado, array_column($idApi, 'no_doc'));
-    $id_tercero = $keyt !== false ? $idApi[$keyt]['id_tercero_api'] : NULL;
+    $id_ter_api = $sb['id_tercero_api'];
     $restar = 0;
     $rest = 0;
     //administrativos
     $contador++;
     $keypf = array_search($id_empleado, array_column($parafiscales, 'id_empleado'));
     $keyss = array_search($id_empleado, array_column($segSocial, 'id_empleado'));
-    try {
-        $liberado = 0;
-        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-        $query = "INSERT INTO `pto_pag_detalle`
+    if ($_SESSION['pto'] == '1') {
+        try {
+            $liberado = 0;
+            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+            $query = "INSERT INTO `pto_pag_detalle`
                     (`id_ctb_doc`,`id_pto_cop_det`,`valor`,`valor_liberado`,`id_tercero_api`)
                 VALUES (?, ?, ?, ?, ?)";
-        $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_ctb_doc_nom, PDO::PARAM_INT);
-        $query->bindParam(2, $id_det, PDO::PARAM_INT);
-        $query->bindParam(3, $valor, PDO::PARAM_STR);
-        $query->bindParam(4, $liberado, PDO::PARAM_STR);
-        $query->bindParam(5, $id_tercero, PDO::PARAM_INT);
-        foreach ($rubros as $rb) {
-            $tipo = $rb['id_tipo'];
-            if ($tipoCargo == '1') {
-                $rubro = $rb['r_admin'];
-            } else {
-                $rubro = $rb['r_operativo'];
-            }
-            $valor = 0;
-            $id_det = NULL;
-            foreach ($ids_detalle as $detalle) {
-                if ($detalle['id_rubro'] == $rubro && $detalle['id_tercero_api'] == $id_tercero) {
-                    $id_det = $detalle['id_pto_cop_det'];
-                    break;
+            $query = $cmd->prepare($query);
+            $query->bindParam(1, $id_ctb_doc_nom, PDO::PARAM_INT);
+            $query->bindParam(2, $id_det, PDO::PARAM_INT);
+            $query->bindParam(3, $valor, PDO::PARAM_STR);
+            $query->bindParam(4, $liberado, PDO::PARAM_STR);
+            $query->bindParam(5, $id_ter_api, PDO::PARAM_INT);
+            foreach ($rubros as $rb) {
+                $tipo = $rb['id_tipo'];
+                if ($tipoCargo == '1') {
+                    $rubro = $rb['r_admin'];
+                } else {
+                    $rubro = $rb['r_operativo'];
                 }
-            }
-            switch ($tipo) {
-                case 1:
-                    $valor = $basico;
-                    break;
-                case 2:
-                    $valor = $extras;
-                    break;
-                case 3:
-                    $valor = $repre;
-                    break;
-                case 4:
-                    $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
-                    $valor = $key !== false ? $vacaciones[$key]['val_bon_recrea'] : 0;
-                    break;
-                case 5:
-                    $key = array_search($id_empleado, array_column($bsp, 'id_empleado'));
-                    $valor = $key !== false ? $bsp[$key]['val_bsp'] : 0;
-                    break;
-                case 6:
-                    $valor = $auxtras;
-                    break;
-                case 7:
-                    $valor = $auxalim;
-                    break;
-                case 8:
-                    $valor = 0;
-                    $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
-                    if ($key !== false) {
-                        $filtro = [];
-                        $filtro = array_filter($incapacidades, function ($incapacidades) use ($id_empleado) {
-                            return $incapacidades["id_empleado"] == $id_empleado;
-                        });
-                        foreach ($filtro as $f) {
-                            if ($f['id_tipo'] == 1) {
-                                $valor += $f['pago_eps'];
-                            } else {
-                                $valor += $f['pago_arl'];
+                $valor = 0;
+                $id_det = NULL;
+                foreach ($ids_detalle as $detalle) {
+                    if ($detalle['id_rubro'] == $rubro && $detalle['id_tercero_api'] == $id_ter_api) {
+                        $id_det = $detalle['id_pto_cop_det'];
+                        break;
+                    }
+                }
+                switch ($tipo) {
+                    case 1:
+                        $valor = $basico;
+                        break;
+                    case 2:
+                        $valor = $extras;
+                        break;
+                    case 3:
+                        $valor = $repre;
+                        break;
+                    case 4:
+                        $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
+                        $valor = $key !== false ? $vacaciones[$key]['val_bon_recrea'] : 0;
+                        break;
+                    case 5:
+                        $key = array_search($id_empleado, array_column($bsp, 'id_empleado'));
+                        $valor = $key !== false ? $bsp[$key]['val_bsp'] : 0;
+                        break;
+                    case 6:
+                        $valor = $auxtras;
+                        break;
+                    case 7:
+                        $valor = $auxalim;
+                        break;
+                    case 8:
+                        $valor = 0;
+                        $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
+                        if ($key !== false) {
+                            $filtro = [];
+                            $filtro = array_filter($incapacidades, function ($incapacidades) use ($id_empleado) {
+                                return $incapacidades["id_empleado"] == $id_empleado;
+                            });
+                            foreach ($filtro as $f) {
+                                if ($f['id_tipo'] == 1) {
+                                    $valor += $f['pago_eps'];
+                                } else {
+                                    $valor += $f['pago_arl'];
+                                }
                             }
                         }
-                    }
-                    break;
-                case 9:
-                    $key = array_search($id_empleado, array_column($indemnizacion, 'id_empleado'));
-                    $valor = $key !== false ? $indemnizacion[$key]['val_liq'] : 0;
-                    break;
-                case 17:
-                    $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
-                    $valor = $key !== false ? $vacaciones[$key]['val_liq'] : 0;
-                    break;
-                case 18:
-                    $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
-                    $valor = $key !== false ? $cesantias[$key]['val_cesantias'] : 0;
-                    break;
-                case 19:
-                    $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
-                    $valor = $key !== false ? $cesantias[$key]['val_icesantias'] : 0;
-                    break;
-                case 20:
-                    $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
-                    $valor = $key !== false ? $vacaciones[$key]['val_prima_vac'] : 0;
-                    break;
-                case 21:
-                    $key = array_search($id_empleado, array_column($prima_nav, 'id_empleado'));
-                    $valor = $key !== false ? $prima_nav[$key]['val_liq_pv'] : 0;
-                    break;
-                case 22:
-                    $key = array_search($id_empleado, array_column($prima_sv, 'id_empleado'));
-                    $valor = $key !== false ? $prima_sv[$key]['val_liq_ps'] : 0;
-                    break;
-                case 32:
-                    $valor = 0;
-                    $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
-                    if ($key !== false) {
-                        $filtro = [];
-                        $filtro = array_filter($incapacidades, function ($incapacidades) use ($id_empleado) {
-                            return $incapacidades["id_empleado"] == $id_empleado;
-                        });
-                        foreach ($filtro as $f) {
-                            $valor += $f['pago_empresa'];
+                        break;
+                    case 9:
+                        $key = array_search($id_empleado, array_column($indemnizacion, 'id_empleado'));
+                        $valor = $key !== false ? $indemnizacion[$key]['val_liq'] : 0;
+                        break;
+                    case 17:
+                        $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
+                        $valor = $key !== false ? $vacaciones[$key]['val_liq'] : 0;
+                        break;
+                    case 18:
+                        $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
+                        $valor = $key !== false ? $cesantias[$key]['val_cesantias'] : 0;
+                        break;
+                    case 19:
+                        $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
+                        $valor = $key !== false ? $cesantias[$key]['val_icesantias'] : 0;
+                        break;
+                    case 20:
+                        $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
+                        $valor = $key !== false ? $vacaciones[$key]['val_prima_vac'] : 0;
+                        break;
+                    case 21:
+                        $key = array_search($id_empleado, array_column($prima_nav, 'id_empleado'));
+                        $valor = $key !== false ? $prima_nav[$key]['val_liq_pv'] : 0;
+                        break;
+                    case 22:
+                        $key = array_search($id_empleado, array_column($prima_sv, 'id_empleado'));
+                        $valor = $key !== false ? $prima_sv[$key]['val_liq_ps'] : 0;
+                        break;
+                    case 32:
+                        $valor = 0;
+                        $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
+                        if ($key !== false) {
+                            $filtro = [];
+                            $filtro = array_filter($incapacidades, function ($incapacidades) use ($id_empleado) {
+                                return $incapacidades["id_empleado"] == $id_empleado;
+                            });
+                            foreach ($filtro as $f) {
+                                $valor += $f['pago_empresa'];
+                            }
                         }
+                        break;
+                    default:
+                        $valor = 0;
+                        break;
+                }
+                if ($valor > 0 && $rubro != '') {
+                    $query->execute();
+                    if (!($cmd->lastInsertId() > 0)) {
+                        echo $query->errorInfo()[2];
                     }
-                    break;
-                default:
-                    $valor = 0;
-                    break;
-            }
-            if ($valor > 0 && $rubro != '') {
-                $query->execute();
-                if (!($cmd->lastInsertId() > 0)) {
-                    echo $query->errorInfo()[2];
                 }
             }
+            $cmd = null;
+        } catch (PDOException $e) {
+            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
         }
-        $cmd = null;
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
     try {
         $neto = 0;
@@ -723,153 +721,214 @@ foreach ($sueldoBasico as $sb) {
         $query->bindParam(5, $credito, PDO::PARAM_STR);
         $query->bindParam(6, $iduser, PDO::PARAM_INT);
         $query->bindParam(7, $fecha2);
-        foreach ($cPasivo as $cp) {
-            $credito = 0;
-            $tipo = $cp['id_tipo'];
-            $cuenta = $cp['cuenta'];
-            $valor = 0;
-            switch ($tipo) {
-                case 1:
-                    $key = array_search($id_empleado, array_column($sindicato, 'id_empleado'));
-                    $valSind = $key !== false ? $sindicato[$key]['val_aporte'] : 0;
-                    $key = array_search($id_empleado, array_column($libranzas, 'id_empleado'));
-                    $valLib =  0;
-                    if ($key !== false) {
-                        foreach ($libranzas as $li) {
-                            if ($li['id_empleado'] == $id_empleado) {
-                                $valLib += $li['val_mes_lib'];
-                            }
-                        }
-                    }
-                    $key = array_search($id_empleado, array_column($embargos, 'id_empleado'));
-                    $valEmb = 0;
-                    if ($key !== false) {
-                        foreach ($embargos as $em) {
-                            if ($em['id_empleado'] == $id_empleado) {
-                                $valEmb += $em['val_mes_embargo'];
-                            }
-                        }
-                    }
-                    $key = array_search($id_empleado, array_column($rfte, 'id_empleado'));
-                    $valRteFte = $key !== false ? $rfte[$key]['val_ret'] : 0;
-                    $ssape = isset($segSocial[$keyss]['aporte_pension_emp']) ? $segSocial[$keyss]['aporte_pension_emp'] : 0;
-                    $ssaspe = isset($segSocial[$keyss]['aporte_solidaridad_pensional']) ? $segSocial[$keyss]['aporte_solidaridad_pensional'] : 0;
-                    $ssase = isset($segSocial[$keyss]['aporte_salud_emp']) ? $segSocial[$keyss]['aporte_salud_emp'] : 0;
-                    $sstot = $ssape + $ssaspe + $ssase;
-                    $valor = $basico + $extras + $repre + $auxtras + $auxalim - ($sstot + $valSind + $valLib + $valEmb + $valRteFte);
-                    if ($valor < 0) {
-                        $rest = $valor * -1;
-                        $valor = 0;
-                    }
-                    break;
-                case 4:
-                    $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
-                    $valor = $key !== false ? $vacaciones[$key]['val_bon_recrea'] : 0;
-                    break;
-                case 5:
-                    $key = array_search($id_empleado, array_column($bsp, 'id_empleado'));
-                    $valor = $key !== false ? $bsp[$key]['val_bsp'] : 0;
-                    break;
-                case 8:
-                    $valor = 0;
-                    $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
-                    if ($key !== false) {
-                        $filtro = [];
-                        $filtro = array_filter($incapacidades, function ($incapacidades) use ($id_empleado) {
-                            return $incapacidades["id_empleado"] == $id_empleado;
-                        });
-                        foreach ($filtro as $f) {
-                            if ($f['id_tipo'] == 1) {
-                                $valor += $f['pago_eps'];
-                            } else {
-                                $valor += $f['pago_arl'];
-                            }
-                        }
-                        $valor -= $rest;
-                        if ($valor < 0) {
-                            $rest = $valor * -1;
-                            $valor = 0;
-                        } else {
-                            $rest = 0;
-                        }
-                    }
 
-                    $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
-                    if ($key !== false) {
-                        if ($incapacidades[$key]['id_tipo'] == 1) {
-                            $valor = $incapacidades[$key]['pago_eps'] - $rest;
-                        } else {
-                            $valor = $incapacidades[$key]['pago_arl'] - $rest;
-                        }
-                        if ($valor < 0) {
-                            $rest = $valor * -1;
-                            $valor = 0;
-                        } else {
-                            $rest = 0;
-                        }
-                    } else {
-                        $valor = 0;
-                    };
-                    break;
-                case 9:
-                    $key = array_search($id_empleado, array_column($indemnizacion, 'id_empleado'));
-                    $valor = $key !== false ? $indemnizacion[$key]['val_liq'] : 0;
-                    break;
-                case 17:
-                    $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
-                    $valor = $key !== false ? $vacaciones[$key]['val_liq'] - $rest : 0;
-                    if ($valor < 0) {
-                        $rest = $valor * -1;
-                        $valor = 0;
-                    } else {
-                        $rest = 0;
-                    }
-                    break;
-                case 18:
-                    $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
-                    $valor = $key !== false ? $cesantias[$key]['val_cesantias'] : 0;
-                    break;
-                case 19:
-                    $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
-                    $valor = $key !== false ? $cesantias[$key]['val_icesantias'] : 0;
-                    break;
-                case 20:
-                    $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
-                    $valor = $key !== false ? $vacaciones[$key]['val_prima_vac'] : 0;
-                    break;
-                case 21:
-                    $key = array_search($id_empleado, array_column($prima_nav, 'id_empleado'));
-                    $valor = $key !== false ? $prima_nav[$key]['val_liq_pv'] : 0;
-                    break;
-                case 22:
-                    $key = array_search($id_empleado, array_column($prima_sv, 'id_empleado'));
-                    $valor = $key !== false ? $prima_sv[$key]['val_liq_ps'] : 0;
-                    break;
-                case 32:
-                    $valor = 0;
-                    $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
-                    if ($key !== false) {
-                        $filtro = [];
-                        $filtro = array_filter($incapacidades, function ($incapacidades) use ($id_empleado) {
-                            return $incapacidades["id_empleado"] == $id_empleado;
-                        });
-                        foreach ($filtro as $f) {
-                            $valor += $f['pago_empresa'];
-                        }
-                        $valor -= $rest;
-                    }
-                    break;
-                default:
-                    $valor = 0;
-                    break;
+        $key_dcto = array_search($id_empleado, array_column($descuentos, 'id_empleado'));
+        $dcto = [];
+        if ($key_dcto !== false) {
+            $dcto = array_filter($descuentos, function ($descuentos) use ($id_empleado) {
+                return $descuentos["id_empleado"] == $id_empleado;
+            });
+        }
+        if (($tipo_nomina == 'CE' || $tipo_nomina == 'IC')) {
+            $valor = 0;
+            if ($tipo_nomina == 'CE') {
+                $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
+                $valor = $key !== false ? $cesantias[$key]['val_cesantias'] : 0;
             }
-            if ($valor > 0 && $cuenta != '') {
-                $query->execute();
-                if (!($cmd->lastInsertId() > 0)) {
-                    echo $query->errorInfo()[2];
-                }
+            if ($tipo_nomina == 'IC') {
+                $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
+                $valor = $key !== false ? $cesantias[$key]['val_icesantias'] : 0;
             }
             $neto += $valor;
+            if ($con_ces == 0) {
+                $cPasivo = array_values($cPasivo);
+                foreach ($cesantias2 as $ces) {
+                    $valor = 0;
+                    $credito = 0;
+                    $key = array_search(18, array_column($cPasivo, 'id_tipo'));
+                    if ($key !== false) {
+                        $cuenta = $cPasivo[$key]['cuenta'];
+                        $valor = $ces['val_cesantias'];
+                        $id_ter_api = $ces['id_tercero_api'];
+                        if ($valor > 0 && $cuenta != '') {
+                            $query->execute();
+                            if (!($cmd->lastInsertId() > 0)) {
+                                echo $query->errorInfo()[2];
+                                exit();
+                            }
+                        }
+                    }
+                    $key = array_search(19, array_column($cPasivo, 'id_tipo'));
+                    if ($key !== false) {
+                        $cuenta = $cPasivo[$key]['cuenta'];
+                        $valor = $ces['val_icesantias'];
+                        $id_ter_api = $ces['id_tercero_api'];
+                        if ($valor > 0 && $cuenta != '') {
+                            $query->execute();
+                            if (!($cmd->lastInsertId() > 0)) {
+                                echo $query->errorInfo()[2];
+                                exit();
+                            }
+                        }
+                    }
+                }
+            }
+            $con_ces = 1;
+        } else {
+            foreach ($cPasivo as $cp) {
+                $credito = 0;
+                $tipo = $cp['id_tipo'];
+                $cuenta = $cp['cuenta'];
+                $valor = 0;
+                switch ($tipo) {
+                    case 1:
+                        $key = array_search($id_empleado, array_column($sindicato, 'id_empleado'));
+                        $valSind = $key !== false ? $sindicato[$key]['val_aporte'] : 0;
+                        $key = array_search($id_empleado, array_column($libranzas, 'id_empleado'));
+                        $valLib =  0;
+                        if ($key !== false) {
+                            foreach ($libranzas as $li) {
+                                if ($li['id_empleado'] == $id_empleado) {
+                                    $valLib += $li['val_mes_lib'];
+                                }
+                            }
+                        }
+                        $key = array_search($id_empleado, array_column($embargos, 'id_empleado'));
+                        $valEmb = 0;
+                        if ($key !== false) {
+                            foreach ($embargos as $em) {
+                                if ($em['id_empleado'] == $id_empleado) {
+                                    $valEmb += $em['val_mes_embargo'];
+                                }
+                            }
+                        }
+                        $val_dcto = 0;
+                        if (!empty($dcto)) {
+                            foreach ($dcto as $d) {
+                                $val_dcto += $d['valor'];
+                            }
+                        }
+                        $key = array_search($id_empleado, array_column($rfte, 'id_empleado'));
+                        $valRteFte = $key !== false ? $rfte[$key]['val_ret'] : 0;
+                        $ssape = isset($segSocial[$keyss]['aporte_pension_emp']) ? $segSocial[$keyss]['aporte_pension_emp'] : 0;
+                        $ssaspe = isset($segSocial[$keyss]['aporte_solidaridad_pensional']) ? $segSocial[$keyss]['aporte_solidaridad_pensional'] : 0;
+                        $ssase = isset($segSocial[$keyss]['aporte_salud_emp']) ? $segSocial[$keyss]['aporte_salud_emp'] : 0;
+                        $sstot = $ssape + $ssaspe + $ssase;
+                        $valor = $basico + $extras + $repre + $auxtras + $auxalim - ($sstot + $valSind + $valLib + $valEmb + $valRteFte + $val_dcto);
+                        if ($valor < 0) {
+                            $rest = $valor * -1;
+                            $valor = 0;
+                        }
+                        break;
+                    case 4:
+                        $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
+                        $valor = $key !== false ? $vacaciones[$key]['val_bon_recrea'] : 0;
+                        break;
+                    case 5:
+                        $key = array_search($id_empleado, array_column($bsp, 'id_empleado'));
+                        $valor = $key !== false ? $bsp[$key]['val_bsp'] : 0;
+                        break;
+                    case 8:
+                        $valor = 0;
+                        $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
+                        if ($key !== false) {
+                            $filtro = [];
+                            $filtro = array_filter($incapacidades, function ($incapacidades) use ($id_empleado) {
+                                return $incapacidades["id_empleado"] == $id_empleado;
+                            });
+                            foreach ($filtro as $f) {
+                                if ($f['id_tipo'] == 1) {
+                                    $valor += $f['pago_eps'];
+                                } else {
+                                    $valor += $f['pago_arl'];
+                                }
+                            }
+                            $valor -= $rest;
+                            if ($valor < 0) {
+                                $rest = $valor * -1;
+                                $valor = 0;
+                            } else {
+                                $rest = 0;
+                            }
+                        }
+
+                        $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
+                        if ($key !== false) {
+                            if ($incapacidades[$key]['id_tipo'] == 1) {
+                                $valor = $incapacidades[$key]['pago_eps'] - $rest;
+                            } else {
+                                $valor = $incapacidades[$key]['pago_arl'] - $rest;
+                            }
+                            if ($valor < 0) {
+                                $rest = $valor * -1;
+                                $valor = 0;
+                            } else {
+                                $rest = 0;
+                            }
+                        } else {
+                            $valor = 0;
+                        };
+                        break;
+                    case 9:
+                        $key = array_search($id_empleado, array_column($indemnizacion, 'id_empleado'));
+                        $valor = $key !== false ? $indemnizacion[$key]['val_liq'] : 0;
+                        break;
+                    case 17:
+                        $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
+                        $valor = $key !== false ? $vacaciones[$key]['val_liq'] - $rest : 0;
+                        if ($valor < 0) {
+                            $rest = $valor * -1;
+                            $valor = 0;
+                        } else {
+                            $rest = 0;
+                        }
+                        break;
+                    case 18:
+                        $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
+                        $valor = $key !== false ? $cesantias[$key]['val_cesantias'] : 0;
+                        break;
+                    case 19:
+                        $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
+                        $valor = $key !== false ? $cesantias[$key]['val_icesantias'] : 0;
+                        break;
+                    case 20:
+                        $key = array_search($id_empleado, array_column($vacaciones, 'id_empleado'));
+                        $valor = $key !== false ? $vacaciones[$key]['val_prima_vac'] : 0;
+                        break;
+                    case 21:
+                        $key = array_search($id_empleado, array_column($prima_nav, 'id_empleado'));
+                        $valor = $key !== false ? $prima_nav[$key]['val_liq_pv'] : 0;
+                        break;
+                    case 22:
+                        $key = array_search($id_empleado, array_column($prima_sv, 'id_empleado'));
+                        $valor = $key !== false ? $prima_sv[$key]['val_liq_ps'] : 0;
+                        break;
+                    case 32:
+                        $valor = 0;
+                        $key = array_search($id_empleado, array_column($incapacidades, 'id_empleado'));
+                        if ($key !== false) {
+                            $filtro = [];
+                            $filtro = array_filter($incapacidades, function ($incapacidades) use ($id_empleado) {
+                                return $incapacidades["id_empleado"] == $id_empleado;
+                            });
+                            foreach ($filtro as $f) {
+                                $valor += $f['pago_empresa'];
+                            }
+                            $valor -= $rest;
+                        }
+                        break;
+                    default:
+                        $valor = 0;
+                        break;
+                }
+                if ($valor > 0 && $cuenta != '') {
+                    $query->execute();
+                    if (!($cmd->lastInsertId() > 0)) {
+                        echo $query->errorInfo()[2];
+                    }
+                }
+                $neto += $valor;
+            }
         }
         $valor = 0;
         $credito = $neto;

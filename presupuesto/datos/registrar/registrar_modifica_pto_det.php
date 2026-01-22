@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -17,15 +17,36 @@ $vigencia = $_SESSION['vigencia'];
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 try {
-    $sql = "SELECT `cod_pptal`, `nom_rubro`, `valor_aprobado`, `id_pto` 
-            FROM `pto_cargue` 
+    $sql = "SELECT 
+                `pto_cargue`.`cod_pptal`
+                , `pto_cargue`.`nom_rubro`
+                , `pto_cargue`.`valor_aprobado`
+                , `pto_cargue`.`id_pto` 
+                , `pto_presupuestos`.`id_tipo`
+            FROM `pto_cargue`
+                INNER JOIN `pto_presupuestos` 
+                    ON (`pto_cargue`.`id_pto` = `pto_presupuestos`.`id_pto`)
             WHERE `id_cargue` = $id_rubroCod";
     $res = $cmd->query($sql);
     $row = $res->fetch();
     $total = !empty($row) ? $row['valor_aprobado'] : 0;
+    $tipo_pto = $row['id_tipo'];
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $sql = "SELECT  `id_tipo_mod` FROM `pto_mod` WHERE (`id_pto_mod` = $id_pto_mod)";
+    $res = $cmd->query($sql);
+    $movto = $res->fetch();
+    $tipo_mvto = $movto['id_tipo_mod'];
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+if ($tipo_pto == 2 && ($tipo_mvto == 2 || $tipo_mvto == 3)) {
+    $valorDeb = $valorCred;
+    $valorCred = 0;
+}
+/*
 if ($total == 0) {
     exit('El rubro no tiene valor aprobado');
 }
@@ -36,7 +57,7 @@ foreach ($saldo as $s) {
 }
 if ($total < 0) {
     exit('El rubro no tiene valor disponible');
-}
+}*/
 try {
     if ($op == 0) {
         $sql = "INSERT INTO `pto_mod_detalle`

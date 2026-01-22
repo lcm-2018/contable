@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -44,7 +44,7 @@ try {
     $sql = "SELECT * FROM tb_tipos_documento";
     $rs = $cmd->query($sql);
     $tipodoc = $rs->fetchAll();
-    $sql = "SELECT * FROM nom_cargo_empleado ORDER BY descripcion_carg";
+    $sql = "SELECT * FROM `nom_cargo_empleado` ORDER BY `descripcion_carg`,`grado` ASC";
     $rs = $cmd->query($sql);
     $cargo = $rs->fetchAll();
     $sql = "SELECT * FROM tb_paises";
@@ -62,6 +62,9 @@ try {
     $sql = "SELECT `id_sede`, `nom_sede` as `nombre` FROM `tb_sedes`";
     $rs = $cmd->query($sql);
     $sedes = $rs->fetchAll();
+    $sql = "SELECT `id_centro`, `nom_centro` FROM `tb_centrocostos` WHERE  `id_centro` > 0 ORDER BY `nom_centro` ASC";
+    $rs = $cmd->query($sql);
+    $ccostos = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -200,7 +203,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar País--</option>
                                                 <?php
                                                 foreach ($pais as $p) {
-                                                    echo '<option value="' . $p['id_pais'] . '" selected>' . $p['nom_pais'] . '</option>';
+                                                    echo '<option value="' . $p['id_pais'] . '">' . $p['nom_pais'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -211,7 +214,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar departamento--</option>
                                                 <?php
                                                 foreach ($dpto as $d) {
-                                                    echo '<option value="' . $d['id_dpto'] . '">' . $d['nom_departamento'] . '</option>';
+                                                    echo '<option value="' . $d['id_departamento'] . '">' . $d['nom_departamento'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -234,7 +237,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar País--</option>
                                                 <?php
                                                 foreach ($pais as $p) {
-                                                    echo '<option value="' . $p['id_pais'] . '" selected>' . $p['nom_pais'] . '</option>';
+                                                    echo '<option value="' . $p['id_pais'] . '">' . $p['nom_pais'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -245,7 +248,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar departamento--</option>
                                                 <?php
                                                 foreach ($dpto as $d) {
-                                                    echo '<option value="' . $d['id_dpto'] . '">' . $d['nom_departamento'] . '</option>';
+                                                    echo '<option value="' . $d['id_departamento'] . '">' . $d['nom_departamento'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -303,7 +306,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar País--</option>
                                                 <?php
                                                 foreach ($pais as $p) {
-                                                    echo '<option value="' . $p['id_pais'] . '" selected>' . $p['nom_pais'] . '</option>';
+                                                    echo '<option value="' . $p['id_pais'] . '">' . $p['nom_pais'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -316,7 +319,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar departamento--</option>
                                                 <?php
                                                 foreach ($dpto as $d) {
-                                                    echo '<option value="' . $d['id_dpto'] . '">' . $d['nom_departamento'] . '</option>';
+                                                    echo '<option value="' . $d['id_departamento'] . '">' . $d['nom_departamento'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -347,7 +350,7 @@ $error = "Debe diligenciar este campo";
                                                 <option selected value="0">--Selecionar cargo--</option>
                                                 <?php
                                                 foreach ($cargo as $c) {
-                                                    echo '<option value="' . $c['id_cargo'] . '">' . $c['descripcion_carg'] . '</option>';
+                                                    echo '<option value="' . $c['id_cargo'] . '">' . $c['descripcion_carg'] . ' -> Grado ' . $c['grado'] . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -399,10 +402,25 @@ $error = "Debe diligenciar este campo";
                                                 <div class="form-control form-control-sm">
                                                     <div class="form-group form-check">
                                                         <input type="checkbox" class="form-check-input" id="checkDependientes" name="checkDependientes">
-                                                        <label class="form-check-label" for="checkDependientes">Dependientes</label>
+                                                        <label class="form-check-label mr-4" for="checkDependientes">Dependientes</label>
+                                                        <input type="checkbox" class="form-check-input" id="checkBsp" name="checkBsp" checked>
+                                                        <label class="form-check-label" for="checkBsp">BSP</label>
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row px-4">
+                                        <div class="form-group col-md-2">
+                                            <label for="slcCCostoEmp" class="small">Centro Costo</label>
+                                            <select id="slcCCostoEmp" name="slcCCostoEmp" class="form-control form-control-sm py-0 sm" aria-label="Default select example">
+                                                <option selected value="0">--Selecionar cargo--</option>
+                                                <?php
+                                                foreach ($ccostos as $cc) {
+                                                    echo '<option value="' . $cc['id_centro'] . '">' . $cc['nom_centro'] . '</option>';
+                                                }
+                                                ?>
+                                            </select>
                                         </div>
                                     </div>
                                     <input type="number" id="numEstadoEmp" value="1" name="numEstadoEmp" hidden>

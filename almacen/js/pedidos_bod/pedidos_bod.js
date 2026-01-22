@@ -40,6 +40,7 @@
                     data.id_sedpro = $('#sl_sedpro_filtro').val();
                     data.id_bodpro = $('#sl_bodpro_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
+                    data.modulo = $('#sl_modulo_origen').val();
                 }
             },
             columns: [
@@ -53,19 +54,23 @@
                 { 'data': 'nom_sede_provee' },
                 { 'data': 'nom_bodega_provee' },
                 { 'data': 'val_total' },
+                { 'data': 'estado' },
                 { 'data': 'nom_estado' },
+                { 'data': 'traslados' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [3, 4, 5, 6, 7, 8] },
+                { class: 'text-wrap', targets: [4, 5, 6, 7, 8] },
                 { type: "numeric-comma", targets: 9 },
-                { orderable: false, targets: 11 }
+                { visible: false, targets: 10 },
+                { orderable: false, targets: 13 }
             ],
             rowCallback: function(row, data) {
-                var estado = $($(row).find("td")[10]).text();
-                if (estado == 'PENDIENTE') {
+                if (data.estado == 1) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
-                } else if (estado == 'ANULADO') {
+                } else if (data.estado == 2) {
+                    $($(row).find("td")[0]).css("background-color", "PaleTurquoise");
+                } else if (data.estado == 0) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
             },
@@ -153,11 +158,7 @@
                         $('#id_pedido').val(r.id);
                         $('#txt_ide').val(r.id);
 
-                        $('#sl_sede_solicitante').prop('disabled', true);
-                        $('#sl_bodega_solicitante').prop('disabled', true);
-                        $('#sl_sede_proveedor').prop('disabled', true);
-                        $('#sl_bodega_proveedor').prop('disabled', true);
-                        $('#btn_cerrar').prop('disabled', false);
+                        $('#btn_confirmar').prop('disabled', false);
                         $('#btn_imprimir').prop('disabled', false);
 
                         $('#divModalDone').modal('show');
@@ -201,12 +202,49 @@
         });
     });
 
-    //Cerrar un registro Pedido
-    $('#divForms').on("click", "#btn_cerrar", function() {
+    //confirmar un registro Pedido
+    $('#divForms').on("click", "#btn_confirmar", function() {
         let id = $(this).attr('value');
-        confirmar_proceso('pedidos_close', id);
+        confirmar_proceso('pedidos_conf', id);
     });
-    $('#divModalConfDel').on("click", "#pedidos_close", function() {
+    $('#divModalConfDel').on("click", "#pedidos_conf", function() {
+        var id = $(this).attr('value');
+        $.ajax({
+            type: 'POST',
+            url: 'editar_pedidos.php',
+            dataType: 'json',
+            data: { id: $('#id_pedido').val(), oper: 'conf' }
+        }).done(function(r) {
+            $('#divModalConfDel').modal('hide');
+            if (r.mensaje == 'ok') {
+                let pag = $('#tb_pedidos').DataTable().page.info().page;
+                reloadtable('tb_pedidos', pag);
+
+                $('#txt_num_pedido').val(r.num_pedido);
+                $('#txt_est_pedido').val('CONFIRMADO');
+
+                $('#btn_guardar').prop('disabled', true);
+                $('#btn_confirmar').prop('disabled', true);
+                $('#btn_finalizar').prop('disabled', false);
+                $('#btn_anular').prop('disabled', false);
+
+                $('#divModalDone').modal('show');
+                $('#divMsgDone').html("Proceso realizado con éxito");
+            } else {
+                $('#divModalError').modal('show');
+                $('#divMsgError').html(r.mensaje);
+            }
+        }).always(function() {}).fail(function() {
+            alert('Ocurrió un error');
+        });
+    });
+
+    //finalizar un registro Pedido
+    $('#divForms').on("click", "#btn_finalizar", function() {
+        let id = $(this).attr('value');
+        confirmar_proceso('pedidos_finalizar', id);
+    });
+    $('#divModalConfDel').on("click", "#pedidos_finalizar", function() {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
@@ -219,12 +257,12 @@
                 let pag = $('#tb_pedidos').DataTable().page.info().page;
                 reloadtable('tb_pedidos', pag);
 
-                $('#txt_num_pedido').val(r.num_pedido);
-                $('#txt_est_pedido').val('CERRADO');
+                $('#txt_est_pedido').val('FINALIZADO');
 
                 $('#btn_guardar').prop('disabled', true);
-                $('#btn_cerrar').prop('disabled', true);
-                $('#btn_anular').prop('disabled', false);
+                $('#btn_confirmar').prop('disabled', true);
+                $('#btn_finalizar').prop('disabled', true);
+                $('#btn_anular').prop('disabled', true);
 
                 $('#divModalDone').modal('show');
                 $('#divMsgDone').html("Proceso realizado con éxito");
@@ -258,7 +296,8 @@
                 $('#txt_est_pedido').val('ANULADO');
 
                 $('#btn_guardar').prop('disabled', true);
-                $('#btn_cerrar').prop('disabled', true);
+                $('#btn_confirmar').prop('disabled', true);
+                $('#btn_finalizar').prop('disabled', true);
                 $('#btn_anular').prop('disabled', true);
 
                 $('#divModalDone').modal('show');
@@ -309,7 +348,7 @@
                 type: 'POST',
                 url: 'editar_pedidos_detalles.php',
                 dataType: 'json',
-                data: data + "&id_pedido=" + $('#id_pedido').val() + '&oper=add'
+                data: data + "&id_pedido=" + $('#id_pedido').val() + "&id_bodega=" + $('#sl_bodega_proveedor').val() + '&oper=add'
             }).done(function(r) {
                 if (r.mensaje == 'ok') {
                     let pag = ($('#id_detalle').val() == -1) ? 0 : $('#tb_pedidos_detalles').DataTable().page.info().page;
@@ -385,7 +424,8 @@
                 fec_fin: $('#txt_fecfin_filtro').val(),
                 id_sedpro: $('#sl_sedpro_filtro').val(),
                 id_bodpro: $('#sl_bodpro_filtro').val(),
-                estado: $('#sl_estado_filtro').val()
+                estado: $('#sl_estado_filtro').val(),
+                modulo: $('#sl_modulo_origen').val()
             }, function(he) {
                 $('#divTamModalImp').removeClass('modal-sm');
                 $('#divTamModalImp').removeClass('modal-lg');

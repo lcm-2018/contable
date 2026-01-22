@@ -2,32 +2,10 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>CONTAFACIL</title>
-    <style>
-        .text {
-            mso-number-format: "\@"
-        }
-    </style>
-
-    <?php
-
-    header("Content-type: application/vnd.ms-excel charset=utf-8");
-    header("Content-Disposition: attachment; filename=FORMATO_201101_F07_AGR.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
-
-    ?>
-</head>
-<?php
 $vigencia = $_SESSION['vigencia'];
 $fecha_corte = $_POST['fecha'];
 function pesos($valor)
@@ -136,6 +114,8 @@ FROM
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             $result = curl_exec($ch);
             $error = curl_error($ch);
             curl_close($ch);
@@ -148,6 +128,8 @@ FROM
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
                 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
                 $res_api = curl_exec($ch);
                 curl_close($ch);
                 $dat_ter = json_decode($res_api, true);
@@ -215,5 +197,3 @@ FROM
     </div>
 
 </div>
-
-</html>

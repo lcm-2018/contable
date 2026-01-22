@@ -68,7 +68,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                     <div class="form-group col-md-3">
                         <label for="txt_nom_bod" class="small">Sede</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_sed" class="small" value="<?php echo $obj['nom_sede'] ?>" readonly="readonly">
-                        <input type="hidden" id="id_txt_sede" name="id_txt_sede" value="<?php echo $obj['id_sede'] ?>">
+                        <input type="hidden" id="id_txt_nom_sed" name="id_txt_nom_sed" value="<?php echo $obj['id_sede'] ?>">
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_fec_ing" class="small">Fecha pedido</label>
@@ -94,14 +94,18 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
             </form>    
             <table id="tb_pedidos_detalles" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                 <thead>
-                <tr class="text-center centro-vertical">
-                        <th>Id</th>
-                        <th>Código</th>
-                        <th>Descripción</th>                        
-                        <th>Cantidad</th>
-                        <th>Vr. Última Compra</th> 
-                        <th>Total</th>
-                        <th>Acciones</th>
+                    <tr class="text-center centro-vertical">
+                        <th rowspan="2">Id</th>
+                        <th rowspan="2">Código</th>
+                        <th rowspan="2">Descripción</th>                        
+                        <th colspan="2">Cantidad</th>
+                        <th rowspan="2">Vr. Promedio</th> 
+                        <th rowspan="2">Total</th>
+                        <th rowspan="2">Acciones</th>
+                    </tr>
+                    <tr class="text-center centro-vertical">
+                        <th>Solicitada</th>
+                        <th>Aprobada</th>
                     </tr>
                 </thead>
                 <tbody class="text-left centro-vertical"></tbody>

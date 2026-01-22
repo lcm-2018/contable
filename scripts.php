@@ -25,7 +25,3 @@
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/js/jquery-ui.min.js?v=<?php echo date('YmdHis') ?>"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/js/sweetalert2010.js?v=<?php echo date('YmdHis') ?>"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/almacen/js/common/common.js?v=<?php echo date('YmdHis') ?>"></script>
-    <script type="text/javascript">
-        window.urlin = "<?php echo $_SESSION['urlin']; ?>"
-        window.user = "<?php echo $_SESSION['id_user']; ?>"
-    </script>

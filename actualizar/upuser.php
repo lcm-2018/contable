@@ -30,7 +30,7 @@ try {
         $updata = 0;
     }
     if (!($sql->execute())) {
-        print_r($sql->errorInfo()[2]);
+        echo $sql->errorInfo()[2];
         exit();
     }
     if ($updata > 0) {

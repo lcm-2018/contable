@@ -10,6 +10,10 @@ $url = $_SESSION['urlin'];
 
 ?>
 <nav id="navMenu" class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <input type="hidden" id="user_js" value="<?= base64_encode($_SESSION['id_user']) ?>">
+    <input type="hidden" id="url_js" value="<?= base64_encode($url) ?>">
+    <input type="hidden" id="op_pto" value="<?= base64_encode($_SESSION['pto']) ?>">
+    <input type="hidden" id="op_caracter" value="<?= base64_encode($_SESSION['caracter']) ?>">
     <a class="navbar-brand sombra-nav" href="<?php echo $url ?>/inicio.php" title="Inicio"><img class="card-img-top" src="<?php echo $url ?>/images/logoFinanciero.png" alt="logo"></a>
     <button class="btn btn-link btn-sm order-1 order-lg-0 sombra-nav" id="sidebarToggle" value="<?php echo $_SESSION['navarlat']; ?>" href="#"><i id="navlateralSH" class="fas fa-bars fa-lg" style="color: #A9CCE3;"></i></button>
     <ul class="navbar-nav ml-auto mr-0 mr-md-3 my-2 my-md-0">
@@ -35,17 +39,19 @@ $url = $_SESSION['urlin'];
                 <?php if ($id_rol == 1) { ?>
                     <a class="dropdown-item sombra" href="<?php echo $url ?>/actualizar/empresa/formupempresa.php">Editar Empresa</a>
                 <?php } ?>
-                <a class="dropdown-item sombra" href="<?php echo $url ?>/vigencia.php">Cambiar Vigencia</a>
                 <a class="dropdown-item sombra" href="#" id="linkChangePass">Cambiar Contraseña</a>
                 <?php if ($id_rol == 1) { ?>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item sombra" href="<?php echo $url ?>/usuarios/listusers.php">Gestión de usuarios</a>
                     <a class="dropdown-item sombra" href="<?php echo $url ?>/usuarios/listperfiles.php">Perfiles</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item sombra" href="#" id="hrefCierre" data-toggle="modal" data-target="#divModalPermisos">Cierre de periodo</a>
+                    <a class="dropdown-item sombra" href="#" id="hrefCierre">Cierre de periodo</a>
 
                 <?php }
+                if ($id_rol == 1 || PermisosUsuario($permisos, 6001, 0)) {
                 ?>
+                    <a class="dropdown-item sombra" href="#" id="hrefGestionDocs">Gestión Documentos</a>
+                <?php } ?>
                 <a class="dropdown-item sombra" href="#" onclick=cambiarFechaSesion(<?php echo $_SESSION['vigencia'] . "," . $_SESSION['id_user'] . ",'" . $url . "'"; ?>) data-target="#divModalPermisos">Fecha de sesión</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item sombra" href="<?php echo $url ?>/cerrar_sesion.php">Cerrar Sesión</a>
@@ -54,7 +60,7 @@ $url = $_SESSION['urlin'];
         </li>
     </ul>
 </nav>
-<div class="modal fade" id="divModalPermisos" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+<div class="modal fade" id="divModalPermisos" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="false" data-backdrop="static" data-keyboard="false">
     <div id="divTamModalPermisos" class="modal-dialog modal-dialog-centered text-center" role="document">
         <div class="modal-content">
             <div class="modal-body text-center" id="divTablePermisos">

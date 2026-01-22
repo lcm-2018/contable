@@ -1,7 +1,11 @@
 <?php
 session_start();
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -67,10 +71,46 @@ try {
             FROM
                 `nom_empleado`
                 LEFT JOIN  
-                (SELECT 
-                    `id_empleado`,`val_bsp`,`mes`,`anio`
-                FROM `nom_liq_bsp`
-                WHERE `id_bonificaciones` IN (SELECT MAX(`id_bonificaciones`) FROM `nom_liq_bsp` WHERE `id_empleado`IN ($ids) GROUP BY `id_empleado`)) AS `t1`
+                (SELECT
+                    `ts1`.`id_empleado`, `val_bsp`,`mes`,`anio` 
+                FROM 
+                    (SELECT 
+                        `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
+                    FROM 
+                        `nom_liq_bsp`
+                    WHERE `id_bonificaciones` IN 
+                        (SELECT
+                            MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                        FROM
+                            `nom_liq_bsp`
+                        INNER JOIN `nom_nominas` 
+                            ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                        WHERE (`nom_nominas`.`tipo` = 'N' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                        GROUP BY `nom_liq_bsp`.`id_empleado`
+                        UNION ALL
+                        SELECT
+                            MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                        FROM
+                            `nom_liq_bsp`
+                        INNER JOIN `nom_nominas` 
+                            ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                        WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                        GROUP BY `nom_liq_bsp`.`id_empleado`)
+                    GROUP BY `id_empleado`) AS  `ts1`
+                INNER JOIN
+                    (SELECT 
+                        `id_empleado`,`mes`,`anio` 
+                    FROM  `nom_liq_bsp` 
+                    WHERE  `id_bonificaciones` IN 
+                        (SELECT
+                            MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                        FROM
+                            `nom_liq_bsp`
+                        INNER JOIN `nom_nominas` 
+                            ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                        WHERE (`nom_nominas`.`tipo` = 'N' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                        GROUP BY `nom_liq_bsp`.`id_empleado`)) AS `ts2`
+                    ON (`ts1`.`id_empleado` = `ts2`.`id_empleado`)) AS `t1`
                     ON (`t1`.`id_empleado` = `nom_empleado`.`id_empleado`)
                 LEFT JOIN 
                 (SELECT 
@@ -91,7 +131,7 @@ try {
                         `nom_liq_prima`
                     INNER JOIN `nom_nominas`
                         ON (`nom_liq_prima`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                    WHERE `nom_nominas`.`tipo` = 'PV'
+                    WHERE `nom_nominas`.`tipo` = 'PV' AND `nom_nominas`.`vigencia` <= '$vigencia'
                     GROUP BY `id_empleado`
                     UNION ALL 
                     SELECT
@@ -116,7 +156,7 @@ try {
                     , SUM(`nom_liq_vac`.`val_prima_vac`) AS `val_prima_vac`
                     , SUM(`nom_liq_vac`.`val_liq`) AS `val_liq`
                     , SUM(`nom_liq_vac`.`val_bon_recrea`) AS `val_bon_recrea`
-                    , `nom_vacaciones`.`corte` AS `corte`  
+                    , `nom_vacaciones`.`corte`  
                 FROM
                     `nom_liq_vac`
                 INNER JOIN `nom_vacaciones` 
@@ -129,7 +169,7 @@ try {
                         ON (`nom_liq_vac`.`id_vac` = `nom_vacaciones`.`id_vac`)
                     INNER JOIN `nom_nominas`
                         ON (`nom_liq_vac`.`id_nomina` = `nom_nominas`.`id_nomina`)
-                    WHERE `nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'VC'
+                    WHERE (`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'VC') AND `nom_nominas`.`vigencia` <= '$vigencia'
                     GROUP BY `id_empleado`
                     UNION ALL 
                     SELECT 
@@ -183,12 +223,16 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "SELECT 
-                `id_salario`,`id_empleado`, `salario_basico`  
-            FROM
-            `nom_salarios_basico`
-            WHERE `id_salario` 
-                IN (SELECT MAX(`id_salario`) AS `id_salario` FROM `nom_salarios_basico` GROUP BY `id_empleado`)
-            AND `id_empleado` IN ($ids)";
+                `id_empleado`, `sal_base` AS `salario_basico` 
+            FROM `nom_liq_salario` 
+            WHERE `id_sal_liq` IN
+                (SELECT 
+                    MAX(`id_sal_liq`) 
+                FROM  `nom_liq_salario` 
+                    INNER JOIN `nom_nominas`
+                        ON (`nom_liq_salario`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                WHERE `nom_nominas`.`tipo` = 'N'
+                GROUP BY `id_empleado`)";
     $rs = $cmd->query($sql);
     $salario = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -613,7 +657,7 @@ if (count($empleado) > 0) {
             $sql->bindParam(6, $fec_retiro, PDO::PARAM_STR);
             $sql->execute();
             if (!($cmd->lastInsertId() > 0)) {
-                echo $cdm->errorInfo()[2] . 'PS';
+                echo $cmd->errorInfo()[2] . 'PS';
             }
             $cmd = null;
         } catch (PDOException $e) {
@@ -885,8 +929,8 @@ if (count($empleado) > 0) {
         try {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-            $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`) 
-                    VALUES (?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`, `sal_base`) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
             $sql = $cmd->prepare($sql);
             $sql->bindParam(1, $id, PDO::PARAM_INT);
             $sql->bindParam(2, $salarioneto, PDO::PARAM_STR);
@@ -894,6 +938,7 @@ if (count($empleado) > 0) {
             $sql->bindParam(4, $mpag, PDO::PARAM_STR);
             $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
             $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
+            $sql->bindParam(7, $salbase, PDO::PARAM_STR);
             $sql->execute();
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -982,7 +1027,7 @@ function PromedioHoras($feci, $fecf, $id)
                         , `tipo`
                     FROM
                         `nom_nominas`
-                    WHERE (`estado` >= 5 AND `tipo` = 'N' AND `id_nomina` > 0)) AS `t1`
+                    WHERE (`estado` = 5 AND `tipo` = 'N' AND `id_nomina` > 0)) AS `t1`
                 WHERE `t1`.`fecha` BETWEEN '$feci' AND '$fecf'";
         $rs = $cmd->query($sql);
         $ids = $rs->fetchAll();

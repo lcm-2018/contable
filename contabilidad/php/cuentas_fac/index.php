@@ -8,7 +8,11 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
+<<<<<<< HEAD
     echo '<script>window.location.replace("../../../index.php");</script>';
+=======
+    header("Location: ../../../index.php");
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
     exit();
 }
 
@@ -71,6 +75,7 @@ include '../../../permisos.php';
                             <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>
                                     <tr class="text-center centro-vertical">
+<<<<<<< HEAD
                                         <th>Id</th>
                                         <th>Régimen</th>
                                         <th>Cobertura</th>
@@ -83,6 +88,42 @@ include '../../../permisos.php';
                             </table>
                         </div>
 
+=======
+                                        <th rowspan="2">Id</th>
+                                        <th rowspan="2">Régimen</th>
+                                        <th rowspan="2">Cobertura</th>
+                                        <th rowspan="2">Modalidad</th>
+                                        <th rowspan="2">Fecha Inicio de Vigencia</th>
+                                        <th colspan="15">Cuentas Contables</th>
+                                        <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Acciones</th>
+                                    </tr>
+                                    <tr class="text-center centro-vertical">
+                                        <th>Presto.</th>
+                                        <th>Presto.Ant.</th>
+                                        <th>Débito</th>
+                                        <th>Crédito</th>
+                                        <th>Copago</th>
+                                        <th>Cop.Cap.</th>
+                                        <th>Glo.Ini.deb.</th>
+                                        <th>Glo.Ini.cre.</th>
+                                        <th>Glo_def.</th>
+                                        <th>Devol.</th>
+                                        <th>Caja</th>
+                                        <th>Fac.Glob.</th>
+                                        <th>Por Iden.</th>
+                                        <th>Baja</th>
+                                        <th>Vigente</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                            <table class="table-bordered table-sm col-md-2">
+                                <tr>
+                                    <td style="background-color:#ffc107">Cuentas Contables Vigentes</td>
+                                </tr>
+                            </table>
+                        </div>
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
                     </div>
                 </div>
             </main>

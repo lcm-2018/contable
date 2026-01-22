@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -52,9 +52,10 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT SUM(`valor`) AS `total`, `id_nomina` FROM `nom_cdp_empleados` GROUP BY `id_nomina`";
+    $sql = "SELECT SUM(`valor`) AS `total`, `id_nomina` FROM `nom_cdp_empleados` WHERE `tipo` = 'N'
+            GROUP BY `id_nomina`";
     $rs = $cmd->query($sql);
-    $totxnomina = $rs->fetchAll();
+    $totxnomina = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
@@ -80,26 +81,7 @@ $meses = [
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ]
@@ -116,9 +98,10 @@ $meses = [
             <table id="tableContrtacionCdp" class="table table-striped table-bordered  table-sm table-hover shadow" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th class="w-15">ID</th>
+                        <th class="w-10">ID</th>
                         <th class="w-60">DESCRIPCIÓN</th>
                         <th class="w-15">VALOR SOLICITADO</th>
+                        <th class="w-10">FECHA</th>
                         <th class="w-10">ACCIONES</th>
                     </tr>
                 </thead>
@@ -126,13 +109,12 @@ $meses = [
                     <?php
                     foreach ($solicitudes as $ce) {
                         $id_nom = $ce['id_nomina'];
+                        $key = array_search($id_nom, array_column($totxnomina, 'id_nomina'));
+                        $total = $key !== false ? $totxnomina[$key]['total'] : 0;
+                        $patronal = '';
                         if ($ce['tipo'] == 'PL') {
                             $patronal = ' - PATRONAL';
                             $total = $ce['patronal'];
-                        } else {
-                            $key = array_search($id_nom, array_column($totxnomina, 'id_nomina'));
-                            $total = $key !== false ? $totxnomina[$key]['total'] : 0;
-                            $patronal = '';
                         }
                         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {
                             $editar = '<button value="' . $id_nom . '|' . $ce['tipo'] . '" onclick="CofirmaCdpRp(this)" class="btn btn-outline-primary btn-sm btn-circle shadow-gb confirmar" title="Confirmar Generación de CDP y RP"><span class="fas  fa-check-square fa-lg"></span></button>';
@@ -144,6 +126,7 @@ $meses = [
                             <td class="text-left"><?php echo $ce['id_nomina'] ?></td>
                             <td class="text-left"><?php echo $ce['descripcion'] . ' - ' . $meses[$mesu] . ' DE ' . $ce['vigencia'] . $patronal ?></td>
                             <td class="text-right">$ <?php echo number_format($total, 2, ',', '.') ?></td>
+                            <td class="text-center"><input type="date" class="form-control form-control-sm" name="fec_doc[]" value="<?php echo date('Y-m-d') ?>"></td>
                             <td class="text-center"> <?php echo $editar ?></td>
                         </tr>
                     <?php
@@ -154,6 +137,6 @@ $meses = [
         </div>
     </div>
     <div class="text-right pt-3">
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>

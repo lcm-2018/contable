@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -11,9 +11,8 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `id_consulta`,`nombre`, `parametros`, `consulta`, `fec_reg`
-            FROM
-                `seg_consultas_sql`
+                `id_consulta`,`nom_consulta`,`des_consulta`,`consulta`,`parametros`,`tipo`,`id_opcion`
+            FROM `tb_consultas_sql`
             WHERE `id_consulta` = $id_consulta";
     $rs = $cmd->query($sql);
     $consultas = $rs->fetch(PDO::FETCH_ASSOC);
@@ -22,10 +21,6 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 $parametros = json_decode($consultas['parametros'], true);
-$head = '';
-foreach ($consultas as $key => $value) {
-    $head .= '<th>' . $key . '</th>';
-}
 ?>
 <script>
     var setIdioma = {
@@ -70,11 +65,13 @@ foreach ($consultas as $key => $value) {
         <div class="p-3">
             <?php
             echo ' <form id="formParams"><div class="form-row"><input type="hidden" name="id" value="' . $id_consulta . '">';
-            foreach ($parametros as $key => $value) {
-                echo '<div class="form-group col-md-3">
+            foreach ($parametros as $element) {
+                foreach ($element as $key => $value) {
+                    echo '<div class="form-group col-md-3">
                     <label class="small">' . $key . '</label>
                     <input type="' . $value . '" class="form-control form-control-sm" name="p[]">
                 </div>';
+                }
             }
             echo '</div></form>';
             ?>

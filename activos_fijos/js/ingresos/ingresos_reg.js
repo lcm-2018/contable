@@ -5,9 +5,9 @@
             buttons: [{
                 action: function(e, dt, node, config) {
                     $.post("../common/buscar_articulos_act_frm.php", function(he) {
-                        $('#divTamModalBus').removeClass('modal-lg');
+                        $('#divTamModalBus').removeClass('modal-xl');
                         $('#divTamModalBus').removeClass('modal-sm');
-                        $('#divTamModalBus').addClass('modal-xl');
+                        $('#divTamModalBus').addClass('modal-lg');
                         $('#divModalBus').modal('show');
                         $("#divFormsBus").html(he);
                     });
@@ -41,7 +41,7 @@
                 { orderable: false, targets: 9 }
             ],
             order: [
-                [0, "desc"]
+                [0, "asc"]
             ],
             lengthMenu: [
                 [10, 25, 50, -1],

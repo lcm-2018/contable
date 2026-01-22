@@ -1,16 +1,76 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
+include '../../financiero/consultas.php';
 $vigencia = $_SESSION['vigencia'];
 $id_vigencia = $_SESSION['id_vigencia'];
 $data = explode('|', file_get_contents("php://input"));
 $idNomina = $data[0];
 $tipo_nomina = $data[1];
-
+$fec_doc = $data[2];
+//validar si hay saldo para los rubros 
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "SELECT
+                `nom_cdp_empleados`.`rubro`
+                , `nom_cdp_empleados`.`valor`
+                , `pto_cargue`.`cod_pptal`
+            FROM
+                `nom_cdp_empleados`
+                INNER JOIN `pto_cargue` 
+                    ON (`nom_cdp_empleados`.`rubro` = `pto_cargue`.`id_cargue`)
+            WHERE (`nom_cdp_empleados`.`id_nomina` = $idNomina AND `nom_cdp_empleados`.`tipo` = 'N')";
+    $rs = $cmd->query($sql);
+    $valxrubro = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+if (empty($valxrubro)) {
+    echo 'No se ha generado una solicitud de CDP para esta nómina';
+    exit();
+} else {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $valida = false;
+    $tabla = '<table class="table table-bordered table-striped table-hover table-sm" style="font-size: 12px; width: 100%">
+                <thead>
+                    <tr>
+                        <th>Rubro</th>
+                        <th>Valor</th>
+                        <th>Saldo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>';
+    foreach ($valxrubro as $vr) {
+        $rubro = $vr['rubro'];
+        $valor = $vr['valor'];
+        $cod_rubro = $vr['cod_pptal'];
+        $respuesta = SaldoRubro($cmd, $rubro, $fec_doc, 0);
+        $saldo = $respuesta['valor_aprobado'] - $respuesta['debito_cdp'] + $respuesta['credito_cdp'] + $respuesta['debito_mod'] - $respuesta['credito_mod'];
+        $estado = $saldo >= $valor ? '<span class="badge badge-success">Disponible</span>' : '<span class="badge badge-danger">Sin Saldo</span>';
+        if ($saldo < $valor) {
+            $valida = true;
+            $tabla .= '<tr>
+                        <td>' . $cod_rubro . '</td>
+                        <td class="text-right">$ ' . number_format($valor, 2, ',', '.') . '</td>
+                        <td class="text-right">$ ' . number_format($saldo, 2, ',', '.') . '</td>
+                        <td>' . $estado . '</td>
+                    </tr>';
+        }
+    }
+    $tabla .= '</tbody></table>';
+    if ($valida) {
+        echo $tabla;
+        exit();
+    }
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -24,10 +84,13 @@ try {
                 , `nom_liq_dlab_auxt`.`aux_alim`
                 , `nom_liq_dlab_auxt`.`g_representa`
                 , `nom_liq_dlab_auxt`.`horas_ext`
+                , `t`.`id_tercero_api`
             FROM
                 `nom_liq_dlab_auxt`
                 INNER JOIN `nom_empleado` 
                     ON (`nom_liq_dlab_auxt`.`id_empleado` = `nom_empleado`.`id_empleado`)
+                LEFT JOIN `tb_terceros` AS `t` 
+                    ON (`nom_empleado`.`no_documento` = `t`.`nit_tercero`)
             WHERE (`nom_liq_dlab_auxt`.`id_nomina` = $idNomina)";
     $rs = $cmd->query($sql);
     $sueldoBasico = $rs->fetchAll(PDO::FETCH_ASSOC);
@@ -35,22 +98,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$ced = [];
-$ced[] = 0;
-foreach ($sueldoBasico as $sb) {
-    $ced[] = $sb['no_documento'];
-}
-$cedulas = implode(',', $ced);
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api`, `no_doc` FROM `seg_terceros` WHERE (`no_doc` IN ($cedulas))";
-    $rs = $cmd->query($sql);
-    $idApi = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -64,27 +112,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_empleado`.`id_empleado`
-                , `nom_empleado`.`tipo_cargo`
-                , `nom_horas_ex_trab`.`id_he`
-                , `nom_liq_horex`.`val_liq`
-            FROM
-                `nom_horas_ex_trab`
-                INNER JOIN `nom_empleado` 
-                    ON (`nom_horas_ex_trab`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                INNER JOIN `nom_liq_horex` 
-                    ON (`nom_liq_horex`.`id_he_lab` = `nom_horas_ex_trab`.`id_he_trab`)
-            WHERE (`nom_liq_horex`.`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $horas = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -141,78 +169,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_empleado`.`id_empleado`
-                , `nom_empleado`.`tipo_cargo`
-                , `nom_liq_embargo`.`val_mes_embargo`
-            FROM
-                `nom_embargos`
-                INNER JOIN `nom_empleado` 
-                    ON (`nom_embargos`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                INNER JOIN `nom_liq_embargo` 
-                    ON (`nom_liq_embargo`.`id_embargo` = `nom_embargos`.`id_embargo`)
-            WHERE (`nom_liq_embargo`.`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $embargos = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_empleado`.`id_empleado`
-                , `nom_empleado`.`tipo_cargo`
-                , `nom_liq_libranza`.`val_mes_lib`
-                , `nom_liq_libranza`.`mes_lib`
-                , `nom_liq_libranza`.`anio_lib`
-            FROM
-                `nom_libranzas`
-                INNER JOIN `nom_empleado` 
-                    ON (`nom_libranzas`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                INNER JOIN `nom_liq_libranza` 
-                    ON (`nom_liq_libranza`.`id_libranza` = `nom_libranzas`.`id_libranza`)
-            WHERE (`nom_liq_libranza`.`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $libranzas = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_empleado`.`id_empleado`
-                , `nom_empleado`.`tipo_cargo`
-                , `nom_liq_sindicato_aportes`.`val_aporte`
-            FROM
-                `nom_cuota_sindical`
-                INNER JOIN `nom_empleado` 
-                    ON (`nom_cuota_sindical`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                INNER JOIN `nom_liq_sindicato_aportes` 
-                    ON (`nom_liq_sindicato_aportes`.`id_cuota_sindical` = `nom_cuota_sindical`.`id_cuota_sindical`)
-            WHERE (`nom_liq_sindicato_aportes`.`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $sindicato = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_empleado` , `val_liq` FROM `nom_liq_salario` WHERE (`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $salario = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -241,101 +198,11 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'ADMIN'";
-    $rs = $cmd->query($sql);
-    $cAdmin = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'URG'";
-    $rs = $cmd->query($sql);
-    $cUrg = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `nom_causacion`.`id_causacion`
-                , `nom_causacion`.`centro_costo`
-                , `nom_causacion`.`id_tipo`
-                , `nom_tipo_rubro`.`nombre`
-                , `nom_causacion`.`cuenta`
-                , `nom_causacion`.`detalle`
-            FROM
-                `nom_causacion`
-                INNER JOIN `nom_tipo_rubro` 
-                    ON (`nom_causacion`.`id_tipo` = `nom_tipo_rubro`.`id_rubro`)
-            WHERE `nom_causacion`.`centro_costo` = 'PASIVO'";
-    $rs = $cmd->query($sql);
-    $cPasivo = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_empleado` , `val_ret` FROM `nom_retencion_fte` WHERE (`id_nomina` = $idNomina)";
-    $rs = $cmd->query($sql);
-    $rfte = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT
-                `tes_cuentas`.`estado`
-                , `tes_cuentas`.`id_tes_cuenta`
-                , `ctb_pgcp`.`cuenta` AS `cta_contable`
-            FROM
-                `tes_cuentas`
-                INNER JOIN `ctb_pgcp` 
-                    ON (`tes_cuentas`.`id_cuenta` = `ctb_pgcp`.`id_pgcp`)
-            WHERE (`tes_cuentas`.`estado` = 1)";
-    $rs = $cmd->query($sql);
-    $banco = $rs->fetch(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_pto` FROM `pto_presupuestos` WHERE `id_tipo` = 2";
+    $sql = "SELECT `id_pto` FROM `pto_presupuestos` WHERE `id_tipo` = 2 AND `id_vigencia` = $id_vigencia";
     $rs = $cmd->query($sql);
     $pto = $rs->fetch(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -521,7 +388,7 @@ try {
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $id_pto, PDO::PARAM_INT);
     $sql->bindParam(2, $id_manu, PDO::PARAM_INT);
-    $sql->bindParam(3, $fecha, PDO::PARAM_STR);
+    $sql->bindParam(3, $fec_doc, PDO::PARAM_STR);
     $sql->bindParam(4, $objeto, PDO::PARAM_STR);
     $sql->bindParam(5, $iduser, PDO::PARAM_INT);
     $sql->bindParam(6, $fecha2);
@@ -539,10 +406,11 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_tercero_api` FROM `seg_terceros` WHERE `no_doc` = " . $_SESSION['nit_emp'];
+    $sql = "SELECT `id_tercero_api` FROM `tb_terceros` WHERE `nit_tercero` = " . $_SESSION['nit_emp'];
     $rs = $cmd->query($sql);
     $tercero = $rs->fetch();
     $id_ter_api = !empty($tercero) ? $tercero['id_tercero_api'] : 0;
+    $id_ter_api = count($sueldoBasico) == 1 ? $sueldoBasico[0]['id_tercero_api'] : $id_ter_api;
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
@@ -571,7 +439,7 @@ try {
     $sql->bindParam(1, $id_pto, PDO::PARAM_INT);
     $sql->bindParam(2, $id_cdp, PDO::PARAM_INT);
     $sql->bindParam(3, $id_manu, PDO::PARAM_INT);
-    $sql->bindParam(4, $fecha, PDO::PARAM_STR);
+    $sql->bindParam(4, $fec_doc, PDO::PARAM_STR);
     $sql->bindParam(5, $objeto, PDO::PARAM_STR);
     $sql->bindParam(6, $iduser, PDO::PARAM_INT);
     $sql->bindParam(7, $fecha2);
@@ -600,8 +468,7 @@ foreach ($sueldoBasico as $sb) {
     $id_sede = $sb['sede_emp'];
     $tipoCargo = $sb['tipo_cargo'];
     $doc_empleado = $sb['no_documento'];
-    $keyt = array_search($doc_empleado, array_column($idApi, 'no_doc'));
-    $id_tercero = $keyt !== false ? $idApi[$keyt]['id_tercero_api'] : NULL;
+    $id_tercero = $sb['id_tercero_api'];
     $restar = 0;
     $rest = 0;
     //administrativos

@@ -1,0 +1,114 @@
+<?php
+session_start();
+if (!isset($_SESSION['user'])) {
+    header("Location: ../../../index.php");
+    exit();
+}
+include '../../../conexion.php';
+include '../common/funciones_generales.php';
+
+$start = isset($_POST['start']) ? intval($_POST['start']) : 0;
+$length = isset($_POST['length']) ? intval($_POST['length']) : 10;
+$limit = "";
+if ($length != -1) {
+    $limit = "LIMIT $start, $length";
+}
+$col = $_POST['order'][0]['column'] + 1;
+$dir = $_POST['order'][0]['dir'];
+$idusr = $_SESSION['id_user'];
+$idrol = $_SESSION['rol'];
+
+$where_usr = " WHERE OI.estado=2 AND OITP.fianza=1";
+
+$where_usr.= " AND OI.id_ingreso NOT IN (
+                    SELECT INGRESO.id_ingreso
+                    FROM 	(SELECT far_orden_ingreso_detalle.id_ingreso,far_medicamento_lote.id_med,
+                                SUM(far_orden_ingreso_detalle.cantidad) AS cantidad
+                            FROM far_orden_ingreso_detalle
+                            INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_ingreso_detalle.id_lote)
+                            GROUP BY far_orden_ingreso_detalle.id_ingreso,far_medicamento_lote.id_med) AS INGRESO        
+                    LEFT JOIN (SELECT far_orden_egreso.id_ingreso_fz,far_medicamento_lote.id_med,
+                            SUM(far_orden_egreso_detalle.cantidad) AS cantidad
+                            FROM far_orden_egreso_detalle
+                            INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote = far_orden_egreso_detalle.id_lote)
+                            INNER JOIN far_orden_egreso ON (far_orden_egreso.id_egreso=far_orden_egreso_detalle.id_egreso)
+                            WHERE far_orden_egreso.estado<>0
+                            GROUP BY far_orden_egreso.id_ingreso_fz,far_medicamento_lote.id_med) AS EGRESO
+                        ON (INGRESO.id_ingreso=EGRESO.id_ingreso_fz AND INGRESO.id_med=EGRESO.id_med)
+                    GROUP BY INGRESO.id_ingreso
+                    HAVING SUM(IF(INGRESO.cantidad>IFNULL(EGRESO.cantidad,0),1,0))=0)";
+if($idrol !=1){
+    $where_usr .= " AND OI.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
+}
+
+$where = $where_usr;
+if (isset($_POST['num_ingreso']) && $_POST['num_ingreso']) {
+    $where .= " AND OI.num_ingreso='" . $_POST['num_ingreso'] . "'";
+}
+if (isset($_POST['fec_ini']) && $_POST['fec_ini'] && isset($_POST['fec_fin']) && $_POST['fec_fin']) {
+    $where .= " AND OI.fec_ingreso BETWEEN '" . $_POST['fec_ini'] . "' AND '" . $_POST['fec_fin'] . "'";
+}
+
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+       
+    //Consulta el total de registros de la tabla
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_ingreso AS OI
+            INNER JOIN far_orden_ingreso_tipo AS OITP ON (OITP.id_tipo_ingreso=OI.id_tipo_ingreso)" . $where_usr;
+    $rs = $cmd->query($sql);
+    $total = $rs->fetch();
+    $totalRecords = $total['total'];
+
+    //Consulta el total de registros aplicando el filtro
+    $sql = "SELECT COUNT(*) AS total FROM far_orden_ingreso AS OI
+            INNER JOIN far_orden_ingreso_tipo AS OITP ON (OITP.id_tipo_ingreso=OI.id_tipo_ingreso)" . $where;
+    $rs = $cmd->query($sql);
+    $total = $rs->fetch();
+    $totalRecordsFilter = $total['total'];
+
+    //Consulta los datos para listarlos en la tabla
+    $sql = "SELECT OI.*,TE.nom_tercero,
+                SO.nom_sede,BO.nombre AS nom_bodega
+            FROM far_orden_ingreso AS OI
+            INNER JOIN tb_terceros AS TE ON (TE.id_tercero = OI.id_provedor)
+            INNER JOIN far_orden_ingreso_tipo AS OITP ON (OITP.id_tipo_ingreso=OI.id_tipo_ingreso)
+            INNER JOIN tb_sedes AS SO ON (SO.id_sede = OI.id_sede)
+            INNER JOIN far_bodegas AS BO ON (BO.id_bodega = OI.id_bodega)"
+            . $where . " ORDER BY $col $dir $limit";
+    $rs = $cmd->query($sql);
+    $objs = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+
+$data = [];
+if (!empty($objs)) {
+    foreach ($objs as $obj) {
+        $id = $obj['id_ingreso'];
+        $imprimir =  '<a value="' . $id . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btn_imprimir" title="imprimir"><span class="fas fa-print fa-lg"></span></a>';
+        $data[] = [
+            "id_ingreso" => $id,
+            "num_ingreso" => $obj['num_ingreso'],
+            "fec_ingreso" => $obj['fec_ingreso'],
+            "detalle" => $obj['detalle'],
+            "id_provedor" => $obj['id_provedor'],
+            "nom_tercero" => $obj['nom_tercero'],
+            "id_sede" => $obj['id_sede'],
+            "nom_sede" => $obj['nom_sede'],
+            "id_bodega" => $obj['id_bodega'],
+            "nom_bodega" => $obj['nom_bodega'],
+            "botones" => '<div class="text-center centro-vertical">' . $imprimir . '</div>'
+        ];
+    }
+}
+$datos = [
+    "data" => $data,
+    "recordsTotal" => $totalRecords,
+    "recordsFiltered" => $totalRecordsFilter
+];
+
+echo json_encode($datos);
+
+   

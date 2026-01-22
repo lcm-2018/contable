@@ -1,12 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include_once '../conexion.php';
 include_once '../permisos.php';
 include_once '../financiero/consultas.php';
+include_once '../terceros.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -17,6 +18,7 @@ $id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : 0;
 $id_crp = isset($_POST['id_crp']) ? $_POST['id_crp'] : 0;
 $tipo_dato = $_POST['tipo_dato'];
 $id_vigencia = $_SESSION['id_vigencia'];
+$vigencia = $_SESSION['vigencia'];
 
 $datosCrp = [];
 function pesos($valor)
@@ -25,18 +27,39 @@ function pesos($valor)
 }
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+$fecha_cierre = fechaCierre($vigencia, 55, $cmd);
+
+try {
+    $sql = "SELECT
+                `cod`,`nombre`,`contab`
+            FROM `ctb_fuente`
+            WHERE `id_doc_fuente` = $tipo_dato LIMIT 1";
+    $rs = $cmd->query($sql);
+    $fuente = $rs->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 if ($id_doc == 0) {
+    $fecha_doc = date('Y-m-d');
     try {
         $sql = "SELECT
-                    `pto_crp`.`id_pto_crp`
-                    , `pto_crp`.`id_tercero_api`
+                    `pto_crp`.`id_pto_crp` AS `id_crp`
+                    , `pto_crp`.`id_tercero_api` AS `id_tercero`
                     , `pto_crp`.`fecha`
-                    , `pto_crp`.`objeto`
+                    , `pto_crp`.`fecha` AS `fecha_crp`
+                    , `pto_crp`.`objeto` AS `detalle`
+                    , 'CUENTAS POR PAGAR' AS `fuente`
+                    , 0 AS `estado`
+                    , 0 AS `val_factura`
+                    , 0 AS `val_imputacion`
+                    , 0 AS `val_ccosto`
+                    , 0 AS `val_retencion`
                 FROM
                     `pto_crp`
                 WHERE (`pto_crp`.`id_pto_crp` = $id_crp) LIMIT 1";
         $rs = $cmd->query($sql);
-        $datosCrp = $rs->fetch();
+        $datosDoc = $rs->fetch();
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -52,41 +75,13 @@ if ($id_doc == 0) {
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
-
-    try {
-        $estado = 1;
-        $id_tercero = $datosCrp['id_tercero_api'];
-        $detalle = $datosCrp['objeto'];
-        $iduser = $_SESSION['id_user'];
-        $date = new DateTime('now', new DateTimeZone('America/Bogota'));
-        $fecha = $date->format('Y-m-d');
-        $fecha2 = $date->format('Y-m-d H:i:s');
-        $query = "INSERT INTO `ctb_doc`
-                        (`id_vigencia`,`id_tipo_doc`,`id_manu`,`id_tercero`,`fecha`,`detalle`,`estado`,`id_user_reg`,`fecha_reg`, `id_crp`)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_vigencia, PDO::PARAM_INT);
-        $query->bindParam(2, $tipo_dato, PDO::PARAM_INT);
-        $query->bindParam(3, $id_manu, PDO::PARAM_INT);
-        $query->bindParam(4, $id_tercero, PDO::PARAM_INT);
-        $query->bindParam(5, $fecha, PDO::PARAM_STR);
-        $query->bindParam(6, $detalle, PDO::PARAM_STR);
-        $query->bindParam(7, $estado, PDO::PARAM_INT);
-        $query->bindParam(8, $iduser, PDO::PARAM_INT);
-        $query->bindParam(9, $fecha2);
-        $query->bindParam(10, $id_crp, PDO::PARAM_INT);
-        $query->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $id_doc = $cmd->lastInsertId();
-        } else {
-            echo $query->errorInfo()[2];
-            exit();
-        }
-    } catch (PDOException $e) {
-        echo $e->getMessage();
-    }
+} else {
+    $datosDoc = GetValoresCxP($id_doc, $cmd);
+    $id_manu = $datosDoc['id_manu'];
+    $fecha_doc = $datosDoc['fecha'];
+    $fecha_doc = date("Y-m-d", strtotime($fecha_doc));
 }
-$datosDoc = GetValoresCxP($id_doc, $cmd);
+
 try {
     $sql = "SELECT
                 `id_ctb_doc`
@@ -105,23 +100,10 @@ $fecha = date('Y-m-d', strtotime($datosDoc['fecha']));
 
 // Consulto tercero registrado en contratación del api de tercero para mostrar el nombre
 // Consulta terceros en la api ********************************************* API
-if (!empty($datosDoc)) {
-    $id_t = ['0' => $datosDoc['id_tercero']];
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res_api = curl_exec($ch);
-    curl_close($ch);
-    $dat_ter = json_decode($res_api, true);
-    $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
-} else {
-    $tercero = '';
+$tercero = '---';
+if (!empty($datosDoc) && $datosDoc['id_tercero'] > 0) {
+    $terceros = getTerceros($datosDoc['id_tercero'], $cmd);
+    $tercero = ltrim($terceros[0]['nom_tercero']);
 }
 $ver = 'readonly';
 ?>
@@ -154,38 +136,44 @@ $ver = 'readonly';
                             <div class="card-body" id="divCuerpoPag">
                                 <div>
                                     <div class="right-block">
-                                        <div class="row mb-1">
-                                            <div class="col-2">
-                                                <div class="col"><span class="small">NUMERO ACTO:</span></div>
+                                        <form id="formGetMvtoCtb">
+                                            <input type="hidden" id="fec_cierre" name="fec_cierre" value="<?php echo $fecha_cierre; ?>">
+                                            <div class="row mb-1">
+                                                <div class="col-2">
+                                                    <div class="col"><span class="small">NUMERO ACTO:</span></div>
+                                                </div>
+                                                <div class="col-10">
+                                                    <input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $id_manu; ?>" required>
+                                                    <input type="hidden" id="tipodato" name="tipodato" value="<?php echo $tipo_dato; ?>">
+                                                    <input type="hidden" id="id_crpp" name="id_crpp" value="<?php echo $datosDoc['id_crp'] > 0 ? $datosDoc['id_crp'] : 0 ?>">
+                                                    <input type="hidden" id="fuente" name="fuente" value="<?php echo $fuente['contab']; ?>">
+                                                </div>
                                             </div>
-                                            <div class="col-10"><input type="number" name="numDoc" id="numDoc" class="form-control form-control-sm" value="<?php echo $datosDoc['id_manu']; ?>" required readonly>
-                                                <input type="hidden" id="tipodato" name="tipodato" value="<?php echo $tipo_dato; ?>">
-                                                <input type="hidden" id="id_crpp" name="id_crpp" value="<?php echo $datosDoc['id_crp'] > 0 ? $datosDoc['id_crp'] : 0 ?>">
-
+                                            <div class="row mb-1">
+                                                <div class="col-2">
+                                                    <div class="col"><span class="small">FECHA:</span></div>
+                                                </div>
+                                                <div class="col-10">
+                                                    <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo $fecha_doc; ?>" min="<?= date('Y-m-d', strtotime($datosDoc['fecha_crp'])) ?>" max="<?= $vigencia . '-12-31' ?>" required>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <div class="col-2">
-                                                <div class="col"><span class="small">FECHA:</span></div>
+                                            <div class="row mb-1">
+                                                <div class="col-2">
+                                                    <div class="col"><span class="small">TERCERO:</span></div>
+                                                </div>
+                                                <div class="col-10"><input type="text" name="tercero" id="tercero" class="form-control form-control-sm" value="<?php echo $tercero; ?>" readonly>
+                                                    <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $datosDoc['id_tercero'] ?>">
+                                                </div>
                                             </div>
-                                            <div class="col-10"> <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" value="<?php echo date('Y-m-d', strtotime($datosDoc['fecha'])); ?>" readonly></div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <div class="col-2">
-                                                <div class="col"><span class="small">TERCERO:</span></div>
+                                            <div class="row mb-1">
+                                                <div class="col-2">
+                                                    <div class="col"><span class="small">OBJETO:</span></div>
+                                                </div>
+                                                <div class="col-10">
+                                                    <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-span="Default select example" rows="3" required="required"><?= $datosDoc['detalle']; ?></textarea>
+                                                </div>
                                             </div>
-                                            <div class="col-10"><input type="text" name="tercero" id="tercero" class="form-control form-control-sm" value="<?php echo $tercero; ?>" readonly>
-                                                <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $datosDoc['id_tercero'] ?>">
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <div class="col-2">
-                                                <div class="col"><span class="small">OBJETO:</span></div>
-                                            </div>
-                                            <div class="col-10">
-                                                <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-span="Default select example" rows="3" required="required" readonly><?php echo $datosDoc['detalle']; ?></textarea>
-                                            </div>
-                                        </div>
+                                        </form>
                                         <?php
                                         if ($tipo_dato == '3') {
                                         ?>
@@ -195,30 +183,78 @@ $ver = 'readonly';
                                                 </div>
                                                 <div class="form-control col-4" readonly id="valFactura"><?php echo pesos($datosDoc['val_factura']); ?></div>
                                             </div>
-                                            <div class="input-group input-group-sm mb-1">
-                                                <div class="input-group-prepend col-2 pr-0">
-                                                    <button class="btn btn-outline-primary btn-block text-left" type="button" onclick="ImputacionCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-file-signature fa-lg mr-2"></i>Imputación</button>
+                                            <?php
+                                            if ($_SESSION['caracter'] == '2') {
+                                            ?>
+                                                <div class="input-group input-group-sm mb-1">
+                                                    <div class="input-group-prepend col-2 pr-0">
+                                                        <button class="btn btn-outline-primary btn-block text-left" type="button" onclick="ImputacionCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-file-signature fa-lg mr-2"></i>Imputación</button>
+                                                    </div>
+                                                    <div class="col-4 input-group input-group-sm p-0">
+                                                        <div class="form-control" readonly id="valImputacion"><?php echo pesos($datosDoc['val_imputacion']); ?></div>
+                                                        <div class="input-group-append" title="Asignar Imputacion y Centros de costo automaticamente">
+                                                            <button class="btn btn-outline-primary" type="button" onclick="CausaAuCentroCostos(this)" <?= $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-eject fa-lg"></i></button>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="form-control col-4" readonly id="valImputacion"><?php echo pesos($datosDoc['val_imputacion']); ?></div>
-                                            </div>
+                                            <?php
+                                            }
+                                            ?>
                                             <div class="input-group input-group-sm mb-1">
                                                 <div class="input-group-prepend col-2 pr-0">
                                                     <button class="btn btn-outline-warning btn-block text-left" type="button" onclick="CentroCostoCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-kaaba fa-lg mr-2"></i></i>Centro Costo</button>
                                                 </div>
-                                                <div class="form-control col-4" readonly id="valCentroCosto"><?php echo pesos($datosDoc['val_ccosto']); ?></div>
+                                                <div class="col-4 input-group input-group-sm p-0">
+                                                    <div class="form-control" readonly id="valCentroCosto"><?php echo pesos($datosDoc['val_ccosto']); ?></div>
+                                                </div>
                                             </div>
+
+
                                             <div class="input-group input-group-sm">
                                                 <div class="input-group-prepend col-2 pr-0">
                                                     <button class="btn btn-outline-info btn-block text-left" type="button" onclick="DesctosCtasPorPagar('<?php echo $id_doc; ?>')" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>><i class="fas fa-donate fa-lg mr-2"></i>Descuentos</button>
                                                 </div>
                                                 <div class="form-control col-4" readonly id="valDescuentos"><?php echo pesos($datosDoc['val_retencion']); ?></div>
                                             </div>
-                                            <div class="text-center py-2">
-                                                <button type="button" class="btn btn-primary btn-sm" onclick="generaMovimientoCxp();" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>
+                                        <?php
+                                        }
+                                        if ($fuente['contab'] == 3) {
+                                        ?>
+                                            <div class="row mb-1 text-left">
+                                                <div class="col-2">
+                                                    <div class="col"><span class="small">PERIODO TRASLADO:</span></div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="row">
+                                                        <div class="col-3">
+                                                            <div class="col"><span class="small text-muted">FECHA INICIO:</span></div>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <input type="date" name="fecIniTraslado" id="fecIniTraslado" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>" min="<?= $vigencia . '-01-01'; ?>" max="<?= $vigencia . '-12-31' ?>" required>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="col"><span class="small text-muted">FECHA FIN:</span></div>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <input type="date" name="fecFinTraslado" id="fecFinTraslado" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>" min="<?= $vigencia . '-01-01'; ?>" max="<?= $vigencia . '-12-31' ?>" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         <?php
                                         }
                                         ?>
+                                    </div>
+                                    <div class="text-center py-2">
+                                        <?php
+                                        $funcion = $fuente['contab'] == 3 ? 'generaMovimientoTrasCosto' : 'generaMovimientoCxp';
+                                        if ($tipo_dato == '3' || $fuente['contab'] == 3) {
+                                        ?>
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="<?= $funcion; ?>(this);" <?php echo $datosDoc['estado'] == '1' ? '' : 'disabled' ?>>Generar movimiento</button>
+                                        <?php
+                                        }
+                                        ?>
+                                        <button type="button" class="btn btn-warning btn-sm" onclick="" <?php echo $datosDoc['estado'] == '2' ? 'disabled' : '' ?> id="GuardaDocCtb" text="<?= $id_doc ?>">Guardar</button>
                                     </div>
                                 </div>
                                 <br>
@@ -242,8 +278,18 @@ $ver = 'readonly';
                                                 <input type="hidden" name="id_codigoCta" id="id_codigoCta" class="form-control form-control-sm" value="0">
                                                 <input type="hidden" name="tipoDato" id="tipoDato" value="0">
                                             </td>
-                                            <td><input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm" required>
-                                                <input type="hidden" name="idTercero" id="idTercero" value="0">
+                                            <td>
+                                                <?php
+                                                if ($tipo_dato == '1') {
+                                                    $trc = $tercero;
+                                                    $idter = $datosDoc['id_tercero'];
+                                                } else {
+                                                    $trc = '';
+                                                    $idter = 0;
+                                                }
+                                                ?>
+                                                <input type="text" name="bTercero" id="bTercero" class="form-control form-control-sm bTercero" required value="<?= $trc; ?>">
+                                                <input type="hidden" name="idTercero" id="idTercero" value="<?= $idter; ?>">
                                             </td>
                                             <td>
                                                 <input type="text" name="valorDebito" id="valorDebito" class="form-control form-control-sm text-right" value="0" required onkeyup="valorMiles(id)" onchange="llenarCero(id)">

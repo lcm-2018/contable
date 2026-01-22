@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include_once '../conexion.php';
@@ -11,6 +11,7 @@ $id_doc = $_POST['id_doc'] ?? 0;
 $id_cop = $_POST['id_cop'] ?? 0;
 $id_fp = $_POST['id_fp'] ?? 0;
 $valor_pago = $_POST['valor'] ?? 0;
+
 $valor_descuento = 0;
 // Consulta tipo de presupuesto
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -40,7 +41,14 @@ try {
 }
 // consultar id bancos de tb_bancos
 try {
-    $sql = "SELECT `id_banco`, `nom_banco` FROM `tb_bancos` ORDER BY `nom_banco` ASC";
+    $sql = "SELECT 
+                `tb_bancos`.`id_banco`, `tb_bancos`.`nom_banco`
+            FROM `tb_bancos` 
+            LEFT JOIN `tes_cuentas`
+                ON (`tb_bancos`.`id_banco` = `tes_cuentas`.`id_banco`)
+            WHERE `tes_cuentas`.`id_banco` IS NOT NULL
+            GROUP BY `tb_bancos`.`id_banco`
+            ORDER BY `nom_banco` ASC";
     $rs = $cmd->query($sql);
     $bancos = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -56,6 +64,7 @@ try {
 }
 // Consulto los documentos que estan relacionados con el pago
 // Consultar el valor a de los descuentos realizados a la cuenta de ctb_causa_retencion
+/*
 try {
     $sql = "SELECT
                 `id_pto_cop_det`
@@ -63,22 +72,22 @@ try {
                 `pto_cop_detalle`
             WHERE (`id_ctb_doc` = $id_doc)
             GROUP BY `id_pto_cop_det`";
+
     $rs = $cmd->query($sql);
     $des_documentos = $rs->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+    */
 // Consultar el valor a de los descuentos realizados a la cuenta de ctb_causa_retencion de acuerdo a los documentos relacionados
 // recorro los documentos relacionados
-foreach ($des_documentos as $des) {
-    try {
-        $sql = "SELECT SUM(`valor_retencion`) AS `valor` FROM `ctb_causa_retencion` WHERE `id_ctb_doc` = {$des['id_pto_cop_det']}";
-        $rs = $cmd->query($sql);
-        $descuentos = $rs->fetch();
-        $valor_descuento = $valor_descuento + $descuentos['valor'];
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-    }
+try {
+    $sql = "SELECT SUM(`valor_retencion`) AS `valor` FROM `ctb_causa_retencion` WHERE `id_ctb_doc` = $id_cop";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetch();
+    $valor_descuento = $valor_descuento + $descuentos['valor'];
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 // consultar el valor registrado en seg_test_detalle_pago para el id_ctb_doc
 try {
@@ -90,6 +99,40 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
+if ($_SESSION['pto'] == '0') {
+    try {
+        $sql = "SELECT 
+                    `causado`.`valor` AS `valor_pagar`
+                    , IFNULL(`pagado`.`valor`,0) AS `valor_pagado`
+                FROM 
+                    `ctb_doc`
+                    INNER JOIN
+                        (SELECT
+                            `ctb_libaux`.`id_ctb_doc`
+                            , SUM(`ctb_libaux`.`credito`) AS `valor`
+                        FROM
+                            `ctb_libaux`
+                            INNER JOIN `ctb_doc` 
+                            ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_libaux`.`id_ctb_doc` = $id_cop AND `ctb_libaux`.`ref` = 1)) AS `causado`
+                        ON(`causado`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    LEFT JOIN
+                        (SELECT
+                            `ctb_doc`.`id_ctb_doc_tipo3`
+                            , SUM(`tes_detalle_pago`.`valor`) AS `valor`
+                        FROM
+                            `tes_detalle_pago`
+                            INNER JOIN `ctb_doc` 
+                                ON (`tes_detalle_pago`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                        WHERE (`ctb_doc`.`id_ctb_doc_tipo3` = $id_cop)) AS `pagado`
+                        ON(`causado`.`id_ctb_doc` = `pagado`.`id_ctb_doc_tipo3`)";
+        $rs = $cmd->query($sql);
+        $pagos = $rs->fetch();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    $valor_pagar = !empty($pagos) ? $pagos['valor_pagar'] - $pagos['valor_pagado'] : 0;
+}
 
 ?>
 <script>
@@ -97,26 +140,7 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ]
@@ -169,8 +193,14 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                     <div class="col-md-2">
                         <label for="numDoc" class="small">VALOR</label>
                         <div class="btn-group"><input type="text" name="valor_pag" id="valor_pag" class="form-control form-control-sm" max="<?php echo $valor_pagar; ?>" value="<?php echo $valor_pagar; ?>" required style="text-align: right;" onkeyup="valorMiles(id)" ondblclick="valorMovTeroreria('');">
-                            <button type="submit" class="btn btn-primary btn-sm" id="">+</button>
                         </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-3 form-group">
+                        <label for="banco" class="small">SALDO</label>
+                        <div id="divSaldoDisp" class="form-control form-control-sm text-right" readonly></div>
+                        <input type="hidden" name="numSaldoDips" id="numSaldoDips" value="0">
                     </div>
                 </div>
             </form>
@@ -192,7 +222,7 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                             //$id_doc = $ce['id_ctb_doc'];
                             $id = $ce['id_detalle_pago'];
                             if (PermisosUsuario($permisos, 5601, 3) || $id_rol == 1) {
-                                $editar = '<a value="' . $id_doc . '" onclick="eliminarFormaPago(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+                                $editar = '<a value="' . $id_doc . '" onclick="eliminarFormaPago(' . $id . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Modificar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
                             </button>
@@ -203,6 +233,7 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                                 $editar = null;
                                 $detalles = null;
                             }
+                            $acciones = null;
                             $valor = number_format($ce['valor'], 2, '.', ',');
                         ?>
                             <tr id="<?php echo $id; ?>">
@@ -221,11 +252,10 @@ $valor_pagar = $valor_pago - $valor_descuento - $valor_programado;
                 </tbody>
             </table>
             <div class="text-right py-3">
-                <a type="button" class="btn btn-success btn-sm" onclick="GuardaFormaPago()">Guardar</a>
+                <a type="button" class="btn btn-success btn-sm" onclick="GuardaFormaPago(this)">Guardar</a>
                 <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</a>
             </div>
         </div>
 
 
     </div>
-    <?php

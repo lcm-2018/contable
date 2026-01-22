@@ -1,12 +1,20 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
+<<<<<<< HEAD
     echo '<script>window.location.replace("../../../index.php");</script>';
+=======
+    header("Location: ../../../index.php");
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
     exit();
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
 //Permisos: 1-Consultar,2-Crear,3-Editar,4-Eliminar,5-Anular,6-Imprimir
+<<<<<<< HEAD
+=======
+include '../common/funciones_generales.php';
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
 
 $oper = isset($_POST['oper']) ? $_POST['oper'] : exit('Acción no permitida');
 $fecha_crea = new DateTime('now', new DateTimeZone('America/Bogota'));
@@ -20,7 +28,12 @@ try {
 
     if ((PermisosUsuario($permisos, 5507, 2) && $oper == 'add' && $_POST['id_cuentafac'] == -1) ||
         (PermisosUsuario($permisos, 5507, 3) && $oper == 'add' && $_POST['id_cuentafac'] != -1) ||
+<<<<<<< HEAD
         (PermisosUsuario($permisos, 5507, 4) && $oper == 'del') || $id_rol == 1) {
+=======
+        (PermisosUsuario($permisos, 5507, 4) && $oper == 'del') || $id_rol == 1
+    ) {
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
 
         if ($oper == 'add') {
             $id = $_POST['id_cuentafac'];
@@ -28,6 +41,7 @@ try {
             $id_cobertura = $_POST['sl_cobertura'];
             $id_modalidad = $_POST['sl_modalidad'];
             $id_cta_pre = $_POST['id_txt_cta_pre'] ? $_POST['id_txt_cta_pre'] : 'NULL';
+<<<<<<< HEAD
             $id_cta_deb = $_POST['id_txt_cta_deb'] ? $_POST['id_txt_cta_deb'] : 'NULL';
             $id_cta_cre = $_POST['id_txt_cta_cre'] ? $_POST['id_txt_cta_cre'] : 'NULL';
             $id_cta_cop = $_POST['id_txt_cta_cop'] ? $_POST['id_txt_cta_cop'] : 'NULL';
@@ -45,6 +59,40 @@ try {
                                 fecha_vigencia,estado,id_usr_crea,fec_creacion) 
                         VALUES($id_regimen,$id_cobertura,$id_modalidad,$id_cta_pre,$id_cta_deb,$id_cta_cre,
                                 $id_cta_cop,$id_cta_gid,$id_cta_gic,$id_cta_gde,$id_cta_dev,$id_cta_caj,
+=======
+            $id_cta_pre_ant = $_POST['id_txt_cta_pre_ant'] ? $_POST['id_txt_cta_pre_ant'] : 'NULL';
+            $id_cta_deb = $_POST['id_txt_cta_deb'] ? $_POST['id_txt_cta_deb'] : 'NULL';
+            $id_cta_cre = $_POST['id_txt_cta_cre'] ? $_POST['id_txt_cta_cre'] : 'NULL';
+            $id_cta_cop = $_POST['id_txt_cta_cop'] ? $_POST['id_txt_cta_cop'] : 'NULL';
+            $id_cta_cop_cap = $_POST['id_txt_cta_cop_cap'] ? $_POST['id_txt_cta_cop_cap'] : 'NULL';
+            $id_cta_gli_deb = $_POST['id_txt_cta_gli_deb'] ? $_POST['id_txt_cta_gli_deb'] : 'NULL';
+            $id_cta_gli_cre = $_POST['id_txt_cta_gli_cre'] ? $_POST['id_txt_cta_gli_cre'] : 'NULL';
+            $id_cta_glo_def = $_POST['id_txt_cta_glo_def'] ? $_POST['id_txt_cta_glo_def'] : 'NULL';
+            $id_cta_dev = $_POST['id_txt_cta_dev'] ? $_POST['id_txt_cta_dev'] : 'NULL';
+            $id_cta_caj = $_POST['id_txt_cta_caj'] ? $_POST['id_txt_cta_caj'] : 'NULL';
+            $id_cta_fac_glo = $_POST['id_txt_cta_fac_glo'] ? $_POST['id_txt_cta_fac_glo'] : 'NULL';
+            $id_cta_x_ide = $_POST['id_txt_cta_x_ide'] ? $_POST['id_txt_cta_x_ide'] : 'NULL';
+            $id_cta_baja = $_POST['id_txt_cta_baja'] ? $_POST['id_txt_cta_baja'] : 'NULL';
+            $fec_vig = $_POST['txt_fec_vig'] ? "'" . $_POST['txt_fec_vig'] . "'" : 'NULL';
+            $estado = $_POST['sl_estado'];
+
+            if ($id == -1) {
+                $sql = "INSERT INTO tb_homologacion(id_regimen,id_cobertura,id_modalidad,
+                                id_cta_presupuesto,id_cta_presupuesto_ant,
+                                id_cta_debito,id_cta_credito,
+                                id_cta_copago,id_cta_copago_capitado,
+                                id_cta_glosaini_debito,id_cta_glosaini_credito,
+                                id_cta_glosadefinitiva,id_cta_devolucion,id_cta_caja,
+                                id_cta_fac_global,id_cta_x_ident,id_cta_baja,
+                                fecha_vigencia,estado,id_usr_crea,fec_creacion) 
+                        VALUES($id_regimen,$id_cobertura,$id_modalidad,
+                                $id_cta_pre,$id_cta_pre_ant,
+                                $id_cta_deb,$id_cta_cre,
+                                $id_cta_cop,$id_cta_cop_cap,
+                                $id_cta_gli_deb,$id_cta_gli_cre,
+                                $id_cta_glo_def,$id_cta_dev,$id_cta_caj,
+                                $id_cta_fac_glo,$id_cta_x_ide,$id_cta_baja,
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
                                 $fec_vig,$estado,$id_usr_ope,'$fecha_ope')";
                 $rs = $cmd->query($sql);
 
@@ -60,9 +108,18 @@ try {
             } else {
                 $sql = "UPDATE tb_homologacion 
                         SET id_regimen=$id_regimen,id_cobertura=$id_cobertura,id_modalidad=$id_modalidad,
+<<<<<<< HEAD
                             id_cta_presupuesto=$id_cta_pre,id_cta_debito=$id_cta_deb,id_cta_credito=$id_cta_cre,
                             id_cta_copago=$id_cta_cop,id_cta_glosaini_debito=$id_cta_gid,id_cta_glosaini_credito=$id_cta_gic,
                             id_cta_glosadefinitiva=$id_cta_gde,id_cta_devolucion=$id_cta_dev,id_cta_caja=$id_cta_caj,
+=======
+                            id_cta_presupuesto=$id_cta_pre,id_cta_presupuesto_ant=$id_cta_pre_ant,
+                            id_cta_debito=$id_cta_deb,id_cta_credito=$id_cta_cre,
+                            id_cta_copago=$id_cta_cop,id_cta_copago_capitado=$id_cta_cop_cap,
+                            id_cta_glosaini_debito=$id_cta_gli_deb,id_cta_glosaini_credito=$id_cta_gli_cre,
+                            id_cta_glosadefinitiva=$id_cta_glo_def,id_cta_devolucion=$id_cta_dev,id_cta_caja=$id_cta_caj,
+                            id_cta_fac_global=$id_cta_fac_glo,id_cta_x_ident=$id_cta_x_ide,id_cta_baja=$id_cta_baja,
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
                             fecha_vigencia=$fec_vig,estado=$estado
                         WHERE id_homo=" . $id;
                 $rs = $cmd->query($sql);
@@ -81,6 +138,13 @@ try {
             $sql = "DELETE FROM tb_homologacion WHERE id_homo=" . $id;
             $rs = $cmd->query($sql);
             if ($rs) {
+<<<<<<< HEAD
+=======
+                include '../../../financiero/reg_logs.php';
+                $ruta = '../../../log';
+                $consulta = $sql;
+                RegistraLogs($ruta, $consulta);
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
                 $res['mensaje'] = 'ok';
             } else {
                 $res['mensaje'] = $cmd->errorInfo()[2];

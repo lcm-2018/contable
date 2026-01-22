@@ -1,27 +1,118 @@
-let timeout;
+/*let timeout;
 let actual = "EAC" + window.location + 'II';
 let esta = actual.indexOf('index')
 if (esta === -1) {
-    document.onmousemove = function () {
+    document.onmousemove = function() {
         clearTimeout(timeout);
-        timeout = setTimeout(function () {
+        timeout = setTimeout(function() {
             $.ajax({
                 type: 'POST',
                 url: window.urlin + '/cerrar_sesion.php',
-                success: function (r) {
+                success: function(r) {
                     $('#divModalXSesion').modal('show');
 
                 }
             });
-        }, 600000);
+        }, 900000); // 15 minutos
     }
+}*/
+document.addEventListener("show.bs.modal", function (event) {
+    var modalsVisible = document.querySelectorAll(".modal.show").length;
+    var zIndex = 1040 + 10 * modalsVisible;
+
+    event.target.style.zIndex = zIndex;
+
+    setTimeout(function () {
+        document.querySelectorAll(".modal-backdrop:not(.modal-stack)").forEach(function (backdrop) {
+            backdrop.style.zIndex = zIndex - 1;
+            backdrop.classList.add("modal-stack");
+        });
+    }, 0);
+}, true);
+
+function mje(titulo, html) {
+    Swal.fire({
+        title: titulo,
+        icon: "success",
+        showConfirmButton: true,
+        timer: 2000,
+        html: html,
+    });
 }
+
+function mjeError(titulo, texto, html) {
+    Swal.fire({
+        title: titulo,
+        text: texto,
+        icon: "error",
+        showConfirmButton: true,
+        timer: 2000,
+        html: html,
+    });
+}
+var url_js = $('#url_js').length ? atob($('#url_js').val()) : '/';
+var user_js = $('#user_js').length ? atob($('#user_js').val()) : '0';
+var op_ppto = $('#op_pto').length ? atob($('#op_pto').val()) : '0';
+var op_caracter = $('#op_caracter').length ? atob($('#op_caracter').val()) : '0';
+window.urlin = url_js;
+window.user = user_js;
+
+var checkbox = '';
+if ($('#tableMvtoContable').length || $('#tableAdquisiciones').length || $('#tableListEmpleados').length || $('#tableNominas').length || $('#tableEjecPresupuesto').length || $('#tableEjecPresupuestoCrp').length || $('#tableTerceros').length || $('#tableMvtoTesoreriaPagos').length) {
+    var checkbox = '<input type="checkbox" value="" id="verAnulados" onclick="MostrarAnulados(this)" title="Ver Anulados y/o Inactivos">' +
+        '<label for="verAnulados" class="mb-0"><span class="badge badge-pill badge-light">ANULADOS</span></label>';
+}
+var setdom = "<'row'<'col-md-6'l><'col-md-6'<'search-wrapper'f>>>" +
+    "<'row'<'col-sm-12'tr>>" +
+    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
+
+if ($("#peReg").val() === '1') {
+    setdom = "<'row'<'col-md-5'l><'bttn-plus-dt col-md-2'B><'col-md-5'<'search-wrapper'f>>>" +
+        "<'row'<'col-sm-12'tr>>" +
+        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
+}
+var setIdioma = {
+    "decimal": "",
+    "emptyTable": "No hay información",
+    "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
+    "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+    "infoFiltered": "(Filtrado de _MAX_ Registros totales)",
+    "infoPostFix": "",
+    "thousands": ",",
+    "lengthMenu": "_MENU_ Filas",
+    "loadingRecords": "Cargando...",
+    "processing": "Procesando...",
+    "search": checkbox + '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
+    "zeroRecords": "No se encontraron registros",
+    "paginate": {
+        "first": "&#10096&#10096",
+        "last": "&#10097&#10097",
+        "next": "&#10097",
+        "previous": "&#10096"
+    }
+};
+function MostrarAnulados(elemento) {
+    //tomar del aria-coontrols el nombre de la tabla
+    var table = elemento.getAttribute('aria-controls');
+    var table = $('#' + table).DataTable().ajax.reload(null, false);
+
+}
+
 (function ($) {
     /*$(document).ready(function () {
         $("body").on("contextmenu", function (e) {
             return false;
         });
     });*/
+    $(document).ready(function () {
+        $('.modal').on('shown.bs.modal', function () {
+            $(this).find('.modal-dialog').draggable({
+                handle: 'h5'
+            });
+            $('.modal').attr('aria-hidden', 'false');
+        });
+        $('[aria-hidden]').attr('aria-hidden', 'false');
+    });
     "use strict";
     $("#sidebarToggle").click(function () {
         let val = $(this).val();
@@ -43,7 +134,7 @@ if (esta === -1) {
 
     $("#btnLogin").click(function () {
         let user = $("#txtUser").val();
-        let pass = $("#passuser").val();
+        let clave = $("#passuser").val();
         if (user === "") {
             $('#divModalError').modal('show');
             $('#divErrorLogin').html("Debe ingresar Usuario");
@@ -51,12 +142,13 @@ if (esta === -1) {
             $('#divModalError').modal('show');
             $('#divErrorLogin').html("Debe ingresar Contraseña");
         } else {
-            pass = hex_sha512(pass);
+            var pass = hex_sha512(clave);
+            var passwd = hex_sha512(clave.toLowerCase());
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
                 url: 'validarLogin.php',
-                data: { user: user, pass: pass }
+                data: { user: user, pass: pass, passwd: passwd }
             }).done(function (res) {
                 switch (res.mensaje) {
                     case 0:
@@ -64,10 +156,7 @@ if (esta === -1) {
                         $('#divErrorLogin').html("Usuario y/o Contraseña incorrecto(s)");
                         break;
                     case 1:
-                        window.location = "vigencia.php";
-                        break;
-                    case 2:
-                        window.location = "terceros/gestion/detalles_tercero.php";
+                        window.location = "inicio.php";
                         break;
                     case 3:
                         $('#divModalError').modal('show');
@@ -151,6 +240,8 @@ if (esta === -1) {
     });
     //modificar contraseña
     $('#divModalPermisos').on('click', '#btnChangePass', function () {
+        var btn = $(this).get(0);
+        InactivaBoton(btn);
         let pass = $("#passAnt").val();
         let newpas = $("#passNew").val();
         let newpasconfir = $("#passNewConf").val();
@@ -188,32 +279,9 @@ if (esta === -1) {
                 }
             });
         }
+        ActivaBoton(btn);
         return false;
     });
-
-    var setIdioma = {
-        "decimal": "",
-        "emptyTable": "No hay información",
-        "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-        "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-        "infoPostFix": "",
-        "thousands": ",",
-        "lengthMenu": "_MENU_ Registros",
-        "loadingRecords": "Cargando...",
-        "processing": "Procesando...",
-        "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-        "zeroRecords": "No se encontraron registros",
-        "paginate": {
-            "first": "&#10096&#10096",
-            "last": "&#10097&#10097",
-            "next": "&#10097",
-            "previous": "&#10096"
-        }
-    };
-    var setdom = "<'row'<'col-md-5'l><'bttn-excel col-md-2'B><'col-md-5'f>>" +
-        "<'row'<'col-sm-12'tr>>" +
-        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
     //Modal permisos de usuarios 
     var permisosModulos = function (id) {
         $.post(window.urlin + "/actualizar/datos_up_permisos.php", { id: id }, function (he) {
@@ -318,17 +386,74 @@ if (esta === -1) {
         });
         return false;
     });
+    $('#passuser').on('focus', function () {
+        $(this).on('keydown', function (e) {
+            if (e.originalEvent.getModifierState("CapsLock")) {
+                $('#caps-lock-message').show();
+            } else {
+                $('#caps-lock-message').hide();
+            }
+        }).on('blur', function () {
+            $('#caps-lock-message').hide();
+        });
+    });
     //Modal cierre de periodos 
-    $('#hrefCierre').on('click', function () {
-        $.post(window.urlin + "/actualizar/datos_up_permisos.php", function (he) {
+    function cierrePeriodo() {
+        $.post(window.urlin + "/actualizar/form_cierre_periodo.php", function (he) {
             $('#divTamModalPermisos').removeClass('modal-xl');
             $('#divTamModalPermisos').removeClass('modal-sm');
             $('#divTamModalPermisos').addClass('modal-lg');
             $('#divModalPermisos').modal('show');
             $("#divTablePermisos").html(he);
         });
+    }
+
+    function GestionDocs() {
+        $.post(window.urlin + "/actualizar/form_gestion_docs.php", function (he) {
+            $('#divTamModalPermisos').removeClass('modal-xl');
+            $('#divTamModalPermisos').removeClass('modal-sm');
+            $('#divTamModalPermisos').addClass('modal-lg');
+            $('#divModalPermisos').modal('show');
+            $("#divTablePermisos").html(he);
+        });
+    }
+    $('#hrefCierre').on('click', function () {
+        cierrePeriodo();
     });
 
+    $("#divTablePermisos").on('click', '.cerrar', function () {
+        var id = $(this).attr('text');
+        Swal.fire({
+            title: "¿Confirma cerrar periodo?, Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#00994C",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si!",
+            cancelButtonText: "NO",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var ruta = window.urlin + '/actualizar/cierre_periodo.php';
+                $.ajax({
+                    type: 'POST',
+                    url: ruta,
+                    data: { id: id },
+                    success: function (r) {
+                        if (r == 'ok') {
+                            cierrePeriodo();
+                            mje("Registro exitoso");
+                        } else {
+                            mjeError("Error: " + r);
+                        }
+                    }
+                });
+            }
+        });
+        return false;
+    });
+    $('#hrefGestionDocs').on('click', function () {
+        window.location = window.urlin + '/documentos/maestro.php';
+    });
     $("#divTablePermisos").on('click', '#dataTablePermiso span', function () {
         let caden = $(this).attr('value');
         let cad = caden.split("|");
@@ -388,7 +513,7 @@ if (esta === -1) {
         let login = $("#txtUsuario").val();
         if (login === "") {
             $('#divModalError').modal('show');
-            $('#divMsgError').html("Login  no puede estar vacio");
+            $('#divMsgError').html("Login no puede estar vacio");
         } else {
             let duser = $("#formUpUser").serialize();
             $.ajax({
@@ -409,7 +534,7 @@ if (esta === -1) {
         }
 
     });
-    $('.table-hover tbody').on('dblclick', 'tr', function () {
+    $('.table-hover tbody').on('click', 'tr', function () {
         let table = $('.table-hover').DataTable();
         if ($(this).hasClass('selecionada')) {
             $(this).removeClass('selecionada');
@@ -438,11 +563,16 @@ if (esta === -1) {
             fixedColumns: {
                 left: 1
             },
-            dom: setdom,
-            language: setIdioma,
+            dom: 'Bfrtip', // Agrega los botones al DataTable
             buttons: [
-                'excel'
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel fa-lg fa-lg text-success"></i>',
+                    title: 'Reporte de Nómina',
+                    className: 'btn btn-light'
+                }
             ],
+            language: setIdioma,
             "lengthMenu": [
                 [10, 25, 50, -1],
                 [10, 25, 50, 'TODO'],
@@ -461,8 +591,6 @@ if (esta === -1) {
         $('.bttn-excel button').html('<span class="fas fa-file-excel fa-lg"></span>');
         $('.bttn-excel').attr('title', 'Exportar a Excel');
 
-    });
-    $(document).ready(function () {
         $('.dropdown-submenu a.test').on("click", function (e) {
             $(this).next('ul').toggle();
             e.stopPropagation();
@@ -539,7 +667,10 @@ if (esta === -1) {
         $('<form action="' + window.urlin + '/formatos/download_formato.php" method="post"><input type="hidden" name="nom_file" value="' + name + '" /></form>').appendTo('body').submit();
     };
     $('#formatoExcelPto').on('click', function () {
-        DownoadFile('cargue_pto.xlsx')
+        DownoadFile('cargue_pto.xlsx');
+    });
+    $('#formatoExcelPuc').on('click', function () {
+        DownoadFile('cargue_puc.xlsx');
     });
     $('.tesoreria').on('click', function () {
         let id = $(this).attr('text');
@@ -547,10 +678,82 @@ if (esta === -1) {
             '<input type="hidden" name="var" value="' + id + '" />' +
             '</form>').appendTo('body').submit();
     });
+    $('#slcVigToChange').on('change', function () {
+        let vig = $(this).val();
+        $.ajax({
+            type: 'POST',
+            url: window.urlin + '/variablesinicio.php',
+            data: { vig: vig },
+            success: function (r) {
+                if (r === '1') {
+                    location.reload();
+                }
+            }
+        });
+    });
+
+    $('.opcion_personalizado').on('click', function () {
+        let id = $(this).attr('txt_id_opcion');
+        $('<form action="' + window.urlin + '/inf_generales/php/inf_personalizados/index.php" method="post">' +
+            '<input type="hidden" name="id_opcion" value="' + id + '" /></form>')
+            .appendTo('body').submit();
+    });
+
 })(jQuery);
 
 function elegirmes(id) {
     if (id > 0) {
         document.forms[0].submit();
     }
+}
+
+function pesos(value) {
+    // Convertir a número
+    let number = parseFloat(value);
+    if (isNaN(number)) number = 0;
+
+    // Usar Intl.NumberFormat para formatear como moneda
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP', // Moneda en pesos colombianos
+        minimumFractionDigits: 2, // Mínimo 2 decimales
+        maximumFractionDigits: 2 // Máximo 2 decimales
+    }).format(number);
+}
+
+function InactivaBoton(elemento) {
+    if (!(elemento instanceof HTMLElement)) {
+        console.error("El parámetro no es un elemento HTML válido:", elemento);
+        return;
+    }
+
+    elemento.disabled = true;
+    var span = elemento.querySelector('span');
+
+    if (!span) {
+        span = document.createElement('span');
+        elemento.prepend(span); // Agrega el spinner al inicio del botón
+    }
+
+    span.classList.add('spinner-border', 'spinner-border-sm', 'mr-2');
+}
+
+function ActivaBoton(elemento) {
+    if (!(elemento instanceof HTMLElement)) {
+        console.error("El parámetro no es un elemento HTML válido:", elemento);
+        return;
+    }
+    setTimeout(() => {
+        elemento.disabled = false;
+        var span = elemento.querySelector('span');
+        if (span) {
+            span.remove();
+        }
+    }, 1500);
+
+}
+function MensajeError(id) {
+    $("#" + id).addClass('is-invalid');
+    $("#" + id).focus();
+    mjeError("Campo requerido");
 }

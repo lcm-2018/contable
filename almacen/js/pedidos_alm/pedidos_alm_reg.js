@@ -4,7 +4,9 @@
             dom: setdom,
             buttons: [{
                 action: function(e, dt, node, config) {
-                    $.post("../common/buscar_articulos_act_frm.php", function(he) {
+                    $.post("buscar_articulos_act_frm.php", {
+                        id_subgrupo: sessionStorage.getItem("id_subgrupo")
+                    }, function(he) {
                         $('#divTamModalBus').removeClass('modal-lg');
                         $('#divTamModalBus').removeClass('modal-sm');
                         $('#divTamModalBus').addClass('modal-xl');
@@ -16,6 +18,7 @@
             language: setIdioma,
             processing: true,
             serverSide: true,
+            autoWidth: false,
             ajax: {
                 url: 'listar_pedidos_detalles.php',
                 type: 'POST',
@@ -29,16 +32,17 @@
                 { 'data': 'cod_medicamento' },
                 { 'data': 'nom_medicamento' },
                 { 'data': 'cantidad' },
+                { 'data': 'aprobado' },
                 { 'data': 'valor' },
                 { 'data': 'val_total' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: 2 },
-                { orderable: false, targets: 6 }
+                { orderable: false, targets: 7 }
             ],
             order: [
-                [0, "desc"]
+                [0, "asc"]
             ],
             lengthMenu: [
                 [10, 25, 50, -1],

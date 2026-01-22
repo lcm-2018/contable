@@ -33,15 +33,15 @@ if (isset($_POST)) {
                 , `ctb_causa_costos`.`valor`
                 , `tb_sedes`.`nom_sede`
                 , `tb_municipios`.`nom_municipio`
-                , `tb_centros_costo`.`descripcion`
+                , `tb_centrocostos`.`descripcion`
                 FROM
                 `ctb_causa_costos`
                 INNER JOIN `tb_sedes` 
                     ON (`ctb_causa_costos`.`id_sede` = `tb_sedes`.`id_sede`)
                 INNER JOIN `tb_municipios` 
                     ON (`tb_sedes`.`id_municipio` = `tb_municipios`.`id_municipio`)
-                INNER JOIN `tb_centros_costo` 
-                    ON (`tb_centros_costo`.`id_centro` = `ctb_causa_costos`.`id_cc`)
+                INNER JOIN `tb_centrocostos` 
+                    ON (`tb_centrocostos`.`id_centro` = `ctb_causa_costos`.`id_cc`)
                 WHERE (`ctb_causa_costos`.`id_ctb_doc` =$id_doc AND estado =0);";
                 $rs = $cmd->query($sql);
                 $rubros = $rs->fetchAll();

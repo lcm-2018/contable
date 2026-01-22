@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 function pesos($valor)
@@ -22,9 +22,7 @@ $vigencia = $_SESSION['vigencia'];
 <html lang="es">
 <?php include '../../head.php' ?>
 
-<body class="sb-nav-fixed <?php if ($_SESSION['navarlat'] == '1') {
-                                echo 'sb-sidenav-toggled';
-                            } ?>">
+<body class="sb-nav-fixed <?php $_SESSION['navarlat'] == '1' ? 'sb-sidenav-toggled' : '' ?>">
     <?php include '../../navsuperior.php' ?>
     <div id="layoutSidenav">
         <?php include '../../navlateral.php' ?>
@@ -179,30 +177,92 @@ $vigencia = $_SESSION['vigencia'];
                                 </div>
                                 <!--parte-->
                                 <div class="card">
+                                    <div class="card-header card-header-detalles py-0 headings" id="formCtt">
+                                        <h5 class="mb-0">
+                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapeseFCtt" aria-expanded="true" aria-controls="collapeseFCtt">
+                                                <div class="form-row">
+                                                    <div class="div-icono">
+                                                        <span class="fas fa-file-word fa-lg" style="color: #2980B9;"></span>
+                                                    </div>
+                                                    <div>
+                                                        5. FORMATOS DE CONTRATACIÓN
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </h5>
+                                    </div>
+                                    <div id="collapeseFCtt" class="collapse" aria-labelledby="formCtt">
+                                        <div class="card-body">
+                                            <div class="text-right">
+                                                <button type="button" class="btn btn-outline-info mb-1" id="btnDownloadVarsCtt" title="Descargar variables de contratación">
+                                                    <span class="fas fa-download mr-2"></span>Variables
+                                                </button>
+                                            </div>
+                                            <table id="tableFormCtt" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Tipo de Formato</th>
+                                                        <th>Tipo de Bien/Servicio</th>
+                                                        <th>Acción</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="modificaFormCtt">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--parte-->
+                                <div class="card">
                                     <div class="card-header card-header-detalles py-0 headings" id="masOpciones">
                                         <h5 class="mb-0">
                                             <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapeseMsOp" aria-expanded="true" aria-controls="collapeseMsOp">
                                                 <div class="form-row">
                                                     <div class="div-icono">
-                                                        <span class="fas fa-bars fa-lg" style="color: #2980B9;"></span>
+                                                        <span class="fas fa-bars fa-lg" style="color: #34495e;"></span>
                                                     </div>
                                                     <div>
-                                                        5. MÁS OPCIONES
+                                                        6. MÁS OPCIONES
                                                     </div>
                                                 </div>
                                             </a>
                                         </h5>
                                     </div>
                                     <div id="collapeseMsOp" class="collapse" aria-labelledby="masOpciones">
-                                        <div class="card-body">
-                                            <button type="button" class="btn btn-outline-success" id="btnExcelHomolgBnSv">
-                                                <span class="fas fa-file-excel"></span>
-                                                Homolagación de bienes y/o servicios
-                                            </button>
-                                            <button type="button" class="btn btn-outline-warning" id="btnExcelHomolgEscHonor">
-                                                <span class="fas fa-file-excel"></span>
-                                                Homolagación escala de honorarios
-                                            </button>
+                                        <div class="card-body form-inline">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <span class="fas fa-file-excel mr-2 text-success"></span>
+                                                        Homolagación de servicios
+                                                    </span>
+                                                </div>
+                                                <div class="input-group-append" id="button-addon4">
+                                                    <button type="button" class="btn btn-outline-primary" id="btnExcelHomolgBnSv" title="Descargar Formato de homologación de servicios">
+                                                        <span class="fas fa-download"></span>
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-warning subirHomologacion" text="1" title="Subir Formato de homologación de servicios">
+                                                        <span class="fas fa-upload"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="input-group px-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <span class="fas fa-file-excel mr-2 text-success"></span>
+                                                        Homolagación escala de honorarios
+                                                    </span>
+                                                </div>
+                                                <div class="input-group-append" id="button-addon4">
+                                                    <button type="button" class="btn btn-outline-primary" id="btnExcelHomolgEscHonor" title="Descargar Formato de homologación escala de honorarios">
+                                                        <span class="fas fa-download"></span>
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-warning subirHomologacion" text="2" title="Subir Formato de homologación escala honorarios">
+                                                        <span class="fas fa-upload"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

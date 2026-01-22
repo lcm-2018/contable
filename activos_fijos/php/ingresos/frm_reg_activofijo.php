@@ -64,7 +64,7 @@ $obj = $rs->fetch();
                     <tr class="text-center centro-vertical">
                         <th>Id</th>
                         <th>Placa</th>
-                        <th>Serial</th>
+                        <th>No. Serial</th>
                         <th>Marca</th>
                         <th>Valor</th>
                         <th>Estado</th>

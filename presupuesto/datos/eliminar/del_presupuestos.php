@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -26,9 +26,13 @@ try {
         $sql->bindParam(1, $idpto, PDO::PARAM_INT);
         $sql->execute();
         if ($sql->rowCount() > 0) {
+            include '../../../financiero/reg_logs.php';
+            $ruta = '../../../log';
+            $consulta = "DELETE FROM `pto_presupuestos` WHERE `id_pto` = $idpto";
+            RegistraLogs($ruta, $consulta);
             echo 'ok';
         } else {
-            print_r($sql->errorInfo()[2]);
+            echo $sql->errorInfo()[2];
         }
         $cmd = null;
     } catch (PDOException $e) {

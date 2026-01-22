@@ -8,6 +8,12 @@ try {
     $query = $pdo->prepare("DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = ?");
     $query->bindParam(1, $id);
     $query->execute();
+    if ($query->rowCount() > 0) {
+        include '../../../financiero/reg_logs.php';
+        $ruta = '../../../log';
+        $consulta = "DELETE FROM `ctb_libaux` WHERE `id_ctb_libaux` = $id";
+        RegistraLogs($ruta, $consulta);
+    }
     $response[] = array("value" => 'ok', "id" => $id);
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();

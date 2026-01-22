@@ -13,7 +13,8 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT id_uni,IF(id_uni=0,unidad,CONCAT(unidad,' (',descripcion,')')) AS nom_unidad
             FROM far_med_unidad
-            WHERE (v_res=2 OR id_uni=0) AND IF(id_uni=0,unidad,CONCAT(unidad,' (',descripcion,')')) LIKE '%$term%'";
+            WHERE (v_res=2 OR id_uni=0) AND IF(id_uni=0,unidad,CONCAT(unidad,' (',descripcion,')')) LIKE '%$term%'
+            ORDER BY IF(id_uni=0,0,CONCAT('1',unidad,descripcion))";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
     $cmd = null;

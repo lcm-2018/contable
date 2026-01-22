@@ -1,14 +1,14 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../../conexion.php';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT `id_cat`, `descripcion` FROM `nom_categoria_tercero` ORDER BY `descripcion` ASC";
+    $sql = "SELECT `id_cat`,`codigo`, `descripcion` FROM `nom_categoria_tercero` ORDER BY `descripcion` ASC";
     $rs = $cmd->query($sql);
     $categorias = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -29,7 +29,7 @@ try {
                         <select name="slcCategoria" id="slcCategoria" class="form-control form-control-sm">
                             <option value="0">--Seleccione--</option>
                             <?php foreach ($categorias as $categoria) : ?>
-                                <option value="<?= $categoria['id_cat'] ?>"><?= $categoria['descripcion'] ?></option>
+                                <option value="<?= $categoria['codigo'] ?>"><?= $categoria['descripcion'] ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -37,6 +37,10 @@ try {
                         <label for="BuscaTerNom" class="small">TERCERO</label>
                         <input type="text" class="form-control form-control-sm" id="BuscaTerNom">
                         <input type="hidden" id="idTerceroNom" name="idTerceroNom" value="0">
+                    </div>
+                </div>
+                <div class=" form-row">
+                    <div class="form-group col-md-12" id="divParaFisc">
                     </div>
                 </div>
             </form>

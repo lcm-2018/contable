@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -48,6 +48,9 @@ if (isset($_POST['id_boddes']) && $_POST['id_boddes']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_traslado.estado=" . $_POST['estado'];
 }
+if (isset($_POST['modulo']) && strlen($_POST['modulo'])) {
+    $where .= " AND far_traslado.creado_far=" . $_POST['modulo'];
+}
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -70,7 +73,7 @@ try {
                 far_traslado.detalle,
                 tb_so.nom_sede AS nom_sede_origen,tb_bo.nombre AS nom_bodega_origen,
                 tb_sd.nom_sede AS nom_sede_destino,tb_bd.nombre AS nom_bodega_destino,
-                far_traslado.val_total,
+                far_traslado.val_total,far_traslado.estado,
                 CASE far_traslado.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
             FROM far_traslado
             INNER JOIN tb_sedes AS tb_so ON (tb_so.id_sede=far_traslado.id_sede_origen)
@@ -104,12 +107,13 @@ if (!empty($objs)) {
             "num_traslado" => $obj['num_traslado'],
             "fec_traslado" => $obj['fec_traslado'],
             "hor_traslado" => $obj['hor_traslado'],
-            "detalle" => $obj['detalle'],
+            "detalle" => $obj['detalle'],            
             "nom_sede_origen" => mb_strtoupper($obj['nom_sede_origen']),
             "nom_bodega_origen" => mb_strtoupper($obj['nom_bodega_origen']),
             "nom_sede_destino" => mb_strtoupper($obj['nom_sede_destino']),
-            "nom_bodega_destino" => mb_strtoupper($obj['nom_bodega_destino']),
-            "val_total" => formato_valor($obj['val_total']),            
+            "nom_bodega_destino" => mb_strtoupper($obj['nom_bodega_destino']),                      
+            "val_total" => formato_valor($obj['val_total']),  
+            "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];

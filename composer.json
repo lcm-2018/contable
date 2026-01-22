@@ -1,8 +1,9 @@
 {
     "require": {
-        "php": "7.3.*",
+        "php": "^7.3",
         "phpoffice/phpword": "^0.18.2",
         "chillerlan/php-qrcode": "^3.4",
-        "dompdf/dompdf": "^2.0"
+        "dompdf/dompdf": "^2.0",
+        "box/spout": "^3.3"
     }
 }

@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -58,12 +58,16 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     <select class="filtro form-control form-control-sm" id="sl_bodega_filtro">
                                     </select>
                                 </div> 
-                                <div class="form-group col-md-1">
-                                    <input type="text" class="filtro form-control form-control-sm" id="txt_codigo_filtro" placeholder="Codigo">
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
-                                </div>
+                                <div class="form-group col-md-3">
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_codigo_filtro" placeholder="Codigo">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
+                                        </div>                                        
+                                    </div>    
+                                </div>    
                                 <div class="form-group col-md-2">
                                     <select class="filtro form-control form-control-sm" id="sl_subgrupo_filtro">
                                         <?php subgrupo_articulo($cmd,'--Subgrupo--') ?>
@@ -78,21 +82,48 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </a>
                                 </div>  
                             </div>    
-                            <div class="form-row">                                
-                                <div class="form-group col-md-2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="filtro form-check-input" type="checkbox" id="chk_artact_filtro" checked>
-                                        <label class="form-check-label small" for="chk_artact_filtro">Articulos Activos</label>
-                                    </div>    
+                            <div class="form-row"> 
+                                 <div class="form-group col-md-5">
+                                    <div class="form-row">                                    
+                                        <div class="form-group col-md-4">
+                                            <select class="filtro form-control form-control-sm" id="sl_tipoasis_filtro">
+                                                <?php estados_sino('--Uso Asistencial--') ?>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <select class="filtro form-control form-control-sm" id="sl_conexi_filtro">
+                                                <?php con_existencia('--Existencia--') ?>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <select class="filtro form-control form-control-sm" id="sl_lotven_filtro">
+                                                <?php lotes_vencidos('--Lotes--') ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>        
+                                <div class="form-group col-md-3">
+                                    <div class="form-row">                                                                                
+                                        <div class="form-group col-md-7">
+                                            <div class="form-check form-check-inline">
+                                                <input class="filtro form-check-input" type="checkbox" id="chk_artact_filtro" checked>
+                                                <label class="form-check-label small" for="chk_artact_filtro">Articulos Activos</label>
+                                            </div>    
+                                        </div>
+                                        <div class="form-group col-md-5">
+                                            <input class="filtro form-check-input" type="checkbox" id="chk_lotact_filtro" checked>
+                                            <label class="form-check-label small" for="chk_lotact_filtro">Lotes Activos</label>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group col-md-2">
-                                    <input class="filtro form-check-input" type="checkbox" id="chk_lotact_filtro" checked>
-                                    <label class="form-check-label small" for="chk_lotact_filtro">Lotes Activos</label>
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <input class="filtro form-check-input" type="checkbox" id="chk_conexi_filtro" checked>
-                                    <label class="form-check-label small" for="chk_conexi_filtro">Con Existencias</label>
-                                </div>                                                                                              
+                                <div class="form-group col-md-3">
+                                    <select class="filtro form-control form-control-sm text-primary" id="sl_tipo_reporte">
+                                        <?php tipo_reporte_exi_lote('--TIPO DE REPORTE--') ?>
+                                    </select>
+                                </div> 
+                                <div class="form-group col-md-1">
+                                    <input type="text" class="filtro form-control form-control-sm" id="txt_diasven_filtro" style="display: none;" value="15" placeholder="Días Vence.">
+                                </div>                                                    
                             </div>
 
                             <!--Lista de registros en la tabla-->

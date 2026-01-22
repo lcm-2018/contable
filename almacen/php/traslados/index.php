@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -73,7 +73,17 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
                                         </div>
                                     </div>
-                                </div>   
+                                </div>
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
+                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                    <a type="button" id="btn_imprime_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
+                                        <span class="fas fa-print" aria-hidden="true"></span>                                       
+                                    </a>
+                                </div>
+                            </div>    
+                            <div class="form-row">   
                                 <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_seddes_filtro">
                                         <?php sedes($cmd, '--Sede Destino--') ?>
@@ -89,13 +99,15 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
-                                    <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
-                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
-                                    </a>
-                                    <a type="button" id="btn_imprime_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
-                                        <span class="fas fa-print" aria-hidden="true"></span>                                       
-                                    </a>
-                                </div>
+                                    <select class="form-control form-control-sm" id="sl_modulo_origen">
+                                    <?php modulo_origen('--Origen--',0) ?>
+                                    </select>
+                                </div> 
+                                <div class="form-group col-md-3">
+                                    <select class="filtro form-control form-control-sm text-primary" id="sl_tipo_reporte">
+                                        <?php tipo_reporte_traslados('--TIPO DE REPORTE--') ?>
+                                    </select>
+                                </div>                                
                             </div>
 
                             <!--Lista de registros en la tabla-->
@@ -113,10 +125,11 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th rowspan="2">No. Traslado</th>
                                         <th rowspan="2">Fecha Traslado</th>
                                         <th rowspan="2">Hora Traslado</th>
-                                        <th rowspan="2">Detalle</th>
+                                        <th rowspan="2">Detalle</th>                                        
                                         <th colspan="2">Unidad Origen</th>
-                                        <th colspan="2">Unidad Destino</th>
+                                        <th colspan="2">Unidad Destino</th>                                        
                                         <th rowspan="2">Vr. Total</th>
+                                        <th rowspan="2">Id.Estado</th>
                                         <th rowspan="2">Estado</th>
                                         <th rowspan="2">Acciones</th>
                                     </tr>

@@ -19,9 +19,16 @@ function formato_valor($valor){
 function bitacora($accion, $opcion, $detalle, $id_usuario, $login) {
     $fecha = date('Y-m-d h:i:s A');
     $usuario = $id_usuario . '-' . $login;
+<<<<<<< HEAD
     $ip=$_SERVER['REMOTE_ADDR'];
     $archivo = date('Ym');
     $dir='C:\wamp64\www\contable\log';
     $log= "Fecha: $fecha, Id Usuario-Login: $usuario, Accion: $accion, Opcion: $opcion, Registro: $detalle,IP:$ip\r\n";
     file_put_contents("$dir/$archivo.log", $log, FILE_APPEND | LOCK_EX);
+=======
+    $ip=$_SERVER['REMOTE_ADDR'];    
+    $archivo = $_SESSION['ruta_logs'] . date('Ym') . 'log';
+    $log= "Fecha: $fecha, Id Usuario-Login: $usuario, Accion: $accion, Opcion: $opcion, Registro: $detalle,IP:$ip\r\n";
+    file_put_contents("$archivo", $log, FILE_APPEND | LOCK_EX);
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
 }

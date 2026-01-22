@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -26,7 +26,7 @@ foreach ($bnsvs as $bs) {
             if ($cmd->lastInsertId() > 0) {
                 $tot_reg++;
             } else {
-                print_r($sql->errorInfo()[2]);
+                echo $sql->errorInfo()[2];
             }
             $cmd = null;
         } catch (PDOException $e) {

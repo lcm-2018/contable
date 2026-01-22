@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 ?>
@@ -47,14 +47,14 @@ try {
                 , IF(`pto_documento_detalles`.`id_tercero_api`,`pto_documento_detalles`.`id_tercero_api`,`ctb_doc`.`id_tercero`) AS id_tercero
                 , `ctb_doc`.`detalle`
                 , `ctb_doc`.`id_manu`
-                , `seg_ctb_factura`.`num_doc`
+                , `ctb_factura`.`num_doc`
                 , `pto_documento_detalles`.`valor`
                 , `pto_documento_detalles`.`rubro`
                 , `ctb_doc`.`id_ctb_doc`
             FROM
-                `seg_ctb_factura`
+                `ctb_factura`
                 INNER JOIN `ctb_doc` 
-                    ON (`seg_ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
+                    ON (`ctb_factura`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                 INNER JOIN `pto_documento_detalles` 
                     ON (`ctb_doc`.`id_ctb_doc` = `pto_documento_detalles`.`id_ctb_doc`)
             WHERE (`ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_final'
@@ -140,6 +140,8 @@ FROM
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
                 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
                 $res_api = curl_exec($ch);
                 curl_close($ch);
                 $dat_ter = json_decode($res_api, true);

@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -55,7 +55,7 @@ try {
                 if ($res > 0) {
                     $add = 1;
                 } else {
-                    print_r($sql->errorInfo()[2]);
+                    echo $sql->errorInfo()[2];
                 }
             }
         }
@@ -65,7 +65,7 @@ try {
             echo 'Operación fallida';
         }
     } else {
-        print_r($sql->errorInfo()[2]);
+        echo $sql->errorInfo()[2];
     }
     $cmd = null;
 } catch (PDOException $e) {

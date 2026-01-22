@@ -15,6 +15,10 @@ try {
     $query->bindParam(1, $id);
     $query->execute();
     if ($query->rowCount() > 0) {
+        include '../../../financiero/reg_logs.php';
+        $ruta = '../../../log';
+        $consulta = "DELETE FROM `tes_caja_const` WHERE `id_caja_const` = $id";
+        RegistraLogs($ruta, $consulta);
         $response['status'] = 'ok';
     } else {
         $response['msg'] = 'Error: ' . $query->errorInfo()[2];

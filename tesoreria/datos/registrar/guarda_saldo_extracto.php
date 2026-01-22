@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 $id_conciliacion = isset($_POST['id_conciliacion']) ? $_POST['id_conciliacion'] : exit('Acceso no disponible');
@@ -20,18 +20,6 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     //consulto la id_tes_cuenta  con el id_cuenta
     if ($id_conciliacion == 0) {
-        $query = "SELECT `id_tes_cuenta` FROM `tes_cuentas` WHERE (`id_cuenta` = ?) LIMIT 1";
-        $query = $cmd->prepare($query);
-        $query->bindParam(1, $id_cuenta, PDO::PARAM_INT);
-        $query->execute();
-        $id_cuenta = $query->fetch(PDO::FETCH_ASSOC);
-        if (!empty($id_cuenta)) {
-            $id_cuenta =  $id_cuenta['id_tes_cuenta'];
-        } else {
-            $response['msg'] = 'No se encontró la cuenta';
-            echo json_encode($response);
-            exit();
-        }
         $query = "INSERT INTO `tes_conciliacion`
                     (`id_cuenta`,`vigencia`,`mes`,`saldo_extracto`,`estado`,`id_user_reg`,`fec_reg`)
                 VALUES (?, ?, ?, ?, ?, ?, ?)";

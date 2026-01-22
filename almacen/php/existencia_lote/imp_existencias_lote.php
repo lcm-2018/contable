@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -18,7 +18,6 @@ $where = " WHERE 1";
 if($idrol !=1){
     $where .= " AND far_medicamento_lote.id_bodega IN (SELECT id_bodega FROM seg_bodegas_usuario WHERE id_usuario=$idusr)";
 }
-
 if (isset($_POST['id_sede']) && $_POST['id_sede']) {
     $where .= " AND far_medicamento_lote.id_bodega IN (SELECT id_bodega FROM tb_sedes_bodega WHERE id_sede=" . $_POST['id_sede'] . ")";
 }
@@ -34,15 +33,29 @@ if (isset($_POST['nombre']) && $_POST['nombre']) {
 if (isset($_POST['id_subgrupo']) && $_POST['id_subgrupo']) {
     $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];
 }
+if (isset($_POST['tipo_asis']) && strlen($_POST['tipo_asis'])) {
+    $where .= " AND far_medicamentos.es_clinico=" . $_POST['tipo_asis'];
+}
 if (isset($_POST['artactivo']) && $_POST['artactivo']) {
     $where .= " AND far_medicamentos.estado=1";
 }
 if (isset($_POST['lotactivo']) && $_POST['lotactivo']) {
     $where .= " AND far_medicamento_lote.estado=1";
 }
-if (isset($_POST['conexistencia']) && $_POST['conexistencia']) {
-    $where .= " AND far_medicamento_lote.existencia>=1";
+if (isset($_POST['con_existencia']) && $_POST['con_existencia']) {
+    if ($_POST['con_existencia'] == 1){
+        $where .= " AND far_medicamento_lote.existencia>=1";
+    } else {
+        $where .= " AND far_medicamento_lote.existencia=0";
+    }    
 }
+if (isset($_POST['lote_ven']) && $_POST['lote_ven']) {
+    if ($_POST['lote_ven'] == 1){
+        $where .= " AND DATEDIFF(far_medicamento_lote.fec_vencimiento,NOW())<0";
+    } else {
+        $where .= " AND DATEDIFF(far_medicamento_lote.fec_vencimiento,NOW())>=0";
+    }    
+} 
 
 try {
     $sql = "SELECT far_medicamento_lote.id_lote,tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
@@ -98,24 +111,24 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>REPORTE DE EXISTENCIAS</th>
+            <th>REPORTE DE EXISTENCIAS POR LOTE</th>
         </tr>     
     </table> 
 
     <table style="width:100% !important">
         <thead style="font-size:60%">                
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
-                <th>ID</th>
-                <th>Sede</th>
-                <th>Bodega</th>
-                <th>Código</th>
+                <th>ID Lote</th>                
+                <th>Código Art.</th>
                 <th>Nombre</th>
                 <th>Subgrupo</th>
+                <th>Sede</th>
+                <th>Bodega</th>                
                 <th>Lote</th>
+                <th>Fecha Vencimiento</th>
                 <th>Existencia</th>
                 <th>Vr. Promedio</th>
-                <th>Vr. Total</th>
-                <th>Fecha Vencimiento</th>
+                <th>Vr. Total</th>                
                 <th>Estado</th>
             </tr>
         </thead>
@@ -124,17 +137,17 @@ try {
             $tabla = '';
             foreach ($objs as $obj) {
                 $tabla .=  '<tr class="resaltar"> 
-                        <td>' . $obj['id_lote'] . '</td>
-                        <td>' . mb_strtoupper($obj['nom_sede']) . '</td>
-                        <td>' . mb_strtoupper($obj['nom_bodega']) . '</td>
+                        <td>' . $obj['id_lote'] . '</td>                                                
                         <td>' . $obj['cod_medicamento'] . '</td>
-                        <td style="text-align:left">' . mb_strtoupper($obj['nom_medicamento']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_medicamento']) . '</td>
                         <td style="text-align:left">' . mb_strtoupper($obj['nom_subgrupo']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_sede']) . '</td>
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_bodega']) . '</td>                        
                         <td>' . $obj['lote'] . '</td>   
+                        <td>' . $obj['fec_vencimiento'] . '</td>    
                         <td>' . $obj['existencia'] . '</td>   
                         <td>' . formato_valor($obj['val_promedio']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']) . '</td>  
-                        <td>' . $obj['fec_vencimiento'] . '</td>    
+                        <td>' . formato_valor($obj['val_total']) . '</td>                          
                         <td>' . $obj['estado'] . '</td></tr>';
             }
             echo $tabla;
@@ -142,17 +155,16 @@ try {
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="3" style="text-align:left">
+                <td colspan="9" style="text-align:left">
                     No. de Registros: <?php echo count($objs); ?>  
                 </td>
-                <td colspan="5"></td>
                 <td style="text-align:left">
                     TOTAL:
                 </td>
-                <td colspan="1" style="text-align:center">
+                <td style="text-align:center">
                     <?php echo formato_valor($obj_tot['val_total']); ?>  
                 </td>
-                <td colspan="2"></td>
+                <td></td>
             </tr>
         </tfoot>
     </table>

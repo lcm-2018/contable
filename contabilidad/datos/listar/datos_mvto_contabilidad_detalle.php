@@ -1,11 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
 include '../../../permisos.php';
+include '../../../terceros.php';
+
 // Div de acciones de la lista
 $id_ctb_doc = $_POST['id_doc'];
 
@@ -46,27 +48,20 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$estado = $estado['estado'];
+$estado = !empty($estado) ? $estado['estado'] : 1;
 $data = [];
 $totDebito = 0;
 $totCredito = 0;
 if (!empty($listappto)) {
     $id_t = [];
     foreach ($listappto as $lp) {
-        $id_t[] = $lp['id_tercero_api'];
+        if ($lp['id_tercero_api'] != '') {
+            $id_t[] = $lp['id_tercero_api'];
+        }
     }
-    $payload = json_encode($id_t);
-    //API URL
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $res_api = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($res_api, true);
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
+
     foreach ($listappto as $lp) {
         $id = $lp['id_ctb_libaux'];
         $id_ctb = $lp['id_ctb_doc'];
@@ -77,8 +72,8 @@ if (!empty($listappto)) {
         $totCredito += $cred;
         $valorDebito =  number_format($deb, 2, '.', ',');
         $valorCredito =  number_format($cred, 2, '.', ',');
-        $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero'));
-        $tercero = $key !== false ? $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social'] : '';
+        $key = array_search($lp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+        $tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '';
         $borrar = $editar = $detalles = $registrar = null;
         if ($estado == 1) {
             $detalles = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb detalles" title="Detalles"><span class="fas fa-eye fa-lg"></span></a>';
@@ -112,7 +107,7 @@ if (!empty($listappto)) {
 }
 $debe = number_format($totDebito, 2, '.', ',');
 $haber = number_format($totCredito, 2, '.', ',');
-$valor = $totDebito - $totCredito;
+$valor = number_format($totDebito, 2, '.', '') - number_format($totCredito, 2, '.', '');
 $msg = $valor == 0 ? '<span class="badge badge-success">Correcto</span>' : '<span class="badge badge-danger">Incorrecto</span>';
 $tfoot = [
     'cuenta' => '1',

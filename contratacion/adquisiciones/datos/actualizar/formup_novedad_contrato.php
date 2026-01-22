@@ -1,17 +1,18 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
+include '../../../../terceros.php';
 $data = isset($_POST['datos']) ? explode('|', $_POST['datos']) : exit('Acción no permitida ');
 $id_novedad = $data[0];
 $opcion = $data[1];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_novedad` , `descripcion` FROM `ctt_tipo_novedad`";
+    $sql = "SELECT `id_novedad` , `descripcion` FROM `ctt_tipo_novedad` WHERE `id_novedad` IN (1,2,3)";
     $rs = $cmd->query($sql);
     $tip_novedad = $rs->fetchAll();
     $cmd = null;
@@ -32,7 +33,7 @@ switch ($opcion) {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             $sql = "SELECT
-                        `id_nov_con`, `val_adicion`, `fec_adcion`, `fec_ini_prorroga`, `fec_fin_prorroga`, `observacion`, `cdp`
+                        `id_nov_con`, `val_adicion`, `fec_adcion`, `fec_ini_prorroga`, `fec_fin_prorroga`, `observacion`, `id_cdp`
                     FROM
                         `ctt_novedad_adicion_prorroga`
                     WHERE `id_nov_con` = $id_novedad";
@@ -121,49 +122,20 @@ switch ($opcion) {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             $sql = "SELECT
-                        `seg_terceros`.`id_tercero`, `seg_terceros`.`no_doc`
-                    FROM
-                        `tb_rel_tercero`
-                        INNER JOIN `seg_terceros` 
-                            ON (`tb_rel_tercero`.`id_tercero_api` = `seg_terceros`.`id_tercero_api`)
-                    WHERE `seg_terceros`.`estado` = 1 AND `tb_rel_tercero`.`id_tipo_tercero` = 2";
-            $rs = $cmd->query($sql);
-            $terceros = $rs->fetchAll();
-            $cmd = null;
-        } catch (PDOException $e) {
-            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-        }
-        if (!empty($terceros)) {
-            $ced = '0';
-            foreach ($terceros as $tE) {
-                $ced .= ',' . $tE['no_doc'];
-            }
-            //API URL
-            $url = $api . 'terceros/datos/res/lista/' . $ced;
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $result = curl_exec($ch);
-            curl_close($ch);
-            $terceros_api = json_decode($result, true);
-        } else {
-            echo "No se ha registrado ningun tercero" . '<br><br><a type="button" class="btn btn-secondary  btn-sm" data-dismiss="modal"> Cancelar</a>';
-        }
-        try {
-            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-            $sql = "SELECT
                         `id_cesion`, `id_adq`, `id_tipo_nov`, `id_tercero`, `fec_cesion`, `observacion`
                     FROM
                         `ctt_novedad_cesion`
                     WHERE (`id_cesion` = $id_novedad)";
             $rs = $cmd->query($sql);
             $detalles_novedad = $rs->fetch();
-            $cmd = null;
         } catch (PDOException $e) {
             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
         }
+        $id_t[] = $detalles_novedad['id_tercero'];
+        $ids = implode(',', $id_t);
+        $terceros_api = getTerceros($ids, $cmd);
+        $cmd = null;
+        $tercero = isset($terceros_api[0]) ? ltrim($terceros_api[0]['nom_tercero'] . ' -> ' . $terceros_api[0]['nit_tercero']) : '';
     ?>
         <div class="px-0">
             <div class="shadow">
@@ -181,15 +153,8 @@ switch ($opcion) {
                         </div>
                         <div class="form-group col-md-8">
                             <label for="slcTerceroCesion" class="small">TERCERO CESIONARIO</label>
-                            <select id="slcTerceroCesion" name="slcTerceroCesion" class="form-control form-control-sm py-0 sm" aria-label="Default select example">
-                                <?php
-                                foreach ($terceros_api as $tc) {
-                                    $slc = $detalles_novedad['id_tercero'] == $tc['id_tercero'] ? 'selected' : '';
-                                    $razsoc = $tc['razon_social'] != '' ? ' - ' . $tc['razon_social'] : '';
-                                    echo '<option ' . $slc . ' value="' . $tc['id_tercero'] . '">' . mb_strtoupper($tc['apellido1'] . ' ' . $tc['apellido2'] . ' ' . $tc['nombre1'] . ' ' . $tc['nombre2'] . $razsoc) . '</option>';
-                                }
-                                ?>
-                            </select>
+                            <input type="text" id="SeaTercer" class="form-control form-control-sm" value="<?php echo $tercero ?>">
+                            <input type="hidden" name="id_tercero" id="id_tercero" value="<?php echo $detalles_novedad['id_tercero'] ?>">
                         </div>
                     </div>
                     <div class="form-row px-4">
@@ -367,6 +332,8 @@ switch ($opcion) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         $result = curl_exec($ch);
         curl_close($ch);
         $tip_terminacion = json_decode($result, true);

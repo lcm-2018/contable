@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -74,7 +74,17 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                             <input type="date" class="form-control form-control-sm" id="txt_fecfin_filtro" name="txt_fecfin_filtro" placeholder="Fecha Final">
                                         </div>
                                     </div>
+                                </div>
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
+                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                    <a type="button" id="btn_imprime_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
+                                        <span class="fas fa-print" aria-hidden="true"></span>                                       
+                                    </a>
                                 </div> 
+                            </div>    
+                            <div class="form-row">    
                                 <div class="form-group col-md-2">
                                     <select class="form-control form-control-sm" id="sl_sedpro_filtro">
                                         <?php sedes($cmd, '--Sede Proveedor--') ?>
@@ -86,17 +96,14 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 </div>                              
                                 <div class="form-group col-md-1">
                                     <select class="form-control form-control-sm" id="sl_estado_filtro">
-                                        <?php estados_movimientos('--Estado--') ?>
+                                        <?php estados_pedidos_2('--Estado--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
-                                    <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
-                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
-                                    </a>
-                                    <a type="button" id="btn_imprime_filtro" class="btn btn-outline-success btn-sm" title="Imprimir">
-                                        <span class="fas fa-print" aria-hidden="true"></span>                                       
-                                    </a>
-                                </div>
+                                    <select class="form-control form-control-sm" id="sl_modulo_origen">
+                                        <?php modulo_origen('--Origen--',0) ?>
+                                    </select>
+                                </div>                                
                             </div>
 
                             <!--Lista de registros en la tabla-->
@@ -114,11 +121,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                         <th rowspan="2">No. Pedido</th>
                                         <th rowspan="2">Fecha Pedido</th>
                                         <th rowspan="2">Hora Pedido</th>
-                                        <th rowspan="2">Detalle</th>
+                                        <th rowspan="2">Detalle</th>                                        
                                         <th colspan="2">Unidad DE donde se solicita</th>
-                                        <th colspan="2">Unidad Proveedora A donde se solicita</th>
+                                        <th colspan="2">Unidad Proveedor</th>                                       
                                         <th rowspan="2">Valor Total</th>
+                                        <th rowspan="2">Id.Estado</th>
                                         <th rowspan="2">Estado</th>
+                                        <th rowspan="2">Ids Traslados</th>
                                         <th rowspan="2">Acciones</th>
                                     </tr>
                                     <tr class="text-center centro-vertical">
@@ -132,7 +141,8 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <table class="table-bordered table-sm col-md-2">
                                 <tr>
                                     <td style="background-color:yellow">Pendiente</td>
-                                    <td>Cerrado</td>
+                                    <td style="background-color:PaleTurquoise">Confirmado</td>
+                                    <td>Finalizado</td>
                                     <td style="background-color:gray">Anulado</td>
                                 </tr>
                             </table>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -27,8 +27,9 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     //Inicializa variable por defecto
-    $obj['estado'] = 1;
     $obj['es_clinico'] = 0;
+    $obj['tipo_riesgo'] = 0;
+    $obj['estado'] = 1;    
 }
 $imprimir = $id != -1 ? '' : 'disabled="disabled"';
 
@@ -47,7 +48,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                 <div class=" form-row">
                     <div class="form-group col-md-2">
                         <label for="txt_cod_art" class="small">Código</label>
-                        <input type="text" class="form-control form-control-sm number" id="txt_cod_art" name="txt_cod_art" required value="<?php echo $obj['cod_medicamento'] ?>">
+                        <input type="text" class="form-control form-control-sm valcode" id="txt_cod_art" name="txt_cod_art" required value="<?php echo $obj['cod_medicamento'] ?>">
                     </div>
                     <div class="form-group col-md-6">
                         <label for="txt_nom_art" class="small">Nombre</label>
@@ -60,17 +61,27 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         </select>
                     </div>
                     <div class="form-group col-md-2">
+                        <label for="txt_vidautil_art" class="small">Vida Últil</label>
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_vidautil_art" name="txt_vidautil_art" value="<?php echo $obj['vida_util'] ?>">
+                    </div>
+                    <div class="form-group col-md-2">
                         <label for="txt_topmin_art" class="small">Tope Mínimo</label>
-                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmin_art" name="txt_topmin_art" required value="<?php echo $obj['top_min'] ?>">
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmin_art" name="txt_topmin_art" value="<?php echo $obj['top_min'] ?>">
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_topmax_art" class="small">Tope Máximo</label>
-                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmax_art" name="txt_topmax_art" required value="<?php echo $obj['top_max'] ?>">
+                        <input type="text" class="form-control form-control-sm numberint" id="txt_topmax_art" name="txt_topmax_art" value="<?php echo $obj['top_max'] ?>">
                     </div>
                     <div class="form-group col-md-4">
                         <label for="txt_unimed_art" class="small">Unidad Medida</label>
                         <input type="text" class="form-control form-control-sm" id="txt_unimed_art" required value="<?php echo $obj['unidad_medida'] ?>">
                         <input type="hidden" id="id_txt_unimed_art" name="id_txt_unimed_art" value="<?php echo $obj['id_unidadmedida_2'] ?>">
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="sl_riesgo_art" class="small">Clasificación de Riesgo</label>
+                        <select class="form-control form-control-sm" id="sl_riesgo_art" name="sl_riesgo_art" required>
+                            <?php clasificacion_riesgo('', $obj['tipo_riesgo']) ?>
+                        </select>
                     </div>
                     <div class="form-group col-md-2">
                         <label class="small">Para Uso Asistencial</label>
@@ -104,7 +115,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
             <div class="p-3">
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link active small" id="nav_lista_cums-tab" data-toggle="tab" href="#nav_lista_cums" role="tab" aria-controls="nav_lista_cums" aria-selected="true">CUMS</a>
+                        <a class="nav-item nav-link active small" id="nav_lista_cums-tab" data-toggle="tab" href="#nav_lista_cums" role="tab" aria-controls="nav_lista_cums" aria-selected="true">CUMS/Expedientes</a>
                         <a class="nav-item nav-link small" id="nav_lista_lotes-tab" data-toggle="tab" href="#nav_lista_lotes" role="tab" aria-controls="nav_lista_lotes" aria-selected="false">LOTES</a>
                     </div>
                 </nav>
@@ -116,9 +127,12 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             <thead>
                                 <tr class="text-center centro-vertical">
                                     <th>Id</th>
-                                    <th>CUM</th>
+                                    <th>CUM/</br>Expediente</th>
                                     <th>IUM</th>
                                     <th>Laboratorio</th>
+                                    <th>Registro Invima</th>
+                                    <th>Fec. Vence</br> Invima</th>
+                                    <th>Estado Invima</th>
                                     <th>Presentación Comercial</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
@@ -136,9 +150,11 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                                     <th>Id</th>
                                     <th>Lote</th>
                                     <th>Principal</th>                                    
-                                    <th>Fecha<br>Vencimiento</th>                                    
+                                    <th>Fecha<br>Vencimiento</th>   
+                                    <th>Reg. Invima</th>                                 
+                                    <th>Marca</th>                                 
                                     <th>Presentación del Lote</th>
-                                    <th>Unidades en UMPL</th>
+                                    <th>Unidades<br>en UMPL</th>
                                     <th>Existencia</th>
                                     <th>CUM</th>
                                     <th>Bodega</th>
@@ -148,6 +164,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                             </thead>
                             <tbody class="text-left centro-vertical"></tbody>
                         </table>
+                        <label class="block text-left"><input type="checkbox" id="chk_lotes_con_exi"/>&nbsp;Listar solo Lotes con Existencia </label>
                     </div>
                 </div>
             </div>

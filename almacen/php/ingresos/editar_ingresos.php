@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -22,7 +22,7 @@ try {
     if ((PermisosUsuario($permisos, 5006, 2) && $oper == 'add' && $_POST['id_ingreso'] == -1) ||
         (PermisosUsuario($permisos, 5006, 3) && $oper == 'add' && $_POST['id_ingreso'] != -1) ||
         (PermisosUsuario($permisos, 5006, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5006, 2) && PermisosUsuario($permisos, 5006, 3) && $oper == 'close') ||
+        (PermisosUsuario($permisos, 5006, 3) && $oper == 'close') ||
         (PermisosUsuario($permisos, 5006, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
 
@@ -32,17 +32,24 @@ try {
             $id_sede = $_POST['id_txt_sede'];
             $fec_ing = $_POST['txt_fec_ing'];
             $hor_ing = $_POST['txt_hor_ing'];
+            $id_tiping = $_POST['id_tip_ing'];
+            $id_pedido = $_POST['txt_id_pedido'];        
             $num_fac = $_POST['txt_num_fac'];
-            $fec_fac = $_POST['txt_fec_fac'];
-            $id_tiping = $_POST['sl_tip_ing'];
-            $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;
+            $fec_fac = $_POST['txt_fec_fac'];                  
+            $id_tercero = $_POST['id_txt_tercero'];
             $detalle = $_POST['txt_det_ing'];
+            $val_aprpeso = $_POST['txt_val_aprpeso'];
 
+            $sql = "SELECT orden_compra FROM far_orden_ingreso_tipo WHERE id_tipo_ingreso=" . $id_tiping;
+            $rs = $cmd->query($sql);
+            $obj_tiping = $rs->fetch();
+            $id_pedido = $obj_tiping['orden_compra'] == 1 ? $id_pedido : 'NULL';
+            
             if ($id == -1) {
                 $sql = "INSERT INTO far_orden_ingreso(fec_ingreso,hor_ingreso,num_factura,fec_factura,id_tipo_ingreso,
-                        id_provedor,id_centrocosto,detalle,val_total,id_sede,id_sedetraslado,id_bodega,id_usr_crea,fec_creacion,estado)
+                        id_provedor,id_centrocosto,detalle,val_total,val_aprpeso,id_sede,id_sedetraslado,id_bodega,id_pedido,id_usr_crea,fec_creacion,creado_far,estado)
                     VALUES('$fec_ing','$hor_ing','$num_fac','$fec_fac',$id_tiping,
-                        $id_tercero,0,'$detalle',0,$id_sede,$id_sede,$id_bodega,$id_usr_ope,'$fecha_ope',1)";
+                        $id_tercero,0,'$detalle',0,0,$id_sede,$id_sede,$id_bodega,$id_pedido,$id_usr_ope,'$fecha_ope',0,1)";
                 $rs = $cmd->query($sql);
 
                 if ($rs) {
@@ -61,8 +68,8 @@ try {
 
                 if ($obj_ingreso['estado'] == 1) {
                     $sql = "UPDATE far_orden_ingreso 
-                        SET num_factura='$num_fac',fec_factura='$fec_fac',id_tipo_ingreso=$id_tiping,id_provedor=$id_tercero,detalle='$detalle'
-                        WHERE id_ingreso=" . $id;
+                            SET num_factura='$num_fac',fec_factura='$fec_fac',id_tipo_ingreso=$id_tiping,id_provedor=$id_tercero,detalle='$detalle',id_pedido=$id_pedido,val_aprpeso=$val_aprpeso
+                            WHERE id_ingreso=" . $id;                           
                     $rs = $cmd->query($sql);
 
                     if ($rs) {
@@ -247,7 +254,7 @@ try {
                         $obj = $rs->fetch();
                         $lotes = $obj['lotes'];
 
-                        recalcular_kardex($cmd,$lotes,'I',$id,'','','','');                        
+                        recalcular_kardex($cmd, $lotes, 'I', $id, '', '', '', '', '', '');                        
                     }
                     if ($rs) {
                         $cmd->commit();

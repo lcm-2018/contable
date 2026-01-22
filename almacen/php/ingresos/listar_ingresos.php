@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -40,6 +40,9 @@ if (isset($_POST['id_tiping']) && $_POST['id_tiping']) {
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_orden_ingreso.estado=" . $_POST['estado'];
 }
+if (isset($_POST['modulo']) && strlen($_POST['modulo'])) {
+    $where .= " AND far_orden_ingreso.creado_far=" . $_POST['modulo'];
+}
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -61,7 +64,7 @@ try {
     $sql = "SELECT far_orden_ingreso.id_ingreso,far_orden_ingreso.num_ingreso,far_orden_ingreso.fec_ingreso,far_orden_ingreso.hor_ingreso,
 	            far_orden_ingreso.num_factura,far_orden_ingreso.fec_factura,far_orden_ingreso.detalle,
                 tb_terceros.nom_tercero,far_orden_ingreso_tipo.nom_tipo_ingreso,far_orden_ingreso.val_total,
-                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,
+                tb_sedes.nom_sede,far_bodegas.nombre AS nom_bodega,far_orden_ingreso.estado,
 	            CASE far_orden_ingreso.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' WHEN 0 THEN 'ANULADO' END AS nom_estado
             FROM far_orden_ingreso
             INNER JOIN far_orden_ingreso_tipo ON (far_orden_ingreso_tipo.id_tipo_ingreso=far_orden_ingreso.id_tipo_ingreso)
@@ -98,11 +101,12 @@ if (!empty($objs)) {
             "num_factura" => $obj['num_factura'],
             "fec_factura" => $obj['fec_factura'],
             "detalle" => $obj['detalle'],
-            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),
             "nom_tipo_ingreso" => mb_strtoupper($obj['nom_tipo_ingreso']),
-            "val_total" => formato_valor($obj['val_total']),
+            "nom_tercero" => mb_strtoupper($obj['nom_tercero']),            
             "nom_sede" => mb_strtoupper($obj['nom_sede']),
             "nom_bodega" => mb_strtoupper($obj['nom_bodega']),
+            "val_total" => formato_valor($obj['val_total']),
+            "estado" => $obj['estado'],
             "nom_estado" => $obj['nom_estado'],
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',
         ];

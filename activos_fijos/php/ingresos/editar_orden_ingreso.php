@@ -21,7 +21,7 @@ try {
     if ((PermisosUsuario($permisos, 5703, 2) && $oper == 'add' && $_POST['id_ingreso'] == -1) ||
         (PermisosUsuario($permisos, 5703, 3) && $oper == 'add' && $_POST['id_ingreso'] != -1) ||
         (PermisosUsuario($permisos, 5703, 4) && $oper == 'del') ||
-        (PermisosUsuario($permisos, 5703, 2) && PermisosUsuario($permisos, 5703, 3) && $oper == 'close') ||
+        (PermisosUsuario($permisos, 5703, 3) && $oper == 'close') ||
         (PermisosUsuario($permisos, 5703, 5) && $oper == 'annul' || $id_rol == 1)
     ) {
 
@@ -33,7 +33,7 @@ try {
             $num_fac = $_POST['txt_num_fac'];
             $fec_fac = $_POST['txt_fec_fac'];
             $id_tiping = $_POST['sl_tip_ing'];
-            $id_tercero = $_POST['sl_tercero'] ? $_POST['sl_tercero'] : 0;
+            $id_tercero = $_POST['id_txt_tercero'];
             $detalle = $_POST['txt_det_ing'];
 
             if ($id == -1) {
@@ -140,15 +140,23 @@ try {
                     $sql = 'UPDATE tb_datos_ips SET num_ingresoactual=num_ingresoactual+1';
                     $rs2 = $cmd->query($sql);
 
+                    //Traer el area y responsable de almacen
+                    $area = area_principal($cmd);
+                    $id_area = $area['id_area'];
+                    $id_responsable = $area['id_responsable'];
+
                     //Crear la hojas de vida de los activos fijos
-                    $sql = "INSERT INTO acf_hojavida(id_ingreso,id_articulo,placa,serial,id_marca,valor,tipo_activo,id_proveedor,id_tipo_ingreso,id_sede,id_area,id_usr_crea,fec_creacion,estado) 
+                    $sql = "INSERT INTO acf_hojavida(id_ingreso,id_articulo,des_activo,placa,num_serial,id_marca,valor,tipo_activo,id_proveedor,id_tipo_ingreso,id_sede,id_area,id_responsable,id_usr_crea,fec_creacion,estado_general,estado) 
                             SELECT $id,acf_orden_ingreso_acfs.id_articulo,
-                                acf_orden_ingreso_acfs.placa,acf_orden_ingreso_acfs.serial,acf_orden_ingreso_acfs.id_marca,
+                                CONCAT_WS(' ',far_medicamentos.nom_medicamento,acf_marca.descripcion) AS nom_activo,
+                                acf_orden_ingreso_acfs.placa,acf_orden_ingreso_acfs.num_serial,acf_orden_ingreso_acfs.id_marca,
                                 acf_orden_ingreso_acfs.valor,acf_orden_ingreso_acfs.tipo_activo,acf_orden_ingreso.id_provedor,
-                                acf_orden_ingreso.id_tipo_ingreso,acf_orden_ingreso.id_sede,1,$id_usr_ope,'$fecha_ope',1
+                                acf_orden_ingreso.id_tipo_ingreso,acf_orden_ingreso.id_sede,$id_area,$id_responsable,$id_usr_ope,'$fecha_ope',1,1
                             FROM acf_orden_ingreso_acfs
                             INNER JOIN acf_orden_ingreso_detalle ON (acf_orden_ingreso_detalle.id_ing_detalle=acf_orden_ingreso_acfs.id_ing_detalle)
                             INNER JOIN acf_orden_ingreso ON (acf_orden_ingreso.id_ingreso=acf_orden_ingreso_detalle.id_ingreso)
+                            INNER JOIN far_medicamentos ON (far_medicamentos.id_med=acf_orden_ingreso_acfs.id_articulo)
+                            INNER JOIN acf_marca ON (acf_marca.id=acf_orden_ingreso_acfs.id_marca)
                             WHERE acf_orden_ingreso_detalle.id_ingreso=" . $id;
                     $rs3 = $cmd->query($sql);
                     
@@ -159,8 +167,8 @@ try {
                         $cmd->commit();
                         $res['mensaje'] = 'ok';
                     } else {
-                        $res['mensaje'] = 'Error de Ejecución de Proceso';
                         $cmd->rollBack();
+                        $res['mensaje'] = 'Error de Ejecución de Proceso';                        
                     }
                 } else {
                     $res['mensaje'] = 'Debe registar los datos básicos de los Articulos: ' . $articulos_pen;                

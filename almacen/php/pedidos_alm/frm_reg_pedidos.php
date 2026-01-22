@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -15,7 +15,7 @@ $id = isset($_POST['id']) ? $_POST['id'] : -1;
 $sql = "SELECT far_alm_pedido.*,
             far_bodegas.nombre AS nom_bodega,
             CASE far_alm_pedido.estado WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CONFIRMADO' 
-                                            WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'CERRADO'
+                                            WHEN 3 THEN 'ACEPTADO' WHEN 4 THEN 'FINALIZADO'
                                             WHEN 0 THEN 'ANULADO' END AS nom_estado
         FROM far_alm_pedido 
         INNER JOIN far_bodegas ON (far_bodegas.id_bodega=far_alm_pedido.id_bodega)
@@ -46,7 +46,7 @@ if (empty($obj)) {
 }
 $guardar = in_array($obj['estado'],[1]) ? '' : 'disabled="disabled"';
 $confirmar = in_array($obj['estado'],[1]) && $id != -1 ? '' : 'disabled="disabled"';
-$cerrar = in_array($obj['estado'],[3]) ? '' : 'disabled="disabled"';
+$finalizar = in_array($obj['estado'],[3]) ? '' : 'disabled="disabled"';
 $anular = in_array($obj['estado'],[2]) ? '' : 'disabled="disabled"';
 $imprimir = $id != -1 ? '' : 'disabled="disabled"';
 
@@ -63,7 +63,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                 <input type="hidden" id="id_pedido" name="id_pedido" value="<?php echo $id ?>">
                 <div class="form-row">
                     <div class="form-group col-md-1">
-                        <label for="txt_fec_ing" class="small">Id.</label>
+                        <label for="txt_ide" class="small">Id.</label>
                         <input type="text" class="form-control form-control-sm" id="txt_ide" name="txt_ide" class="small" value="<?php echo ($id==-1?'':$id) ?>" readonly="readonly">
                     </div>
                     <div class="form-group col-md-3">
@@ -96,14 +96,18 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
             </form>    
             <table id="tb_pedidos_detalles" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                 <thead>
-                <tr class="text-center centro-vertical">
-                        <th>Id</th>
-                        <th>Código</th>
-                        <th>Descripción</th>                        
-                        <th>Cantidad</th>
-                        <th>Vr. Promedio</th> 
-                        <th>Total</th>
-                        <th>Acciones</th>
+                    <tr class="text-center centro-vertical">
+                        <th rowspan="2">Id</th>
+                        <th rowspan="2">Código</th>
+                        <th rowspan="2">Descripción</th>                        
+                        <th colspan="2">Cantidad</th>
+                        <th rowspan="2">Vr. Promedio</th> 
+                        <th rowspan="2">Total</th>
+                        <th rowspan="2">Acciones</th>
+                    </tr>
+                    <tr class="text-center centro-vertical">
+                        <th>Solicitada</th>
+                        <th>Aprobada</th>
                     </tr>
                 </thead>
                 <tbody class="text-left centro-vertical"></tbody>
@@ -122,7 +126,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
     <div class="text-center pt-3">
         <button type="button" class="btn btn-primary btn-sm" id="btn_guardar" <?php echo $guardar ?>>Guardar</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_confirmar" <?php echo $confirmar ?>>Confirmar</button>
-        <button type="button" class="btn btn-primary btn-sm" id="btn_cerrar" <?php echo $cerrar ?>>Cerrar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn_finalizar" <?php echo $finalizar ?>>finalizar</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_anular" <?php echo $anular ?>>Anular</button>
         <button type="button" class="btn btn-primary btn-sm" id="btn_imprimir" <?php echo $imprimir ?>>Imprimir</button>
         <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</a>

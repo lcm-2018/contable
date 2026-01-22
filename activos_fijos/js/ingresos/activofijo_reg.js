@@ -30,7 +30,7 @@
             columns: [
                 { 'data': 'id_act_fij' }, //Index=0
                 { 'data': 'placa' },
-                { 'data': 'serial' },
+                { 'data': 'num_serial' },
                 { 'data': 'nom_marca' },
                 { 'data': 'valor' },
                 { 'data': 'tipo_activo' },
@@ -40,7 +40,7 @@
                 { orderable: false, targets: 6 }
             ],
             order: [
-                [0, "desc"]
+                [0, "asc"]
             ],
             lengthMenu: [
                 [10, 25, 50, -1],

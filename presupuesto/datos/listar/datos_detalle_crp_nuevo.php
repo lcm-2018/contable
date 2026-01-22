@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -14,17 +14,25 @@ function pesos($valor)
 $id_cdp = $_POST['id_cdp'];
 $id_crp = $_POST['id_crp'];
 $where = '';
-if ($id_crp > 0) {
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+if ($id_crp > '0') {
     $where = "AND `pto_crp_detalle`.`id_pto_crp` = $id_crp";
+    try {
+        $sql = "SELECT `id_cdp` FROM `pto_crp` WHERE (`id_pto_crp` = $id_crp)";
+        $rs = $cmd->query($sql);
+        $id_cdp = $rs->fetch();
+        $id_cdp = !empty($id_cdp) ? $id_cdp['id_cdp'] : 0;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
 }
 
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `pto_cdp_detalle`.`id_pto_cdp_det`
                 , `pto_cdp_detalle`.`id_rubro`
-                , (IFNULL(`pto_cdp_detalle`.`valor`,0) - IFNULL(`pto_cdp_detalle`.`valor_liberado`,0)) AS `val_cdp`
+                , (SUM(IFNULL(`pto_cdp_detalle`.`valor`,0)) - SUM(IFNULL(`pto_cdp_detalle`.`valor_liberado`,0))) AS `val_cdp`
                 , `pto_cargue`.`cod_pptal`
                 , `pto_cargue`.`nom_rubro`
                 , IFNULL(`t1`.`val_crp`,0) AS `val_crp`
@@ -40,10 +48,13 @@ try {
                         `pto_crp_detalle`
                     INNER JOIN `pto_cdp_detalle` 
                         ON (`pto_crp_detalle`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-                    WHERE (`pto_cdp_detalle`.`id_pto_cdp` = $id_cdp $where)
+                    INNER JOIN `pto_crp` 
+                        ON (`pto_crp_detalle`.`id_pto_crp` = `pto_crp`.`id_pto_crp`)
+                    WHERE (`pto_cdp_detalle`.`id_pto_cdp` = $id_cdp AND `pto_crp`.`estado` > 0 $where)
                     GROUP BY `pto_crp_detalle`.`id_pto_cdp_det`) AS `t1`
                     ON (`t1`.`id_pto_cdp_det` = `pto_cdp_detalle`.`id_pto_cdp_det`)
-            WHERE (`pto_cdp_detalle`.`id_pto_cdp` = $id_cdp)";
+            WHERE (`pto_cdp_detalle`.`id_pto_cdp` = $id_cdp)
+            GROUP BY `pto_cdp_detalle`.`id_pto_cdp_det`";
     $rs = $cmd->query($sql);
     $detalles = $rs->fetchAll();
 } catch (PDOException $e) {
@@ -53,6 +64,7 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT `estado` FROM `pto_crp` WHERE (`id_pto_crp` = $id_crp)";
+    $rs = $cmd->query($sql);
     $estado = $rs->fetch();
     $estado = !empty($estado) ? $estado['estado'] : 1;
 } catch (PDOException $e) {

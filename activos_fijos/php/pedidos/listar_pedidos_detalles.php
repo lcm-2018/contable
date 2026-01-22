@@ -44,7 +44,7 @@ try {
 
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT far_alm_pedido_detalle.id_ped_detalle,far_medicamentos.cod_medicamento,far_medicamentos.nom_medicamento,
-                    far_alm_pedido_detalle.cantidad,far_alm_pedido_detalle.valor,
+                    far_alm_pedido_detalle.cantidad,far_alm_pedido_detalle.aprobado,far_alm_pedido_detalle.valor,
                     (far_alm_pedido_detalle.cantidad*far_alm_pedido_detalle.valor) AS val_total
                 FROM far_alm_pedido_detalle
                 INNER JOIN far_medicamentos ON (far_medicamentos.id_med = far_alm_pedido_detalle.id_medicamento)
@@ -74,6 +74,7 @@ if (!empty($objs)) {
             "cod_medicamento" => $obj['cod_medicamento'],
             "nom_medicamento" => $obj['nom_medicamento'],
             "cantidad" => $obj['cantidad'],
+            "aprobado" => $obj['aprobado'],
             "valor" => formato_valor($obj['valor']),           
             "val_total" => formato_valor($obj['val_total']),
             "botones" => '<div class="text-center centro-vertical">' . $editar . $eliminar . '</div>',

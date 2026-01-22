@@ -4,7 +4,7 @@ use Sabberworm\CSS\Value\Value;
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 function pesos($valor)
@@ -448,6 +448,25 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `nom_otros_descuentos`.`id_empleado`
+                , SUM(`nom_liq_descuento`.`valor`) AS `valor`
+            FROM
+                `nom_liq_descuento`
+                INNER JOIN `nom_otros_descuentos` 
+                    ON (`nom_liq_descuento`.`id_dcto` = `nom_otros_descuentos`.`id_dcto`)
+            WHERE (`nom_liq_descuento`.`id_nomina` = $id_nomina)
+            GROUP BY `nom_otros_descuentos`.`id_empleado`";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+
 $concepto = isset($_POST['concepto']) ? $_POST['concepto'] : 'A';
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $meses = [
@@ -489,7 +508,7 @@ $meses = [
                 <a type="button" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
                     <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
                 </a>
-                <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"> Imprimir</a>
+                <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir','<?php echo 0; ?>');"> Imprimir</a>
             <?php } ?>
             <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
         </div>
@@ -614,6 +633,8 @@ EOT;
             $val_prim_nav = $key !== false ? $prima_nav[$key]['val_liq_pv'] : 0;
             $key = array_search($id_empleado, array_column($compensatorios, 'id_empleado'));
             $val_compensa = $key !== false ? $compensatorios[$key]['val_compensa'] : 0;
+            $key = array_search($id_empleado, array_column($descuentos, 'id_empleado'));
+            $val_desc = $key !== false ? $descuentos[$key]['valor'] : 0;
             $filtro = [];
             $filtro = array_filter($hoex, function ($hoex) use ($id_empleado) {
                 return $hoex["id_empleado"] == $id_empleado;
@@ -666,7 +687,7 @@ EOT;
                 }
             }
             $devengado = $val_sueldo + $val_auxt + $val_auxal + $val_bsp + $val_vac + $val_pri_vac + $val_recrea + $val_lic + $val_indem + $representacion + $val_hoext + $val_incap + $val_ces + $val_ices + $val_prim_sv + $val_prim_nav + $val_compensa;
-            $deducido = $val_salud + $val_pension + $val_solidaria + $val_rtefte + $val_libr + $val_embar + $val_sind;
+            $deducido = $val_salud + $val_pension + $val_solidaria + $val_rtefte + $val_libr + $val_embar + $val_sind + $val_desc;
             $val_neto = $devengado - $deducido;
             $netos[$id_empleado] = $val_neto;
         }
@@ -1414,7 +1435,7 @@ EOT;
                         <td>' . $o['nom_municipio'] . '</td>
                         <td>' . $o['no_documento'] . '</td>' . $getBanco .
                         '<td>' . $diasLab . '</td>
-                        <td>' . pesos($pagado) . '</td>
+                        <td style="text-align: right;">$ ' . $pagado . '</td>
                     </tr>';
                     $total_conceptos += $pagado;
                     break;

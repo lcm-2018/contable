@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -11,14 +11,22 @@ include '../common/funciones_generales.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
+$id_bodega = isset($_POST['id_bodega']) && $_POST['id_bodega'] ? $_POST['id_bodega'] : -1;
+$id_articulo = isset($_POST['id_articulo']) ? $_POST['id_articulo'] : -1;
+$articulo = isset($_POST['articulo']) ? $_POST['articulo'] : '';
 $id_lote = isset($_POST['id_lote']) ? $_POST['id_lote'] : -1;
+$cantidad = isset($_POST['cantidad']) ? $_POST['cantidad'] : 0;
+
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
+
 $sql = "SELECT far_orden_ingreso_detalle.*,
-            far_medicamento_lote.lote,far_medicamentos.nom_medicamento AS nom_articulo,
+            far_medicamentos.id_med,
+            CONCAT(far_medicamentos.nom_medicamento,IF(far_medicamento_lote.id_marca=0,'',CONCAT(' - ',acf_marca.descripcion))) AS nom_articulo,
             far_presentacion_comercial.nom_presentacion,IFNULL(far_presentacion_comercial.cantidad,1) AS cantidad_umpl
         FROM far_orden_ingreso_detalle
         INNER JOIN far_medicamento_lote ON (far_medicamento_lote.id_lote=far_orden_ingreso_detalle.id_lote)
         INNER JOIN far_medicamentos ON (far_medicamentos.id_med=far_medicamento_lote.id_med)
+        INNER JOIN acf_marca ON (acf_marca.id=far_medicamento_lote.id_marca)
         INNER JOIN far_presentacion_comercial ON (far_presentacion_comercial.id_prescom=far_orden_ingreso_detalle.id_presentacion)
         WHERE id_ing_detalle=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
@@ -32,15 +40,12 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     $obj['iva'] = 0;
+    $obj['id_med'] = $id_articulo;
+    $obj['nom_articulo'] = $articulo;
+    $obj['id_lote'] = $id_lote;
+    $obj['cantidad'] = (int)$cantidad;
+} 
 
-    $lote = datos_lote($cmd, $id_lote);
-    $obj['id_lote'] = $lote['id_lote'];
-    $obj['lote'] = $lote['lote'];
-    $obj['nom_articulo'] = $lote['nom_articulo'];
-    $obj['id_presentacion'] = $lote['id_presentacion'];
-    $obj['nom_presentacion'] = $lote['nom_presentacion'];
-    $obj['cantidad_umpl'] = $lote['cantidad_umpl'];
-}
 ?>
 
 <div class="px-0">
@@ -54,15 +59,24 @@ if (empty($obj)) {
             <form id="frm_reg_ingresos_detalles">
                 <input type="hidden" id="id_detalle" name="id_detalle" value="<?php echo $id ?>">
                 <div class=" form-row">
-                    <div class="form-group col-md-9">
+                    <div class="form-group col-md-8">
                         <label for="txt_nom_art" class="small">Articulo</label>
                         <input type="text" class="form-control form-control-sm" id="txt_nom_art" class="small" value="<?php echo $obj['nom_articulo'] ?>" readonly="readonly">
+                        <input type="hidden" id="id_txt_nom_art" name="id_txt_nom_art" value="<?php echo $obj['id_med'] ?>">
                     </div>
-                    <div class="form-group col-md-3">
-                        <label for="txt_nom_lot" class="small">Lote</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_nom_lot" class="small" value="<?php echo $obj['lote'] ?>" readonly="readonly">
-                        <input type="hidden" id="id_txt_nom_lot" name="id_txt_nom_lot" value="<?php echo $obj['id_lote'] ?>">
-                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="sl_lote_art" class="small">Lote</label>
+                        <div class=" form-row">
+                            <div class="form-group col-md-9">
+                                <select class="form-control form-control-sm" id="sl_lote_art" name="sl_lote_art">
+                                    <?php lotes_articulo($cmd, $id_bodega, $obj['id_med'], $obj['id_lote']) ?>
+                                </select>                    
+                                </div>                                    
+                            <div class="form-group col-md-3">    
+                                <button type="button" class="btn btn-primary btn-sm" id="btn_nuevo_lote">Nuevo</button>                        
+                            </div>    
+                        </div>
+                    </div>    
                     <div class="form-group col-md-10">
                         <label for="txt_pre_lot" class="small">Unidad de Medida de Presentación del Lote</label>
                         <input type="text" class="form-control form-control-sm" id="txt_pre_lot" value="<?php echo $obj['nom_presentacion'] ?>">
@@ -70,15 +84,15 @@ if (empty($obj)) {
                     </div>
                     <div class="form-group col-md-2">
                         <label for="txt_can_lot" class="small">Cant. X UMPL</label>
-                        <input type="text" class="form-control form-control-sm" id="txt_can_lot" value="<?php echo $obj['cantidad_umpl'] ?>" readonly="readonly">
+                        <input type="text" class="form-control form-control-sm" id="txt_can_lot" name="txt_can_lot" value="<?php echo $obj['cantidad_umpl'] ?>" readonly="readonly">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="txt_can_ing" class="small">Cantidadd</label>
+                        <label for="txt_can_ing" class="small">Cantidad</label>
                         <input type="number" class="form-control form-control-sm numberint" id="txt_can_ing" name="txt_can_ing" required value="<?php echo $obj['cantidad'] ?>">
                     </div>
                     <div class="form-group col-md-3">
-                        <label for="txt_val_uni" class="small">Vr. Unitarioo</label>
-                        <input type="text" class="form-control form-control-sm numberfloat" id="txt_val_uni" name="txt_val_uni" required value="<?php echo $obj['valor_sin_iva'] ?>">
+                        <label for="txt_val_uni" class="small">Vr. Unitario</label>
+                        <input type="text" class="form-control form-control-sm numberfloat" id="txt_val_uni" name="txt_val_uni" required value="<?php echo formato_decimal($obj['valor_sin_iva']) ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_por_iva" class="small">% IVA</label>

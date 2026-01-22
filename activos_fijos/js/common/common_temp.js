@@ -1,34 +1,3 @@
-var setIdioma = {
-    "decimal": "",
-    "emptyTable": "No hay información",
-    "info": "Mostrando _START_ - _END_ registros de _TOTAL_",
-    "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-    "infoFiltered": "(Filtrado de _MAX_ en total)",
-    "infoPostFix": "",
-    "thousands": ",",
-    "lengthMenu": "Ver _MENU_ Filas",
-    "loadingRecords": "Cargando...",
-    "processing": "Procesando...",
-    "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-    "zeroRecords": "No se encontraron registros",
-    "paginate": {
-        "first": "&#10096&#10096",
-        "last": "&#10097&#10097",
-        "next": "&#10097",
-        "previous": "&#10096"
-    }
-};
-var setdom;
-if ($("#peReg").val() === '1') {
-    setdom = "<'row'<'col-md-5'l><'bttn-plus-dt col-md-2'B><'col-md-5'f>>" +
-        "<'row'<'col-sm-12'tr>>" +
-        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-} else {
-    setdom = "<'row'<'col-md-6'l><'col-md-6'f>>" +
-        "<'row'<'col-sm-12'tr>>" +
-        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
-}
-
 //CONFIRMAIÓN DE BORRAR REGISTROS
 var confirmar_del = function(tipo, id) {
     var msg = "Esta seguro de esta Operación?";
@@ -87,6 +56,26 @@ var verifica_vacio_2 = function(objeto1, objeto2, msg = "") {
     return error;
 };
 
+var showError = function(error) {
+    $('#divModalError').modal('show');
+    $('#divMsgError').html(error);
+}
+
+//VERIFICA SI UN OBJETO TIENE UN VALOR MÍNIMO ESPECÍFICO Y RESALTA OTRO OBJETO RELACIONADO
+var verifica_valmin_2 = function(objeto1, objeto2, val = 0, msg = "") {
+    var error = 0;
+    if (parseInt(objeto1.val()) < val) {
+        objeto2.addClass('is-invalid');
+        objeto2.focus();
+        error = 1;
+        if (msg != "") {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html(msg);
+        }
+    }
+    return error;
+};
+
 //VERIFICA SI UN OBJETO TIENE UN VALOR MÍNIMO ESPECÍFICO
 var verifica_valmin = function(objeto, val = 0, msg = "") {
     var error = 0;
@@ -102,14 +91,24 @@ var verifica_valmin = function(objeto, val = 0, msg = "") {
     return error;
 };
 
-var showError = function(error) {
-    $('#divModalError').modal('show');
-    $('#divMsgError').html(error);
-}
+//VERIFICA SI UN OBJETO TIENE UN VALOR MÁXIMO ESPECÍFICO
+var verifica_valmax = function(objeto, val = 500, msg = "") {
+    var error = 0;
+    if (parseInt(objeto.val()) > val) {
+        objeto.addClass('is-invalid');
+        objeto.focus();
+        error = 1;
+        if (msg != "") {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html(msg);
+        }
+    }
+    return error;
+};
 
 $(function() {
-    //clase con Dato numerico
-    $('#divForms,#divModalReg').on("input", ".number", function() {
+    //Dato numerico
+    $("#divModalForms,#divModalReg,#divModalBus").on("input", ".number", function() {
         var that = $(this);
         that.val(that.val().replace(/[^0-9]/g, ''));
         if (isNaN(that.val())) {
@@ -117,8 +116,8 @@ $(function() {
         }
     });
 
-    //clase con Dato numerico entero >=0
-    $('#divForms,#divModalReg').on("input", ".numberint", function() {
+    //Dato numerico entero >=0
+    $("#divModalForms,#divModalReg,#divModalBus").on("input", ".numberint", function() {
         var that = $(this);
         that.val(that.val().replace(/[^0-9]/g, ''));
         if (that.val().substring(0, 1).trim() == '0') {
@@ -129,8 +128,8 @@ $(function() {
         }
     });
 
-    //clase con Dato numerico flotante
-    $('#divForms,#divModalReg').on("input", ".numberfloat", function() {
+    //Dato numerico flotante
+    $("#divModalForms,#divModalReg,#divModalBus").on("input", ".numberfloat", function() {
         var that = $(this);
         that.val(that.val().replace(/[^0-9\.]/g, ''));
         if (that.val().substring(0, 1).trim() == '0' && that.val().substring(1, 2).trim() != '.') {
@@ -144,8 +143,8 @@ $(function() {
         }
     });
 
-    //clase con Dato letras, numeros, y -
-    $('#divForms,#divModalReg').on("input", ".valcode", function() {
+    //Dato letras, numeros, y -
+    $("#divModalForms,#divModalReg,#divModalBus").on("input", ".valcode", function() {
         var that = $(this);
         that.val(that.val().replace(/[^0-9a-zA-Z\-]/g, ''));
         if (isNaN(that.val())) {
@@ -175,3 +174,14 @@ $(function() {
         $('<form action="../common/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
     });
 });
+
+//Funcion para validar numero enteros
+function number_int(that) {
+    that.val(that.val().replace(/[^0-9]/g, ''));
+    if (that.val().substring(0, 1).trim() == '0') {
+        that.val('0');
+    }
+    if (isNaN(that.val())) {
+        e.preventDefault();
+    }
+}

@@ -3,7 +3,7 @@ session_start();
 set_time_limit(5600);
 
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -12,7 +12,10 @@ $fecha_corte = $_POST['f_fin'];
 $cuenta = $_POST['cuenta'];
 $tipo = $_POST['tipo'];
 $saldo = $_POST['saldo'];
+$nit = $_POST['nit'];
 $condicion = $tipo == 'M' ? "LIKE '$cuenta%'" : "= '$cuenta'";
+$where = $_POST['xTercero'] == 1 ? " AND `tb_terceros`.`nit_tercero` = '$nit'" : '';
+
 
 function pesos($valor)
 {
@@ -20,6 +23,7 @@ function pesos($valor)
 }
 
 include '../../conexion.php';
+include '../../terceros.php';
 
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -37,7 +41,9 @@ try {
                 `ctb_fuente`.`nombre` AS `nom_tipo_doc`,
                 `ctb_doc`.`id_manu`,
                 `ctb_doc`.`detalle`,
-                `tes_forma_pago`.`forma_pago`
+                `tes_forma_pago`.`forma_pago`,
+                `tb_terceros`.`nom_tercero`,
+                `tb_terceros`.`nit_tercero`
             FROM 
                 `ctb_libaux`
             INNER JOIN `ctb_doc` 
@@ -50,7 +56,9 @@ try {
                 ON `tes_detalle_pago`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`
             LEFT JOIN `tes_forma_pago` 
                 ON `tes_detalle_pago`.`id_forma_pago` = `tes_forma_pago`.`id_forma_pago`
-            WHERE `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2 AND `ctb_pgcp`.`cuenta` $condicion
+            LEFT JOIN `tb_terceros`
+                ON `ctb_libaux`.`id_tercero_api` = `tb_terceros`.`id_tercero_api`
+            WHERE `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte' AND `ctb_doc`.`estado` = 2 AND `ctb_pgcp`.`cuenta` $condicion $where
             ORDER BY `ctb_pgcp`.`fecha`, `ctb_pgcp`.`cuenta` ASC";
     $res = $cmd->query($sql);
     $cuentas = $res->fetchAll();
@@ -70,23 +78,15 @@ try {
 
 $id_t = [];
 foreach ($cuentas as $ter) {
-    if (!empty($ter['id_tercero_api'])) {
+    if ($ter['id_tercero_api'] != '') {
         $id_t[] = $ter['id_tercero_api'];
     }
 }
 
 $terceros = [];
 if (count($id_t) > 0) {
-    $payload = json_encode($id_t);
-    $url = $api . 'terceros/datos/res/lista/terceros';
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $terceros = json_decode($result, true);
+    $ids = implode(',', $id_t);
+    $terceros = getTerceros($ids, $cmd);
 }
 
 $nom_informe = "LIBRO AUXILIAR DETALLADO DE LA CUENTA $cuenta";
@@ -126,9 +126,9 @@ $bandera = in_array($primer_caracter, [1, 5, 6, 7]);
         } else {
             $saldo = $saldo + $tp['credito'] - $tp['debito'];
         }
-        $key = array_search($tp['id_tercero_api'], array_column($terceros, 'id_tercero'));
-        $nom_ter = $key !== false ? ltrim($terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['razon_social']) : '---';
-        $cc_nit = $key !== false ? $terceros[$key]['cc_nit'] : '---';
+        $key = array_search($tp['id_tercero_api'], array_column($terceros, 'id_tercero_api'));
+        $nom_ter = $key !== false ? ltrim($terceros[$key]['nom_tercero']) : '---';
+        $cc_nit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
         $fecha = date('Y-m-d', strtotime($tp['fecha']));
         echo "<tr>
                 <td class='text-right'>" . $fecha . "</td>

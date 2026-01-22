@@ -9,16 +9,16 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
     `ctt_destino_contrato`.`id_adquisicion`
-    , `tb_centros_costo`.`id_centro`
+    , `tb_centrocostos`.`id_centro`
     , `ctt_destino_contrato`.`horas_mes`
-    , `tb_centro_costo_x_sede`.`id_sede`
+    , `far_centrocosto_area`.`id_sede`
     , `ctt_destino_contrato`.`horas_mes` / 192 as participacion
 FROM
-    `tb_centro_costo_x_sede`
-    INNER JOIN `tb_centros_costo` 
-        ON (`tb_centro_costo_x_sede`.`id_centro_c` = `tb_centros_costo`.`id_centro`)
+    `far_centrocosto_area`
+    INNER JOIN `tb_centrocostos` 
+        ON (`far_centrocosto_area`.`id_centrocosto` = `tb_centrocostos`.`id_centro`)
     INNER JOIN `ctt_destino_contrato` 
-        ON (`ctt_destino_contrato`.`id_centro_costo` = `tb_centro_costo_x_sede`.`id_x_sede`)
+        ON (`ctt_destino_contrato`.`id_centro_costo` = `far_centrocosto_area`.`id_sede`)
 WHERE (`ctt_destino_contrato`.`id_adquisicion` =73);";
     $rs = $cmd->query($sql);
     $centros = $rs->fetchAll();

@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 $data = json_decode(file_get_contents('php://input'), true);
@@ -18,7 +18,7 @@ try {
                 `id_soporte`, `id_factura_no`, `shash`
             FROM
                 `seg_soporte_fno`
-            WHERE `id_soporte` = '$id_soporte'";
+            WHERE `id_soporte` = '$id_soporte' AND `tipo` = 0";
     $rs = $cmd->query($sql);
     $soporte = $rs->fetch();
     if ($soporte['id_soporte'] == '') {

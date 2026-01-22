@@ -1,11 +1,12 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
+include '../terceros.php';
 
 $id_doc = isset($_POST['id']) ? $_POST['id'] : exit('Acceso no disponible');
 
@@ -23,11 +24,11 @@ try {
                 , `ctb_causa_retencion`.`id_terceroapi`
             FROM
                 `ctb_causa_retencion`
-                INNER JOIN `ctb_retencion_rango` 
+                LEFT JOIN `ctb_retencion_rango` 
                     ON (`ctb_causa_retencion`.`id_rango` = `ctb_retencion_rango`.`id_rango`)
-                INNER JOIN `ctb_retenciones` 
+                LEFT JOIN `ctb_retenciones` 
                     ON (`ctb_retencion_rango`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
-                INNER JOIN `ctb_retencion_tipo` 
+                LEFT JOIN `ctb_retencion_tipo` 
                     ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
             WHERE (`ctb_causa_retencion`.`id_ctb_doc` = $id_doc)";
     $rs = $cmd->query($sql);
@@ -70,7 +71,6 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $band = !empty($facturas) ? true : false;
-$cmd = null;
 function pesos($valor)
 {
     return '$ ' . number_format($valor, 2, ',', '.');
@@ -85,32 +85,13 @@ $val_iva = $valores[1];
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ],
         columnDefs: [{
             class: 'text-wrap',
-            targets: [0,1]
+            targets: [0, 1]
         }],
     });
     $('#tableCausacionRetenciones').wrap('<div class="overflow" />');
@@ -141,37 +122,45 @@ $val_iva = $valores[1];
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-4">
-                            <label for="tipo_rete" class="small">Tipo retención</label>
-                            <select class="form-control form-control-sm py-0 sm" name="tipo_rete" id="tipo_rete" onchange="mostrarRetenciones(value);" required>
-                                <option value="0">-- Seleccionar --</option>
-                                <?php
-                                foreach ($retenciones as $retencion) {
-                                    echo "<option value='$retencion[id_retencion_tipo]'>$retencion[tipo]</option>";
-                                }
-                                ?>
-                            </select>
-                            <input type="hidden" name="id_docr" id="id_docr" value="<?php echo $id_doc; ?>">
-                            <input type="hidden" name="tarifa" id="tarifa" value="">
-                            <input type="hidden" name="id_terceroapi" id="id_terceroapi" value="">
-                            <input type="hidden" name="id_detalle" id="id_detalle" value="0">
-                            <input type="hidden" name="id_rango" id="id_rango" value="0">
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <label for="tipo_rete" class="small">Tipo retención</label>
+                                    <select class="form-control form-control-sm py-0 sm" name="tipo_rete" id="tipo_rete" onchange="mostrarRetenciones(value);" required>
+                                        <option value="0">-- Seleccionar --</option>
+                                        <?php
+                                        foreach ($retenciones as $retencion) {
+                                            echo "<option value='$retencion[id_retencion_tipo]'>$retencion[tipo]</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                    <input type="hidden" name="id_docr" id="id_docr" value="<?php echo $id_doc; ?>">
+                                    <input type="hidden" name="tarifa" id="tarifa" value="">
+                                    <input type="hidden" name="id_terceroapi" id="id_terceroapi" value="">
+                                    <input type="hidden" name="id_detalle" id="id_detalle" value="0">
+                                    <input type="hidden" name="id_rango" id="id_rango" value="0">
+                                    <input type="hidden" name="hd_id_causa_retencion" id="hd_id_causa_retencion" value="0">
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group col-md-4" id="divRete">
-                            <label for="id_rete" class="small">Retención</label>
-                            <select class="form-control form-control-sm py-0 sm" id="id_rete" name="id_rete">
-                                <option value="0">-- Seleccionar --</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="valor_rte" class="small">Valor retención</label>
-                            <input type="text" name="valor_rte" id="valor_rte" class="form-control form-control-sm text-right" onkeyup="valorMiles(id)" value="<?php echo 0; ?>">
+                        <div class="form-group col-md-8">
+                            <div id="divRete">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="id_rete" class="small">Retención</label>
+                                        <select class="form-control form-control-sm py-0 sm" id="id_rete" name="id_rete">
+                                            <option value="0">-- Seleccionar --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="valor_rte" class="small">Valor retención</label>
+                                        <input type="text" name="valor_rte" id="valor_rte" class="form-control form-control-sm text-right" onkeyup="valorMiles(id)" value="<?php echo 0; ?>">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-row mb-2" id="conDivSobre">
-                        <div class="form-group col-md-4" id="divSede">
-                        </div>
-                        <div class="form-group col-md-4" id="divSobre">
-                        </div>
+                    <div id="divRetIca">
+
                     </div>
                 </form>
                 <table id="tableCausacionRetenciones" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width: 100%;">
@@ -192,38 +181,35 @@ $val_iva = $valores[1];
                             $j++;
                             // Consulto el valor del tercero de la api
                             $id_ter = $ce['id_terceroapi'];
-                            $url = $api . 'terceros/datos/res/datos/id/' . $id_ter;
-                            $ch = curl_init($url);
-                            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-                            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                            $res_api = curl_exec($ch);
-                            curl_close($ch);
-                            $dat_ter = json_decode($res_api, true);
-                            $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
-                            // fin api terceros
+                            $tercero = getTerceros($id_ter, $cmd);
+                            $tercero = isset($tercero[0]) ? $tercero[0]['nom_tercero'] : '--';
                             // Obtener el saldo del registro por obligar
 
+                            $modificar = null;
+                            $editar = null;
+
+                            $editar = '<a value="' . $id_doc . '" onclick="eliminarRetencion(' . $id_doc . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
+
                             if (true) {
-                                $editar = '<a value="' . $id_doc . '" onclick="eliminarRetencion(' . $id_doc . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb editar" title="Causar"><span class="fas fa-trash-alt fa-lg"></span></a>';
                                 $acciones = '<button  class="btn btn-outline-pry btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                             ...
                             </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <a value="' . $id_doc . '" class="dropdown-item sombra carga" href="#">Historial</a>
                             </div>';
-                            } else {
-                                $editar = null;
-                                $detalles = null;
                             }
+                            
                             $valor = number_format($ce['valor_base'], 2, '.', ',');
+                            $acciones = NULL;
+
+                            $modificar = '<a value="' . $id_doc . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb modificar" title="Causar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
                         ?>
                             <tr id="<?php echo $id_doc; ?>">
                                 <td class="text-left"> <?php echo $tercero; ?></td>
                                 <td class="text-left"> <?php echo $ce['nombre_retencion']; ?></td>
                                 <td class="text-right"> <?php echo number_format($ce['valor_base'], 2, '.', ','); ?></td>
                                 <td class="text-right"> <?php echo number_format($ce['valor_retencion'], 2, '.', ','); ?></td>
-                                <td class="text-center"> <?php echo $editar .  $acciones; ?></td>
+                                <td class="text-center"> <?php echo $modificar . $editar .  $acciones; ?></td>
 
                             </tr>
                         <?php
@@ -241,8 +227,8 @@ $val_iva = $valores[1];
     </div>
     <div class="text-right pt-3">
         <?php if ($band) { ?>
-            <a type="button" class="btn btn-primary btn-sm" onclick="GuardarRetencion()">Guardar</a>
+            <button type="button" class="btn btn-primary btn-sm" onclick="GuardarRetencion(this)">Guardar</button>
         <?php } ?>
-        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Aceptar</a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
     </div>
 </div>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
@@ -107,7 +107,7 @@ if ($id_otro != 0) {
 }
 // Si el proceso viene de adquisiciones llama el objeto y valida fecha
 $objeto = $datosCdp['objeto'];
-if ($id_adq != 0) {
+if ($id_adq > 0) {
     // consulto datos de ctt_adquisiciones donde id_adq sea igual a id_adquisiciones
     $sql = "SELECT `objeto`,`fecha_adquisicion`,`val_contrato` FROM `ctt_adquisiciones` WHERE `id_adquisicion` = $id_adq";
     $res = $cmd->query($sql);
@@ -115,12 +115,12 @@ if ($id_adq != 0) {
     $objeto = $datosAdq['objeto'];
     $valoradq = $datosAdq['val_contrato'];
 }
-if ($id_otro != 0) {
+if ($id_otro > 0) {
     $objeto = "OTRO SI " . $objeto;
     $valoradq = $valorotro;
 }
-// Consulta funcion fechaCierre del modulo 4
-$fecha_cierre = fechaCierre($_SESSION['vigencia'], 4, $cmd);
+// Consulta funcion fechaCierre del modulo 54
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
 $cmd = null;
 $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 ?>
@@ -153,7 +153,7 @@ $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
 
                                     <input type="hidden" id="id_pto_docini" value="<?php echo $datosCdp['id_manu']; ?>">
                                     <div class="right-block">
-                                        <div class="row">
+                                        <div class="row pb-1">
                                             <div class="col-2">
                                                 <div class="col"><label for="fecha" class="small">NUMERO CDP:</label></div>
                                             </div>
@@ -165,7 +165,7 @@ $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
                                                 <div class=""><a value="' . $id_pto . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb" title="Lista de CDP " id="botonListaCdp"><span class="far fa-list-alt fa-lg"></span></a></div>
                                             </div>-->
                                         </div>
-                                        <div class="row">
+                                        <div class="row pb-1">
                                             <div class="col-2">
                                                 <div class="col"><label for="fecha" class="small">FECHA:</label></div>
                                             </div>
@@ -173,17 +173,19 @@ $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
                                                 <input type="date" name="fecha" id="fecha" class="form-control form-control-sm" min="<?php echo $fecha_cierre; ?>" max="<?php echo $fecha_max; ?>" value="<?php echo $fecha; ?>" onchange="buscarConsecutivo('CDP');" readonly>
                                             </div>
                                         </div>
-                                        <div class="row">
+                                        <div class="row pb-1">
                                             <div class="col-2">
                                                 <div class="col"><label for="fecha" class="small">OBJETO:</label></div>
                                             </div>
                                             <div class="col-10"> <textarea id="objeto" type="text" name="objeto" class="form-control form-control-sm py-0 sm" aria-label="Default select example" rows="3" required="required" readonly><?php echo $objeto; ?></textarea></div>
                                         </div>
-                                        <div class="row">
+                                        <div class="row pb-1">
                                             <div class="col-2">
                                                 <div class="col"><label for="sol" class="small">No SOLICITUD:</label></div>
                                             </div>
-                                            <div class="col-10"> <input type="text" name="solicitud" id="solicitud" class="form-control form-control-sm" value="<?php echo $datosCdp['num_solicitud']; ?>" readonly></div>
+                                            <div class="col-10">
+                                                <input type="text" name="solicitud" id="solicitud" class="form-control form-control-sm" value="<?php echo $datosCdp['num_solicitud']; ?>">
+                                            </div>
                                         </div>
 
                                     </div>
@@ -203,7 +205,7 @@ $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
                                         <tr>
                                             <th style="width: 8%;">ID</th>
                                             <th style="width: 60%;">Codigo</th>
-                                            <th style="width: 20%;" Class="text-center">Valor</th>
+                                            <th style="width: 20%;" class="text-center">Valor</th>
                                             <th style="width: 12%;">Acciones</th>
                                         </tr>
                                     </thead>

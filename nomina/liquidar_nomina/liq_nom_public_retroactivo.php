@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -113,9 +113,28 @@ try {
                 `nom_empleado`
                 LEFT JOIN  
                 (SELECT 
-                    `id_empleado`,`val_bsp`
-                FROM `nom_liq_bsp`
-                WHERE `id_bonificaciones` IN (SELECT MAX(`id_bonificaciones`) FROM `nom_liq_bsp` WHERE `id_empleado`IN ($ids) GROUP BY `id_empleado`)) AS `t1`
+                    `id_empleado`, SUM(`val_bsp`) AS `val_bsp`
+                FROM 
+                    `nom_liq_bsp`
+                WHERE `id_bonificaciones` IN 
+                    (SELECT
+                        MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                    FROM
+                        `nom_liq_bsp`
+                    INNER JOIN `nom_nominas`
+                        ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                    WHERE ((`nom_nominas`.`tipo` = 'N' OR `nom_nominas`.`tipo` = 'PS') AND `nom_nominas`.`vigencia` <= '$vigencia')
+                    GROUP BY `nom_liq_bsp`.`id_empleado`
+                    UNION ALL
+                    SELECT
+                        MAX(`nom_liq_bsp`.`id_bonificaciones`) AS `id_bonificaciones`
+                    FROM
+                        `nom_liq_bsp`
+                    INNER JOIN `nom_nominas` 
+                        ON (`nom_liq_bsp`.`id_nomina` = `nom_nominas`.`id_nomina`)
+                    WHERE (`nom_nominas`.`tipo` = 'RA' AND `nom_nominas`.`vigencia` <= '$vigencia')
+                    GROUP BY `nom_liq_bsp`.`id_empleado`)
+                GROUP BY `id_empleado`) AS `t1`
                     ON (`t1`.`id_empleado` = `nom_empleado`.`id_empleado`)
                 LEFT JOIN
                 (SELECT   
@@ -1296,8 +1315,8 @@ if (count($empleado) > 0) {
             try {
                 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`) 
-                    VALUES (?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO `nom_liq_salario` (`id_empleado`, `val_liq`, `forma_pago`, `metodo_pago`, `fec_reg`, `id_nomina`, `sal_base`) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $sql = $cmd->prepare($sql);
                 $sql->bindParam(1, $id, PDO::PARAM_INT);
                 $sql->bindParam(2, $salarioneto, PDO::PARAM_STR);
@@ -1305,6 +1324,7 @@ if (count($empleado) > 0) {
                 $sql->bindParam(4, $mpag, PDO::PARAM_STR);
                 $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
                 $sql->bindParam(6, $id_nomina, PDO::PARAM_INT);
+                $sql->bindParam(7, $salbase, PDO::PARAM_STR);
                 $sql->execute();
             } catch (PDOException $e) {
                 echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();

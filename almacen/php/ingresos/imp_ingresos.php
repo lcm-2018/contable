@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -11,7 +11,8 @@ include '../common/funciones_generales.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$where = "WHERE far_orden_ingreso.id_ingreso<>0";
+$where = "WHERE 1";
+
 if (isset($_POST['id_ing']) && $_POST['id_ing']) {
     $where .= " AND far_orden_ingreso.id_ingreso='" . $_POST['id_ing'] . "'";
 }
@@ -32,6 +33,9 @@ if (isset($_POST['id_tiping']) && $_POST['id_tiping']) {
 }
 if (isset($_POST['estado']) && strlen($_POST['estado'])) {
     $where .= " AND far_orden_ingreso.estado=" . $_POST['estado'];
+}
+if (isset($_POST['modulo']) && strlen($_POST['modulo'])) {
+    $where .= " AND far_orden_ingreso.creado_far=" . $_POST['modulo'];
 }
 
 try {
@@ -90,16 +94,18 @@ try {
                 <th>No. Factura</th>
                 <th>Fecha Factura</th>
                 <th>Detalle</th>
-                <th>Tercero</th>
                 <th>Tipo Ingreso</th>
-                <th>Vr. Total</th>
+                <th>Tercero</th>                                
                 <th>Sede</th>
                 <th>Bodega</th>
+                <th>Vr. Total</th>
                 <th>Estado</th>
             </tr>    
         </thead>
         <tbody style="font-size: 60%;">
             <?php
+            $total = 0;
+            $numreg = count($objs);
             $tabla = '';
             foreach ($objs as $obj) {
                 $tabla .=  '<tr class="resaltar" style="text-align:center"> 
@@ -110,21 +116,29 @@ try {
                         <td>' . $obj['num_factura'] . '</td>
                         <td>' . $obj['fec_factura'] . '</td> 
                         <td style="text-align:left">' . $obj['detalle']. '</td>   
-                        <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_tipo_ingreso']) . '</td>   
-                        <td>' . formato_valor($obj['val_total']). '</td>   
-                        <td>' . mb_strtoupper($obj['nom_sede']) . '</td>   
-                        <td>' . mb_strtoupper($obj['nom_bodega']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_tipo_ingreso']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_tercero']) . '</td>                                                   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_sede']) . '</td>   
+                        <td style="text-align:left">' . mb_strtoupper($obj['nom_bodega']) . '</td>   
+                        <td style="text-align:right">' . formato_valor($obj['val_total']). '</td>   
                         <td>' . $obj['nom_estado']. '</td></tr>';
+                $total += $obj['val_total']; 
             }
             echo $tabla;
             ?>            
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="13" style="text-align:left">
-                    No. de Registros: <?php echo count($objs); ?>
-                </td>
+                <th colspan="10" style="text-align:left">
+                    No. de Registros: <?php echo $numreg; ?>  
+                </th>
+                <th style="text-align:left">
+                    TOTAL:
+                </th>
+                <th style="text-align:right">
+                    <?php echo formato_valor($total); ?>  
+                </th>
+                <td></td>
             </tr>
         </tfoot>
     </table>

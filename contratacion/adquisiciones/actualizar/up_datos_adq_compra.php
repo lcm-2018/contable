@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -25,7 +25,7 @@ if ($id_pretbnsv === $id_posttbnsv) {
         $sql->bindParam(1, $id_compra, PDO::PARAM_INT);
         $sql->execute();
         if (!($sql->rowCount() > 0)) {
-            print_r($sql->errorInfo()[2]);
+            echo $sql->errorInfo()[2];
         }
         upCompra();
         $cmd = null;
@@ -51,7 +51,7 @@ function upCompra()
         $sql->execute();
         $cambio = $sql->rowCount();
         if (!($sql->execute())) {
-            print_r($sql->errorInfo()[2]);
+            echo $sql->errorInfo()[2];
             exit();
         } else {
             if ($cambio > 0) {
@@ -66,7 +66,7 @@ function upCompra()
                 if ($sql->rowCount() > 0) {
                     echo '1';
                 } else {
-                    print_r($sql->errorInfo()[2]);
+                    echo $sql->errorInfo()[2];
                 }
             } else {
                 echo 'No se registró ningún nuevo dato';

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 function pesos($valor)
@@ -25,9 +25,20 @@ try {
 }
 try {
     $sql = "SELECT
-                `id_nomina`, `descripcion`, `mes`, `vigencia`, `tipo`, `estado`, `id_user_reg`
+                `nom_nominas`.`id_nomina`
+                , `nom_nominas`.`descripcion`
+                , `nom_nominas`.`mes`, `vigencia`
+                , `nom_nominas`.`tipo`
+                , `nom_nominas`.`estado`
+                , `nom_nominas`.`id_user_reg`
+                , CONCAT_WS(' ', `seg_usuarios_sistema`.`nombre1`
+                , `seg_usuarios_sistema`.`nombre2`
+                , `seg_usuarios_sistema`.`apellido1`
+                , `seg_usuarios_sistema`.`apellido2`) AS `usuario`
             FROM
                 `nom_nominas`
+                LEFT JOIN `seg_usuarios_sistema` 
+                    ON (`nom_nominas`.`id_user_reg` = `seg_usuarios_sistema`.`id_usuario`)            
             WHERE (`id_nomina` = $id_nomina)";
     $rs = $cmd->query($sql);
     $nomina = $rs->fetch(PDO::FETCH_ASSOC);
@@ -50,35 +61,30 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT 
-                `id_empleado`, `vigencia`, `salario_basico`, `no_documento`, `estado`, CONCAT_WS(' ', `apellido1`, `apellido2`, `nombre1`, `nombre2`) AS `nombre`, `representacion`
-            FROM
-                (SELECT  
-                    `nom_empleado`.`id_empleado`
-                    , `nom_empleado`.`tipo_doc`
-                    , `nom_empleado`.`no_documento`
-                    , `nom_empleado`.`genero`
-                    , `nom_empleado`.`apellido1`
-                    , `nom_empleado`.`apellido2`
-                    , `nom_empleado`.`nombre2`
-                    , `nom_empleado`.`nombre1`
-                    , `nom_empleado`.`representacion`
-                    , `nom_empleado`.`estado`
-                    , `nom_salarios_basico`.`id_salario`
-                    , `nom_salarios_basico`.`vigencia`
-                    , `nom_salarios_basico`.`salario_basico`
-                    , `nom_liq_salario`.`mes`
-                    , `nom_liq_salario`.`anio`
-                    , `nom_liq_salario`.`tipo_liq`
-                    , `nom_liq_salario`.`id_nomina`
-                FROM `nom_salarios_basico`
-                    INNER JOIN `nom_empleado`
-                        ON(`nom_salarios_basico`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                    INNER JOIN `nom_liq_salario` 
-                        ON (`nom_liq_salario`.`id_empleado` = `nom_empleado`.`id_empleado`)
-                WHERE `nom_salarios_basico`.`id_salario` 
-                    IN(SELECT MAX(`id_salario`) FROM `nom_salarios_basico` WHERE `vigencia` <= '$vigencia' GROUP BY `id_empleado`)) AS t
-            WHERE `id_nomina` = $id_nomina";
+    $sql = "SELECT  
+                `nom_empleado`.`id_empleado`
+                ,`nom_empleado`.`sede_emp`
+                , `nom_empleado`.`tipo_doc`
+                , `nom_empleado`.`no_documento`
+                , `nom_empleado`.`genero`
+                ,  CONCAT_WS(' ', `nom_empleado`.`nombre1`
+                , `nom_empleado`.`nombre2`
+                , `nom_empleado`.`apellido1`
+                , `nom_empleado`.`apellido2`) AS `nombre`
+                , `nom_empleado`.`representacion`
+                , `nom_empleado`.`estado`
+                , `nom_liq_salario`.`id_nomina`
+                , `nom_liq_salario`.`sal_base` AS `salario_basico`
+                , `nom_cargo_empleado`.`descripcion_carg` AS `cargo`
+                , `tb_sedes`.`nom_sede` AS `sede`
+            FROM `nom_empleado`
+                INNER JOIN `nom_liq_salario` 
+                    ON (`nom_liq_salario`.`id_empleado` = `nom_empleado`.`id_empleado`)
+                LEFT JOIN `nom_cargo_empleado` 
+                    ON (`nom_empleado`.`cargo` = `nom_cargo_empleado`.`id_cargo`)
+                LEFT JOIN `tb_sedes` 
+                    ON (`nom_empleado`.`sede_emp` = `tb_sedes`.`id_sede`)
+            WHERE `nom_liq_salario`.`id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $obj = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -431,6 +437,64 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `nom_otros_descuentos`.`id_empleado`
+                , SUM(`nom_liq_descuento`.`valor`) AS `valor`
+            FROM
+                `nom_liq_descuento`
+                INNER JOIN `nom_otros_descuentos` 
+                    ON (`nom_liq_descuento`.`id_dcto` = `nom_otros_descuentos`.`id_dcto`)
+            WHERE (`nom_liq_descuento`.`id_nomina` = $id_nomina)
+            GROUP BY `nom_otros_descuentos`.`id_empleado`";
+    $rs = $cmd->query($sql);
+    $descuentos = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$fecha = date('Y-m-d', strtotime($nomina['vigencia'] . '-' . $nomina['mes'] . '-01'));
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `fin_maestro_doc`.`control_doc`
+                , `tb_terceros`.`nom_tercero`
+                , `tb_terceros`.`nit_tercero`
+                , `tb_terceros`.`genero`
+                , `fin_respon_doc`.`cargo`
+                , `fin_respon_doc`.`tipo_control`
+                , `fin_tipo_control`.`descripcion` AS `nom_control`
+                , `fin_respon_doc`.`fecha_ini`
+                , `fin_respon_doc`.`fecha_fin`
+            FROM
+                `fin_respon_doc`
+                INNER JOIN `fin_maestro_doc` 
+                    ON (`fin_respon_doc`.`id_maestro_doc` = `fin_maestro_doc`.`id_maestro`)
+                INNER JOIN `tb_terceros` 
+                    ON (`fin_respon_doc`.`id_tercero` = `tb_terceros`.`id_tercero_api`)
+                INNER JOIN `fin_tipo_control` 
+                    ON (`fin_respon_doc`.`tipo_control` = `fin_tipo_control`.`id_tipo`)
+            WHERE (`fin_maestro_doc`.`id_modulo` = 51 
+                AND `fin_respon_doc`.`fecha_fin` >= '$fecha' 
+                AND `fin_respon_doc`.`fecha_ini` <= '$fecha'
+                AND `fin_respon_doc`.`estado` = 1
+                AND `fin_maestro_doc`.`estado` = 1)";
+    $res = $cmd->query($sql);
+    $responsables = $res->fetchAll(PDO::FETCH_ASSOC);
+    $key = array_search('4', array_column($responsables, 'tipo_control'));
+    $nom_respon = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+    $cargo_respon = $key !== false ? $responsables[$key]['cargo'] : '';
+    $gen_respon = $key !== false ? $responsables[$key]['genero'] : '';
+    $control = isset($responsables[0]['control_doc']) ? $responsables[0]['control_doc'] : '';
+    $control = $control == '' || $control == '0' ? false : true;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
 $meses = array(
     '01' => 'Enero',
     '02' => 'Febrero',
@@ -454,7 +518,7 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
         <a type="button" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
             <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
         </a>
-        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"> Imprimir</a>
+        <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir','<?php echo 0; ?>');"> Imprimir</a>
     <?php } ?>
     <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
 </div>
@@ -541,7 +605,7 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                         <th style="border: 1px solid black; " rowspan="2" class="text-center centro-vertical">I. Ces.</th>
                         <th style="border: 1px solid black; " rowspan="2" class="text-center centro-vertical">Compen.</th>
                         <th style="border: 1px solid black; " colspan="3" class="text-center centro-vertical">Seguridad Social</th>
-                        <th style="border: 1px solid black; " colspan="4" class="text-center centro-vertical">Deducciones</th>
+                        <th style="border: 1px solid black; " colspan="5" class="text-center centro-vertical">Deducciones</th>
                         <th style="border: 1px solid black; " rowspan="2" class="text-center centro-vertical">NETO</th>
                     </tr>
                     <tr style="color: black;font-size:9px">
@@ -561,12 +625,13 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                         <th style=" border: 1px solid black; ">Libranza</th>
                         <th style=" border: 1px solid black; ">Embargo</th>
                         <th style=" border: 1px solid black; ">Sindicato</th>
-                        <th style=" border: 1px solid black; ">Ret. Fte.</th>
+                        <th style=" border: 1px solid black; ">Ret.Fte.</th>
+                        <th style=" border: 1px solid black; ">Otros</th>
                     </tr>
                 </thead>
                 <tbody style=" font-size:9px">
                     <?php
-                    $tot_incap = $tot_lic = $tot_vac = $tot_indem = $tot_pordias = $tot_auxtra = $tot_auxalim = $tot_he = $tot_bsps = $tot_prima_vac = $tot_grpre = $tot_bon_recrea = $tot_prim_serv = $tot_prim_nav = $tot_ces = $tot_ices = $tot_comp = $tot_aport_salud = $tot_aport_pension = $tot_aport_solidaridad = $tot_lib = $tot_emb = $tot_sind = $tot_ret = $tot_saln = 0;
+                    $tot_incap = $tot_lic = $tot_vac = $tot_indem = $tot_pordias = $tot_auxtra = $tot_auxalim = $tot_he = $tot_bsps = $tot_prima_vac = $tot_grpre = $tot_bon_recrea = $tot_prim_serv = $tot_prim_nav = $tot_ces = $tot_ices = $tot_comp = $tot_aport_salud = $tot_aport_pension = $tot_aport_solidaridad = $tot_lib = $tot_emb = $tot_sind = $tot_ret = $tot_saln = $tot_otros = 0;
                     foreach ($obj as $o) {
                         $id = $o["id_empleado"];
                         $keysaln = array_search($id, array_column($saln, 'id_empleado'));
@@ -903,7 +968,19 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                                 </td>
                                 <td style="border: 1px solid black;" class="text-right">
                                     <?php
-                                    $deducido = $g + $i + $j + $k + $l + $m + $n;
+                                    $nda = 0;
+                                    $key_dcto = array_search($id, array_column($descuentos, 'id_empleado'));
+                                    if (false !== $key_dcto) {
+                                        echo pesos($descuentos[$key_dcto]['valor']);
+                                        $nda = $descuentos[$key_dcto]['valor'];
+                                        $tot_otros += $nda;
+                                    } else {
+                                        echo '$0.00';
+                                    } ?>
+                                </td>
+                                <td style="border: 1px solid black;" class="text-right">
+                                    <?php
+                                    $deducido = $g + $i + $j + $k + $l + $m + $n + $nda;
                                     $devengado = $valluto + $a + $b + $c + $d1 + $d + $e + $e1 + $f + $c3 + $c4 + $cgrp + $c5 + $ps + $pn + $ces + $ices + $comp;
                                     $netop = $devengado - $deducido;
                                     $tot_saln += $netop;
@@ -941,70 +1018,78 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                         <td style="border: 1px solid black;" class="text-right"><?php echo pesos($tot_emb) ?></td>
                         <td style="border: 1px solid black;" class="text-right"><?php echo pesos($tot_sind) ?></td>
                         <td style="border: 1px solid black;" class="text-right"><?php echo pesos($tot_ret) ?></td>
+                        <td style="border: 1px solid black;" class="text-right"><?php echo pesos($tot_otros) ?></td>
                         <td style="border: 1px solid black;" class="text-right"><?php echo pesos($tot_saln) ?></td>
                     </tr>
                     <tr>
                         <td colspan="38" style="padding: 30px;"></td>
                     </tr>
                     <tr style="font-size: 14px;">
-                        <td colspan="5"></td>
-                        <td colspan="7" style="text-align: center;">
-                            _______________________________________
+            </table>
+            </br>
+            </br>
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: center">
+                        <div>___________________________________</div>
+                        <div><?php echo $nom_respon; ?> </div>
+                        <div><?php echo $cargo_respon; ?> </div>
+                    </td>
+            </table>
+            </br> </br> </br>
+            <?php
+            if ($control) {
+            ?>
+                <table class="table-bordered bg-light" style="width:100% !important;font-size: 10px;">
+                    <tr style="text-align:left">
+                        <td style="width:33%">
+                            <strong>Elaboró:</strong>
                         </td>
-                        <td colspan="7" style="text-align: center;">
-                            _______________________________________
+                        <td style="width:33%">
+                            <strong>Revisó:</strong>
                         </td>
-                        <td colspan="7" style="text-align: center;">
-                            _______________________________________
+                        <td style="width:33%">
+                            <strong>Aprobó:</strong>
                         </td>
-                        <td colspan="8"></td>
                     </tr>
-                    <tr style="font-size: 14px;">
-                        <td colspan="5"></td>
-                        <td colspan="7" style="text-align: center;">
-                            <?php echo mb_strtoupper($usuario['nombre']); ?>
+                    <tr style="text-align:center">
+                        <td>
+                            <?= trim($nomina['usuario']) ?>
                         </td>
-                        <td colspan="7" style="text-align: center;">
-                            <?php echo mb_strtoupper('Jorge Eliecer Pérez izquierdo'); ?>
+                        <td>
+                            <br>
+                            <br>
+                            <?php
+                            $key = array_search('2', array_column($responsables, 'tipo_control'));
+                            $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                            $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                            echo $nombre . '<br> ' . $cargo;
+                            ?>
                         </td>
-                        <td colspan="7" style="text-align: center;">
-                            <?php echo mb_strtoupper('Gissel Dayana Medina barrios'); ?>
+                        <td>
+                            <br>
+                            <br>
+                            <?php
+                            $key = array_search('3', array_column($responsables, 'tipo_control'));
+                            $nombre = $key !== false ? $responsables[$key]['nom_tercero'] : '';
+                            $cargo = $key !== false ? $responsables[$key]['cargo'] : '';
+                            echo $nombre . '<br> ' . $cargo;
+                            ?>
                         </td>
-                        <td colspan="8"></td>
                     </tr>
-                    <tr style="font-size: 14px;">
-                        <td colspan="5"></td>
-                        <td colspan="7" style="text-align: center;">
-                            Técnico administrativo
-                        </td>
-
-                        <td colspan="7" style="text-align: center;">
-                            Contador
-                        </td>
-                        <td colspan="7" style="text-align: center;">
-                            Jefe administrativa y financiera
-                        </td>
-                        <td colspan="8"></td>
-                    </tr>
-                    <tr style="font-size: 14px;">
-                        <td colspan="5"></td>
-                        <td colspan="7" style="text-align: center;">
-                            Elaboró
-                        </td>
-                        <td colspan="7" style="text-align: center;">
-                            Revisó
-                        </td>
-                        <td colspan="7" style="text-align: center;">
-                            Aprobó
-                        </td>
-                        <td colspan="8"></td>
-                    </tr>
-                </tbody>
-                <tfoot style="background-color: white !important;">
-                    <tr>
-                        <td colspan="38" style="text-align:right;font-size:70%;color:black">Fecha Imp: <?php echo $date->format('Y-m-d H:m:s') . ' CRONHIS' ?></td>
-                    </tr>
-                </tfoot>
+                </table>
+            <?php
+            }
+            ?>
+            </tr>
+            </tbody>
+            <tfoot style="background-color: white !important; font-size: 10px !important;">
+                <tr>
+                    <td colspan="38">
+                        <br>Fecha Imp: <?php echo $date->format('Y-m-d H:m:s') . ' CRONHIS' ?>
+                    </td>
+                </tr>
+            </tfoot>
             </table>
         </div>
     </div>

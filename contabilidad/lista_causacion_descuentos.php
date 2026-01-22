@@ -1,11 +1,12 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
+include '../terceros.php';
 
 $id_doc = $_POST['id_doc'] ?? '';
 $valor_pago = $_POST['valor'] ?? 0;
@@ -38,6 +39,15 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$id_t = [];
+foreach ($rubros as $r) {
+    if ($rubros['id_terceroapi'] != '') {
+        $id_t[] = $r['id_terceroapi'];
+    }
+}
+$ids = implode(',', $id_t);
+$terceros = getTerceros($ids, $cmd);
+
 // Consultar tipo de retenciones tabla ctb_retenciones_tipo
 try {
     $sql = "SELECT `id_retencion_tipo`, `tipo` FROM `ctb_retencion_tipo` ORDER BY `tipo` ASC;";
@@ -55,26 +65,7 @@ $cmd = null;
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ]
@@ -156,16 +147,14 @@ $cmd = null;
                         $j++;
                         // Consulto el valor del tercero de la api
                         $id_ter = $ce['id_terceroapi'];
-                        $url = $api . 'terceros/datos/res/datos/id/' . $id_ter;
-                        $ch = curl_init($url);
-                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        $res_api = curl_exec($ch);
-                        curl_close($ch);
-                        $dat_ter = json_decode($res_api, true);
-                        $tercero = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['razon_social'];
-                        // fin api terceros
+                        $key = array_search($id_ter, array_column($terceros, 'id_tercero_api'));
+                        if ($key === false) {
+                            $tercero = '---';
+                            $nit = '---';
+                        } else {
+                            $tercero = $terceros[$key]['nom_tercero'];
+                            $nit = $terceros[$key]['nit_tercero'];
+                        }
                         // Obtener el saldo del registro por obligar
 
                         if ((intval($permisos['editar'])) === 1) {

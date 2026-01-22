@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -21,11 +21,18 @@ if (isset($_POST['nombre']) && $_POST['nombre']) {
 if (isset($_POST['id_subgrupo']) && $_POST['id_subgrupo']) {
     $where .= " AND far_medicamentos.id_subgrupo=" . $_POST['id_subgrupo'];
 }
+if (isset($_POST['tipo_asis']) && strlen($_POST['tipo_asis'])) {
+    $where .= " AND far_medicamentos.es_clinico=" . $_POST['tipo_asis'];
+}
 if (isset($_POST['artactivo']) && $_POST['artactivo']) {
     $where .= " AND far_medicamentos.estado=1";
 }
-if (isset($_POST['conexistencia']) && $_POST['conexistencia']) {
-    $where .= " AND far_medicamentos.existencia>=1";
+if (isset($_POST['con_existencia']) && $_POST['con_existencia']) {
+    if ($_POST['con_existencia'] == 1){
+        $where .= " AND far_medicamentos.existencia>=1";
+    } else {
+        $where .= " AND far_medicamentos.existencia=0";
+    }    
 }
 
 try {
@@ -36,7 +43,7 @@ try {
             IF(far_medicamentos.estado=1,'ACTIVO','INACTIVO') AS estado
             FROM far_medicamentos
             INNER JOIN far_subgrupos ON (far_subgrupos.id_subgrupo=far_medicamentos.id_subgrupo) $where 
-            ORDER BY far_medicamentos.cod_medicamento ASC";
+            ORDER BY far_medicamentos.nom_medicamento ASC";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();
 
@@ -75,14 +82,14 @@ try {
 
     <table style="width:100%; font-size:70%">
         <tr style="text-align:center">
-            <th>REPORTE DE EXISTENCIAS</th>
+            <th>REPORTE DE EXISTENCIAS POR ARTICULO</th>
         </tr>     
     </table> 
 
     <table style="width:100% !important">
         <thead style="font-size:60%">                
             <tr style="background-color:#CED3D3; color:#000000; text-align:center">
-                <th>ID</th>
+                <th>ID Art.</th>
                 <th>Código</th>
                 <th>Nombre</th>
                 <th>Subgrupo</th>
@@ -115,17 +122,16 @@ try {
         </tbody>
         <tfoot style="font-size:60%"> 
             <tr style="background-color:#CED3D3; color:#000000">
-                <td colspan="3" style="text-align:left">
+                <td colspan="7" style="text-align:left">
                     No. de Registros: <?php echo count($objs); ?>  
                 </td>
-                <td colspan="4"></td>
                 <td style="text-align:left">
                     TOTAL:
                 </td>
-                <td colspan="1" style="text-align:center">
+                <td style="text-align:center">
                     <?php echo formato_valor($obj_tot['val_total']); ?>  
                 </td>
-                <td colspan="1"></td>
+                <td></td>
             </tr>
         </tfoot>
     </table>

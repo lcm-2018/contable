@@ -31,22 +31,27 @@
                 type: 'POST',
                 dataType: 'json',
                 data: function(data) {
-                    data.nombre = $('#txt_nombre_filtro').val();
+                    data.nom_area = $('#txt_nombre_filtro').val();
+                    data.id_cencosto = $('#sl_centrocosto_filtro').val();
+                    data.id_sede = $('#sl_sede_filtro').val();
+                    data.estado = $('#sl_estado_filtro').val();
                 }
             },
             columns: [
                 { 'data': 'id_area' }, //Index=0              
                 { 'data': 'nom_area' },
-                { 'data': 'nom_centrocosto' },
                 { 'data': 'nom_tipo_area' },
-                { 'data': 'usr_responsable' },
+                { 'data': 'nom_centrocosto' },
                 { 'data': 'nom_sede' },
+                { 'data': 'usr_responsable' },
                 { 'data': 'nom_bodega' },
+                { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [1, 2] },
-                { orderable: false, targets: 7 }
+                { visible: false, targets: 6 },
+                { orderable: false, targets: 8 }
             ],
             order: [
                 [0, "desc"]
@@ -106,8 +111,10 @@
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
         var error = verifica_vacio($('#txt_nom_area'));
+        error += verifica_vacio_2($('#id_txt_responsable'), $('#txt_responsable'));
         error += verifica_vacio($('#sl_centrocosto'));
         error += verifica_vacio($('#sl_sede'));
+        error += verifica_vacio($('#sl_estado'));
 
         if (error >= 1) {
             $('#divModalError').modal('show');
@@ -169,7 +176,10 @@
     $('#btn_imprime_filtro').on('click', function() {
         reloadtable('tb_cencos_areas');
         $.post("imp_cencos_areas.php", {
-            nombre: $('#txt_nombre_filtro').val()
+            nom_area: $('#txt_nombre_filtro').val(),
+            id_cencosto: $('#sl_centrocosto_filtro').val(),
+            id_sede: $('#sl_sede_filtro').val(),
+            estado: $('#sl_estado_filtro').val()
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');
             $('#divTamModalImp').removeClass('modal-lg');

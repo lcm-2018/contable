@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -34,13 +34,9 @@ try {
     $sqlup->bindParam(3, $idemp);
     $sqlup->execute();
     if ($sqlup->rowCount() > 0) {
-        if ($estad === '0') {
-            echo '<i class="fas fa-toggle-off fa-lg" style="color:gray;"></i>';
-        } else {
-            echo '<i class="fas fa-toggle-on fa-lg" style="color:#37E146;"></i>';
-        }
+        echo 'ok';
     } else {
-        echo  $sqlup->errorInfo();
+        echo $sqlup->errorInfo();
     }
     $cmd = null;
 } catch (PDOException $e) {

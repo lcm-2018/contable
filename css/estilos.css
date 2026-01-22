@@ -728,3 +728,25 @@ div[slider]>input[type=range]::-ms-tooltip {
 .caps {
     text-transform: uppercase !important;
 }
+
+.autocomplete-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+    align-items: center;
+}
+
+.autocomplete-item .nombre {
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.autocomplete-item .cedula {
+    flex: 0 0 100px;
+    text-align: right;
+    white-space: nowrap;
+}

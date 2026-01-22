@@ -23,7 +23,7 @@ if (isset($_POST)) {
     include '../../../conexion.php';
     include '../../../permisos.php';
 
-    // Consulto el id_tercero_api del facturador en la tabla seg_terceros
+    // Consulto el id_tercero_api del facturador en la tabla tb_terceros
     try {
         // consulto id_auto_dep de la tabla pto_mov segun el id_pto_doc = id_crpp
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

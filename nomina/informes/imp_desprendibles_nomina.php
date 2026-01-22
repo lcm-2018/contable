@@ -4,7 +4,7 @@ use Sabberworm\CSS\Value\Value;
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 require_once '../../vendor/autoload.php';
@@ -515,7 +515,7 @@ $meses = [
                     <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
                 </a>
 
-                <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"> Imprimir</a>
+                <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir','<?php echo 0; ?>');"> Imprimir</a>
             <?php } ?>
             <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
         </div>
@@ -1052,11 +1052,12 @@ compensatorios*/
                                 'verify_peer_name' => false,
                                 'allow_self_signed' => true
                             ]
-                        ];                                           //Send using SMTP
+                        ];
+                        $mail->CharSet = 'UTF-8';                                   //Send using SMTP
                         $mail->Host       = 'mail.lcm.com.co';                     //Set the SMTP server to send through
                         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
                         $mail->Username   = 'mail@lcm.com.co';                     //SMTP username
-                        $mail->Password   = 'Lcm2021*';                               //SMTP password
+                        $mail->Password   = 'Lcm2025&*';                               //SMTP password
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
                         $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
 

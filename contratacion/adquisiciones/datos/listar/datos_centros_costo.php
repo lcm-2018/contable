@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 $id_sede = isset($_POST['id_sede']) ? $_POST['id_sede'] : exit('Acción no permitida');
@@ -10,13 +10,13 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `tb_centro_costo_x_sede`.`id_x_sede`, `tb_centros_costo`.`descripcion`
+                `far_centrocosto_area`.`id_area`, `tb_centrocostos`.`nom_centro`
             FROM
-                `tb_centro_costo_x_sede`
-                INNER JOIN `tb_centros_costo` 
-                    ON (`tb_centro_costo_x_sede`.`id_centro_c` = `tb_centros_costo`.`id_centro`)
-            WHERE `tb_centro_costo_x_sede`.`id_sede` = '$id_sede' 
-            ORDER BY `tb_centros_costo`.`descripcion` ASC";
+                `far_centrocosto_area`
+                INNER JOIN `tb_centrocostos` 
+                    ON (`far_centrocosto_area`.`id_centrocosto` = `tb_centrocostos`.`id_centro`)
+            WHERE `far_centrocosto_area`.`id_sede` = '$id_sede' 
+            ORDER BY `tb_centrocostos`.`nom_centro` ASC";
     $rs = $cmd->query($sql);
     $centros_costo = $rs->fetchAll();
     $cmd = null;
@@ -27,7 +27,7 @@ $res = '';
 if (!empty($centros_costo)) {
     $res .=  '<option value="0">--Seleccione--</option>';
     foreach ($centros_costo as $centro_costo) {
-        $res .= '<option value="' . $centro_costo['id_x_sede'] . '">' . $centro_costo['descripcion'] . '</option>';
+        $res .= '<option value="' . $centro_costo['id_area'] . '">' . $centro_costo['nom_centro'] . '</option>';
     }
 } else {
     $res .=  '<option value="0">--Sede sin centros de costo--</option>';

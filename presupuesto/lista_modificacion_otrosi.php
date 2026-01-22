@@ -1,11 +1,12 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../index.php");</script>';
+    header('Location: ../index.php');
     exit();
 }
 include '../conexion.php';
 include '../permisos.php';
+include '../terceros.php';
 // Consulta tipo de presupuesto
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -32,57 +33,24 @@ try {
 }
 // Consulto los id de terceros creado en la tabla ctb_doc
 try {
-    $sql = "SELECT DISTINCT
-    `id_tercero_api`
-    FROM
-    `seg_terceros`";
+    $sql = "SELECT
+                `id_tercero_api`
+                , `nom_tercero`
+                , `nit_tercero`
+            FROM
+                `tb_terceros`";
     $res = $cmd->query($sql);
-    $id_terceros = $res->fetchAll();
+    $terceros = $res->fetchAll();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$id_t = [];
-foreach ($id_terceros as $ter) {
-    $id_t[] = $ter['id_tercero_api'];
-}
-$payload = json_encode($id_t);
-//API URL
-$url = $api . 'terceros/datos/res/lista/terceros';
-$ch = curl_init($url);
-//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$result = curl_exec($ch);
-curl_close($ch);
-$terceros = json_decode($result, true);
 ?>
 <script>
     $('#tableContrtacionCdp').DataTable({
         dom: "<'row'<'col-md-2'l><'col-md-10'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        language: {
-            "decimal": "",
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ - _END_ registros de _TOTAL_ ",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-            "infoFiltered": "(Filtrado de _MAX_ entradas en total )",
-            "infoPostFix": "",
-            "thousands": ",",
-            "lengthMenu": "Ver _MENU_ Filas",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": '<i class="fas fa-search fa-flip-horizontal" style="font-size:1.5rem; color:#2ECC71;"></i>',
-            "zeroRecords": "No se encontraron registros",
-            "paginate": {
-                "first": "&#10096&#10096",
-                "last": "&#10097&#10097",
-                "next": "&#10097",
-                "previous": "&#10096"
-            },
-        },
+        language: setIdioma,
         "order": [
             [0, "desc"]
         ]
@@ -111,23 +79,10 @@ $terceros = json_decode($result, true);
                 <tbody>
                     <?php
                     foreach ($solicitudes as $ce) {
-                        // Consulto el tercero_api en la tabal seg_teceros
-                        try {
-                            $sql = "SELECT
-                                        `id_tercero_api`
-                                    FROM
-                                        `seg_terceros`
-                                    WHERE `id_tercero` ={$ce['id_tercero']};";
-                            $res = $cmd->query($sql);
-                            $ccnit = $res->fetch();
-                            $id_tercero = $ccnit['id_tercero_api'];
-                        } catch (PDOException $e) {
-                            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-                        }
-                        // Consulto el api de terceros para obtener los datos
-                        $key = array_search($id_tercero, array_column($terceros, 'id_tercero'));
-                        $tercero = $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['razon_social'];
-                        $ccnit = $terceros[$key]['cc_nit'];
+                        $id_tercero = $ce['id_tercero'];
+                        $key = array_search($id_tercero, array_column($terceros, 'id_tercero_api'));
+                        $tercero = $key !== false ? $terceros[$key]['nom_tercero'] : '---';
+                        $ccnit = $key !== false ? $terceros[$key]['nit_tercero'] : '---';
 
                         $id_doc = $ce['id_nov_con'];
                         if (PermisosUsuario($permisos, 5401, 3) || $id_rol == 1) {

@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -51,6 +51,7 @@ $numcta = $_POST['txtCuentaBanc'];
 $sede = $_POST['slcSedeEmp'];
 $tipo_cargo = $_POST['slcTipoCargo'];
 $idemp = $_POST['idEmpleado'];
+$bsp = isset($_POST['checkBsp']) ? 1 : 0;
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -58,8 +59,8 @@ try {
     $sql = "UPDATE nom_empleado SET tipo_empleado = ?, subtipo_empleado = ?, alto_riesgo_pension = ?, tipo_contrato = ?, tipo_doc = ?, no_documento = ?,
         nombre1= ?, nombre2 = ?, apellido1 = ?, apellido2 = ?, fech_inicio = ?, fec_retiro = ?, salario_integral = ?,
         correo = ?, telefono = ?, cargo = ?, pais = ?, departamento = ?, municipio = ?, direccion = ?,
-        id_banco = ?, tipo_cta = ?, cuenta_bancaria= ?, genero= ?, 
-        `pais_exp` = ?,`dpto_exp` = ?,`city_exp` = ?,`fec_exp` = ?,`pais_nac` = ?,`dpto_nac` = ?,`city_nac` = ?,`fec_nac` = ?, `sede_emp` = ?, `tipo_cargo` = ?
+        id_banco = ?, tipo_cta = ?, cuenta_bancaria= ?, genero= ?, `pais_exp` = ?,`dpto_exp` = ?,`city_exp` = ?
+        ,`fec_exp` = ?,`pais_nac` = ?,`dpto_nac` = ?,`city_nac` = ?,`fec_nac` = ?, `sede_emp` = ?, `tipo_cargo` = ?, bsp = ?
         WHERE id_empleado = ?";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $tipoemp, PDO::PARAM_INT);
@@ -96,7 +97,8 @@ try {
     $sql->bindParam(32, $fechaNac, PDO::PARAM_STR);
     $sql->bindParam(33, $sede, PDO::PARAM_INT);
     $sql->bindParam(34, $tipo_cargo, PDO::PARAM_INT);
-    $sql->bindParam(35, $idemp, PDO::PARAM_INT);
+    $sql->bindParam(35, $bsp, PDO::PARAM_INT);
+    $sql->bindParam(36, $idemp, PDO::PARAM_INT);
     $sql->execute();
     if ($sql->rowCount() > 0) {
         $updatemp = 1;
@@ -104,28 +106,11 @@ try {
         $updatemp = 0;
     }
     if (!($sql->execute())) {
-        print_r($sql->errorInfo()[2]);
+        echo $sql->errorInfo()[2];
         exit();
     }
-    if (isset($_POST['id_salario'])) {
-        $id_salario = $_POST['id_salario'];
-        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "UPDATE nom_salarios_basico SET  salario_basico = ?  WHERE id_salario = ?";
-        $sql = $cmd->prepare($sql);
-        $sql->bindValue(1, $sal, PDO::PARAM_STR);
-        $sql->bindParam(2, $id_salario, PDO::PARAM_INT);
-        if (!($sql->execute())) {
-            echo $sql->errorInfo()[2];
-            exit();
-        } else {
-            if ($sql->rowCount() > 0) {
-                $upsalemp = 1;
-            } else {
-                $upsalemp = 0;
-            }
-        }
-    } else {
+    $upsalemp = 0;
+    if ($_POST['salAnt'] != $_POST['numSalarioEmp']) {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
         $sql = "INSERT INTO nom_salarios_basico (id_empleado, vigencia, salario_basico, fec_reg) VALUES (?, ?, ?, ?)";
@@ -135,7 +120,7 @@ try {
         $sql->bindParam(3, $sal, PDO::PARAM_STR);
         $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
         if (!($sql->execute())) {
-            print_r($sql->errorInfo()[2]);
+            echo $sql->errorInfo()[2];
             exit();
         } else {
             $upsalemp = 1;
@@ -180,7 +165,7 @@ try {
             $sql->bindParam(2, $id_salario, PDO::PARAM_INT);
             $sql->execute();
         }
-        echo '1';
+        echo 'ok';
     } else {
         echo 'No se ingresó ningún dato nuevo';
     }

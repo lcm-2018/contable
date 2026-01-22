@@ -1,13 +1,14 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
 $nomCod = $_POST['nomCod'];
 $tipoDato = $_POST['tipoDato'];
 $vigencia = $_SESSION['vigencia'];
+$id_vigencia = $_SESSION['id_vigencia'];
 $nomRubro = $tipoDato == '0' ? strtoupper($_POST['nomRubro']) : $_POST['nomRubro'];
 $valorAprob = isset($_POST['valorAprob']) && $_POST['valorAprob'] > 0 ? $_POST['valorAprob'] : 0;
 $valorAprob = str_replace(',', '', $valorAprob);
@@ -17,9 +18,28 @@ $id_pto = $_POST['id_pto'];
 $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 
+$padre = explode('.', $nomCod);
+array_pop($padre);
+$padre = implode('.', $padre);
+
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sq = "SELECT
+                `pto_cargue`.`tipo_dato`
+            FROM
+                `pto_cargue`
+                INNER JOIN `pto_presupuestos` 
+                    ON (`pto_cargue`.`id_pto` = `pto_presupuestos`.`id_pto`)
+            WHERE (`pto_presupuestos`.`id_vigencia` = $id_vigencia AND `pto_cargue`.`cod_pptal` = '$padre')";
+    $rs = $cmd->query($sq);
+    $data = $rs->fetch();
+    $tipoPadre = !empty($data) ? $data['tipo_dato'] : 0;
+    if ($tipoPadre == 1) {
+        echo "La cuenta Mayor $padre es de detalle";
+        exit();
+    }
+
     $sql = "INSERT INTO `pto_cargue` 
                 (`id_pto`, `cod_pptal`, `nom_rubro`, `tipo_dato`, `valor_aprobado`, `id_tipo_recurso`, `tipo_pto`, `id_user_reg`, `fec_reg`) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";

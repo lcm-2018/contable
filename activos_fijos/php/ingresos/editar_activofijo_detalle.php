@@ -35,7 +35,7 @@ try {
                 $id_art = $_POST['id_articulo'];
                 $id_ing_det = $_POST['id_ing_detalle'];
                 $placa = $_POST['txt_placa'];
-                $serial = $_POST['txt_serial'];
+                $num_serial = $_POST['txt_serial'];
                 $id_marca = $_POST['sl_marca'];
                 $valor = $_POST['txt_val_uni'] ? $_POST['txt_val_uni'] : 0;
                 $tip_act = $_POST['sl_tipoactivo'];
@@ -50,8 +50,8 @@ try {
                     $obj = $rs->fetch();
                     $cantidad = $obj['cantidad'];
                     if ($obj['cantidad'] > $obj['registros']){
-                        $sql = "INSERT INTO acf_orden_ingreso_acfs(id_ing_detalle,id_articulo,placa,serial,id_marca,valor,tipo_activo)
-                                VALUES($id_ing_det,$id_art,'$placa','$serial',$id_marca,$valor,$tip_act)";
+                        $sql = "INSERT INTO acf_orden_ingreso_acfs(id_ing_detalle,id_articulo,placa,num_serial,id_marca,valor,tipo_activo)
+                                VALUES($id_ing_det,$id_art,'$placa','$num_serial',$id_marca,$valor,$tip_act)";
                         $rs = $cmd->query($sql);
 
                         if ($rs) {
@@ -68,7 +68,7 @@ try {
                     }    
                 } else {
                     $sql = "UPDATE acf_orden_ingreso_acfs 
-                            SET placa='$placa',serial='$serial',id_marca=$id_marca,valor=$valor,tipo_activo=$tip_act
+                            SET placa='$placa',num_serial='$num_serial',id_marca=$id_marca,valor=$valor,tipo_activo=$tip_act
                             WHERE id_act_fij=" . $id;
 
                     $rs = $cmd->query($sql);

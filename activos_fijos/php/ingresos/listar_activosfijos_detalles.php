@@ -20,7 +20,7 @@ $dir = $_POST['order'][0]['dir'];
 $where = "";
 if (isset($_POST['search']['value']) && $_POST['search']['value']){
     $search = $_POST['search']['value'];
-    $where .= " AND (acf_orden_ingreso_acfs.placa LIKE '%$search%' OR acf_orden_ingreso_acfs.serial LIKE '%$search%')";
+    $where .= " AND (acf_orden_ingreso_acfs.placa LIKE '%$search%' OR acf_orden_ingreso_acfs.num_serial LIKE '%$search%')";
 }
 
 try {
@@ -44,7 +44,7 @@ try {
     //Consulta los datos para listarlos en la tabla
     $sql = "SELECT acf_orden_ingreso_acfs.id_act_fij,
                 acf_orden_ingreso_acfs.placa,
-                acf_orden_ingreso_acfs.serial,                
+                acf_orden_ingreso_acfs.num_serial,                
                 acf_orden_ingreso_acfs.valor,
                 CASE acf_orden_ingreso_acfs.tipo_activo WHEN 1 THEN 'PROPIEDAD, PLANTA Y EQUIPO' WHEN 2 THEN 'PROPIDAD PARA LA VENTA' WHEN 3 THEN 'PROPIEDAD DE INVERSION' END AS tipo_activo,
                 acf_marca.descripcion AS nom_marca
@@ -75,7 +75,7 @@ if (!empty($objs)) {
         $data[] = [
             "id_act_fij" => $id,
             "placa" => $obj['placa'],
-            "serial" => $obj['serial'],
+            "num_serial" => $obj['num_serial'],
             "nom_marca" => $obj['nom_marca'],
             "valor" => formato_valor($obj['valor']),
             "tipo_activo" => $obj['tipo_activo'],

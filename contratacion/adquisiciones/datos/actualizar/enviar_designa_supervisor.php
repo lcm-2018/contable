@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../../index.php");</script>';
+    header('Location: ../../../../index.php');
     exit();
 }
 include '../../../../conexion.php';
@@ -31,6 +31,8 @@ if (isset($_FILES['fileSup'])) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     $result = curl_exec($ch);
     curl_close($ch);
     $res = json_decode($result, true);
@@ -48,7 +50,7 @@ if (isset($_FILES['fileSup'])) {
             $sql->bindParam(4, $id_compra, PDO::PARAM_INT);
             $sql->execute();
             if (!($sql->rowCount() > 0)) {
-                print_r($sql->errorInfo()[2]);
+                echo $sql->errorInfo()[2];
             } else {
                 echo 1;
             }

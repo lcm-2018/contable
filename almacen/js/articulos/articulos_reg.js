@@ -29,13 +29,17 @@
                 { 'data': 'cum' },
                 { 'data': 'ium' },
                 { 'data': 'nom_laboratorio' },
+                { 'data': 'reg_invima' },
+                { 'data': 'fec_invima' },
+                { 'data': 'estado_invima' },
                 { 'data': 'nom_presentacion' },
                 { 'data': 'estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [3, 4] },
-                { orderable: false, targets: 6 }
+                { class: 'text-wrap', targets: [3, 7] },
+                { width: '5%', targets: [0, 1, 2, 4, 5, 6, 8] },
+                { orderable: false, targets: 9 }
             ],
             order: [
                 [0, "desc"]
@@ -58,7 +62,6 @@
                         $('#divTamModalReg').addClass('modal-lg');
                         $('#divModalReg').modal('show');
                         $("#divFormsReg").html(he);
-
                     });
                 }
             }],
@@ -71,6 +74,7 @@
                 dataType: 'json',
                 data: function(data) {
                     data.id_articulo = $('#id_articulo').val();
+                    data.con_existencia = $('#chk_lotes_con_exi').is(':checked') ? 1 : 0;
                 }
             },
             columns: [
@@ -78,6 +82,8 @@
                 { 'data': 'lote' },
                 { 'data': 'lote_pri' },
                 { 'data': 'fec_vencimiento' },
+                { 'data': 'reg_invima' },
+                { 'data': 'nom_marca' },
                 { 'data': 'nom_presentacion', },
                 { 'data': 'existencia_umpl' },
                 { 'data': 'existencia' },
@@ -87,8 +93,9 @@
                 { 'data': 'botones' }
             ],
             columnDefs: [
-                { class: 'text-wrap', targets: [4] },
-                { orderable: false, targets: 10 }
+                { class: 'text-wrap', targets: [5, 6] },
+                { width: '5%', targets: [0, 1, 2, 3, 4, 7, 8, 9, 10, 11] },
+                { orderable: false, targets: 12 }
             ],
             order: [
                 [0, "desc"]

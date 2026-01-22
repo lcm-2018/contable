@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 function pesos($valor)
@@ -46,21 +46,57 @@ $vigencia = $_SESSION['vigencia'];
                                 }
                                 ?>
                                 <div class="col-md-2 text-right">
+                                    <button class="btn btn-warning btn-sm" id="btnActualizaRepositorio" title="Actualizar repositorio de terceros">
+                                        <span class="mr-2"></span><i class="fas fa-user-edit fa-lg"></i>
+                                    </button>
                                     <!-- botón para descargar excel -->
-                                    <button class="btn btn-success btn-sm" id="btnReporteTerceros" title="Descargar Informe de Terceros">
+                                    <button class="btn btn-info btn-sm" id="btnReporteTerceros" title="Descargar Informe de Terceros">
                                         <i class="fas fa-file-excel fa-lg"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body" id="divCuerpoPag">
+
+
+                            <!--Opciones de filtros -->
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <input type="text" class="filtro form-control form-control-sm" id="txt_ccnit_filtro" placeholder="Doc / Nit">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <input type="text" class="filtro form-control form-control-sm" id="txt_tercero_filtro" placeholder="Tercero">
+                                </div>
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_buscar_filtro" class="btn btn-outline-success btn-sm" title="Filtrar">
+                                        <span class="fas fa-search fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                </div>
+
+                                <!-- para dashboard  -->
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_iniciar_dashboard" class="btn btn-outline-success btn-sm" title="Dashboard">
+                                        <span class="fas fa-chart-line fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                </div>
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_dashboard" class="btn btn-outline-primary btn-sm" title="Dashboard">
+                                        <span class="fas fa-chart-line fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                </div>
+                                <div class="form-group col-md-1">
+                                    <a type="button" id="btn_detener_dashboard" class="btn btn-outline-danger btn-sm" title="Dashboard">
+                                        <span class="fas fa-chart-line fa-lg" aria-hidden="true"></span>
+                                    </a>
+                                </div>
+                            </div>
+
                             <div class="table-responsive">
                                 <table id="tableTerceros" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>No. Doc.</th>
-                                            <th>Nombre</th>
-                                            <th>Razón Social</th>
+                                            <th>Nombre / Razón Social</th>
                                             <th>Tipo</th>
                                             <th>Ciudad</th>
                                             <th>Dirección</th>
@@ -76,8 +112,7 @@ $vigencia = $_SESSION['vigencia'];
                                     <tfoot>
                                         <tr>
                                             <th>No. Doc.</th>
-                                            <th>Nombre</th>
-                                            <th>Razón Social</th>
+                                            <th>Nombre / Razón Social</th>
                                             <th>Tipo</th>
                                             <th>Ciudad</th>
                                             <th>Dirección</th>
@@ -99,6 +134,7 @@ $vigencia = $_SESSION['vigencia'];
         <?php include '../../modales.php' ?>
     </div>
     <?php include '../../scripts.php' ?>
+    <script type="text/javascript" src="../../terceros/js/historialtercero/historialtercero.js?v=<?php echo date('YmdHis') ?>"></script>
 </body>
 
 </html>

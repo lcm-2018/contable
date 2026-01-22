@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -23,51 +23,56 @@ try {
         (PermisosUsuario($permisos, 5003, 4) && $oper == 'del') || $id_rol == 1) {
 
         $id_pedido = $_POST['id_pedido'];
+        $id_bodega = isset($_POST['id_bodega']) ? $_POST['id_bodega'] : -1;
 
         if ($id_pedido > 0) {
 
-            $sql = "SELECT estado FROM far_pedido WHERE id_pedido=" . $id_pedido;
+            $sql = "SELECT estado,id_bodega_origen FROM far_pedido WHERE id_pedido=" . $id_pedido;
             $rs = $cmd->query($sql);
             $obj_pedido = $rs->fetch();            
           
             if ($obj_pedido['estado'] == 1) {
                 if ($oper == 'add') {
-                    $id = $_POST['id_detalle'];        
-                    $id_med = $_POST['id_txt_nom_med'];                  
-                    $cantidad = $_POST['txt_can_ped'] ? $_POST['txt_can_ped'] : 1;                    
-                    $valor = $_POST['txt_val_pro'] ? $_POST['txt_val_pro'] : 0;
-                   
-                    if ($id == -1) {   
-                        $sql = "SELECT COUNT(*) AS count FROM far_pedido_detalle WHERE id_pedido=$id_pedido AND id_medicamento=" . $id_med;
-                        $rs = $cmd->query($sql);
-                        $obj = $rs->fetch();
-                        if ($obj['count'] == 0) {
-                            $sql = "INSERT INTO far_pedido_detalle(id_pedido,id_medicamento,cantidad,valor)
-                                    VALUES($id_pedido,$id_med ,$cantidad,$valor)";
+                    if ($obj_pedido['id_bodega_origen'] == $id_bodega) {
+                        $id = $_POST['id_detalle'];        
+                        $id_med = $_POST['id_txt_nom_med'];                  
+                        $cantidad = $_POST['txt_can_ped'] ? $_POST['txt_can_ped'] : 1;                    
+                        $valor = $_POST['txt_val_pro'] ? $_POST['txt_val_pro'] : 0;
+                    
+                        if ($id == -1) {   
+                            $sql = "SELECT COUNT(*) AS count FROM far_pedido_detalle WHERE id_pedido=$id_pedido AND id_medicamento=" . $id_med;
                             $rs = $cmd->query($sql);
+                            $obj = $rs->fetch();
+                            if ($obj['count'] == 0) {
+                                $sql = "INSERT INTO far_pedido_detalle(id_pedido,id_medicamento,cantidad,valor)
+                                        VALUES($id_pedido,$id_med ,$cantidad,$valor)";
+                                $rs = $cmd->query($sql);
 
+                                if ($rs) {
+                                    $res['mensaje'] = 'ok';
+                                    $sql_i = 'SELECT LAST_INSERT_ID() AS id';
+                                    $rs = $cmd->query($sql_i);
+                                    $obj = $rs->fetch();
+                                    $res['id'] = $obj['id'];
+                                } else {
+                                    $res['mensaje'] = $cmd->errorInfo()[2];
+                                }
+                            } else {
+                                $res['mensaje'] = 'El Artículo ya existe en los detalles del Pedido';    
+                            }    
+                        } else {
+                            $sql = "UPDATE far_pedido_detalle SET cantidad=$cantidad WHERE id_ped_detalle=" . $id;
+                            $rs = $cmd->query($sql);
                             if ($rs) {
                                 $res['mensaje'] = 'ok';
-                                $sql_i = 'SELECT LAST_INSERT_ID() AS id';
-                                $rs = $cmd->query($sql_i);
-                                $obj = $rs->fetch();
-                                $res['id'] = $obj['id'];
+                                $res['id'] = $id;
                             } else {
                                 $res['mensaje'] = $cmd->errorInfo()[2];
                             }
-                        } else {
-                            $res['mensaje'] = 'El Artículo ya existe en los detalles del Pedido';    
-                        }    
-                    } else {
-                        $sql = "UPDATE far_pedido_detalle SET cantidad=$cantidad WHERE id_ped_detalle=" . $id;
-                        $rs = $cmd->query($sql);
-                        if ($rs) {
-                            $res['mensaje'] = 'ok';
-                            $res['id'] = $id;
-                        } else {
-                            $res['mensaje'] = $cmd->errorInfo()[2];
                         }
-                    }
+                    }else{
+                        $res['mensaje'] = 'Primero debe guardar el Pedido para adicionar detalles';  
+                    }     
                 }
 
                 if ($oper == 'del') {

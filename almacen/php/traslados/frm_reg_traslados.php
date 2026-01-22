@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -12,16 +12,20 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $id = isset($_POST['id']) ? $_POST['id'] : -1;
-$sql = "SELECT far_traslado.*,            
-            tb_so.nom_sede AS nom_sede_origen,tb_bo.nombre AS nom_bodega_origen,
-            tb_sd.nom_sede AS nom_sede_destino,tb_bd.nombre AS nom_bodega_destino,
-            CASE far_traslado.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado 
-        FROM far_traslado       
-        INNER JOIN tb_sedes AS tb_so ON (tb_so.id_sede=far_traslado.id_sede_origen)
-        INNER JOIN far_bodegas AS tb_bo ON (tb_bo.id_bodega=far_traslado.id_bodega_origen)
-        INNER JOIN tb_sedes AS tb_sd ON (tb_sd.id_sede=far_traslado.id_sede_destino)
-        INNER JOIN far_bodegas AS tb_bd ON (tb_bd.id_bodega=far_traslado.id_bodega_destino)
-        WHERE id_traslado=" . $id . " LIMIT 1";
+$sql = "SELECT TT.fec_traslado,TT.hor_traslado,TT.num_traslado,TT.tipo,
+            TT.id_sede_origen,TT.id_bodega_origen,TT.id_sede_destino,TT.id_bodega_destino,
+            TT.estado,TT.detalle,TT.val_total,
+            CASE TT.estado WHEN 0 THEN 'ANULADO' WHEN 1 THEN 'PENDIENTE' WHEN 2 THEN 'CERRADO' END AS nom_estado,
+            PEDIDO.id_pedido,CONCAT(PEDIDO.detalle,'(',PEDIDO.fec_pedido,')') AS des_pedido,
+            OI.id_ingreso,CONCAT(OI.detalle,'(',OI.fec_ingreso,')') AS des_ingreso 
+        FROM far_traslado AS TT
+        LEFT JOIN far_orden_ingreso AS OI ON (OI.id_ingreso=TT.id_ingreso)
+        LEFT JOIN (SELECT TD.id_traslado,PD.id_pedido,PP.detalle,PP.fec_pedido
+                    FROM far_traslado_detalle AS TD 
+                    INNER JOIN far_pedido_detalle AS PD ON (PD.id_ped_detalle=TD.id_ped_detalle)
+                    INNER JOIN far_pedido AS PP ON (PP.id_pedido=PD.id_pedido)
+                    GROUP BY TD.id_traslado) AS PEDIDO ON (PEDIDO.id_traslado=TT.id_traslado)    
+        WHERE TT.id_traslado=" . $id . " LIMIT 1";
 $rs = $cmd->query($sql);
 $obj = $rs->fetch();
 
@@ -34,7 +38,7 @@ if (empty($obj)) {
         $obj[$name] = NULL;
     endfor;
     //Inicializa variable por defecto
-    $obj['id_sede_origen'] = 0;
+    $obj['id_sede_origen'] = sede_unica_usuario($cmd)['id_sede'];    
     $obj['id_sede_destino'] = 0;
     $obj['estado'] = 1;
     $obj['nom_estado'] = 'PENDIENTE';
@@ -82,31 +86,96 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <label for="txt_est_traslado" class="small">Estado traslado</label>
                         <input type="text" class="form-control form-control-sm" id="txt_est_traslado" name="txt_est_traslado" class="small" value="<?php echo $obj['nom_estado'] ?>" readonly="readonly">
                     </div>
-                </div>    
+                    <div class="form-group col-md-3">
+                        <label for="sl_tip_traslado" class="small" required>Tipo Traslado</label>
+                        <select class="form-control form-control-sm" id="sl_tip_traslado" name="sl_tip_traslado" <?php echo $editar ?>>
+                            <?php tipo_traslado('', $obj['tipo']) ?>
+                        </select>
+                        <input type="hidden" id="id_tip_traslado" name="id_tip_traslado" value="<?php echo $obj['tipo'] ?>">
+                    </div>
+                </div>
+
+                <div class="form-row" id="divPedido" <?php echo $obj['tipo'] == 1 ? '' : 'style="display: none;"' ?>>
+                    <div class="form-group col-md-1">
+                        <label for="txt_id_pedido" class="small">Id. Pedido</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_id_pedido" name="txt_id_pedido" class="small" value="<?php echo $obj['id_pedido'] ?>" readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <div class="form-row">
+                            <div class="form-group col-md-10">
+                                <label for="txt_des_pedido" class="small">Pedido de una Bodega para el Traslado</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_des_pedido" name="txt_des_pedido" class="small" value="<?php echo $obj['des_pedido'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Pedido">
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_imprime_pedido" class="btn btn-outline-success btn-sm" title="Imprimir Pedido Seleccionado">
+                                    <span class="fas fa-print" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_cancelar_pedido" class="btn btn-outline-success btn-sm" title="Cancelar Selección">
+                                    <span class="fas fa-ban" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                        </div>
+                    </div>        
+                </div>   
+                <div class="form-row" id="divIngreso" <?php echo $obj['tipo'] == 2 ? '' : 'style="display: none;"' ?>>
+                    <div class="form-group col-md-1">
+                        <label for="txt_id_ingreso" class="small">Id. Ingreso</label>
+                        <input type="text" class="form-control form-control-sm" id="txt_id_ingreso" name="txt_id_ingreso" class="small" value="<?php echo $obj['id_ingreso'] ?>" readonly="readonly">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <div class="form-row">
+                            <div class="form-group col-md-10">
+                                <label for="txt_des_ingreso" class="small">Ingreso de Almacen A Trasladar</label>
+                                <input type="text" class="form-control form-control-sm" id="txt_des_ingreso" name="txt_des_ingreso" class="small" value="<?php echo $obj['des_ingreso'] ?>" readonly="readonly" title="Doble Click para Seleccionar el No. de Ingreso">
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_imprime_ingreso" class="btn btn-outline-success btn-sm" title="Imprimir Ingreso Seleccionado">
+                                    <span class="fas fa-print" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                            <div class="form-group col-md-1">            
+                                <label class="small">&emsp;&emsp;&emsp;&emsp;</label>            
+                                <a type="button" id="btn_cancelar_ingreso" class="btn btn-outline-success btn-sm" title="Cancelar Selección">
+                                    <span class="fas fa-ban" aria-hidden="true"></span>                                       
+                                </a>
+                            </div>
+                        </div>
+                    </div>        
+                </div> 
+
                 <div class="form-row">                    
                     <div class="form-group col-md-3">
                         <label for="sl_sede_origen" class="small">Sede Origen</label>
                         <select class="form-control form-control-sm" id="sl_sede_origen" name="sl_sede_origen" <?php echo $editar ?>>
                             <?php sedes_usuario($cmd, '', $obj['id_sede_origen']) ?>   
                         </select>
+                        <input type="hidden" id="id_sede_origen" name="id_sede_origen" value="<?php echo $obj['id_sede_origen'] ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_bodega_origen" class="small">Bodega Origen</label>
                         <select class="form-control form-control-sm" id="sl_bodega_origen" name="sl_bodega_origen" <?php echo $editar ?>>
                             <?php bodegas_usuario($cmd, '', $obj['id_sede_origen'], $obj['id_bodega_origen']) ?>   
                         </select>
+                        <input type="hidden" id="id_bodega_origen" name="id_bodega_origen" value="<?php echo $obj['id_bodega_origen'] ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_sede_destino" class="small">Sede Destino</label>
                         <select class="form-control form-control-sm" id="sl_sede_destino" name="sl_sede_destino" <?php echo $editar ?>>
                             <?php sedes($cmd, '', $obj['id_sede_destino']) ?>   
                         </select>
+                        <input type="hidden" id="id_sede_destino" name="id_sede_destino" value="<?php echo $obj['id_sede_destino'] ?>">
                     </div>
                     <div class="form-group col-md-3">
                         <label for="sl_bodega_destino" class="small">Bodega Destino</label>
                         <select class="form-control form-control-sm" id="sl_bodega_destino" name="sl_bodega_destino" <?php echo $editar ?>> 
                             <?php bodegas_sede($cmd, '', $obj['id_sede_destino'], $obj['id_bodega_destino']) ?>   
                         </select>
+                        <input type="hidden" id="id_bodega_destino" name="id_bodega_destino" value="<?php echo $obj['id_bodega_destino'] ?>">
                     </div>                
                     <div class="form-group col-md-12">
                         <label for="txt_det_traslado" class="small">DETALLE</label>
@@ -121,6 +190,7 @@ $imprimir = $id != -1 ? '' : 'disabled="disabled"';
                         <th>Código</th>
                         <th>Descripción</th>
                         <th>Lote</th>
+                        <th>Existencia</th>
                         <th>Fecha Vencimiento</th>
                         <th>Cantidad</th>
                         <th>Vr. Unitario</th>

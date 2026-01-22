@@ -50,21 +50,22 @@
                 { 'data': 'detalle' },
                 { 'data': 'nom_tercero' },
                 { 'data': 'nom_tipo_ingreso' },
-                { 'data': 'val_total' },
                 { 'data': 'nom_sede' },
+                { 'data': 'val_total' },
+                { 'data': 'estado' },
                 { 'data': 'nom_estado' },
                 { 'data': 'botones' }
             ],
             columnDefs: [
                 { class: 'text-wrap', targets: [6, 7] },
-                { type: "numeric-comma", targets: 9 },
-                { orderable: false, targets: 12 }
+                { type: "numeric-comma", targets: 10 },
+                { visible: false, targets: 11 },
+                { orderable: false, targets: 13 }
             ],
             rowCallback: function(row, data) {
-                var estado = $($(row).find("td")[11]).text();
-                if (estado == 'PENDIENTE') {
+                if (data.estado == 1) {
                     $($(row).find("td")[0]).css("background-color", "yellow");
-                } else if (estado == 'ANULADO') {
+                } else if (data.estado == 0) {
                     $($(row).find("td")[0]).css("background-color", "gray");
                 }
             },
@@ -93,6 +94,26 @@
         }
     });
 
+    // Autocompletar Terceros
+    $('#divForms').on("input", "#txt_tercero", function() {
+        $(this).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "../common/cargar_terceros_ls.php",
+                    dataType: "json",
+                    type: 'POST',
+                    data: { term: request.term }
+                }).done(function(data) {
+                    response(data);
+                });
+            },
+            minLength: 2,
+            select: function(event, ui) {
+                $('#id_txt_tercero').val(ui.item.id);
+            }
+        });
+    });
+
     //Editar un registro Orden Ingreso
     $('#tb_ingresos').on('click', '.btn_editar', function() {
         let id = $(this).attr('value');
@@ -108,14 +129,13 @@
         $('.is-invalid').removeClass('is-invalid');
 
         var error = verifica_vacio_2($('#id_txt_sede'), $('#txt_nom_sede'));
-        error += verifica_vacio($('#txt_fec_ing'));
-        error += verifica_vacio($('#txt_hor_ing'));
+        error += verifica_vacio_2($('#id_txt_area'), $('#txt_nom_area'));
         error += verifica_vacio($('#txt_num_fac'));
         error += verifica_vacio($('#txt_fec_fac'));
         error += verifica_vacio($('#sl_tip_ing'));
 
         if ($('#sl_tip_ing').find('option:selected').attr('data-intext') == 2) {
-            error += verifica_vacio($('#sl_tercero'));
+            error += verifica_valmin_2($('#id_txt_tercero'), $('#txt_tercero'), 1);
         }
 
         error += verifica_vacio($('#txt_det_ing'));

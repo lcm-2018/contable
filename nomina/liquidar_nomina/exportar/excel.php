@@ -1,7 +1,8 @@
 <?php
+// ya no se usa, se ecporta directamente desde la datatable
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 if (isset($_POST['mesNomElec'])) {

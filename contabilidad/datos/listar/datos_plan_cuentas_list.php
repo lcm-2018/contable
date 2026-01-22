@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include_once '../../../conexion.php';
@@ -17,8 +17,8 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `id_pgcp`, `fecha`, `cuenta`, `nombre`, `tipo_dato`, `estado`
-            FROM`ctb_pgcp`
+                `id_pgcp`, `fecha`, `cuenta`, `nombre`, `tipo_dato`, `estado`, `desagrega` 
+            FROM `ctb_pgcp`
             $where
             ORDER BY `cuenta` ASC
             LIMIT $start, $length";
@@ -37,14 +37,19 @@ try {
 }
 if (!empty($lista)) {
     foreach ($lista as $lp) {
-        $cerrar = $editar = $detalles = $borrar = null;
+        $cerrar = $editar = $detalles = $borrar = $desagrega = $costos = null;
         $id_ctb = $lp['id_pgcp'];
         if ((PermisosUsuario($permisos, 5504, 3) || $id_rol == 1) && ($lp['estado'] == 1)) {
             $editar = '<a id ="editar_' . $id_ctb . '" value="' . $id_ctb . '" onclick="editarDatosPlanCuenta(' . $id_ctb . ')" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Editar_' . $id_ctb . '"><span class="fas fa-pencil-alt fa-lg"></span></a>';
         }
+        $desagrega = '<button value="' . $id_ctb . '" onclick="formDesagregacion(' . $id_ctb . ')" class="btn btn-outline-info btn-sm btn-circle shadow-gb"  title="Formulario de desagregación de terceros"><span class="fas fa-clipboard-list fa-lg"></span></button>';
+
+        if (strlen($lp['cuenta']) == 4 && substr($lp['cuenta'], 0, 1) === "7") {
+            $costos = '<button value="' . $id_ctb . '" onclick="formCostos(' . $id_ctb . ')" class="btn btn-outline-success btn-sm btn-circle shadow-gb"  title="Formulario traslado de costos"><span class="fas fa-exchange-alt fa-lg"></span></button>';
+        }
         if (PermisosUsuario($permisos, 5504, 4) || $id_rol == 1) {
             if ($lp['estado'] == 1) {
-                $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" onclick="cerrarCuentaPlan(' . $id_ctb . ')" title="Desactivar cuenta"><span class="fas fa-lock-open fa-lg"></span></a>';
+                $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-warning btn-sm btn-circle shadow-gb" onclick="cerrarCuentaPlan(' . $id_ctb . ')" title="Desactivar cuenta"><span class="fas fa-unlock fa-lg"></span></a>';
                 $borrar = '<a value="' . $id_ctb . '" onclick="eliminarCuentaContable(' . $id_ctb . ')" class="btn btn-outline-danger btn-sm btn-circle shadow-gb "  title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
             } else {
                 $cerrar = '<a value="' . $id_ctb . '" class="btn btn-outline-secondary btn-sm btn-circle shadow-gb" onclick="abrirCuentaPlan(' . $id_ctb . ')" title="Activar cuenta"><span class="fas fa-lock fa-lg"></span></a>';
@@ -55,6 +60,8 @@ if (!empty($lista)) {
         } else {
             $estado = '<span class="badge badge-danger">Inactiva</span>';
         }
+        $des  = $lp['desagrega'] == 1 ? '<span class="badge badge-info">Si</span>' : '<span class="badge badge-secondary">No</span>';
+
         $fecha = date("d-m-Y", strtotime($lp['fecha']));
         $data[] = [
 
@@ -63,8 +70,9 @@ if (!empty($lista)) {
             'nombre' => $lp['nombre'],
             'tipo' => '<div class="text-center">' . $lp['tipo_dato'] . '</div>',
             'nivel' => '<div class="text-center">' . Nivel($lp['cuenta']) . '</div>',
+            'desagrega' => '<div class="text-center">' . $des . '</div>',
             'estado' => '<div class="text-center">' . $estado . '</div>',
-            'botones' => '<div class="text-center" style="position:relative">' . $editar . $borrar . $cerrar. '</div>',
+            'botones' => '<div class="text-center" style="position:relative">' . $editar . $desagrega . $costos . $borrar . $cerrar . '</div>',
         ];
     }
 } else {

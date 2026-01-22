@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
@@ -62,6 +62,21 @@ try {
             ORDER BY fec_afiliacion ASC";
     $rs = $cmd->query($sql);
     $afpnov = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT  
+                `id_empleado`, `vigencia`, `salario_basico`, `fec_reg`
+            FROM
+                `nom_salarios_basico` 
+            WHERE `id_empleado` = $id
+            ORDER BY `id_salario` DESC";
+    $rs = $cmd->query($sql);
+    $salemp = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -284,7 +299,7 @@ if ($_SESSION['navarlat'] == '1') {
                                             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo">
                                                 <div class="card-body">
                                                     <?php
-                                                   if ((PermisosUsuario($permisos, 5101, 2) || $id_rol == 1)) {
+                                                    if ((PermisosUsuario($permisos, 5101, 2) || $id_rol == 1)) {
                                                         echo '<input type="hidden" id="peReg" value="1">';
                                                     } else {
                                                         echo '<input type="hidden" id="peReg" value="0">';
@@ -374,6 +389,75 @@ if ($_SESSION['navarlat'] == '1') {
                                                         </tr>
                                                     </thead>
                                                     <tbody id="modificarAfps">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <div class="card-header card-header-detalles py-0 headings" id="headingctt">
+                                            <h5 class="mb-0">
+                                                <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#configctt" aria-expanded="true" aria-controls="collapsectt">
+                                                    <div class="form-row">
+                                                        <div class="div-icono">
+                                                            <span class="fas fa-file-contract fa-lg" style="color: #5dade2;">
+                                                        </div>
+                                                        <div>
+                                                            <?php echo $contador;
+                                                            $contador++ ?>. CONTRATOS.
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </h5>
+                                        </div>
+                                        <div id="configctt" class="collapse" aria-labelledby="headingctt">
+                                            <div class="card-body">
+                                                <table id="tbCttEmpleado" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                                    <thead class="text-center">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Inicia</th>
+                                                            <th>Termina</th>
+                                                            <th>Salario</th>
+                                                            <th>Estado</th>
+                                                            <th>Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="modificaCttEmpleado">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- parte-->
+                                    <div class="card">
+                                        <div class="card-header card-header-detalles py-0 headings" id="historyCCosto">
+                                            <h5 class="mb-0">
+                                                <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapseCcosto" aria-expanded="false" aria-controls="collapseCcosto">
+                                                    <div class="form-row">
+                                                        <div class="div-icono">
+                                                            <span class="fas fa-landmark fa-lg" style="color: #3498db;"></span>
+                                                        </div>
+                                                        <div>
+                                                            <?php echo $contador;
+                                                            $contador++ ?>. CENTROS DE COSTO
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </h5>
+                                        </div>
+                                        <div id="collapseCcosto" class="collapse" aria-labelledby="historyCCosto">
+                                            <div class="card-body">
+                                                <table id="tableCCostoEmp" class="table table-striped table-bordered table-sm display nowrap table-hover shadow" style="width:100%">
+                                                    <thead>
+                                                        <tr class="text-center">
+                                                            <th>ID</th>
+                                                            <th>Nombre</th>
+                                                            <th>Fecha</th>
+                                                            <th>Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="modificarCCostoEmp">
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -803,12 +887,50 @@ if ($_SESSION['navarlat'] == '1') {
                                                                         <tr>
                                                                             <th>ID</th>
                                                                             <th>Fecha</th>
+                                                                            <th>Tipo</th>
                                                                             <th>Concepto</th>
                                                                             <th>Valor</th>
+                                                                            <th>Estado</th>
                                                                             <th>Acciones</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody id="modificaOtroDcto">
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--parte-->
+                                                <div class="card">
+                                                    <div class="card-header card-header-detalles py-0 headings" id="IntVivienda">
+                                                        <h5 class="mb-0">
+                                                            <a class="btn btn-link-acordeon sombra collapsed" data-toggle="collapse" data-target="#collapseIntVivienda" aria-expanded="false" aria-controls="collapseIntVivienda">
+                                                                <div class="form-row">
+                                                                    <div class="div-icono">
+                                                                        <span class="fas fa-home fa-lg" style="color:rgb(7, 234, 250) ;"></span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <?php echo $contador . '.' . $decimal . '.';
+                                                                        $decimal++ ?> INTERESES DE VIVIENDA
+                                                                    </div>
+                                                                </div>
+                                                            </a>
+                                                        </h5>
+                                                    </div>
+                                                    <div id="collapseIntVivienda" class="collapse" aria-labelledby="IntVivienda">
+                                                        <div class="card-body">
+                                                            <div>
+                                                                <table id="tableIntVivienda" class="table table-striped table-bordered table-sm display table-hover table-hover shadow" style="width:100%">
+                                                                    <thead>
+                                                                        <tr class="text-center">
+                                                                            <th>ID</th>
+                                                                            <th>Fecha</th>
+                                                                            <th>Valor</th>
+                                                                            <th>Acciones</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody id="modificaIntVivienda">
                                                                     </tbody>
                                                                 </table>
                                                             </div>

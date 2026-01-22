@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -13,7 +13,11 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT id_usuario,CONCAT_WS(' ',nombre1,nombre2,apellido1,apellido2) AS nom_usuario
             FROM seg_usuarios_sistema
+<<<<<<< HEAD
             WHERE CONCAT(nombre1,nombre2,apellido1,apellido2) LIKE '%$term%'
+=======
+            WHERE CONCAT(nombre1,nombre2,apellido1,apellido2) LIKE '$term%'
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
             ORDER BY nombre1,nombre2,apellido1,apellido2";
     $rs = $cmd->query($sql);
     $objs = $rs->fetchAll();

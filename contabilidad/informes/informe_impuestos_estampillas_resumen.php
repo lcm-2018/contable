@@ -2,7 +2,7 @@
 session_start();
 set_time_limit(5600);
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 ?>
@@ -30,9 +30,9 @@ if (!isset($_SESSION['user'])) {
 <?php
 $vigencia = $_SESSION['vigencia'];
 // estraigo las variables que llegan por post en json
-$fecha_inicial = $_POST['fec_inicial'];
-$fecha_corte = $_POST['fec_final'];
-$id_des = $_POST['mpio'];
+$fecha_inicial = $_POST['fecha_inicial'];
+$fecha_corte = $_POST['fecha_final'];
+$id_des = $_POST['xtercero'];
 function pesos($valor)
 {
     return '$' . number_format($valor, 2);
@@ -43,19 +43,25 @@ $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usua
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
     $sql = "SELECT
-    `ctb_retenciones`.`nombre_retencion`
-    , SUM(`ctb_causa_retencion`.`valor_retencion`) as valor_retencion
+    tb_tipos_documento.id_tipodoc,
+    tb_tipos_documento.descripcion,
+    ctb_retenciones.nombre_retencion as nombre,
+    SUM(ctb_causa_retencion.valor_base) AS total_valor_base,
+    SUM(ctb_causa_retencion.valor_retencion) AS total_valor_retencion
 FROM
-    `ctb_causa_retencion`
-    INNER JOIN `ctb_retenciones` 
-        ON (`ctb_causa_retencion`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
-    INNER JOIN `ctb_retencion_tipo` 
-        ON (`ctb_retenciones`.`id_retencion_tipo` = `ctb_retencion_tipo`.`id_retencion_tipo`)
-    INNER JOIN `ctb_doc` 
-        ON (`ctb_causa_retencion`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
-WHERE (`ctb_causa_retencion`.`id_retencion` =$id_des
-    AND `ctb_doc`.`fecha` BETWEEN '$fecha_inicial' AND '$fecha_corte');";
-
+    ctb_causa_retencion
+    INNER JOIN ctb_doc ON (ctb_causa_retencion.id_ctb_doc = ctb_doc.id_ctb_doc)
+    INNER JOIN ctb_retencion_rango ON (ctb_causa_retencion.id_rango = ctb_retencion_rango.id_rango)
+    INNER JOIN ctb_retenciones ON (ctb_retencion_rango.id_retencion = ctb_retenciones.id_retencion)
+    INNER JOIN tb_terceros ON (tb_terceros.id_tercero_api = ctb_doc.id_tercero)
+    INNER JOIN tb_tipos_documento ON (tb_terceros.tipo_doc = tb_tipos_documento.id_tipodoc)
+WHERE 
+    ctb_retenciones.id_retencion_tipo =5
+    AND ctb_doc.fecha BETWEEN '$fecha_inicial' AND '$fecha_corte'
+GROUP BY 
+        ctb_retenciones.id_retencion
+ORDER BY 
+        ctb_retenciones.nombre_retencion";
     $res = $cmd->query($sql);
     $causaciones = $res->fetchAll();
 } catch (PDOException $e) {
@@ -63,10 +69,7 @@ WHERE (`ctb_causa_retencion`.`id_retencion` =$id_des
 }
 // consulto el nombre de la empresa de la tabla tb_datos_ips
 try {
-    $sql = "SELECT
-    `nombre`
-    , `nit`
-    , `dig_ver`
+    $sql = "SELECT razon_social_ips, nit_ips,dv
 FROM
     `tb_datos_ips`;";
     $res = $cmd->query($sql);
@@ -87,13 +90,13 @@ FROM
             </tr>
 
             <tr>
-                <td colspan="4" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
+                <td colspan="4" style="text-align:center"><?php echo $empresa['razon_social_ips']; ?></td>
             </tr>
             <tr>
-                <td colspan="4" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
+                <td colspan="4" style="text-align:center"><?php echo $empresa['nit_ips'] . '-' . $empresa['dv']; ?></td>
             </tr>
             <tr>
-                <td colspan="4" style="text-align:center"><?php echo 'RELACION DE DESCUENTOS Y RETENCIONES OTROS'; ?></td>
+                <td colspan="4" style="text-align:center"><?php echo 'RELACION DE DESCUENTOS Y RETENCIONES ESTAMPILLAS'; ?></td>
             </tr>
             <tr>
                 <td colspan="4" style="text-align:center"></td>
@@ -128,11 +131,11 @@ FROM
             $total_pago =  0;
             foreach ($causaciones as $rp) {
                 echo "<tr>
-                    <td class='text-right'>" . $id_des . "</td>
-                    <td class='text'>" . $rp['nombre_retencion'] . "</td>
-                    <td class='text-right'>" . number_format($rp['valor_retencion'], 2, ".", ",")  . "</td>
+                    <td class='text-left'>" . $rp['nombre'] . "</td>
+                    <td class='text'>" . number_format($rp['total_valor_base'], 2, ".", ",") . "</td>
+                    <td class='text-right'>" . number_format($rp['total_valor_retencion'], 2, ".", ",")  . "</td>
                     </tr>";
-                $total_ret = $total_ret + $rp['valor_retencion'];
+                $total_ret = $total_ret + $rp['total_valor_retencion'];
             }
             echo "<tr>
             <td class='text-right' colspan='2'> Total</td>

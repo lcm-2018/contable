@@ -50,10 +50,10 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                             <!--Opciones de filtros -->
                             <div class="form-row">
                                 <div class="form-group col-md-1">
-                                    <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
-                                </div>
-                                <div class="form-group col-md-1">
                                     <input type="text" class="filtro form-control form-control-sm" id="txt_placa_filtro" placeholder="Placa">
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <input type="text" class="filtro form-control form-control-sm" id="txt_nombre_filtro" placeholder="Nombre">
                                 </div>
                                 <div class="form-group col-md-1">
                                     <input type="text" class="filtro form-control form-control-sm" id="txt_serial_filtro" placeholder="Serial">
@@ -64,8 +64,13 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                     </select>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <select class="form-control form-control-sm" id="sl_tipoactivo_filtro">
-                                        <?php tipos_activo('--Tipo Activo--') ?>
+                                    <select class="form-control form-control-sm" id="sl_estadogen_filtro">
+                                        <?php estado_general_activo('--Estado General--') ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <select class="filtro form-control form-control-sm" id="sl_estado_filtro">
+                                        <?php estado_activo('--Estado Proceso--') ?>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-1">
@@ -78,9 +83,21 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 </div>
                             </div>
 
-                            <!--Lista de registros en la tabla-->
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_sede_filtro">
+                                        <?php sedes($cmd, '--Sede--') ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <select class="form-control form-control-sm" id="sl_area_filtro">
+                                    </select>
+                                </div> 
+                            </div>
+                            
+                            <!--Lista de registros-->                            
                             <?php
-                            if (PermisosUsuario($permisos, 5006, 2) || $id_rol == 1) {
+                            if (PermisosUsuario($permisos, 5704, 2) || $id_rol == 1) {
                                 echo '<input type="hidden" id="peReg" value="1">';
                             } else {
                                 echo '<input type="hidden" id="peReg" value="0">';
@@ -90,22 +107,32 @@ $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                                 <thead>
                                     <tr class="text-center centro-vertical">
                                         <th>Id</th>
-                                        <th>Codigo</th>
-                                        <th>Nombre</th>
-                                        <th>Placa</th>>
-                                        <th>Serial</th>
+                                        <th>Placa</th>                                        
+                                        <th>Cod. Articulo</th>
+                                        <th>Articulo</th>
+                                        <th>Nombre Activo Fijo</th>
+                                        <th>No. Serial</th>
                                         <th>Marca</th>
-                                        <th>Valor</th>
-                                        <th>Tipo Activo</th>
+                                        <th>Valor</th>                                        
+                                        <th>Sede</th>
+                                        <th>Area</th>
+                                        <th>Responsable</th>
+                                        <th>Id.Estado General</th>
+                                        <th>Estado</br>Funcionam.</th>
+                                        <th>Mantenimiento</br>(Apro.-Eejec.)</th>
+                                        <th>Id.Estado</th>
+                                        <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                             </table>
-                            <table class="table-bordered table-sm col-md-2">
+                            <table class="table-bordered table-sm col-md-5">
                                 <tr>
-                                    <td style="background-color:yellow">Pendiente</td>
-                                    <td>Cerrado</td>
-                                    <td style="background-color:gray">Anulado</td>
+                                    <td>Activo</td>
+                                    <td style="background-color:yellow">Para mantenimiento</td>
+                                    <td style="background-color:DodgerBlue">En mantenimiento</td>
+                                    <td style="background-color:green">Inactivo</td>
+                                    <td style="background-color:gray">Dado de baja</td>
                                 </tr>
                             </table>
                         </div>

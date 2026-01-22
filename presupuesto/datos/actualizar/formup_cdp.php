@@ -1,14 +1,20 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
+include '../../../financiero/consultas.php';
 $id_cdp = isset($_POST['id_cdp']) ? $_POST['id_cdp'] : exit('Acceso no disponible');
+$id_pto = $_POST['id_pto'];
+
+$cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+$cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+$fecha_cierre = fechaCierre($_SESSION['vigencia'], 54, $cmd);
+
 try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `id_pto_cdp`, `id_manu`, `fecha`, `objeto`, `num_solicitud`
             FROM
@@ -20,18 +26,23 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+
+
+
 ?>
 <div class="px-0">
     <div class="shadow">
         <div class="card-header" style="background-color: #16a085 !important;">
-            <h5 style="color: white;">REGISTRAR CDP</h5>
+            <h5 style="color: white;">ACTUALIZAR CDP</h5>
         </div>
         <form id="formUpCDP">
             <input type="hidden" name="id_cdp" value="<?php echo $id_cdp ?>">
+            <input type="hidden" name="id_pto" value="<?php echo $id_pto ?>">
+            <input type="hidden" id="fec_cierre" value="<?php echo $fecha_cierre ?>">
             <div class="form-row px-4 pt-2">
                 <div class="form-group col-md-4">
                     <label for="id_manu" class="small">CONSECUTIVO CDP</label>
-                    <input type="number" name="id_manu" id="id_manu" class="form-control form-control-sm" value="<?php echo $datos['id_manu'] ?>" readonly>
+                    <input type="number" name="id_manu" id="id_manu" class="form-control form-control-sm" value="<?php echo $datos['id_manu'] ?>">
                 </div>
                 <div class="form-group col-md-4">
                     <label for="dateFecha" class="small">FECHA</label>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../index.php");</script>';
+    header('Location: ../../index.php');
     exit();
 }
 include '../../conexion.php';
@@ -102,6 +102,7 @@ try {
             </main>
             <?php include '../../footer.php' ?>
         </div>
+        <?php include '../../modales.php' ?>
     </div>
     <?php include '../../scripts.php' ?>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/nomina/certificaciones/js/funcionescertifica.js"></script>

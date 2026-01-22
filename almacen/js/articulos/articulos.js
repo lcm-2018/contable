@@ -34,6 +34,7 @@
                     data.codigo = $('#txt_codigo_filtro').val();
                     data.nombre = $('#txt_nombre_filtro').val();
                     data.subgrupo = $('#sl_subgrupo_filtro').val();
+                    data.clinico = $('#sl_clinico_filtro').val();
                     data.estado = $('#sl_estado_filtro').val();
                 }
             },
@@ -138,6 +139,7 @@
                 if (r.mensaje == 'ok') {
                     let pag = ($('#id_articulo').val() == -1) ? 0 : $('#tb_articulos').DataTable().page.info().page;
                     reloadtable('tb_articulos', pag);
+                    reloadtable('tb_articulos_lotes');
                     $('#id_articulo').val(r.id);
 
                     $('#btn_imprimir').prop('disabled', false);
@@ -189,7 +191,7 @@
     //Editar un registro CUM
     $('#divForms').on('click', '#tb_articulos_cums .btn_editar', function() {
         let id = $(this).attr('value');
-        $.post("frm_reg_articulos_cums.php", { id: id, id_articulo: $('#id_articulo').val() }, function(he) {
+        $.post("frm_reg_articulos_cums.php", { id: id }, function(he) {
             $('#divTamModalReg').addClass('modal-lg');
             $('#divModalReg').modal('show');
             $("#divFormsReg").html(he);
@@ -215,6 +217,7 @@
             }
         });
     });
+
     // Autocompletar Presentacion Comercial
     $('#divFormsReg').on("input", "#txt_precom_cum", function() {
         $(this).autocomplete({
@@ -303,6 +306,9 @@
     /* ---------------------------------------------------
     LOTES
     -----------------------------------------------------*/
+    $('#divForms').on("click", "#chk_lotes_con_exi", function() {
+        reloadtable('tb_articulos_lotes');
+    });
 
     //Editar un registro LOTE
     $('#divForms').on('click', '#tb_articulos_lotes .btn_editar', function() {
@@ -349,7 +355,7 @@
             $('#divMsgError').html('Los datos resaltados son obligatorios');
         } else {
 
-            if (!verifica_valmin($('#txt_can_gru'), 2, "El valor de la Cantidad en la Unidad debe ser mayor a 1")) {
+            if (!verifica_valmin($('#txt_can_lote'), 1, "El valor de la Cantidad en la Unidad debe ser mayor a 1")) {
 
                 var data = $('#frm_reg_articulos_lotes').serialize();
                 $.ajax({
@@ -411,6 +417,7 @@
             codigo: $('#txt_codigo_filtro').val(),
             nombre: $('#txt_nombre_filtro').val(),
             subgrupo: $('#sl_subgrupo_filtro').val(),
+            clinico: $('#sl_clinico_filtro').val(),
             estado: $('#sl_estado_filtro').val()
         }, function(he) {
             $('#divTamModalImp').removeClass('modal-sm');

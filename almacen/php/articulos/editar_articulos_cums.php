@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    echo '<script>window.location.replace("../../../index.php");</script>';
+    header("Location: ../../../index.php");
     exit();
 }
 include '../../../conexion.php';
@@ -30,11 +30,17 @@ try {
                 $cod_ium = $_POST['txt_cod_ium'];
                 $id_lab = $_POST['id_txt_lab_cum'] ? $_POST['id_txt_lab_cum'] : 0;
                 $id_precom = $_POST['id_txt_precom_cum'] ? $_POST['id_txt_precom_cum'] : 0;
+<<<<<<< HEAD
+=======
+                $reg_inv = $_POST['txt_reg_inv'];
+                $estado_inv = $_POST['sl_estado_inv'] ? $_POST['sl_estado_inv'] : 0;
+                $fec_veninv = $_POST['txt_fec_ven_inv'] ? "'" . $_POST['txt_fec_ven_inv'] . "'" : 'NULL';
+>>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
                 $estado = $_POST['sl_estado_cum'];
 
                 if ($id == -1) {
-                    $sql = "INSERT INTO far_medicamento_cum(cum,ium,id_lab,id_prescom,estado,id_usr_crea,id_med,con_sismed,uni_fac_sismed)  
-                        VALUES('$cod_cum','$cod_ium',$id_lab,$id_precom,$estado,$id_usr_crea,$id_articulo,1,'C')";
+                    $sql = "INSERT INTO far_medicamento_cum(cum,ium,id_lab,id_prescom,estado,id_usr_crea,id_med,con_sismed,uni_fac_sismed,reg_invima,estado_invima,fec_invima)  
+                        VALUES('$cod_cum','$cod_ium',$id_lab,$id_precom,$estado,$id_usr_crea,$id_articulo,1,'C','$reg_inv',$estado_inv,$fec_veninv)";
                     $rs = $cmd->query($sql);
 
                     if ($rs) {
@@ -47,8 +53,9 @@ try {
                         $res['mensaje'] = $cmd->errorInfo()[2];
                     }
                 } else {
-                    $sql = "UPDATE far_medicamento_cum SET cum='$cod_cum',ium='$cod_ium',id_lab=$id_lab,id_prescom=$id_precom,estado=$estado
-                        WHERE id_cum=" . $id;
+                    $sql = "UPDATE far_medicamento_cum SET cum='$cod_cum',ium='$cod_ium',id_lab=$id_lab,
+                                    id_prescom=$id_precom,estado=$estado,reg_invima='$reg_inv',estado_invima=$estado_inv,fec_invima=$fec_veninv
+                            WHERE id_cum=" . $id;
                     $rs = $cmd->query($sql);
 
                     if ($rs) {
