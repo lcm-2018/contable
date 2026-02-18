@@ -33,7 +33,7 @@ try {
                 , IFNULL(`t1`.`valor`,0) AS `valor` 
             FROM
                 `tes_caja_const`
-                INNER JOIN
+                LEFT JOIN
                 (SELECT
                     `id_caja_const`
                     , SUM(`valor`) AS `valor`

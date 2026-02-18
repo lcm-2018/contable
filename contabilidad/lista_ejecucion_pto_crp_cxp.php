@@ -52,7 +52,7 @@ try {
                         <div class="card-body" id="divCuerpoPag">
                             <div>
                                
-                                <table id="tableEjecPresupuestoCxp" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 98%;">
+                                <table id="tableEjecPresupuestoCxp" class="table table-striped table-bordered table-sm table-hover shadow align-middle" style="table-layout: fixed;width: 98%;">
                                     <thead>
                                         <tr>
                                             <th style="width: 8%;">Numero</th>

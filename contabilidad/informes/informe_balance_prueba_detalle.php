@@ -154,10 +154,10 @@ include_once '../../financiero/encabezado_empresa.php';
             foreach ($acum as $tp) {
                 $nat1 = substr($tp['cuenta'], 0, 1);
                 $nat2 = substr($tp['cuenta'], 0, 2);
-                if ($nat1 == '1' || $nat1 == '5' || $nat1 == '6' || $nat1 == '7' || $nat2 == '81' || $nat2 == '83' || $nat2 == '99') {
+                if ($nat1 == '1' || $nat1 == '5' || $nat1 == '6' || $nat1 == '7' || $nat2 == '81' || $nat2 == '83') {
                     $naturaleza = "D";
                 }
-                if ($nat1 == '2' || $nat1 == '3' || $nat1 == '4' || $nat2 == '91' || $nat2 == '92'  || $nat2 == '93' || $nat2 == '89') {
+                if ($nat1 == '2' || $nat1 == '3' || $nat1 == '4' || $nat2 == '91' || $nat2 == '92'  || $nat2 == '93') {
                     $naturaleza = "C";
                 }
                 if ($naturaleza == "D") {

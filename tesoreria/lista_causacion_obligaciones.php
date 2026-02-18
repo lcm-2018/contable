@@ -67,7 +67,7 @@ try {
                         ON (`ctt_adquisiciones`.`id_cdp` = `pto_cdp`.`id_pto_cdp`)
                     LEFT JOIN `ctt_contratos` 
                         ON (`ctt_contratos`.`id_compra` = `ctt_adquisiciones`.`id_adquisicion`)
-                WHERE `ctb_doc`.`id_crp` IS NOT NULL) AS `t1`  
+                WHERE `ctb_doc`.`id_crp` IS NOT NULL AND DATE_FORMAT(`ctb_doc`.`fecha`,'%Y-%m-%d') BETWEEN '{$vigencia}-01-01' AND '{$vigencia}-12-31') AS `t1`  
             WHERE  `valor` > `valor_pagado`
             GROUP BY `id_ctb_doc`";
     } else {
@@ -104,7 +104,8 @@ try {
                             ON (`ctb_libaux`.`id_ctb_doc` = `ctb_doc`.`id_ctb_doc`)
                         WHERE (`ctb_doc`.`id_ctb_doc_tipo3` > 0 AND `ctb_doc`.`estado` > 0)
                         GROUP BY `ctb_libaux`.`id_ctb_doc`) AS `pagado`
-                        ON(`causado`.`id_ctb_doc` = `pagado`.`id_ctb_doc_tipo3`)";
+                        ON(`causado`.`id_ctb_doc` = `pagado`.`id_ctb_doc_tipo3`)
+                    WHERE (DATE_FORMAT(`ctb_doc`.`fecha`,'%Y-%m-%d') BETWEEN '{$vigencia}-01-01' AND '{$vigencia}-12-31')";
     }
     $sql2 = $sql;
     $rs = $cmd->query($sql);

@@ -195,7 +195,7 @@ try {
                                     </div>
                                 </div>
 
-                                <table id="tableEjecPresupuesto" class="table table-striped table-bordered table-sm table-hover shadow" style="table-layout: fixed;width: 100%;">
+                                <table id="tableEjecPresupuesto" class="table table-striped table-bordered table-sm table-hover shadow align-middle" style="table-layout: fixed;width: 100%;">
                                     <thead>
                                         <tr class="text-center">
                                             <th style="width: 8%;">Numero</th>

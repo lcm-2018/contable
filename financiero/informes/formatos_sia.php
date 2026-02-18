@@ -4,6 +4,10 @@ if (!isset($_SESSION['user'])) {
     header('Location: ../../index.php');
     exit();
 }
+//colocar memoria ilimitada
+ini_set('memory_limit', '-1');
+//tiempo de espera ilimitado
+set_time_limit(0);
 include '../../conexion.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

@@ -56,20 +56,26 @@ try {
 }
 
 try {
-    $sql = "SELECT 
-                `tb_terceros`.`id_tercero_api` 
+    $sql = "SELECT 	tb_terceros.id_tercero_api
+            FROM seg_usuarios_sistema 
+            INNER JOIN tb_terceros ON (seg_usuarios_sistema.num_documento = tb_terceros.nit_tercero) 
+            WHERE seg_usuarios_sistema.id_usuario IN 
+                (SELECT DISTINCT id_usuario FROM(
+            SELECT
+                seg_usuarios_sistema.id_usuario
             FROM
-                `seg_usuarios_sistema` 
-                INNER JOIN `tb_terceros` 
-                    ON (`seg_usuarios_sistema`.`num_documento` = `tb_terceros`.`nit_tercero`) 
-            WHERE `seg_usuarios_sistema`.`id_usuario` IN 
-                (SELECT DISTINCT 
-                    `id_usr_crea` 
-                FROM
-                    (SELECT  `id_usr_crea`  FROM `fac_facturacion`  
-                    UNION 
-                    SELECT  `id_usr_crea`  FROM `fac_otros` 
-                    UNION SELECT  `id_usr_crea`  FROM `far_ventas`) AS `t`)";
+                fac_arqueo_detalles
+                INNER JOIN fac_arqueo ON (fac_arqueo_detalles.id_arqueo = fac_arqueo.id_arqueo)
+                INNER JOIN fac_facturacion ON (fac_arqueo_detalles.id_factura = fac_facturacion.id_factura)
+                INNER JOIN seg_usuarios_sistema ON (fac_facturacion.id_usr_cierre = seg_usuarios_sistema.id_usuario)
+            WHERE  fac_arqueo.estado IN (1,2)
+            UNION ALL 
+            SELECT seg_usuarios_sistema.id_usuario
+            FROM fac_arqueo_detalles
+                INNER JOIN fac_arqueo ON (fac_arqueo_detalles.id_arqueo = fac_arqueo.id_arqueo)
+                INNER JOIN far_ventas ON (fac_arqueo_detalles.id_venta = far_ventas.id_venta)
+                INNER JOIN seg_usuarios_sistema ON (far_ventas.id_usr_crea = seg_usuarios_sistema.id_usuario)
+            WHERE fac_arqueo.estado IN (1,2)) AS us)";
     $rs = $cmd->query($sql);
     $facturador = $rs->fetchAll();
 } catch (PDOException $e) {

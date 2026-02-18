@@ -84,7 +84,7 @@ include_once '../../financiero/encabezado_empresa.php';
         <?php
         if (!empty($causaciones)) {
             foreach ($causaciones as $rp) {
-                if ($rp['valor'] >= 0) {
+                if ($rp['valor'] != 0) {
                     echo "<tr>
                         <td style='text-align:left'>" . $rp['id_manu'] . "</td>
                         <td style='text-align:left'>" . $rp['num_factura'] . "</td>

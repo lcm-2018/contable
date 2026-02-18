@@ -723,13 +723,15 @@ foreach ($documentos_tes as $documento) {
                 <?php
                 if ($tipo == '4' || $cod_doc == '9' || $tipo == '34' || $cod_doc == 'CICP') {
                     if ($_SESSION['nit_emp'] != '844001355' || $id_forma == 2 || $cod_doc == 'CICP' || $tipo == '34') {
+                        if (!($_SESSION['nit_emp'] == '900190473' && $tipo == '4')) {
                 ?>
-                        <td>
-                            <div>___________________________________</div>
-                            <div><?= $tercero; ?></div>
-                            <div>RECIBE CC/NIT:</div>
-                        </td>
+                            <td>
+                                <div>___________________________________</div>
+                                <div><?= $tercero; ?></div>
+                                <div>RECIBE CC/NIT:</div>
+                            </td>
                 <?php
+                        }
                     }
                 }
                 ?>

@@ -10,6 +10,7 @@ include '../permisos.php';
 $id_doc = isset($_POST['id_doc']) ? $_POST['id_doc'] : 0;
 $id_tercero = isset($_POST['id_tercero']) ? $_POST['id_tercero'] : 0;
 $id_cop = isset($_POST['id_cop']) ? $_POST['id_cop'] : 0;
+$vigencia = $_SESSION['vigencia'];
 // Consulta tipo de presupuesto
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -46,7 +47,8 @@ try {
                     WHERE (`id_tercero_api` = $id_tercero AND `ctb_doc`.`estado` = 2)
                     GROUP BY `id_pto_cop_det`) AS `pagado`
                     ON (`pto_cop_detalle`.`id_pto_cop_det` = `pagado`.`id_pto_cop_det`)
-                WHERE `pto_cop_detalle`.`id_tercero_api` = $id_tercero AND `ctb_doc`.`estado` = 2) AS `t1`
+                WHERE `pto_cop_detalle`.`id_tercero_api` = $id_tercero AND `ctb_doc`.`estado` = 2
+                AND DATE_FORMAT(`ctb_doc`.`fecha`,'%Y-%m-%d') BETWEEN '{$vigencia}-01-01' AND '{$vigencia}-12-31') AS `t1`
             WHERE `val_cop` > `val_pag`
             GROUP BY `t1`.`id_ctb_doc`";
     } else {
@@ -82,7 +84,7 @@ try {
                         WHERE (`ctb_doc`.`id_ctb_doc_tipo3` > 0 AND `ctb_doc`.`estado` > 1)
                         GROUP BY `ctb_libaux`.`id_ctb_doc`) AS `pagado`
                         ON(`causado`.`id_ctb_doc` = `pagado`.`id_ctb_doc_tipo3`)
-                WHERE `ctb_doc`.`id_tercero` = $id_tercero";
+                WHERE `ctb_doc`.`id_tercero` = $id_tercero  AND (DATE_FORMAT(`ctb_doc`.`fecha`,'%Y-%m-%d') BETWEEN '{$vigencia}-01-01' AND '{$vigencia}-12-31')";
     }
     $rs = $cmd->query($sql);
     $causaciones = $rs->fetchAll();

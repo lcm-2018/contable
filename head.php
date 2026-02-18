@@ -13,5 +13,4 @@
         <link href="<?php echo $_SESSION['urlin'] ?>/css/estilos.css?v=<?php echo date('YmdHis') ?>" rel="stylesheet" />
         <link href="<?php echo $_SESSION['urlin'] ?>/css/jquery-ui.css?v=<?php echo date('YmdHis') ?>" rel="stylesheet" />
         <link href="<?php echo $_SESSION['urlin'] ?>/css/font-awesome.min.css" rel="stylesheet" />
-        <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/js/all.min.js"></script>
     </head>

@@ -52,6 +52,8 @@ try {
                 FROM (SELECT id_pto_crp, id_pto_crp_det FROM pto_crp_detalle GROUP BY id_pto_crp, id_pto_crp_det) pto_crp_detalle2
                 INNER JOIN pto_cop_detalle ON (pto_cop_detalle.id_pto_crp_det = pto_crp_detalle2.id_pto_crp_det)
                 INNER JOIN pto_pag_detalle ON (pto_pag_detalle.id_pto_cop_det = pto_cop_detalle.id_pto_cop_det)
+                INNER JOIN ctb_doc ON (ctb_doc.id_ctb_doc = pto_pag_detalle.id_ctb_doc)
+                WHERE ctb_doc.estado = 2
                 GROUP BY pto_crp_detalle2.id_pto_crp
             ) pag_sum ON pag_sum.id_pto_crp = pto_crp.id_pto_crp
             where pto_crp.estado = 2
@@ -107,7 +109,7 @@ include_once 'encabezado_empresa.php';
                 <td style="border:#A9A9A9 1px solid; text-align:right"><?php echo $obj['a_menos_b'] ?></td>
                 <td style="border:#A9A9A9 1px solid; text-align:right"><?php echo $obj['b_menos_c'] ?></td>
             </tr>
-        <?php 
+        <?php
         }
         ?>
     </tbody>
