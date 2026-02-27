@@ -72,11 +72,7 @@ var showError = function (error) {
 }
 
 //VERIFICA SI UN OBJETO TIENE UN VALOR MÍNIMO ESPECÍFICO Y RESALTA OTRO OBJETO RELACIONADO
-<<<<<<< HEAD
-var verifica_valmin_2 = function(objeto1, objeto2, val = 0, msg = "") {
-=======
 var verifica_valmin_2 = function (objeto1, objeto2, val = 0, msg = "") {
->>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
     var error = 0;
     if (parseInt(objeto1.val()) < val) {
         objeto2.addClass('is-invalid');
@@ -91,11 +87,7 @@ var verifica_valmin_2 = function (objeto1, objeto2, val = 0, msg = "") {
 };
 
 //VERIFICA SI UN OBJETO TIENE UN VALOR MÍNIMO ESPECÍFICO
-<<<<<<< HEAD
-var verifica_valmin = function(objeto, val = 0, msg = "") {
-=======
 var verifica_valmin = function (objeto, val = 0, msg = "") {
->>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
     var error = 0;
     if (parseInt(objeto.val()) < val) {
         objeto.addClass('is-invalid');
@@ -110,11 +102,7 @@ var verifica_valmin = function (objeto, val = 0, msg = "") {
 };
 
 //VERIFICA SI UN OBJETO TIENE UN VALOR MÁXIMO ESPECÍFICO
-<<<<<<< HEAD
-var verifica_valmax = function(objeto, val = 500, msg = "") {
-=======
 var verifica_valmax = function (objeto, val = 500, msg = "") {
->>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
     var error = 0;
     if (parseInt(objeto.val()) > val) {
         objeto.addClass('is-invalid');

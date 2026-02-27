@@ -9,6 +9,7 @@ include '../financiero/consultas.php';
 
 $id_caja = isset($_POST['id_caja'])  ? $_POST['id_caja'] : exit('Acceso no permitido');
 $id_detalle = isset($_POST['id_detalle']) ? $_POST['id_detalle'] : 0;
+$id_vigencia = $_SESSION['id_vigencia'];
 
 
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -106,6 +107,22 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+
+try {
+    $sql = "SELECT
+                `id_pto` as `id`
+            FROM
+                `pto_presupuestos`
+            WHERE (`id_vigencia` = $id_vigencia
+                AND `id_tipo` = 2)
+            LIMIT 1";
+    $rs = $cmd->query($sql);
+    $pto = $rs->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+
+
 if (empty($detalle)) {
     $detalle = [
         'id_caja_rubros' => 0,
@@ -142,7 +159,7 @@ if (empty($detalle)) {
     </div>
     <div class="p-3">
         <form id="formAddRubrosCaja">
-            <input type="hidden" id="id_pto_movto" value="2">
+            <input type="hidden" id="id_pto_movto" value="<?= $pto['id']; ?>">
             <input type="hidden" id="id_caja_rubros" name="id_caja_rubros" value="<?php echo $detalle['id_caja_rubros']; ?>">
             <input type="hidden" id="id_caja" name="id_caja" value="<?php echo $id_caja ?>">
             <div class="form-row">

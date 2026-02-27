@@ -25,7 +25,7 @@ switch ($id_corte) {
         $codigo = '10909';
         break;
     case 4:
-        $fecha_corte = $vigencia . '-03-31';
+        $fecha_corte = $vigencia . '-12-31';
         $codigo = '11212';
         break;
     default:

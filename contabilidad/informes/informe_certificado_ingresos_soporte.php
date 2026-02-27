@@ -91,7 +91,7 @@ try {
                 INNER JOIN `ctb_retencion_rango` ON (`ctb_causa_retencion`.`id_rango` = `ctb_retencion_rango`.`id_rango`)
                 INNER JOIN `ctb_retenciones` ON (`ctb_retencion_rango`.`id_retencion` = `ctb_retenciones`.`id_retencion`)
                 INNER JOIN ctb_retencion_tipo ON (ctb_retenciones.id_retencion_tipo = ctb_retencion_tipo.id_retencion_tipo)
-            WHERE `ctb_doc`.`id_tercero` =$id_tercero AND  `ctb_doc`.`fecha` BETWEEN '$fecha_ini' AND '$fecha_fin' AND `ctb_doc`.`id_tipo_doc` =3  AND `ctb_retenciones`.`id_retencion_tipo` IN ($campos) and ctb_doc.estado=2
+            WHERE `ctb_doc`.`id_tercero` =$id_tercero AND DATE_FORMAT(`ctb_doc`.`fecha`, '%Y-%m-%d') BETWEEN '$fecha_ini' AND '$fecha_fin' AND `ctb_doc`.`id_tipo_doc` =3  AND `ctb_retenciones`.`id_retencion_tipo` IN ($campos) and ctb_doc.estado=2
             GROUP BY `ctb_causa_retencion`.`tarifa`, `ctb_causa_retencion`.`id_terceroapi`";
     $rs = $cmd->query($sql);
     $retenciones = $rs->fetchAll();

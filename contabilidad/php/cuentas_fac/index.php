@@ -8,11 +8,7 @@ error_reporting(E_ALL);
 */
 
 if (!isset($_SESSION['user'])) {
-<<<<<<< HEAD
-    echo '<script>window.location.replace("../../../index.php");</script>';
-=======
     header("Location: ../../../index.php");
->>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
     exit();
 }
 
@@ -75,20 +71,6 @@ include '../../../permisos.php';
                             <table id="tb_cuentas" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%; font-size:80%">
                                 <thead>
                                     <tr class="text-center centro-vertical">
-<<<<<<< HEAD
-                                        <th>Id</th>
-                                        <th>Régimen</th>
-                                        <th>Cobertura</th>
-                                        <th>Modalidad</th>
-                                        <th>Fecha Vigencia</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-
-=======
                                         <th rowspan="2">Id</th>
                                         <th rowspan="2">Régimen</th>
                                         <th rowspan="2">Cobertura</th>
@@ -123,7 +105,6 @@ include '../../../permisos.php';
                                 </tr>
                             </table>
                         </div>
->>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
                     </div>
                 </div>
             </main>

@@ -116,10 +116,6 @@
         error += verifica_vacio($('#sl_subgrp_art'));
         error += verifica_vacio($('#txt_topmin_art'));
         error += verifica_vacio($('#txt_topmax_art'));
-<<<<<<< HEAD
-        error += verifica_vacio_2($('#id_txt_unimed_art'), $('#txt_unimed_art'));
-=======
->>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b
         error += verifica_vacio($('#sl_estado'));
 
         if (error >= 1) {

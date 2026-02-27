@@ -81,14 +81,7 @@
     //Guardar registro 
     $('#divForms').on("click", "#btn_guardar", function() {
         $('.is-invalid').removeClass('is-invalid');
-<<<<<<< HEAD:almacen/js/subgrupos/subgrupos.js
-        var error = verifica_vacio($('#txt_cod_subgrupo'));
-        error += verifica_vacio($('#txt_nom_subgrupo'));
-        error += verifica_vacio($('#sl_grp_subgrupo'));
-        error += verifica_vacio($('#sl_estado'));
-=======
         var error = verifica_vacio($('#txt_nom_marca'));
->>>>>>> d750d9bf66c1ebfb0ab684f97d76cc2d83a9799b:almacen/js/marcas/marcas.js
 
         if (error >= 1) {
             $('#divModalError').modal('show');

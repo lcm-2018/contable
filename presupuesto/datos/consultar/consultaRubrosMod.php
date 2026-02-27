@@ -5,7 +5,7 @@ include '../../../conexion.php';
 $search = isset($_POST['search']) ? $_POST['search'] : exit('Acceso denegado');
 $id_pto = isset($_POST['id_pto']) ? $_POST['id_pto'] : 0;
 $id_vigencia = $_SESSION['id_vigencia'];
-$where = $id_pto > 0 ? " AND `pp`.`id_tipo` = $id_pto" : "";
+$where = $id_pto > 0 ? " AND `pc`.`id_pto` = $id_pto" : "";
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
